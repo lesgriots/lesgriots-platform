@@ -1,0 +1,23 @@
+# Service systemd pour le dashboard Next.js
+# À copier sur le VPS dans /etc/systemd/system/dashboard.service
+# puis : sudo systemctl daemon-reload && sudo systemctl enable --now dashboard
+
+[Unit]
+Description=LES GRIOTS Dashboard (Next.js)
+After=network.target
+
+[Service]
+Type=simple
+User=moos
+WorkingDirectory=/srv/dashboard
+# Variables d'environnement (secrets) chargées depuis un fichier hors-Git
+EnvironmentFile=/etc/dashboard.env
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+RestartSec=5
+# L'app écoute en local sur 3000, nginx l'expose en HTTPS
+Environment=NODE_ENV=production
+Environment=PORT=3000
+
+[Install]
+WantedBy=multi-user.target

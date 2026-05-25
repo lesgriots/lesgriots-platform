@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Les Griots — Épisodes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page-archive">
+
+<!-- =========================================================
+     STAGE — full-bleed image stack
+     ========================================================= -->
+<main class="stage" data-screen-label="01 Archive">
+
+  <!-- Image stack (one per griot) -->
+  <div class="stage-images">
+    <img class="stage-img is-active" data-key="florale"    src="assets/florale.jpg" alt="" />
+    <img class="stage-img"           data-key="indigo"     src="assets/indigo-cristal.jpg" alt="" />
+    <img class="stage-img"           data-key="monument"   src="assets/monument.jpg" alt="" />
+    <img class="stage-img"           data-key="aissata"    src="https://picsum.photos/seed/lg-aissata/2000/1300" alt="" />
+    <img class="stage-img"           data-key="kwesi"      src="https://picsum.photos/seed/lg-kwesi/2000/1300" alt="" />
+    <img class="stage-img"           data-key="adwoa"      src="https://picsum.photos/seed/lg-adwoa/2000/1300" alt="" />
+    <img class="stage-img"           data-key="toumani"    src="https://picsum.photos/seed/lg-toumani/2000/1300" alt="" />
+    <img class="stage-img"           data-key="khady"      src="https://picsum.photos/seed/lg-khady/2000/1300" alt="" />
+    <img class="stage-img"           data-key="mariama"    src="https://picsum.photos/seed/lg-mariama/2000/1300" alt="" />
+    <img class="stage-img"           data-key="ndao"       src="https://picsum.photos/seed/lg-ndao/2000/1300" alt="" />
+  </div>
+
+  <!-- Vignettes — top + bottom for legibility -->
+  <div class="stage-veil" aria-hidden="true"></div>
+
+  <!-- TOP BAR -->
+  <header class="stage-top">
+    <a class="brand brand-vertical" href="index.html" aria-label="Accueil Les Griots">
+      <img src="assets/les-griots-logo.png" alt="Les Griots" />
+    </a>
+    <nav class="stage-nav">
+      <a href="index.html">Accueil</a>
+      <a href="#" class="active">Épisodes</a>
+      <a href="#">En direct</a>
+      <a href="#">Écouter</a>
+      <a href="#">Boutique</a>
+      <button class="burger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- CENTER CAPTION -->
+  <div class="stage-caption" aria-hidden="true">
+    <span>Un épisode Les Griots</span>
+    <span class="bullet"></span>
+    <span class="caption-role">Entretien</span>
+  </div>
+
+  <!-- LEFT NAMES LIST -->
+  <nav class="stage-list" aria-label="Sélection d'épisodes">
+    <a href="#" data-key="florale"    class="row is-active"><span class="name">Florale</span><span class="watch">↳ Regarder</span></a>
+    <a href="#" data-key="indigo"     class="row"><span class="name">Indigo Cristal</span><span class="watch">↳ Regarder</span></a>
+    <a href="#" data-key="monument"   class="row"><span class="name">Monument</span><span class="watch">↳ Regarder</span></a>
+    <a href="#" data-key="aissata"    class="row"><span class="name">Aïssata Diallo</span><span class="watch">↳ Regarder</span></a>
+    <a href="#" data-key="kwesi"      class="row"><span class="name">Kwesi Ofori</span><span class="watch">↳ Regarder</span></a>
+    <a href="#" data-key="adwoa"      class="row"><span class="name">Adwoa Mensah</span><span class="watch">↳ Regarder</span></a>
+    <a href="#" data-key="toumani"    class="row"><span class="name">Toumani Sissoko</span><span class="watch">↳ Regarder</span></a>
+    <a href="#" data-key="khady"      class="row"><span class="name">Khady Ba</span><span class="watch">↳ Regarder</span></a>
+    <a href="#" data-key="mariama"    class="row"><span class="name">Mariama Bâ</span><span class="watch">↳ Regarder</span></a>
+    <a href="#" data-key="ndao"       class="row"><span class="name">Maison Ndao</span><span class="watch">↳ Regarder</span></a>
+  </nav>
+
+  <!-- BOTTOM RIGHT — mail icon -->
+  <a class="stage-mail" href="#" aria-label="Nous contacter">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+      <rect x="3" y="6" width="18" height="13" rx="1"/>
+      <path d="M3 7l9 7 9-7"/>
+    </svg>
+  </a>
+
+</main>
+
+<style id="__om-edit-overrides"></style>
+
+<script>
+  (function() {
+    const stack = document.querySelector('.stage-images');
+    const rows = document.querySelectorAll('.stage-list .row');
+    if (!stack || !rows.length) return;
+
+    let lockedKey = stack.querySelector('.is-active')?.dataset.key;
+
+    function activate(key) {
+      stack.querySelectorAll('.stage-img').forEach((img) => {
+        img.classList.toggle('is-active', img.dataset.key === key);
+      });
+      rows.forEach((r) => r.classList.toggle('is-active', r.dataset.key === key));
+    }
+
+    rows.forEach((row) => {
+      row.addEventListener('mouseenter', () => activate(row.dataset.key));
+      row.addEventListener('focus',      () => activate(row.dataset.key));
+      row.addEventListener('click', (e) => {
+        e.preventDefault();
+        lockedKey = row.dataset.key;
+        activate(lockedKey);
+      });
+    });
+
+    document.querySelector('.stage-list')?.addEventListener('mouseleave', () => {
+      activate(lockedKey);
+    });
+  })();
+</script>
+</body>
+</html>

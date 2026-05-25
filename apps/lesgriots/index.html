@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Les Griots — Récits inattendus du continent et de ses diasporas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page-archive">
+
+<!-- BRAND : lives outside all sections so its z-index escapes stacking contexts -->
+<a class="brand-mark" id="brand" href="#landing" aria-label="Retour à l'accueil">
+  <img class="brand-img brand-yellow" src="assets/les-griots-logo.png" alt="Les Griots" />
+  <img class="brand-img brand-white"  src="assets/les-griots-logo.png" alt="" aria-hidden="true" />
+</a>
+
+<!-- =========================================================
+     LANDING — section 0 : Florale home video, big logo
+     ========================================================= -->
+<section class="landing" id="landing" data-screen-label="00 Vidéo d'accueil">
+  <img class="landing-image" src="assets/florale.jpg" alt="" />
+  <div class="landing-veil" aria-hidden="true"></div>
+  <p class="landing-tag">UNE PLATEFORME ÉDITORIALE POUR L'AFRIQUE ET SES DIASPORAS.</p>
+</section>
+
+<!-- =========================================================
+     STAGE — section 1 : projects with menu + small logo
+     ========================================================= -->
+<main class="stage" id="stage" data-screen-label="01 Projets">
+
+  <!-- Image stack (one per project) — Florale is the home video so not here -->
+  <div class="stage-images">
+    <img class="stage-img is-active is-visible" data-key="indigo"     src="assets/indigo-cristal.jpg" alt="" />
+    <img class="stage-img" data-key="monument"   src="assets/monument.jpg" alt="" />
+    <img class="stage-img" data-key="aissata"    src="https://picsum.photos/seed/lg-aissata/2000/1300" alt="" />
+  </div>
+
+  <!-- Vignettes — top + bottom for legibility -->
+  <div class="stage-veil" aria-hidden="true"></div>
+
+  <!-- LEFT NAMES LIST — Florale is the home video, not listed here -->
+  <nav class="stage-list" aria-label="Sélection d'épisodes">
+    <a href="#" data-key="indigo"     class="row is-active"><span class="name">Indigo Cristal</span><span class="watch">↳ Regarder</span></a>
+    <a href="#" data-key="monument"   class="row"><span class="name">Monument</span><span class="watch">↳ Regarder</span></a>
+    <a href="#" data-key="aissata"    class="row"><span class="name">Aïssata Diallo</span><span class="watch">↳ Regarder</span></a>
+  </nav>
+
+  <!-- BOTTOM RIGHT — mail icon -->
+  <a class="stage-mail" href="#" aria-label="Nous contacter">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+      <rect x="3" y="6" width="18" height="13" rx="1"/>
+      <path d="M3 7l9 7 9-7"/>
+    </svg>
+  </a>
+
+</main>
+
+<!-- =========================================================
+     DEFINITION — manifeste (static)
+     ========================================================= -->
+<section class="definition" id="definition" data-screen-label="02 Manifeste">
+  <div class="def-spacer"></div>
+
+  <div class="def-body">
+    <p class="manifeste-eyebrow">— Manifeste</p>
+
+    <h2 class="manifeste-h">Nous sommes les<br/><em>griots du présent</em>.</h2>
+
+    <p class="manifeste-lede">
+      Nous sommes l'écho d'une parole ancienne et la voix d'un siècle nouveau.<br/>
+      Nous portons les récits que d'autres ont voulu taire.
+    </p>
+
+    <p class="manifeste-p">
+      Nous croyons que <em>raconter</em> est un acte politique. Que chaque image, chaque chant, chaque
+      geste est un fragment de mémoire. Que la transmission n'est pas un musée, mais un feu vivant.
+    </p>
+
+    <p class="manifeste-p">
+      Nous filmons celles et ceux que personne ne filme. Nous écrivons en mandingue, en wolof, en peul,
+      en français, en anglais, en silence. Nous mélangeons les langues pour ne plus avoir à choisir.
+    </p>
+
+    <p class="manifeste-p">
+      Nous célébrons les <em>diasporas</em> comme des continents en mouvement. Nous célébrons le retour
+      comme un départ. Nous célébrons celles et ceux qui partent et celles et ceux qui restent.
+    </p>
+
+    <p class="manifeste-p">
+      Nous croyons au temps long, au geste répété, au cinéma de l'attention. Nous croyons à la beauté
+      qui ne se vend pas, et aux images qui ne se publient pas pour plaire.
+    </p>
+
+    <p class="manifeste-p">
+      Nous sommes une plateforme, une famille, une institution éphémère et entêtée. Une boîte à archives.
+      Une scène. Un studio. Un manifeste vivant.
+    </p>
+
+    <p class="manifeste-p">
+      Nous ne demandons pas la permission. Nous prenons la parole — et nous la donnons.
+    </p>
+
+    <p class="manifeste-signoff">
+      <span>Les Griots</span>
+      <span class="bullet"></span>
+      <span>Dakar · Marseille · Lagos · Brixton</span>
+      <span class="bullet"></span>
+      <span>MMXXVI</span>
+    </p>
+  </div>
+
+</section>
+
+<!-- =========================================================
+     ARCHIVE GRID — reached by scrolling past the entered stage
+     ========================================================= -->
+<section class="archive" id="archive" data-screen-label="03 Archive">
+  <div class="archive-grid">
+    <a class="tile" href="#"><img src="assets/florale.jpg" alt="" /></a>
+    <a class="tile" href="#"><img src="assets/indigo-cristal.jpg" alt="" /></a>
+    <a class="tile" href="#"><img src="assets/monument.jpg" alt="" /></a>
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-aissata/1600/900" alt="" /></a>
+
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-kwesi/1600/900" alt="" /></a>
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-adwoa/1600/900" alt="" /></a>
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-toumani/1600/900" alt="" /></a>
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-khady/1600/900" alt="" /></a>
+
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-bintou/1600/900" alt="" /></a>
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-inua/1600/900" alt="" /></a>
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-mariama/1600/900" alt="" /></a>
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-souley/1600/900" alt="" /></a>
+
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-ndao/1600/900" alt="" /></a>
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-1/1600/900" alt="" /></a>
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-2/1600/900" alt="" /></a>
+    <a class="tile" href="#"><img src="https://picsum.photos/seed/lg-3/1600/900" alt="" /></a>
+  </div>
+</section>
+
+<!-- =========================================================
+     PLAYER — Colors-style full-bleed video, opens on tile click
+     ========================================================= -->
+<div class="player" id="player" aria-hidden="true">
+  <button class="player-close" aria-label="Fermer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M6 6l12 12M18 6L6 18"/>
+    </svg>
+  </button>
+  <div class="player-stage">
+    <img class="player-image" id="player-image" alt="" />
+  </div>
+  <div class="player-badge">
+    Les<br/>Griots<br/><span>*studios</span>
+  </div>
+  <div class="player-meta">
+    <span class="player-title" id="player-title">—</span>
+    <span class="player-sub">Un épisode Les Griots · 2026</span>
+  </div>
+</div>
+
+<style id="__om-edit-overrides"></style>
+
+<script>
+  (function() {
+    const body = document.body;
+    const stage = document.getElementById('stage');
+    const stack = document.querySelector('.stage-images');
+    const rows = document.querySelectorAll('.stage-list .row');
+
+    // Build the rotation order from the DOM
+    const slides = Array.from(stack.querySelectorAll('.stage-img'));
+    const keys = slides.map((el) => el.dataset.key);
+    let currentIdx = 0;
+    let rotateTimer = null;
+    let zCounter = 1;
+    const ROTATE_MS = 2200; // each project shown ~2.2s before reveal
+
+    // Initial : indigo is visible in the stage section (florale lives in landing)
+    const initial = stack.querySelector('.stage-img.is-active');
+    if (initial) {
+      initial.classList.add('is-visible');
+      initial.style.zIndex = String(zCounter);
+    }
+
+    function showByIdx(i) {
+      currentIdx = (i + keys.length) % keys.length;
+      const key = keys[currentIdx];
+      slideUp(key);
+      rows.forEach((r) => r.classList.toggle('is-active', r.dataset.key === key));
+    }
+
+    // Slide the target image up from below, on top of whatever was there.
+    // Previous images stay visible underneath.
+    function slideUp(key) {
+      const el = stack.querySelector(`.stage-img[data-key="${key}"]`);
+      if (!el) return;
+      // If it's already the top one, nothing to do
+      if (el.classList.contains('is-visible') && parseInt(el.style.zIndex, 10) === zCounter) return;
+      zCounter++;
+      el.style.zIndex = String(zCounter);
+      // Simple cross-fade: just make this one visible
+      el.classList.add('is-visible');
+    }
+
+    function startRotation() { /* disabled — only one video shows on arrival */ }
+    function stopRotation() {
+      if (rotateTimer) { clearInterval(rotateTimer); rotateTimer = null; }
+    }
+
+    function enter() {
+      if (body.classList.contains('entered')) return;
+      body.classList.add('entered');
+      stopRotation();
+    }
+
+    // Begin auto-rotation on load
+    startRotation();
+
+    // 1. Click anywhere on landing OR scrolling triggers enter and scrolls to stage
+    const landing = document.getElementById('landing');
+    if (landing) {
+      landing.addEventListener('click', function(e) {
+        enter();
+        document.getElementById('stage')?.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+    if (stage) {
+      stage.addEventListener('click', function(e) {
+        if (e.target.closest('.stage-list, .stage-mail')) return;
+      });
+    }
+
+    // 2. Scroll / wheel / touch / keyboard → enter too
+    function onScroll() {
+      if (window.scrollY > window.innerHeight * 0.10) enter();
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('wheel',    enter,    { passive: true, once: true });
+    window.addEventListener('touchmove', enter,   { passive: true, once: true });
+    window.addEventListener('keydown', (e) => {
+      if (['ArrowDown','PageDown',' ','Enter'].includes(e.key)) enter();
+    });
+
+    // 3. After entering, the side menu becomes interactive
+    let lockedKey = keys[0];
+    function activate(key) {
+      const idx = keys.indexOf(key);
+      if (idx < 0) return;
+      currentIdx = idx;
+      showByIdx(idx);
+    }
+    rows.forEach((row) => {
+      row.addEventListener('mouseenter', () => { if (body.classList.contains('entered')) activate(row.dataset.key); });
+      row.addEventListener('focus',      () => { if (body.classList.contains('entered')) activate(row.dataset.key); });
+      row.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!body.classList.contains('entered')) {
+          enter();
+          lockedKey = row.dataset.key;
+          activate(lockedKey);
+        } else {
+          // Already in archive mode → open the player
+          openPlayer(row.dataset.key, row.querySelector('.name').textContent);
+        }
+      });
+    });
+
+    // Archive tiles → open the player
+    document.querySelectorAll('.archive .tile').forEach((tile) => {
+      tile.addEventListener('click', (e) => {
+        e.preventDefault();
+        const img = tile.querySelector('img');
+        const title = tile.querySelector('.ttl')?.textContent || '';
+        openPlayer(null, title, img?.src);
+      });
+    });
+
+    // --- Player open/close ---
+    const player = document.getElementById('player');
+    const playerImg = document.getElementById('player-image');
+    const playerTitle = document.getElementById('player-title');
+    function openPlayer(key, title, src) {
+      let url = src;
+      if (!url && key) {
+        const el = stack.querySelector(`.stage-img[data-key="${key}"]`);
+        url = el?.getAttribute('src');
+      }
+      if (url) playerImg.src = url;
+      playerTitle.textContent = title || '';
+      player.classList.add('is-open');
+      player.setAttribute('aria-hidden', 'false');
+      stopRotation();
+    }
+    function closePlayer() {
+      player.classList.remove('is-open');
+      player.setAttribute('aria-hidden', 'true');
+    }
+    player.querySelector('.player-close').addEventListener('click', closePlayer);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePlayer();
+    });
+    document.querySelector('.stage-list')?.addEventListener('mouseleave', () => {
+      if (body.classList.contains('entered')) activate(lockedKey);
+    });
+
+    // On entering, sync lockedKey to whatever was on screen
+    const observer = new MutationObserver(() => {
+      if (body.classList.contains('entered')) {
+        lockedKey = keys[currentIdx];
+        observer.disconnect();
+      }
+    });
+    observer.observe(body, { attributes: true, attributeFilter: ['class'] });
+    // --- Logo : a white "page" rises through the yellow logo as the definition
+    //     section crosses over it. The reveal is a clean horizontal cut line.
+    const brand = document.getElementById('brand');
+    const def   = document.getElementById('definition');
+    if (brand && def) {
+      function onCross() {
+        const b = brand.getBoundingClientRect();
+        const r = def.getBoundingClientRect();
+        // Position of the def's top edge inside the brand box, as a percentage
+        let cut = ((r.top - b.top) / b.height) * 100;
+        cut = Math.max(0, Math.min(100, cut));
+        brand.style.setProperty('--cut', cut + '%');
+      }
+      window.addEventListener('scroll', onCross, { passive: true });
+      window.addEventListener('resize', onCross);
+      onCross();
+    }
+  })();
+</script>
+</body>
+</html>

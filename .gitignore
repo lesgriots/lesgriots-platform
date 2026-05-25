@@ -1,0 +1,76 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Dépendances
+node_modules/
+.pnp/
+.pnp.js
+.yarn/
+
+# Build
+build/
+dist/
+out/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Secrets — JAMAIS commités
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets/
+
+# Données locales (bases SQLite + uploads utilisateurs)
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+uploads/
+# NB : studio.json et griotheque.json SONT commités comme seed V1
+# (le projet est utilisable dès le clone). En prod, ils sont écrasés
+# par les données du back-office.
+
+# Médias lourds — hébergés sur le VPS, pas dans git
+# (sinon repo > 400 Mo et GitHub refuse > 100 Mo par fichier)
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.bak
+*.original.*
+
+# Tests
+coverage/
+.nyc_output/
+
+# Temp
+.tmp/
+tmp/
+
+# Archive + backups manuels (hors projet, non versionnés)
+_archive/
+_backup_*/
+
+# Résidu de l'ancien dossier non supprimable depuis le sandbox
+LESGRIOTSxSTUDIO.com/

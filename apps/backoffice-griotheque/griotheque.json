@@ -1,0 +1,906 @@
+{
+  "formations": [
+    {
+      "id": "strategie-marque",
+      "title": "Stratégie de marque",
+      "tagline": "Repars avec ta plateforme de marque écrite — identité, positionnement, récit — prête à pitcher dès lundi.",
+      "overview": [
+        [
+          "Une marque qui tient debout change tout.",
+          "Elle décide si tu signes le client à 6 000 € ou si tu négocies pour 1 500 €. Elle filtre les bonnes demandes, ferme les mauvaises, donne envie aux meilleurs de te recommander. Sans elle, tu vends ton temps. Avec elle, tu vends une vision."
+        ],
+        [
+          "Mais construire une vraie marque, c'est plus dur qu'on ne le dit.",
+          "Les conseils en ligne te parlent de logo, de palette, de moodboard. C'est la couche visible. La couche invisible — territoire, positionnement, récit fondateur — c'est elle qui décide si ta marque tient dix ans ou trois mois. Et personne ne te montre comment la bâtir."
+        ],
+        [
+          "Tu peux poser des fondations qui tiennent.",
+          "Cette journée te donne la méthode qu'on utilise pour structurer la marque d'artistes signés en major (Rilès, Vacra, Médine) et d'institutions culturelles. Tu repars avec ta plateforme de marque écrite — utilisable lundi matin, défendable face à un comité, claire pour ton équipe."
+        ]
+      ],
+      "discipline": "STRATÉGIE · MARQUE",
+      "media": {
+        "type": "image",
+        "src": "img/f-marque.jpg",
+        "credit": "FILA × LES GRIOTS"
+      },
+      "duration": "7H · 1 JOURNÉE",
+      "format": "PRÉSENTIEL · PARIS / EN LIGNE",
+      "location": null,
+      "price": "300 €",
+      "cpf": false,
+      "opco": true,
+      "trainer": {
+        "name": "MOOS COULIBALY",
+        "role": "FONDATEUR · LES GRIOTS"
+      },
+      "description": "Une journée pour construire une marque qui tient debout : poser son identité, défendre un positionnement clair, articuler le récit fondateur. La méthode est celle d'un praticien — neuf ans à structurer la marque d'artistes signés en major (Rilès, Vacra, Oumar, Médine) et de structures culturelles établies.",
+      "audience": "Créatifs, entrepreneurs et TPE, fondateurs de studio, porteurs de projet culturel. Toute personne qui veut clarifier ce que sa marque dit et défendre sa singularité.",
+      "prerequisites": "Avoir une activité ou un projet en cours, même au stade de l'idée. Aucun prérequis technique.",
+      "objectives": [
+        "Distinguer identité, positionnement et récit",
+        "Construire les fondations d'une marque (valeurs, promesse, ton)",
+        "Défendre un positionnement clair face à la concurrence",
+        "Structurer son récit fondateur pour les supports clés",
+        "Bâtir une plateforme de marque utilisable au quotidien"
+      ],
+      "chapters": [
+        "Identité — territoire, valeurs, promesse",
+        "Positionnement — qui, contre qui, pour quoi",
+        "Récit — fondations narratives de la marque",
+        "Plateforme de marque — outil opérationnel",
+        "Cas pratique sur projet réel du stagiaire"
+      ],
+      "program": [
+        {
+          "day": "matin",
+          "modules": [
+            {
+              "title": "Identité",
+              "items": [
+                "Cartographier son territoire (ce qu'on défend, ce qu'on refuse)",
+                "Identifier ses valeurs opérantes (pas celles qu'on affiche)",
+                "Formuler une promesse claire — courte, mesurable, tenable",
+                "Caler le ton qui va porter tout le reste"
+              ]
+            }
+          ],
+          "exercises": [
+            "Exercice de territoire sur le projet du stagiaire"
+          ]
+        },
+        {
+          "day": "midi",
+          "modules": [
+            {
+              "title": "Positionnement",
+              "items": [
+                "Qui — qui est exactement la cible (3 cercles concentriques)",
+                "Contre qui — la carte concurrentielle réelle",
+                "Pour quoi — la singularité défendable en une phrase"
+              ]
+            }
+          ],
+          "exercises": [
+            "Construire son énoncé de positionnement en 1 phrase"
+          ]
+        },
+        {
+          "day": "après-midi",
+          "modules": [
+            {
+              "title": "Récit",
+              "items": [
+                "Fondations narratives — origine, mission, conflit",
+                "Articulation pour les supports clés (site, deck, pitch oral)"
+              ]
+            },
+            {
+              "title": "Plateforme",
+              "items": [
+                "Document opérationnel synthèse pour l'équipe",
+                "Décliner sur les premiers points de contact"
+              ]
+            }
+          ],
+          "exercises": [
+            "Plateforme de marque v1 sur projet réel du stagiaire",
+            "Restitution + feedback collectif"
+          ]
+        }
+      ],
+      "methods": null,
+      "evaluation": null,
+      "accessibility": null,
+      "next": "—",
+      "available": true,
+      "position": 0,
+      "updated_at": "2026-05-25T10:37:44.829Z",
+      "created_at": "2026-05-25T10:37:44.829Z"
+    },
+    {
+      "id": "strategie-contenu",
+      "title": "Stratégie de contenu & acquisition client",
+      "tagline": "Repars avec ton plan éditorial à 90 jours — sujets, formats, cadence — prêt à publier dès lundi.",
+      "overview": [
+        [
+          "Le contenu peut changer toute ton activité.",
+          "Publier régulièrement est devenu le prérequis pour exister en tant qu'indépendant ou marque. Pas pour buzzer — pour être crédible, joignable, recommandable. C'est aujourd'hui ton premier commercial, ton CV vivant, ton réseau qui travaille pendant que tu dors."
+        ],
+        [
+          "Mais publier sans cadre, c'est s'épuiser.",
+          "Tu produis, ça flop. Tu changes de format toutes les semaines. Tu doutes de chaque post avant de cliquer. Tu finis par t'arrêter au bout de trois mois — et tu te dis que ce n'est pas pour toi. Le problème n'est pas toi : c'est l'absence de méthode."
+        ],
+        [
+          "Tu peux publier régulièrement sans t'épuiser.",
+          "Cette journée te donne la structure : piliers de contenu, plateformes adaptées à ton audience, calendrier réaliste pour un freelance ou une petite équipe. Tu repars avec ton plan éditorial à 90 jours — sujets, formats, cadence — prêt à publier dès lundi."
+        ]
+      ],
+      "discipline": "STRATÉGIE · CONTENU",
+      "media": {
+        "type": "image",
+        "src": "img/f-contenu.jpg",
+        "credit": "Florale × LES GRIOTS"
+      },
+      "duration": "7H · 1 JOURNÉE",
+      "format": "PRÉSENTIEL · PARIS / EN LIGNE",
+      "location": null,
+      "price": "300 €",
+      "cpf": false,
+      "opco": true,
+      "trainer": {
+        "name": "MOOS COULIBALY",
+        "role": "FONDATEUR · LES GRIOTS"
+      },
+      "description": "Une journée pour structurer sa stratégie de contenu et tenir dans la durée. Comprendre la langue de chaque plateforme, choisir ses formats, bâtir une cadence réaliste, transformer une audience en communauté active. Méthode forgée sur la gestion de plusieurs comptes à six chiffres de followers et l'accompagnement de marques.",
+      "audience": "Freelances, fondateurs de TPE créatives, indépendants — graphistes, DA, designers, photographes, vidéastes, artistes. Toute personne qui veut structurer sa présence en ligne sans se vider.",
+      "prerequisites": "Avoir une activité indépendante ou un projet en cours. Maîtrise basique d'au moins un réseau social recommandée.",
+      "objectives": [
+        "Définir sa stratégie de contenu sur les cinq questions-clés",
+        "Choisir ses plateformes selon leur langue et leur posture",
+        "Bâtir un storyboard et tenir une cadence réaliste",
+        "Adapter ses contenus aux formats et durées de chaque réseau",
+        "Transformer une audience en communauté via 3 gestes-clés"
+      ],
+      "chapters": [
+        "Contenu — fond avant la forme",
+        "Plateformes — chaque langue, chaque posture",
+        "Durée — cadence, calendrier éditorial, persévérance",
+        "Storyboard & incarnation",
+        "De l'audience à la communauté"
+      ],
+      "program": [
+        {
+          "day": "matin",
+          "modules": [
+            {
+              "title": "Contenu",
+              "items": [
+                "Les 5 questions à se poser avant de publier",
+                "Distinguer contenu de marque, contenu utilitaire, contenu personnel",
+                "Fond avant la forme — éviter le piège esthétique"
+              ]
+            }
+          ],
+          "exercises": [
+            "Audit express de ses 10 derniers contenus"
+          ]
+        },
+        {
+          "day": "midi",
+          "modules": [
+            {
+              "title": "Plateformes",
+              "items": [
+                "La langue de chaque plateforme (IG, TikTok, LinkedIn, YouTube)",
+                "Choisir 2 plateformes principales selon sa posture",
+                "Adapter sans diluer — la règle 1 message, 3 formes"
+              ]
+            }
+          ],
+          "exercises": [
+            "Choisir son duo de plateformes + justifier"
+          ]
+        },
+        {
+          "day": "après-midi",
+          "modules": [
+            {
+              "title": "Cadence & storyboard",
+              "items": [
+                "Calendrier éditorial qui tient sur 6 mois",
+                "Construire un storyboard par série / thématique",
+                "Gérer la durée — éviter le burn-out créateur"
+              ]
+            },
+            {
+              "title": "Audience → communauté",
+              "items": [
+                "Incarnation — le rôle du visage et de la voix",
+                "3 gestes-clés pour transformer un abonné en supporter",
+                "Mesurer ce qui compte (pas les vues — les retours)"
+              ]
+            }
+          ],
+          "exercises": [
+            "Plan éditorial 90 jours sur cas réel"
+          ]
+        }
+      ],
+      "methods": null,
+      "evaluation": null,
+      "accessibility": null,
+      "next": "—",
+      "available": true,
+      "position": 1,
+      "updated_at": "2026-05-25T10:37:44.847Z",
+      "created_at": "2026-05-25T10:37:44.847Z"
+    },
+    {
+      "id": "filmer-au-telephone",
+      "title": "Filmer au téléphone",
+      "tagline": "Repars avec une vidéo finie et publiée — et la méthode pour en sortir une nouvelle chaque semaine, avec ton seul téléphone.",
+      "overview": [
+        [
+          "La vidéo est devenue ton premier point de contact.",
+          "Avant qu'un client te contacte, il a déjà regardé tes vidéos. Avant qu'un programmateur t'invite, il a vérifié ton feed. Avant qu'un partenaire propose une collab, il a checké si tu sais raconter une histoire en 30 secondes. La vidéo n'est plus optionnelle — c'est le format qui ouvre les portes."
+        ],
+        [
+          "Mais attendre une équipe ou un budget, c'est rater le train.",
+          "Tu as un sujet, tu as une intention, tu as un téléphone. Et pourtant tu ne publies pas — parce que tu trouves ça moche, parce que tu ne sais pas par où commencer, parce que tu attends « le bon moment ». Le bon moment, c'est aujourd'hui, avec ce que tu as déjà dans la poche."
+        ],
+        [
+          "Tu peux produire pro avec un seul téléphone.",
+          "Cette journée te donne les bons réflexes — lumière, cadre, son, montage, export — pour produire des vidéos crédibles sans matériel pro. Tu repars avec une vidéo finie et publiée, et la méthode pour en sortir une nouvelle chaque semaine."
+        ]
+      ],
+      "discipline": "VIDÉO · MOBILE",
+      "media": {
+        "type": "video",
+        "src": "img/f-mobile.mp4",
+        "poster": "img/f-mobile-poster.jpg",
+        "credit": "Indigo Cristal × LES GRIOTS"
+      },
+      "duration": "7H · 1 JOURNÉE",
+      "format": "PRÉSENTIEL · PARIS / EN LIGNE",
+      "location": null,
+      "price": "300 €",
+      "cpf": false,
+      "opco": true,
+      "trainer": {
+        "name": "MOOS COULIBALY",
+        "role": "RÉALISATEUR · LES GRIOTS"
+      },
+      "description": "Une journée pour réaliser de la vidéo qui tient avec un simple smartphone. On travaille l'image, le cadrage, la lumière disponible et le montage mobile. La méthode vient du terrain — Moos a réalisé pour Médine (Voltaire, Grand Médine), Oumar (Yeezy, 99 Problems), Doni M / TIERS (Les Oubliés).",
+      "audience": "Toute personne qui veut produire de la vidéo professionnelle avec un téléphone : créatifs, entrepreneurs, communicants, journalistes, artistes, porteurs de projet associatif.",
+      "prerequisites": "Posséder un smartphone (iOS ou Android) avec capacité de filmer en Full HD ou 4K. Aucun prérequis technique préalable.",
+      "objectives": [
+        "Maîtriser les réglages image et son d'un smartphone",
+        "Composer un cadrage qui sert le propos",
+        "Travailler avec la lumière disponible (intérieur, extérieur)",
+        "Monter une séquence courte directement sur mobile",
+        "Exporter aux bons formats selon les plateformes"
+      ],
+      "chapters": [
+        "Image — réglages, formats, résolution",
+        "Cadrage — règles, ruptures, points de vue",
+        "Lumière — naturelle, disponible, simple",
+        "Montage — outils mobiles, rythme, sound design",
+        "Export & diffusion — formats par plateforme"
+      ],
+      "program": [
+        {
+          "day": "matin",
+          "modules": [
+            {
+              "title": "Image",
+              "items": [
+                "Réglages caméra natifs vs app pro (Filmic, BlackMagic)",
+                "Formats — 4K, 1080p, HDR : choisir selon la destination",
+                "Stabilisation logicielle vs gimbal vs main posée"
+              ]
+            },
+            {
+              "title": "Cadrage",
+              "items": [
+                "Règles de base — règle des tiers, ligne d'horizon",
+                "Quand les casser (et pourquoi le faire intentionnellement)",
+                "Points de vue — la hauteur d'œil n'est pas neutre"
+              ]
+            }
+          ],
+          "exercises": [
+            "Tourner 3 plans contrastés sur place avec son téléphone"
+          ]
+        },
+        {
+          "day": "midi",
+          "modules": [
+            {
+              "title": "Lumière",
+              "items": [
+                "Lire la lumière disponible avant de la modifier",
+                "Lumière naturelle — fenêtre, contre-jour, golden hour",
+                "Compléments simples — réflecteur, lampe LED de poche"
+              ]
+            },
+            {
+              "title": "Son",
+              "items": [
+                "Le micro intégré ne suffit jamais en interview",
+                "Micros-cravate Bluetooth — DJI Mic, Rode Wireless"
+              ]
+            }
+          ],
+          "exercises": [
+            "Interview 1 minute en intérieur — lumière + micro externe"
+          ]
+        },
+        {
+          "day": "après-midi",
+          "modules": [
+            {
+              "title": "Montage mobile",
+              "items": [
+                "CapCut, LumaFusion, Premiere Rush — quoi pour quoi",
+                "Rythme — couper sur le mouvement, sur la voix",
+                "Sound design — bed musical + foley + voix"
+              ]
+            },
+            {
+              "title": "Export & diffusion",
+              "items": [
+                "Formats par plateforme — 9:16, 1:1, 16:9, vertical safe areas",
+                "Bitrate, codec, sous-titres — checklist par destination"
+              ]
+            }
+          ],
+          "exercises": [
+            "Monter une séquence 30 secondes à partir des rushes du jour",
+            "Exporter au format de la plateforme cible du stagiaire"
+          ]
+        }
+      ],
+      "methods": null,
+      "evaluation": null,
+      "accessibility": null,
+      "next": "—",
+      "available": true,
+      "position": 2,
+      "updated_at": "2026-05-25T10:37:44.851Z",
+      "created_at": "2026-05-25T10:37:44.851Z"
+    },
+    {
+      "id": "contenu-video-telephone",
+      "title": "Stratégie de contenu et création vidéo au téléphone",
+      "tagline": "Repars en 2 jours avec un film produit, une méthode autonome et un calendrier éditorial trimestriel — prêt à publier dès lundi.",
+      "overview": [
+        [
+          "La vidéo + la stratégie : le combo qui change tout.",
+          "Aujourd'hui, tes publics découvrent ta marque par la vidéo. Mais une belle vidéo sans plan derrière, c'est un coup de chance. Et un plan éditorial sans capacité de production, c'est une fiche Notion qui prend la poussière. Les deux ensemble — c'est ça qui fait passer une activité à l'échelle."
+        ],
+        [
+          "Mais combiner technique et stratégie, c'est rare.",
+          "Les écoles t'enseignent l'un OU l'autre. Tu apprends à filmer mais pas à diffuser. Tu apprends à publier mais tu sous-traites la prod. Résultat : tu dépends des autres ou tu publies des contenus génériques."
+        ],
+        [
+          "Tu peux maîtriser les deux en deux jours.",
+          "Jour 1 : tu apprends à filmer et monter pro avec ton seul téléphone. Jour 2 : tu construis ta stratégie de contenu — cible, piliers, calendrier. Tu repars avec un film produit, une méthode autonome, un plan éditorial trimestriel et une feuille de route personnalisée."
+        ]
+      ],
+      "discipline": "STRATÉGIE · VIDÉO",
+      "media": {
+        "type": "video",
+        "src": "img/f-mobile.mp4",
+        "poster": "img/f-mobile-poster.jpg",
+        "credit": "LES GRIOTS × terrain"
+      },
+      "duration": "14H · 2 JOURNÉES",
+      "format": "PRÉSENTIEL · LE HAVRE (intra possible à Paris)",
+      "location": "Présentiel uniquement, dans les locaux de La Griothèque au Havre (80 avenue du 8 mai 1945, 76610 Le Havre). Possibilité de session parisienne ou intra-entreprise sur demande.",
+      "price": "2 000 € (intra) · sur devis",
+      "cpf": false,
+      "opco": true,
+      "trainer": {
+        "name": "MOOS COULIBALY",
+        "role": "FONDATEUR · LES GRIOTS"
+      },
+      "description": "La vidéo est aujourd'hui le format poussé par l'ensemble des plateformes — elle capte l'attention, prouve l'expertise et installe une confiance immédiate avec les publics. Cette formation de deux jours croise la maîtrise technique de l'appareil (réglages, lumière, cadre, plans, mouvements, interview, montage, export) et la structuration éditoriale (identité, perception, cible, incarnation, plateformes, calendrier). Chaque séquence donne lieu à un livrable activable. Chaque stagiaire repart avec une méthode autonome, un film produit et une feuille de route personnalisée. « Le storytelling, ce n'est pas l'histoire que tu racontes. C'est l'histoire que les autres se racontent quand ils posent le regard sur toi. »",
+      "audience": "Entrepreneurs, fondateurs et dirigeants de TPE. Responsables communication et équipes internes. Créatifs et artistes indépendants (musiciens, danseurs, plasticiens, designers, photographes, réalisateurs). Porteurs de projets culturels (lieux hybrides, tiers-lieux, cafés culturels, associations). Professionnels de la restauration, de la mode, du sport ou du bien-être. Freelances et auteurs indépendants.",
+      "prerequisites": "Aucun prérequis technique ni académique. Smartphone personnel ou professionnel en état de marche (iOS ou Android), au moins 10 Go d'espace de stockage libre, comptes Instagram et TikTok fonctionnels.",
+      "objectives": [
+        "Maîtriser l'interface et les réglages fondamentaux de son smartphone pour la vidéo",
+        "Régler exposition, vitesse, ISO, balance des blancs et mise au point",
+        "Choisir résolution et cadence adaptées à la destination (HD, 4K, PAL, ralenti)",
+        "Composer un plan, placer un sujet et exploiter la lumière naturelle ou artificielle",
+        "Préparer et conduire une interview",
+        "Monter sur CapCut, synchroniser image et son, générer des sous-titres",
+        "Exporter et décliner pour Instagram, TikTok, Meta et YouTube",
+        "Formuler une stratégie de contenu à partir de l'identité, de la perception et de la cible",
+        "Construire et piloter un calendrier éditorial trimestriel",
+        "Analyser la performance d'une publication et ajuster la production suivante"
+      ],
+      "chapters": [
+        "Jour 1 · Matin — Prise en main & réglages (interface, exposition, résolutions, cadences)",
+        "Jour 1 · Après-midi — Lumière, cadre & tournage (composition, plans, interview, B-roll)",
+        "Jour 2 · Matin — Montage & publication (CapCut, exports, plateformes)",
+        "Jour 2 · Après-midi — Stratégie de contenu (identité, cible, incarnation, calendrier éditorial)"
+      ],
+      "program": [
+        {
+          "day": "jour 1 · matin",
+          "modules": [
+            {
+              "title": "Ouverture & cadrage",
+              "items": [
+                "Présentation Les Griots, La Griothèque et de l'intervenant",
+                "Tour de table, parcours et attentes",
+                "Pourquoi la vidéo est un enjeu stratégique",
+                "Qu'est-ce qu'un contenu de qualité (utile, clair, simple, adressé)"
+              ]
+            },
+            {
+              "title": "Interface & prise en main",
+              "items": [
+                "Application Caméra native (iOS, Android)",
+                "Modes disponibles et modes experts",
+                "Focales disponibles et anatomie du smartphone",
+                "Applications tierces — Blackmagic Camera, FiLMiC Pro"
+              ]
+            },
+            {
+              "title": "Réglages fondamentaux",
+              "items": [
+                "Triangle d'exposition, verrouillage AE, compensation",
+                "Vitesse d'obturation et règle du 180°",
+                "Sensibilité ISO et bruit numérique",
+                "Balance des blancs, réglage en Kelvin",
+                "Mise au point — AF, AF Lock, AE/AF combiné, focus pull"
+              ]
+            },
+            {
+              "title": "Résolutions & cadences",
+              "items": [
+                "HD, Full HD, 4K — qualité, poids, stockage",
+                "Cadences 24 / 25 / 30 / 50 / 60 fps",
+                "Mode PAL, scintillement des sources artificielles",
+                "Ralenti — activation, cadences 120 / 240 fps"
+              ]
+            }
+          ],
+          "exercises": []
+        },
+        {
+          "day": "jour 1 · après-midi",
+          "modules": [
+            {
+              "title": "La lumière",
+              "items": [
+                "Direction et qualité (dure, douce, frontale, latérale, contre-jour)",
+                "Lumière naturelle selon les heures et les contextes",
+                "Lumière artificielle, températures, mix de sources",
+                "Positionner son sujet ou se positionner par rapport à la lumière"
+              ]
+            },
+            {
+              "title": "Composition, cadre & sujet",
+              "items": [
+                "Règle des tiers, lignes de force, hors-champ, profondeur",
+                "Le sujet dans une vidéo — intention, placement",
+                "Rapport sujet / décor, distance et focale",
+                "Sujet en mouvement, anticipation du cadre"
+              ]
+            },
+            {
+              "title": "Plans, mouvements & formats",
+              "items": [
+                "Échelle des plans, angles, raccords",
+                "Panoramique, travelling, plan fixe — stabilisation",
+                "Formats 9:16, 1:1, 16:9 et ce qu'ils induisent",
+                "Micros intégrés, micro-cravate Bluetooth, dictaphone"
+              ]
+            },
+            {
+              "title": "Faire une interview & organisation",
+              "items": [
+                "Préparation, questions, structure",
+                "Cadre, lumière, son, regard — conduite de l'entretien",
+                "B-roll et plans de coupe",
+                "Mode avion, stockage, batterie, nommage des rushes"
+              ]
+            }
+          ],
+          "exercises": [
+            "3 types de plans & 3 types de mouvements en autonomie",
+            "Tournage d'une vidéo courte avec interview dans le lieu"
+          ]
+        },
+        {
+          "day": "jour 2 · matin",
+          "modules": [
+            {
+              "title": "Prise en main de CapCut",
+              "items": [
+                "Installation (iOS + Android), création de compte",
+                "Créer un projet, choisir le format, importer rushes et musique",
+                "Cut, Trim, Zoom timeline — synchroniser image et son",
+                "Transitions, textes, sous-titres générés, gestion du son"
+              ]
+            },
+            {
+              "title": "Export & plateformes",
+              "items": [
+                "Format d'export — résolution, cadence, codec",
+                "Vertical 9:16, carré 1:1, horizontal 16:9",
+                "Instagram Reels, Stories, Feed · TikTok · Meta · YouTube",
+                "Zones safe, durées, placements de texte",
+                "Décliner un même tournage vers plusieurs formats"
+              ]
+            }
+          ],
+          "exercises": [
+            "Montage complet de la vidéo et de l'interview tournées la veille"
+          ]
+        },
+        {
+          "day": "jour 2 · après-midi",
+          "modules": [
+            {
+              "title": "Qui êtes-vous & perception",
+              "items": [
+                "Identité, passions, âme du projet",
+                "Perception vs intention",
+                "Le storytelling comme regard de l'autre"
+              ]
+            },
+            {
+              "title": "Votre cible",
+              "items": [
+                "Besoins / Manque · Désirs / Peur",
+                "Pyramide de Maslow appliquée à votre projet",
+                "Problème résolu, amélioration, raison de s'en soucier"
+              ]
+            },
+            {
+              "title": "Contenu, incarnation & calendrier",
+              "items": [
+                "Piliers de contenu et déclinaisons possibles",
+                "Quatre formes d'incarnation — interne, clients, créateurs, influence",
+                "Plateformes comme espaces narratifs",
+                "Rythme, temps forts, campagnes — Google Sheets, Notion, Trello",
+                "Indicateurs de performance et boucle d'amélioration"
+              ]
+            },
+            {
+              "title": "Clôture — écrire sa prochaine vidéo",
+              "items": [
+                "La méthode en 8 étapes, du script à l'analyse",
+                "Script, shot list, storyboard à emporter"
+              ]
+            }
+          ],
+          "exercises": [
+            "Travail sur sa cible et la manière dont on comble ses Besoins / Manques / Désirs",
+            "Écriture et storyboard d'une vidéo à produire dans les 15 jours"
+          ]
+        }
+      ],
+      "methods": "Alternance d'apports théoriques, d'études de cas, d'ateliers pratiques et de mises en situation individuelles. Un livrable activable est produit à chaque séquence. Chaque stagiaire reçoit un Kit La Griothèque comprenant le workbook pédagogique, une carte mémo des réglages, des supports de travail et le modèle CapCut à importer. Effectif limité à 12 stagiaires par session (minimum 4 pour le maintien). Suivi post-formation inclus : exercice en autonomie (vidéo produite dans les 15 jours) + entretien individuel personnalisé de 20 minutes.",
+      "evaluation": "Questionnaire de positionnement en amont. Évaluation continue par les ateliers. Quiz de validation des acquis en fin de formation. Exercice en autonomie — une vidéo produite dans les 15 jours suivant la formation. Entretien individuel personnalisé de 20 minutes (compris dans le tarif). Questionnaire de satisfaction à chaud et à froid. Attestation de fin de formation et certificat de réalisation remis à chaque stagiaire.",
+      "accessibility": null,
+      "next": "—",
+      "available": true,
+      "position": 3,
+      "updated_at": "2026-05-25T10:46:24.535Z",
+      "created_at": "2026-05-25T10:37:44.857Z"
+    }
+  ],
+  "workshops": [
+    {
+      "id": "ws-residence-recit",
+      "title": "RÉSIDENCE — STRUCTURER SON RÉCIT",
+      "tagline": "Repars de la résidence avec le récit complet de ton projet — fondations, ton, supports — prêt à diffuser.",
+      "discipline": "RÉCIT · STRATÉGIE",
+      "media": {
+        "type": "image",
+        "src": "img/w-residence.jpg",
+        "credit": "Mains × LES GRIOTS"
+      },
+      "duration": "21H · 3 JOURS",
+      "format": "RÉSIDENCE · LIEU À CONFIRMER",
+      "location": "Résidence en région — lieu communiqué après sélection sur dossier.",
+      "price": "900 € HT",
+      "cpf": false,
+      "opco": true,
+      "trainer": {
+        "name": "MOOS COULIBALY",
+        "role": "FONDATEUR · LES GRIOTS"
+      },
+      "description": "Trois jours d'immersion totale en résidence pour structurer le récit de ton projet — idée, fondations, positionnement, ton, matrices narratives, supports de diffusion. Petit groupe (8 max), accompagnement individuel sur ton cas réel.",
+      "audience": "Porteurs de projet créatif ou culturel ayant une idée à structurer et la volonté de la déployer publiquement dans les 12 mois.",
+      "prerequisites": "Sur sélection de dossier (court pitch écrit envoyé par mail). Avoir un projet à structurer ou un lancement à préparer.",
+      "objectives": [
+        "Clarifier le récit fondateur d'un projet",
+        "Construire ses matrices narratives (story, positionnement, ton)",
+        "Identifier ses publics et leurs entrées",
+        "Adapter le récit à chaque support de diffusion",
+        "Repartir avec un kit récit applicable immédiatement"
+      ],
+      "chapters": [
+        "Idée & fondations",
+        "Positionnement & ton",
+        "Matrices narratives",
+        "Publics & entrées",
+        "Supports & diffusion",
+        "Kit récit final"
+      ],
+      "methods": null,
+      "evaluation": null,
+      "accessibility": null,
+      "next": "—",
+      "available": false,
+      "position": 0,
+      "updated_at": "2026-05-25T10:37:44.863Z",
+      "created_at": "2026-05-25T10:37:44.863Z"
+    },
+    {
+      "id": "ws-bootcamp-marque",
+      "title": "BOOTCAMP MARQUE — 48H",
+      "tagline": "Repars en 2 jours avec ta marque écrite — pas une idée, un document utilisable dès lundi.",
+      "discipline": "MARQUE · POSITIONNEMENT",
+      "media": {
+        "type": "image",
+        "src": "img/w-bootcamp.jpg",
+        "credit": "Atavisme × LES GRIOTS"
+      },
+      "duration": "14H · 2 JOURS",
+      "format": "PRÉSENTIEL · PARIS",
+      "location": null,
+      "price": "600 € HT",
+      "cpf": false,
+      "opco": true,
+      "trainer": {
+        "name": "MOOS COULIBALY",
+        "role": "FONDATEUR · LES GRIOTS"
+      },
+      "description": "Format bootcamp 48h pour poser en deux jours les fondations d'une marque solide : identité, positionnement, récit, plateforme de marque opérationnelle. Versus la formation Stratégie de Marque, le bootcamp pousse plus loin la mise en pratique sur ton cas réel.",
+      "audience": "Fondateurs, entrepreneurs, créatifs en phase de lancement ou de refonte de marque. Idéal pour aller vite et profond en 48h.",
+      "prerequisites": "Avoir un projet de marque en cours (lancement, refonte, pivot). Aucun prérequis technique.",
+      "objectives": [
+        "Poser identité, positionnement, récit en 48h",
+        "Construire sa plateforme de marque complète",
+        "Tester et défendre son positionnement",
+        "Repartir avec un kit marque opérationnel"
+      ],
+      "chapters": [
+        "J1 — Diagnostic & fondations",
+        "J1 — Positionnement & territoire",
+        "J2 — Récit & ton de voix",
+        "J2 — Plateforme & application"
+      ],
+      "methods": null,
+      "evaluation": null,
+      "accessibility": null,
+      "next": "—",
+      "available": false,
+      "position": 1,
+      "updated_at": "2026-05-25T10:37:44.869Z",
+      "created_at": "2026-05-25T10:37:44.869Z"
+    },
+    {
+      "id": "ws-intensif-mobile",
+      "title": "INTENSIF VIDÉO MOBILE",
+      "tagline": "Repars en 2 jours avec ton workflow vidéo en main — produire et publier régulièrement, avec ton téléphone.",
+      "discipline": "VIDÉO · TERRAIN",
+      "media": {
+        "type": "image",
+        "src": "img/w-mobile.jpg",
+        "credit": "Monument × LES GRIOTS"
+      },
+      "duration": "14H · 2 JOURS",
+      "format": "PRÉSENTIEL · PARIS",
+      "location": null,
+      "price": "600 € HT",
+      "cpf": false,
+      "opco": true,
+      "trainer": {
+        "name": "MOOS COULIBALY",
+        "role": "RÉALISATEUR · LES GRIOTS"
+      },
+      "description": "Deux jours intensifs pour produire, monter et publier une vidéo complète au téléphone : tournage sur le terrain, captation son, montage mobile, étalonnage basique, exports plateforme. Tu repars avec une vidéo publiable.",
+      "audience": "Créatifs, communicants, journalistes, entrepreneurs qui veulent produire de la vidéo régulière au mobile sans dépendre d'une équipe technique.",
+      "prerequisites": "Posséder un smartphone capable de filmer en Full HD ou 4K. Bases vidéo bienvenues mais pas obligatoires.",
+      "objectives": [
+        "Réaliser une vidéo complète au téléphone en 48h",
+        "Maîtriser captation image et son en terrain",
+        "Monter, étalonner et exporter sur mobile",
+        "Publier au format adapté à chaque plateforme"
+      ],
+      "chapters": [
+        "J1 — Image & captation son terrain",
+        "J1 — Tournage sur cas réel",
+        "J2 — Montage mobile & étalonnage",
+        "J2 — Export & publication"
+      ],
+      "methods": null,
+      "evaluation": null,
+      "accessibility": null,
+      "next": "—",
+      "available": false,
+      "position": 2,
+      "updated_at": "2026-05-25T10:37:44.874Z",
+      "created_at": "2026-05-25T10:37:44.874Z"
+    }
+  ],
+  "trainers": [
+    {
+      "id": "moos-coulibaly",
+      "name": "MOOS COULIBALY",
+      "role": "Fondateur · Les Griots",
+      "bio": "Moos a fondé Les Griots (SASU, 2021), plateforme d'ingénierie narrative regroupant un studio créatif, une production originale et La Griothèque. Praticien transversal — chorégraphie, réalisation, direction artistique, stratégie de marque — il accompagne Rilès, Vacra, Oumar, Médine, Eesah Yasuke, FILA, CCN Le Havre. Il forme désormais créatifs, entrepreneurs et institutions à structurer leur récit et leur marque.",
+      "photo": null,
+      "formations": [
+        "strategie-marque",
+        "strategie-contenu",
+        "filmer-au-telephone",
+        "contenu-video-telephone"
+      ],
+      "position": 0,
+      "updated_at": "2026-05-25T10:37:44.878Z",
+      "created_at": "2026-05-25T10:37:44.878Z"
+    },
+    {
+      "id": "alexandre-sanou",
+      "name": "ALEXANDRE SANOU",
+      "role": "Directeur créatif · Snap",
+      "bio": "Rencontre à venir — intervention à caler.",
+      "photo": null,
+      "formations": [],
+      "status": "prospect",
+      "position": 1,
+      "updated_at": "2026-05-25T10:37:44.883Z",
+      "created_at": "2026-05-25T10:37:44.883Z"
+    },
+    {
+      "id": "terrence-nguea",
+      "name": "TERRENCE NGUEA",
+      "role": "Mino",
+      "bio": "Rencontre à venir — intervention à caler.",
+      "photo": null,
+      "formations": [],
+      "status": "prospect",
+      "position": 2,
+      "updated_at": "2026-05-25T10:37:44.887Z",
+      "created_at": "2026-05-25T10:37:44.887Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "ws-ses-intensif-mobile-sept",
+      "kind": "workshop",
+      "targetId": "ws-intensif-mobile",
+      "date": "2026-09-27",
+      "dateLabel": "Jeu. 24 → Ven. 25 septembre 2026",
+      "format": "PRÉSENTIEL · PARIS",
+      "seats": 10,
+      "status": "À VENIR",
+      "position": 9,
+      "updated_at": "2026-05-25T12:24:43.735Z",
+      "created_at": "2026-05-25T10:37:44.927Z",
+      "formation_id": "",
+      "places": "10",
+      "workshop_id": "ws-intensif-mobile"
+    },
+    {
+      "id": "ses-strategie-marque-2026-04-15",
+      "date": "2026-04-15",
+      "formation_id": "strategie-marque",
+      "workshop_id": "",
+      "places": "8 / 12",
+      "status": "OUVERTE",
+      "format": "PRÉSENTIEL · PARIS",
+      "created_at": "2026-05-25T12:44:18.093982Z",
+      "updated_at": "2026-05-25T12:44:18.093982Z",
+      "position": 1
+    },
+    {
+      "id": "ses-filmer-telephone-2026-06-10",
+      "date": "2026-06-10",
+      "formation_id": "filmer-au-telephone",
+      "workshop_id": "",
+      "places": "10",
+      "status": "OUVERTE",
+      "format": "PRÉSENTIEL · PARIS / EN LIGNE",
+      "created_at": "2026-05-25T12:44:18.093982Z",
+      "updated_at": "2026-05-25T12:44:18.093982Z",
+      "position": 2
+    },
+    {
+      "id": "ws-ses-bootcamp-marque-2026-05-20",
+      "date": "2026-05-20",
+      "formation_id": "",
+      "workshop_id": "ws-bootcamp-marque",
+      "places": "6 / 8",
+      "status": "OUVERTE",
+      "format": "PRÉSENTIEL · PARIS",
+      "created_at": "2026-05-25T12:44:18.093982Z",
+      "updated_at": "2026-05-25T12:44:18.093982Z",
+      "position": 3
+    },
+    {
+      "id": "ses-ws-bootcamp-marque-260529",
+      "date": "2026-05-29",
+      "formation_id": "",
+      "workshop_id": "ws-bootcamp-marque",
+      "places": "10",
+      "status": "À VENIR",
+      "position": 0,
+      "updated_at": "2026-05-25T12:46:15.530Z",
+      "created_at": "2026-05-25T12:45:23.513Z"
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-cinq-questions",
+      "title": "LES CINQ QUESTIONS DE LA STRATÉGIE DE CONTENU",
+      "type": "article",
+      "format": "LECTURE · 8 MIN",
+      "href": "#",
+      "available": true,
+      "position": 0,
+      "updated_at": "2026-05-25T10:37:44.934Z",
+      "created_at": "2026-05-25T10:37:44.934Z"
+    },
+    {
+      "id": "res-plateforme-marque-template",
+      "title": "PLATEFORME DE MARQUE — TEMPLATE",
+      "type": "template",
+      "format": "FIGMA / PDF",
+      "href": "#",
+      "available": false,
+      "position": 1,
+      "updated_at": "2026-05-25T10:37:44.937Z",
+      "created_at": "2026-05-25T10:37:44.937Z"
+    },
+    {
+      "id": "res-guide-filmer-mobile",
+      "title": "GUIDE — FILMER AU TÉLÉPHONE EN INTÉRIEUR",
+      "type": "guide",
+      "format": "PDF · 12 PAGES",
+      "href": "#",
+      "available": false,
+      "position": 2,
+      "updated_at": "2026-05-25T10:37:44.941Z",
+      "created_at": "2026-05-25T10:37:44.941Z"
+    },
+    {
+      "id": "res-cadence-realiste",
+      "title": "TENIR UNE CADENCE ÉDITORIALE RÉALISTE",
+      "type": "article",
+      "format": "LECTURE · 6 MIN",
+      "href": "#",
+      "available": false,
+      "position": 3,
+      "updated_at": "2026-05-25T10:37:44.944Z",
+      "created_at": "2026-05-25T10:37:44.944Z"
+    }
+  ],
+  "leads": [],
+  "active_pages": {
+    "home": true,
+    "approche": true,
+    "formations": true,
+    "workshops": false,
+    "agenda": true,
+    "financement": false,
+    "ressources": false,
+    "cgv": true,
+    "contact": true
+  },
+  "defaults": {
+    "methods": "La formation se structure autour d'un accompagnement global sur la session et individuel sur les exercices pratiques, en groupes limités à 12 stagiaires maximum. Chaque module mêle exposés magistraux, cas pratiques sur projets réels et partage d'expérience, animés par un praticien actif qui transmet ce qu'il a construit — pas un théoricien qui enseigne ce qu'il a lu.",
+    "evaluation": "En amont, un questionnaire d'auto-évaluation est envoyé à chaque stagiaire. En fin de session, une évaluation des acquis est proposée, suivie d'un certificat de réalisation. Une enquête de satisfaction est envoyée à chaque stagiaire pour suivre la qualité pédagogique.",
+    "accessibility": "Nos formations sont accessibles aux personnes en situation de handicap. Pour étudier les adaptations nécessaires, contacter notre référente handicap à formations@lesgriots.com en amont de l'inscription.",
+    "location": "Présentiel : structure de formation à Paris (adresse communiquée lors de l'inscription). En ligne : sessions live via Zoom ou Google Meet, lien communiqué à l'inscription."
+  }
+}

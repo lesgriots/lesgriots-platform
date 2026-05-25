@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, initial-scale=1.0">
+<title>Stratégie de contenu et acquisition client — La Griothèque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #000000;
+    --paper: #f6f5f3;
+    --accent: #ffca00;
+    --muted: #6b6b6b;
+    --line: rgba(0, 0, 0, 0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: #2a2a2a;
+    color: var(--ink);
+    font-family: 'Geist Mono', 'Courier New', monospace;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body.presenting { overflow: hidden; height: 100vh; }
+
+  .deck {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 0;
+    gap: 24px;
+  }
+
+  body.presenting .deck { padding: 0; gap: 0; height: 100vh; justify-content: center; }
+
+  .page {
+    width: 1920px;
+    height: 1080px;
+    background: var(--paper);
+    position: relative;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    overflow: hidden;
+    flex-shrink: 0;
+    transform-origin: center center;
+  }
+
+  body.presenting .page { display: none; }
+  body.presenting .page.active { display: block; transform: scale(var(--scale, 1)); }
+
+  body:not(.presenting) .deck { padding: 24px 0; }
+  body:not(.presenting) .page { transform: scale(0.5); transform-origin: top center; margin-bottom: -540px; }
+
+  /* HEADERS / FOOTERS */
+  .content-header {
+    position: absolute; top: 90px; left: 100px;
+    font-weight: 500; font-size: 26px;
+    text-transform: uppercase; letter-spacing: 0.02em;
+  }
+  .content-header-right {
+    position: absolute; top: 96px; right: 100px;
+    font-weight: 400; font-size: 13px;
+    text-transform: uppercase; text-align: right;
+    line-height: 1.5; letter-spacing: 0.08em; color: var(--muted);
+  }
+  .page-number {
+    position: absolute; bottom: 70px; left: 100px;
+    font-weight: 400; font-size: 13px;
+    letter-spacing: 0.12em; color: var(--muted);
+  }
+  .page-footer {
+    position: absolute; bottom: 70px; right: 100px;
+    font-weight: 400; font-size: 13px;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); text-align: right;
+  }
+
+  /* COVER */
+  .cover-formation-label {
+    position: absolute; left: 100px; top: 240px;
+    font-weight: 400; font-size: 14px;
+    text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted);
+  }
+  .cover-title {
+    position: absolute; left: 100px; top: 280px;
+    font-weight: 500; font-size: 110px;
+    letter-spacing: -0.01em; line-height: 0.95; text-transform: uppercase;
+  }
+  .cover-subtitle {
+    position: absolute; left: 100px; bottom: 180px;
+    font-weight: 400; font-size: 32px;
+    text-transform: uppercase; letter-spacing: 0.005em; line-height: 1.25;
+    max-width: 1400px; color: var(--ink);
+  }
+  .cover-footer {
+    position: absolute; left: 100px; bottom: 80px;
+    font-weight: 500; font-size: 18px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .cover-footer-right {
+    position: absolute; right: 100px; bottom: 80px;
+    font-weight: 400; font-size: 13px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    text-align: right; line-height: 1.5; color: var(--muted);
+  }
+
+  /* CONTENT */
+  .content-area {
+    position: absolute; top: 200px; left: 100px; right: 100px; bottom: 130px;
+  }
+  .content-area.center-vertical {
+    display: flex; flex-direction: column; justify-content: center;
+  }
+
+  .section-title {
+    font-weight: 500; font-size: 52px;
+    text-transform: uppercase; letter-spacing: -0.01em;
+    line-height: 1; margin-bottom: 60px;
+  }
+  .section-title.big { font-size: 96px; line-height: 0.95; }
+  .section-title.huge { font-size: 140px; line-height: 0.92; letter-spacing: -0.02em; }
+
+  .body-text {
+    font-weight: 400; font-size: 18px;
+    line-height: 1.65; max-width: 1200px;
+  }
+  .body-text strong { font-weight: 500; }
+
+  /* ACCENT BOX (jaune) */
+  .accent-box {
+    background: var(--accent);
+    padding: 40px 50px;
+    font-weight: 400; font-size: 32px;
+    line-height: 1.35; color: var(--ink);
+    letter-spacing: -0.01em; max-width: 1500px;
+  }
+  .accent-box .label {
+    font-weight: 500; font-size: 12px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 18px; display: block;
+  }
+  .accent-box.large {
+    font-size: 44px; padding: 56px 64px; line-height: 1.25;
+  }
+
+  /* SUBHEAD */
+  .subhead {
+    font-weight: 500; font-size: 14px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding-bottom: 8px; border-bottom: 1px solid var(--ink);
+    margin-bottom: 24px;
+  }
+
+  /* NUMBERED LIST */
+  .num-list {
+    list-style: none; display: flex; flex-direction: column;
+    gap: 28px; max-width: 1500px;
+  }
+  .num-list li { display: flex; gap: 40px; align-items: baseline; }
+  .num-list li .num {
+    font-weight: 500; font-size: 38px; color: var(--ink); min-width: 60px;
+  }
+  .num-list li .text {
+    font-weight: 400; font-size: 32px;
+    line-height: 1.2; letter-spacing: -0.01em;
+  }
+
+  /* EXERCISE LINES */
+  .exercise-lines {
+    display: flex; flex-direction: column; gap: 64px; margin-top: 60px;
+  }
+  .exercise-lines .line { border-bottom: 1px solid var(--line); height: 1px; }
+
+  .exercise-prompt {
+    font-weight: 500; font-size: 44px;
+    text-transform: uppercase; letter-spacing: -0.01em;
+    line-height: 1.1; margin-bottom: 30px;
+  }
+
+  /* CREDITS BLOCK */
+  .credits-block {
+    display: flex; flex-direction: column; gap: 0;
+    margin-top: 40px; max-width: 1500px;
+  }
+  .credits-block .credit-line {
+    display: grid; grid-template-columns: 380px 1fr; gap: 30px;
+    padding: 18px 0; border-top: 1px solid var(--line); font-size: 19px;
+  }
+  .credits-block .credit-line:last-child { border-bottom: 1px solid var(--line); }
+  .credits-block .credit-label {
+    font-weight: 500; text-transform: uppercase;
+    letter-spacing: 0.06em; font-size: 13px; color: var(--muted);
+  }
+
+  /* GRIOTS PILLARS */
+  .griots-pillars {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 50px; margin-top: 50px;
+  }
+  .griots-pillars .gp { border-top: 2px solid var(--ink); padding-top: 24px; }
+  .griots-pillars .gp.highlight { border-top-color: var(--accent); border-top-width: 4px; }
+  .griots-pillars .gp h4 {
+    font-weight: 500; font-size: 28px;
+    text-transform: uppercase; letter-spacing: 0.01em; margin-bottom: 16px;
+  }
+  .griots-pillars .gp p { font-size: 16px; line-height: 1.55; }
+
+  /* TOUR DE TABLE */
+  .tdt-list {
+    list-style: none; display: flex; flex-direction: column;
+    gap: 36px; margin-top: 50px;
+  }
+  .tdt-list li { display: flex; gap: 40px; align-items: baseline; }
+  .tdt-list li .num { font-weight: 500; font-size: 32px; min-width: 60px; }
+  .tdt-list li .text {
+    font-size: 36px; font-weight: 400;
+    text-transform: uppercase; letter-spacing: 0.01em;
+  }
+
+  /* BIG QUESTION */
+  .big-question {
+    font-weight: 500; font-size: 110px;
+    text-transform: uppercase; line-height: 0.95;
+    letter-spacing: -0.02em; max-width: 1700px;
+  }
+  .big-question.medium { font-size: 78px; }
+  .big-question.small { font-size: 56px; }
+
+  /* TROIS COLONNES (pour les piliers du module) */
+  .three-cols {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 60px; margin-top: 50px;
+  }
+  .three-cols .col { border-top: 1px solid var(--ink); padding-top: 24px; }
+  .three-cols .col h4 {
+    font-weight: 500; font-size: 22px;
+    text-transform: uppercase; letter-spacing: 0.01em; margin-bottom: 16px;
+  }
+  .three-cols .col p { font-size: 16px; line-height: 1.55; color: var(--ink); }
+  .three-cols .col .num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px; color: var(--muted); letter-spacing: 0.18em;
+    text-transform: uppercase; margin-bottom: 8px; display: block;
+  }
+
+  /* DEUX COLONNES */
+  .two-cols {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; margin-top: 40px;
+  }
+
+  /* TABLEAU 2 COLONNES (douleurs / gains style) */
+  .compare-table {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-top: 2px solid var(--ink); border-left: 1px solid var(--ink);
+    margin-top: 50px;
+  }
+  .compare-table .ct-cell {
+    border-right: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: 24px 28px; min-height: 70px;
+    font-size: 18px; line-height: 1.5;
+  }
+  .compare-table .ct-header {
+    font-weight: 500; font-size: 14px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    background: var(--ink); color: var(--paper);
+    padding: 18px 28px;
+  }
+
+  /* TROIS TEMPS */
+  .three-times {
+    display: flex; flex-direction: column;
+    gap: 50px; max-width: 1700px;
+  }
+  .three-times .time-block {
+    display: grid; grid-template-columns: 80px 1fr;
+    gap: 32px; align-items: baseline;
+  }
+  .three-times .time-block .num {
+    font-weight: 500; font-size: 38px; color: var(--ink);
+  }
+  .three-times .time-block .text {
+    font-size: 32px; line-height: 1.25; letter-spacing: -0.01em;
+  }
+  .three-times .time-block.conclusion {
+    border-top: 2px solid var(--ink); padding-top: 40px;
+  }
+  .three-times .time-block.conclusion .text {
+    font-weight: 500; text-transform: uppercase; letter-spacing: 0.005em;
+  }
+
+  /* MODULE OPENER (slide d'introduction de chaque module) */
+  .module-opener-num {
+    font-weight: 500; font-size: 16px;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--muted); margin-bottom: 30px;
+  }
+
+  /* PILLAR LABEL (sur les slides de chaque chapitre) */
+  .pillar-label {
+    display: inline-block;
+    font-weight: 500; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--muted); margin-bottom: 18px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--ink);
+  }
+
+  /* NAV */
+  .nav-controls {
+    position: fixed; bottom: 16px; left: 50%;
+    transform: translateX(-50%); z-index: 1000;
+    background: rgba(0, 0, 0, 0.85); color: var(--paper);
+    padding: 10px 20px; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    font-family: 'Geist Mono', monospace;
+    pointer-events: none; opacity: 0;
+    transition: opacity 0.3s;
+  }
+  body.presenting .nav-controls.show { opacity: 1; }
+  body:not(.presenting) .nav-controls { opacity: 1; }
+
+  .helper {
+    position: fixed; bottom: 16px; right: 16px;
+    background: var(--ink); color: var(--paper);
+    padding: 10px 16px; font-family: 'Geist Mono', monospace;
+    font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; z-index: 1000;
+  }
+
+  @media print {
+    @page { size: 1920px 1080px; margin: 0; }
+    html, body { background: var(--paper); }
+    body.presenting .page { display: block !important; transform: none !important; }
+    .page { margin: 0; box-shadow: none; page-break-after: always; transform: none !important; }
+    .page:last-child { page-break-after: auto; }
+    .nav-controls, .helper { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav-controls" id="navControls">MODE PRÉSENTATION : APPUYEZ SUR P</div>
+<div class="helper">P : PRÉSENTATION · ← → : NAVIGUER · F : PLEIN ÉCRAN</div>
+
+<div class="deck" id="deck">
+
+  <!-- ============================== OUVERTURE ============================== -->
+
+  <!-- 01 — COVER -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Confidentiel<br>Par Moos Coulibaly</div>
+    <div class="cover-formation-label">— Formation</div>
+    <div class="cover-title">Stratégie<br>de contenu<br>&amp; acquisition<br>client</div>
+    <div class="cover-subtitle">Construire une stratégie de contenu qui transforme l'audience en clients.</div>
+    <div class="cover-footer">©2026 Les Griots</div>
+    <div class="cover-footer-right">Tout droits réservés<br>Version 1.0</div>
+  </section>
+
+  <!-- 02 — TOUR DE TABLE -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Ouverture</div>
+    <div class="content-area center-vertical">
+      <h2 class="section-title huge">Tour de table</h2>
+      <ul class="tdt-list">
+        <li><span class="num">01.</span><span class="text">Prénom</span></li>
+        <li><span class="num">02.</span><span class="text">Votre activité, en une phrase</span></li>
+        <li><span class="num">03.</span><span class="text">Vos enjeux du moment</span></li>
+      </ul>
+    </div>
+    <div class="page-number">02 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 03 — MOOS COULIBALY -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Présentation · 01<br>Le formateur</div>
+    <div class="content-area">
+      <h2 class="section-title big">Moos Coulibaly</h2>
+      <p class="body-text" style="font-size: 22px; margin-bottom: 8px;">Artiste multidisciplinaire franco-sénégalais.</p>
+      <p class="body-text" style="font-size: 22px; margin-bottom: 20px;">Fondateur &amp; directeur créatif, LES GRIOTS.</p>
+      <div class="credits-block">
+        <div class="credit-line">
+          <span class="credit-label">Direction créative</span>
+          <span>Vacra · Universal Music France</span>
+        </div>
+        <div class="credit-line">
+          <span class="credit-label">Chorégraphie · Direction du mouvement</span>
+          <span>Rilès · Bercy / Accor Arena</span>
+        </div>
+        <div class="credit-line">
+          <span class="credit-label">Réalisation</span>
+          <span>Médine, Oumar · Sony Music France</span>
+        </div>
+        <div class="credit-line">
+          <span class="credit-label">Interventions</span>
+          <span>Arty Farty · H71 · L'Échelle (Fondation Chanel)</span>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">03 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 04 — LES GRIOTS -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Présentation · 02<br>L'écosystème</div>
+    <div class="content-area">
+      <h2 class="section-title big">Les Griots</h2>
+      <p class="body-text" style="font-size: 22px;">Plateforme d'ingénierie narrative afro-diasporique.</p>
+      <div class="griots-pillars">
+        <div class="gp">
+          <h4>Studio</h4>
+          <p>Direction créative, réalisation, chorégraphie. Accompagnement d'artistes et de marques sur leurs projets audiovisuels et scéniques.</p>
+        </div>
+        <div class="gp">
+          <h4>Production originale</h4>
+          <p>Projets propres portés par le studio, à l'intersection du film, de la photographie et du récit afro-diasporique.</p>
+        </div>
+        <div class="gp highlight">
+          <h4>La Griothèque</h4>
+          <p>Pilier formation, certifié Qualiopi. Cette intervention s'inscrit dans ce pilier.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">04 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 05 — FLYWHEEL LES GRIOTS -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Présentation · 03<br>Flywheel</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 200px;">Mécanique</div>
+      <h2 class="section-title big">Comment Les Griots fonctionne.</h2>
+
+      <div style="display: flex; align-items: center; justify-content: center; gap: 80px; margin-top: 30px;">
+        <svg width="640" height="600" viewBox="0 0 640 600" style="flex-shrink: 0;">
+          <circle cx="320" cy="300" r="220" fill="none" stroke="black" stroke-width="0.8" stroke-dasharray="2 6" opacity="0.35"/>
+          <path d="M 388 100 A 220 220 0 0 1 488 354" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+          <polygon points="488,354 478,346 484,360" fill="black"/>
+          <path d="M 488 446 A 220 220 0 0 1 152 446" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+          <polygon points="152,446 162,440 158,454" fill="black"/>
+          <path d="M 152 354 A 220 220 0 0 1 252 100" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+          <polygon points="252,100 256,114 244,108" fill="black"/>
+          <circle cx="320" cy="300" r="68" fill="#ffca00" stroke="black" stroke-width="1.5"/>
+          <text x="320" y="293" text-anchor="middle" font-family="Geist Mono, monospace" font-weight="500" font-size="13" fill="black" letter-spacing="2.2">LES</text>
+          <text x="320" y="313" text-anchor="middle" font-family="Geist Mono, monospace" font-weight="500" font-size="13" fill="black" letter-spacing="2.2">GRIOTS</text>
+          <circle cx="320" cy="80" r="62" fill="white" stroke="black" stroke-width="1.5"/>
+          <text x="320" y="68" text-anchor="middle" font-family="Geist Mono, monospace" font-weight="500" font-size="9" fill="#6b6b6b" letter-spacing="1.8">— 01</text>
+          <text x="320" y="85" text-anchor="middle" font-family="Geist Mono, monospace" font-weight="500" font-size="11" fill="black" letter-spacing="1.5">PRODUCTION</text>
+          <text x="320" y="100" text-anchor="middle" font-family="Geist Mono, monospace" font-weight="500" font-size="11" fill="black" letter-spacing="1.5">ORIGINALE</text>
+          <circle cx="510" cy="410" r="62" fill="white" stroke="black" stroke-width="1.5"/>
+          <text x="510" y="398" text-anchor="middle" font-family="Geist Mono, monospace" font-weight="500" font-size="9" fill="#6b6b6b" letter-spacing="1.8">— 02</text>
+          <text x="510" y="415" text-anchor="middle" font-family="Geist Mono, monospace" font-weight="500" font-size="11" fill="black" letter-spacing="1.5">LESGRIOTS</text>
+          <text x="510" y="430" text-anchor="middle" font-family="Geist Mono, monospace" font-weight="500" font-size="11" fill="black" letter-spacing="1.5">×STUDIO</text>
+          <circle cx="130" cy="410" r="62" fill="white" stroke="black" stroke-width="1.5"/>
+          <text x="130" y="398" text-anchor="middle" font-family="Geist Mono, monospace" font-weight="500" font-size="9" fill="#6b6b6b" letter-spacing="1.8">— 03</text>
+          <text x="130" y="415" text-anchor="middle" font-family="Geist Mono, monospace" font-weight="500" font-size="11" fill="black" letter-spacing="1.5">LA</text>
+          <text x="130" y="430" text-anchor="middle" font-family="Geist Mono, monospace" font-weight="500" font-size="11" fill="black" letter-spacing="1.5">GRIOTHÈQUE</text>
+        </svg>
+
+        <div style="display: flex; flex-direction: column; gap: 30px; max-width: 380px;">
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); margin-bottom: 6px;">— 01 · Production Originale</div>
+            <div style="font-size: 17px; line-height: 1.5;">Crée de nouveaux récits et imaginaires indépendants.</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); margin-bottom: 6px;">— 02 · LESGRIOTS×STUDIO</div>
+            <div style="font-size: 17px; line-height: 1.5;">Aide les artistes et les marques à se raconter.</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); margin-bottom: 6px;">— 03 · La Griothèque (+ IRL)</div>
+            <div style="font-size: 17px; line-height: 1.5;">Transmet les outils. Permet à une nouvelle génération de se raconter.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">05 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- ============================== CADRAGE ============================== -->
+
+  <!-- 06 — THÈSE DIRECTRICE -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Thèse directrice</div>
+    <div class="content-area center-vertical">
+      <div class="subhead" style="max-width: 220px;">Thèse directrice</div>
+      <h2 class="big-question">Comment une TPE se raconte sur les réseaux sociaux&nbsp;?</h2>
+    </div>
+    <div class="page-number">06 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 07 — SOMMAIRE 3 MODULES -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Dix chapitres</div>
+    <div class="content-area">
+      <h2 class="section-title">Dix chapitres.</h2>
+      <ul class="num-list">
+        <li><span class="num">01.</span><span class="text">Introduction et objectifs</span></li>
+        <li><span class="num">02.</span><span class="text">Compréhension de l'audience et diagnostic</span></li>
+        <li><span class="num">03.</span><span class="text">Objectifs et indicateurs de performance</span></li>
+        <li><span class="num">04.</span><span class="text">Storytelling et positionnement</span></li>
+        <li><span class="num">05.</span><span class="text">Planification et calendrier éditorial</span></li>
+        <li><span class="num">06.</span><span class="text">Formats et canaux de diffusion</span></li>
+        <li><span class="num">07.</span><span class="text">Techniques visuelles et storytelling multimédia</span></li>
+        <li><span class="num">08.</span><span class="text">Conversion et mini-funnel</span></li>
+        <li><span class="num">09.</span><span class="text">Analyse, optimisation et feedback</span></li>
+        <li><span class="num">10.</span><span class="text">Synthèse et plan d'action</span></li>
+      </ul>
+    </div>
+    <div class="page-number">07 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 08 — POSTURE : CE QUE CETTE FORMATION N'EST PAS -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Posture pédagogique</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 220px;">Posture</div>
+      <h2 class="section-title big">Ce que cette formation n'est pas.</h2>
+      <ul class="num-list" style="margin-top: 50px;">
+        <li><span class="num">—</span><span class="text" style="font-size: 28px;">Une recette pour devenir viral.</span></li>
+        <li><span class="num">—</span><span class="text" style="font-size: 28px;">Un cours de marketing froid.</span></li>
+        <li><span class="num">—</span><span class="text" style="font-size: 28px;">Un kit personal branding.</span></li>
+      </ul>
+      <div class="accent-box" style="margin-top: 60px; max-width: 1500px;">
+        <span class="label">Ce que c'est</span>
+        Une méthode pour que votre activité prenne forme sur les réseaux comme un récit qui vous ressemble.
+      </div>
+    </div>
+    <div class="page-number">08 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- INSERT — OBJECTIFS PÉDAGOGIQUES -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Objectifs pédagogiques</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Objectifs pédagogiques</div>
+      <h2 class="section-title big">Ce que vous saurez faire à la fin.</h2>
+      <ul class="num-list" style="margin-top: 50px;">
+        <li><span class="num">01.</span><span class="text">Identifier votre audience cible et ses attentes profondes.</span></li>
+        <li><span class="num">02.</span><span class="text">Définir des objectifs clairs et des indicateurs de performance.</span></li>
+        <li><span class="num">03.</span><span class="text">Structurer une ligne éditoriale cohérente avec votre offre.</span></li>
+
+  <!-- ============================== CHAPITRE 01 ============================== -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Chapitre 01 · Ouverture</div>
+    <div class="content-area center-vertical">
+      <div class="module-opener-num">— Chapitre 01</div>
+      <h2 class="section-title huge">Introduction<br>et objectifs.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1300px; color: var(--muted);">Présentation des participants, de leurs projets, et du mindset stratégique qui guidera ces deux jours.</p>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Mindset stratégique -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 01<br>Mindset stratégique</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Mindset</div>
+      <h2 class="section-title big">Quatre principes<br>pour ces deux jours.</h2>
+      <ul class="num-list" style="margin-top: 50px;">
+        <li><span class="num">01.</span><span class="text">La stratégie précède le contenu. On définit le pourquoi avant le quoi.</span></li>
+        <li><span class="num">02.</span><span class="text">Le contenu n'est pas une finalité. C'est un véhicule de conversion.</span></li>
+        <li><span class="num">03.</span><span class="text">Mesurer ne veut pas dire tracker. C'est savoir ce qui compte vraiment.</span></li>
+        <li><span class="num">04.</span><span class="text">Une stratégie qui tient se construit sur la durée, pas sur un coup d'éclat.</span></li>
+      </ul>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- ============================== CHAPITRE 02 ============================== -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Chapitre 02 · Ouverture</div>
+    <div class="content-area center-vertical">
+      <div class="module-opener-num">— Chapitre 02</div>
+      <h2 class="section-title huge">Compréhension<br>de l'audience<br>et diagnostic.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1300px; color: var(--muted);">Identifier le client idéal — ses douleurs, ses désirs, ses aspirations. Auditer l'existant. Avant tout, savoir à qui on parle.</p>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+  <!-- 16 — CHAPITRE 1.2 OUVERTURE -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 02<br>Stratégie de communication</div>
+    <div class="content-area center-vertical">
+      <div class="pillar-label">Chapitre 02</div>
+      <h2 class="big-question">Quelle est votre stratégie&nbsp;?</h2>
+    </div>
+    <div class="page-number">19 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 17 — STRATÉGIE = 4 QUESTIONS -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 02<br>Cinq questions</div>
+    <div class="content-area">
+      <h2 class="section-title">Une stratégie repose sur cinq questions.</h2>
+      <ul class="num-list">
+        <li><span class="num">01.</span><span class="text">Qui êtes-vous&nbsp;?</span></li>
+        <li><span class="num">02.</span><span class="text">À qui parlez-vous&nbsp;?</span></li>
+        <li><span class="num">03.</span><span class="text">Pour quels objectifs&nbsp;?</span></li>
+        <li><span class="num">04.</span><span class="text">Que dites-vous&nbsp;?</span></li>
+        <li><span class="num">05.</span><span class="text">Comment, où et quand le dites-vous&nbsp;?</span></li>
+      </ul>
+      <p class="body-text" style="font-size: 20px; color: var(--muted); margin-top: 50px; max-width: 1300px;">Tout ce qui vient après — visuel, format, planning, hashtags — est subordonné à ces cinq questions.</p>
+    </div>
+    <div class="page-number">20 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 18 — PROPOSITION DE VALEUR -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 02<br>Proposition de valeur</div>
+    <div class="content-area">
+      <div class="pillar-label">Outil</div>
+      <h2 class="section-title big">Votre proposition de valeur.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px;">Avant de creuser votre cible, posez ce que vous faites concrètement et pour quel problème.</p>
+
+      <div style="background: var(--paper); border: 2px solid var(--ink); padding: 40px 50px; margin-top: 50px; max-width: 1500px; font-size: 26px; line-height: 1.6;">
+        <span style="font-weight: 500; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 18px; display: block; color: var(--muted);">Formule</span>
+        Je suis <em style="font-style: normal; color: var(--muted);">(qui vous êtes)</em>.<br>
+        Pour résoudre <em style="font-style: normal; color: var(--muted);">(le problème que vous adressez)</em>.
+      </div>
+    </div>
+    <div class="page-number">21 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 19 — IDENTIFIER SA CIBLE -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 02<br>Cible</div>
+    <div class="content-area center-vertical">
+      <h2 class="big-question medium">Si vous deviez parler à un seul type de personne, qui serait-il&nbsp;?</h2>
+      <p class="body-text" style="font-size: 22px; color: var(--muted); margin-top: 40px; max-width: 1300px;">Une cible vague produit un récit vague. Une cible précise produit un récit puissant.</p>
+    </div>
+    <div class="page-number">22 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 20 — DOULEURS / GAINS -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 02 · Outil<br>Douleurs / Gains</div>
+    <div class="content-area">
+      <div class="exercise-prompt" style="font-size: 36px;">Quelles douleurs vit votre client&nbsp;?<br>Quels gains aimerait-il avoir davantage&nbsp;?</div>
+      <div class="compare-table" style="grid-template-columns: 1fr 1fr;">
+        <div class="ct-cell ct-header">Douleurs · Frictions</div>
+        <div class="ct-cell ct-header">Gains · Aspirations</div>
+        <div class="ct-cell" style="min-height: 90px;"></div>
+        <div class="ct-cell" style="min-height: 90px;"></div>
+        <div class="ct-cell" style="min-height: 90px;"></div>
+        <div class="ct-cell" style="min-height: 90px;"></div>
+        <div class="ct-cell" style="min-height: 90px;"></div>
+        <div class="ct-cell" style="min-height: 90px;"></div>
+      </div>
+    </div>
+    <div class="page-number">23 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- ============================== CHAPITRE 1.3 — DÉVELOPPER SA VISIBILITÉ ============================== -->
+
+  <!-- Slide — Audit du contenu existant -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 02<br>Audit du contenu existant</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Diagnostic</div>
+      <h2 class="section-title big">Auditer<br>avant de produire.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Avant d'ajouter du contenu, comprendre ce qui existe déjà — ce qui marche, ce qui ne marche pas, ce qui est cohérent avec votre récit.</p>
+      <div class="three-cols" style="margin-top: 60px;">
+        <div class="col">
+          <span class="num">— 01</span>
+          <h4>Performance</h4>
+          <p>Quels contenus génèrent le plus d'engagement, de partages, de leads ? Sur quelles plateformes ?</p>
+        </div>
+        <div class="col">
+          <span class="num">— 02</span>
+          <h4>Cohérence</h4>
+          <p>Vos contenus parlent-ils d'une même voix ? Servent-ils tous une même promesse ?</p>
+        </div>
+        <div class="col">
+          <span class="num">— 03</span>
+          <h4>Alignement</h4>
+          <p>Vos contenus s'adressent-ils au bon public ? Servent-ils votre offre, ou la diluent-ils ?</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- ============================== CHAPITRE 03 ============================== -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Chapitre 03 · Ouverture</div>
+    <div class="content-area center-vertical">
+      <div class="module-opener-num">— Chapitre 03</div>
+      <h2 class="section-title huge">Objectifs<br>et indicateurs<br>de performance.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1300px; color: var(--muted);">Distinguer objectifs business et objectifs de communication. Définir trois KPIs principaux qui comptent vraiment pour votre activité.</p>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Objectifs business vs communication -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 03<br>Deux niveaux d'objectifs</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Distinction</div>
+      <h2 class="section-title big">Business&nbsp;/<br>Communication.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Les deux niveaux d'objectifs ne se mesurent pas avec les mêmes indicateurs. Confondre les deux, c'est mesurer du vent.</p>
+      <div class="three-cols" style="margin-top: 60px; grid-template-columns: 1fr 1fr;">
+        <div class="col">
+          <span class="num">— Niveau Business</span>
+          <h4>Ce que ça doit produire</h4>
+          <p>Chiffre d'affaires, nouveaux clients, leads qualifiés, taux de rétention, lifetime value. Ce qui paie les factures.</p>
+        </div>
+        <div class="col">
+          <span class="num">— Niveau Communication</span>
+          <h4>Ce qui doit se passer en amont</h4>
+          <p>Notoriété, portée, engagement, crédibilité perçue. Les conditions qui rendent les objectifs business possibles.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Méthode SMART -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 03 · Outil<br>Méthode SMART</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Outil</div>
+      <h2 class="section-title big">Un objectif qui tient<br>est un objectif SMART.</h2>
+      <ul class="num-list" style="margin-top: 50px;">
+        <li><span class="num">S</span><span class="text"><strong>Spécifique.</strong> Précis, sans ambiguïté possible.</span></li>
+        <li><span class="num">M</span><span class="text"><strong>Mesurable.</strong> Chiffré, observable.</span></li>
+        <li><span class="num">A</span><span class="text"><strong>Atteignable.</strong> Ambitieux mais réaliste.</span></li>
+        <li><span class="num">R</span><span class="text"><strong>Relevant.</strong> Aligné avec la stratégie globale.</span></li>
+        <li><span class="num">T</span><span class="text"><strong>Temporel.</strong> Avec une échéance claire.</span></li>
+      </ul>
+      <div class="accent-box" style="margin-top: 50px; max-width: 1500px;">
+        <span class="label">Exemple</span>
+        « Générer 30 leads qualifiés via LinkedIn d'ici fin du trimestre » est SMART. « Avoir plus de visibilité » ne l'est pas.
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Atelier 3 KPIs -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 03 · Atelier<br>Trois KPIs</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Atelier pratique</div>
+      <h2 class="section-title big">Définir vos trois KPIs<br>principaux.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Pas dix. Pas vingt. Trois. Ceux qui, s'ils bougent dans le bon sens, signifient que votre stratégie fonctionne.</p>
+      <div class="three-cols" style="margin-top: 60px;">
+        <div class="col">
+          <span class="num">— KPI 01</span>
+          <h4>Acquisition</h4>
+          <p>Nouvelles personnes qui découvrent votre activité. Portée, abonnés, visites uniques, vues qualifiées.</p>
+        </div>
+        <div class="col">
+          <span class="num">— KPI 02</span>
+          <h4>Engagement</h4>
+          <p>Profondeur de la relation. Temps passé, sauvegardes, partages, commentaires, taux de retour.</p>
+        </div>
+        <div class="col">
+          <span class="num">— KPI 03</span>
+          <h4>Conversion</h4>
+          <p>Passage à l'action. Leads, prises de rendez-vous, ventes, inscriptions, devis demandés.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- ============================== CHAPITRE 04 ============================== -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Chapitre 04 · Ouverture</div>
+    <div class="content-area center-vertical">
+      <div class="module-opener-num">— Chapitre 04</div>
+      <h2 class="section-title huge">Storytelling<br>et positionnement.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1300px; color: var(--muted);">Structurer une histoire engageante qui aligne ce que vous dites avec ce que vous vendez.</p>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Trois temps du storytelling -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 04<br>Trois temps</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Storytelling</div>
+      <h2 class="section-title big">Le storytelling,<br>en trois temps.</h2>
+      <ul class="num-list" style="margin-top: 50px;">
+        <li><span class="num">01.</span><span class="text">Votre nom et votre image projettent des imaginaires, que vous le vouliez ou non.</span></li>
+        <li><span class="num">02.</span><span class="text">Le storytelling, ce n'est pas l'histoire que vous racontez. C'est l'histoire que les autres se racontent quand ils posent le regard sur vous.</span></li>
+        <li><span class="num">03.</span><span class="text">Être conscient des deux premiers points vous rend maître de votre récit.</span></li>
+      </ul>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Atelier contenu narratif -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 04 · Atelier<br>Contenu narratif</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Atelier pratique</div>
+      <h2 class="section-title big">Créer un ou deux<br>contenus narratifs.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Sur le format de votre choix : post LinkedIn, story Instagram, vidéo TikTok. L'objectif : raconter quelque chose qui crée du lien avec votre audience cible, pas vendre frontalement.</p>
+
+      <div class="three-cols" style="margin-top: 60px;">
+        <div class="col">
+          <span class="num">— Structure 01</span>
+          <h4>Avant / Après</h4>
+          <p>Une transformation. D'un état à un autre, votre offre étant le pont.</p>
+        </div>
+        <div class="col">
+          <span class="num">— Structure 02</span>
+          <h4>Erreur évitée</h4>
+          <p>Une leçon apprise. Vous évitez à votre audience de tomber dans un piège.</p>
+        </div>
+        <div class="col">
+          <span class="num">— Structure 03</span>
+          <h4>Coulisses</h4>
+          <p>Un moment d'envers du décor. Ce qu'on ne voit jamais, et qui humanise.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+<!-- 21 — LIGNE ÉDITORIALE -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 04<br>Ligne éditoriale</div>
+    <div class="content-area">
+      <h2 class="section-title big">Votre ligne éditoriale.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 20px; max-width: 1500px;">C'est l'ensemble des choix qui rendent votre voix reconnaissable&nbsp;: les sujets que vous traitez, le ton que vous adoptez, ce que vous refusez de dire.</p>
+
+      <div class="three-cols" style="margin-top: 40px;">
+        <div class="col">
+          <span class="num">— 01</span>
+          <h4>Vos thèmes</h4>
+          <p>Les 3 ou 4 grands sujets que vous traitez. Pas plus. Mieux vaut être précis qu'exhaustif.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 02</span>
+          <h4>Votre ton</h4>
+          <p>Comment vous parlez. Posé ou direct, technique ou poétique, distancé ou complice. Choisissez et tenez.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 03</span>
+          <h4>Vos non-sujets</h4>
+          <p>Ce que vous ne traiterez jamais. Ce qui ne vous concerne pas. Ce qui dilue votre récit.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">24 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  
+  <!-- ============================== CHAPITRE 05 ============================== -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Chapitre 05 · Ouverture</div>
+    <div class="content-area center-vertical">
+      <div class="module-opener-num">— Chapitre 05</div>
+      <h2 class="section-title huge">Planification<br>et calendrier<br>éditorial.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1300px; color: var(--muted);">Définir les piliers de contenu, organiser une cadence tenable, planifier sur deux à trois semaines.</p>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Trois piliers de contenu -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 05<br>Trois piliers de contenu</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Architecture</div>
+      <h2 class="section-title big">Trois piliers<br>pour structurer votre flux.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Un récit qui tient s'organise autour de trois axes complémentaires. Aucun ne suffit seul. Les trois ensemble construisent une présence cohérente.</p>
+      <div class="three-cols" style="margin-top: 60px;">
+        <div class="col">
+          <span class="num">— Pilier 01</span>
+          <h4>Expertise</h4>
+          <p>Vous démontrez votre maîtrise. Conseils, méthodes, analyses, prises de position. C'est ce qui vous installe comme une référence.</p>
+        </div>
+        <div class="col">
+          <span class="num">— Pilier 02</span>
+          <h4>Transformation</h4>
+          <p>Vous montrez l'avant/après. Études de cas, témoignages, résultats concrets. C'est ce qui rend votre offre désirable.</p>
+        </div>
+        <div class="col">
+          <span class="num">— Pilier 03</span>
+          <h4>Impact</h4>
+          <p>Vous incarnez votre vision. Récits personnels, valeurs, manifestes, coulisses. C'est ce qui crée du lien et rassemble.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Cadence -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 05<br>Cadence tenable</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Discipline</div>
+      <h2 class="section-title big">Une cadence<br>que vous pouvez tenir.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">La régularité bat l'intensité. Mieux vaut publier deux fois par semaine pendant un an, que tous les jours pendant deux mois puis disparaître.</p>
+      <ul class="num-list" style="margin-top: 50px;">
+        <li><span class="num">01.</span><span class="text"><strong>Auditer votre temps réel.</strong> Combien d'heures par semaine, lucidement ?</span></li>
+        <li><span class="num">02.</span><span class="text"><strong>Fixer un volume tenable.</strong> 2 à 3 publications hebdo maximum si vous démarrez seul·e.</span></li>
+        <li><span class="num">03.</span><span class="text"><strong>Rythmer par piliers.</strong> Alterner expertise / transformation / impact pour ne pas lasser.</span></li>
+        <li><span class="num">04.</span><span class="text"><strong>Bloquer du temps de production.</strong> Un créneau fixe par semaine, non négociable.</span></li>
+      </ul>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Atelier calendrier 2-3 semaines -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 05 · Atelier<br>Calendrier éditorial</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Atelier pratique</div>
+      <h2 class="section-title big">Planifier deux<br>à trois semaines.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Un tableau simple. Une ligne par publication. Quatre colonnes minimum.</p>
+      <div class="exercise-lines" style="margin-top: 60px; display: grid; grid-template-columns: 1fr 1fr 1.5fr 1fr; gap: 0; border: 1.5px solid var(--ink);">
+        <div style="padding: 16px; border-right: 1px solid var(--line); border-bottom: 1.5px solid var(--ink); font-weight: 500; font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase;">Date</div>
+        <div style="padding: 16px; border-right: 1px solid var(--line); border-bottom: 1.5px solid var(--ink); font-weight: 500; font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase;">Pilier</div>
+        <div style="padding: 16px; border-right: 1px solid var(--line); border-bottom: 1.5px solid var(--ink); font-weight: 500; font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase;">Sujet / Angle</div>
+        <div style="padding: 16px; border-bottom: 1.5px solid var(--ink); font-weight: 500; font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase;">Format · Plateforme</div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px;"></div>
+        <div style="padding: 22px; border-bottom: 1px solid var(--line); height: 60px;"></div>
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- ============================== CHAPITRE 06 ============================== -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Chapitre 06 · Ouverture</div>
+    <div class="content-area center-vertical">
+      <div class="module-opener-num">— Chapitre 06</div>
+      <h2 class="section-title huge">Formats<br>et canaux<br>de diffusion.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1300px; color: var(--muted);">Choisir ses formats. Penser réutilisable plutôt que sur-mesure. Diffuser au bon endroit au bon moment.</p>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+  <!-- 12 — THÈSE : RS = OUTIL DE SEGMENTATION -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 06<br>Définition</div>
+    <div class="content-area">
+      <div class="pillar-label">Définition</div>
+      <h2 class="section-title big">Un réseau social est<br>un outil de segmentation.</h2>
+      <p class="body-text" style="font-size: 26px; margin-top: 30px; max-width: 1500px;">Son but&nbsp;: poser des étiquettes sur les gens et connecter ceux qui partagent les mêmes intérêts.</p>
+      <p class="body-text" style="font-size: 20px; color: var(--muted); margin-top: 24px; max-width: 1500px;">Avant d'être un canal de promotion, c'est une infrastructure qui range les humains par centres d'intérêt.</p>
+    </div>
+    <div class="page-number">13 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 13 — DEUX USAGES : PERSONNEL VS PROFESSIONNEL -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 06<br>Deux usages</div>
+    <div class="content-area">
+      <h2 class="section-title">Deux usages, deux postures.</h2>
+      <div class="compare-table">
+        <div class="ct-cell ct-header">Usage personnel</div>
+        <div class="ct-cell ct-header">Usage professionnel</div>
+        <div class="ct-cell">On partage ce qu'on vit.</div>
+        <div class="ct-cell">On construit un récit cohérent.</div>
+        <div class="ct-cell">On cherche du lien social.</div>
+        <div class="ct-cell">On cherche une audience qualifiée.</div>
+        <div class="ct-cell">On poste quand on en a envie.</div>
+        <div class="ct-cell">On poste selon une discipline éditoriale.</div>
+        <div class="ct-cell">On mesure son ressenti.</div>
+        <div class="ct-cell">On mesure son impact.</div>
+      </div>
+    </div>
+    <div class="page-number">14 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 14 — PANORAMA DES PLATEFORMES -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 06<br>Panorama des plateformes</div>
+    <div class="content-area">
+      <h2 class="section-title">Chaque plateforme a sa langue.</h2>
+      <div class="three-cols" style="grid-template-columns: repeat(2, 1fr); gap: 50px;">
+        <div class="col">
+          <span class="num">— Instagram</span>
+          <h4>L'image qui dure</h4>
+          <p>Format visuel premium. Esthétique, ambiance, identité. Public adulte, qualifié, attentif au soin du détail. Carrousel, Reel, Story.</p>
+        </div>
+        <div class="col">
+          <span class="num">— TikTok</span>
+          <h4>Le récit qui surprend</h4>
+          <p>Format vidéo court et vertical. Public jeune, mais pas que. Récompense l'audace, la rapidité, la spontanéité. Algorithme puissant, viralité possible sans audience préalable.</p>
+        </div>
+        <div class="col">
+          <span class="num">— LinkedIn</span>
+          <h4>Le pair qui parle</h4>
+          <p>Format texte et carrousel professionnel. Public actif. Récompense l'expertise, le retour d'expérience, l'analyse. B2B, recrutement, prises de parole sectorielles.</p>
+        </div>
+        <div class="col">
+          <span class="num">— Facebook</span>
+          <h4>Le local qui se rassemble</h4>
+          <p>Format groupe et page. Public 35+. Reste pertinent pour les communautés locales, les événements, les commerçants de proximité. À ne pas négliger pour une TPE ancrée.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">15 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 15 — GOOGLE BUSINESS PROFILE (cas à part) -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 06<br>Google Business Profile</div>
+    <div class="content-area">
+      <div class="pillar-label">Cas à part</div>
+      <h2 class="section-title big">Google Business Profile.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 20px; max-width: 1500px;">Ce n'est pas un réseau social. Pas de feed, pas de communauté, pas d'algorithme de recommandation. C'est une <strong>fiche d'établissement</strong> rattachée à Google Maps et à la recherche locale.</p>
+
+      <div class="three-cols" style="margin-top: 50px;">
+        <div class="col">
+          <span class="num">— 01 · Visibilité</span>
+          <h4>Première vitrine</h4>
+          <p>Quand quelqu'un tape votre activité dans Google ou Maps, c'est votre fiche qui apparaît avant tout le reste. Avant votre site. Avant Instagram.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 02 · Crédibilité</span>
+          <h4>Preuve par les avis</h4>
+          <p>Les avis Google sont consultés avant la décision d'achat. Une TPE sans avis est une TPE invisible. Une TPE avec 50 avis 4,8 étoiles vend deux fois plus.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 03 · Conversion</span>
+          <h4>L'action en un clic</h4>
+          <p>Appeler, itinéraire, horaires, photos, site web. Tout est sur la fiche. C'est souvent là que la décision se prend, pas sur Instagram.</p>
+        </div>
+      </div>
+
+      <div class="accent-box" style="margin-top: 40px; max-width: 1500px; font-size: 24px;">
+        <span class="label">Pour une TPE locale</span>
+        Avant d'optimiser Instagram, optimisez votre fiche Google Business. C'est le levier numéro un.
+      </div>
+    </div>
+    <div class="page-number">16 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- INSERT — QUATRE FORMES D'INCARNATION -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 06<br>Quatre incarnations</div>
+    <div class="content-area">
+      <h2 class="section-title">Quatre formes d'incarnation.</h2>
+      <p class="body-text" style="font-size: 20px; color: var(--muted); margin-bottom: 30px; max-width: 1500px;">Une TPE ne raconte jamais d'une seule voix. Vous avez quatre leviers à votre disposition.</p>
+      <div class="three-cols" style="grid-template-columns: repeat(2, 1fr); gap: 50px;">
+        <div class="col">
+          <span class="num">— 01 · Interne</span>
+          <h4>Vous, vos collaborateurs, vos coulisses</h4>
+          <p>Le cœur du récit. Votre voix, vos gestes, votre quotidien. Le public ne distingue pas l'entreprise du dirigeant — c'est une force pour une TPE.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 02 · Clients</span>
+          <h4>Témoignages, retours, transformations</h4>
+          <p>La preuve par l'autre. Un client qui parle vaut dix fois ce que vous direz vous-même. À filmer, à recueillir, à partager — toujours avec accord.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 03 · Créateurs</span>
+          <h4>Vos pairs, votre milieu, vos références</h4>
+          <p>Vous existez dans un écosystème. Citer un confrère, partager le travail d'un pair, c'est s'inscrire dans un récit collectif plus large que vous.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 04 · Influence</span>
+          <h4>Personnalités externes mobilisables</h4>
+          <p>Quand une voix extérieure parle de vous — micro-influenceur, journaliste, prescripteur. Levier rare mais puissant. À cultiver, pas à acheter.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">17 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 16 — EXERCICE : OÙ EST VOTRE PUBLIC ? -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 06 · Exercice<br>Diagnostic plateformes</div>
+    <div class="content-area">
+      <div class="exercise-prompt">Sur quelles plateformes votre public se trouve-t-il&nbsp;?<br>Pourquoi&nbsp;?</div>
+      <div class="exercise-lines">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+    </div>
+    <div class="page-number">18 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- ============================== CHAPITRE 1.2 — STRATÉGIE DE COMMUNICATION ============================== -->
+
+
+  <!-- Slide — Réutilisable vs sur-mesure -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 06<br>Réutilisable vs sur-mesure</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Économie de production</div>
+      <h2 class="section-title big">Penser réutilisable<br>plutôt que jetable.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Un contenu produit doit servir plusieurs fois, sur plusieurs canaux. Sinon, vous courez après le temps.</p>
+      <div class="three-cols" style="margin-top: 60px; grid-template-columns: 1fr 1fr;">
+        <div class="col">
+          <span class="num">— Approche 01</span>
+          <h4>Le contenu pilier réutilisable</h4>
+          <p>Un long format (article, vidéo, podcast) qui est ensuite découpé en posts, stories, reels, citations. Une production, dix utilisations.</p>
+        </div>
+        <div class="col">
+          <span class="num">— Approche 02</span>
+          <h4>Le contenu sur-mesure</h4>
+          <p>Conçu pour un canal précis, pour un moment précis. Plus efficace par publication, mais plus coûteux en temps. À doser.</p>
+        </div>
+      </div>
+      <div class="accent-box" style="margin-top: 50px; max-width: 1500px;">
+        <span class="label">Règle simple</span>
+        80&nbsp;% de contenu réutilisable, 20&nbsp;% sur-mesure pour les moments-clés.
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- ============================== CHAPITRE 07 ============================== -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Chapitre 07 · Ouverture</div>
+    <div class="content-area center-vertical">
+      <div class="module-opener-num">— Chapitre 07</div>
+      <h2 class="section-title huge">Techniques<br>visuelles et<br>storytelling<br>multimédia.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1300px; color: var(--muted);">Principes visuels et narration. Construire un storyboard pour une vidéo ou une série de posts.</p>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Trois principes visuels -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 07<br>Trois principes visuels</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Principes</div>
+      <h2 class="section-title big">Trois principes<br>pour un visuel qui tient.</h2>
+      <div class="three-cols" style="margin-top: 60px;">
+        <div class="col">
+          <span class="num">— 01</span>
+          <h4>Lisibilité</h4>
+          <p>Un message principal par image. Du contraste suffisant. Du texte assez gros pour être lu sur smartphone.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 02</span>
+          <h4>Cohérence</h4>
+          <p>Une palette de couleurs limitée. Des typographies récurrentes. Un cadrage signature. Votre identité doit se reconnaître en un coup d'œil.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 03</span>
+          <h4>Hiérarchie</h4>
+          <p>L'œil doit savoir où regarder en premier, en second, en dernier. Pas tout à la même importance — sinon plus rien n'est important.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Atelier storyboard -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 07 · Atelier<br>Storyboard</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Atelier pratique</div>
+      <h2 class="section-title big">Construire un storyboard.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Pour une vidéo ou une série de posts. Six cases qui racontent une histoire complète : accroche, contexte, problème, méthode, résultat, appel à l'action.</p>
+      <div style="margin-top: 60px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 20px; height: 500px;">
+        <div style="border: 1.5px solid var(--ink); padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+          <span style="font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);">— 01 · Accroche</span>
+          <span style="font-size: 12px; color: var(--muted);">Image · Texte · Action</span>
+        </div>
+        <div style="border: 1.5px solid var(--ink); padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+          <span style="font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);">— 02 · Contexte</span>
+          <span style="font-size: 12px; color: var(--muted);">Image · Texte · Action</span>
+        </div>
+        <div style="border: 1.5px solid var(--ink); padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+          <span style="font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);">— 03 · Problème</span>
+          <span style="font-size: 12px; color: var(--muted);">Image · Texte · Action</span>
+        </div>
+        <div style="border: 1.5px solid var(--ink); padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+          <span style="font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);">— 04 · Méthode</span>
+          <span style="font-size: 12px; color: var(--muted);">Image · Texte · Action</span>
+        </div>
+        <div style="border: 1.5px solid var(--ink); padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+          <span style="font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);">— 05 · Résultat</span>
+          <span style="font-size: 12px; color: var(--muted);">Image · Texte · Action</span>
+        </div>
+        <div style="border: 1.5px solid var(--ink); padding: 16px; display: flex; flex-direction: column; justify-content: space-between; background: var(--accent);">
+          <span style="font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase;">— 06 · CTA</span>
+          <span style="font-size: 12px;">Action · Lien · Étape suivante</span>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- ============================== CHAPITRE 08 ============================== -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Chapitre 08 · Ouverture</div>
+    <div class="content-area center-vertical">
+      <div class="module-opener-num">— Chapitre 08</div>
+      <h2 class="section-title huge">Conversion<br>et mini-funnel.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1300px; color: var(--muted);">Transformer le contenu en leads et en clients. Maîtriser la rareté, le fit check, et l'appel à l'action efficace.</p>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — TOFU MOFU BOFU -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 08<br>Trois étages du funnel</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Cadre</div>
+      <h2 class="section-title big">Trois étages,<br>trois objectifs.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Un funnel n'est pas un tunnel. C'est une succession d'étapes où chaque contenu joue un rôle précis selon où se situe la personne dans son parcours.</p>
+      <div class="three-cols" style="margin-top: 60px;">
+        <div class="col">
+          <span class="num">— TOFU · Top of funnel</span>
+          <h4>Découverte</h4>
+          <p>L'audience ne vous connaît pas. Objectif : attirer l'attention, créer du familier. Contenus larges, pédagogiques, divertissants.</p>
+        </div>
+        <div class="col">
+          <span class="num">— MOFU · Middle of funnel</span>
+          <h4>Considération</h4>
+          <p>L'audience vous connaît, hésite. Objectif : prouver que vous êtes la bonne personne. Études de cas, témoignages, démonstrations.</p>
+        </div>
+        <div class="col">
+          <span class="num">— BOFU · Bottom of funnel</span>
+          <h4>Décision</h4>
+          <p>L'audience est prête. Objectif : faciliter le passage à l'action. Offres claires, deadlines, appels à l'action sans friction.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Scarcity & Fit check -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 08<br>Scarcity et fit check</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Leviers de conversion</div>
+      <h2 class="section-title big">Deux leviers<br>qui font basculer.</h2>
+      <div class="three-cols" style="margin-top: 60px; grid-template-columns: 1fr 1fr;">
+        <div class="col">
+          <span class="num">— Levier 01</span>
+          <h4>Scarcity · Rareté maîtrisée</h4>
+          <p>Limiter le nombre de places, fixer une deadline réelle, restreindre l'accès. Pas pour manipuler, mais pour signaler que ce que vous proposez n'est pas inépuisable.</p>
+        </div>
+        <div class="col">
+          <span class="num">— Levier 02</span>
+          <h4>Fit check · Le bon prospect</h4>
+          <p>Aider la personne à savoir si elle est au bon endroit. « Cette offre est pour toi si... / pas pour toi si... ». Vous filtrez. Vous repoussez les mauvais leads pour mieux attirer les bons.</p>
+        </div>
+      </div>
+      <div class="accent-box" style="margin-top: 50px; max-width: 1500px;">
+        <span class="label">Important</span>
+        Le fit check est plus puissant que la promesse universelle. Un bon prospect, c'est quelqu'un que vous avez aussi le droit de refuser.
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Atelier mini-funnel -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 08 · Atelier<br>Mini-funnel</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Atelier pratique</div>
+      <h2 class="section-title big">Construire votre<br>mini-funnel.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Trois contenus. Un par étage. Pour transformer un inconnu en prospect, puis en client.</p>
+      <ul class="num-list" style="margin-top: 50px;">
+        <li><span class="num">01.</span><span class="text"><strong>Contenu TOFU</strong> — un post / vidéo qui attire votre cible. Sujet large mais pertinent pour eux.</span></li>
+        <li><span class="num">02.</span><span class="text"><strong>Contenu MOFU</strong> — une preuve. Cas client, démonstration, retour terrain. Pour convaincre que ça marche.</span></li>
+        <li><span class="num">03.</span><span class="text"><strong>Contenu BOFU</strong> — une offre. CTA clair, modalité de prise de rendez-vous, lien direct.</span></li>
+      </ul>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+  <!-- 30 — DU CONTENU À LA CONVERSION -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 08<br>Du contenu à la conversion</div>
+    <div class="content-area">
+      <h2 class="section-title">Du contenu à la conversion.</h2>
+      <div class="three-cols">
+        <div class="col">
+          <span class="num">— 01 · Attirer</span>
+          <h4>Contenu de visibilité</h4>
+          <p>Vous racontez ce que vous faites. Le but est qu'un inconnu vous découvre. Format&nbsp;: récit, démonstration, coulisses.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 02 · Engager</span>
+          <h4>Contenu de relation</h4>
+          <p>Vous parlez à votre audience. Le but est qu'elle vous reconnaisse. Format&nbsp;: question, sondage, conversation, réponse à un commentaire.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 03 · Convertir</span>
+          <h4>Contenu d'offre</h4>
+          <p>Vous proposez quelque chose. Le but est qu'un client passe à l'achat. Format&nbsp;: produit, service, témoignage client, appel à l'action.</p>
+        </div>
+      </div>
+      <p class="body-text" style="font-size: 20px; color: var(--muted); margin-top: 40px; max-width: 1500px;">La règle des trois tiers&nbsp;: équilibrez votre flux entre les trois. Une majorité d'offres tue la communauté. Une absence d'offres tue l'activité.</p>
+    </div>
+    <div class="page-number">33 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 31 — LA PUBLICITÉ COMME ACCÉLÉRATEUR -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 08<br>Publicité</div>
+    <div class="content-area">
+      <h2 class="section-title big">La publicité accélère<br>ce qui marche déjà.</h2>
+      <p class="body-text" style="font-size: 24px; margin-top: 30px; max-width: 1500px;">Elle ne sauve pas un contenu faible. Elle ne crée pas une stratégie. Elle amplifie ce qui fonctionne organiquement.</p>
+      <div class="accent-box" style="margin-top: 50px; max-width: 1500px;">
+        <span class="label">Principe</span>
+        N'achetez jamais de publicité avant d'avoir validé votre contenu en organique.
+      </div>
+    </div>
+    <div class="page-number">34 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- ============================== TRANSITION VERS MODULE 2 ============================== -->
+
+
+  <!-- ============================== CHAPITRE 09 ============================== -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Chapitre 09 · Ouverture</div>
+    <div class="content-area center-vertical">
+      <div class="module-opener-num">— Chapitre 09</div>
+      <h2 class="section-title huge">Analyse,<br>optimisation<br>et feedback.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1300px; color: var(--muted);">Suivre les performances. Distinguer les vrais signaux du bruit. Mettre en place une boucle de feedback mensuelle.</p>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Test & learn -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 09<br>Test & learn</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Posture</div>
+      <h2 class="section-title big">Tester. Mesurer.<br>Ajuster. Recommencer.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Aucune stratégie ne fonctionne du premier coup. Ce qui compte, c'est la vitesse à laquelle vous apprenez ce qui marche pour vous.</p>
+      <ul class="num-list" style="margin-top: 50px;">
+        <li><span class="num">01.</span><span class="text"><strong>Tester</strong> — variations de format, d'angle, d'horaire, de canal.</span></li>
+        <li><span class="num">02.</span><span class="text"><strong>Mesurer</strong> — pas tout. Seulement les KPIs définis au chapitre 03.</span></li>
+        <li><span class="num">03.</span><span class="text"><strong>Ajuster</strong> — abandonner ce qui ne marche pas, doubler ce qui marche.</span></li>
+        <li><span class="num">04.</span><span class="text"><strong>Recommencer</strong> — une boucle mensuelle, pas hebdomadaire. Le temps de voir des tendances.</span></li>
+      </ul>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Atelier rituel mensuel -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 09 · Atelier<br>Rituel mensuel</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Atelier pratique</div>
+      <h2 class="section-title big">Définir un cycle<br>de révision mensuel.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Un rendez-vous fixe avec vous-même. Une heure. Quatre questions. Un plan ajusté.</p>
+      <div class="three-cols" style="margin-top: 60px; grid-template-columns: 1fr 1fr;">
+        <div class="col">
+          <span class="num">— Question 01</span>
+          <h4>Qu'est-ce qui a marché ?</h4>
+          <p>Quelles publications ont dépassé les attentes ? Pourquoi ? À reproduire.</p>
+        </div>
+        <div class="col">
+          <span class="num">— Question 02</span>
+          <h4>Qu'est-ce qui n'a pas marché ?</h4>
+          <p>Quelles publications sont passées inaperçues ? Pourquoi ? À abandonner ou à retravailler.</p>
+        </div>
+        <div class="col">
+          <span class="num">— Question 03</span>
+          <h4>Que dit la donnée ?</h4>
+          <p>Vos KPIs ont-ils bougé ? Dans quel sens ? À quelle vitesse ?</p>
+        </div>
+        <div class="col">
+          <span class="num">— Question 04</span>
+          <h4>Que faire le mois prochain ?</h4>
+          <p>Trois ajustements concrets. Pas dix. Trois.</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+  <!-- 23 — TROIS LEVIERS DE VISIBILITÉ -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 09<br>Trois leviers</div>
+    <div class="content-area">
+      <h2 class="section-title">Trois leviers, trois économies.</h2>
+      <div class="three-cols">
+        <div class="col">
+          <span class="num">— 01</span>
+          <h4>Organique</h4>
+          <p>Vous publiez régulièrement, vous engagez votre audience, vous laissez l'algorithme faire son travail. Lent, mais durable. Économie&nbsp;: votre temps.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 02</span>
+          <h4>Payant</h4>
+          <p>Vous achetez de la visibilité auprès d'un public ciblé. Rapide, mais s'arrête quand le budget s'arrête. Économie&nbsp;: votre argent.</p>
+        </div>
+        <div class="col">
+          <span class="num">— 03</span>
+          <h4>Influence</h4>
+          <p>Vous mobilisez d'autres voix qui parlent de vous. Levier puissant si l'alignement est réel. Économie&nbsp;: votre réseau.</p>
+        </div>
+      </div>
+      <p class="body-text" style="font-size: 20px; color: var(--muted); margin-top: 50px; max-width: 1500px;">Une stratégie mature combine les trois. Une stratégie débutante en choisit un et l'apprend bien.</p>
+    </div>
+    <div class="page-number">26 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 24 — DISCIPLINE DE PUBLICATION -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 09<br>Discipline</div>
+    <div class="content-area">
+      <h2 class="section-title">Mieux vaut une cadence tenue qu'un coup d'éclat.</h2>
+      <ul class="num-list" style="margin-top: 50px;">
+        <li><span class="num">—</span><span class="text" style="font-size: 28px;">Choisissez une fréquence que vous pouvez tenir un an.</span></li>
+        <li><span class="num">—</span><span class="text" style="font-size: 28px;">Mieux vaut publier 2 fois par semaine pendant 12 mois que 7 fois par semaine pendant 3 semaines.</span></li>
+        <li><span class="num">—</span><span class="text" style="font-size: 28px;">Anticipez vos contenus à 4 semaines minimum.</span></li>
+      </ul>
+      <div class="accent-box" style="margin-top: 50px; max-width: 1500px;">
+        <span class="label">Principe</span>
+        Les algorithmes récompensent la régularité avant la qualité.
+      </div>
+    </div>
+    <div class="page-number">27 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 25 — LIMITES & CRÉATIVITÉ -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 09<br>Limites &amp; créativité</div>
+    <div class="content-area">
+      <h2 class="big-question small" style="margin-bottom: 16px;">Vous sentez-vous limité dans votre manière de raconter certains sujets&nbsp;?</h2>
+      <p class="body-text" style="font-size: 20px; color: var(--muted); margin-bottom: 60px;">Shadow ban, modération, invisibilisation algorithmique.</p>
+      <div class="accent-box large" style="margin-top: 20px;">
+        <span class="label">Réponse</span>
+        Il y a toujours moyen de toucher son audience. Soyez créatifs.
+      </div>
+    </div>
+    <div class="page-number">28 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- ============================== CHAPITRE 1.4 — DÉVELOPPER SA COMMUNAUTÉ ============================== -->
+
+  <!-- 27 — DIFFÉRENCE AUDIENCE / COMMUNAUTÉ -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 09<br>Distinction</div>
+    <div class="content-area">
+      <h2 class="section-title">La distinction.</h2>
+      <div class="compare-table">
+        <div class="ct-cell ct-header">Audience</div>
+        <div class="ct-cell ct-header">Communauté</div>
+        <div class="ct-cell">Regarde.</div>
+        <div class="ct-cell">Participe.</div>
+        <div class="ct-cell">Est passive.</div>
+        <div class="ct-cell">Est active.</div>
+        <div class="ct-cell">Se mesure en abonnés.</div>
+        <div class="ct-cell">Se mesure en interactions.</div>
+        <div class="ct-cell">Vous suit.</div>
+        <div class="ct-cell">Vous défend.</div>
+        <div class="ct-cell">Disparaît avec l'algorithme.</div>
+        <div class="ct-cell">Reste avec vous.</div>
+      </div>
+    </div>
+    <div class="page-number">30 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- 28 — TROIS GESTES POUR FAIRE COMMUNAUTÉ -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 09<br>Trois gestes</div>
+    <div class="content-area">
+      <h2 class="section-title">Trois gestes pour transformer une audience en communauté.</h2>
+      <ul class="num-list">
+        <li><span class="num">01.</span><span class="text">Répondez. À chaque commentaire, à chaque message, dans les 48 heures.</span></li>
+        <li><span class="num">02.</span><span class="text">Posez des questions. Le contenu qui demande une réponse engage davantage.</span></li>
+        <li><span class="num">03.</span><span class="text">Créez des rituels. Une rubrique récurrente, un rendez-vous hebdomadaire, un format reconnaissable.</span></li>
+      </ul>
+    </div>
+    <div class="page-number">31 / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- ============================== CHAPITRE 1.5 — LEVIER COMMERCIAL ============================== -->
+
+
+  <!-- ============================== CHAPITRE 10 ============================== -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Chapitre 10 · Ouverture</div>
+    <div class="content-area center-vertical">
+      <div class="module-opener-num">— Chapitre 10</div>
+      <h2 class="section-title huge">Synthèse<br>et plan d'action.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1300px; color: var(--muted);">Reprendre les fils. Choisir trois actions prioritaires. Prendre des engagements clairs.</p>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Synthèse -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 10<br>Synthèse</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Synthèse</div>
+      <h2 class="section-title big">Ce qu'on a construit<br>ces deux jours.</h2>
+      <ul class="num-list" style="margin-top: 50px;">
+        <li><span class="num">01.</span><span class="text">Un diagnostic clair de votre audience et de ses douleurs / gains.</span></li>
+        <li><span class="num">02.</span><span class="text">Trois KPIs principaux alignés avec vos objectifs business.</span></li>
+        <li><span class="num">03.</span><span class="text">Une ligne éditoriale et un récit qui vous ressemble.</span></li>
+        <li><span class="num">04.</span><span class="text">Un calendrier éditorial sur deux à trois semaines.</span></li>
+        <li><span class="num">05.</span><span class="text">Un mini-funnel TOFU / MOFU / BOFU prêt à l'emploi.</span></li>
+        <li><span class="num">06.</span><span class="text">Un rituel mensuel de révision et d'ajustement.</span></li>
+      </ul>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Trois actions prioritaires -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 10 · Atelier<br>Trois actions</div>
+    <div class="content-area">
+      <div class="subhead" style="max-width: 280px;">Atelier pratique</div>
+      <h2 class="section-title big">Vos trois actions<br>pour les 30 prochains jours.</h2>
+      <p class="body-text" style="font-size: 22px; margin-top: 30px; max-width: 1500px; color: var(--muted);">Pas dix. Pas vingt. Trois actions concrètes, datées, mesurables. Sortir d'ici avec un plan.</p>
+      <div class="exercise-lines" style="margin-top: 60px;">
+        <div class="line" style="border-bottom: 1.5px solid var(--ink); padding: 24px 0; display: grid; grid-template-columns: auto 1fr; gap: 30px; align-items: center;">
+          <span style="font-size: 18px; font-weight: 500; letter-spacing: 0.14em; color: var(--muted);">— ACTION 01</span>
+          <span style="font-size: 16px; color: var(--muted);">À faire d'ici le ........................</span>
+        </div>
+        <div class="line" style="border-bottom: 1.5px solid var(--ink); padding: 24px 0; display: grid; grid-template-columns: auto 1fr; gap: 30px; align-items: center;">
+          <span style="font-size: 18px; font-weight: 500; letter-spacing: 0.14em; color: var(--muted);">— ACTION 02</span>
+          <span style="font-size: 16px; color: var(--muted);">À faire d'ici le ........................</span>
+        </div>
+        <div class="line" style="border-bottom: 1.5px solid var(--ink); padding: 24px 0; display: grid; grid-template-columns: auto 1fr; gap: 30px; align-items: center;">
+          <span style="font-size: 18px; font-weight: 500; letter-spacing: 0.14em; color: var(--muted);">— ACTION 03</span>
+          <span style="font-size: 16px; color: var(--muted);">À faire d'ici le ........................</span>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+  <!-- Slide — Engagements -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Chapitre 10<br>Engagements</div>
+    <div class="content-area center-vertical">
+      <div class="subhead" style="max-width: 280px;">Engagements</div>
+      <h2 class="section-title big">Une dernière chose.</h2>
+      <p class="body-text" style="font-size: 26px; margin-top: 50px; max-width: 1500px;">Une stratégie n'a de valeur que si elle est appliquée. Le vrai test commence demain matin, quand vous serez seul·e devant votre écran.</p>
+      <div class="accent-box" style="margin-top: 50px; max-width: 1500px;">
+        <span class="label">Engagement</span>
+        Vous prenez l'engagement, ici et maintenant, de mettre en œuvre vos trois actions prioritaires dans les trente prochains jours, et de revenir, le mois prochain, vous poser les quatre questions du rituel.
+      </div>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+  <!-- ============================== CLÔTURE ============================== -->
+  <section class="page">
+    <div class="content-header">La Griothèque</div>
+    <div class="content-header-right">Stratégie de contenu<br>Clôture</div>
+    <div class="content-area center-vertical">
+      <h2 class="section-title huge">Merci.</h2>
+    </div>
+    <div class="page-number">— / —</div>
+    <div class="page-footer">©2026 Les Griots · Tout droits réservés</div>
+  </section>
+
+</div>
+
+<script>
+  const pages = document.querySelectorAll('.page');
+  const total = pages.length;
+  const navControls = document.getElementById('navControls');
+  let current = 0;
+  let presenting = false;
+
+  // Mettre à jour les numéros de page automatiquement
+  pages.forEach((page, idx) => {
+    const pn = page.querySelector('.page-number');
+    if (pn) {
+      pn.textContent = `${String(idx + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+    }
+  });
+
+  function rescaleActive() {
+    if (!presenting) return;
+    const active = document.querySelector('.page.active');
+    if (!active) return;
+    const sx = window.innerWidth / 1920;
+    const sy = window.innerHeight / 1080;
+    const scale = Math.min(sx, sy);
+    active.style.setProperty('--scale', scale);
+  }
+
+  function show(i) {
+    if (i < 0 || i >= total) return;
+    pages.forEach((p, idx) => p.classList.toggle('active', idx === i));
+    current = i;
+    navControls.textContent = `${String(i+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
+    rescaleActive();
+  }
+
+  function togglePresenting() {
+    presenting = !presenting;
+    document.body.classList.toggle('presenting', presenting);
+    if (presenting) {
+      navControls.classList.add('show');
+      show(current);
+    } else {
+      navControls.classList.remove('show');
+      pages.forEach(p => { p.classList.remove('active'); p.style.removeProperty('--scale'); });
+      window.scrollTo(0, 0);
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'p' || e.key === 'P') {
+      e.preventDefault(); togglePresenting();
+    } else if (presenting) {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault(); show(Math.min(current + 1, total - 1));
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault(); show(Math.max(current - 1, 0));
+      } else if (e.key === 'Home') { e.preventDefault(); show(0); }
+      else if (e.key === 'End') { e.preventDefault(); show(total - 1); }
+      else if (e.key === 'Escape') { togglePresenting(); }
+      else if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+      }
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!presenting) return;
+    if (e.target.closest('a, button')) return;
+    const x = e.clientX;
+    const w = window.innerWidth;
+    if (x > w / 2) show(Math.min(current + 1, total - 1));
+    else show(Math.max(current - 1, 0));
+  });
+
+  window.addEventListener('resize', rescaleActive);
+  navControls.textContent = `MODE PRÉSENTATION : APPUYEZ SUR P`;
+</script>
+
+</body>
+</html>

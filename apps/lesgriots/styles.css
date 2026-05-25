@@ -1,0 +1,807 @@
+/* =========================================================
+   Les Griots — clean stylesheet
+   ========================================================= */
+
+:root {
+  --bg: #0a0a0a;
+  --ink: #ffffff;
+  --accent: #F1B81F;
+  --hot: #C4321F;
+  --serif: "Instrument Serif", "Newsreader", "Times New Roman", Georgia, serif;
+  --sans: "Geist", "Söhne", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #000; color: #fff; }
+html {
+  scroll-snap-type: y proximity;
+  scroll-behavior: smooth;
+}
+body {
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+img, video { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+/* =========================================================
+   LANDING — section 0 : Florale home video, big vertical logo
+   Sticky so the next section can slide UP over it.
+   ========================================================= */
+.landing {
+  position: sticky;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #0a0a0a;
+  cursor: pointer;
+  z-index: 1;
+  scroll-snap-align: start;
+}
+.landing-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.1) brightness(.95);
+  transition: filter 1.2s ease;
+}
+body.entered .landing-image {
+  filter: grayscale(0) contrast(1.05) brightness(1);
+}
+.landing-veil {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,0) 18%, rgba(0,0,0,0) 70%, rgba(0,0,0,.6));
+}
+
+/* Bottom centered tagline, like COLORS' "CURATED SHOWS, FREQUENTLY UPDATED." */
+.landing-tag {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(28px, 4vh, 48px);
+  transform: translateX(-50%);
+  z-index: 5;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.9);
+  text-shadow: 0 1px 12px rgba(0,0,0,.5);
+  white-space: nowrap;
+  text-align: center;
+  transition: opacity .6s ease, transform .6s ease;
+}
+body.entered .landing-tag {
+  opacity: 0;
+  transform: translateX(-50%) translateY(10px);
+  pointer-events: none;
+}
+/* Heavy film grain on landing only */
+.landing::after {
+  content: "";
+  position: absolute;
+  inset: -80px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: .72;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .9 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/></svg>");
+  background-size: 260px 260px;
+  animation: grain .35s steps(10) infinite;
+  will-change: transform;
+}
+/* Second grain layer for extra density */
+.landing::before {
+  content: "";
+  position: absolute;
+  inset: -80px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: .35;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='340' height='340'><filter id='n2'><feTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .8 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n2)' opacity='1'/></svg>");
+  background-size: 340px 340px;
+  animation: grain .9s steps(6) infinite reverse;
+}
+
+/* =========================================================
+   STAGE — section 1 : slides up over landing, sticky so next slides over it
+   ========================================================= */
+.stage {
+  position: sticky;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #0a0a0a;
+  cursor: pointer;
+  z-index: 2;
+  scroll-snap-align: start;
+}
+body.entered .stage { cursor: default; }
+
+/* Video element uses object-fit too */
+.stage-video {
+  background: #1c1c1c;
+}
+
+/* =========================================================
+   ARCHIVE GRID — sits below the stage, scrolls up over it
+   ========================================================= */
+.archive {
+  position: relative;
+  z-index: 4;
+  background: #000;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.archive-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2px;
+  padding: 0;
+  flex: 1;
+  min-height: 100vh;
+}
+.archive .tile {
+  position: relative;
+  overflow: hidden;
+  background: #111;
+  display: block;
+}
+.archive .tile .yr {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--serif);
+  font-size: clamp(18px, 1.6vw, 24px);
+  color: rgba(255,255,255,.92);
+  letter-spacing: .04em;
+  pointer-events: none;
+  text-shadow: 0 1px 18px rgba(0,0,0,.5);
+  z-index: 2;
+}
+.archive-head {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 22px 28px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.78);
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  position: sticky;
+  top: 0;
+  background: rgba(0,0,0,.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 2;
+}
+.archive-head .ah-l { justify-self: start; }
+.archive-head .ah-c { justify-self: center; }
+.archive-head .ah-r { justify-self: end; }
+
+.archive .tile.t-wide { grid-column: span 2; }
+.archive .tile.t-tall { grid-row: span 2; }
+.archive .tile.t-big  { grid-column: span 2; grid-row: span 2; }
+.archive .gap { grid-column: span 1; grid-row: span 1; }
+.archive .tile {
+  position: relative;
+  overflow: hidden;
+  background: #111;
+  display: block;
+  grid-column: span 1;
+  grid-row: span 1;
+}
+.archive .tile.t-wide { grid-column: span 2; }
+.archive .tile.t-tall { grid-row: span 2; }
+.archive .tile.t-big  { grid-column: span 2; grid-row: span 2; }
+.archive .gap { grid-column: span 1; grid-row: span 1; }
+.archive .tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(.85) contrast(1.02) brightness(.78);
+  transition: transform .9s ease, filter .35s ease;
+}
+.archive .tile:hover img {
+  transform: scale(1.04);
+  filter: saturate(1) contrast(1.05) brightness(.9);
+}
+.archive .tile .yr {
+  position: absolute;
+  top: 12px; left: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: rgba(255,255,255,.92);
+}
+.archive .tile .ttl {
+  position: absolute;
+  left: 14px; right: 14px;
+  bottom: 12px;
+  font-family: var(--serif);
+  font-size: clamp(18px, 1.6vw, 26px);
+  line-height: 1.05;
+  color: #fff;
+  text-shadow: 0 1px 16px rgba(0,0,0,.4);
+}
+
+@media (max-width: 980px) {
+  .archive-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 640px) {
+  .archive-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* =========================================================
+   PLAYER — Colors-style full-bleed overlay
+   ========================================================= */
+.player {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: #0a0a0a;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .6s ease;
+}
+.player.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.player-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(120% 80% at 50% 50%, #5c1224 0%, #2a0712 55%, #0a0405 100%);
+}
+.player-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .88;
+  mix-blend-mode: luminosity;
+  filter: contrast(1.05) saturate(.92);
+}
+
+/* Branded square : COL/ORS-style sticker bottom-left */
+.player-badge {
+  position: absolute;
+  bottom: 28px;
+  left: 28px;
+  background: #ffffff;
+  color: #0a0a0a;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.05;
+  letter-spacing: .02em;
+  padding: 14px 16px 12px;
+  width: 110px;
+  z-index: 3;
+}
+.player-badge span {
+  display: block;
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-top: 6px;
+  color: #777;
+}
+
+/* Title bottom-right */
+.player-meta {
+  position: absolute;
+  bottom: 32px;
+  right: 36px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  color: #fff;
+  font-family: var(--sans);
+}
+.player-title {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3vw, 44px);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -.01em;
+}
+.player-sub {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+}
+
+/* Close button top-right */
+.player-close {
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  z-index: 4;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.18);
+  transition: background .2s, color .2s;
+}
+.player-close:hover { background: #fff; color: #0a0a0a; }
+.player-close svg { width: 16px; height: 16px; }
+
+@media (max-width: 720px) {
+  .player-badge { width: 88px; font-size: 12px; padding: 12px 14px 10px; bottom: 18px; left: 18px; }
+  .player-meta { right: 20px; bottom: 22px; }
+}
+.definition {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #0a0a0a;
+  color: #f4efe3;
+  min-height: 100vh;
+  padding: 24px clamp(28px, 4vw, 64px) 110px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  scroll-snap-align: start;
+}
+.def-body {
+  max-width: 880px;
+  margin: 0 auto;
+  padding-top: clamp(60px, 14vh, 180px);
+  width: 100%;
+}
+.def-head {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(244,239,227,.85);
+}
+.def-head .dh-l { justify-self: start; }
+.def-head .dh-c { justify-self: center; }
+.def-head .dh-r { justify-self: end; }
+.def-head .dh-r a { border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+
+.def-body {
+  max-width: 880px;
+  margin: 0 auto;
+  padding-top: clamp(60px, 14vh, 180px);
+  width: 100%;
+}
+.def-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(34px, 4.2vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -.01em;
+  margin-bottom: 6px;
+}
+.def-pron { font-style: italic; color: rgba(244,239,227,.6); font-size: .9em; }
+.def-pos {
+  font-family: var(--serif);
+  font-style: italic;
+  color: rgba(244,239,227,.6);
+  margin-bottom: 28px;
+}
+.def-etym {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(18px, 1.4vw, 22px);
+  line-height: 1.45;
+  max-width: 68ch;
+  color: rgba(244,239,227,.85);
+}
+.def-rule {
+  height: 1px;
+  background: rgba(244,239,227,.35);
+  margin: 28px 0;
+}
+.def-tags {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(244,239,227,.9);
+}
+.def-text {
+  font-family: var(--serif);
+  font-size: clamp(16px, 1.2vw, 18px);
+  line-height: 1.6;
+  margin-top: 28px;
+  max-width: 64ch;
+  color: rgba(244,239,227,.78);
+}
+.def-foot {
+  position: absolute;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: .02em;
+  color: #f4efe3;
+}
+
+/* Manifeste typography */
+.manifeste-eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(244,239,227,.55);
+  margin-bottom: clamp(20px, 3vw, 36px);
+}
+.manifeste-h {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(40px, 5.4vw, 84px);
+  line-height: 1;
+  letter-spacing: -.02em;
+  margin-bottom: clamp(28px, 4vw, 56px);
+}
+.manifeste-h em {
+  font-style: italic;
+  color: var(--accent, #F1B81F);
+}
+.manifeste-lede {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(20px, 1.8vw, 30px);
+  line-height: 1.35;
+  color: #f4efe3;
+  margin-bottom: clamp(40px, 6vw, 80px);
+  max-width: 28ch;
+}
+.manifeste-p {
+  font-family: var(--serif);
+  font-size: clamp(18px, 1.4vw, 24px);
+  line-height: 1.5;
+  color: rgba(244,239,227,.85);
+  max-width: 60ch;
+  margin-bottom: clamp(22px, 2.4vw, 34px);
+}
+.manifeste-p em { color: var(--accent, #F1B81F); font-style: italic; }
+.manifeste-signoff {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(244,239,227,.6);
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: clamp(40px, 6vw, 80px);
+}
+.manifeste-signoff .bullet {
+  width: 4px; height: 4px; border-radius: 999px;
+  background: rgba(244,239,227,.4);
+}
+
+/* Image stack — simple cross-fade between projects */
+.stage-images { position: absolute; inset: 0; z-index: 0; }
+.stage-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity .6s ease;
+  pointer-events: none;
+}
+.stage-img.is-visible {
+  opacity: 1;
+}
+
+/* Subtle vignettes top + bottom for chrome legibility */
+.stage-veil {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,0) 18%, rgba(0,0,0,0) 70%, rgba(0,0,0,.6)),
+    radial-gradient(120% 80% at 10% 95%, rgba(0,0,0,.55), rgba(0,0,0,0) 55%);
+}
+
+/* Film grain overlay — heavy on landing, eases off once entered */
+.stage::after {
+  content: "";
+  position: absolute;
+  inset: -60px;
+  z-index: 6;
+  pointer-events: none;
+  opacity: .42;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .7 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.95'/></svg>");
+  background-size: 240px 240px;
+  animation: grain .55s steps(8) infinite;
+  will-change: transform, opacity;
+  transition: opacity 1.2s ease;
+}
+
+/* Once entered → grain fades to almost nothing, true texture shows */
+body.entered .stage::after {
+  opacity: .06;
+}
+
+.stage-img {
+  filter: saturate(.72) contrast(1.05);
+  transition: transform 1.1s cubic-bezier(.7,0,.2,1), opacity .35s ease, filter 1.2s ease;
+}
+body.entered .stage-img {
+  filter: saturate(1) contrast(1);
+}
+@keyframes grain {
+  0%   { transform: translate(0, 0); }
+  10%  { transform: translate(-14px, 6px); }
+  20%  { transform: translate(10px, -10px); }
+  30%  { transform: translate(-6px, 14px); }
+  40%  { transform: translate(12px, 4px); }
+  50%  { transform: translate(-10px, -6px); }
+  60%  { transform: translate(4px, 12px); }
+  70%  { transform: translate(-12px, -10px); }
+  80%  { transform: translate(8px, 6px); }
+  90%  { transform: translate(-4px, -14px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* =========================================================
+   BRAND MARK — vertical logo, big on landing, small after scroll
+   ========================================================= */
+.brand-mark {
+  position: absolute;
+  top: 0;
+  left: 32px;
+  width: calc(100vh / 3.89);
+  height: 100vh;
+  z-index: 100;
+  pointer-events: none;
+  overflow: visible;
+  display: block;
+  transition:
+    top .9s cubic-bezier(.7,0,.2,1),
+    left .9s cubic-bezier(.7,0,.2,1),
+    width .9s cubic-bezier(.7,0,.2,1),
+    height .9s cubic-bezier(.7,0,.2,1),
+    position 0s;
+}
+body.entered .brand-mark { pointer-events: auto; cursor: pointer; }
+
+/* Once entered, the logo becomes fixed so it stays put while archive scrolls */
+body.entered .brand-mark {
+  position: fixed;
+  top: 32px;
+  left: 32px;
+  width: 72px;
+  height: 280px;
+  z-index: 100;
+}
+body.entered .brand-mark .brand-img {
+  width: 280px;
+}
+.brand-mark .brand-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vh;
+  height: auto;
+  max-width: none;
+  display: block;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  filter: drop-shadow(0 2px 14px rgba(0,0,0,.45));
+  transition:
+    width .9s cubic-bezier(.7,0,.2,1);
+}
+/* White layer : same logo, filtered white, clipped to show only BELOW the cut line.
+   The cut line follows the top edge of the definition section as it scrolls up. */
+.brand-mark .brand-white {
+  filter: brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,.25));
+  /* clip-path applies in the wrapper's local box (post-transform of the image),
+     so we apply the inset on the wrapper instead — see below */
+}
+.brand-mark {
+  /* Hide top portion of the wrapper for the white layer only via mask */
+  --cut: 100%;
+}
+/* Stack ordering : white must be ABOVE yellow */
+.brand-mark .brand-white { z-index: 2; }
+.brand-mark .brand-yellow { z-index: 1; }
+/* White layer : mask uses "to right" because the image is rotated -90deg, so
+   its local x-axis maps to the viewport vertical (left = bottom, right = top).
+   That way the white reveal reads as bottom-to-top in the viewport. */
+.brand-mark .brand-white {
+  -webkit-mask: linear-gradient(to right, #000 0, #000 calc(100% - var(--cut, 100%)), transparent calc(100% - var(--cut, 100%)), transparent 100%);
+  mask: linear-gradient(to right, #000 0, #000 calc(100% - var(--cut, 100%)), transparent calc(100% - var(--cut, 100%)), transparent 100%);
+}
+
+/* =========================================================
+   TOP NAV — revealed after click
+   ========================================================= */
+.stage-nav {
+  position: absolute;
+  top: 28px;
+  right: clamp(20px, 3vw, 44px);
+  z-index: 9;
+  display: flex; align-items: center; gap: clamp(20px, 2.6vw, 42px);
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .6s ease .3s, transform .6s ease .3s;
+}
+body.entered .stage-nav { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.stage-nav a {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.78);
+  transition: color .2s;
+}
+.stage-nav a:hover, .stage-nav a.active { color: #fff; }
+.stage-nav .burger {
+  display: inline-flex; flex-direction: column; gap: 4px;
+  margin-left: 10px;
+  width: 22px; height: 18px; align-items: stretch;
+  background: none; border: 0; cursor: pointer; padding: 0;
+}
+.stage-nav .burger span {
+  height: 1.5px;
+  background: #fff;
+  display: block;
+}
+
+/* =========================================================
+   CENTER CAPTION
+   ========================================================= */
+.stage-caption {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  display: inline-flex; align-items: center; gap: 18px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.88);
+  text-shadow: 0 1px 14px rgba(0,0,0,.35);
+  opacity: 0;
+  transition: opacity .8s ease .5s;
+}
+body.entered .stage-caption { opacity: 1; }
+.stage-caption .bullet {
+  width: 4px; height: 4px; border-radius: 999px;
+  background: rgba(255,255,255,.55);
+}
+
+/* =========================================================
+   LEFT NAMES LIST
+   ========================================================= */
+.stage-list {
+  position: absolute;
+  left: clamp(20px, 3vw, 48px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  display: flex; flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .7s ease .5s, transform .9s cubic-bezier(.7,0,.2,1);
+}
+body.entered .stage-list {
+  opacity: 1;
+  pointer-events: auto;
+}
+.stage-list .row {
+  position: relative;
+  display: flex; align-items: center; gap: 14px;
+  padding: 4px 0;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.32);
+  transition: color .25s ease;
+}
+.stage-list .row:hover { color: rgba(255,255,255,.85); }
+.stage-list .row.is-active {
+  color: #fff;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 0 10px;
+}
+.stage-list .row .name { display: inline-block; }
+.stage-list .row .watch {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  color: #fff;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity .25s ease, transform .25s ease;
+}
+.stage-list .row.is-active .watch {
+  opacity: 1;
+  transform: translateX(0);
+  margin-left: 4px;
+}
+
+/* =========================================================
+   MAIL — bottom right
+   ========================================================= */
+.stage-mail {
+  position: absolute;
+  right: clamp(20px, 3vw, 44px);
+  bottom: clamp(28px, 4vh, 44px);
+  z-index: 5;
+  width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .7s ease .6s;
+}
+body.entered .stage-mail {
+  opacity: .72;
+  pointer-events: auto;
+}
+.stage-mail:hover { opacity: 1 !important; }
+.stage-mail svg { width: 22px; height: 22px; }
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 720px) {
+  .stage { height: 100svh; }
+  .brand-mark { width: calc(100svh / 3.89); height: 100svh; }
+  .brand-mark img { width: 100svh; }
+  body.entered .brand-mark { width: 28px; height: 100px; }
+  body.entered .brand-mark img { width: 100px; }
+
+  .stage-nav { top: 20px; right: 18px; gap: 14px; }
+  .stage-nav a:not(.active) { display: none; }
+  .stage-list { left: 18px; }
+  .stage-list .row { font-size: 11px; }
+}

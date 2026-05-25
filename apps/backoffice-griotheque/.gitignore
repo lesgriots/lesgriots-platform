@@ -1,0 +1,8 @@
+node_modules/
+.next/
+.env.local
+studio.json
+studio.json.tmp
+studio.db
+studio.db-journal
+*.log
