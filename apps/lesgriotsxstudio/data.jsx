@@ -2,7 +2,7 @@
 // LESGRIOTSxSTUDIO — projects data
 // ⚠️  FICHIER GÉNÉRÉ AUTOMATIQUEMENT par backoffice/.
 // Ne pas éditer à la main — ouvre le back office (http://localhost:3030).
-// Dernière génération : 2026-06-13T16:34:48.758Z
+// Dernière génération : 2026-06-13T16:39:05.463Z
 
 const PROJECTS = [
   {
