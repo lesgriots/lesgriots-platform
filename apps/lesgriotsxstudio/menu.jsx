@@ -52,16 +52,19 @@ function MenuBar({ view, onNavigate }) {
   //   sentir perdu — fonctionne comme un "retour au début" universel).
   //   Comme Work, elle navigue vers la home view ; les 2 sont volontaires
   //   pour clarté UX (Home = repère, Work = contenu).
-  // - WORK / PROJETS : clé menu "home" vers la page "work" côté back office.
+  // - WORK / PROJETS : navigue vers "home" view (back office key "work").
+  //
+  // /!\ id  → identifiant unique pour React.key (évite le warning "duplicate key")
+  //     to  → cible de navigation (peut être identique entre 2 items)
   const items = [
-    { key: "home",  label: tr("menu.home",  lang), active: true },
-    { key: "home",  label: tr("menu.work",  lang), active: isActive("work") },
-    { key: "about", label: tr("menu.about", lang), active: isActive("about") },
-    { key: "eco",   label: tr("menu.eco",   lang), active: isActive("eco") },
+    { id: "home-anchor", to: "home",  label: tr("menu.home",  lang), active: true },
+    { id: "work",        to: "home",  label: tr("menu.work",  lang), active: isActive("work") },
+    { id: "about",       to: "about", label: tr("menu.about", lang), active: isActive("about") },
+    { id: "eco",         to: "eco",   label: tr("menu.eco",   lang), active: isActive("eco") },
   ].filter((it) => it.active);
 
   function pick(it) {
-    onNavigate(it.key);
+    onNavigate(it.to);
     setOpen(false);
   }
 
@@ -161,8 +164,8 @@ function MenuBar({ view, onNavigate }) {
               .reduce((acc, p) => acc + p.label.length * speed + 200, 0);
             return (
               <button
-                key={it.key}
-                className={view === it.key ? "active" : ""}
+                key={it.id}
+                className={view === it.to ? "active" : ""}
                 onClick={() => pick(it)}
               >
                 <span className="prompt" aria-hidden="true">&gt;</span>
@@ -170,8 +173,8 @@ function MenuBar({ view, onNavigate }) {
                   text={it.label}
                   speed={speed}
                   delay={prevDuration}
-                  cursor={view === it.key ? "always" : "while"}
-                  key={"m-" + it.key + "-" + lang + "-" + openSeq}
+                  cursor={view === it.to ? "always" : "while"}
+                  key={"m-" + it.id + "-" + lang + "-" + openSeq}
                 />
                 {/* "VOIR" / "VIEW" retiré — le prompt > et le label
                     suffisent, plus simple visuellement. */}
