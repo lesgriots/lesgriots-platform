@@ -235,9 +235,9 @@ const SITE_CONTENT = {
     ]
   },
   "activePages": {
-    "work": false,
+    "work": true,
     "about": true,
-    "eco": false
+    "eco": true
   }
 };
 

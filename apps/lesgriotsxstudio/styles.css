@@ -156,7 +156,8 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   left: 14px;
   width: 280px;
   z-index: 90;
-  cursor: pointer;
+  /* pas de cursor: pointer ici — on garde le curseur custom mustard global
+     (pas de switch vers le pointeur OS au hover). */
   background: transparent;
   border: 0;
   padding: 0;
@@ -186,7 +187,9 @@ body.booted .idcard {
     opacity: 1;
   }
 }
-.idcard:hover { transform: translate(-2px, -2px); }
+/* Pas d'effet hover sur le sticker — il reste statique. La translate
+   au hover était trop "interactive" pour un élément qui n'est qu'un
+   logo cliquable retour-accueil. */
 .idcard__img { display: block; width: 100%; height: auto; }
 /* Hide the sticker on the ecosystem page */
 body:has(.eco3) .idcard { display: none !important; }
