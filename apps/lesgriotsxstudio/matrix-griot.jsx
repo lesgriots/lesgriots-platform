@@ -86,13 +86,80 @@ function MatrixGriot() {
     );
   }, [tick]);
 
-  // Pas d'interaction au click — le griot est purement décoratif,
-  // une présence visuelle qui respire en bas-droite. L'effet 0/1 et
-  // toutes ses variantes ont été retirés (décision 2026-06-12).
+  // Easter egg réactivé : click sur le griot → joue le son de kora
+  // (uploadé via le BO si présent, sinon mélodie pentatonique synthétisée)
+  // ET binarize les textes de la page (tous les chars deviennent 0/1
+  // pendant 1.6s puis se restaurent).
+  const onClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const uploaded =
+        typeof window !== "undefined"
+        && window.SITE_CONTENT
+        && window.SITE_CONTENT.koraSound
+        && window.SITE_CONTENT.koraSound.path;
+
+      if (uploaded) {
+        // Fichier audio uploadé via le back office — lecture directe.
+        const audio = window.__griotKoraAudio || new Audio();
+        audio.src = uploaded;
+        audio.currentTime = 0;
+        audio.volume = 0.8;
+        audio.play().catch(() => {/* autoplay bloqué */});
+        window.__griotKoraAudio = audio;
+      } else {
+        // Fallback : mélodie pentatonique D mineure synthétisée
+        // (D4 → F4 → A4 → C5 → D5 → A4 → F4), 4 harmoniques par note
+        // avec enveloppe exponentielle qui mime un pluck de kora.
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) {
+          const ctx = window.__griotKoraCtx || (window.__griotKoraCtx = new AC());
+          if (ctx.state === "suspended") ctx.resume();
+          const now = ctx.currentTime;
+          const MELODY = [
+            [293.66, 0],    // D4
+            [349.23, 130],  // F4
+            [440.00, 260],  // A4
+            [523.25, 390],  // C5
+            [587.33, 530],  // D5
+            [440.00, 720],  // A4 retour
+            [349.23, 850],  // F4
+          ];
+          const playNote = (freq, when) => {
+            const start = now + when / 1000;
+            [1, 2, 3, 4].forEach((h) => {
+              const osc = ctx.createOscillator();
+              osc.type = "sine";
+              osc.frequency.value = freq * h;
+              const gain = ctx.createGain();
+              const peak = 0.22 / (h * 1.6);
+              gain.gain.setValueAtTime(0, start);
+              gain.gain.linearRampToValueAtTime(peak, start + 0.005);
+              gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.55);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(start);
+              osc.stop(start + 0.6);
+            });
+          };
+          MELODY.forEach(([freq, offset]) => playNote(freq, offset));
+        }
+      }
+    } catch (_) {
+      // Audio échoue ? L'effet 0/1 marche toujours sans le son.
+    }
+    // Tous les textes de la page flickerent en 0/1 pendant 1.6s puis
+    // se restaurent. Le griot lui-même (skipEl) est exclu pour rester
+    // visible et identifiable comme l'élément déclencheur.
+    window.binarizePage && window.binarizePage({ duration: 1600, skipEl: e.currentTarget });
+  };
+
   return (
     <pre
       className="matrix-griot"
-      aria-hidden="true"
+      onClick={onClick}
+      title="Click."
     >
       {lines.join("\n")}
     </pre>

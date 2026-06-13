@@ -30,6 +30,9 @@ function useLang() {
 const DICT = {
   "menu.menu":     { en: "MENU",      fr: "MENU" },
   "menu.home":     { en: "HOME",      fr: "ACCUEIL" },
+  // Sticker (idcard) — clé dédiée pour découpler du menu (le menu n'a
+  // plus d'entrée HOME, le sticker assume seul ce rôle).
+  "sticker.home":  { en: "HOME",      fr: "ACCUEIL" },
   "menu.work":     { en: "WORK",      fr: "PROJETS" },
   "menu.about":    { en: "ABOUT",     fr: "À PROPOS" },
   "menu.eco":      { en: "ECOSYSTEM", fr: "ÉCOSYSTÈME" },
@@ -74,7 +77,7 @@ const DICT = {
   "viewer.close":    { en: "CLOSE",       fr: "FERMER" },
   "viewer.info":     { en: "INFORMATION", fr: "INFORMATIONS" },
   "viewer.project":  { en: "PROJECT",     fr: "PROJET" },
-  "viewer.overview": { en: "OVERVIEW",    fr: "VUE D'ENSEMBLE" },
+  "viewer.overview": { en: "GALLERY",     fr: "GALERIE" },
   "viewer.gallery":  { en: "GALLERY",     fr: "GALERIE" },
 
   "about.intro": {

@@ -94,20 +94,11 @@ function BootLoader({ onDone }) {
       onClick={dismiss}
       role="button"
       tabIndex={0}>
-      {/* Backdrop vidéo : MÊME effet que le hover Work (.ahome__bg).
-          - Vidéo en B&W + contrast bumpé + brightness 0.6
-          - Zoom-in subtil (scale 1.05 → 1) sur la durée du boot
-          - Film grain animé en screen blend par-dessus
-          - Veil radial pour focus centre + lisibilité chrome */}
+      {/* Backdrop : film grain animé + veil radial.
+          La vidéo de fond (riles-survival.mp4) a été retirée le 2026-06-13
+          à la demande de Moos — on garde uniquement les couches grain et
+          veil pour conserver la même atmosphère sans la vidéo. */}
       <div className="boot-matrix__bg" aria-hidden="true">
-        <video
-          className="boot-matrix__bg__video"
-          src="img/riles-survival.mp4"
-          autoPlay
-          muted
-          loop
-          playsInline
-        />
         <div className="boot-matrix__bg__grain" />
         <div className="boot-matrix__bg__veil" />
       </div>

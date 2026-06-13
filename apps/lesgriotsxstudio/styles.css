@@ -206,8 +206,12 @@ body.booted .idcard {
 /* Effet bookmark : au hover le sticker glisse vers la gauche comme un
    marque-page qu'on tire pour le retirer du livre. Le slide-in initial
    (idcard-slide-in) doit être fini sinon il y a conflit avec le hover —
-   pas de souci, l'animation a both/forwards et finit en transform: none. */
-.idcard:hover { transform: translateX(-10px); }
+   pas de souci, l'animation a both/forwards et finit en transform: none.
+   /!\ Réservé aux DEVICES AVEC POINTEUR (souris) — sur tactile ce serait
+   un trap "tap then tap" : 1er tap = hover, 2e tap = clic. */
+@media (hover: hover) and (pointer: fine) {
+  .idcard:hover { transform: translateX(-10px); }
+}
 .idcard__img { display: block; width: 100%; height: auto; }
 
 /* Label "HOME" / "ACCUEIL" flottant sous le sticker — même esprit que
@@ -235,7 +239,12 @@ body.booted .idcard {
   opacity: 0.6;
   margin-right: 1px;
 }
-.idcard:hover .idcard__label { opacity: 1; }
+/* Le label n'apparait qu'aux devices avec souris (hover natif). Sur
+   tactile, un seul tap doit suffire à naviguer — pas d'étape "hover"
+   intermédiaire qui demande un 2e tap. */
+@media (hover: hover) and (pointer: fine) {
+  .idcard:hover .idcard__label { opacity: 1; }
+}
 /* Hide the sticker on the ecosystem page */
 body:has(.eco3) .idcard { display: none !important; }
 
@@ -3713,6 +3722,14 @@ body.overview-open .utilbar {
 .page-foot button { pointer-events: auto; }
 .page-foot button:hover { color: var(--ink); }
 
+/* Mobile : on retire le bouton [X] BACK en bas à gauche de la page-foot
+   (utilisable sur About / Eco). Sur mobile le sticker top-left assume
+   déjà le rôle "retour accueil", et les visiteurs peuvent aussi swiper.
+   On garde par contre copy + locs (les 2 spans à droite). */
+@media (max-width: 760px) {
+  .page-foot button { display: none; }
+}
+
 /* ============================================================
    Responsive
    ============================================================ */
@@ -5602,8 +5619,88 @@ body.overview-open .utilbar {
 }
 
 
-/* Griot purement décoratif — pas d'interaction, pas de cursor pointer. */
+/* Griot cliquable : déclenche le son de kora + binarize les textes
+   de la page pendant 1.6s. Curseur custom mustard pointing-finger
+   (qui hérite de la règle globale grâce au sélecteur .is-clickable). */
 .matrix-griot {
-  pointer-events: none;
+  pointer-events: auto;
   user-select: none;
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' shape-rendering='crispEdges'><path d='M8 1 L11 1 L11 9 L13 9 L13 7 L15 7 L15 9 L17 9 L17 11 L19 11 L19 19 L7 19 L7 14 L5 14 L5 11 L8 11 Z' fill='black' stroke='%238a7a20' stroke-width='1' stroke-linejoin='miter'/></svg>") 8 1, pointer;
+}
+.matrix-griot:hover { filter: brightness(1.3); }
+
+
+/* ============================================================
+   LANDSCAPE MOBILE — téléphone tenu en mode paysage
+   ============================================================
+   On cible spécifiquement les téléphones en paysage (largeur ≥
+   environ 600px, hauteur ≤ 500px). max-height: 500px évite de
+   matcher les tablettes en paysage (iPad mini ~768px de haut).
+
+   Objectif : exploiter la largeur disponible pour les médias
+   tout en compactant le chrome qui mange la hauteur. */
+@media (orientation: landscape) and (max-height: 500px) {
+
+  /* ───── Sticker plus petit pour libérer de l'espace vertical
+     (180px dans une fenêtre haute de 375px = 50% du screen) ──── */
+  .idcard,
+  .boot-matrix__sticker { width: 120px; }
+
+  /* ───── Boot loader ─────────────────────────────────────────
+     L'ASCII griot fait 60 lignes — en paysage très court, il
+     dépasse. On réduit le font-size pour qu'il tienne. */
+  .boot-matrix .matrix-griot { font-size: clamp(2.4px, 0.45vw, 3.5px); }
+  /* LOADING repositionné plus bas pour ne pas overlap le griot */
+  .boot-matrix__loading { top: auto; bottom: 16px; }
+
+  /* ───── Viewer ──────────────────────────────────────────────
+     Media va jusqu'à 80dvh (au lieu de 50dvh portrait) — quand
+     l'utilisateur tourne son téléphone, c'est pour voir le
+     contenu en plus grand. */
+  .viewer__media-wrap { max-height: 80dvh !important; }
+  /* Projmeta en bas-droit reste mais texte un poil plus petit */
+  .viewer__projmeta { font-size: 9px; }
+  /* Counter détaché en haut-droit en paysage (plus de place) */
+  .viewer__counter { font-size: 9px; }
+  /* GALLERY + INFORMATION buttons : en row, plus petits */
+  .viewer__action-overview,
+  .viewer__action-info {
+    font-size: 9px;
+    padding: 5px 10px;
+  }
+
+  /* ───── Grille Work ─────────────────────────────────────────
+     Passage à 4 colonnes en paysage (au lieu de 3 portrait) pour
+     mieux exploiter la largeur. Le gap reste raisonnable. */
+  .ahome__grid,
+  .ahome--large .ahome__grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 60px 20px;
+    padding: 30px 16px 80px;
+  }
+
+  /* ───── Page-foot (About / Eco) ─────────────────────────────
+     Le bouton [X] est déjà masqué en mobile, on compacte juste
+     le texte restant pour qu'il reste lisible mais pas envahissant. */
+  .page-foot { font-size: 9px; bottom: 8px; }
+
+  /* ───── Menu ouvert ─────────────────────────────────────────
+     En paysage le menu fullscreen avec items en column = scroll
+     vertical. On passe en row pour rester dans le viewport. */
+  .menubar.open .menubar__items {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 6px 28px;
+    padding: 14px 28px 20px;
+  }
+  .menubar.open .menubar__items button {
+    flex: 0 0 auto;
+    padding: 4px 10px;
+  }
+
+  /* ───── Matrix-griot décoratif bottom-right ─────────────────
+     En paysage très court, il déborde aussi. On réduit. */
+  .ahome__griot { right: 12px; bottom: 40px; }
+  .ahome__griot .matrix-griot { font-size: 2.5px; }
 }
