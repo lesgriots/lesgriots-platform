@@ -5633,74 +5633,19 @@ body.overview-open .utilbar {
 /* ============================================================
    LANDSCAPE MOBILE — téléphone tenu en mode paysage
    ============================================================
-   On cible spécifiquement les téléphones en paysage (largeur ≥
-   environ 600px, hauteur ≤ 500px). max-height: 500px évite de
-   matcher les tablettes en paysage (iPad mini ~768px de haut).
+   Cible : téléphones en paysage (max-height: 500px évite de
+   matcher iPad mini ~768px de haut).
 
-   Objectif : exploiter la largeur disponible pour les médias
-   tout en compactant le chrome qui mange la hauteur. */
+   Décision UX : on garde le MÊME layout qu'en mobile portrait
+   (sticker, menu, grille, chrome — tout identique) pour la
+   cohérence visuelle. La SEULE chose qui change : le viewer
+   exploite la hauteur disponible pour rendre les médias plus
+   visibles (vidéos et photos plus grandes quand l'utilisateur
+   tourne son téléphone — c'est précisément pour ça qu'il tourne). */
 @media (orientation: landscape) and (max-height: 500px) {
 
-  /* ───── Sticker plus petit pour libérer de l'espace vertical
-     (180px dans une fenêtre haute de 375px = 50% du screen) ──── */
-  .idcard,
-  .boot-matrix__sticker { width: 120px; }
-
-  /* ───── Boot loader ─────────────────────────────────────────
-     L'ASCII griot fait 60 lignes — en paysage très court, il
-     dépasse. On réduit le font-size pour qu'il tienne. */
-  .boot-matrix .matrix-griot { font-size: clamp(2.4px, 0.45vw, 3.5px); }
-  /* LOADING repositionné plus bas pour ne pas overlap le griot */
-  .boot-matrix__loading { top: auto; bottom: 16px; }
-
-  /* ───── Viewer ──────────────────────────────────────────────
-     Media va jusqu'à 80dvh (au lieu de 50dvh portrait) — quand
-     l'utilisateur tourne son téléphone, c'est pour voir le
-     contenu en plus grand. */
-  .viewer__media-wrap { max-height: 80dvh !important; }
-  /* Projmeta en bas-droit reste mais texte un poil plus petit */
-  .viewer__projmeta { font-size: 9px; }
-  /* Counter détaché en haut-droit en paysage (plus de place) */
-  .viewer__counter { font-size: 9px; }
-  /* GALLERY + INFORMATION buttons : en row, plus petits */
-  .viewer__action-overview,
-  .viewer__action-info {
-    font-size: 9px;
-    padding: 5px 10px;
-  }
-
-  /* ───── Grille Work ─────────────────────────────────────────
-     Passage à 4 colonnes en paysage (au lieu de 3 portrait) pour
-     mieux exploiter la largeur. Le gap reste raisonnable. */
-  .ahome__grid,
-  .ahome--large .ahome__grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 60px 20px;
-    padding: 30px 16px 80px;
-  }
-
-  /* ───── Page-foot (About / Eco) ─────────────────────────────
-     Le bouton [X] est déjà masqué en mobile, on compacte juste
-     le texte restant pour qu'il reste lisible mais pas envahissant. */
-  .page-foot { font-size: 9px; bottom: 8px; }
-
-  /* ───── Menu ouvert ─────────────────────────────────────────
-     En paysage le menu fullscreen avec items en column = scroll
-     vertical. On passe en row pour rester dans le viewport. */
-  .menubar.open .menubar__items {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    gap: 6px 28px;
-    padding: 14px 28px 20px;
-  }
-  .menubar.open .menubar__items button {
-    flex: 0 0 auto;
-    padding: 4px 10px;
-  }
-
-  /* ───── Matrix-griot décoratif bottom-right ─────────────────
-     En paysage très court, il déborde aussi. On réduit. */
-  .ahome__griot { right: 12px; bottom: 40px; }
-  .ahome__griot .matrix-griot { font-size: 2.5px; }
+  /* Viewer : media va jusqu'à 90dvh (au lieu de 50dvh portrait) —
+     plus immersif. Le sticker, le menu et le reste du chrome
+     restent identiques au portrait mobile. */
+  .viewer__media-wrap { max-height: 90dvh !important; }
 }
