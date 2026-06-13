@@ -114,7 +114,15 @@ a, button, [role="button"], label, summary, select,
 .ahome__cell img,
 .ahome__cell video,
 .viewer__thumb img,
-.viewer__thumb video {
+.viewer__thumb video,
+.idcard,
+.idcard__img,
+.menubar__items button,
+.menubar__items button *,
+.menubar__toggle,
+.menubar__toggle *,
+.menubar__lang button,
+.menubar__lang button * {
   cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' shape-rendering='crispEdges'><path d='M8 1 L11 1 L11 9 L13 9 L13 7 L15 7 L15 9 L17 9 L17 11 L19 11 L19 19 L7 19 L7 14 L5 14 L5 11 L8 11 Z' fill='black' stroke='%238a7a20' stroke-width='1' stroke-linejoin='miter'/></svg>") 8 1, pointer;
 }
 /* Les inputs gardent un curseur texte natif — plus pratique pour saisir */
@@ -156,13 +164,11 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   left: 14px;
   width: 280px;
   z-index: 90;
-  /* Curseur custom mustard pointing-finger (le même que sur les cells et
-     les autres éléments cliquables). Explicite pour éviter qu'une règle
-     générique de spécificité supérieure ne reset au pointeur OS. */
-  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' shape-rendering='crispEdges'><path d='M8 1 L11 1 L11 9 L13 9 L13 7 L15 7 L15 9 L17 9 L17 11 L19 11 L19 19 L7 19 L7 14 L5 14 L5 11 L8 11 Z' fill='black' stroke='%238a7a20' stroke-width='1' stroke-linejoin='miter'/></svg>") 8 1, pointer;
+  /* Curseur custom mustard pointing-finger : géré par la règle globale
+     en haut du fichier (qui couvre .idcard ET .idcard__img). */
   background: transparent;
   border: 0;
-  /* Transition douce pour l'effet bookmark au hover */
+  /* Transition douce pour l'effet bookmark au hover (slide vers la gauche) */
   transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
   padding: 0;
   outline: none; /* kill le focus ring par défaut du button */
@@ -179,7 +185,13 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 body.booted .idcard {
   display: block;
-  animation: idcard-slide-in 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  /* fill-mode "backwards" : applique la from-keyframe AVANT le start
+     (évite le flash à t=0 où le sticker apparaitrait à sa position
+     finale puis sauterait à -100%), MAIS relâche le transform à la
+     fin de l'animation pour que .idcard:hover puisse le surcharger.
+     Avec "both" ou "forwards" l'animation aurait gardé son to-keyframe
+     en mémoire et bloqué tout autre transform. */
+  animation: idcard-slide-in 700ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
 }
 @keyframes idcard-slide-in {
   from {
