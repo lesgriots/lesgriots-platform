@@ -16,6 +16,30 @@ function EcoView() {
   // Each site is a "planet": elliptical orbit with rx/ry radii (in vmin),
   // starting angle, period, dot size, and a poster/video preview shown
   // in the bg on hover. When `videoSrc` is set, a <video> autoplays.
+  //
+  // CONTENU ÉDITABLE : le back office peut surcharger kicker / url /
+  // description / poster / preview / videoSrc de chaque univers via
+  // window.SITE_CONTENT.ecosystem[id] = { kickerFr, kickerEn, url,
+  // descFr, descEn, poster, preview, videoSrc }. La géométrie des orbites
+  // (rx, ry, period, taille…) reste technique et n'est pas éditable.
+  const ov = (typeof window !== "undefined" && window.SITE_CONTENT && window.SITE_CONTENT.ecosystem)
+    ? window.SITE_CONTENT.ecosystem
+    : {};
+  // Applique une surcharge sur un univers de base, en gardant la valeur
+  // d'origine si le champ correspondant est vide côté back office.
+  const merge = (base) => {
+    const o = ov[base.id] || {};
+    const pick = (v, fallback) => (v != null && v !== "" ? v : fallback);
+    return {
+      ...base,
+      kicker: pick(lang === "fr" ? o.kickerFr : o.kickerEn, base.kicker),
+      url: pick(o.url, base.url),
+      poster: pick(o.poster, base.poster),
+      preview: pick(o.preview, base.preview),
+      videoSrc: pick(o.videoSrc, base.videoSrc),
+      description: pick(lang === "fr" ? o.descFr : o.descEn, base.description),
+    };
+  };
   const sites = [
     {
       id: "lesgriots",
@@ -28,8 +52,6 @@ function EcoView() {
       size: 14,
       poster: "img/p-monument.jpg",
       preview: "img/preview-lesgriots.png",  // screenshot homepage
-      // Placeholder : à remplacer par un screencast du vrai site lesgriots.com.
-      // Peut être un chemin local (img/xxx.mp4) ou un URL externe (Bunny, R2…).
       videoSrc: "img/indigo-cristal-thumb.mp4",
       description: lang === "fr"
         ? "Plateforme éditoriale dédiée aux récits inattendus de l'Afrique et de ses diasporas. Une parole ancienne, une voix nouvelle."
@@ -46,8 +68,7 @@ function EcoView() {
       period: 90,
       size: 18,
       poster: "img/atavisme-01.jpg",
-      preview: "img/atavisme-01.jpg",  // TODO: vrai screenshot homepage
-      // Placeholder : à remplacer par un screencast du site studio.
+      preview: "img/atavisme-01.jpg",
       videoSrc: "img/nike-thumb.mp4",
       description: lang === "fr"
         ? "Studio créatif : stratégie narrative, direction artistique et production audiovisuelle pour artistes, marques et institutions."
@@ -63,14 +84,13 @@ function EcoView() {
       period: 130,
       size: 12,
       poster: "img/florale-01.jpg",
-      preview: "img/florale-01.jpg",  // TODO: vrai screenshot homepage
-      // Placeholder : à remplacer par un screencast du site Griothèque.
+      preview: "img/florale-01.jpg",
       videoSrc: "img/indigo-cristal-thumb.mp4",
       description: lang === "fr"
         ? "École de transmission pour la nouvelle génération créative. Formations courtes, méthodes éprouvées sur le terrain, certifiée Qualiopi."
         : "School of transmission for the next creative generation. Short formats, methods proven in the field, Qualiopi-certified.",
     },
-  ];
+  ].map(merge);
 
   const [hovered, setHovered] = useStateE(null);
   const [pointer, setPointer] = useStateE({ x: 0, y: 0 });

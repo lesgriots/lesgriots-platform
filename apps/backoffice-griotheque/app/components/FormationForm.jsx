@@ -365,6 +365,33 @@ export default function FormationForm({
         </Section>
       )}
 
+      {/* ========== ARCHIVAGE (formations uniquement) ==========
+          Une formation archivée (available: false) sort du catalogue principal
+          et apparaît dans l'onglet "archives" du site lagriotheque. Utilisé
+          pour les formations qu'on ne propose plus mais qu'on veut garder
+          visibles dans l'historique. Le toggle est volontairement séparé en
+          fin de form (decision rare, important quand utilisée).
+          NB : par défaut available n'est pas défini → la formation est active. */}
+      {!isWorkshop && (
+        <Section title="Archivage">
+          <Row>
+            <Field label="Statut" hint="Cochée = retirée du catalogue principal, déplacée dans l'onglet archives du site.">
+              <div style={{ paddingTop: 8 }}>
+                <label style={{ display: "inline-flex", gap: 8, alignItems: "center", margin: 0, fontSize: 12, textTransform: "none", letterSpacing: 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={data.available === false}
+                    onChange={(e) => set("available", e.target.checked ? false : true)}
+                    style={{ width: "auto" }}
+                  />
+                  Archivée (ne plus afficher dans le catalogue actif)
+                </label>
+              </div>
+            </Field>
+          </Row>
+        </Section>
+      )}
+
       {/* ========== TEXTES MUTUALISÉS (overrides) ========== */}
       <Section title="Textes mutualisés (overrides)">
         <p className="note" style={{ marginBottom: 14 }}>

@@ -86,18 +86,13 @@ function MatrixGriot() {
     );
   }, [tick]);
 
-  // Easter egg — binarize every other text node on the page.
-  const onClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    window.binarizePage && window.binarizePage({ duration: 1600, skipEl: e.currentTarget });
-  };
-
+  // Pas d'interaction au click — le griot est purement décoratif,
+  // une présence visuelle qui respire en bas-droite. L'effet 0/1 et
+  // toutes ses variantes ont été retirés (décision 2026-06-12).
   return (
     <pre
       className="matrix-griot"
-      onClick={onClick}
-      title="Click."
+      aria-hidden="true"
     >
       {lines.join("\n")}
     </pre>
@@ -105,6 +100,10 @@ function MatrixGriot() {
 }
 
 window.MatrixGriot = MatrixGriot;
+// Expose la constante ASCII brute pour que d'autres composants puissent
+// rendre une version STATIQUE du griot (sans flicker) — utile pour le
+// menu mobile où le dessin doit rester stable.
+window.ASCII_GRIOT = ASCII_GRIOT;
 
 /* ============================================================
    binarizePage(opts) — site-wide flicker of every text node to
@@ -203,6 +202,144 @@ window.binarizePage = function binarizePage(opts) {
       });
       window.__binarizing = false;
       try { opts.onDone && opts.onDone(); } catch (e) {}
+    }
+  }
+  raf = requestAnimationFrame(frame);
+};
+
+/* ============================================================
+   binarizeBackground(opts) — Matrix-rain plein écran de 0/1.
+   Création d'un canvas overlay (z-index entre le content et le
+   griot) qui dessine des colonnes de chiffres binaires qui
+   tombent. Fade in/out géré sur la duration totale.
+   Options identiques à binarizePage : duration, skipEl (ignoré).
+   ============================================================ */
+window.binarizeBackground = function binarizeBackground(opts) {
+  opts = opts || {};
+  const duration = opts.duration || 1600;
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  if (window.__bg_binarizing) return;
+  window.__bg_binarizing = true;
+
+  // Création de l'overlay canvas.
+  // mix-blend-mode: screen → la canvas devient ADDITIVE. Les chiffres
+  // mustard apparaissent en ajoutant de la luminance par-dessus le
+  // contenu (visible sur fond sombre, discret sur miniatures claires).
+  // Plus de voile blanc qui obscurcit la grille des projets.
+  const canvas = document.createElement("canvas");
+  canvas.setAttribute("aria-hidden", "true");
+  canvas.style.position = "fixed";
+  canvas.style.inset = "0";
+  canvas.style.width = "100vw";
+  canvas.style.height = "100vh";
+  canvas.style.zIndex = "9000";
+  canvas.style.pointerEvents = "none";
+  canvas.style.opacity = "0";
+  canvas.style.transition = "opacity 220ms ease-out";
+  canvas.style.mixBlendMode = "screen";
+  document.body.appendChild(canvas);
+
+  // Promote skipEl (le griot) au-dessus du canvas pendant l'effet
+  // pour qu'il reste visible et cliquable.
+  let skipPrevPos = null;
+  let skipPrevZ = null;
+  let skipPrevWrapZ = null;
+  let skipWrap = null;
+  if (opts.skipEl && opts.skipEl.style) {
+    skipPrevPos = opts.skipEl.style.position;
+    skipPrevZ = opts.skipEl.style.zIndex;
+    opts.skipEl.style.position = opts.skipEl.style.position || "relative";
+    opts.skipEl.style.zIndex = "9500";
+    // Le wrapper .ahome__griot doit aussi monter pour que son enfant soit visible
+    skipWrap = opts.skipEl.closest(".ahome__griot");
+    if (skipWrap) {
+      skipPrevWrapZ = skipWrap.style.zIndex;
+      skipWrap.style.zIndex = "9500";
+    }
+  }
+
+  // Couleurs : encre mustard sur fond NOIR.
+  // - ink = jaune mustard (couleur principale du site, visible en additive
+  //   par-dessus n'importe quel contenu grâce à mix-blend-mode: screen)
+  // - trail = noir profond (au lieu de paper/blanc) — combiné avec screen,
+  //   il n'a aucun effet visuel sur le contenu mais permet aux chiffres
+  //   précédents de s'estomper progressivement (effet de comète).
+  const cs = getComputedStyle(document.body);
+  const ink = (cs.getPropertyValue("--ink") || "#8a7a20").trim();
+  const paper = "#000000";
+
+  // High-DPI scaling
+  const dpr = window.devicePixelRatio || 1;
+  function resize() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  const ctx = canvas.getContext("2d");
+  const FONT_SIZE = 14;
+  const COL_W = FONT_SIZE * 0.9;
+  ctx.font = `bold ${FONT_SIZE * dpr}px "Geist Mono", "JetBrains Mono", monospace`;
+  ctx.textBaseline = "top";
+
+  // Une colonne = un tableau de y positions (la "tête" qui descend)
+  let cols = [];
+  function setupCols() {
+    const n = Math.ceil(canvas.width / (COL_W * dpr));
+    cols = Array.from({ length: n }, () => Math.random() * canvas.height);
+  }
+  setupCols();
+
+  // Forcer le fade in après mount
+  requestAnimationFrame(() => { canvas.style.opacity = "0.92"; });
+
+  const start = performance.now();
+  let raf;
+  function frame() {
+    const elapsed = performance.now() - start;
+
+    // Background : recouvrement avec papier semi-opaque (trail effect)
+    ctx.fillStyle = paper;
+    ctx.globalAlpha = 0.14;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
+
+    // Chiffres binaires en encre
+    ctx.fillStyle = ink;
+    for (let i = 0; i < cols.length; i++) {
+      const char = Math.random() < 0.5 ? "0" : "1";
+      const x = i * COL_W * dpr;
+      const y = cols[i];
+      ctx.fillText(char, x, y);
+
+      // Reset aléatoire quand on dépasse en bas
+      if (y > canvas.height && Math.random() > 0.975) {
+        cols[i] = 0;
+      }
+      cols[i] = y + FONT_SIZE * dpr * 0.95;
+    }
+
+    if (elapsed < duration - 220) {
+      raf = requestAnimationFrame(frame);
+    } else {
+      // Fade out + cleanup
+      canvas.style.opacity = "0";
+      setTimeout(() => {
+        if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+        window.removeEventListener("resize", resize);
+        // Restore griot z-index/position
+        if (opts.skipEl && opts.skipEl.style) {
+          opts.skipEl.style.position = skipPrevPos || "";
+          opts.skipEl.style.zIndex = skipPrevZ || "";
+        }
+        if (skipWrap) {
+          skipWrap.style.zIndex = skipPrevWrapZ || "";
+        }
+        window.__bg_binarizing = false;
+      }, 240);
     }
   }
   raf = requestAnimationFrame(frame);

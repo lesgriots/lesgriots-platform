@@ -72,7 +72,13 @@ export default function RootLayout({ children }) {
               <span className="bo-nav__sep">·</span>
               <a href="/site/about">Page About</a>
               <span className="bo-nav__sep">·</span>
+              <a href="/site/services">Services</a>
+              <span className="bo-nav__sep">·</span>
+              <a href="/site/ecosysteme">Écosystème</a>
+              <span className="bo-nav__sep">·</span>
               <a href="/site/pages">Pages actives</a>
+              <span className="bo-nav__sep">·</span>
+              <a href="/site/kora">Son du Griot</a>
             </nav>
           </header>
           <main>{children}</main>
@@ -113,6 +119,11 @@ const globalCss = `
     --yellow-deep: #d9c510;
     --danger: #ff5f56;
     --font-mono: "Geist Mono", "JetBrains Mono", "Courier New", monospace;
+    /* Aliases — utilisés par les pages/composants. Avant ils n'étaient pas
+       définis → les couleurs tombaient en fallback navigateur (bug). */
+    --dim: var(--ink-dim);
+    --accent: var(--yellow);
+    --fg: var(--ink);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {

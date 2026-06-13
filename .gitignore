@@ -74,3 +74,7 @@ _backup_*/
 
 # Résidu de l'ancien dossier non supprimable depuis le sandbox
 LESGRIOTSxSTUDIO.com/
+
+# Assets de test à la racine (ne pas commiter)
+/Logo-remove.png
+/Screenshot*.png

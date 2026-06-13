@@ -43,6 +43,37 @@
 
   --font-mono: "Geist Mono", "JetBrains Mono", "Courier New", monospace;
   --font-sans: "Geist", "Inter", system-ui, sans-serif;
+
+  /* ---- Échelle typographique canonique ----------------------------------
+     Référence pour toute nouvelle UI. Les tailles existantes ont été
+     resserrées sur ces paliers (sauf micro-valeurs décoratives < 4px et
+     le bloc @media print qui reste en pt). Réutilise ces tokens plutôt
+     que des px en dur pour garder la cohérence. */
+  --text-2xs: 10px;
+  --text-xs:  11px;
+  --text-sm:  12px;
+  --text-base:13px;
+  --text-md:  14px;
+  --text-lg:  16px;
+  --text-xl:  18px;
+  --text-2xl: 22px;
+  --text-3xl: 28px;
+  --text-4xl: 36px;
+  --text-5xl: 56px;
+
+  /* ---- Échelle d'espacement (grille 4px) --------------------------------
+     Les marges/paddings du site suivent déjà cette grille pour l'essentiel. */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-15: 60px;
+  --space-20: 80px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -304,12 +335,21 @@ button {
   text-transform: lowercase;
 }
 .lg__menu__link:hover {
+  /* Override la règle globale `a:hover { color: var(--accent); }` qui rendait
+     le menu jaune au survol. On garde la couleur noire (ink) et on signale
+     le hover uniquement par un soulignement, cohérent avec la sobriété N&B
+     du reste de l'interface. */
+  color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 .lg__menu__link.is-active {
-  text-decoration: line-through;
+  /* Indicateur de page courante : soulignement (cohérent avec le hover)
+     plutôt que barré. Le pointer-events: none reste pour éviter qu'on
+     clique sur le lien de la page où on est déjà. */
+  text-decoration: underline;
   text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
   pointer-events: none;
 }
 
@@ -390,7 +430,8 @@ button {
   font-size: 18px;
 }
 .lg__drawer__item .lg__menu__link.is-active {
-  text-decoration: line-through;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .lg__drawer__item .lg__menu__link:hover {
   text-decoration: underline;
@@ -466,7 +507,7 @@ button {
 }
 .lg__splash .matrix-griot { font-size: 4px; }
 .lg__splash .lg__hero__griot__ring text {
-  font-size: 30px;
+  font-size: 32px;
   letter-spacing: 0.05em;
 }
 .lg__splash__sub {
@@ -602,7 +643,7 @@ button {
 }
 .lg__manifesto__griot .matrix-griot { font-size: 1.6px; }
 .lg__manifesto__griot .lg__hero__griot__ring text {
-  font-size: 34px;
+  font-size: 36px;
   letter-spacing: 0.04em;
   fill: var(--ink);
 }
@@ -650,7 +691,7 @@ button {
 }
 .lg__manifesto__cols article p {
   font-family: var(--font-sans);
-  font-size: 13.5px;
+  font-size: 13px;
   line-height: 1.35;
   margin: 0 0 8px;
   color: var(--ink);
@@ -659,7 +700,7 @@ button {
   display: inline-block;
   margin-top: 8px;
   font-family: var(--font-sans);
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--ink);
   text-decoration: none;
 }
@@ -1707,6 +1748,17 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+/* Ligne de modalité (INTER) — petite info en mono, sobre, juste sous le head */
+.lg__formation__upcoming__modality {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2, rgba(0,0,0,0.65));
+  margin: 0 16px 14px;
+  padding: 0;
+}
 .lg__formation__upcoming__empty {
   font-family: var(--font-sans);
   font-size: 16px;
@@ -2022,7 +2074,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 .lg__section-big__body .lg__formation__prose {
   font-family: var(--font-sans);
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.5;
   color: var(--ink);
   max-width: 64ch;
@@ -2542,20 +2594,29 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__ag {
   border-bottom: 1px solid var(--ink);
 }
-.lg__ag.is-soon .lg__ag__title,
-.lg__ag.is-soon .lg__ag__day,
-.lg__ag.is-soon .lg__ag__month { color: var(--ink-3, rgba(0,0,0,0.55)); }
+.lg__ag.is-soon .lg__ag__title { color: var(--ink-3, rgba(0,0,0,0.55)); }
+/* Anciennes classes .lg__ag__day / .lg__ag__month retirées avec la refonte
+   du format de date (one-liner "Mercredi 15 avril 2026"). */
 .lg__ag.is-full .lg__ag__title,
 .lg__ag.is-cancel .lg__ag__title { opacity: 0.7; }
 
-/* Row cliquable (head) : grid 3 cols desktop, stack mobile */
+/* Row cliquable (head) : grid 3 cols desktop, stack mobile.
+   La date est maintenant sur une ligne unique ("Mercredi 15 avril 2026")
+   donc la colonne date n'a plus besoin de faire 200px — on resserre
+   à minmax(220px, 260px) pour bien laisser respirer le label. */
 .lg__ag__head {
   display: grid;
-  grid-template-columns: minmax(140px, 200px) 1fr auto;
+  grid-template-columns: minmax(220px, 260px) 1fr auto;
   gap: 24px;
-  align-items: center;
+  /* align-items: start permet aux 3 colonnes de partir du haut.
+     La date (col 1) et le side (col 3) compensent ensuite via padding-top
+     pour s'aligner au TITRE (col 2) et non au kind label au-dessus. */
+  align-items: start;
   width: 100%;
-  padding: 20px 0;
+  /* Padding latéral pour décoller la date du bord gauche et le side
+     du bord droit. Le trait noir de l'état ouvert reste collé au bord
+     (inset box-shadow sur .lg__ag) pour rester visuel. */
+  padding: 18px 24px;
   background: transparent;
   border: 0;
   text-align: left;
@@ -2564,31 +2625,32 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   color: var(--ink);
   transition: background 0.15s ease;
 }
-.lg__ag__head:hover { background: rgba(0,0,0,0.025); }
-/* État ouvert : zéro jaune. On marque l'état déplié avec un trait noir à
-   gauche + un fond gris très léger. La page Agenda reste 100% N&B. */
-.lg__ag.is-open { box-shadow: inset 3px 0 0 0 var(--ink); }
-.lg__ag.is-open .lg__ag__head { background: rgba(0,0,0,0.03); }
+.lg__ag__head:hover { background: transparent; }
+/* État ouvert : aucune surcharge visuelle (ni trait à gauche, ni fond).
+   La signature de l'état déplié se fait uniquement via le caret (+/−)
+   qui change et le panneau qui s'affiche en dessous. */
+.lg__ag.is-open .lg__ag__head { background: transparent; }
 
-/* DATE prominente à gauche — Geist sans, gros jour, mois+année en mono dessous */
-.lg__ag__date { display: flex; flex-direction: column; align-items: flex-start; }
-.lg__ag__day {
+/* DATE complète "Mercredi 15 avril 2026" — une seule ligne, lisible.
+   Le sans (Geist) reste cohérent avec le reste des textes du site.
+   On aligne le baseline de la date avec celui du titre (et non avec le
+   kind label au-dessus) en compensant par un padding-top égal à la hauteur
+   du kind label + son margin-bottom (~22px). */
+.lg__ag__date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-top: 22px;
+}
+.lg__ag__date__full {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(48px, 5vw, 80px);
-  line-height: 0.95;
-  letter-spacing: -0.03em;
+  font-size: clamp(15px, 1.4vw, 18px);
+  line-height: 1.25;
+  letter-spacing: -0.005em;
   color: var(--ink);
 }
-.lg__ag__month {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-top: 6px;
-  color: var(--ink);
-  opacity: 0.7;
-}
+.lg__ag.is-soon .lg__ag__date__full { color: var(--ink-3, rgba(0,0,0,0.55)); }
 
 /* MAIN : type (mono) + titre (Geist sans medium) */
 .lg__ag__main { min-width: 0; }
@@ -2610,13 +2672,15 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   color: var(--ink);
 }
 
-/* SIDE : pill statut + places + caret */
+/* SIDE : pill statut + places + caret.
+   Padding-top pour aligner avec le titre (skipper le kind label). */
 .lg__ag__side {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 6px;
   flex-shrink: 0;
+  padding-top: 22px;
 }
 .lg__ag__pill {
   font-family: var(--font-mono);
@@ -2632,11 +2696,13 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__ag__pill.is-cancel { color: #b03030; text-decoration: line-through; }
 .lg__ag__pill.is-soon { color: var(--ink-3, rgba(0,0,0,0.55)); }
 .lg__ag__places {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  /* Donnée (= texte), pas un label → on garde sans pour rester cohérent
+     avec le reste des textes du site. */
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
   color: var(--ink);
   opacity: 0.75;
-  letter-spacing: 0.04em;
 }
 .lg__ag__caret {
   font-family: var(--font-mono);
@@ -2650,9 +2716,10 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 
 /* PANEL — accordion qui se déroule sous la row */
 .lg__ag__panel {
-  padding: 4px 0 32px;
-  padding-left: 224px; /* aligné sur la 2e col (date col + gap) */
-  max-width: 800px;
+  padding: 4px 24px 32px;
+  /* Aligné sur la 2e col (date 260px + gap 24px) + padding gauche du head (24px) = 308px */
+  padding-left: 308px;
+  max-width: 900px;
   animation: lg-ag-slide 0.25s ease;
 }
 @keyframes lg-ag-slide {
@@ -2685,17 +2752,21 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   margin-bottom: 3px;
 }
 .lg__ag__pair__value {
-  font-family: var(--font-mono);
-  font-size: 12px;
+  /* Valeur (= contenu) → sans, comme le reste des textes du site.
+     Le label (.lg__ag__pair__label) reste en mono caps comme accent. */
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
   color: var(--ink);
 }
 .lg__ag__desc {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.6;
+  /* Description (= prose) → sans, aligné sur .lg__formation__prose. */
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
   color: var(--ink);
-  opacity: 0.85;
   margin: 0 0 22px;
+  max-width: 80ch;
 }
 .lg__ag__actions {
   display: flex;
@@ -2720,28 +2791,33 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__ag__btn--primary { background: var(--ink); color: var(--paper); font-weight: 600; }
 .lg__ag__btn--primary:hover { background: transparent; color: var(--ink); }
 
-/* ----- MOBILE — la grid se stack ----- */
+/* ----- MOBILE — la grid passe en stack vertical ----- */
 @media (max-width: 700px) {
   .lg__ag__head {
-    grid-template-columns: 80px 1fr;
-    gap: 14px;
+    /* La date est sur une ligne longue ("Mercredi 15 avril 2026"), pas
+       intéressante à mettre en colonne. On stack date au-dessus du titre. */
+    grid-template-columns: 1fr;
+    gap: 4px;
     padding: 16px 0;
   }
-  .lg__ag__day { font-size: 36px; }
-  .lg__ag__month { font-size: 9px; margin-top: 3px; }
+  .lg__ag__date__full { font-size: 13px; }
   .lg__ag__title { font-size: 16px; }
   .lg__ag__side {
     grid-column: 1 / -1;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding-left: 94px;
-    margin-top: 8px;
+    margin-top: 10px;
   }
   .lg__ag__caret { margin-top: 0; }
   .lg__ag__panel {
-    padding-left: 0;
-    padding-right: 0;
+    /* En mobile, on garde le même padding horizontal (16px) que la head */
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .lg__ag__head {
+    /* En mobile, padding horizontal réduit (16px au lieu de 24px) */
+    padding: 16px;
   }
 }
 .lg__agenda__head,
@@ -3125,7 +3201,8 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__approche__title {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(40px, 6vw, 96px);
+  /* Légèrement réduit (vs 40-96px) pour ne pas écraser la lede en dessous. */
+  font-size: clamp(36px, 5.2vw, 80px);
   line-height: 0.98;
   letter-spacing: -0.035em;
   margin: 0 0 40px;
@@ -3235,7 +3312,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 
 @media (max-width: 900px) {
   .lg__approche__list { gap: 28px; margin-top: 28px; }
-  .lg__approche__item dt { font-size: 19px; margin-bottom: 8px; }
+  .lg__approche__item dt { font-size: 18px; margin-bottom: 8px; }
 }
 
 /* ----- FINANCEMENT (layout Bildung : titre + 2 cols) ---------- */
@@ -3390,8 +3467,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__contact__info {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(22px, 3.4vw, 48px);
-  line-height: 1.08;
+  /* Légèrement réduit (vs 22-48px) — moins écrasant, plus respirant. */
+  font-size: clamp(18px, 2.8vw, 38px);
+  line-height: 1.12;
   letter-spacing: -0.02em;
   color: var(--ink);
   max-width: 24ch;
@@ -3556,7 +3634,7 @@ a.lg__partners__logo:hover {
 @media (max-width: 700px) {
   .lg__partners { padding: 28px 0 0; margin-top: 30px; }
   .lg__partners__logo { font-size: 15px; }
-  .lg__partners__logo--main { font-size: 26px; }
+  .lg__partners__logo--main { font-size: 24px; }
   .lg__partners__logo--img { height: 36px; }
   .lg__partners__logo--img img { max-width: 140px; }
   .lg__partners__list { gap: 20px 28px; }
@@ -3751,6 +3829,65 @@ a.lg__partners__logo:hover {
   margin-bottom: 40px;
   max-width: 60ch;
 }
+
+/* Badge "ÉLIGIBLE CPF" affiché en haut de l'overview d'une formation
+   certifiante. Visuellement distinct (couleur accent + brackets style
+   terminal) pour qu'on repère le statut CPF immédiatement. */
+.lg__detail__cpf-badge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--accent);
+  padding: 10px 14px;
+  margin-bottom: 28px;
+  border-radius: 2px;
+}
+.lg__detail__cpf-badge__main {
+  font-weight: 700;
+  white-space: nowrap;
+}
+.lg__detail__cpf-badge__rs {
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.lg__detail__cpf-badge__rs strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+.lg__detail__cpf-badge__link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.18s ease;
+}
+.lg__detail__cpf-badge__link:hover {
+  color: var(--accent);
+}
+@media (max-width: 720px) {
+  .lg__detail__cpf-badge {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+/* CTA Mon Compte Formation — variante du bouton primary pour faire
+   ressortir le financement CPF (le call-to-action principal pour les
+   formations RS éligibles). */
+.lg__btn--cpf {
+  /* On garde le look du primary mais avec une icône / signal subtil */
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
 .lg__detail__grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -3852,7 +3989,7 @@ a.lg__partners__logo:hover {
   .lg__splash { height: 80vh; min-height: 480px; }
   .lg__splash .lg__hero__griot__wrap { width: 400px; height: 400px; }
   .lg__splash .matrix-griot { font-size: 3px; }
-  .lg__splash .lg__hero__griot__ring text { font-size: 30px; letter-spacing: 0.04em; }
+  .lg__splash .lg__hero__griot__ring text { font-size: 32px; letter-spacing: 0.04em; }
 }
 
 @media (max-width: 600px) {
@@ -3874,4 +4011,152 @@ a.lg__partners__logo:hover {
   .lg__splash .lg__hero__griot__wrap { width: 320px; height: 320px; }
   .lg__splash .matrix-griot { font-size: 2.5px; }
   .lg__splash .lg__hero__griot__ring text { font-size: 24px; letter-spacing: 0.04em; }
+}
+
+/* ============================================================
+   PAGE RESSOURCE — détail (inspiration The Futur, palette Griothèque)
+   ============================================================ */
+.lg__resource {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-6) var(--space-20);
+}
+.lg__resource__back {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  text-decoration: none;
+  margin-bottom: var(--space-8);
+  transition: color 0.15s;
+}
+.lg__resource__back:hover { color: var(--ink); }
+
+.lg__resource__grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: var(--space-12);
+  align-items: start;
+}
+
+/* ---- Colonne média (sticky) ---- */
+.lg__resource__aside { position: sticky; top: var(--space-6); }
+.lg__resource__cover {
+  border: 1px solid var(--rule);
+  background: var(--paper-2);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  margin-bottom: var(--space-4);
+}
+.lg__resource__cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lg__resource__cover--ph {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.2em;
+  color: var(--ink-3);
+}
+.lg__resource__card {
+  border: 1px solid var(--ink);
+  padding: var(--space-5);
+  background: var(--paper);
+}
+.lg__resource__card__meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+  margin: 0 0 var(--space-2);
+}
+.lg__resource__card__price {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 var(--space-4);
+}
+.lg__resource__cta { width: 100%; justify-content: center; text-align: center; }
+.lg__resource__card__note {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--ink-3);
+  margin: var(--space-3) 0 0;
+  line-height: 1.5;
+}
+
+/* ---- Colonne contenu ---- */
+.lg__resource__kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  background: var(--ink);
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  margin: 0 0 var(--space-4);
+}
+.lg__resource__title {
+  font-family: var(--font-sans);
+  font-size: var(--text-5xl);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--ink);
+  margin: 0 0 var(--space-4);
+}
+.lg__resource__subtitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-xl);
+  line-height: 1.4;
+  color: var(--ink-2);
+  margin: 0 0 var(--space-4);
+}
+.lg__resource__author {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  margin: 0 0 var(--space-8);
+}
+.lg__resource__desc {
+  font-family: var(--font-sans);
+  font-size: var(--text-lg);
+  line-height: 1.65;
+  color: var(--ink-2);
+  margin-bottom: var(--space-10);
+}
+.lg__resource__desc p { margin: 0 0 var(--space-4); }
+.lg__resource__h2 {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: var(--space-2);
+  margin: 0 0 var(--space-5);
+}
+.lg__resource__inside ul { list-style: none; padding: 0; margin: 0; }
+.lg__resource__inside li {
+  font-family: var(--font-sans);
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: var(--ink-2);
+  padding: var(--space-3) 0 var(--space-3) var(--space-6);
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+.lg__resource__inside li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+
+@media (max-width: 900px) {
+  .lg__resource { padding: var(--space-6) var(--space-4) var(--space-15); }
+  .lg__resource__grid { grid-template-columns: 1fr; gap: var(--space-8); }
+  .lg__resource__aside { position: static; max-width: 360px; }
+  .lg__resource__title { font-size: var(--text-4xl); }
 }

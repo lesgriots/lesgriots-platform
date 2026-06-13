@@ -3,6 +3,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Type from "./Type";
+import FileInput from "./FileInput";
 
 function slugify(s) {
   return (s || "")
@@ -188,6 +189,18 @@ function FieldRenderer({ field, value, onChange, related }) {
         </select>
       );
     }
+    case "file":
+      // Upload de fichier (PDF, image…) avec progression + fallback URL.
+      // Le `subdir` permet de ranger par type (ex: "ressources" → img/ressources/).
+      return (
+        <FileInput
+          value={v}
+          onChange={onChange}
+          accept={field.accept}
+          subdir={field.subdir}
+          placeholder={field.placeholder}
+        />
+      );
     case "number":
       return <input type="number" value={v} onChange={(e) => onChange(Number(e.target.value))} />;
     case "date":

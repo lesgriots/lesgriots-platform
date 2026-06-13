@@ -48,6 +48,9 @@ function formatProject(p, indent = "  ") {
   // Comme ça le site n'a jamais d'image cassée ni d'écran noir.
   lines.push(`${indent}  cover: ${s(safeCover(p))},`);
   if (p.thumbVideo) lines.push(`${indent}  thumbVideo: ${s(p.thumbVideo)},`);
+  if (typeof p.thumbStart === "number" && p.thumbStart > 0) {
+    lines.push(`${indent}  thumbStart: ${p.thumbStart},`);
+  }
   lines.push(`${indent}  strip: ${JSON.stringify(p.strip || [])},`);
   // Resources : on préserve toutes les clés (y compris duration, etc.)
   if (p.resources && p.resources.length) {

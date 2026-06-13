@@ -365,9 +365,9 @@
       "evaluation": null,
       "accessibility": null,
       "next": "—",
-      "available": true,
+      "available": false,
       "position": 2,
-      "updated_at": "2026-05-25T10:37:44.851Z",
+      "updated_at": "2026-05-25T17:21:03.826Z",
       "created_at": "2026-05-25T10:37:44.851Z"
     },
     {
@@ -845,7 +845,7 @@
       "title": "LES CINQ QUESTIONS DE LA STRATÉGIE DE CONTENU",
       "type": "article",
       "format": "LECTURE · 8 MIN",
-      "href": "#",
+      "href": "img/ressources/cinq-questions-strategie-contenu.pdf",
       "available": true,
       "position": 0,
       "updated_at": "2026-05-25T10:37:44.934Z",
@@ -856,8 +856,8 @@
       "title": "PLATEFORME DE MARQUE — TEMPLATE",
       "type": "template",
       "format": "FIGMA / PDF",
-      "href": "#",
-      "available": false,
+      "href": "img/ressources/plateforme-marque-template.pdf",
+      "available": true,
       "position": 1,
       "updated_at": "2026-05-25T10:37:44.937Z",
       "created_at": "2026-05-25T10:37:44.937Z"
@@ -867,8 +867,8 @@
       "title": "GUIDE — FILMER AU TÉLÉPHONE EN INTÉRIEUR",
       "type": "guide",
       "format": "PDF · 12 PAGES",
-      "href": "#",
-      "available": false,
+      "href": "img/ressources/guide-filmer-au-telephone.pdf",
+      "available": true,
       "position": 2,
       "updated_at": "2026-05-25T10:37:44.941Z",
       "created_at": "2026-05-25T10:37:44.941Z"
@@ -878,14 +878,24 @@
       "title": "TENIR UNE CADENCE ÉDITORIALE RÉALISTE",
       "type": "article",
       "format": "LECTURE · 6 MIN",
-      "href": "#",
-      "available": false,
+      "href": "img/ressources/tenir-cadence-editoriale.pdf",
+      "available": true,
       "position": 3,
       "updated_at": "2026-05-25T10:37:44.944Z",
       "created_at": "2026-05-25T10:37:44.944Z"
     }
   ],
-  "leads": [],
+  "leads": [
+    {
+      "id": "lead-mplcmmp1-kv13",
+      "email": "mike@mike.fr",
+      "name": "Mike",
+      "resource_id": "res-cinq-questions",
+      "consent": true,
+      "source": "site",
+      "created_at": "2026-05-25T15:16:09.445Z"
+    }
+  ],
   "active_pages": {
     "home": true,
     "approche": true,
@@ -893,7 +903,7 @@
     "workshops": false,
     "agenda": true,
     "financement": false,
-    "ressources": false,
+    "ressources": true,
     "cgv": true,
     "contact": true
   },

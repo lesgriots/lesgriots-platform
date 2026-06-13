@@ -70,9 +70,11 @@ const DICT = {
   "filt.campaign": { en: "CAMPAIGN",     fr: "CAMPAGNE" },
   "filt.music":    { en: "MUSIC VIDEO",  fr: "CLIP" },
 
-  "viewer.close":   { en: "CLOSE",       fr: "FERMER" },
-  "viewer.info":    { en: "INFORMATION", fr: "INFORMATIONS" },
-  "viewer.project": { en: "PROJECT",     fr: "PROJET" },
+  "viewer.close":    { en: "CLOSE",       fr: "FERMER" },
+  "viewer.info":     { en: "INFORMATION", fr: "INFORMATIONS" },
+  "viewer.project":  { en: "PROJECT",     fr: "PROJET" },
+  "viewer.overview": { en: "OVERVIEW",    fr: "VUE D'ENSEMBLE" },
+  "viewer.gallery":  { en: "GALLERY",     fr: "GALERIE" },
 
   "about.intro": {
     en: [

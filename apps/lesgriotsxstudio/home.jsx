@@ -24,6 +24,13 @@ function aspectFromFirstResource(proj) {
   return null;
 }
 
+// clampCellAspect RETIRÉE : on conserve désormais l'aspect réel du
+// contenu (cover image / vidéo) tel qu'il est, sans truncate. Le
+// clamping précédent imposait 3:4 sur les verticaux et 16:9 sur les
+// panoramiques, ce qui croppait le contenu via object-fit: cover et
+// faisait disparaître des parties d'image. Plus de clamp → la cell
+// prend la hauteur exacte qu'il faut pour afficher le cover entier.
+
 function useScatter(mode) {
   return useMemoH(() => {
     const rng = mulberry32(11);
@@ -42,14 +49,26 @@ function useScatter(mode) {
         else if (sBucket < 0.80) sizeClass = "md";
         else                     sizeClass = "lg";
       }
+      // Override per-project depuis data.jsx (proj.sizeClass ou
+      // proj.sizeClassLarge selon le mode actif). Permet de forcer
+      // certains projets à une taille précise quel que soit le rng.
+      const sizeOverride = isLarge
+        ? (proj.sizeClassLarge || proj.sizeClass)
+        : proj.sizeClass;
+      if (sizeOverride === "sm" || sizeOverride === "md" || sizeOverride === "lg") {
+        sizeClass = sizeOverride;
+      }
       // Aspect derived from the first resource of the project if available.
       // Falls back to a deterministic random for legacy projects.
       const explicitAspect = aspectFromFirstResource(proj);
       let aspect;          // legacy class "portrait" | "landscape"
       let aspectStyle;     // inline aspect-ratio if explicit
       if (explicitAspect) {
+        // Aspect ratio annoncé sur la première resource — utilisé comme
+        // fallback pré-load. Le vrai aspect (cover image native) écrase
+        // ensuite via recordAspect / realAspects.
         aspectStyle = explicitAspect;
-        const parts = explicitAspect.split("/").map((p) => parseFloat(p));
+        const parts = aspectStyle.split("/").map((p) => parseFloat(p));
         const ratio = parts[0] / parts[1];
         aspect = ratio < 1 ? "portrait" : "landscape";
       } else {
@@ -84,6 +103,9 @@ function HomeView({ onOpenProject, onNavigate }) {
   const [realAspects, setRealAspects] = useStateH({});
   function recordAspect(projId, w, h) {
     if (!w || !h) return;
+    // Aspect réel de l'image / vidéo, SANS clamp — la cellule prend
+    // les vraies proportions du media pour qu'il s'affiche entier
+    // (pas de crop via object-fit: cover si l'aspect cell ≠ aspect img).
     setRealAspects((m) => (m[projId] ? m : { ...m, [projId]: `${w} / ${h}` }));
   }
   // Only compute scatter cells for grid modes (skip in INDEX mode)
@@ -118,26 +140,28 @@ function HomeView({ onOpenProject, onNavigate }) {
       <div className="ahome__griot" aria-hidden="true">
         <MatrixGriot />
       </div>
-      {/* Top corners */}
-      <div className="ahome__top">
-        <div className="ahome__brand">a.cre<sup>®</sup></div>
-      </div>
+      {/* Top corners — brand mark "a.cre®" retiré (legacy, redondant
+          avec le sticker .idcard du top-left + visible pendant le boot
+          quand le sticker est caché). */}
 
       {/* Size toggle — bottom-left, terminal style.
-          On mobile we only expose THUMB (FRAME and DATA are desktop-only). */}
+          On mobile we only expose SMALL (LARGE and INDEX are desktop-only).
+          Les valeurs internes ("compact" / "large" / "index") sont
+          conservées pour ne pas casser useScatter et HomeIndex — seul
+          le label visible change. */}
       <div className="ahome__size">
         <button
           className={mode === "compact" ? "is-active" : ""}
-          onClick={() => setMode("compact")}>THUMB</button>
+          onClick={() => setMode("compact")}>SMALL</button>
         <span className="sep ahome__size--desktop">/</span>
         <button
           className={"ahome__size--desktop " + (mode === "large" ? "is-active" : "")}
-          onClick={() => setMode("large")}>FRAME</button>
+          onClick={() => setMode("large")}>LARGE</button>
         <span className="sep ahome__size--desktop">/</span>
         <button
           className={"ahome__size--desktop " + (mode === "index" ? "is-active" : "")}
           onClick={() => setMode("index")}
-          title="Data view">DATA</button>
+          title="Index view">INDEX</button>
       </div>
 
       {isIndex ? (
@@ -148,7 +172,7 @@ function HomeView({ onOpenProject, onNavigate }) {
           className={"ahome__grid" + (hoveredKey ? " has-hover" : "")}
           onMouseLeave={() => { setVideoHover(null); setHoveredKey(null); }}
         >
-          {cells.map((cell) => {
+          {cells.map((cell, cellIdx) => {
             // If the project has a `thumbVideo` (a tiny pre-rendered ~5s teaser),
             // use it as the cell preview. Otherwise fall back to the full
             // first resource if it's a real video file.
@@ -158,13 +182,26 @@ function HomeView({ onOpenProject, onNavigate }) {
               && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(first.src || "");
             const cellVideo = cell.proj.thumbVideo
               || (firstIsRealVideo ? first.src : null);
+            // Aspect orientation calculée dynamiquement : on suit l'aspect
+            // RÉELLEMENT détecté au load (realAspects) plutôt que le hint
+            // posé au build (cell.aspect) qui peut être incorrect si la
+            // resource.aspect ne reflète pas le cover affiché.
+            const detected = realAspects[cell.proj.id];
+            let dynAspect = cell.aspect;
+            if (typeof detected === "string" && detected.includes("/")) {
+              const parts = detected.split("/").map((p) => parseFloat(p));
+              if (parts.length === 2 && parts[0] && parts[1]) {
+                dynAspect = (parts[0] / parts[1] < 1) ? "portrait" : "landscape";
+              }
+            }
             return (
             <button
               key={cell.key}
               className={
                 "ahome__cell" +
                 ` ahome__cell--${cell.sizeClass}` +
-                ` ahome__cell--${cell.aspect}` +
+                ` ahome__cell--${dynAspect}` +
+                ` ahome__cell--p-${cell.proj.id}` +
                 (cellVideo ? " ahome__cell--video" : "") +
                 (hoveredKey === cell.key ? " is-hovered" : "")
               }
@@ -176,6 +213,10 @@ function HomeView({ onOpenProject, onNavigate }) {
                 // mobile pour le côté "destructuré" sans casser le drag JS).
                 "--jx": `${cell.dx}px`,
                 "--jy": `${cell.dy}px`,
+                // Delay d'apparition staggered — chaque cell entre avec un
+                // décalage de 35ms × son index. Premières cells appear
+                // immédiat, dernières ~1s après. Effet boot-sequence.
+                "--enter-delay": `${cellIdx * 35}ms`,
                 transform: `translate(var(--jx), var(--jy))`,
                 // Priorité au ratio réel détecté au load > ratio annoncé
                 // sur la première resource > rien (laisse la classe CSS).
@@ -226,26 +267,83 @@ function HomeView({ onOpenProject, onNavigate }) {
                   </span>
                 </span>
               )}
-              {cellVideo ? (
-                <video
-                  src={cellVideo}
-                  poster={cell.proj.cover}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  /* Safety fallback in case the source is the full video
-                     rather than a pre-rendered thumb: cap at 5s. */
-                  onTimeUpdate={(e) => {
-                    if (!cell.proj.thumbVideo && e.currentTarget.currentTime >= 5) {
-                      e.currentTarget.currentTime = 0;
-                    }
-                  }}
-                  /* Aspect-ratio dynamique : on lit la dimension native
-                     une fois la métadata vidéo chargée. */
-                  onLoadedMetadata={(e) => recordAspect(cell.proj.id, e.currentTarget.videoWidth, e.currentTarget.videoHeight)}
-                />
-              ) : (
+              {cellVideo ? (() => {
+                // Détection YouTube : si cellVideo est une URL YouTube, on
+                // construit un iframe avec start/end/loop pour jouer un
+                // extrait de 4s à partir de thumbStart. Lazy-load : iframe
+                // créée uniquement quand la cellule est hover, sinon on
+                // affiche juste la cover image (économie de bande passante,
+                // pas de 10+ iframes YouTube qui se chargent au boot).
+                const ytMatch = cellVideo.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([\w-]{6,})/i);
+                const isHovered = hoveredKey === cell.key;
+                if (ytMatch) {
+                  const id = ytMatch[1];
+                  const start = Math.max(0, Math.floor(cell.proj.thumbStart || 0));
+                  const end = start + 4;
+                  if (!isHovered) {
+                    // État repos : on tente la thumbnail YouTube directement
+                    // (i.ytimg.com/vi/ID/maxresdefault.jpg). Si elle 404 ou
+                    // est introuvable, fallback automatique sur la cover du
+                    // projet (placeholder SVG si rien d'autre). Comme ça la
+                    // grille montre déjà un visuel pertinent au lieu de
+                    // l'écran jaune "NO COVER YET". */}
+                    const ytThumb = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+                    return (
+                      <img
+                        src={ytThumb}
+                        alt={cell.proj.name}
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.src = cell.proj.cover; }}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    );
+                  }
+                  // Hover : embed YouTube avec extrait 4s loopé. controls=0
+                  // + modestbranding=1 pour minimum d'UI YouTube visible.
+                  // playlist=ID est requis pour que loop=1 fonctionne.
+                  const embedUrl =
+                    `https://www.youtube.com/embed/${id}` +
+                    `?autoplay=1&mute=1&controls=0&modestbranding=1` +
+                    `&rel=0&iv_load_policy=3&showinfo=0&disablekb=1` +
+                    `&playsinline=1&loop=1&playlist=${id}` +
+                    `&start=${start}&end=${end}`;
+                  return (
+                    <iframe
+                      src={embedUrl}
+                      title={cell.proj.name}
+                      frameBorder="0"
+                      allow="autoplay; encrypted-media"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        border: 0,
+                        pointerEvents: "none", // les clics passent à la cell parent (onClick → openProject)
+                      }}
+                    />
+                  );
+                }
+                // Cas standard : vidéo self-hostée .mp4
+                return (
+                  <video
+                    src={cellVideo}
+                    poster={cell.proj.cover}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    /* Safety fallback in case the source is the full video
+                       rather than a pre-rendered thumb: cap at 5s. */
+                    onTimeUpdate={(e) => {
+                      if (!cell.proj.thumbVideo && e.currentTarget.currentTime >= 5) {
+                        e.currentTarget.currentTime = 0;
+                      }
+                    }}
+                    /* Aspect-ratio dynamique : on lit la dimension native
+                       une fois la métadata vidéo chargée. */
+                    onLoadedMetadata={(e) => recordAspect(cell.proj.id, e.currentTarget.videoWidth, e.currentTarget.videoHeight)}
+                  />
+                );
+              })() : (
                 <img
                   src={cell.proj.cover}
                   alt=""
@@ -339,6 +437,13 @@ function HomeMobile({ onOpenProject }) {
           && p.resources[0].type === "video"
           && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(p.resources[0].src || "");
         const insertBrand = i > 0 && i % BRAND_EVERY === 0;
+        // Détection thumbnail YouTube : si thumbVideo est une URL YouTube,
+        // on extrait l'ID et on utilise https://i.ytimg.com/vi/ID/maxresdefault.jpg
+        // comme image cover (mobile = pas de hover, donc on montre la
+        // miniature YT statique). Sinon, on prend le cover du projet.
+        const ytMatch = (p.thumbVideo || "").match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([\w-]{6,})/i);
+        const ytThumb = ytMatch ? `https://i.ytimg.com/vi/${ytMatch[1]}/maxresdefault.jpg` : null;
+        const imgSrc = ytThumb || p.cover;
         return (
           <React.Fragment key={p.id}>
             {insertBrand && (
@@ -351,14 +456,14 @@ function HomeMobile({ onOpenProject }) {
               {isFirstRealVideo ? (
                 <video
                   src={p.resources[0].src}
-                  poster={p.cover}
+                  poster={imgSrc}
                   autoPlay
                   muted
                   loop
                   playsInline
                 />
               ) : (
-                <img src={p.cover} alt={p.name} loading="lazy" />
+                <img src={imgSrc} alt={p.name} loading="lazy" />
               )}
               {/* icône caméra retirée — gâchait l'esthétique des cellules */}
             </button>

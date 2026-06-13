@@ -102,9 +102,19 @@ html, body, html * {
   cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' shape-rendering='crispEdges'><polygon points='1,1 1,17 5,13 8,20 11,19 8,12 14,12' fill='black' stroke='%238a7a20' stroke-width='1' stroke-linejoin='miter'/></svg>") 1 1, default;
 }
 /* Main pointée pixel art noire contour jaune pour tout ce qui est cliquable.
-   Hotspot à 8,1 (la pointe du doigt en haut).                          */
+   Hotspot à 8,1 (la pointe du doigt en haut).
+   /!\ React lie les handlers via addEventListener — donc le sélecteur
+   `[onclick]` ne capture PAS les onClick JSX. Pour les <video> et <img>
+   du viewer (cliquables pour play/pause), on les target explicitement
+   ci-dessous. */
 a, button, [role="button"], label, summary, select,
-.is-clickable, [onclick] {
+.is-clickable, [onclick],
+.viewer__media-wrap video,
+.viewer__media-wrap img,
+.ahome__cell img,
+.ahome__cell video,
+.viewer__thumb img,
+.viewer__thumb video {
   cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' shape-rendering='crispEdges'><path d='M8 1 L11 1 L11 9 L13 9 L13 7 L15 7 L15 9 L17 9 L17 11 L19 11 L19 19 L7 19 L7 14 L5 14 L5 11 L8 11 Z' fill='black' stroke='%238a7a20' stroke-width='1' stroke-linejoin='miter'/></svg>") 8 1, pointer;
 }
 /* Les inputs gardent un curseur texte natif — plus pratique pour saisir */
@@ -128,7 +138,11 @@ body::before {
 }
 
 a { color: inherit; text-decoration: none; }
-button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; padding: 0; }
+/* /!\ cursor: pointer retiré ici — la règle plus haut (a, button, ...)
+   applique le SVG inline custom mustard. Ce reset générique du button
+   venait écraser le cursor mustard par spécificité identique + ordre
+   source plus bas. */
+button { font: inherit; color: inherit; background: none; border: none; padding: 0; }
 
 .app { position: relative; min-height: 100vh; width: 100%; }
 
@@ -146,13 +160,63 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   background: transparent;
   border: 0;
   padding: 0;
+  outline: none; /* kill le focus ring par défaut du button */
+  -webkit-tap-highlight-color: transparent; /* kill le flash bleu mobile */
   transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
   filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, 0.35));
+  /* PAR DÉFAUT le sticker est masqué — pas de trace à son emplacement
+     pendant le boot, pas de flash au premier render. Il devient
+     display:block UNIQUEMENT quand body.booted est posée (cf. App.jsx
+     useLayoutEffect → appliqué avant le premier paint).
+     Animation slide-in déclenchée à l'apparition (animation: both
+     garde l'état final si on quitte la page). */
+  display: none;
+}
+body.booted .idcard {
+  display: block;
+  animation: idcard-slide-in 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes idcard-slide-in {
+  from {
+    transform: translateX(calc(-100% - 14px));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 .idcard:hover { transform: translate(-2px, -2px); }
 .idcard__img { display: block; width: 100%; height: auto; }
 /* Hide the sticker on the ecosystem page */
 body:has(.eco3) .idcard { display: none !important; }
+
+/* Sticker du boot loader — même look que .idcard (sticker mustard fixé
+   en haut à gauche). On déclare la base ICI plutôt qu'à côté du reste
+   du CSS boot-matrix (plus bas dans le fichier) parce que les @media
+   queries qui le repassent à 180px arrivent juste après, et qu'on a
+   besoin de cette base AVANT pour que la cascade fonctionne (même
+   spécificité = la dernière déclaration gagne). */
+.boot-matrix__sticker {
+  position: fixed;
+  left: 14px;
+  top: 14px;
+  width: 280px;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(2px 4px 0 rgba(0,0,0,0.5));
+  z-index: 1;
+}
+
+/* Sticker mobile : on bascule à 180px dès que le viewer passe en mobile
+   (≤1200px), pour que le boot ne paraisse pas démesuré sur tablette
+   paysage / petit laptop par rapport au sticker de la page work une
+   fois entré dans le site. Le coin reste à 14px ici, on resserre à
+   10px seulement sur les vrais petits écrans (≤760px, plus bas). */
+@media (max-width: 1200px) {
+  .idcard,
+  .boot-matrix__sticker { width: 180px; }
+}
 
 /* ============================================================
    Boot loader — CRT terminal screen
@@ -380,6 +444,14 @@ body:has(.eco3) .idcard { display: none !important; }
   top: 22px;
   right: 28px;
   z-index: 95;
+  /* /!\ Le menubar enfant .menubar__term a min-width: 280px et reste dans
+     le flow (juste opacity: 0 / translateY) quand fermé → la div .menubar
+     est étirée à 280px de large et bouffe les clics dans cette zone
+     fantôme (notamment les tap zones edge-next à droite sur mobile).
+     Solution : pointer-events: none sur le conteneur, on ré-active
+     localement sur les enfants vraiment interactifs (toggle, term ouvert,
+     lang switch, items du menu). */
+  pointer-events: none;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -409,14 +481,16 @@ body:has(.eco3) .idcard { display: none !important; }
   letter-spacing: 0.12em;
 }
 .menubar__lang button {
-  color: var(--yellow);
-  opacity: 0.6;
+  /* Mustard tres sombre par défaut (ink-dim) ; active/hover passe en
+     mustard sombre (ink). Plus de jaune vif. */
+  color: var(--ink-dim);
+  opacity: 1;
   padding: 4px 2px;
   transition: color 0.18s ease, opacity 0.18s ease;
 }
-.menubar__lang button.is-active { color: var(--yellow); opacity: 1; }
-.menubar__lang button:hover { color: var(--yellow); opacity: 1; }
-.menubar__lang .sep { color: var(--yellow); opacity: 0.55; }
+.menubar__lang button.is-active { color: var(--ink); opacity: 1; }
+.menubar__lang button:hover { color: var(--ink); opacity: 1; }
+.menubar__lang .sep { color: var(--ink-dim); opacity: 1; }
 
 .menubar__mode {
   display: inline-flex;
@@ -551,15 +625,71 @@ body:has(.eco3) .idcard { display: none !important; }
   color: rgba(138, 122, 32, 0.2);
 }
 .idx-term__row.is-active {
-  border-left-color: var(--yellow);
-  background: rgba(246, 226, 28, 0.04);
+  border-left-color: var(--ink);
+  background: rgba(138, 122, 32, 0.06);
 }
 .idx-term__row.is-active,
-.idx-term__row.is-active .c-name { color: var(--yellow); }
+.idx-term__row.is-active .c-name { color: var(--ink); }
 .idx-term__row.is-active .c-num,
 .idx-term__row.is-active .c-date,
 .idx-term__row.is-active .c-client,
 .idx-term__row.is-active .c-svc { color: var(--ink); }
+
+/* Variante INFO — pour l'overlay détails d'un projet (viewer InfoOverlay).
+   Bloc centré horizontalement ET verticalement. On override le height: 100vh
+   et l'align-items: flex-start de la version Work pour que le bloc se
+   compacte autour de son contenu et se laisse centrer par le parent
+   .infos__inner (qui a justify-content: center). */
+.idx-term--info {
+  max-width: 800px;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  padding: 0;
+  align-items: center;
+  text-align: center;
+}
+.idx-term--info .idx-term__inner {
+  align-items: center;
+  max-height: none;
+  overflow: visible;
+}
+.idx-term--info .idx-term__cmd,
+.idx-term--info .idx-term__rows { text-align: center; }
+.idx-term--info .idx-term__rows {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+.idx-term__row--info {
+  grid-template-columns:
+    34px                          /* 01 */
+    minmax(180px, max-content)    /* LABEL (CLIENT, YEAR, ...) */
+    minmax(220px, 1fr);           /* VALEUR */
+  cursor: default;
+  /* Justifier le contenu de chaque cellule à gauche pour garder la grille
+     lisible, mais le bloc entier reste centré dans la page. */
+  text-align: left;
+}
+.idx-term__row--info .c-label {
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.idx-term__row--info .c-value {
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+/* En mode info, on désactive le highlight au hover (rows pas cliquables). */
+.idx-term--info .idx-term__rows:hover .idx-term__row--info,
+.idx-term--info .idx-term__rows:hover .idx-term__row--info .c-label,
+.idx-term--info .idx-term__rows:hover .idx-term__row--info .c-value,
+.idx-term--info .idx-term__rows:hover .idx-term__row--info .c-num {
+  color: inherit;
+}
 
 /* Blinking caret at the bottom prompt */
 .idx-term .blink {
@@ -767,6 +897,17 @@ body:has(.eco3) .idcard { display: none !important; }
   gap: 10px;
   padding: 4px 0;
   color: var(--ink);
+  /* Ré-activation des clics sur le toggle (le parent .menubar a
+     pointer-events: none pour ne pas bouffer les clics dans sa zone
+     fantôme à droite). */
+  pointer-events: auto;
+}
+/* Ré-activation des clics sur le switch de langue + le terminal du menu
+   (quand ouvert). Le terminal fermé reste pointer-events: none via la
+   règle plus bas, donc pas de double-capture en zone fantôme. */
+.menubar__lang,
+.menubar.open .menubar__term {
+  pointer-events: auto;
 }
 .menubar__icon {
   display: inline-flex;
@@ -784,25 +925,37 @@ body:has(.eco3) .idcard { display: none !important; }
 .menubar.open .menubar__icon span:nth-child(2) { opacity: 0; }
 .menubar.open .menubar__icon span:nth-child(3) { transform: translate(0, -4.4px) rotate(-45deg); }
 
-/* Mini terminal window that wraps the menu items when MENU is open */
+/* SIDEBAR latérale du menu (desktop). Position fixed à droite, full
+   height, slide-in depuis la droite. Garde l'esthétique terminal
+   (dots + title bar) en haut.
+   /!\ Sur mobile (≤1200px), un @media plus bas override complètement
+   ces règles pour passer en fullscreen split avec backdrop-blur. */
 .menubar__term {
-  margin-top: 14px;
-  min-width: 280px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 340px;
   background: var(--bg);
-  border: 1px solid var(--rule);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6),
-              0 0 0 1px rgba(246, 226, 28, 0.04) inset;
-  opacity: 0;
-  transform: translateY(-6px) scale(0.98);
-  transform-origin: top right;
+  /* Plus de border-left jaune ni d'inset jaune — sidebar clean,
+     délimitée juste par le bg solide vs le reste de la page. */
+  border-left: 0;
+  box-shadow: -16px 0 40px rgba(0, 0, 0, 0.55);
+  opacity: 1;
+  transform: translateX(100%);
   pointer-events: none;
-  transition: opacity 0.22s ease, transform 0.22s ease;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  z-index: 95;
 }
 .menubar.open .menubar__term {
-  opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translateX(0);
   pointer-events: auto;
 }
+/* Pas de blur du contenu derrière sur desktop — la page reste nette,
+   seule la sidebar slide par-dessus. Le blur reste en mobile (override
+   plus bas dans @media (max-width: 1200px)). */
 .menubar__term__bar {
   display: flex;
   align-items: center;
@@ -844,28 +997,257 @@ body:has(.eco3) .idcard { display: none !important; }
 .menubar__term__x:hover { color: var(--yellow); }
 
 .menubar__items {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0;
-  padding: 6px 12px 10px;
+  padding: 18px 28px 28px;
+  flex: 1; /* prend toute la hauteur dispo sous la term bar */
 }
 .menubar__items button {
   display: flex;
   justify-content: flex-start;
   align-items: baseline;
   gap: 10px;
-  padding: 8px 0;
+  /* Padding compact pour resserer les items. Padding-left 14px réserve
+     la place pour le border-left de 2px qui apparaît au hover. */
+  padding: 6px 12px 6px 14px;
+  /* Même couleur et même taille que le bouton MENU dans le topline
+     (mustard var(--ink), 12px mono, letter-spacing 0.12em). */
   color: var(--ink);
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  border-left: 2px solid transparent;
+  background: transparent;
+  transition: color 0.18s ease,
+              border-color 0.18s ease,
+              background 0.18s ease,
+              opacity 0.18s ease;
+  text-align: left;
+  opacity: 0.85;
 }
-.menubar__items button.active { color: var(--yellow); }
+/* Hover UNIQUEMENT : effet identique à .idx-term__row.is-active de
+   la vue INDEX — mustard sombre partout (plus de jaune vif). */
+.menubar__items button:hover {
+  opacity: 1;
+  color: var(--ink);
+  border-left-color: var(--ink);
+  background: rgba(138, 122, 32, 0.06);
+}
+.menubar__items button:hover .prompt {
+  color: var(--ink);
+  opacity: 1;
+}
+/* État ACTIVE (page courante) : juste mustard à pleine opacité, pas
+   de jaune, pas de border, pas de background. C'est subtil mais
+   suffisant pour différencier la page courante des autres. */
+.menubar__items button.active {
+  opacity: 1;
+  color: var(--ink);
+}
+.menubar__items button.active .prompt {
+  color: var(--ink);
+  opacity: 1;
+}
+/* Effet INDEX view : quand on hover la liste, les items non-hover
+   se dim — SAUF l'active qui reste en mustard pleine opacité. */
+.menubar__items:hover button:not(:hover):not(.active) {
+  opacity: 0.3;
+}
+.menubar__items:hover button:not(:hover):not(.active) .prompt {
+  opacity: 0.2;
+}
 .menubar__items button .prompt {
-  color: var(--yellow);
+  /* Prompt > en ink aussi (plus en yellow) pour rester cohérent avec
+     la couleur du bouton MENU. */
+  color: var(--ink);
   font-weight: 600;
+  opacity: 0.6;
 }
-.menubar__items .voir { color: var(--ink-dim); margin-left: auto; }
+.menubar__items .voir {
+  color: var(--ink);
+  opacity: 0.45;
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+/* Switch de langue dupliqué pour le menu mobile : masqué par défaut
+   (desktop). Le @media plus bas l'affiche en mobile et masque celui
+   du topline. */
+.menubar__lang--in-term { display: none; }
+
+/* ============================================================
+   Menu mobile — fullscreen overlay style ACRE Creative
+   Nav items alignés à gauche en colonne, [X] close en haut à droite,
+   on garde tout le délire terminal (mono, brackets, prompt >, cascade
+   typewriter) mais sans la term bar dots + ~ menu.sh qui ne servent
+   que sur le panel desktop compact.
+   ============================================================ */
+@media (max-width: 1200px) {
+  /* Menubar passe en fullscreen au lieu d'être un panel compact en
+     haut à droite. Le topline (lang switch + bouton MENU) reste en
+     haut à droite quand le menu est fermé. */
+  .menubar {
+    top: 14px;
+    right: 16px;
+  }
+  /* Quand le menu est ouvert, le term devient un overlay plein viewport
+     MAIS visuellement scindé en deux : moitié haute = bg solide
+     (les items + le close [X]), moitié basse = transparente avec
+     backdrop-filter blur → la page derrière (work grid, viewer, etc.)
+     transparaît floutée façon glassmorphism. */
+  .menubar.open .menubar__term {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    margin: 0;
+    min-width: 0;
+    border: none;
+    box-shadow: none;
+    /* /!\ transform: none !important — même un transform identité
+       (translateY(0) scale(1)) crée un stacking context qui peut
+       casser backdrop-filter sur certaines pages (viewer, eco avec
+       leurs propres transforms). On annule pour que le blur capte
+       toujours le contenu derrière. */
+    transform: none !important;
+    /* will-change pour pousser Safari iOS à composer le backdrop-filter
+       sur le GPU et le rendre correctement sur toutes les pages. */
+    will-change: backdrop-filter;
+    isolation: auto;
+    /* Gradient noir solide sur la moitié haute → transparent sur la
+       moitié basse. La moitié basse laisse voir le contenu de la page
+       derrière (qui est lui-même blurré via filter:blur sur
+       body.menu-open). On utilise #000 et non var(--bg) (mustard
+       sombre) pour avoir un fond vraiment NOIR, pas grisé. */
+    background: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 50%,
+      transparent 50%,
+      transparent 100%
+    );
+    /* Padding global supprimé : la term bar et la liste d'items ont
+       maintenant leur propre padding pour que la term bar (header)
+       colle bien au bord haut comme sur une vraie fenêtre de terminal. */
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+  /* Term bar full-width en haut : on garde EXACTEMENT le chrome
+     desktop (3 dots de couleur trafficlight + "~ menu.sh" centré +
+     close × à droite) pour que ça ressemble pour de vrai à une
+     fenêtre de terminal. */
+  .menubar.open .menubar__term__bar {
+    width: 100%;
+    padding: 9px 14px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+  }
+  /* Dots traffic-light et title visibles (comme desktop) */
+  .menubar.open .menubar__term__dots,
+  .menubar.open .menubar__term__title {
+    display: inline-flex;
+  }
+  /* Close × : style desktop, taille un peu plus présente pour le tap */
+  .menubar.open .menubar__term__x {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 8px;
+    color: var(--ink-dim);
+  }
+  /* Items sous la term bar — colonne avec le prompt > jaune et le
+     "VOIR" à droite. Exactement le même listing que desktop, juste
+     en pleine largeur. */
+  .menubar.open .menubar__items {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 14px 18px;
+    margin-top: 8px;
+    align-items: flex-start;
+  }
+  .menubar.open .menubar__items button {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 6px 0;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    gap: 10px;
+  }
+  /* "VOIR" masqué en mobile : moins chargé visuellement, le prompt >
+     et le label de l'item suffisent pour le délire terminal. */
+  .menubar.open .menubar__items .voir {
+    display: none;
+  }
+
+  /* Blur direct du contenu de la page derrière le menu (méthode robuste
+     cross-browser, indépendante des stacking contexts qui peuvent casser
+     backdrop-filter sur iOS Safari / certaines pages comme le viewer
+     qui a des transforms). On cible les VRAIS conteneurs racine de
+     chaque page (ahome, idx-term, about-min, viewer, eco-solar, hm)
+     pour que le blur soit effectif depuis n'importe quelle page. Le
+     menubar et l'idcard restent nets car ils sont au niveau body, hors
+     de ces conteneurs. */
+  body.menu-open .ahome,
+  body.menu-open .hm,
+  body.menu-open .idx-term,
+  body.menu-open .viewer,
+  body.menu-open .about-min,
+  body.menu-open .eco-solar {
+    filter: blur(10px);
+    transition: filter 0.3s ease;
+  }
+  /* .infos est un enfant de .viewer (InfoOverlay), donc déjà couvert
+     par le filter sur .viewer. Pas besoin de cibler séparément. */
+
+  /* Griot menu mobile retiré : le menu reste épuré, juste term bar + items. */
+
+  /* Switch de langue : par défaut le topline EN/FR + MENU s'affiche en
+     haut-droit même sur mobile. On masque celui du topline, on affiche
+     celui qui est dans le term (au-dessus des items, ou en bas si besoin). */
+  .menubar > .menubar__topline > .menubar__lang {
+    display: none;
+  }
+  /* Switch lang dans le term : visible uniquement en mobile, posé en
+     haut de la liste d'items (juste sous la term bar). */
+  .menubar__lang--in-term {
+    display: inline-flex !important;
+    padding: 12px 18px 6px;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--yellow);
+  }
+  .menubar__lang--in-term button {
+    background: transparent;
+    border: 0;
+    color: var(--yellow);
+    opacity: 0.6;
+    padding: 2px 4px;
+    font-family: inherit;
+    font-size: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+    transition: opacity 0.18s ease;
+  }
+  .menubar__lang--in-term button.is-active {
+    opacity: 1;
+  }
+  .menubar__lang--in-term .sep {
+    opacity: 0.55;
+  }
+}
 
 /* ============================================================
    HOME — bottom strip of projects
@@ -1442,11 +1824,30 @@ body:has(.eco3) .idcard { display: none !important; }
   background: #0a0a0a;
   border: 0;
   padding: 0;
-  cursor: pointer;
+  /* /!\ pas de cursor: pointer ici — la cell est un <button> donc le
+     curseur custom mustard (.button matché par la règle globale en
+     haut du fichier) s'applique. cursor: pointer aurait une spécificité
+     supérieure et écraserait le SVG inline custom. */
   /* overflow: visible so the hover label (positioned above the cell)
      can render outside the cell's bounds */
   overflow: visible;
   transition: transform 0.4s cubic-bezier(0.2,0.7,0.2,1), opacity 0.3s ease, filter 0.3s ease;
+  /* Animation d'apparition staggered. On anime UNIQUEMENT opacity et
+     filter (pas transform) → ça ne rentre pas en conflit avec le
+     transform inline qui porte le jitter de scatter. Le delay est posé
+     en var --enter-delay depuis home.jsx (35ms × index de la cell). */
+  animation: ahome-cell-in 600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--enter-delay, 0ms);
+}
+@keyframes ahome-cell-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
 }
 .ahome__cell img,
 .ahome__cell video {
@@ -1481,6 +1882,13 @@ body:has(.eco3) .idcard { display: none !important; }
 .ahome__cell--md { width: 170px; }
 .ahome__cell--lg { width: 190px; }
 
+/* Cells portrait : INVERSION width/height (portrait_height = landscape_width
+   pour même sizeClass) — équilibrage visuel.
+   !important pour battre tout override de spécificité. */
+.ahome__cell--portrait.ahome__cell--sm { width: auto !important; height: 130px !important; }
+.ahome__cell--portrait.ahome__cell--md { width: auto !important; height: 170px !important; }
+.ahome__cell--portrait.ahome__cell--lg { width: auto !important; height: 190px !important; }
+
 /* Large mode — bigger grid, fewer columns, fewer items */
 .ahome--large .ahome__grid {
   grid-template-columns: repeat(3, 1fr);
@@ -1491,6 +1899,10 @@ body:has(.eco3) .idcard { display: none !important; }
 .ahome--large .ahome__cell--sm { width: 220px; }
 .ahome--large .ahome__cell--md { width: 320px; }
 .ahome--large .ahome__cell--lg { width: 420px; }
+/* Inversion idem en mode LARGE */
+.ahome--large .ahome__cell--portrait.ahome__cell--sm { width: auto !important; height: 220px !important; }
+.ahome--large .ahome__cell--portrait.ahome__cell--md { width: auto !important; height: 320px !important; }
+.ahome--large .ahome__cell--portrait.ahome__cell--lg { width: auto !important; height: 420px !important; }
 
 /* THUMB / FRAME / DATA toggle, bottom-left */
 .ahome__size {
@@ -1518,7 +1930,8 @@ body:has(.eco3) .idcard { display: none !important; }
 }
 .ahome__size button:hover { color: var(--ink); opacity: 1; }
 .ahome__size button.is-active {
-  color: var(--yellow);
+  /* Vue active = mustard sombre + underline (plus de jaune vif). */
+  color: var(--ink);
   opacity: 1;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -1667,6 +2080,10 @@ body:has(.eco3) .idcard { display: none !important; }
   .ahome__cell--sm { width: 160px; }
   .ahome__cell--md { width: 220px; }
   .ahome__cell--lg { width: 280px; }
+  /* Inversion portrait idem au breakpoint tablette */
+  .ahome__cell--portrait.ahome__cell--sm { width: auto; height: 160px; }
+  .ahome__cell--portrait.ahome__cell--md { width: auto; height: 220px; }
+  .ahome__cell--portrait.ahome__cell--lg { width: auto; height: 280px; }
 }
 @media (max-width: 760px) {
   .ahome { display: none; }
@@ -2038,18 +2455,79 @@ body:has(.eco3) .idcard { display: none !important; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  /* Gap réduit (4px au lieu de 14px) : la barre colle quasi au bord
+     bas de la vidéo. Le margin-top sur .viewer__controls--fixed est
+     également mis à 0 pour cumuler l'effet. */
+  gap: 4px;
 }
-/* Wrapper média — bloc simple qui contient juste la vidéo ou l'image.
-   La barre de lecture est en dessous, en flow normal du stage. */
+/* Wrapper média — englobe le média (vidéo/image) ET la barre de lecture
+   pour qu'elles soient toujours soudées visuellement, à la MÊME LARGEUR,
+   sans aucun gap parasite.
+   Pattern : display: flex column + width: fit-content. Le wrap s'ajuste
+   au pixel près à la largeur du média (la barre, plus étroite, ne contraint
+   pas le wrap car elle est en align-self:stretch et suit la largeur
+   décidée par le média). Du coup la barre fait toujours pile la largeur
+   de la vidéo, sans dépendre du JS mediaWidth (qui reste comme renfort).
+   En mobile, on positionne le wrap en absolu pile au centre du viewport
+   (cf. règle dans @media (max-width: 1200px) plus bas). */
 .viewer__media-wrap {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  max-width: 100%;
+  /* z-index > .viewer__edge (4) → la barre de lecture (qui vit dans
+     media-wrap) reçoit bien ses clics même sur ses bords gauche/droite
+     qui chevauchent les tap zones prev/next du stage. Sinon les clics
+     près des extrémités de la barre déclenchaient goPrev/goNext au
+     lieu de seek. position: relative pour que z-index s'applique. */
+  position: relative;
+  z-index: 6;
+}
+/* La barre s'étire à la largeur du wrap = largeur du média */
+.viewer__media-wrap > .viewer__controls--fixed {
+  align-self: stretch;
+  width: auto;
+}
+
+/* Label optionnel au-dessus du média — mêmes dimensions que la projmeta
+   (.viewer__projmeta) en dessous du média : font-size 11px,
+   letter-spacing 0.14em, uppercase, opacity 0.55 (= projmeta__client).
+   Centré horizontalement, animation typewriter via le composant Type. */
+.viewer__media-label {
+  align-self: stretch;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.55;
+  padding: 0 0 18px 0;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 1200px) {
+  .viewer__media-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 0 0 14px 0;
+  }
 }
 .viewer__media-wrap > img,
 .viewer__media-wrap > video {
   display: block;
-  max-width: 100%;
-  max-height: calc(100vh - 500px);
+  /* /!\ max-height (pas height fixe) pour que le box du <video> shrinke
+     à la taille intrinsèque du contenu visible. Sinon, pour une vidéo
+     paysage capée à max-width 80vw, le box garde la hauteur calc(100vh
+     - 340px) tandis que le contenu visible est plus petit (letterboxing
+     dans le box) → vide entre la fin visible de la vidéo et la barre
+     de lecture qui suit dans media-wrap. Là, le box colle au contenu
+     = bar littéralement collée sous la vidéo, peu importe l'aspect
+     ratio. Même fix qu'en mobile. */
+  max-height: calc(100vh - 340px);
+  max-width: 80vw;
   width: auto;
   height: auto;
   object-fit: contain;
@@ -2061,6 +2539,102 @@ body:has(.eco3) .idcard { display: none !important; }
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.99); }
   to { opacity: 1; transform: scale(1); }
+}
+
+/* Caption "PROJET" + "CLIENT" — stack vertical (client en dessous du nom),
+   fixée verticalement entre le player bar et l'utilbar du bas. */
+.viewer__projmeta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-align: center;
+  pointer-events: none;
+  z-index: 85;
+}
+.viewer__projmeta__name { display: block; }
+.viewer__projmeta__sep { display: none; } /* plus de séparateur en stack vertical */
+.viewer__projmeta__client { display: block; opacity: 0.55; }
+.viewer__projmeta__role { display: block; opacity: 0.4; }
+.viewer__projmeta__counter {
+  display: block;
+  margin-top: 8px;
+  opacity: 0.4;
+  font-variant-numeric: tabular-nums;
+}
+
+/* En mobile, la caption se place juste SOUS la vidéo / le player (pas de
+   centrage entre 2 ancres puisque l'utilbar desktop est masquée). On retire
+   le translateY(-50%) pour que le `top` injecté en JS corresponde bien au
+   bord supérieur de la caption.
+   Breakpoint 1200px (au lieu de 1000) : sur petits laptops/iPad paysage,
+   le rail droit (right:0, ~150px de footprint) chevauchait le média
+   (max-width:90vw centré). À 1200px et en dessous, on bascule en layout
+   mobile où le rail est pinné en bas. */
+@media (max-width: 1200px) {
+  /* En mobile, la caption projet passe en bas du viewport, centrée
+     horizontalement et verticalement entre le bas du média et le bord
+     bas du viewport. Le `top` est posé en inline-style par le JS
+     (captionY = midpoint(media bottom, viewport bottom)).
+     flex-direction: column → ordre NOM → CLIENT → ROLE → counter
+     (counter remonté en order:-1 au-dessus). */
+  .viewer__projmeta {
+    /* On NE met PAS top:auto ici — on laisse le JS poser top:captionY
+       en inline-style. Idem pas de bottom fixe. translate(-50%) sur Y
+       pour caler le bloc visuellement au centre vertical de l'espace. */
+    bottom: auto !important;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%) !important;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 2px;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    line-height: 1.15;
+    max-width: 90vw;
+    margin: 0 auto;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+  }
+  /* Toutes les lignes de la projmeta (counter, name, client, role) sont
+     à la même taille typographique — on garde la hiérarchie par opacité
+     et casse (pas par font-size). Le nom reste pleine opacité ; client
+     et role sont déjà à 0.55 / 0.4 dans la base. */
+  .viewer__projmeta__name {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    opacity: 1;
+    text-transform: uppercase;
+  }
+  /* Counter au-dessus du nom (style Renell) : order: -1 le remonte en
+     haut de la pile flex sans toucher au DOM. L'ordre visuel devient
+     donc COUNTER (top) → NAME → CLIENT → ROLE. Margin-bottom plus
+     généreux (16px) pour DÉTACHER le counter du bloc nom/client/role :
+     visuellement, le counter "01/10" devient un meta-marker discret
+     posé au-dessus, séparé du titre. */
+  .viewer__projmeta__counter {
+    order: -1;
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+  /* Pas de rail en mobile (style Renell) — la navigation se fait via
+     les edge tap zones (prev/next) et les contrôles HUD. Le rail
+     entier est masqué, y compris son counter. */
+  .viewer__rail,
+  .viewer__rail__counter {
+    display: none !important;
+  }
 }
 
 /* Video controls — Frame 110 style.
@@ -2082,12 +2656,15 @@ body:has(.eco3) .idcard { display: none !important; }
    (inline-style depuis le JS) pour s'aligner sur ses bords. */
 .viewer__controls--fixed {
   position: relative;
-  margin-top: 14px;
+  /* margin-top retiré : la barre colle direct sous la vidéo, séparée
+     uniquement par le gap de 4px du stage flex. */
+  margin-top: 0;
   padding: 0;
   z-index: 5;
 }
 .viewer__controls .play-btn,
-.viewer__controls .mute-btn {
+.viewer__controls .mute-btn,
+.viewer__controls .fs-btn {
   color: var(--ink);
   padding: 4px 0;
   background: transparent;
@@ -2104,9 +2681,17 @@ body:has(.eco3) .idcard { display: none !important; }
   transition: color 0.18s ease;
 }
 .viewer__controls .play-btn { text-align: left; }
-.viewer__controls .mute-btn { text-align: right; }
+.viewer__controls .fs-btn {
+  /* SVG icon-only, centré vertical, taille pile alignée sur les textes */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 2px;
+}
+.viewer__controls .fs-btn svg { display: block; }
 .viewer__controls .play-btn:hover,
-.viewer__controls .mute-btn:hover { color: var(--yellow); }
+.viewer__controls .mute-btn:hover,
+.viewer__controls .fs-btn:hover { color: var(--yellow); }
 /* Strike-through line on the SOUND label when muted */
 .viewer__controls .mute-btn.is-muted {
   text-decoration: line-through;
@@ -2161,51 +2746,90 @@ body:has(.eco3) .idcard { display: none !important; }
   right: 0;
   top: 50%;
   transform: translateY(-50%);
+  /* Flex column : thumbs stack naturellement, centrés verticalement.
+     Pas de scroll. Si peu de thumbs → rail compact. Si beaucoup → le
+     calcul JS dans viewer.jsx définit --rail-thumb-w (largeur réduite)
+     pour que tout rentre dans 70vh sans dépasser. */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 14px;
+  gap: 10px;
   max-height: 70vh;
-  overflow-y: auto;
-  scrollbar-width: none;
+  overflow: hidden;
+  /* z-index > viewer__edge (4) pour que les mousemove du dock effect
+     atteignent bien les miniatures. */
+  z-index: 6;
+  /* Padding gauche pour que la miniature qui se décale à gauche ait la
+     place visuelle nécessaire sans déborder du parent. */
+  padding-left: 50px;
 }
 .viewer__rail::-webkit-scrollbar { display: none; }
 
+/* Compteur de position dans la galerie (01/07) — affiché en haut du rail. */
+.viewer__rail__counter {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.55;
+  padding: 0 4px 8px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+  align-self: flex-end;
+}
+
 .viewer__thumb {
   position: relative;
-  width: 90px;
-  height: 60px;
+  /* Largeur = var --rail-thumb-w injectée depuis viewer.jsx (calculée
+     pour que tous les thumbs rentrent dans 70vh sans dépasser).
+     Hauteur auto, dictée par l'aspect natif du media. */
+  display: block !important;
+  width: var(--rail-thumb-w, 100px) !important;
+  height: auto !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box;
   overflow: hidden;
   cursor: pointer;
   background: #0a0908;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  border: 0;
+  padding: 0;
+  /* Seule la miniature sous le curseur reçoit un translateX (--mag-x).
+     Les autres restent statiques. Pas d'agrandissement, pas de push. */
+  transform: translateX(var(--mag-x, 0));
+  transition: opacity 0.2s ease,
+              transform 0.18s ease-out;
 }
-/* Varied aspect ratios on the rail so it doesn't look uniform */
-.viewer__rail > .viewer__thumb:nth-child(3n+1) { height: 60px; width: 90px; }
-.viewer__rail > .viewer__thumb:nth-child(3n+2) { height: 110px; width: 90px; } /* portrait */
-.viewer__rail > .viewer__thumb:nth-child(3n+3) { height: 50px; width: 100px; } /* wide landscape */
-.viewer__rail > .viewer__thumb:nth-child(5n)   { height: 130px; width: 84px; } /* tall portrait */
-.viewer__rail > .viewer__thumb:nth-child(7n)   { height: 70px; width: 100px; } /* slight pano */
-.viewer__thumb:hover { opacity: 1; transform: scale(1.06); }
-.viewer__thumb.active:hover { transform: scale(1.04); }
-.viewer__thumb.active { opacity: 1; outline: 1px solid var(--yellow); outline-offset: -1px; }
+/* /!\ Les variations forcées par nth-child (height: 110px portrait, 50px
+   pano, etc.) sont SUPPRIMÉES : on respecte maintenant l'aspect réel
+   de chaque resource via aspect-ratio inline-style. */
+/* Hover : juste l'opacité — le scale est géré par le dock effect (--mag) */
+.viewer__thumb:hover { opacity: 1; }
+/* Miniature active : juste full opacity + version couleur (passe-passe via
+   le sélecteur .active img/video plus bas). Plus de contour jaune. */
+.viewer__thumb.active { opacity: 1; }
 /* Same B&W treatment as the home (work) grid — only the currently
    selected resource is shown in colour. Hover restores some colour
    and scales slightly. */
 .viewer__thumb img,
 .viewer__thumb video {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  /* Largeur 100% du parent (= --rail-thumb-w), hauteur auto → l'image
+     garde son ratio natif et dicte sa hauteur. */
+  width: 100% !important;
+  height: auto !important;
+  object-fit: initial !important;
   filter: grayscale(1) contrast(1.05) brightness(0.95);
   transition: filter 0.3s ease, transform 0.5s ease;
 }
 .viewer__thumb:hover img,
 .viewer__thumb:hover video {
+  /* Plus de scale interne sur le hover : c'est le parent .viewer__thumb
+     qui scale via --mag (dock effect). Sinon ça compose deux transforms
+     et l'image semble "shifter" / cropper différemment au survol. */
   filter: grayscale(0.4) contrast(1.1);
-  transform: scale(1.04);
 }
 .viewer__thumb.active img,
 .viewer__thumb.active video,
@@ -2233,16 +2857,10 @@ body:has(.eco3) .idcard { display: none !important; }
   opacity: 0.55;
 }
 .viewer__thumb__play {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: var(--font-mono);
-  font-size: 22px;
-  line-height: 1;
-  color: var(--ink);
-  text-shadow: 0 0 8px rgba(0,0,0,0.7);
-  pointer-events: none;
+  /* Logo ▶ masqué sur les miniatures du rail — choix éditorial. La
+     reconnaissance "vidéo vs image" se fait visuellement (preview qui
+     bouge au hover si vidéo réelle) plutôt que via un pictogramme. */
+  display: none;
 }
 
 /* Bottom utility bar — shared across viewer + info overlay */
@@ -2251,8 +2869,8 @@ body:has(.eco3) .idcard { display: none !important; }
   bottom: 14px;
   left: 18px;
   right: 18px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -2276,6 +2894,205 @@ body:has(.eco3) .idcard { display: none !important; }
   letter-spacing: 0;
 }
 .utilbar button:hover { color: var(--ink); }
+
+/* OVERVIEW trigger — bouton standalone, MOBILE-ONLY. Positionné en
+   bas-gauche, même taille typographique que le bouton MENU (top-right).
+   Plain text, pas de box. */
+.viewer__overview-trigger {
+  display: none;
+}
+@media (max-width: 1200px) {
+  .viewer__overview-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    position: fixed;
+    bottom: 14px;
+    left: 14px;
+    z-index: 100; /* > utilbar (90) pour rester cliquable au-dessus du fond */
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    padding: 4px 0;
+    cursor: pointer;
+  }
+  .viewer__overview-trigger:active { opacity: 0.6; }
+  /* La utilbar entière est cachée sur mobile — ses deux boutons (CLOSE,
+     INFO) sont remplacés par les triggers standalone OVERVIEW (bas-gauche)
+     et INFO (bas-droit). Pour quitter le viewer : passer par le menu. */
+  .utilbar { display: none !important; }
+}
+
+/* INFO trigger — bouton standalone, MOBILE-ONLY, miroir de OVERVIEW
+   mais en bas-droit. Même taille typographique que MENU (top-right). */
+.viewer__info-trigger {
+  display: none;
+}
+@media (max-width: 1200px) {
+  .viewer__info-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    position: fixed;
+    bottom: 14px;
+    right: 14px;
+    z-index: 100;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    padding: 4px 0;
+    cursor: pointer;
+  }
+  .viewer__info-trigger:active { opacity: 0.6; }
+}
+
+/* ============================================================
+   OVERVIEW panel — mobile gallery grid (style Renell Medrano)
+   - Panel qui slide-up depuis le bas → couvre la moitié inférieure
+   - Le viewer derrière est blurré (body.overview-open .viewer)
+   - Backdrop sur la moitié haute : tap → close
+   - Visible mobile only
+   ============================================================ */
+.viewer__overview-backdrop {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 50dvh; /* couvre exactement la moitié supérieure */
+  z-index: 69; /* sous le panel (70), au-dessus du viewer */
+  background: transparent;
+  display: none;
+  /* pointer-events off quand fermé → le viewer reste interactif */
+  pointer-events: none;
+}
+@media (max-width: 1200px) {
+  .viewer__overview-backdrop { display: block; }
+}
+.viewer__overview-backdrop.is-open {
+  pointer-events: auto;
+}
+.viewer__overview {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 50dvh; /* moitié inférieure du viewport visible */
+  /* Noir solide (pas le mustard semi-transparent qui paraissait gris). */
+  background: #000;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 70;
+  /* Scroll vertical réactivé : si y a beaucoup de resources, on scrolle
+     dans le panel pour voir le reste de la grille. */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px 14px 70px; /* bottom-padding pour pas chevaucher OVERVIEW button */
+  display: none;
+  /* Slide-up animation depuis le bas */
+  transform: translateY(100%);
+  transition: transform 280ms cubic-bezier(0.22, 0.78, 0.32, 1);
+}
+@media (max-width: 1200px) {
+  .viewer__overview { display: block; }
+}
+.viewer__overview.is-open {
+  transform: translateY(0);
+}
+/* Blur du viewer quand l'overview est ouvert (même mécanique que .menu-open) */
+body.overview-open .viewer__main,
+body.overview-open .viewer__projmeta,
+body.overview-open .viewer__sticker,
+body.overview-open .utilbar {
+  filter: blur(10px);
+  transition: filter 0.3s ease;
+}
+.viewer__overview__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 4px 12px;
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.viewer__overview__title-client { opacity: 0.55; }
+.viewer__overview__count { opacity: 0.55; font-size: 9px; white-space: nowrap; }
+.viewer__overview__grid {
+  display: grid;
+  /* Nombre de colonnes calculé dynamiquement depuis JS (CSS var --grid-cols).
+     Toutes les colonnes 1fr → cells de MÊME LARGEUR. */
+  grid-template-columns: repeat(var(--grid-cols, 3), 1fr);
+  /* Rangées auto : la hauteur d'une rangée = celle de la cell la plus
+     haute (image avec la plus grande hauteur naturelle). align-items:
+     start pour que les cells plus petites collent au haut au lieu
+     d'être centrées. */
+  grid-auto-rows: auto;
+  align-items: start;
+  gap: 6px;
+}
+.viewer__overview__cell {
+  position: relative;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: transform 120ms ease, opacity 120ms ease;
+  width: 100%; /* remplit la colonne */
+  /* aspect-ratio inline depuis JSX (style={{ aspectRatio: r.aspect }}) */
+}
+.viewer__overview__cell:active { transform: scale(0.96); }
+/* Plus d'outline mustard sur la cell active — pas de marqueur visuel
+   de la resource actuellement consultée. */
+.viewer__overview__cell.is-active { outline: none; }
+/* (Plus de feature 2×2 sur la 1ère cell — toutes les cells sont
+   égales dans la grille. */
+.viewer__overview__cell > img,
+.viewer__overview__cell > video {
+  /* L'image remplit 100% de la largeur de sa cell et sa hauteur est
+     dictée par son aspect natif. Pas de crop, pas de position absolute. */
+  position: static;
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: initial;
+  display: block;
+}
+.viewer__overview__cell__missing {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  opacity: 0.4;
+  font-family: var(--font-mono);
+  font-size: 24px;
+}
+.viewer__overview__cell__num {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+/* Icône play ▶ retirée des thumbs vidéo de l'overview mobile. */
+.viewer__overview__cell__play { display: none; }
 
 /* ============================================================
    INFORMATIONS overlay
@@ -2305,7 +3122,9 @@ body:has(.eco3) .idcard { display: none !important; }
 }
 .infos.open .infos__bg { opacity: 1; transform: scale(1); }
 
-/* Vidéo / image preview en fond, mêmes filtres que .ahome__bg */
+/* Vidéo / image preview en fond, mêmes filtres que .ahome__bg
+   mais brightness réduite (0.6 → 0.35) pour assombrir et améliorer
+   la lisibilité du texte par-dessus. */
 .infos__bg video,
 .infos__bg__img {
   position: absolute;
@@ -2316,13 +3135,15 @@ body:has(.eco3) .idcard { display: none !important; }
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  filter: grayscale(1) contrast(1.1) brightness(0.6);
+  filter: grayscale(1) contrast(1.1) brightness(0.35);
 }
-/* Veil radial sombre pour faire ressortir le texte par-dessus */
+/* Veil radial plus opaque pour assombrir davantage le fond — surtout
+   sur les bords pour préserver la lisibilité du texte sur toutes
+   les tailles de viewport. */
 .infos__bg__veil {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 100%);
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.92) 100%);
 }
 
 .infos__inner {
@@ -2332,6 +3153,8 @@ body:has(.eco3) .idcard { display: none !important; }
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* Centrage horizontal du bloc terminal (idx-term--info) à l'intérieur. */
+  align-items: center;
   gap: 38px;
   color: var(--ink);
   font-family: var(--font-mono);
@@ -2849,7 +3672,9 @@ body:has(.eco3) .idcard { display: none !important; }
 @media (max-width: 1100px) {
   .viewer { grid-template-columns: 1fr 100px; }
   .viewer__main { padding-left: 0; padding-top: 200px; }
-  .viewer__thumb { width: 92px; height: 60px; }
+  /* Width un peu plus serré sur tablette (92px vs 100px desktop).
+     La hauteur reste dérivée de l'aspect natif du media. */
+  .viewer__thumb { width: 92px; height: auto; }
   .infos__inner, .about, .eco { padding-left: 32px; padding-right: 32px; }
   .infos__cols { grid-template-columns: 1fr 1fr; }
   .home__status { left: 320px; right: 220px; gap: 16px; }
@@ -2945,7 +3770,12 @@ body:has(.eco3) .idcard { display: none !important; }
   .home__bg,
   .home__status { display: none !important; }
 
+  /* idcard et boot-matrix sticker : taille mobile à 180px (cf. block
+     dédié plus bas qui déclenche dès 1200px pour rester cohérent avec
+     le breakpoint mobile du viewer). On garde aussi la déclaration ici
+     pour les très petits écrans (≤760px) où le top/left est plus serré. */
   .idcard { width: 180px; top: 10px; left: 10px; }
+  .boot-matrix__sticker { width: 180px; top: 10px; left: 10px; }
   .menubar { top: 14px; right: 14px; }
   .menubar__toggle { font-size: 10px; gap: 6px; }
 
@@ -3068,6 +3898,14 @@ body:has(.eco3) .idcard { display: none !important; }
     padding: 80px 24px 12px;
     text-align: center;
     gap: 8px;
+  }
+  /* Texte de la page eco masqué en mobile — l'utilisateur veut une vue
+     purement visuelle (griot + vignettes cliquables). On retire le lead
+     d'intro + tout le bloc texte des items (nom, kicker, "VOUS ÊTES ICI").
+     Les vignettes restent cliquables et conduisent vers les sites. */
+  .eco-mobile__hero__lead,
+  .eco-mobile__row__text {
+    display: none !important;
   }
   /* Griot ultra-compact — minuscule décoration, prend très peu de place */
   .eco-mobile__hero__griot {
@@ -3717,7 +4555,9 @@ body:has(.eco3) .idcard { display: none !important; }
   font-size: clamp(8px, 0.9vw, 14px);
   line-height: 1;
   letter-spacing: 0.02em;
-  color: rgba(138, 122, 32, 0.32);
+  /* color initial fixé sur ink-dim (mustard très sombre) — l'animation
+     matrix-pulse plus bas va respirer entre ink-dim et ink. */
+  color: var(--ink-dim);
   white-space: pre;
   z-index: 1;
   pointer-events: none;
@@ -3725,9 +4565,12 @@ body:has(.eco3) .idcard { display: none !important; }
   text-shadow: 0 0 6px rgba(138, 122, 32, 0.15);
   animation: matrix-pulse 4.2s ease-in-out infinite;
 }
+/* Le griot respire entre mustard sombre (--ink #8a7a20) au pic et
+   un mustard ULTRA sombre (#332c0d, plus sombre que --ink-dim) au creux.
+   Range élargie pour un effet de respiration plus prononcé. */
 @keyframes matrix-pulse {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.7; }
+  0%, 100% { color: #332c0d; }
+  50%      { color: var(--ink); }
 }
 
 
@@ -3743,9 +4586,73 @@ body:has(.eco3) .idcard { display: none !important; }
   display: grid;
   place-items: center;
   transition: opacity 0.6s ease;
-  cursor: pointer;
+  /* Curseur main pointée pixel art mustard custom — même SVG que les
+     éléments cliquables du reste du site (cf. règle a, button, etc.
+     plus haut). Évite le pointer OS par défaut qui briserait la
+     cohérence visuelle pendant le boot. */
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' shape-rendering='crispEdges'><path d='M8 1 L11 1 L11 9 L13 9 L13 7 L15 7 L15 9 L17 9 L17 11 L19 11 L19 19 L7 19 L7 14 L5 14 L5 11 L8 11 Z' fill='black' stroke='%238a7a20' stroke-width='1' stroke-linejoin='miter'/></svg>") 8 1, pointer;
+  overflow: hidden;
 }
 .boot-matrix.is-leaving { opacity: 0; }
+
+/* Backdrop vidéo du boot — réplique EXACTE du hover de la page Work
+   (.ahome__bg / .ahome__bg__video / .ahome__bg__grain / .ahome__bg__veil).
+   Même filtre B&W + brightness 0.6, même grain animé, même veil radial. */
+.boot-matrix__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  filter: grayscale(1) contrast(1.1) brightness(0.6);
+  /* Zoom-in subtil 1.05 → 1 sur 4s pour mimer la transition hover Work
+     (qui passe scale(1.05) → scale(1) en 1.2s). Sur la durée totale du
+     boot (3s) on a un slow-mo cinéma léger. */
+  transform: scale(1.05);
+  animation: boot-zoom-in 4s ease-out forwards;
+  pointer-events: none;
+  overflow: hidden;
+}
+@keyframes boot-zoom-in {
+  to { transform: scale(1); }
+}
+.boot-matrix__bg__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+/* Film grain animé — SVG turbulence en screen blend (copié 1:1 du
+   .ahome__bg__grain pour matcher exactement le look hover Work). */
+.boot-matrix__bg__grain {
+  position: absolute;
+  inset: -10%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch' seed='9'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.1 0'/><feComponentTransfer><feFuncA type='linear' slope='1.6' intercept='-0.15'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23g)'/></svg>");
+  background-size: 520px 520px;
+  mix-blend-mode: screen;
+  opacity: 0.45;
+  animation: film-grain 0.55s steps(1) infinite;
+  z-index: 1;
+}
+.boot-matrix__bg__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+}
+/* Le matrix griot et le LOADING doivent rester au-dessus de la vidéo
+   + veil. Le sticker est en position:fixed (déjà au-dessus du fond)
+   mais son z-index doit aussi passer au-dessus du veil. */
+.boot-matrix .matrix-griot,
+.boot-matrix__loading {
+  position: relative;
+  z-index: 2;
+}
+.boot-matrix__sticker { z-index: 2; }
 
 /* Override the matrix griot styling inside the boot — brighter & larger */
 .boot-matrix .matrix-griot {
@@ -3836,6 +4743,12 @@ body:has(.eco3) .idcard { display: none !important; }
   color: var(--ink-dim);
   opacity: 0.7;
 }
+/* Le placeholder = reste de "LOADING" pas encore tapé, invisible mais
+   présent dans le layout → préserve la largeur totale du bloc pour
+   éviter le shift horizontal pendant que LOADING s'écrit. */
+.boot-matrix__loading__placeholder {
+  visibility: hidden;
+}
 /* Caret block qui clignote derrière le texte typé — style terminal */
 .boot-matrix__loading__caret {
   display: inline-block;
@@ -3854,16 +4767,12 @@ body:has(.eco3) .idcard { display: none !important; }
   25%, 100% { opacity: 1; }
 }
 
-.boot-matrix__sticker {
-  position: fixed;
-  left: 14px;
-  top: 14px;
-  width: 280px;
-  height: auto;
-  pointer-events: none;
-  filter: drop-shadow(2px 4px 0 rgba(0,0,0,0.5));
-  z-index: 1;
-}
+/* La déclaration de base de .boot-matrix__sticker est remontée tout en haut
+   du fichier (juste sous .idcard), pour qu'elle soit déclarée AVANT les
+   @media (max-width: 1200px) et @media (max-width: 760px) qui la passent
+   à 180px. Sinon, à spécificité égale, la déclaration tardive l'emporte
+   et le sticker reste à 280px même sur mobile.
+   Voir bloc autour de la ligne 167. */
 
 
 .boot-matrix__tagline {
@@ -3924,6 +4833,18 @@ body:has(.eco3) .idcard { display: none !important; }
 .hm { display: none; }
 
 @media (max-width: 760px) {
+  /* Mobile : layout style a.cre — 3 colonnes, chaque cell remplit
+     100% de sa colonne, l'image dicte sa hauteur naturelle.
+     PAS DE CROP : l'image est affichée en entier, son aspect natif
+     détermine la hauteur de la cell. Plein color (pas de B&W). */
+  .ahome__cell img,
+  .ahome__cell video {
+    filter: none !important;
+    width: 100% !important;
+    height: auto !important;
+    object-fit: initial !important;
+  }
+
   /* On mobile we reuse the desktop .ahome scatter grid, locked to a
      dense 3-column contact-sheet (style a.cre). FRAME and DATA modes
      are desktop-only — JS forces the state to "compact" on mobile.
@@ -3942,13 +4863,42 @@ body:has(.eco3) .idcard { display: none !important; }
     padding: 30px 16px 80px;
     max-width: none;
   }
-  /* Cells fill their column, no fixed widths */
-  .ahome__cell--sm,
-  .ahome__cell--md,
-  .ahome__cell--lg,
-  .ahome--large .ahome__cell--sm,
-  .ahome--large .ahome__cell--md,
-  .ahome--large .ahome__cell--lg { width: 100% !important; }
+  /* RÈGLE DURE : portrait_height ≤ landscape_width.
+     /!\ NE PAS override aspect-ratio : on a besoin de l'aspect-ratio
+     inline pour que le browser calcule la dimension manquante
+     (ex : height fixée + aspect 2/3 → width = height × 2/3).
+     Spécificité bumpée à (0,3,0) pour battre les desktop (0,2,0)+!important. */
+  .ahome .ahome__cell.ahome__cell--landscape,
+  .ahome--large .ahome__cell.ahome__cell--landscape {
+    width: 100% !important;
+    height: auto !important;
+    justify-self: center;
+  }
+  .ahome .ahome__cell.ahome__cell--portrait,
+  .ahome--large .ahome__cell.ahome__cell--portrait {
+    width: auto !important;
+    height: calc((100vw - 92px) / 3 * 1.0) !important;
+    justify-self: center;
+  }
+  /* Reset sizeClass widths : neutralisé via unset. */
+  .ahome .ahome__cell.ahome__cell--sm,
+  .ahome .ahome__cell.ahome__cell--md,
+  .ahome .ahome__cell.ahome__cell--lg,
+  .ahome--large .ahome__cell.ahome__cell--sm,
+  .ahome--large .ahome__cell.ahome__cell--md,
+  .ahome--large .ahome__cell.ahome__cell--lg {
+    width: unset;
+    height: unset;
+  }
+  /* Image à l'intérieur des cells : remplit le cell (qui a maintenant
+     ses dimensions définies par CSS + aspect-ratio inline). PAS height:
+     auto qui causait un calcul circulaire avec parent width: auto. */
+  .ahome .ahome__cell img,
+  .ahome .ahome__cell video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
   /* Ignore les positions grid 5-cols du JS et laisse la grille couler en
      3 cols. On GARDE le jitter pour un décalage volontairement irrégulier
      (style contact-sheet bricolé, pas grille rigide). */
@@ -3960,12 +4910,35 @@ body:has(.eco3) .idcard { display: none !important; }
      décale chaque cellule de quelques pixels en X/Y. Les cellules restent
      droites mais ne sont jamais parfaitement alignées sur une grille rigide.
      Le flow de gauche à droite est assuré par la grille 3-cols ci-dessus. */
-  /* Auto-rows sized by content so cells stack cleanly without big gaps */
+  /* Auto-rows sized by content. align-items: center centre chaque cell
+     verticalement dans sa rangée — les projets ne sont JAMAIS alignés
+     par le haut ni par le bas. Combiné avec les translateY irréguliers
+     par nth-child plus bas pour varier davantage. */
   .ahome__grid,
   .ahome--large .ahome__grid {
     grid-auto-rows: auto;
-    align-items: start;
+    align-items: center;
     justify-items: stretch;
+  }
+  /* Effet "drift" — décalages verticaux SUBTILS par nth-child (cycle de
+     5 pour éviter un pattern régulier sur 3-col grid). Les cells ne
+     sont jamais alignées strictement au top/bottom mais l'œil perçoit
+     toujours la grille en colonnes/rangées. Style contact-sheet
+     bricolé. !important pour battre le transform inline React. */
+  .ahome__cell:nth-child(5n+1) {
+    transform: translate(var(--jx, 0), calc(var(--jy, 0px) - 8px)) !important;
+  }
+  .ahome__cell:nth-child(5n+2) {
+    transform: translate(var(--jx, 0), calc(var(--jy, 0px) + 12px)) !important;
+  }
+  .ahome__cell:nth-child(5n+3) {
+    transform: translate(var(--jx, 0), calc(var(--jy, 0px) - 5px)) !important;
+  }
+  .ahome__cell:nth-child(5n+4) {
+    transform: translate(var(--jx, 0), calc(var(--jy, 0px) + 9px)) !important;
+  }
+  .ahome__cell:nth-child(5n+5) {
+    transform: translate(var(--jx, 0), calc(var(--jy, 0px) - 14px)) !important;
   }
   /* The label sits below the cell — wraps if too long on narrow screens */
   .ahome__cell__label { white-space: normal; max-width: 100%; font-size: 9px; letter-spacing: 0.1em; }
@@ -4097,9 +5070,11 @@ body:has(.eco3) .idcard { display: none !important; }
 
 /* ============================================================
    MOBILE PROJECT VIEWER — stacked layout
+   Breakpoint à 1200px (cf. note sur .viewer__projmeta plus haut) pour
+   éviter que le rail droit chevauche le média sur petits écrans paysage.
    ============================================================ */
 
-@media (max-width: 1000px) {
+@media (max-width: 1200px) {
   /* 3-row grid:
        row 1 = empty top spacer (1fr)
        row 2 = main block (auto, contains image + controls) → centred in viewport
@@ -4108,14 +5083,29 @@ body:has(.eco3) .idcard { display: none !important; }
   .viewer {
     display: grid !important;
     grid-template-columns: 1fr !important;
-    grid-template-rows: 1fr auto 1fr;
+    /* Pas de rangée HUD réservée : le HUD est en position:fixed, il
+       overlay le viewport sans prendre de place dans le grid. Un seul
+       1fr pour le main → centrage parfait du média dans tout le
+       viewport. */
+    grid-template-rows: 1fr;
     align-items: stretch;
     justify-items: stretch;
-    min-height: 100vh;
-    padding: 28px 0 70px;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    overflow: hidden;
+    /* Paddings haut/bas SYMÉTRIQUES (60px chacun) : le HUD (top) et la
+       projmeta (bottom-right) sont fixed et flottent au-dessus, ils
+       ne mangent pas le centrage. */
+    padding: 60px 0 60px;
   }
   .viewer__main {
-    grid-row: 2;
+    /* grid-row: 1 : le grid n'a plus qu'une seule rangée (1fr) puisque
+       le HUD est en position:fixed et n'a pas besoin de réservation.
+       Sans ça, main allait dans une rangée implicite 2 (= auto height)
+       et le stage perdait tout son centrage vertical. */
+    grid-row: 1;
     grid-column: 1;
     width: 100% !important;
     max-width: 100% !important;
@@ -4135,18 +5125,94 @@ body:has(.eco3) .idcard { display: none !important; }
     width: 100vw;
     max-width: 100vw;
     aspect-ratio: auto;
-    max-height: none;
+    /* Stage = remplit la rangée 1fr du grid, mais ne dépasse pas. */
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    /* Stage en position:relative (déjà via base) pour servir d'ancre
+       au media-wrap positionné en absolu (centrage par translate, voir
+       plus bas). */
+    position: relative !important;
+  }
+  /* Centrage GÉOMÉTRIQUE pile au milieu du viewport (top: 50dvh +
+     translateY(-50%)). Pour que le média ne déborde JAMAIS sur le
+     sticker (top-left 180px de haut) ni sur la projmeta (bottom ~60px),
+     on cap son max-height à 2 × (50% - sticker_bottom) ≈ calc(100vh -
+     380px). À cette taille, l'image centrée a son bord supérieur pile
+     à la bordure inférieure du sticker, et son bord inférieur bien
+     au-dessus de la projmeta — donc centrage visuel garanti sans
+     overlap. */
+  .viewer__media-wrap {
+    position: fixed !important;
+    top: 50dvh !important;
+    bottom: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translate(-50%, -50%) !important;
+    /* z-index 6 > .viewer__edge (4) → la barre de lecture en mobile
+       reçoit bien ses clics même sur ses bords gauche/droite (qui
+       chevauchent les tap zones prev/next). Bumped de 3 à 6. */
+    z-index: 6;
+    align-items: center;
+    justify-content: center;
   }
   .viewer__stage img,
   .viewer__stage video {
-    width: 100%;
+    /* /!\ IMPORTANT : on utilise max-height (pas height fixe) pour que
+       le box du <video> shrinke à la taille intrinsèque du contenu
+       visible. Sinon, pour une vidéo paysage capée à max-width 92vw,
+       le box garde 644px de haut tandis que la vidéo visible ne fait
+       que ~194px → énorme vide noir AVANT que le bar (qui suit dans
+       media-wrap) ne soit rendu. Là, le box colle au contenu = bar
+       littéralement collé sous la vidéo, peu importe l'aspect ratio. */
+    max-height: calc(100vh - 380px);
+    max-width: 92vw;
+    width: auto;
     height: auto;
-    max-height: 70vh;
     object-fit: contain;
     display: block;
+    margin: 0 auto;
+  }
+  /* Rail thumbs PIN VERS LE BAS DU VIEWPORT (mais pas tout au bord).
+     bottom: 40px → la rail flotte au-dessus du bord pour respirer.
+     justify-content: center → quand le contenu tient dans la largeur
+     du viewport, les thumbs sont centrées. Si ça déborde, l'overflow-x
+     auto prend le relais et on peut scroller. */
+  .viewer__rail {
+    position: fixed !important;
+    bottom: 40px !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    height: 80px !important;
+    max-height: 80px !important;
+    padding: 8px 12px !important;
+    background: transparent;
+    z-index: 70;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    justify-content: center !important;
+  }
+  /* Compteur déplacé au-dessus du rail (centré) au lieu d'être en colonne. */
+  .viewer__rail__counter {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    align-self: auto;
+    padding: 0 0 6px;
   }
   /* Rail = thumbnails row, lives in grid row 3 (bottom area) and is
-     vertically centred between the image bottom and the page bottom. */
+     vertically centred between the image bottom and the page bottom.
+     justify-content: center → thumbs centrées horizontalement quand le
+     contenu tient ; scroll horizontal en fallback si débordement. */
   .viewer__rail {
     position: static;
     transform: none;
@@ -4156,7 +5222,7 @@ body:has(.eco3) .idcard { display: none !important; }
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 8px;
     padding: 0 14px;
     margin-top: 0;
@@ -4178,14 +5244,15 @@ body:has(.eco3) .idcard { display: none !important; }
     width: 84px;
     height: 56px;
     flex: 0 0 auto;
-    scroll-snap-align: start;
+    scroll-snap-align: center;
   }
 
-  /* Floating utility bar — fixed at bottom */
+  /* Floating utility bar — fixed at bottom (CLOSE à gauche, INFO à droite,
+     space-between du flex les répartit aux extrémités). Le bouton OVERVIEW
+     est en dehors de la utilbar, positionné indépendamment au-dessus. */
   .utilbar {
     position: fixed;
     left: 0; right: 0; bottom: 0;
-    grid-template-columns: 1fr 1fr;
     gap: 10px;
     padding: 12px 14px;
     background: rgba(5, 5, 5, 0.85);
@@ -4193,7 +5260,6 @@ body:has(.eco3) .idcard { display: none !important; }
     border-top: 1px solid rgba(138,122,32,0.18);
     font-size: 10px;
   }
-  .utilbar > *:last-child { display: none; }
 
   /* Fullscreen toggle out of place on small screens — hide */
   .viewer__fs { right: 8px; bottom: 8px; width: 30px; height: 30px; }
@@ -4204,6 +5270,13 @@ body:has(.eco3) .idcard { display: none !important; }
   }
   .infos__cols { grid-template-columns: 1fr; gap: 28px; }
   .infos__footer { padding-top: 18px; font-size: 10px; }
+  /* Texte des credits sur mobile : plus petit que desktop mais quand
+     même lisible (12px au lieu de 13px desktop). */
+  .idx-term--info .idx-term__inner { font-size: 12px; line-height: 1.5; }
+  .idx-term--info .idx-term__row--info {
+    grid-template-columns: 28px minmax(80px, max-content) minmax(120px, 1fr);
+    gap: 12px;
+  }
 }
 
 
@@ -4228,21 +5301,71 @@ body:has(.eco3) .idcard { display: none !important; }
   transition: opacity 0.25s ease, background 0.25s ease;
   pointer-events: auto;
 }
-.viewer__edge--prev { left: 0; cursor: w-resize; }
-.viewer__edge--next { right: 0; cursor: e-resize; }
+/* Cursor SVG custom — fichiers SVG dédiés dans img/, mis en cache par le
+   navigateur dès le 1er chargement (au lieu d'un data URI inline qui est
+   re-parsé à chaque hover, ce qui créait des délais d'affichage).
+   Hotspot au bout de la pointe. */
+.viewer__edge--prev {
+  left: 0;
+  cursor: url("img/cursor-prev.svg") 4 14, w-resize;
+}
+.viewer__edge--next {
+  right: 0;
+  cursor: url("img/cursor-next.svg") 24 14, e-resize;
+}
 .viewer__stage:hover .viewer__edge { opacity: 0.75; }
 .viewer__edge:hover { opacity: 1 !important; background: transparent; }
 .viewer__edge--next:hover { background: transparent; }
 /* .viewer__edge__arrow retiré — les flèches ‹ › ne sont plus dans le DOM,
    les zones de tap restent fonctionnelles mais invisibles. */
 
-@media (max-width: 1000px) {
-  /* Tap zones plus larges sur mobile pour la discoverabilité */
-  .viewer__edge { opacity: 0.55; width: 22%; }
+@media (max-width: 1200px) {
+  /* Tap zones beaucoup plus larges sur mobile, en position:fixed full
+     height pour étendre la surface tappable au-dessus et en dessous
+     du média (où elles ne se font pas voler les clics par
+     .viewer__media-wrap z-index 6).
+     - left/right: 0
+     - top: 60px (sous le sticker pour ne pas le bloquer)
+     - bottom: 50px (au-dessus des triggers OVERVIEW / INFO)
+     - width: 38% de chaque côté → 76% total en sides, 24% au centre
+       pour le média (mais le média conserve play/pause via son z-index
+       supérieur dans les overlaps).
+     - z-index: 4 (en dessous du média 6, au-dessus du fond 0). */
+  .viewer__edge {
+    position: fixed;
+    top: 0;
+    bottom: 50px;
+    width: 38%;
+    min-width: 120px;
+    opacity: 0.55;
+    z-index: 4;
+  }
+  .viewer__edge--prev { left: 0; right: auto; }
+  .viewer__edge--next { right: 0; left: auto; }
+  /* La menubar (z-index 95) et le sticker (z-index 90) sont au-dessus,
+     donc leurs clics restent intacts même si les edge zones s'étendent
+     jusqu'au top: 0. */
+  /* Override de .viewer--video .viewer__edge (ligne ~5021, hors @media)
+     qui forçait width: 22% pour les projets vidéo. Sans ça, dès qu'un
+     projet contient une vidéo (.viewer--video), nos 38% en fixed sont
+     écrasés et les edge zones reviennent à 22% en absolute. */
+  .viewer--video .viewer__edge {
+    position: fixed;
+    top: 0;
+    bottom: 50px;
+    width: 38%;
+    min-width: 120px;
+  }
 }
 
-/* Fullscreen video mode — zones de tap plus larges aussi */
-.viewer--video .viewer__edge { width: 22%; }
+/* Video project mode — zones de tap un peu plus larges sur desktop.
+   On exclut explicitement mobile (≤1200px) parce que sur mobile on a
+   un override @media plus haut qui pousse à 38% en position fixed
+   pleine hauteur — sans ce gating, cette règle ré-écraserait celle
+   du mobile par source order (même spécificité, dernier rule wins). */
+@media (min-width: 1201px) {
+  .viewer--video .viewer__edge { width: 22%; }
+}
 
 
 /* Real browser-fullscreen mode — the viewer element fills the screen.
@@ -4279,7 +5402,13 @@ body:has(.eco3) .idcard { display: none !important; }
   background: #000;
 }
 .viewer--fs .viewer__rail,
-.viewer--fs .utilbar {
+.viewer--fs .utilbar,
+.viewer--fs .viewer__edge,
+.viewer--fs .viewer__projmeta {
+  /* En fullscreen, on cache le rail, l'utilbar, les edge tap zones
+     (prev/next) et la projmeta. Le fullscreen est dédié à UNE vidéo
+     unique sans gallery navigation — pour revenir au projet, sortir
+     du fullscreen (Esc ou bouton FS dans le player bar). */
   display: none !important;
 }
 /* En fullscreen, la barre de lecture passe en position fixed bas écran
@@ -4299,7 +5428,7 @@ body:has(.eco3) .idcard { display: none !important; }
    ============================================================ */
 .viewer__hud { display: none; }
 
-@media (max-width: 1000px) {
+@media (max-width: 1200px) {
   .viewer__hud {
     display: block;
     position: fixed;
@@ -4364,26 +5493,69 @@ body:has(.eco3) .idcard { display: none !important; }
   .utilbar { display: none !important; }
 }
 
-/* Mobile: barre de lecture pleine largeur sous la vidéo, fond sombre lisible */
-@media (max-width: 1000px) {
-  .viewer__controls--fixed {
-    width: 100% !important;
-    background: rgba(5,5,5,0.55);
-    backdrop-filter: blur(6px);
-    padding: 4px 14px;
-    margin-top: 0;
+/* Mobile : la barre est désormais directement enfant du media-wrap
+   (cf. règle .viewer__media-wrap plus haut), donc elle vit ANATOMIQUEMENT
+   sous la vidéo, à la largeur exacte du média. On désactive les styles
+   "footer flottant" (background sombre, blur, padding) hérités de
+   .viewer--video .viewer__controls qui sont prévus pour le mode
+   fullscreen desktop et n'ont rien à faire ici.
+
+   /!\ CRITIQUE : sur iOS Safari (et autres browsers sans Fullscreen API
+   sur les <div>), un clic sur le bouton FULL tombe sur un fallback
+   CSS-only qui ajoute quand même la classe .viewer--fs sur le viewer.
+   Sans neutralisation explicite, les règles .viewer--fs et .viewer--video
+   (positionnement bar en position:fixed bottom:24px, aspect-ratio 16/9
+   sur le stage, etc.) s'activent et BRISENT le layout mobile. On les
+   override toutes ici pour rester sur le layout mobile natif quelle que
+   soit la valeur du state fullscreen. */
+@media (max-width: 1200px) {
+  .viewer__controls--fixed,
+  .viewer--video .viewer__controls,
+  .viewer--video .viewer__controls--fixed,
+  .viewer--fs .viewer__controls,
+  .viewer--fs .viewer__controls--fixed {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: auto !important;
+    z-index: auto !important;
+  }
+  /* Stage : on annule le aspect-ratio et le fond noir de .viewer--video
+     pour qu'il reste fluide comme en mode non-fullscreen. */
+  .viewer--video .viewer__stage,
+  .viewer--fs .viewer__stage {
+    aspect-ratio: auto !important;
+    background: transparent !important;
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+  /* Médias : max-height + max-width (PAS height fixe), pour que le box
+     du média shrinke à la taille intrinsèque du contenu. Le bar (dans
+     media-wrap) suit immédiatement, sans vide entre eux. Cf. note sur
+     .viewer__stage img/video plus haut pour le détail. */
+  .viewer--video .viewer__stage img,
+  .viewer--video .viewer__stage video,
+  .viewer--fs .viewer__stage img,
+  .viewer--fs .viewer__stage video {
+    width: auto !important;
+    height: auto !important;
+    max-width: 92vw !important;
+    max-height: calc(100vh - 380px) !important;
+    object-fit: contain !important;
   }
   .viewer--video .viewer__main { padding: 0; }
-  /* Kill any default gap the .viewer__main flex layout may inject */
   .viewer__main { gap: 0 !important; }
   .viewer__stage { margin-bottom: 0; }
 }
 
 
-/* Griot is clickable — let pointer events through it (default is none on
-   the background variant via aria-hidden, but we removed that). */
+/* Griot purement décoratif — pas d'interaction, pas de cursor pointer. */
 .matrix-griot {
-  pointer-events: auto;
-  cursor: pointer;
+  pointer-events: none;
+  user-select: none;
 }
-.matrix-griot:hover { filter: brightness(1.3); }

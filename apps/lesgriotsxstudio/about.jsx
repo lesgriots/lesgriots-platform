@@ -21,20 +21,32 @@ function AboutView() {
     : null;
   const intro = Array.isArray(override) && override.length ? override : tr("about.intro", lang);
 
-  // Services — title + 4 service lines, cascaded
+  // Services — titre + N lignes de service, cascadées.
+  // Le back office peut surcharger la liste via window.SITE_CONTENT.services
+  // = { en: ["BRAND STRATEGY", ...], fr: ["STRATÉGIE DE MARQUE", ...] }.
+  // Si rien n'est défini, on retombe sur les 4 services i18n hard-codés.
+  const svcOverride = (typeof window !== "undefined" && window.SITE_CONTENT && window.SITE_CONTENT.services)
+    ? window.SITE_CONTENT.services[lang]
+    : null;
+  const svcLines = (Array.isArray(svcOverride) && svcOverride.length)
+    ? svcOverride
+    : [
+        tr("about.svc.brand",      lang),
+        tr("about.svc.creative",   lang),
+        tr("about.svc.stage",      lang),
+        tr("about.svc.production", lang),
+      ];
   const servicesItems = [
-    { text: tr("about.services",       lang), speed: 40, key: "sv" },
-    { text: tr("about.svc.brand",      lang), speed: 28, key: "s1" },
-    { text: tr("about.svc.creative",   lang), speed: 28, key: "s2" },
-    { text: tr("about.svc.stage",      lang), speed: 28, key: "s3" },
-    { text: tr("about.svc.production", lang), speed: 28, key: "s4" },
+    { text: tr("about.services", lang), speed: 40, key: "sv" },
+    ...svcLines.map((text, i) => ({ text, speed: 28, key: "s" + i })),
   ];
   const servicesDelays = cascadeDelays(servicesItems, 400, 250);
 
-  // Contact — title + email, cascaded
+  // Contact — title + email + handle Instagram, cascaded
   const contactItems = [
     { text: tr("about.contact", lang),   speed: 40, key: "co"   },
-    { text: "studio@Lesgriots.com",      speed: 28, key: "co-m" },
+    { text: "studio@lesgriots.com",      speed: 28, key: "co-m" },
+    { text: "@lesgriotsxstudio",         speed: 28, key: "co-ig" },
   ];
   const contactDelays = cascadeDelays(contactItems, 600, 250);
 
@@ -107,8 +119,23 @@ function AboutView() {
               text={contactItems[1].text}
               speed={contactItems[1].speed}
               delay={contactDelays[1]}
-              cursor="always"
+              cursor="while"
               key={contactItems[1].key + "-" + lang}
+            />
+          </a>
+        </p>
+        <p className="about-min__person">
+          <a
+            href="https://www.instagram.com/lesgriotsxstudio"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Type
+              text={contactItems[2].text}
+              speed={contactItems[2].speed}
+              delay={contactDelays[2]}
+              cursor="always"
+              key={contactItems[2].key + "-" + lang}
             />
           </a>
         </p>

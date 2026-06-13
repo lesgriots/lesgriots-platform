@@ -1,4 +1,4 @@
-/* global React, Type, useLang, setLang, tr */
+/* global React, Type, useLang, setLang, tr, MatrixGriot */
 // Top-right inline menu (Frame 136 style) + FR/EN switch + STRIP/INDEX toggle + INQUIRY
 
 function MenuBar({ view, onNavigate }) {
@@ -9,6 +9,16 @@ function MenuBar({ view, onNavigate }) {
   const [openSeq, setOpenSeq] = React.useState(0);
   React.useEffect(() => {
     if (open) setOpenSeq((s) => s + 1);
+  }, [open]);
+
+  // Toggle une classe sur body quand le menu s'ouvre/ferme. La classe sert
+  // à appliquer un filter: blur direct sur le contenu de la page (méthode
+  // fiable cross-browser, surtout iOS Safari où backdrop-filter peut
+  // échouer à travers les stacking contexts du viewer).
+  React.useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.classList.toggle("menu-open", open);
+    return () => { document.body.classList.remove("menu-open"); };
   }, [open]);
 
   // Close the menu when clicking outside of it, or when pressing Escape.
@@ -94,7 +104,20 @@ function MenuBar({ view, onNavigate }) {
           </span>
         </button>
       </div>
-      <div className="menubar__term" role="dialog" aria-label="Menu">
+      <div
+        className="menubar__term"
+        role="dialog"
+        aria-label="Menu"
+        onClick={(e) => {
+          // Tap dans la zone vide du panel (la moitié basse transparente
+          // OU les espaces entre les items) → ferme le menu.
+          // Tout tap dont la cible n'est PAS un élément cliquable
+          // (button, a, ou enfant d'un button/a) ferme le menu.
+          const t = e.target;
+          if (t && t.closest && t.closest("button, a")) return;
+          setOpen(false);
+        }}
+      >
         <div className="menubar__term__bar">
           <span className="menubar__term__dots" aria-hidden="true">
             <span className="d d--y"></span>
@@ -104,6 +127,25 @@ function MenuBar({ view, onNavigate }) {
             className="menubar__term__x"
             onClick={() => setOpen(false)}
             aria-label="Close menu">×</button>
+        </div>
+        {/* Switch de langue dans le menu (visible uniquement en mobile via
+            CSS) — duplique le switch du topline qui est masqué sur mobile.
+            Permet à l'utilisateur d'accéder à la langue depuis le menu
+            ouvert sans avoir à fermer pour atteindre le topline. */}
+        <div className="menubar__lang menubar__lang--in-term">
+          <button
+            className={lang === "en" ? "is-active" : ""}
+            onClick={() => pickLang("en")}
+            aria-label="English">
+            EN
+          </button>
+          <span className="sep">/</span>
+          <button
+            className={lang === "fr" ? "is-active" : ""}
+            onClick={() => pickLang("fr")}
+            aria-label="Français">
+            FR
+          </button>
         </div>
         <div className="menubar__items">
           {items.map((it, i) => {
@@ -125,15 +167,8 @@ function MenuBar({ view, onNavigate }) {
                   cursor={view === it.key ? "always" : "while"}
                   key={"m-" + it.key + "-" + lang + "-" + openSeq}
                 />
-                <span className="voir">
-                  <Type
-                    text={tr("menu.view", lang)}
-                    speed={speed}
-                    delay={prevDuration + it.label.length * speed + 80}
-                    cursor="while"
-                    key={"v-" + it.key + "-" + lang + "-" + openSeq}
-                  />
-                </span>
+                {/* "VOIR" / "VIEW" retiré — le prompt > et le label
+                    suffisent, plus simple visuellement. */}
               </button>
             );
           })}

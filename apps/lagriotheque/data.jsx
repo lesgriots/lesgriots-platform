@@ -2,7 +2,7 @@
 // LA GRIOTHÈQUE — formations data
 // ⚠️  FICHIER GÉNÉRÉ AUTOMATIQUEMENT par backoffice-griotheque/.
 // Ne pas éditer à la main — ouvre le back office (http://localhost:3031).
-// Dernière génération : 2026-05-25T13:16:35.650Z
+// Dernière génération : 2026-05-25T17:21:05.852Z
 
 const DEFAULT_METHODS = "La formation se structure autour d'un accompagnement global sur la session et individuel sur les exercices pratiques, en groupes limités à 12 stagiaires maximum. Chaque module mêle exposés magistraux, cas pratiques sur projets réels et partage d'expérience, animés par un praticien actif qui transmet ce qu'il a construit — pas un théoricien qui enseigne ce qu'il a lu.";
 const DEFAULT_EVALUATION = "En amont, un questionnaire d'auto-évaluation est envoyé à chaque stagiaire. En fin de session, une évaluation des acquis est proposée, suivie d'un certificat de réalisation. Une enquête de satisfaction est envoyée à chaque stagiaire pour suivre la qualité pédagogique.";
@@ -367,7 +367,7 @@ const FORMATIONS = [
     methods: DEFAULT_METHODS,
     evaluation: DEFAULT_EVALUATION,
     accessibility: DEFAULT_ACCESSIBILITY,
-    available: true,
+    available: false,
     next: "—",
   },
   {
@@ -591,6 +591,167 @@ const FORMATIONS = [
     available: true,
     next: "—",
   },
+  {
+    id: "communication-reseaux-sociaux-tpe",
+    title: "Communiquer sur les réseaux sociaux pour promouvoir sa TPE",
+    tagline: "28h pour piloter ta présence sociale TPE : stratégie, page entreprise, ligne édito et e-réputation — certifiée CPF (RS7200).",
+    discipline: "STRATÉGIE · RÉSEAUX SOCIAUX",
+    duration: "28H · 4 JOURNÉES",
+    format: "PRÉSENTIEL · LE HAVRE / DISTANCIEL ZOOM",
+    location: "En distanciel via Zoom (lien envoyé après inscription) ou en présentiel — salles louées en France sélectionnées pour leur conformité aux exigences réglementaires de la formation professionnelle (accessibilité, sécurité, équipements pédagogiques). Sessions intra-entreprise sur demande.",
+    price: "900 € TTC",
+    cpf: true,
+    opco: true,
+    // Certification professionnelle inscrite au Répertoire Spécifique de France Compétences.
+    rs: "RS7200",
+    certifier: "CréActifs",
+    cpfUrl: "https://www.moncompteformation.gouv.fr/espace-prive/html/#/formation/recherche?Code=RS7200",
+    franceCompetencesUrl: "https://www.francecompetences.fr/recherche/rs/7200/",
+    trainer: {
+    "name": "MOOS COULIBALY",
+    "role": "FONDATEUR · LES GRIOTS · RÉFÉRENT PÉDAGOGIQUE"
+  },
+    media: {
+    "type": "image",
+    "src": "img/f-rs7200.jpg",
+    "credit": "LES GRIOTS"
+  },
+    overview: [
+    [
+      "Une TPE qui maîtrise ses réseaux sociaux, c'est une TPE qui ne dépend plus du bouche-à-oreille.",
+      "Mais entre les algorithmes qui changent, les plateformes qui se multiplient et le temps qui manque, beaucoup d'entrepreneurs publient sans plan et finissent par décrocher. Cette formation est faite pour reprendre la main, méthodiquement."
+    ],
+    [
+      "Une certification reconnue par l'État.",
+      "Cette formation prépare au RS7200 « Communiquer sur les réseaux sociaux pour promouvoir sa TPE », enregistrée au Répertoire Spécifique de France Compétences (certificateur CréActifs). Elle est éligible au CPF — tu peux la financer via ton Compte Personnel de Formation."
+    ],
+    [
+      "Repars avec une stratégie sociale qui tient debout.",
+      "En 4 jours (28h), tu construis ta stratégie sur les réseaux que tu choisis (en t'appuyant sur ton activité, tes ressources, ta cible), tu paramètres ta page entreprise, tu poses ta ligne éditoriale, tu produis tes premiers contenus (y compris avec l'IA générative), et tu apprends à gérer ta e-réputation (publicité, modération, bad buzz, influenceurs)."
+    ]
+  ],
+    description: "Formation certifiante (RS7200, France Compétences, certificateur CréActifs) éligible CPF. 28 heures réparties sur 4 journées de 7 heures, en distanciel (Zoom) ou en présentiel. Effectif limité à 12 stagiaires. Animée par Moos Coulibaly, fondateur de LES GRIOTS, qui structure depuis dix ans la communication digitale d'artistes signés en major et de TPE/PME créatives.",
+    audience: "Dirigeants de TPE (auto-entrepreneurs, artisans, commerçants, créateurs d'activité) souhaitant développer leur visibilité en ligne, acquérir les bases de la communication digitale et utiliser efficacement les réseaux sociaux pour promouvoir leur activité. La certification s'adresse à des créateurs ou chefs d'entreprise qui veulent gérer eux-mêmes leur présence sur les réseaux sociaux.",
+    prerequisites: "Maîtrise des outils bureautiques (traitement de texte, traitement des images, navigation internet, tableur). Aisance dans le rédactionnel et le traitement de données chiffrées. Disposer d'un ordinateur (PC ou Mac), d'une connexion internet haut-débit et d'un téléphone portable permettant de prendre photos et vidéos. Admission sur entretien téléphonique, visio ou présentiel.",
+    objectives: [
+    "Définir une stratégie réseaux sociaux adaptée à la TPE (ressources, cible, objectifs commerciaux)",
+    "Sélectionner les plateformes pertinentes en analysant audience, algorithmes et concurrence",
+    "Créer et paramétrer la page entreprise sur les réseaux choisis (identité visuelle, fonctionnalités)",
+    "Élaborer une stratégie éditoriale et un planning de publication régulier",
+    "Produire des contenus engageants en s'appuyant sur l'IA générative et des outils de design (accessibles aux personnes en situation de handicap)",
+    "Cultiver la e-réputation (publicité, modération, bad buzz, e-influenceurs, KPIs)"
+  ],
+    chapters: [
+    "Module 1 — Stratégie réseaux sociaux adaptée à la TPE",
+    "Module 2 — Sélection des plateformes cibles",
+    "Module 3 — Page entreprise : création et paramétrage",
+    "Module 4 — Stratégie éditoriale et planning",
+    "Module 5 — Création de contenus (IA, design, accessibilité)",
+    "Module 6 — E-réputation et publicité"
+  ],
+    program: [
+    {
+      "day": "jour 1",
+      "modules": [
+        {
+          "title": "Module 1 — Stratégie réseaux sociaux",
+          "items": [
+            "Définir une stratégie adaptée aux ressources mobilisables par la TPE",
+            "Aligner stratégie, public cible et objectifs commerciaux",
+            "Élaborer un plan d'action réaliste (capacités financières et temporelles)"
+          ]
+        },
+        {
+          "title": "Module 2 — Sélection des plateformes",
+          "items": [
+            "Comparer les positionnements des plateformes (audience, algorithmes, fonctionnalités)",
+            "Vérifier la correspondance avec son public cible",
+            "Analyser les pratiques de la concurrence pour identifier les bonnes communautés"
+          ]
+        }
+      ],
+      "exercises": [
+        "Atelier : élaboration de la stratégie sociale du stagiaire",
+        "Cartographie comparée des plateformes pertinentes pour le projet"
+      ]
+    },
+    {
+      "day": "jour 2",
+      "modules": [
+        {
+          "title": "Module 3 — Page entreprise",
+          "items": [
+            "Créer une page de présentation de l'entreprise TPE",
+            "Exploiter les interfaces et fonctionnalités de la plateforme",
+            "Intégrer nom et identité visuelle pour ancrer la page dans le réseau social"
+          ]
+        }
+      ],
+      "exercises": [
+        "Création et paramétrage d'une page professionnelle complète",
+        "Optimisation des descriptions, fonctionnalités (messagerie, suivi des performances)"
+      ]
+    },
+    {
+      "day": "jour 3",
+      "modules": [
+        {
+          "title": "Module 4 — Stratégie éditoriale",
+          "items": [
+            "Définir objectifs qualitatifs, quantitatifs et temporels",
+            "Élaborer un planning éditorial basé sur la saisonnalité du projet",
+            "Organiser une régularité dans la ligne éditoriale"
+          ]
+        },
+        {
+          "title": "Module 5 — Création de contenus",
+          "items": [
+            "Concevoir des contenus visuels et textuels adaptés aux formats des plateformes",
+            "S'appuyer sur l'IA générative (prompts) et outils de design graphique",
+            "Garantir l'accessibilité (sous-titrage, descriptions alternatives, etc.)",
+            "Ajuster le ton à la communauté visée"
+          ]
+        }
+      ],
+      "exercises": [
+        "Planning éditorial du stagiaire (saisonnalité, cadence)",
+        "Production d'un post complet (texte + visuel) prêt à publier"
+      ]
+    },
+    {
+      "day": "jour 4",
+      "modules": [
+        {
+          "title": "Module 6 — E-réputation",
+          "items": [
+            "Construire une campagne publicitaire (durée, cible, budget, contenu)",
+            "Traiter avis, commentaires négatifs, bad buzz et crises d'image",
+            "Sélectionner et collaborer avec des e-influenceurs pertinents",
+            "Suivre et interpréter les données du réseau social (KPIs, performance)"
+          ]
+        },
+        {
+          "title": "Préparation à la certification",
+          "items": [
+            "Structuration du dossier écrit (stratégie, page, ligne édito, post, publicité)",
+            "Préparation du diaporama et de la soutenance orale",
+            "Simulation de jury"
+          ]
+        }
+      ],
+      "exercises": [
+        "Mise en place d'une campagne publicitaire sur le réseau choisi",
+        "Cas pratique : gestion d'un commentaire négatif et d'un bad buzz",
+        "Restitution finale + retours individualisés"
+      ]
+    }
+  ],
+    methods: "Méthode pédagogique active et participative, en distanciel via Zoom ou en présentiel. Nombre de participants : de 1 à 12 maximum. Plateforme de contenus : Teachizy. Délai d'accès minimum : 2 semaines après l'inscription. Sessions permanentes. Encadrement par un formateur expérimenté (Moos Coulibaly, fondateur LES GRIOTS, référent pédagogique). Matériel requis : ordinateur PC ou Mac, connexion internet haut-débit, téléphone portable pour prises de vues. Formation adaptable et personnalisable (modalités à communiquer en amont de la signature).",
+    evaluation: "Évaluation certifiante (RS7200) : conception et mise en place d'une stratégie de communication et éditoriale d'une entreprise TPE via les réseaux sociaux, avec remise d'un rapport écrit et soutenance orale devant un jury composé de 3 personnes (un représentant CréActifs + deux professionnels extérieurs, soit 66 % d'externes). Le candidat présente un diaporama et est questionné par le jury. Évaluation individuelle réalisée chez le certificateur. Référentiel d'évaluation complet sur francecompetences.fr (RS7200).",
+    accessibility: "Des adaptations sont possibles pour les personnes en situation de handicap, après échange avec le référent handicap (Moos Coulibaly, lesgriots.of@gmail.com, 06 47 04 15 35). Supports, modalités d'évaluation et outils pédagogiques peuvent être ajustés en fonction des besoins identifiés, dans le respect du référentiel de certification.",
+    available: true,
+    next: "Sessions permanentes — nous contacter pour la prochaine date.",
+  },
 ];
 
 const WORKSHOPS = [
@@ -813,7 +974,7 @@ const RESOURCES = [
     title: "LES CINQ QUESTIONS DE LA STRATÉGIE DE CONTENU",
     format: "LECTURE · 8 MIN",
     type: "article",
-    href: "#",
+    href: "img/ressources/cinq-questions-strategie-contenu.pdf",
     available: true,
   },
   {
@@ -821,24 +982,24 @@ const RESOURCES = [
     title: "PLATEFORME DE MARQUE — TEMPLATE",
     format: "FIGMA / PDF",
     type: "template",
-    href: "#",
-    available: false,
+    href: "img/ressources/plateforme-marque-template.pdf",
+    available: true,
   },
   {
     id: "res-guide-filmer-mobile",
     title: "GUIDE — FILMER AU TÉLÉPHONE EN INTÉRIEUR",
     format: "PDF · 12 PAGES",
     type: "guide",
-    href: "#",
-    available: false,
+    href: "img/ressources/guide-filmer-au-telephone.pdf",
+    available: true,
   },
   {
     id: "res-cadence-realiste",
     title: "TENIR UNE CADENCE ÉDITORIALE RÉALISTE",
     format: "LECTURE · 6 MIN",
     type: "article",
-    href: "#",
-    available: false,
+    href: "img/ressources/tenir-cadence-editoriale.pdf",
+    available: true,
   },
 ];
 
@@ -850,7 +1011,7 @@ const SITE_CONFIG = {
     "workshops": false,
     "agenda": true,
     "financement": false,
-    "ressources": false,
+    "ressources": true,
     "cgv": true,
     "contact": true
   },

@@ -3,6 +3,17 @@
 import { NextResponse } from "next/server";
 
 export function middleware(req) {
+  // Endpoints PUBLICS — appelés par le site lagriotheque sans auth.
+  // /api/leads = capture des emails depuis la modal ressources (lead-gate).
+  // Le visiteur du site n'a pas et ne doit pas avoir le mot de passe back-office,
+  // donc on laisse passer sans auth. La route elle-même valide l'email + applique
+  // le CORS pour n'accepter que les origines connues (localhost:8082, prod).
+  // Le preflight OPTIONS aussi doit passer sans auth, sinon CORS échoue.
+  const publicPaths = ["/api/leads"];
+  if (publicPaths.includes(req.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
   const auth = req.headers.get("authorization");
   const expected = process.env.ADMIN_PASSWORD || "changeme";
 

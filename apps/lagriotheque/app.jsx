@@ -529,6 +529,21 @@ function SectionRow({ title, id, index, open, onToggle, children }) {
   );
 }
 
+// Affichage de la durée : on retire le préfixe "XH · " ou "XH·" si présent,
+// pour ne garder que la partie "X jours" / "X journée(s)".
+// Choix éditorial Moos : jamais d'heures sur le site (les heures sont en
+// interne pour le calcul OPCO, le visiteur lit en jours).
+// Ex : "7H · 1 JOURNÉE" → "1 JOURNÉE" ; "14H · 2 JOURS" → "2 JOURS".
+function formatDuration(d) {
+  if (!d) return "";
+  // Sépare sur " · " et garde tous les segments qui ne contiennent pas "H"
+  // (heures, ex : "7H", "14h") en tant qu'unité de temps.
+  const parts = String(d).split(/\s*·\s*/).map((p) => p.trim()).filter(Boolean);
+  const noHours = parts.filter((p) => !/^\d+\s*h(eure)?s?$/i.test(p));
+  // Si tout était des heures, on garde le brut (au moins on affiche qqch).
+  return (noHours.length > 0 ? noHours : parts).join(" · ");
+}
+
 // Renvoie un libellé lisible pour une session, qu'elle vienne de l'ancien
 // schéma (s.dateLabel) ou du nouveau (s.date au format ISO ou texte FR).
 function sessionDateLabel(s) {
@@ -822,6 +837,14 @@ function ProgramPage({ item, kind }) {
           <h2 className="lg__formation__upcoming__title">Prochaines sessions</h2>
           <a className="lg__formation__upcoming__more" href="#/agenda">voir l'agenda complet →</a>
         </div>
+        {/* Modalité : on précise que les formations sont en INTER (groupe ouvert,
+            stagiaires de structures différentes) — info clé pour le prospect.
+            Pas affiché sur les workshops (qui ont leur propre format). */}
+        {kind === "formation" && (
+          <p className="lg__formation__upcoming__modality">
+            Formation inter-entreprises · groupe restreint · sessions à dates fixes
+          </p>
+        )}
         {upcoming.length > 0 ? (
           <ul className="lg__formation__sessions">
             {upcoming.map((s) => {
@@ -995,7 +1018,7 @@ function ProgramPage({ item, kind }) {
           title: "durée",
           body: (
             <p className="lg__formation__prose">
-              {f.duration || "—"}
+              {formatDuration(f.duration) || "—"}
               {f.format ? <> · {f.format.toLowerCase()}</> : null}
             </p>
           ),
@@ -1127,10 +1150,35 @@ function FormationDetail({ id, onClose }) {
         <h2 className="lg__detail__title">{f.title}</h2>
         <p className="lg__detail__tagline">{f.tagline}</p>
 
+        {/* Badge CPF : visible en haut de l'overview pour qu'on sache
+            immédiatement si la formation est éligible CPF + code RS si
+            elle est certifiante. Lien optionnel vers la fiche France
+            Compétences. */}
+        {f.cpf && (
+          <div className="lg__detail__cpf-badge" aria-label="Formation éligible CPF">
+            <span className="lg__detail__cpf-badge__main">[ ÉLIGIBLE CPF ]</span>
+            {f.rs && (
+              <span className="lg__detail__cpf-badge__rs">
+                · Certification <strong>{f.rs}</strong>
+                {f.certifier && <> · Certificateur {f.certifier}</>}
+              </span>
+            )}
+            {f.franceCompetencesUrl && (
+              <a
+                className="lg__detail__cpf-badge__link"
+                href={f.franceCompetencesUrl}
+                target="_blank"
+                rel="noopener noreferrer">
+                · Voir la fiche France Compétences →
+              </a>
+            )}
+          </div>
+        )}
+
         <div className="lg__detail__grid">
           <div>
             <h6>DURÉE</h6>
-            <p>{f.duration}</p>
+            <p>{formatDuration(f.duration)}</p>
           </div>
           <div>
             <h6>FORMAT</h6>
@@ -1181,7 +1229,19 @@ function FormationDetail({ id, onClose }) {
         )}
 
         <div className="lg__detail__actions">
-          <a className="lg__btn lg__btn--primary" href="mailto:formations@lesgriots.com?subject=Inscription%20%E2%80%94%20{title}">
+          {/* CTA prioritaire Mon Compte Formation pour les formations
+              éligibles CPF (avec un cpfUrl) — financement direct depuis
+              le compte personnel de formation du candidat. */}
+          {f.cpf && f.cpfUrl && (
+            <a
+              className="lg__btn lg__btn--primary lg__btn--cpf"
+              href={f.cpfUrl}
+              target="_blank"
+              rel="noopener noreferrer">
+              S'INSCRIRE VIA MON COMPTE FORMATION →
+            </a>
+          )}
+          <a className={"lg__btn" + (f.cpf && f.cpfUrl ? "" : " lg__btn--primary")} href="mailto:formations@lesgriots.com?subject=Inscription%20%E2%80%94%20{title}">
             DEMANDER UNE INSCRIPTION
           </a>
           <a className="lg__btn" href="mailto:formations@lesgriots.com?subject=Devis%20CPF%2FOPCO">
@@ -1356,6 +1416,25 @@ const MONTHS_FR = [
 ];
 const MONTHS_FR_LOWER = MONTHS_FR.map((m) => m.toLowerCase());
 const MONTHS_ABBR = MONTHS_FR_LOWER.map((m) => m.slice(0, 4));
+const DAYS_FR = [
+  "Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi",
+];
+
+// Renvoie la date complète "Mercredi 15 avril 2026" si on a year/month/day,
+// sinon le mois+année seul ("Avril 2026"), sinon le brut ("Date à confirmer").
+// On capitalise la 1re lettre — typo française classique.
+function fullDateLabel(dateInfo) {
+  if (!dateInfo || dateInfo.monthIdx === undefined) return "";
+  if (dateInfo.day) {
+    // Date JS pour récupérer le jour de la semaine (0 = dimanche)
+    const d = new Date(dateInfo.year, dateInfo.monthIdx, dateInfo.day);
+    const dow = DAYS_FR[d.getDay()];
+    const month = (MONTHS_FR[dateInfo.monthIdx] || "").toLowerCase();
+    return `${dow} ${dateInfo.day} ${month} ${dateInfo.year}`;
+  }
+  // Pas de jour précis → on garde le monthLabel (ex: "Avril 2026")
+  return dateInfo.monthLabel || "";
+}
 
 // Renvoie { year, monthIdx, day?, sortKey, monthLabel }
 function parseSessionDate(input) {
@@ -1415,11 +1494,8 @@ function AgendaRow({ s, item, isOpen, onToggle }) {
   const isWorkshop = !!s.workshop_id || s.kind === "workshop";
   const targetId = s.formation_id || s.workshop_id || s.targetId || "";
   const title = item?.title || s.title || targetId || "—";
-  const dayBig = dateInfo.day ? String(dateInfo.day).padStart(2, "0") : "—";
-  const monthLong = (MONTHS_FR[dateInfo.monthIdx] || "").toLowerCase();
-  const dateLong = dateInfo.day
-    ? `${dateInfo.day} ${monthLong} ${dateInfo.year}`
-    : `${monthLong} ${dateInfo.year}`;
+  // Date complète "Mercredi 15 avril 2026" — choix éditorial validé avec Moos.
+  const dateLong = fullDateLabel(dateInfo);
   const subject = encodeURIComponent(`Inscription — ${title} (${dateLong})`);
   const mailto = `mailto:formations@lesgriots.com?subject=${subject}`;
   const detailHref = isWorkshop
@@ -1436,8 +1512,10 @@ function AgendaRow({ s, item, isOpen, onToggle }) {
         aria-expanded={isOpen}
       >
         <div className="lg__ag__date">
-          <div className="lg__ag__day">{dayBig}</div>
-          <div className="lg__ag__month">{monthLong} {dateInfo.year}</div>
+          {/* Date complète sur une seule ligne, sans la séparation jour/mois.
+              Le rendu lit comme une phrase courte ("Mercredi 15 avril 2026")
+              au lieu de plaquer un numéro géant + un mois en mono caps. */}
+          <div className="lg__ag__date__full">{dateLong}</div>
         </div>
         <div className="lg__ag__main">
           <div className="lg__ag__kind">{isWorkshop ? "workshop" : "formation"}</div>
@@ -1459,8 +1537,13 @@ function AgendaRow({ s, item, isOpen, onToggle }) {
             <p className="lg__ag__tagline">{item.tagline}</p>
           )}
           <div className="lg__ag__grid">
-            {item?.duration && <Pair label="Durée" value={item.duration} />}
+            {item?.duration && <Pair label="Durée" value={formatDuration(item.duration)} />}
             {item?.format && <Pair label="Format" value={item.format} />}
+            {/* Lieu : priorité au lieu défini sur la session (s.location),
+                sinon on retombe sur celui de la formation/workshop (item.location). */}
+            {(s.location || item?.location) && (
+              <Pair label="Lieu" value={s.location || item.location} />
+            )}
             {item?.price && <Pair label="Tarif" value={item.price} />}
             {item?.trainer?.name && <Pair label="Intervenant" value={item.trainer.name} />}
           </div>
@@ -1588,7 +1671,7 @@ function _UnusedSessionDetailModal({ session, item, isWorkshop, onClose }) {
           {item?.duration && (
             <div>
               <div style={{ fontSize: 10, letterSpacing: "0.16em", opacity: 0.5, marginBottom: 3 }}>DURÉE</div>
-              <div style={{ fontSize: 13 }}>{item.duration}</div>
+              <div style={{ fontSize: 13 }}>{formatDuration(item.duration)}</div>
             </div>
           )}
           {item?.format && (
@@ -1769,28 +1852,27 @@ function Agenda() {
   );
 }
 
-function ResourceRow({ r, onRequest }) {
-  const titleRef = useMarqueeOverflow([r.title]);
-  const typeLabel = {
+// Libellé lisible d'un type de ressource (réutilisé par la ligne et la page).
+function resourceTypeLabel(type) {
+  return {
     template: "TEMPLATE",
     guide: "GUIDE",
     article: "ARTICLE",
     video: "VIDÉO",
-  }[r.type] || "RESSOURCE";
+    outil: "OUTIL",
+  }[type] || "RESSOURCE";
+}
 
-  // Sur clic : ouvre la modal lead-gate au lieu de naviguer directement.
-  // Si pas dispo : ne fait rien (le visiteur voit le label "BIENTÔT").
-  function handleClick(e) {
-    e.preventDefault();
-    if (!r.available) return;
-    onRequest(r);
-  }
+function ResourceRow({ r }) {
+  const titleRef = useMarqueeOverflow([r.title]);
+  const typeLabel = resourceTypeLabel(r.type);
 
+  // Sur clic : navigue vers la page détail de la ressource (#/ressources/<id>).
+  // Le téléchargement (avec capture email) se fait depuis cette page.
   return (
     <a
       className={"lg__row" + (r.available ? "" : " is-soon")}
-      href={r.available ? r.href : "#/ressources"}
-      onClick={handleClick}
+      href={`#/ressources/${r.id}`}
     >
       <p className="lg__row__label">
         {typeLabel} · {r.format}
@@ -1814,6 +1896,8 @@ function ResourceModal({ resource, onClose }) {
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState("");
+  // Étape post-submit : "form" → "done" (affiche la confirmation 2.5s avant fermeture)
+  const [step, setStep] = useState("form");
 
   // Esc ferme la modal
   useEffect(() => {
@@ -1825,6 +1909,22 @@ function ResourceModal({ resource, onClose }) {
       document.body.style.overflow = "";
     };
   }, [onClose]);
+
+  // Déclenche un VRAI téléchargement (pas window.open qui ouvre en nouvel onglet).
+  // L'attribut `download` force le navigateur à sauvegarder le fichier au lieu
+  // de l'afficher inline. Marche pour les URLs same-origin (nos PDFs servis par
+  // le site) ; pour les URLs externes, le download attr est ignoré et on
+  // retombe sur un nouvel onglet, c'est OK aussi.
+  function triggerDownload(href) {
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = ""; // garde le nom de fichier d'origine
+    a.target = "_blank";
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
 
   async function submit(e) {
     e.preventDefault();
@@ -1861,13 +1961,16 @@ function ResourceModal({ resource, onClose }) {
 
     setSubmitting(false);
 
-    // Déclenche le téléchargement et ferme la modal.
+    // Déclenche le téléchargement + bascule sur l'écran de confirmation.
+    // Auto-close après 2.5s pour que le visiteur voie bien le message.
     if (resource.href && resource.href !== "#") {
-      window.open(resource.href, "_blank", "noopener");
+      triggerDownload(resource.href);
+      setStep("done");
+      setTimeout(() => onClose(), 2500);
     } else {
-      alert("Le fichier n'est pas encore disponible. Tu seras prévenu(e) par email.");
+      alert("Le fichier n'est pas encore disponible. Tu seras prévenu(e) par email dès qu'il sera prêt.");
+      onClose();
     }
-    onClose();
   }
 
   return (
@@ -1917,9 +2020,49 @@ function ResourceModal({ resource, onClose }) {
         <h3 style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 24, lineHeight: 1.15, marginBottom: 18, letterSpacing: "-0.01em" }}>
           {resource.title}
         </h3>
+
+        {step === "done" ? (
+          /* Écran de confirmation — visible 2.5s avant fermeture auto.
+             Permet au visiteur de comprendre que (1) son email est enregistré
+             et (2) le téléchargement vient de démarrer (au cas où le fichier
+             arrive direct dans son dossier Téléchargements sans aucune fanfare). */
+          <div style={{ padding: "8px 0 12px" }}>
+            <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>
+              ✓ Merci{name ? `, ${name}` : ""} — ton email est enregistré.
+            </p>
+            <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 18, opacity: 0.75 }}>
+              Le téléchargement vient de démarrer (regarde ton dossier <em>Téléchargements</em>).
+              Si rien ne s'est lancé, clique ici :
+            </p>
+            <a
+              href={resource.href}
+              download
+              target="_blank"
+              rel="noopener"
+              style={{
+                display: "inline-block",
+                padding: "10px 18px",
+                border: "1px solid var(--ink)",
+                background: "var(--ink)",
+                color: "var(--paper)",
+                fontFamily: "var(--font-mono)",
+                fontSize: 12,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                textDecoration: "none",
+              }}
+            >
+              ↓ Télécharger à nouveau
+            </a>
+            <p style={{ fontSize: 11, opacity: 0.5, marginTop: 18 }}>
+              Cette fenêtre se fermera dans quelques secondes.
+            </p>
+          </div>
+        ) : (
+        <>
         <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 24, opacity: 0.75 }}>
-          Laisse-nous ton email et la ressource s'ouvre dans un nouvel onglet.
-          On t'enverra aussi de temps en temps nos prochaines ressources.
+          Laisse-nous ton email et le téléchargement démarre dans la foulée.
+          On t'enverra aussi occasionnellement nos prochaines ressources.
         </p>
 
         <form onSubmit={submit}>
@@ -2002,38 +2145,99 @@ function ResourceModal({ resource, onClose }) {
             </button>
           </div>
         </form>
+        </>
+        )}
       </div>
     </div>
   );
 }
 
 function Ressources() {
-  // Lead-gate : la ressource demandée est stockée en state.
-  // Quand non-null, la modal s'ouvre avec son contexte.
-  const [requested, setRequested] = useState(null);
-
   return (
     <section className="lg__catalogue" id="ressources">
       <PageIntro
         text={
           <>
-            Worksheets, templates et guides — des outils pratiques pour
-            affûter ta méthode, structurer ton activité et renforcer ta
-            marque personnelle. À télécharger et à utiliser dès aujourd'hui.
+            Worksheets, templates et guides — des outils gratuits pour
+            structurer ton récit, affûter ta méthode et renforcer ta marque
+            personnelle. À télécharger et à utiliser dès aujourd'hui.
           </>
         }
-        sub="Gratuit · mis à jour régulièrement"
+        sub="Gratuites · mises à jour régulièrement"
       />
       <div className="lg__rows">
         {RESOURCES.map((r) => (
-          <ResourceRow key={r.id} r={r} onRequest={setRequested} />
+          <ResourceRow key={r.id} r={r} />
         ))}
       </div>
+    </section>
+  );
+}
+
+// Page détail d'une ressource — inspirée des pages produit The Futur :
+// couverture, accroche, description, "ce que tu obtiens", crédit auteur, et
+// un gros CTA de téléchargement qui ouvre la modal de capture email.
+function ResourcePage({ r }) {
+  const [requested, setRequested] = useState(false);
+  const typeLabel = resourceTypeLabel(r.type);
+
+  // Description : un paragraphe par ligne vide. "Ce que tu obtiens" : une puce par ligne.
+  const paras = (r.description || "").split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
+  const inside = (r.whatsInside || "").split("\n").map((s) => s.trim()).filter(Boolean);
+  const coverSrc = r.cover && r.cover.trim() ? r.cover : null;
+
+  return (
+    <section className="lg__resource" id="ressource">
+      <a className="lg__resource__back" href="#/ressources">← toutes les ressources</a>
+
+      <div className="lg__resource__grid">
+        {/* Colonne média : couverture + carte de téléchargement */}
+        <aside className="lg__resource__aside">
+          <div className="lg__resource__cover">
+            {coverSrc
+              ? <img src={coverSrc} alt={r.title} loading="lazy" />
+              : <div className="lg__resource__cover--ph" aria-hidden="true">{typeLabel}</div>}
+          </div>
+          <div className="lg__resource__card">
+            <p className="lg__resource__card__meta">{typeLabel}{r.format ? " · " + r.format : ""}</p>
+            <p className="lg__resource__card__price">GRATUIT</p>
+            {r.available ? (
+              <button className="lg__btn lg__btn--primary lg__resource__cta" onClick={() => setRequested(true)}>
+                Télécharger ▶
+              </button>
+            ) : (
+              <button className="lg__btn lg__resource__cta" disabled>Bientôt disponible</button>
+            )}
+            <p className="lg__resource__card__note">Envoyé par email · sans spam · désinscription en 1 clic</p>
+          </div>
+        </aside>
+
+        {/* Colonne contenu */}
+        <div className="lg__resource__body">
+          <p className="lg__resource__kicker">{typeLabel}</p>
+          <h1 className="lg__resource__title">{r.title}</h1>
+          {r.subtitle && <p className="lg__resource__subtitle">{r.subtitle}</p>}
+          {r.author && <p className="lg__resource__author">Par {r.author}</p>}
+
+          {paras.length > 0 && (
+            <div className="lg__resource__desc">
+              {paras.map((p, i) => <p key={i}>{p}</p>)}
+            </div>
+          )}
+
+          {inside.length > 0 && (
+            <div className="lg__resource__inside">
+              <h2 className="lg__resource__h2">Ce que tu obtiens</h2>
+              <ul>
+                {inside.map((it, i) => <li key={i}>{it}</li>)}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+
       {requested && (
-        <ResourceModal
-          resource={requested}
-          onClose={() => setRequested(null)}
-        />
+        <ResourceModal resource={r} onClose={() => setRequested(false)} />
       )}
     </section>
   );
@@ -2069,11 +2273,13 @@ function CGV() {
           <p>
             <strong>SASU LES GRIOTS</strong> · Société par actions
             simplifiée unipersonnelle au capital social de 1 000 €.
-            Siège social : Paris (QPV), France.
-            SIRET : à compléter · RCS Paris : à compléter.
+            Siège social : 80 avenue du 8 mai 1945, 76610 Le Havre, France.
+            SIREN : 902 628 684 · RCS Le Havre 902 628 684 · SIRET : 902 628 684 00018.
             <strong> TVA non applicable, art. 293 B du CGI.</strong>
-            Numéro de déclaration d'activité (NDA) : en cours
-            d'enregistrement auprès de la DREETS Île-de-France.
+            Numéro de déclaration d'activité (NDA) : 28760747176, enregistré
+            auprès de la DREETS Normandie.
+            Spécialité de formation : techniques de l'image et du son,
+            métiers connexes du spectacle.
             Certifié Qualiopi au titre de la catégorie « Actions de formation ».
           </p>
         </li>
@@ -2204,7 +2410,7 @@ function CGV() {
             LA GRIOTHÈQUE ne pourra être tenue responsable d'un manquement
             résultant d'un cas de force majeure. Les présentes CGV sont
             soumises au droit français. À défaut de résolution amiable,
-            tout litige sera porté devant le tribunal compétent de Paris.
+            tout litige sera porté devant le tribunal compétent du Havre (siège social).
           </p>
         </li>
       </ol>
@@ -2212,6 +2418,299 @@ function CGV() {
       <p className="lg__cgv__footer">
         Pour toute question relative aux présentes CGV, contacter
         LA GRIOTHÈQUE à
+        <a href="mailto:formations@lesgriots.com"> formations@lesgriots.com</a>.
+      </p>
+    </section>
+  );
+}
+
+// Mentions légales — page obligatoire (Loi LCEN 2004).
+// Reprend exactement les classes .lg__cgv pour la cohérence de mise en page :
+// même typo, même rythme, même style éditorial SUPSI.
+function MentionsLegales() {
+  return (
+    <section className="lg__cgv" id="mentions-legales">
+      <h1 className="lg__cgv__title">Mentions légales</h1>
+      <p className="lg__cgv__lede">
+        Informations légales relatives au site lagriotheque.com,
+        édité par la <span className="lg-brand">SASU LES GRIOTS</span>.
+        Conformément à la loi n° 2004-575 du 21 juin 2004 pour la confiance
+        dans l'économie numérique (LCEN). Version au 25 mai 2026.
+      </p>
+
+      <ol className="lg__cgv__list">
+        <li>
+          <h2>01 — Éditeur du site</h2>
+          <p>
+            <strong>SASU LES GRIOTS</strong>, Société par actions simplifiée
+            unipersonnelle au capital de 1 000 €.<br />
+            Siège social : 80 avenue du 8 mai 1945, 76610 Le Havre, France.<br />
+            SIREN : 902 628 684 — RCS Le Havre 902 628 684 — SIRET : 902 628 684 00018.<br />
+            Code APE : 5911B (Production de films institutionnels et publicitaires).<br />
+            TVA non applicable, art. 293 B du CGI (franchise en base).<br />
+            Numéro de déclaration d'activité (NDA) : 28760747176, enregistré
+            auprès de la DREETS Normandie.<br />
+            Spécialité de formation : techniques de l'image et du son,
+            métiers connexes du spectacle.<br />
+            Certifié Qualiopi au titre de la catégorie « Actions de formation ».
+          </p>
+        </li>
+
+        <li>
+          <h2>02 — Directeur de la publication</h2>
+          <p>
+            Moustapha COULIBALY, en sa qualité de président de la SASU
+            LES GRIOTS.<br />
+            Contact :{" "}
+            <a href="mailto:formations@lesgriots.com">formations@lesgriots.com</a>
+          </p>
+        </li>
+
+        <li>
+          <h2>03 — Hébergeur</h2>
+          <p>
+            Le site est hébergé par <strong>OVH SAS</strong>, société par
+            actions simplifiée au capital de 50 909 766,40 €.<br />
+            Siège social : 2 rue Kellermann, 59100 Roubaix, France.<br />
+            RCS Lille Métropole : 424 761 419.<br />
+            Téléphone : 09 72 10 10 07.<br />
+            Site web :{" "}
+            <a href="https://www.ovhcloud.com" target="_blank" rel="noopener">
+              www.ovhcloud.com
+            </a>
+          </p>
+        </li>
+
+        <li>
+          <h2>04 — Propriété intellectuelle</h2>
+          <p>
+            L'ensemble du contenu du site (textes, images, vidéos, logos,
+            structure, code, ressources téléchargeables) est la propriété
+            exclusive de la SASU LES GRIOTS, sauf mention contraire explicite.
+            Toute reproduction, représentation, modification ou exploitation,
+            totale ou partielle, sans autorisation écrite préalable, est
+            interdite et constitue une contrefaçon sanctionnée par les
+            articles L. 335-2 et suivants du Code de la propriété intellectuelle.
+          </p>
+        </li>
+
+        <li>
+          <h2>05 — Marques et noms commerciaux</h2>
+          <p>
+            « LA GRIOTHÈQUE » et « LES GRIOTS » sont les noms commerciaux
+            utilisés par la SASU LES GRIOTS dans le cadre de son activité.
+            Toute utilisation non autorisée de ces dénominations,
+            reproduction du logo ou imitation susceptible de créer une
+            confusion est susceptible d'engager la responsabilité de son
+            auteur sur le fondement de la concurrence déloyale et du
+            parasitisme.
+          </p>
+        </li>
+
+        <li>
+          <h2>06 — Données personnelles</h2>
+          <p>
+            Le traitement des données personnelles collectées via ce site
+            (notamment via le formulaire de demande de ressources) est régi
+            par notre <a href="#/confidentialite">Politique de confidentialité</a>.
+          </p>
+        </li>
+
+        <li>
+          <h2>07 — Cookies</h2>
+          <p>
+            Ce site n'utilise pas de cookies de traçage (analytics, publicité,
+            réseaux sociaux). Seuls des cookies techniques strictement
+            nécessaires au fonctionnement du site peuvent être utilisés (ex :
+            préférences d'affichage). Ils ne nécessitent pas de consentement
+            au titre de l'article 82 de la loi Informatique et Libertés.
+          </p>
+        </li>
+
+        <li>
+          <h2>08 — Liens externes</h2>
+          <p>
+            Le site peut contenir des liens vers des sites externes. LES GRIOTS
+            décline toute responsabilité quant au contenu de ces sites tiers.
+          </p>
+        </li>
+
+        <li>
+          <h2>09 — Droit applicable</h2>
+          <p>
+            Les présentes mentions légales sont régies par le droit français.
+            Tout litige relèvera de la compétence des tribunaux du ressort du
+            siège social (Le Havre).
+          </p>
+        </li>
+      </ol>
+
+      <p className="lg__cgv__footer">
+        Pour toute question relative à ces mentions, contacter
+        <a href="mailto:formations@lesgriots.com"> formations@lesgriots.com</a>.
+      </p>
+    </section>
+  );
+}
+
+// Politique de confidentialité — obligatoire RGPD (Règlement UE 2016/679).
+// Décrit qui collecte, quoi, pourquoi, combien de temps, avec qui, et les droits
+// de la personne concernée. Conforme aux recommandations CNIL.
+function Confidentialite() {
+  return (
+    <section className="lg__cgv" id="confidentialite">
+      <h1 className="lg__cgv__title">Politique de confidentialité</h1>
+      <p className="lg__cgv__lede">
+        Comment <span className="lg-brand">LA GRIOTHÈQUE</span> traite les
+        données personnelles collectées via ce site. Conforme au Règlement
+        général sur la protection des données (RGPD, UE 2016/679) et à la
+        Loi Informatique et Libertés. Version au 25 mai 2026.
+      </p>
+
+      <ol className="lg__cgv__list">
+        <li>
+          <h2>01 — Responsable de traitement</h2>
+          <p>
+            <strong>SASU LES GRIOTS</strong><br />
+            80 avenue du 8 mai 1945, 76610 Le Havre, France.<br />
+            SIREN 902 628 684 — RCS Le Havre.<br />
+            Contact :{" "}
+            <a href="mailto:formations@lesgriots.com">formations@lesgriots.com</a>
+          </p>
+        </li>
+
+        <li>
+          <h2>02 — Données collectées</h2>
+          <p>
+            Nous collectons uniquement les données strictement nécessaires
+            aux finalités décrites ci-dessous :
+          </p>
+          <ul>
+            <li><strong>Email</strong> (obligatoire pour télécharger une ressource ou demander une session)</li>
+            <li><strong>Prénom</strong> (facultatif, pour personnaliser les communications)</li>
+            <li><strong>Consentement</strong> (case cochée pour accepter ces conditions)</li>
+            <li><strong>Identifiant et date</strong> de la demande (généré automatiquement)</li>
+          </ul>
+          <p>
+            Aucune donnée sensible (santé, opinion, origine, etc.) n'est
+            collectée. Aucun cookie de traçage n'est déposé.
+          </p>
+        </li>
+
+        <li>
+          <h2>03 — Finalités du traitement</h2>
+          <p>
+            Vos données sont utilisées pour :
+          </p>
+          <ul>
+            <li>vous transmettre la ressource demandée ;</li>
+            <li>vous informer occasionnellement de nos nouvelles ressources,
+              sessions de formation ou actualités pédagogiques (si vous avez
+              donné votre consentement) ;</li>
+            <li>répondre à vos demandes de contact.</li>
+          </ul>
+          <p>
+            <strong>Base légale :</strong> votre consentement explicite
+            (article 6.1.a du RGPD), donné via la case à cocher du formulaire.
+          </p>
+        </li>
+
+        <li>
+          <h2>04 — Durée de conservation</h2>
+          <p>
+            Vos données sont conservées <strong>3 ans à compter de votre
+            dernier contact actif</strong> (téléchargement, ouverture d'email,
+            réponse). Au-delà, elles sont supprimées de nos bases.
+          </p>
+        </li>
+
+        <li>
+          <h2>05 — Destinataires des données</h2>
+          <p>
+            Vos données sont accessibles uniquement aux personnes habilitées
+            de LA GRIOTHÈQUE. Elles peuvent être traitées par nos
+            sous-traitants techniques strictement pour les besoins de
+            fonctionnement du service :
+          </p>
+          <ul>
+            <li>hébergeur du site (OVH SAS, France)</li>
+            <li>fournisseur d'envoi d'email transactionnel (si activé ultérieurement)</li>
+          </ul>
+          <p>
+            Vos données ne sont <strong>jamais vendues, louées ou cédées</strong>{" "}
+            à des tiers à des fins commerciales.
+          </p>
+        </li>
+
+        <li>
+          <h2>06 — Transferts hors UE</h2>
+          <p>
+            Toutes nos données sont stockées sur des serveurs situés en Union
+            européenne (OVH, France). Aucun transfert hors UE n'a lieu dans
+            le cadre du fonctionnement normal du site.
+          </p>
+        </li>
+
+        <li>
+          <h2>07 — Vos droits</h2>
+          <p>
+            Conformément au RGPD, vous disposez à tout moment des droits suivants
+            sur vos données personnelles :
+          </p>
+          <ul>
+            <li>droit d'<strong>accès</strong> à vos données ;</li>
+            <li>droit de <strong>rectification</strong> des données inexactes ;</li>
+            <li>droit à l'<strong>effacement</strong> (« droit à l'oubli ») ;</li>
+            <li>droit à la <strong>limitation</strong> du traitement ;</li>
+            <li>droit à la <strong>portabilité</strong> de vos données (export) ;</li>
+            <li>droit d'<strong>opposition</strong> au traitement ;</li>
+            <li>droit de <strong>retirer votre consentement</strong> à tout moment ;</li>
+            <li>droit de définir des <strong>directives post-mortem</strong>.</li>
+          </ul>
+          <p>
+            Pour exercer ces droits, écrivez-nous à{" "}
+            <a href="mailto:formations@lesgriots.com">formations@lesgriots.com</a>
+            {" "}avec votre demande. Nous y répondons sous 30 jours.
+          </p>
+        </li>
+
+        <li>
+          <h2>08 — Réclamation auprès de la CNIL</h2>
+          <p>
+            Si vous estimez que vos droits ne sont pas respectés, vous pouvez
+            adresser une réclamation à la Commission Nationale de l'Informatique
+            et des Libertés (CNIL) :{" "}
+            <a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">
+              www.cnil.fr/fr/plaintes
+            </a>{" "}
+            — ou par courrier à 3 place de Fontenoy, 75007 Paris.
+          </p>
+        </li>
+
+        <li>
+          <h2>09 — Sécurité</h2>
+          <p>
+            Nous mettons en œuvre les mesures techniques et organisationnelles
+            appropriées pour protéger vos données : chiffrement HTTPS du site,
+            accès restreint à la base de données, sauvegardes régulières,
+            authentification renforcée du back-office.
+          </p>
+        </li>
+
+        <li>
+          <h2>10 — Modifications de cette politique</h2>
+          <p>
+            La présente politique peut évoluer pour refléter de nouvelles
+            obligations légales ou de nouveaux traitements. La date en haut
+            de page indique la dernière mise à jour. Pour les modifications
+            substantielles, vous serez informé par email si vous figurez dans
+            notre base de contacts.
+          </p>
+        </li>
+      </ol>
+
+      <p className="lg__cgv__footer">
+        Pour toute question relative à vos données personnelles, contactez-nous à
         <a href="mailto:formations@lesgriots.com"> formations@lesgriots.com</a>.
       </p>
     </section>
@@ -2226,18 +2725,6 @@ function Approche() {
         Trois points qui définissent l'ADN de <span className="lg-brand">LA GRIOTHÈQUE</span> —
         ce qui nous rend différents d'un centre de formation comme les autres.
       </p>
-
-      <div className="lg__approche__feature">
-        <p className="lg__approche__feature__h">Des intervenants en activité</p>
-        <p className="lg__approche__feature__p">
-          Tous nos formateurs exercent activement la pratique qu'ils
-          enseignent. Pas des théoriciens qui paraphrasent — des
-          praticiens qui transmettent leur méthode après l'avoir éprouvée
-          sur le terrain pour <strong>Rilès, Vacra, Médine, Oumar, FILA,
-          CCN Le Havre, Eesah Yasuke</strong>. Tu apprends une discipline
-          en train d'être pratiquée, pas une discipline figée dans un manuel.
-        </p>
-      </div>
 
       <ApprocheAccordion />
 
@@ -2361,7 +2848,8 @@ function Financement() {
             <span className="lg-brand">LA GRIOTHÈQUE</span> est le pilier
             formation de la SASU LES GRIOTS, certifié Qualiopi (Actions de
             formation), Lauréat French Tech, et déclaré sous le numéro NDA
-            (en cours d'enregistrement) auprès de la DREETS Île-de-France.
+            28760747176 auprès de la DREETS Normandie — spécialité techniques
+            de l'image et du son, métiers connexes du spectacle.
           </p>
           <p>
             Pour toute question d'accessibilité ou d'adaptation, merci de
@@ -2382,8 +2870,8 @@ function Contact() {
         <p>de la SASU LES GRIOTS</p>
         <p>Certifié Qualiopi</p>
         <p>&nbsp;</p>
-        <p>Paris, France</p>
-        <p>Implanté en QPV</p>
+        <p>Présentiel à Paris</p>
+        <p>Siège social — Le Havre</p>
         <p>&nbsp;</p>
         <p><a href="mailto:formations@lesgriots.com">formations@lesgriots.com</a></p>
         <p>&nbsp;</p>
@@ -2394,7 +2882,6 @@ function Contact() {
       <div className="lg__contact__griot" aria-hidden="true">
         <GriotRing />
       </div>
-      <Partners />
     </section>
   );
 }
@@ -2470,35 +2957,21 @@ function Partners() {
           </a>
           <a
             className="lg__partners__logo lg__partners__logo--img"
-            href="https://lehavre.fr"
+            href="#"
             target="_blank"
             rel="noopener"
-            aria-label="Ville du Havre"
+            aria-label="Les Révélations — L'image de demain"
           >
-            <img src="img/lehavre.svg" alt="Ville du Havre" />
+            <img src="img/les-revelations.svg" alt="Les Révélations — L'image de demain" />
           </a>
           <a
             className="lg__partners__logo lg__partners__logo--img"
-            href="https://about.meta.com"
+            href="https://lesdetermines.fr"
             target="_blank"
             rel="noopener"
-            aria-label="Meta"
+            aria-label="Les Déterminés"
           >
-            <img src="img/meta.svg" alt="Meta" />
-          </a>
-        </div>
-      </div>
-      <div className="lg__partners__tier">
-        <p className="lg__partners__label">Certifié par</p>
-        <div className="lg__partners__list">
-          <a
-            className="lg__partners__logo lg__partners__logo--img"
-            href="https://travail-emploi.gouv.fr/qualiopi"
-            target="_blank"
-            rel="noopener"
-            aria-label="Qualiopi — processus certifié"
-          >
-            <img src="img/qualiopi.png" alt="Qualiopi — processus certifié" />
+            <img src="img/les-determines.svg" alt="Les Déterminés" />
           </a>
         </div>
       </div>
@@ -2583,6 +3056,7 @@ function App() {
   // Pour les routes formations/[id] et workshops/[id], on remonte au parent
   const routeBase = route.startsWith("formations/") ? "catalogue"
     : route.startsWith("workshops/") ? "workshops"
+    : route.startsWith("ressources/") ? "ressources"
     : route;
   const pageKey = ROUTE_TO_PAGE_KEY[routeBase];
   const isPageBlocked = pageKey && cfgActivePages[pageKey] === false;
@@ -2612,6 +3086,10 @@ function App() {
     const id = route.slice("workshops/".length);
     const w = WORKSHOPS.find((x) => x.id === id);
     page = w ? <WorkshopPage w={w} /> : <Workshops />;
+  } else if (route.startsWith("ressources/")) {
+    const id = route.slice("ressources/".length);
+    const r = RESOURCES.find((x) => x.id === id);
+    page = r ? <ResourcePage r={r} /> : <Ressources />;
   } else {
     switch (route) {
       case "catalogue":   page = <Catalogue />; break;
@@ -2620,9 +3098,11 @@ function App() {
       case "ressources":  page = <Ressources />; break;
       case "approche":    page = <Approche />; break;
       case "contact":     page = <Contact />; break;
-      case "cgv":         page = <CGV />; break;
-      case "financement": page = <Financement />; break;
-      default:            page = <Manifesto />;
+      case "cgv":             page = <CGV />; break;
+      case "mentions-legales":page = <MentionsLegales />; break;
+      case "confidentialite": page = <Confidentialite />; break;
+      case "financement":     page = <Financement />; break;
+      default:                page = <Manifesto />;
     }
   }
 
@@ -2652,10 +3132,11 @@ function App() {
               <a href="mailto:formations@lesgriots.com?subject=Newsletter">newsletter</a>
             </div>
             <div className="lg__footer__col">
-              <p>SASU Les Griots — Paris, QPV</p>
-              <p>Certifié Qualiopi · Lauréat French Tech</p>
-              <p>NDA · en cours · DREETS Île-de-France</p>
-              <a href="#/contact">mentions légales</a>
+              {/* Les infos société (SIREN, RCS, NDA, DREETS, etc.) sont
+                  centralisées sur la page Mentions légales pour ne pas alourdir
+                  le footer — accessibles en un clic via le lien ci-dessous. */}
+              <a href="#/mentions-legales">mentions légales</a>
+              <a href="#/confidentialite">politique de confidentialité</a>
               <a href="#/cgv">conditions générales de vente</a>
               <div className="lg__qualiopi" aria-label="Certifié Qualiopi">
                 <img

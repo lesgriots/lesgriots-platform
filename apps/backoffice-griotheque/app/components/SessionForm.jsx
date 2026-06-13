@@ -30,6 +30,7 @@ export default function SessionForm({ initial = null }) {
       workshop_id: "",
       places: "",
       status: "OUVERTE",
+      location: "",
     };
   }
 
@@ -175,6 +176,16 @@ export default function SessionForm({ initial = null }) {
             placeholder='ex: "8 / 12" ou "10"'
           />
           <p className="note">Information affichée publiquement.</p>
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          <label>Lieu</label>
+          <input
+            value={data.location || ""}
+            onChange={(e) => set("location", e.target.value)}
+            placeholder='ex: "Paris 11e — atelier" ou "En ligne (Zoom)"'
+          />
+          <p className="note">Affiché publiquement dans l'agenda. Laisse vide pour reprendre le lieu par défaut de la formation/workshop.</p>
         </div>
 
         <div style={{ marginTop: 16 }}>

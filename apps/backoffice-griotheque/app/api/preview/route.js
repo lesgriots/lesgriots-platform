@@ -12,6 +12,7 @@ const MIME = {
   ".webp": "image/webp", ".svg": "image/svg+xml",
   ".mp4": "video/mp4", ".mov": "video/quicktime", ".webm": "video/webm",
   ".woff2": "font/woff2", ".woff": "font/woff", ".ttf": "font/ttf", ".otf": "font/otf",
+  ".pdf": "application/pdf", ".zip": "application/zip",
 };
 
 export async function GET(req) {

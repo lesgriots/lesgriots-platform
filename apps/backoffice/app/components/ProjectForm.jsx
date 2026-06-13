@@ -42,6 +42,10 @@ const EMPTY = {
   location: "",
   cover: "",
   thumbVideo: "",
+  // Timecode de départ du thumb (en secondes). Utile uniquement quand
+  // thumbVideo pointe sur une URL YouTube : la grille Work lit une boucle
+  // de 4 secondes à partir de cette position. Ignoré pour les .mp4 self-hostés.
+  thumbStart: 0,
   strip: [],         // ["img/xx.jpg", ...]
   resources: [],     // [{type, src, poster?, label, aspect?}]
   credits: [],       // [{role, names: "a, b, c"}]  -> serialisé en {ROLE: [names]}
@@ -67,6 +71,7 @@ function projectToForm(p) {
     location: p.location || "",
     cover: p.cover || "",
     thumbVideo: p.thumbVideo || "",
+    thumbStart: typeof p.thumbStart === "number" ? p.thumbStart : 0,
     strip: p.strip || [],
     resources: p.resources || [],
     credits,
@@ -94,6 +99,7 @@ function formToProject(f) {
     location: f.location.trim(),
     cover: f.cover.trim(),
     thumbVideo: f.thumbVideo.trim() || undefined,
+    thumbStart: f.thumbStart ? Number(f.thumbStart) : undefined,
     strip: f.strip.filter(Boolean),
     resources: f.resources.filter((r) => r.src && r.src.trim()),
     credits,
@@ -108,9 +114,19 @@ async function uploadFile(file, subdir = "") {
   fd.append("file", file);
   if (subdir) fd.append("subdir", subdir);
   const r = await fetch("/api/upload", { method: "POST", body: fd });
-  if (!r.ok) throw new Error("upload failed");
-  const j = await r.json();
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || `upload échoué (${r.status})`);
   return j.path;
+}
+
+// Slugifie un nom de projet → id propre (minuscules, tirets, sans accents).
+function slugify(str) {
+  return (str || "")
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[×x]\s/g, "x-")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 export default function ProjectForm({ initial, isNew }) {
@@ -118,8 +134,19 @@ export default function ProjectForm({ initial, isNew }) {
   const [f, setF] = useState(projectToForm(initial));
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
+  // Tant que l'utilisateur n'a pas touché l'ID à la main, on le génère
+  // automatiquement depuis le nom (uniquement en création).
+  const [idTouched, setIdTouched] = useState(!isNew);
 
   function set(k, v) { setF((p) => ({ ...p, [k]: v })); }
+
+  function handleName(v) {
+    setF((p) => ({
+      ...p,
+      name: v,
+      ...(isNew && !idTouched ? { id: slugify(v) } : {}),
+    }));
+  }
 
   // ---- COVER -----------------------------------------------------------
   async function handleCover(file) {
@@ -135,10 +162,28 @@ export default function ProjectForm({ initial, isNew }) {
   }
   // ---- RESOURCES (médias détaillés du projet) -------------------------
   function resourceAdd(type) {
-    const blank = type === "video"
-      ? { type: "video", src: "", poster: "", label: "", aspect: "16/9" }
-      : { type: "image", src: "", label: "", aspect: "16/9" };
+    let blank;
+    if (type === "video") {
+      blank = { type: "video", src: "", poster: "", label: "", aspect: "16/9" };
+    } else if (type === "youtube") {
+      // Le user colle juste l'URL — on stocke direct dans src, et l'embed
+      // est calculé côté viewer (parse VIDEO_ID, construit youtube.com/embed/...).
+      blank = { type: "youtube", src: "", label: "", aspect: "16/9" };
+    } else {
+      blank = { type: "image", src: "", label: "", aspect: "16/9" };
+    }
     set("resources", [...f.resources, blank]);
+  }
+  // Parse une URL YouTube/Vimeo et renvoie l'ID propre, sinon null.
+  function parseYouTubeId(url) {
+    if (!url) return null;
+    const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([\w-]{6,})/i);
+    return m ? m[1] : null;
+  }
+  function parseVimeoId(url) {
+    if (!url) return null;
+    const m = url.match(/vimeo\.com\/(?:video\/)?(\d{6,})/i);
+    return m ? m[1] : null;
   }
   function resourcePatch(i, patch) {
     const arr = [...f.resources];
@@ -244,11 +289,14 @@ export default function ProjectForm({ initial, isNew }) {
           <label>ID (slug, immuable)</label>
           <input
             value={f.id}
-            onChange={(e) => set("id", e.target.value)}
+            onChange={(e) => { setIdTouched(true); set("id", slugify(e.target.value) || e.target.value); }}
             disabled={!isNew}
             placeholder="ava-x-nike-courir"
             required
           />
+          {isNew && !idTouched && (
+            <p className="note" style={{ marginTop: 4 }}>Généré automatiquement depuis le nom — modifie-le si besoin.</p>
+          )}
         </div>
         <div>
           <label>Position (ordre dans la liste)</label>
@@ -262,7 +310,7 @@ export default function ProjectForm({ initial, isNew }) {
       <label>Nom du projet</label>
       <input
         value={f.name}
-        onChange={(e) => set("name", e.target.value)}
+        onChange={(e) => handleName(e.target.value)}
         placeholder="AVA X / NIKE × COURIR"
         required
       />
@@ -345,6 +393,9 @@ export default function ProjectForm({ initial, isNew }) {
       />
 
       <label>Thumb video (mp4 court qui se lance au hover — optionnel)</label>
+      <p className="note" style={{ marginTop: 0, marginBottom: 6, color: "var(--dim)" }}>
+        Tu peux aussi coller une URL YouTube ici : la grille jouera un extrait de 4 s à partir du timecode spécifié ci-dessous.
+      </p>
       <MediaInput
         value={f.thumbVideo}
         onUpload={handleThumbVideo}
@@ -353,6 +404,26 @@ export default function ProjectForm({ initial, isNew }) {
         accept="video/mp4"
         isVideo
       />
+      {/* Timecode de départ — utile uniquement quand thumbVideo est une
+          URL YouTube. La grille Work joue un extrait [thumbStart → +4s]
+          en boucle au hover. Ignoré pour les .mp4 self-hostés (qui sont
+          déjà des thumbs courts pré-rendus). */}
+      {/youtube\.com|youtu\.be/i.test(f.thumbVideo || "") && (
+        <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 10 }}>
+          <label style={{ marginBottom: 0 }}>Démarrer à (sec) :</label>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            value={f.thumbStart || 0}
+            onChange={(e) => set("thumbStart", Number(e.target.value))}
+            style={{ width: 90 }}
+          />
+          <span className="note" style={{ color: "var(--dim)" }}>
+            Extrait joué : {f.thumbStart || 0}s → {(f.thumbStart || 0) + 4}s, en boucle.
+          </span>
+        </div>
+      )}
 
       {/* Section "Strip" retirée — le champ existait dans data.jsx mais n'est
           affiché nulle part sur le site. Les valeurs existantes restent en DB
@@ -360,7 +431,6 @@ export default function ProjectForm({ initial, isNew }) {
 
       <h2>Galerie (médias du projet)</h2>
       <p className="note">Un par bloc média sur la page projet. Image ou vidéo, ratio libre. Upload local ou URL externe (Bunny, R2, Cloudflare).</p>
-      <p className="note">Un par bloc média sur la page projet. Image ou vidéo, ratio libre.</p>
       {f.resources.map((r, i) => (
         <div key={i} className="resource">
           <div className="resource__head">
@@ -372,30 +442,62 @@ export default function ProjectForm({ initial, isNew }) {
             </span>
           </div>
           <div className="row">
-            <div>
-              <label>Source ({r.type})</label>
-              <MediaInput
-                value={r.src}
-                onUpload={(file) => resourceUpload(i, "src", file)}
-                onUrl={(url) => resourceSetUrl(i, "src", url)}
-                onClear={() => resourcePatch(i, { src: "" })}
-                accept={r.type === "video" ? "video/*" : "image/*"}
-                isVideo={r.type === "video"}
-                // Pour les vidéos lourdes, on recommande de coller un URL Bunny/R2 plutôt qu'uploader
-                urlHint={r.type === "video" ? "Recommandé : URL .mp4 Bunny/R2/Cloudflare" : null}
-              />
-            </div>
-            {r.type === "video" && (
-              <div>
-                <label>Poster (image de chargement)</label>
-                <MediaInput
-                  value={r.poster || ""}
-                  onUpload={(file) => resourceUpload(i, "poster", file)}
-                  onUrl={(url) => resourceSetUrl(i, "poster", url)}
-                  onClear={() => resourcePatch(i, { poster: "" })}
-                  accept="image/*"
+            {r.type === "youtube" ? (
+              <div style={{ flex: 1 }}>
+                <label>URL YouTube ou Vimeo</label>
+                <input
+                  type="url"
+                  value={r.src || ""}
+                  onChange={(e) => resourcePatch(i, { src: e.target.value.trim() })}
+                  placeholder="https://www.youtube.com/watch?v=… ou https://vimeo.com/…"
+                  style={{ width: "100%" }}
                 />
+                {/* Aperçu de l'ID parsé pour valider que le BO comprend bien l'URL.
+                    Le viewer studio construit l'embed à la volée à partir de l'ID. */}
+                {r.src && !parseYouTubeId(r.src) && !parseVimeoId(r.src) && (
+                  <p className="note" style={{ color: "var(--danger)" }}>
+                    ✗ URL non reconnue (attendu : youtube.com / youtu.be / vimeo.com)
+                  </p>
+                )}
+                {r.src && parseYouTubeId(r.src) && (
+                  <p className="note" style={{ color: "var(--accent)" }}>
+                    ✓ YouTube ID : <code>{parseYouTubeId(r.src)}</code>
+                  </p>
+                )}
+                {r.src && parseVimeoId(r.src) && (
+                  <p className="note" style={{ color: "var(--accent)" }}>
+                    ✓ Vimeo ID : <code>{parseVimeoId(r.src)}</code>
+                  </p>
+                )}
               </div>
+            ) : (
+              <>
+                <div>
+                  <label>Source ({r.type})</label>
+                  <MediaInput
+                    value={r.src}
+                    onUpload={(file) => resourceUpload(i, "src", file)}
+                    onUrl={(url) => resourceSetUrl(i, "src", url)}
+                    onClear={() => resourcePatch(i, { src: "" })}
+                    accept={r.type === "video" ? "video/*" : "image/*"}
+                    isVideo={r.type === "video"}
+                    // Pour les vidéos lourdes, on recommande de coller un URL Bunny/R2 plutôt qu'uploader
+                    urlHint={r.type === "video" ? "Recommandé : URL .mp4 Bunny/R2/Cloudflare" : null}
+                  />
+                </div>
+                {r.type === "video" && (
+                  <div>
+                    <label>Poster (image de chargement)</label>
+                    <MediaInput
+                      value={r.poster || ""}
+                      onUpload={(file) => resourceUpload(i, "poster", file)}
+                      onUrl={(url) => resourceSetUrl(i, "poster", url)}
+                      onClear={() => resourcePatch(i, { poster: "" })}
+                      accept="image/*"
+                    />
+                  </div>
+                )}
+              </>
             )}
           </div>
           <div className="row">
@@ -412,7 +514,8 @@ export default function ProjectForm({ initial, isNew }) {
       ))}
       <div className="actions" style={{ marginTop: 12 }}>
         <button type="button" className="btn btn--ghost" onClick={() => resourceAdd("image")}>+ Image</button>
-        <button type="button" className="btn btn--ghost" onClick={() => resourceAdd("video")}>+ Vidéo</button>
+        <button type="button" className="btn btn--ghost" onClick={() => resourceAdd("video")}>+ Vidéo (fichier)</button>
+        <button type="button" className="btn btn--ghost" onClick={() => resourceAdd("youtube")}>+ YouTube / Vimeo</button>
       </div>
 
       <h2>Crédits</h2>

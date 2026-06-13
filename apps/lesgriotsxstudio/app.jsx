@@ -45,6 +45,17 @@ function App() {
   const [booted, setBooted] = useState(false);
   const lang = useLang();
 
+  // Toggle une classe sur <body> pour piloter en CSS l'apparition du
+  // chrome (sticker, menubar) APRÈS la fin du boot. On utilise
+  // useLayoutEffect pour appliquer la classe AVANT le premier paint —
+  // sinon il y a un bref flash où le sticker apparaît à sa position
+  // avant que body.is-booting ne soit posée par un useEffect normal.
+  React.useLayoutEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.classList.toggle("booted", booted);
+    return () => { document.body.classList.remove("booted"); };
+  }, [booted]);
+
   function navigate(v) {
     // Sécurise contre les navigations vers une page désactivée
     // (vieux liens, clic involontaire, etc.) — on redirige sur la 1ère active.
@@ -55,6 +66,18 @@ function App() {
     setProjectId(id);
     setView("viewer");
     window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  // Switch vers le projet suivant / précédent depuis le viewer. Appelé
+  // quand l'utilisateur tape sur edge-prev/next et qu'on est déjà au
+  // début / à la fin des resources du projet courant.
+  function switchProject(direction) {
+    if (!projectId) return;
+    const idx = PROJECTS.findIndex((p) => p.id === projectId);
+    if (idx === -1) return;
+    const next = direction === "next"
+      ? (idx + 1) % PROJECTS.length
+      : (idx - 1 + PROJECTS.length) % PROJECTS.length;
+    openProject(PROJECTS[next].id);
   }
   function closeViewer() { setView(isViewActive("home") ? "home" : firstActiveView()); }
 
@@ -93,7 +116,11 @@ function App() {
         </React.Fragment>
       )}
       {view === "viewer" && (
-        <ViewerView projectId={projectId} onClose={closeViewer} />
+        <ViewerView
+          projectId={projectId}
+          onClose={closeViewer}
+          onSwitchProject={switchProject}
+        />
       )}
       {view === "about" && <AboutView />}
       {view === "eco" && <EcoView />}

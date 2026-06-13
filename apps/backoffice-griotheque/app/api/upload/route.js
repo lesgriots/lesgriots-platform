@@ -27,7 +27,7 @@ const IMG_DIR = path.resolve(process.cwd(), "..", "lagriotheque", "img");
 const ALLOWED_EXTS = new Set([
   ".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp",   // images
   ".mp4", ".mov", ".webm", ".m4v",                     // vidéos
-  ".pdf",                                              // ressources
+  ".pdf", ".zip", ".fig",                              // ressources (PDF, archives, fichiers Figma)
 ]);
 
 const VIDEO_EXTS = new Set([".mp4", ".mov", ".webm", ".m4v"]);
