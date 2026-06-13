@@ -29,6 +29,7 @@ function useLang() {
 
 const DICT = {
   "menu.menu":     { en: "MENU",      fr: "MENU" },
+  "menu.home":     { en: "HOME",      fr: "ACCUEIL" },
   "menu.work":     { en: "WORK",      fr: "PROJETS" },
   "menu.about":    { en: "ABOUT",     fr: "À PROPOS" },
   "menu.eco":      { en: "ECOSYSTEM", fr: "ÉCOSYSTÈME" },

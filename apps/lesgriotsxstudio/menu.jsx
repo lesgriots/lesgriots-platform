@@ -47,8 +47,14 @@ function MenuBar({ view, onNavigate }) {
   const activePages = (typeof window !== "undefined" &&
     window.SITE_CONTENT && window.SITE_CONTENT.activePages) || {};
   const isActive = (k) => activePages[k] !== false;
-  // Mapping : la clé menu "home" pointe vers la page "work" côté back office.
+  // Mapping :
+  // - HOME / ACCUEIL : entrée d'ancre toujours active (pour ne jamais se
+  //   sentir perdu — fonctionne comme un "retour au début" universel).
+  //   Comme Work, elle navigue vers la home view ; les 2 sont volontaires
+  //   pour clarté UX (Home = repère, Work = contenu).
+  // - WORK / PROJETS : clé menu "home" vers la page "work" côté back office.
   const items = [
+    { key: "home",  label: tr("menu.home",  lang), active: true },
     { key: "home",  label: tr("menu.work",  lang), active: isActive("work") },
     { key: "about", label: tr("menu.about", lang), active: isActive("about") },
     { key: "eco",   label: tr("menu.eco",   lang), active: isActive("eco") },

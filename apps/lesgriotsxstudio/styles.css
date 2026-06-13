@@ -156,10 +156,14 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   left: 14px;
   width: 280px;
   z-index: 90;
-  /* pas de cursor: pointer ici — on garde le curseur custom mustard global
-     (pas de switch vers le pointeur OS au hover). */
+  /* Curseur custom mustard pointing-finger (le même que sur les cells et
+     les autres éléments cliquables). Explicite pour éviter qu'une règle
+     générique de spécificité supérieure ne reset au pointeur OS. */
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' shape-rendering='crispEdges'><path d='M8 1 L11 1 L11 9 L13 9 L13 7 L15 7 L15 9 L17 9 L17 11 L19 11 L19 19 L7 19 L7 14 L5 14 L5 11 L8 11 Z' fill='black' stroke='%238a7a20' stroke-width='1' stroke-linejoin='miter'/></svg>") 8 1, pointer;
   background: transparent;
   border: 0;
+  /* Transition douce pour l'effet bookmark au hover */
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
   padding: 0;
   outline: none; /* kill le focus ring par défaut du button */
   -webkit-tap-highlight-color: transparent; /* kill le flash bleu mobile */
@@ -187,9 +191,11 @@ body.booted .idcard {
     opacity: 1;
   }
 }
-/* Pas d'effet hover sur le sticker — il reste statique. La translate
-   au hover était trop "interactive" pour un élément qui n'est qu'un
-   logo cliquable retour-accueil. */
+/* Effet bookmark : au hover le sticker glisse vers la gauche comme un
+   marque-page qu'on tire pour le retirer du livre. Le slide-in initial
+   (idcard-slide-in) doit être fini sinon il y a conflit avec le hover —
+   pas de souci, l'animation a both/forwards et finit en transform: none. */
+.idcard:hover { transform: translateX(-10px); }
 .idcard__img { display: block; width: 100%; height: auto; }
 /* Hide the sticker on the ecosystem page */
 body:has(.eco3) .idcard { display: none !important; }
