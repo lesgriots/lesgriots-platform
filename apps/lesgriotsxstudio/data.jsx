@@ -2,7 +2,7 @@
 // LESGRIOTSxSTUDIO — projects data
 // ⚠️  FICHIER GÉNÉRÉ AUTOMATIQUEMENT par backoffice/.
 // Ne pas éditer à la main — ouvre le back office (http://localhost:3030).
-// Dernière génération : 2026-06-13T04:37:25.828Z
+// Dernière génération : 2026-06-13T16:34:48.758Z
 
 const PROJECTS = [
   {
@@ -235,9 +235,9 @@ const SITE_CONTENT = {
     ]
   },
   "activePages": {
-    "work": true,
+    "work": false,
     "about": true,
-    "eco": true
+    "eco": false
   }
 };
 
