@@ -36,11 +36,57 @@ function isViewActive(v) {
   return true; // viewer reste toujours accessible
 }
 
+// ============================================================
+// HISTORY API — intégration avec l'historique du navigateur.
+// Permet aux gestures de retour (swipe iPhone, two-finger Mac,
+// bouton back Windows, touche backspace, Cmd/Ctrl+[/]) de
+// naviguer dans l'app de manière naturelle. Bonus : chaque
+// projet a son URL partageable (lesgriotsxstudio.com/work/xxx).
+//
+// Mapping URL ↔ état :
+//   /                  → home (vue Work)
+//   /about             → about
+//   /eco               → eco
+//   /work/<projectId>  → viewer du projet
+// ============================================================
+
+function urlToState(pathname) {
+  if (!pathname || pathname === "/" || pathname === "") {
+    return { view: firstActiveView(), projectId: null };
+  }
+  if (pathname === "/about" || pathname === "/about/") {
+    return { view: "about", projectId: null };
+  }
+  if (pathname === "/eco" || pathname === "/eco/") {
+    return { view: "eco", projectId: null };
+  }
+  const m = pathname.match(/^\/work\/([^\/]+)\/?$/);
+  if (m) return { view: "viewer", projectId: decodeURIComponent(m[1]) };
+  // URL inconnue → fallback home (au lieu d'un 404 React)
+  return { view: firstActiveView(), projectId: null };
+}
+
+function stateToUrl(view, projectId) {
+  if (view === "viewer" && projectId) return `/work/${encodeURIComponent(projectId)}`;
+  if (view === "about")  return "/about";
+  if (view === "eco")    return "/eco";
+  return "/";
+}
+
 function App() {
-  // La vue initiale respecte les pages actives définies dans le back office.
-  // Si la page Work a été désactivée, on tombe sur About (ou Eco).
-  const [view, setView] = useState(firstActiveView);
-  const [projectId, setProjectId] = useState(null);
+  // État initial déterminé par l'URL (lien partagé, refresh, bookmark).
+  // Si l'URL est /work/xxx, on ouvre direct le viewer ; sinon home/about/eco.
+  // Sécurise contre une vue désactivée par le back office.
+  const initialFromUrl = React.useMemo(() => {
+    if (typeof window === "undefined") return { view: firstActiveView(), projectId: null };
+    const s = urlToState(window.location.pathname);
+    if (s.view !== "viewer" && !isViewActive(s.view)) {
+      return { view: firstActiveView(), projectId: null };
+    }
+    return s;
+  }, []);
+  const [view, setView] = useState(initialFromUrl.view);
+  const [projectId, setProjectId] = useState(initialFromUrl.projectId);
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const [booted, setBooted] = useState(false);
   const lang = useLang();
@@ -56,15 +102,54 @@ function App() {
     return () => { document.body.classList.remove("booted"); };
   }, [booted]);
 
+  // ─── HISTORY API ──────────────────────────────────────────────────
+  // Au mount, on remplace l'entrée d'historique actuelle par notre
+  // state initial (pour que popstate ait quelque chose à lire si
+  // l'utilisateur recharge la page et fait back).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.history.replaceState(
+      { view: initialFromUrl.view, projectId: initialFromUrl.projectId },
+      "",
+      stateToUrl(initialFromUrl.view, initialFromUrl.projectId)
+    );
+
+    // Écoute les events de navigation back/forward du navigateur
+    // (swipe iPhone, two-finger Mac, bouton back Windows, etc.).
+    const onPopState = (e) => {
+      const s = e.state || urlToState(window.location.pathname);
+      const newView = (s.view !== "viewer" && !isViewActive(s.view)) ? firstActiveView() : s.view;
+      setView(newView);
+      setProjectId(s.projectId || null);
+      window.scrollTo({ top: 0, behavior: "instant" });
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  // Helper : pousse une nouvelle entrée d'historique pour les navigations
+  // déclenchées en JS (clic menu, clic projet, etc.).
+  function pushHistory(newView, newProjectId) {
+    if (typeof window === "undefined") return;
+    const url = stateToUrl(newView, newProjectId);
+    // Évite de pousser un doublon si on est déjà à la même URL
+    if (window.location.pathname === url) return;
+    window.history.pushState({ view: newView, projectId: newProjectId }, "", url);
+  }
+
   function navigate(v) {
     // Sécurise contre les navigations vers une page désactivée
     // (vieux liens, clic involontaire, etc.) — on redirige sur la 1ère active.
-    setView(isViewActive(v) ? v : firstActiveView());
+    const safeView = isViewActive(v) ? v : firstActiveView();
+    setView(safeView);
+    setProjectId(null);
+    pushHistory(safeView, null);
     window.scrollTo({ top: 0, behavior: "instant" });
   }
   function openProject(id) {
     setProjectId(id);
     setView("viewer");
+    pushHistory("viewer", id);
     window.scrollTo({ top: 0, behavior: "instant" });
   }
   // Switch vers le projet suivant / précédent depuis le viewer. Appelé
@@ -79,7 +164,19 @@ function App() {
       : (idx - 1 + PROJECTS.length) % PROJECTS.length;
     openProject(PROJECTS[next].id);
   }
-  function closeViewer() { setView(isViewActive("home") ? "home" : firstActiveView()); }
+  function closeViewer() {
+    // Si on est arrivé au viewer via une navigation interne (donc il y a
+    // une entrée d'historique précédente sur ce site), on délègue au
+    // browser back — ça respecte la pile d'historique et le geste
+    // "swipe right" iPhone marche naturellement. Sinon (lien direct ou
+    // bookmark sur /work/xxx), on navigue vers home explicitement.
+    if (typeof window !== "undefined" && window.history.state
+        && window.history.state.view === "viewer") {
+      window.history.back();
+    } else {
+      navigate("home");
+    }
+  }
 
   useEffect(() => {
     const k = (e) => { if (e.key === "Escape" && view === "viewer") closeViewer(); };
