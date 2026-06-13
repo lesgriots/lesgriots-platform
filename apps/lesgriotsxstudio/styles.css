@@ -209,6 +209,33 @@ body.booted .idcard {
    pas de souci, l'animation a both/forwards et finit en transform: none. */
 .idcard:hover { transform: translateX(-10px); }
 .idcard__img { display: block; width: 100%; height: auto; }
+
+/* Label "HOME" / "ACCUEIL" flottant sous le sticker — même esprit que
+   le .ahome__cell__label des miniatures. Caché par défaut, révélé au
+   hover du sticker. Style mono, mustard, uppercase. */
+.idcard__label {
+  position: absolute;
+  left: 14px;            /* aligné sur le bord gauche du sticker */
+  top: calc(100% + 8px); /* juste en dessous du sticker, 8px d'air */
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+/* Petit caret > terminal devant le label, pour cohérence avec le
+   reste du chrome (menu, idx-term, etc.) */
+.idcard__label::before {
+  content: "> ";
+  color: var(--ink-dim);
+  opacity: 0.6;
+  margin-right: 1px;
+}
+.idcard:hover .idcard__label { opacity: 1; }
 /* Hide the sticker on the ecosystem page */
 body:has(.eco3) .idcard { display: none !important; }
 
