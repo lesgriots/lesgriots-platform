@@ -47,20 +47,16 @@ function MenuBar({ view, onNavigate }) {
   const activePages = (typeof window !== "undefined" &&
     window.SITE_CONTENT && window.SITE_CONTENT.activePages) || {};
   const isActive = (k) => activePages[k] !== false;
-  // Mapping :
-  // - HOME / ACCUEIL : entrée d'ancre toujours active (pour ne jamais se
-  //   sentir perdu — fonctionne comme un "retour au début" universel).
-  //   Comme Work, elle navigue vers la home view ; les 2 sont volontaires
-  //   pour clarté UX (Home = repère, Work = contenu).
-  // - WORK / PROJETS : navigue vers "home" view (back office key "work").
+  // HOME a été retiré du menu — le sticker (.idcard) sert maintenant de
+  // bouton "retour accueil" universel avec son propre label HOME/ACCUEIL
+  // au hover. Le menu ne liste que les pages de contenu : WORK, ABOUT, ECO.
   //
   // /!\ id  → identifiant unique pour React.key (évite le warning "duplicate key")
   //     to  → cible de navigation (peut être identique entre 2 items)
   const items = [
-    { id: "home-anchor", to: "home",  label: tr("menu.home",  lang), active: true },
-    { id: "work",        to: "home",  label: tr("menu.work",  lang), active: isActive("work") },
-    { id: "about",       to: "about", label: tr("menu.about", lang), active: isActive("about") },
-    { id: "eco",         to: "eco",   label: tr("menu.eco",   lang), active: isActive("eco") },
+    { id: "work",  to: "home",  label: tr("menu.work",  lang), active: isActive("work") },
+    { id: "about", to: "about", label: tr("menu.about", lang), active: isActive("about") },
+    { id: "eco",   to: "eco",   label: tr("menu.eco",   lang), active: isActive("eco") },
   ].filter((it) => it.active);
 
   function pick(it) {
