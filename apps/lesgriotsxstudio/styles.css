@@ -5688,20 +5688,27 @@ body.overview-open .utilbar {
    tourne son téléphone — c'est précisément pour ça qu'il tourne). */
 @media (orientation: landscape) and (max-height: 500px) {
 
-  /* Viewer : media prend QUASI 100% de la hauteur (référence visuelle :
-     portfolios style Renell Medrano où l'image domine et le chrome
-     est minimal). Le centrage fixed:50dvh + max-height: 100dvh = le
-     media s'étend jusqu'aux bords haut/bas du viewport. Le chrome
-     (sticker, menu, projmeta, boutons GALLERY/INFO) se superpose en
-     transparence avec son z-index. */
-  .viewer__media-wrap { max-height: 100dvh !important; }
+  /* Viewer : media généreux mais PAS plein écran (laisse respirer le
+     chrome bottom). 85dvh = ~ 425px sur un viewport 500px, le reste
+     accueille projmeta + bottom row des boutons. */
+  .viewer__media-wrap { max-height: 85dvh !important; }
   /* Sticker un poil plus discret pour ne pas voler trop d'espace
-     visuel à l'image. 130px au lieu de 180px portrait — l'écart est
-     subtil, on garde la même esthétique. */
+     visuel à l'image. 130px au lieu de 180px portrait. */
   .idcard { width: 130px; }
-  /* Projmeta + boutons GALLERY/INFO se collent plus près du bord
-     pour libérer de la place verticale au media. */
-  .viewer__projmeta { bottom: 12px; }
+  /* Layout 2 niveaux empilés en bas :
+     - Niveau 1 (bottom: 10px)  → [GALLERY] | [INFORMATION] (seuls,
+                                   tout en bas du viewport)
+     - Niveau 2 (bottom: 50px)  → projmeta (NAME / CLIENT / ROLE)
+                                   centrée horizontalement, au-dessus
+                                   des boutons
+     Les 2 niveaux n'overlap pas, le media reste lisible jusqu'au
+     niveau 2 sans empiétement. */
+  .viewer__projmeta {
+    bottom: 50px !important;
+    line-height: 1.35;
+  }
   .viewer__action-overview,
-  .viewer__action-info { bottom: 12px; }
+  .viewer__action-info {
+    bottom: 10px !important;
+  }
 }

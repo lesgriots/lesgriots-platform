@@ -88,7 +88,16 @@ function App() {
   const [view, setView] = useState(initialFromUrl.view);
   const [projectId, setProjectId] = useState(initialFromUrl.projectId);
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
-  const [booted, setBooted] = useState(false);
+  // Boot loader UNIQUEMENT à la première visite de la session navigateur :
+  // refresh / navigation entre pages = on saute direct sur le contenu.
+  // sessionStorage = vit jusqu'à la fermeture de l'onglet (puis remis à
+  // zéro à la prochaine ouverture). Sur mobile, ça évite que le boot
+  // joue à chaque pull-to-refresh accidentel.
+  const [booted, setBooted] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try { return sessionStorage.getItem("lgxs_booted") === "1"; }
+    catch (e) { return false; }
+  });
   const lang = useLang();
 
   // Toggle une classe sur <body> pour piloter en CSS l'apparition du
@@ -201,7 +210,11 @@ function App() {
 
   return (
     <React.Fragment>
-      {!booted && <BootLoader onDone={() => setBooted(true)} />}
+      {!booted && <BootLoader onDone={() => {
+        // Mémorise dans la session pour skipper le boot aux refresh suivants
+        try { sessionStorage.setItem("lgxs_booted", "1"); } catch (e) {}
+        setBooted(true);
+      }} />}
       <div className="app app--booted" style={cssVars}>
       <YellowCard onClick={() => navigate("home")} />
       <MenuBar view={view} onNavigate={navigate} />
