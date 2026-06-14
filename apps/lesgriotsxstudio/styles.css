@@ -5511,7 +5511,15 @@ body.overview-open .utilbar {
     line-height: 1.4;
     pointer-events: auto;
   }
-  .viewer__hud__tl { top: 0; left: 0; }
+  /* HUD top-left masqué : ses 3 entrées ([ LESGRIOTSXSTUDIO ] brand,
+     [ INFORMATION ] et [ BACK ]) sont déjà toutes assumées ailleurs
+     dans l'UI mobile :
+     - sticker idcard top-left = brand + retour home (click)
+     - viewer__info-trigger bottom-right = bouton INFORMATION
+     Le HUD __tl apparaissait en transparence avant que le sticker ne
+     se reveal (body.booted), ce qui créait un flash de chrome dupliqué
+     sous le sticker pendant le chargement. */
+  .viewer__hud__tl { display: none; }
   .viewer__hud__tr { top: 0; right: 0; align-items: flex-end; flex-direction: row; gap: 10px; }
 
   .viewer__hud__brand {
@@ -5688,31 +5696,34 @@ body.overview-open .utilbar {
    tourne son téléphone — c'est précisément pour ça qu'il tourne). */
 @media (orientation: landscape) and (max-height: 500px) {
 
-  /* Viewer : media généreux mais PAS plein écran (laisse respirer le
-     chrome bottom). 85dvh = ~ 425px sur un viewport 500px, le reste
-     accueille projmeta + bottom row des boutons. */
-  .viewer__media-wrap { max-height: 85dvh !important; }
+  /* Viewer paysage : on override TOUTES les contraintes max-height
+     qui s'empilaient en mobile portrait :
+     - .viewer--video .viewer__stage : calc(100vh - 220px) → 180px en paysage
+     - .viewer--video .viewer__stage img/video : idem
+     - .viewer__stage img/video (mobile @760) : calc(100vh - 380px) → 20px (!)
+     Tous remplacés par calc(100dvh - 90px) pour laisser pile la place
+     en bas à projmeta (50px) + bouttons (10px) + un peu d'air. */
+  .viewer__media-wrap,
+  .viewer__stage,
+  .viewer__stage img,
+  .viewer__stage video,
+  .viewer--video .viewer__stage,
+  .viewer--video .viewer__stage img,
+  .viewer--video .viewer__stage video {
+    max-height: calc(100dvh - 140px) !important;
+    max-width: 100vw !important;
+  }
   /* Sticker un poil plus discret. 130px au lieu de 180px portrait. */
   .idcard { width: 130px; }
 
-  /* Layout 2 niveaux empilés en bas, sans overlap :
-     - Niveau 1 (bottom: 10px) → boutons GALLERY (gauche) + INFORMATION
-                                  (droite) seuls, collés tout en bas
-     - Niveau 2 (bottom: 50px) → projmeta NAME / CLIENT / ROLE,
-                                  centrée horizontalement, au-dessus
-                                  des boutons
-
-     En mobile portrait la projmeta est positionnée par le JS (inline
-     top: captionY), donc on FORCE le top auto et bottom fixe ici pour
-     reprendre le contrôle en paysage. */
+  /* Projmeta : on laisse le JS poser le top inline (captionY = juste
+     sous le média avec +8px d'air en paysage, cf. viewer.jsx). Le bloc
+     suit le bas de la vidéo, peu importe sa taille. */
   .viewer__projmeta {
-    top: auto !important;
-    bottom: 50px !important;
-    transform: translateY(0) !important;
     line-height: 1.35;
   }
-  /* Les vrais noms de classes des boutons (j'avais mis le mauvais nom
-     avant) — viewer__overview-trigger et viewer__info-trigger. */
+  /* Boutons GALLERY (gauche) + INFORMATION (droite) collés tout en bas
+     du viewport, niveau dédié séparé du projmeta. */
   .viewer__overview-trigger,
   .viewer__info-trigger {
     bottom: 10px !important;

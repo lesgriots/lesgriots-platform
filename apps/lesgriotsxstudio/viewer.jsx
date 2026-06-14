@@ -157,14 +157,21 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
         // Desktop : milieu entre ancre haute et utilbar
         setCaptionY(Math.round((topAnchor + utilRect.top) / 2));
       } else {
-        // Mobile (utilbar display:none) : projmeta centrée verticalement
-        // entre le bas du média (topAnchor) et le bord bas du viewport.
-        // Comme ça la projmeta "flotte" toujours au milieu de l'espace
-        // libre quelle que soit la hauteur du média (portrait → moins
-        // d'espace en bas, projmeta proche du média ; landscape → plus
-        // d'espace en bas, projmeta plus basse mais centrée).
-        const vh = window.innerHeight || document.documentElement.clientHeight || 800;
-        setCaptionY(Math.round((topAnchor + vh) / 2));
+        // Mobile (utilbar display:none).
+        // Paysage : on COLLE la projmeta juste sous le média (+8px d'air)
+        //          pour que le bloc nom/client/role suive la vidéo plutôt
+        //          que de flotter au milieu de l'espace vide bas.
+        // Portrait : on garde le centrage entre bas média et viewport
+        //            (comportement historique, qui marche bien quand le
+        //            média prend déjà la majorité de la hauteur).
+        const isLandscapeMobile = window.matchMedia
+          && window.matchMedia("(orientation: landscape) and (max-height: 500px)").matches;
+        if (isLandscapeMobile) {
+          setCaptionY(Math.round(topAnchor + 8));
+        } else {
+          const vh = window.innerHeight || document.documentElement.clientHeight || 800;
+          setCaptionY(Math.round((topAnchor + vh) / 2));
+        }
       }
     };
     updateCaption();
