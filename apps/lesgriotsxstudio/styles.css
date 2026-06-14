@@ -5692,23 +5692,29 @@ body.overview-open .utilbar {
      chrome bottom). 85dvh = ~ 425px sur un viewport 500px, le reste
      accueille projmeta + bottom row des boutons. */
   .viewer__media-wrap { max-height: 85dvh !important; }
-  /* Sticker un poil plus discret pour ne pas voler trop d'espace
-     visuel à l'image. 130px au lieu de 180px portrait. */
+  /* Sticker un poil plus discret. 130px au lieu de 180px portrait. */
   .idcard { width: 130px; }
-  /* Layout 2 niveaux empilés en bas :
-     - Niveau 1 (bottom: 10px)  → [GALLERY] | [INFORMATION] (seuls,
-                                   tout en bas du viewport)
-     - Niveau 2 (bottom: 50px)  → projmeta (NAME / CLIENT / ROLE)
-                                   centrée horizontalement, au-dessus
-                                   des boutons
-     Les 2 niveaux n'overlap pas, le media reste lisible jusqu'au
-     niveau 2 sans empiétement. */
+
+  /* Layout 2 niveaux empilés en bas, sans overlap :
+     - Niveau 1 (bottom: 10px) → boutons GALLERY (gauche) + INFORMATION
+                                  (droite) seuls, collés tout en bas
+     - Niveau 2 (bottom: 50px) → projmeta NAME / CLIENT / ROLE,
+                                  centrée horizontalement, au-dessus
+                                  des boutons
+
+     En mobile portrait la projmeta est positionnée par le JS (inline
+     top: captionY), donc on FORCE le top auto et bottom fixe ici pour
+     reprendre le contrôle en paysage. */
   .viewer__projmeta {
+    top: auto !important;
     bottom: 50px !important;
+    transform: translateY(0) !important;
     line-height: 1.35;
   }
-  .viewer__action-overview,
-  .viewer__action-info {
+  /* Les vrais noms de classes des boutons (j'avais mis le mauvais nom
+     avant) — viewer__overview-trigger et viewer__info-trigger. */
+  .viewer__overview-trigger,
+  .viewer__info-trigger {
     bottom: 10px !important;
   }
 }
