@@ -1,0 +1,34 @@
+# Service systemd pour le BO Studio Next.js
+# À copier sur le VPS dans /etc/systemd/system/lesgriotsxstudio-backoffice.service
+# puis :
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now lesgriotsxstudio-backoffice
+#
+# Logs : sudo journalctl -u lesgriotsxstudio-backoffice -f
+
+[Unit]
+Description=LES GRIOTS — Back Office Studio (Next.js)
+After=network.target
+
+[Service]
+Type=simple
+User=deployment
+WorkingDirectory=/var/www/ecosystem/production/lesgriots-platform/apps/backoffice
+# Variables d'environnement (mots de passe, etc.) hors-Git
+EnvironmentFile=-/etc/lesgriotsxstudio-backoffice.env
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+RestartSec=5
+# L'app écoute en local sur 3030, nginx l'expose en HTTPS sous /studio/
+Environment=NODE_ENV=production
+Environment=PORT=3030
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/www/ecosystem/production/lesgriots-platform/apps/backoffice
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

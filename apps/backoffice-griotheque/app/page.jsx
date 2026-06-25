@@ -14,6 +14,7 @@ const SECTIONS = [
   { key: "resources", title: "RESSOURCES", desc: "Guides, articles, outils téléchargeables" },
   { key: "leads", title: "LEADS", desc: "Emails capturés via téléchargement de ressource" },
   { key: "defaults", title: "TEXTES PAR DÉFAUT", desc: "Méthodes, évaluation, accessibilité, lieu" },
+  { key: "site/content", title: "CONTENU DU SITE", desc: "Manifeste, approche, headers de page, FAQ générique" },
   { key: "pages", title: "PAGES ACTIVES", desc: "Activer/désactiver chaque page du site" },
 ];
 
@@ -22,15 +23,22 @@ export default function HomePage() {
 
   useEffect(() => {
     // Charge les compteurs de chaque collection en parallèle.
-    // defaults et pages renvoient un objet (pas un array) → on compte les clés.
+    // defaults / pages / site/content sont des objets — pas comptés ici.
+    const SKIP = new Set(["defaults", "pages", "site/content"]);
     Promise.all(
-      SECTIONS.filter((s) => s.key !== "defaults" && s.key !== "pages").map((s) =>
+      SECTIONS.filter((s) => !SKIP.has(s.key)).map((s) =>
         fetch(`/api/${s.key}`)
           .then((r) => (r.ok ? r.json() : []))
           .then((arr) => [s.key, Array.isArray(arr) ? arr.length : 0])
           .catch(() => [s.key, 0])
       )
     ).then((entries) => setCounts(Object.fromEntries(entries)));
+
+    // Compteur sections du contenu de site
+    fetch("/api/content").then((r) => r.json()).then((j) => {
+      const n = (j.sections || []).length;
+      setCounts((c) => ({ ...c, "site/content": `${n} sections` }));
+    }).catch(() => {});
 
     // Pages actives : compte combien sont ON
     fetch("/api/pages").then((r) => r.json()).then((obj) => {
@@ -67,6 +75,8 @@ export default function HomePage() {
                 ? "4 textes"
                 : s.key === "pages"
                 ? (counts.pages ? `${counts.pages} actives` : "…")
+                : s.key === "site/content"
+                ? (counts["site/content"] || "…")
                 : counts[s.key] !== undefined
                 ? `${counts[s.key]} entrée${counts[s.key] > 1 ? "s" : ""}`
                 : "…"}

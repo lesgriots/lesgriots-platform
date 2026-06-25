@@ -54,9 +54,10 @@ function MenuBar({ view, onNavigate }) {
   // /!\ id  → identifiant unique pour React.key (évite le warning "duplicate key")
   //     to  → cible de navigation (peut être identique entre 2 items)
   const items = [
-    { id: "work",  to: "home",  label: tr("menu.work",  lang), active: isActive("work") },
-    { id: "about", to: "about", label: tr("menu.about", lang), active: isActive("about") },
-    { id: "eco",   to: "eco",   label: tr("menu.eco",   lang), active: isActive("eco") },
+    { id: "work",   to: "home",   label: tr("menu.work",   lang), active: isActive("work") },
+    { id: "talent", to: "talent", label: tr("menu.talent", lang), active: isActive("talent") },
+    { id: "eco",    to: "eco",    label: tr("menu.eco",    lang), active: isActive("eco") },
+    { id: "about",  to: "about",  label: tr("menu.about",  lang), active: isActive("about") },
   ].filter((it) => it.active);
 
   function pick(it) {

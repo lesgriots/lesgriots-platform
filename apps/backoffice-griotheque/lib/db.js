@@ -198,12 +198,65 @@ export const listProjects = () => [];
 export const getProject = () => null;
 export const upsertProject = () => { throw new Error("legacy: use upsertFormation"); };
 export const deleteProject = () => 0;
-export const getContent = () => null;
-export const setContent = () => {};
-export const listContent = () => [];
 export const rowToProject = (p) => p;
 export const projectToRow = (p) => p;
 export const getDb = () => ({});
+
+// ---- SITE CONTENT (textes marketing éditables du site lagriotheque) ------
+// Stocké sous `site_content` dans griotheque.json, organisé en sections
+// imbriquées : { home: { manifesto, tagline... }, approche: {...}, ... }.
+// Voir lib/site-content-defaults.js pour le schéma complet.
+//
+// Pattern : on retourne TOUJOURS un objet complet (defaults mergés avec les
+// overrides utilisateur) pour que les consumers (UI BO + exporter) n'aient
+// jamais à se soucier des clés manquantes.
+
+import {
+  SITE_CONTENT_DEFAULTS,
+  mergeSiteContent,
+} from "./site-content-defaults.js";
+
+export function getSiteContent() {
+  const store = load();
+  return mergeSiteContent(store.site_content);
+}
+
+// Remplace TOUT le bloc site_content (rare — utilisé pour reset).
+export function setSiteContent(next) {
+  const store = load();
+  store.site_content = next || {};
+  save(store);
+  return getSiteContent();
+}
+
+// Patch partiel : { home: { manifesto: "..." } } met à jour juste cette clé,
+// sans toucher au reste. C'est le mode normal utilisé par la page d'admin.
+export function patchSiteContent(partial) {
+  if (!partial || typeof partial !== "object") return getSiteContent();
+  const store = load();
+  const current = store.site_content || {};
+  for (const section of Object.keys(partial)) {
+    current[section] = {
+      ...(current[section] || {}),
+      ...(partial[section] || {}),
+    };
+  }
+  store.site_content = current;
+  save(store);
+  return getSiteContent();
+}
+
+// Compat : ces 3 noms étaient des stubs avant. On les garde pour ne casser
+// aucun import existant, mais ils pointent maintenant vers le vrai contenu.
+export const getContent = (section) => {
+  const all = getSiteContent();
+  return section ? all[section] : all;
+};
+export const setContent = (section, values) => {
+  if (!section) return setSiteContent(values);
+  return patchSiteContent({ [section]: values });
+};
+export const listContent = () => Object.keys(SITE_CONTENT_DEFAULTS);
 
 // ACTIVE PAGES (toggles des pages du site lagriotheque)
 export function getActivePages() {

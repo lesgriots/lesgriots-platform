@@ -7,6 +7,7 @@
 import { useEffect, useState } from "react";
 import Type from "./Type";
 import MediaInput from "./MediaInput";
+import ProgrammePdfInput from "./ProgrammePdfInput";
 
 // Slugify pour générer un id à partir du titre
 function slugify(s) {
@@ -195,6 +196,27 @@ export default function FormationForm({
           defaultValue={defaults.location}
           onChange={(v) => set("location", v)}
         />
+        {/* Paiement en ligne via Stripe Payment Link — uniquement workshops
+            payants. Si renseigné, le bouton CTA devient "Payer {prix} →" et
+            renvoie vers Stripe Checkout au lieu d'un mailto. Vide ou prix
+            gratuit → fallback réservation par email. */}
+        <Field
+          label="Lien de paiement Stripe"
+          hint={
+            <>
+              URL d'un Payment Link Stripe pour ce workshop payant. À créer dans
+              Stripe Dashboard → Payment links. Si vide, le CTA reste un mailto
+              de réservation. Ignoré si le prix est gratuit.
+            </>
+          }
+        >
+          <input
+            type="url"
+            value={data.stripePaymentLink || ""}
+            placeholder="https://buy.stripe.com/..."
+            onChange={(e) => set("stripePaymentLink", e.target.value)}
+          />
+        </Field>
       </Section>
 
       {/* ========== MÉDIA (image ou vidéo en haut de page) ========== */}
@@ -203,6 +225,11 @@ export default function FormationForm({
           value={data.media}
           onChange={(media) => set("media", media)}
         />
+      </Section>
+
+      {/* ========== PROGRAMME PDF (téléchargeable depuis la modale du site) ========== */}
+      <Section title="Programme PDF (téléchargé par les leads)">
+        <ProgrammePdfInput formationId={data.id} />
       </Section>
 
       {/* ========== INTERVENANT ========== */}

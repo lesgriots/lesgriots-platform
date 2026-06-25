@@ -2,7 +2,7 @@
 // LESGRIOTSxSTUDIO — projects data
 // ⚠️  FICHIER GÉNÉRÉ AUTOMATIQUEMENT par backoffice/.
 // Ne pas éditer à la main — ouvre le back office (http://localhost:3030).
-// Dernière génération : 2026-06-13T16:39:05.463Z
+// Dernière génération : 2026-06-15T16:34:01.754Z
 
 const PROJECTS = [
   {
@@ -132,6 +132,8 @@ const PROJECTS = [
     thumbVideo: "img/riles-live-06.mp4",
     strip: ["img/riles-live-06-cover.jpg"],
     resources: [
+      { type: "video", src: "img/riles-survival-bestof-v4.web.mp4", poster: "img/riles-survival-bestof-v4-cover.jpg", label: "RILES — SURVIVAL · BEST OF", aspect: "16 / 9", duration: 97.33 },
+      { type: "video", src: "img/riles-survival-end.web.mp4", poster: "img/riles-survival-end-cover.jpg", label: "RILES — SURVIVAL · END", aspect: "9 / 16", duration: 18.20 },
       { type: "video", src: "img/riles-live-04.mp4", label: "RILES — SURVIVAL · LIVE 01", aspect: "4 / 3", duration: 14.72 },
       { type: "video", src: "img/riles-live-05.mp4", label: "RILES — SURVIVAL · LIVE 02", aspect: "4 / 3", duration: 9.76 },
       { type: "video", src: "img/riles-live-06.mp4", label: "RILES — SURVIVAL · LIVE 03", aspect: "4 / 3", duration: 21.32 },
@@ -218,41 +220,72 @@ const PROJECTS = [
     cover: "img/yasuke-cover.jpg",
     strip: ["img/yasuke-cover.jpg"],
     resources: [
-      { type: "image", src: "img/yasuke-cover.jpg",        label: "EESAH YASUKE — COVER" },
-      { type: "image", src: "img/yasuke-coverlp1.jpg",     label: "EESAH YASUKE — LP1 COVER" },
+      { type: "image", src: "img/yasuke-cover.jpg", label: "EESAH YASUKE — COVER" },
+      { type: "image", src: "img/yasuke-coverlp1.jpg", label: "EESAH YASUKE — LP1 COVER" },
       { type: "image", src: "img/yasuke-youssoupha-1.jpg", label: "EESAH YASUKE × YOUSSOUPHA — 01", aspect: "1080 / 1350" },
       { type: "image", src: "img/yasuke-youssoupha-2.jpg", label: "EESAH YASUKE × YOUSSOUPHA — 02", aspect: "1080 / 1350" },
       { type: "image", src: "img/yasuke-youssoupha-5.jpg", label: "EESAH YASUKE × YOUSSOUPHA — 03", aspect: "1080 / 1350" },
       { type: "image", src: "img/yasuke-youssoupha-6.jpg", label: "EESAH YASUKE × YOUSSOUPHA — 04", aspect: "1080 / 1350" },
       { type: "image", src: "img/yasuke-youssoupha-9.jpg", label: "EESAH YASUKE × YOUSSOUPHA — 05", aspect: "1080 / 1350" },
-      { type: "image", src: "img/yasuke-presse-2.jpg",     label: "EESAH YASUKE — PRESSE 01" },
-      { type: "image", src: "img/yasuke-presse-3.jpg",     label: "EESAH YASUKE — PRESSE 02" },
-      { type: "image", src: "img/yasuke-presse-9.jpg",     label: "EESAH YASUKE — PRESSE 03" },
+      { type: "image", src: "img/yasuke-presse-2.jpg", label: "EESAH YASUKE — PRESSE 01" },
+      { type: "image", src: "img/yasuke-presse-3.jpg", label: "EESAH YASUKE — PRESSE 02" },
+      { type: "image", src: "img/yasuke-presse-9.jpg", label: "EESAH YASUKE — PRESSE 03" },
     ],
     credits: {"CREATIVE DIRECTION":["MOOS COULIBALY"],"ARTIST":["EESAH YASUKE"]},
     tags: ["MUSIC","CAMPAIGN","2024"],
   },
 ];
 
+// SITE_CONTENT — surcharges éditoriales (priorité sur i18n.jsx via AboutView).
+// Mis à jour juin 2026 : aligné sur la bible LES GRIOTS — mission triptyque
+// AGENCE (structurer et amplifier les récits) + ingénierie narrative +
+// perspective culturelle et traditionnelle ancrée dans la diaspora africaine.
+// Le 4e paragraphe sur le talent unique (Moos) reste dans la bible, pas exposé.
 const SITE_CONTENT = {
   "aboutIntro": {
     "en": [
-      "LESGRIOTSxSTUDIO IS A TRANSDISCIPLINARY CREATIVE STUDIO.",
-      "WE COMBINE ARTISTIC DIRECTION, MOVEMENT, AND AUDIOVISUAL PRODUCTION TO DESIGN NARRATIVES THAT RESONATE ACROSS IMAGE, STORY, AND PERFORMANCE.",
-      "OUR PRACTICE IS ROOTED IN AFRO-DIASPORIC PERSPECTIVES AND DEDICATED TO BUILDING CULTURAL LEGACIES THROUGH POWERFUL VISUAL STORYTELLING.",
-      "WE ARE DRIVEN BY COLLABORATION AND THRIVE IN CREATIVE ENVIRONMENTS WHERE MEANING AND IMPACT ARE AT THE CORE."
+      "LESGRIOTSxSTUDIO IS THE CREATIVE AGENCY OF LES GRIOTS. OUR MISSION: TO STRUCTURE AND AMPLIFY THE NARRATIVES OF THE BRANDS, ARTISTS AND INSTITUTIONS WHO ENTRUST THEIRS TO US.",
+      "WE PRACTICE NARRATIVE ENGINEERING — STRATEGY, CREATIVE DIRECTION, MOVEMENT, AUDIOVISUAL PRODUCTION — IN SERVICE OF A SINGLE GOAL: A STORY THAT HOLDS, ACROSS EVERY SURFACE, AGAINST EVERY DISTRACTION.",
+      "OUR PERSPECTIVE IS CULTURAL AND TRADITIONAL — ROOTED IN THE AFRICAN DIASPORA, DRAWING FROM THE FIGURE OF THE GRIOT. OUR LEGITIMACY COMES FROM THE FIELD — UNIVERSAL, SONY, WARNER, ACCOR ARENA — AND RETURNS THERE."
     ],
     "fr": [
-      "LESGRIOTSxSTUDIO EST UN STUDIO CRÉATIF TRANSDISCIPLINAIRE.",
-      "NOUS RÉUNISSONS DIRECTION ARTISTIQUE, MOUVEMENT ET PRODUCTION AUDIOVISUELLE POUR CONSTRUIRE DES RÉCITS QUI RÉSONNENT À TRAVERS L'IMAGE, L'HISTOIRE ET LA PERFORMANCE.",
-      "NOTRE PRATIQUE EST ANCRÉE DANS DES PERSPECTIVES AFRO-DIASPORIQUES ET DÉDIÉE À LA CONSTRUCTION D'HÉRITAGES CULTURELS PAR UN STORYTELLING VISUEL PUISSANT.",
-      "NOUS SOMMES MUS PAR LA COLLABORATION ET PROSPÉRONS DANS DES ENVIRONNEMENTS CRÉATIFS OÙ LE SENS ET L'IMPACT SONT AU CŒUR."
+      "LESGRIOTSxSTUDIO EST L'AGENCE CRÉATIVE DE LES GRIOTS. NOTRE MISSION : STRUCTURER ET AMPLIFIER LES RÉCITS DES MARQUES, ARTISTES ET INSTITUTIONS QUI NOUS CONFIENT LES LEURS.",
+      "NOUS PRATIQUONS UNE INGÉNIERIE NARRATIVE — STRATÉGIE, DIRECTION CRÉATIVE, MOUVEMENT, PRODUCTION AUDIOVISUELLE — AU SERVICE D'UN SEUL OBJECTIF : QUE LE RÉCIT TIENNE DEBOUT, SUR TOUS LES SUPPORTS, FACE À TOUTES LES DISTRACTIONS.",
+      "NOTRE PERSPECTIVE EST CULTURELLE ET TRADITIONNELLE — ANCRÉE DANS LA DIASPORA AFRICAINE, INSPIRÉE PAR LA FIGURE DU GRIOT. NOTRE LÉGITIMITÉ VIENT DU TERRAIN — UNIVERSAL, SONY, WARNER, ACCOR ARENA — ET Y RETOURNE."
     ]
   },
   "activePages": {
-    "work": false,
+    "work": true,
+    "talent": true,
     "about": true,
-    "eco": false
+    "eco": true
+  },
+  // Page Talent — surcharges. Tant que tu n'as pas de vraie photo Moos
+  // dédiée, on utilise indigo-cristal-mooslab.jpg comme placeholder pour
+  // visualiser l'inscription dans la cellule. À swapper en posant une
+  // image dédiée dans img/ et en modifiant juste le path ci-dessous.
+  // Vidéo de hover : indigo-cristal-thumb.mp4 (version teaser optimisée
+  // pour la grille, légère à charger). Pour la full HD, utiliser
+  // indigo-cristal.web.mp4.
+  "talent": {
+    "portrait": "img/indigo-cristal-mooslab.jpg",
+    "hoverVideo": "img/indigo-cristal-thumb.mp4"
+  },
+  "services": {
+    "fr": [
+      "STRATÉGIE & RÉCIT",
+      "DIRECTION CRÉATIVE",
+      "DIRECTION DU MOUVEMENT",
+      "PRODUCTION AUDIOVISUELLE",
+      "PROJETS SPÉCIAUX"
+    ],
+    "en": [
+      "STRATEGY & NARRATIVE",
+      "CREATIVE DIRECTION",
+      "MOVEMENT DIRECTION",
+      "AUDIOVISUAL PRODUCTION",
+      "SPECIAL PROJECTS"
+    ]
   }
 };
 

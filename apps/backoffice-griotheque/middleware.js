@@ -9,7 +9,7 @@ export function middleware(req) {
   // donc on laisse passer sans auth. La route elle-même valide l'email + applique
   // le CORS pour n'accepter que les origines connues (localhost:8082, prod).
   // Le preflight OPTIONS aussi doit passer sans auth, sinon CORS échoue.
-  const publicPaths = ["/api/leads"];
+  const publicPaths = ["/api/leads", "/api/stripe/create-payment-intent"];
   if (publicPaths.includes(req.nextUrl.pathname)) {
     return NextResponse.next();
   }

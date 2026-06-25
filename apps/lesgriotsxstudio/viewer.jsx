@@ -60,7 +60,25 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
   const remeasureMedia = React.useCallback(() => {
     const el = videoRef.current || imgRef.current;
     if (!el) return;
-    const w = el.getBoundingClientRect().width;
+    const rect = el.getBoundingClientRect();
+    let w = rect.width;
+    // Pour une vidéo ou image avec object-fit: contain, le BOX peut être
+    // plus large que le CONTENU si l'aspect-ratio est portrait (la vidéo
+    // est letterboxée latéralement). On calcule alors la vraie largeur
+    // visible à partir du ratio intrinsèque :
+    //   wReal = height * (intrinsicWidth / intrinsicHeight)
+    // Conséquence : la barre de lecture s'aligne pile sous la vidéo,
+    // pas sous le box vide qui l'entoure.
+    const intrinsicW = el.videoWidth || el.naturalWidth || 0;
+    const intrinsicH = el.videoHeight || el.naturalHeight || 0;
+    if (intrinsicW > 0 && intrinsicH > 0 && rect.height > 0) {
+      const intrinsicRatio = intrinsicW / intrinsicH;
+      const boxRatio = rect.width / rect.height;
+      if (intrinsicRatio < boxRatio) {
+        // Contenu plus portrait que le box → letterbox latéral
+        w = rect.height * intrinsicRatio;
+      }
+    }
     if (w > 0) setMediaWidth(Math.round(w));
   }, []);
   React.useEffect(() => {
@@ -602,7 +620,12 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
               <video
                 ref={videoRef}
                 src={active.src}
-                loop
+                /* poster = image affichée tant que la vidéo n'est pas
+                   chargée/jouable. Évite le cadre noir / le rien qui
+                   apparaît quand la vidéo met du temps à se charger.
+                   Priorité : poster de la resource → cover du projet. */
+                poster={active.poster || project.cover}
+                preload="auto"
                 playsInline
                 muted={muted}
                 autoPlay
@@ -616,6 +639,16 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
                   remeasureMedia();
                 }}
                 onLoadedData={remeasureMedia}
+                /* Retry play() dès que la vidéo a assez de buffer pour
+                   jouer. Sans ça, sur certaines vidéos lourdes ou lentes
+                   à charger, le autoPlay HTML + le useEffect play() partent
+                   AVANT que la vidéo soit prête, échouent silencieusement,
+                   et la vidéo reste figée sur la poster image. */
+                onCanPlay={(e) => {
+                  if (!playing) return;
+                  const p = e.currentTarget.play();
+                  if (p && typeof p.catch === "function") p.catch(() => {});
+                }}
                 onClick={togglePlay}
                 /* cursor géré globalement dans styles.css (.viewer__media-wrap
                    video) pour appliquer le curseur custom mustard. Pas de

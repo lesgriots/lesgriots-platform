@@ -3714,6 +3714,12 @@ body.overview-open .utilbar {
 .page-foot .key { color: var(--ink); }
 .page-foot button { pointer-events: auto; }
 .page-foot button:hover { color: var(--ink); }
+/* Prompt terminal façon menu.sh : caret jaune brand juste avant le label
+   "back". Le curseur clignotant (cursor="always" sur Type) suit le label. */
+.page-foot button .prompt {
+  color: var(--yellow);
+  margin-right: 8px;
+}
 
 /* Mobile : on retire le bouton [X] BACK en bas à gauche de la page-foot
    (utilisable sur About / Eco). Sur mobile le sticker top-left assume
@@ -4083,7 +4089,14 @@ body.overview-open .utilbar {
   left: 0;
   transform: translate(-50%, -50%);
   z-index: 3;
+  /* Wrapper transparent aux events pour ne pas bloquer le pan dans le vide,
+     mais le griot interne (matrix-griot) accepte les clicks via override. */
   pointer-events: none;
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.eco-solar__sun.is-boosted {
+  /* Pulse léger pendant le boost pour signaler l'effet déclenché */
+  transform: translate(-50%, -50%) scale(1.12);
 }
 .eco-solar__sun .matrix-griot {
   font-size: 4px;
@@ -4091,6 +4104,9 @@ body.overview-open .utilbar {
   color: var(--ink);
   text-shadow: 0 0 8px rgba(138, 122, 32, 0.35);
   white-space: pre;
+  /* Réactive les clicks UNIQUEMENT sur le griot ASCII */
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 /* Orbits = thin concentric circles */
@@ -4108,6 +4124,17 @@ body.overview-open .utilbar {
    ellipse defined by --rx / --ry. We use a translate-only animation
    (24 keyframes ≈ 15° apart) so the planet itself never inherits
    rotation or scale — it stays upright and round. */
+/* Wrapper qui tilte chaque orbite individuellement → chaque planète
+   gravite sur son propre plan 3D, plus de coplanarité. Le orbit ring
+   et le anchor (planète + animation) partagent ce plan incliné. */
+.eco-solar__orbit-tilt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
 .eco-solar__anchor {
   position: absolute;
   top: 0;
@@ -4115,6 +4142,160 @@ body.overview-open .utilbar {
   width: 0;
   height: 0;
   animation: eco-orbit-ellipse linear infinite;
+  transform-style: preserve-3d;
+}
+
+/* ===================================================================
+   Trackball / globe interactif — bottom-center
+   =================================================================== */
+.eco-solar__trackball {
+  position: absolute;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--ink);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: auto;
+  user-select: none;
+}
+.eco-solar__trackball__ball {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 202, 0, 0.25), transparent 60%),
+    radial-gradient(circle at 50% 50%, #1a1a1a, #000 70%);
+  border: 1px solid var(--ink);
+  cursor: grab;
+  touch-action: none;
+  overflow: hidden;
+}
+.eco-solar__trackball__ball:active { cursor: grabbing; }
+.eco-solar__trackball__ring {
+  position: absolute;
+  inset: 14%;
+  border: 1px dashed rgba(138, 122, 32, 0.35);
+  border-radius: 50%;
+}
+.eco-solar__trackball__pin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: var(--ink);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(255, 202, 0, 0.5);
+}
+.eco-solar__trackball__reset {
+  background: none;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.eco-solar__trackball__reset:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+/* Trackball masqué sur mobile — la vue solaire (.eco-solar__plane) est déjà
+   désactivée au profit du layout .eco-mobile. */
+@media (max-width: 760px) {
+  .eco-solar__trackball { display: none !important; }
+}
+.eco-solar__tilt__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.eco-solar__tilt__reset {
+  background: none;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.eco-solar__tilt__reset:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.eco-solar__tilt__label {
+  font-weight: 500;
+  min-width: 10px;
+  text-align: center;
+}
+.eco-solar__tilt__value {
+  min-width: 38px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.65;
+}
+.eco-solar__tilt__slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 0;
+  outline: none;
+  cursor: pointer;
+}
+.eco-solar__tilt__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.eco-solar__tilt__slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+.eco-solar__tilt__slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+}
+@media (max-width: 760px) {
+  .eco-solar__tilt {
+    bottom: 80px;
+    padding: 10px 12px;
+    gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .eco-solar__tilt__row { gap: 6px; }
+  .eco-solar__tilt__slider { width: 140px; }
 }
 @keyframes eco-orbit-ellipse {
   0%        { transform: translate(calc(var(--rx) *  1.0000), calc(var(--ry) *  0.0000)); }
@@ -4160,25 +4341,60 @@ body.overview-open .utilbar {
   border: 0;
   color: var(--ink);
   cursor: pointer;
+  transform-style: preserve-3d;
   z-index: 4;
   transition: opacity 0.25s ease;
 }
 .eco-solar__planet.is-current { cursor: default; }
+/* Billboard : wrapper qui contre-rotate la rotation du plane (trackball)
+   pour que la sphère interne reste toujours orientée vers la caméra. Sans
+   ça, le radial-gradient (qui est 2D) se vrille et la "sphère" redevient
+   visiblement plate quand on tilte la galaxie. */
+.eco-solar__planet__billboard {
+  display: inline-block;
+  transform-style: preserve-3d;
+  line-height: 0;
+}
+
+/* Planètes en vraies sphères CSS : superposition de plusieurs radial-gradients
+   pour le volume (lumière diffuse, terminator, ombre propre, spéculaire) +
+   inset shadows pour l'ambient occlusion + glow extérieur. */
 .eco-solar__planet__dot {
   display: block;
   border-radius: 50%;
-  background: var(--ink);
-  box-shadow: 0 0 12px rgba(246, 226, 28, 0.18);
+  background:
+    /* Highlight spéculaire (petit point très clair en haut-gauche) */
+    radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 9%),
+    /* Lumière diffuse principale (terminator marqué) */
+    radial-gradient(circle at 32% 28%, #d8c878 0%, #8a7a20 38%, #2a2410 76%, #0a0805 100%);
+  box-shadow:
+    /* Ombre propre : un croissant sombre en bas-droite (face non éclairée) */
+    inset -6px -8px 12px -4px rgba(0, 0, 0, 0.85),
+    /* Léger rim light sur le bord opposé (rebond ambiant) */
+    inset 4px 4px 6px -2px rgba(255, 220, 120, 0.18),
+    /* Halo de la planète + ombre portée subtile */
+    0 0 16px rgba(246, 226, 28, 0.28),
+    0 4px 10px rgba(0, 0, 0, 0.4);
   transition: transform 0.3s cubic-bezier(0.2, 1.4, 0.4, 1), box-shadow 0.3s ease;
 }
 .eco-solar__planet.is-current .eco-solar__planet__dot {
-  background: var(--yellow);
-  box-shadow: 0 0 18px rgba(246, 226, 28, 0.6);
+  background:
+    radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 10%),
+    radial-gradient(circle at 32% 28%, #fff4b8 0%, var(--yellow) 36%, #8a6d00 78%, #2a2200 100%);
+  box-shadow:
+    inset -6px -8px 14px -4px rgba(40, 30, 0, 0.85),
+    inset 4px 4px 7px -2px rgba(255, 240, 200, 0.45),
+    0 0 26px rgba(246, 226, 28, 0.7),
+    0 4px 12px rgba(0, 0, 0, 0.4);
 }
 .eco-solar__planet:hover .eco-solar__planet__dot,
 .eco-solar__planet.is-hover .eco-solar__planet__dot {
   transform: scale(1.4);
-  box-shadow: 0 0 22px rgba(246, 226, 28, 0.55);
+  box-shadow:
+    inset -6px -8px 14px -4px rgba(0, 0, 0, 0.85),
+    inset 4px 4px 7px -2px rgba(255, 230, 140, 0.3),
+    0 0 32px rgba(246, 226, 28, 0.7),
+    0 6px 14px rgba(0, 0, 0, 0.45);
 }
 .eco-solar__planet__label {
   font-size: 10px;
@@ -5696,6 +5912,30 @@ body.overview-open .utilbar {
    tourne son téléphone — c'est précisément pour ça qu'il tourne). */
 @media (orientation: landscape) and (max-height: 500px) {
 
+  /* En landscape mobile :
+     - le compteur "01 / 10" est posé EN DESSOUS DU PLAYER (juste sous le
+       bas du média) via une position absolute calée sur la hauteur média.
+     - le reste de la caption (nom + client + rôle) reste ancré en bas du
+       viewport. L'espace flotte entre les deux. */
+  .viewer__projmeta {
+    top: auto !important;
+    bottom: 6px !important;
+    transform: none !important;
+  }
+  .viewer__projmeta__counter {
+    position: absolute !important;
+    top: calc(100dvh - 84px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: auto !important;
+    margin: 0 !important;
+    text-align: center;
+    z-index: 10;
+    pointer-events: none;
+  }
+  /* La galerie (rail) garde le même comportement qu'en mobile portrait
+     (masquée). Pas d'override spécifique au landscape. */
+
   /* Viewer paysage : on override TOUTES les contraintes max-height
      qui s'empilaient en mobile portrait :
      - .viewer--video .viewer__stage : calc(100vh - 220px) → 180px en paysage
@@ -5727,5 +5967,245 @@ body.overview-open .utilbar {
   .viewer__overview-trigger,
   .viewer__info-trigger {
     bottom: 10px !important;
+  }
+}
+
+/* ─── Page TALENT ─────────────────────────────────────────────────────
+   Réutilise la grammaire visuelle de la page Work :
+   - Wrapper .ahome (fond noir + ASCII griot bottom-right via .ahome__griot)
+   - Cellule unique stylée comme .ahome__cell (border jaune au hover,
+     vidéo qui joue au survol, label typewriter en bas)
+   La variant .ahome--talent désactive le scatter grid au profit d'un
+   simple flex 2 colonnes : cellule grand format + bio terminal à côté.
+   ────────────────────────────────────────────────────────────────── */
+.ahome--talent {
+  /* Pas de grid scattered, juste un layout deux colonnes propre */
+  position: relative;
+}
+.ahome__grid--talent {
+  /* Override le grid auto du scatter : photo (auto) à gauche, bio (1fr)
+     à droite. La photo est COLLÉE au bord gauche du viewport — on aligne
+     juste sur le padding 7vw standard, pas de max-width ni de centering
+     pour qu'elle reste à gauche sur tous les écrans, y compris >1600px.
+     Padding-top élevé (180px) → la photo passe verticalement en dessous
+     du sticker .idcard (qui descend à ~140-150px), donc PAS BESOIN de
+     padding-left géant : sticker et photo se croisent sans se chevaucher,
+     l'un en haut, l'autre en bas. */
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5vw;
+  padding: 180px 7vw 70px;
+  max-width: none;
+  margin: 0;
+  align-items: start;  /* la bio commence en haut, alignée sur la cellule */
+}
+
+/* Cellule single — REPRODUCTION EXACTE d'une miniature portrait en
+   mode LARGE desktop (cf .ahome--large .ahome__cell--portrait.ahome__cell--lg).
+   On force ici les dimensions car la cellule n'est plus dans le scatter
+   grid qui calcule normalement size/position via useScatter. */
+.ahome__cell--single {
+  /* Annule les transforms scatter */
+  transform: none !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
+  /* Format portrait — même proportions que les vignettes Work portrait */
+  aspect-ratio: 3 / 4.2;
+  /* Même taille qu'une cellule .ahome--large .ahome__cell--portrait.ahome__cell--lg :
+     420px de haut → ~300px de large. Taille LARGE pour donner de la présence
+     au portrait du talent unique. */
+  height: 420px;
+  width: auto;
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  background: #000;
+}
+/* Le rest (MatrixGriot / image) prend toute la cellule.
+   Au repos : la photo est en N&B (filter grayscale 1) — cohérent avec
+   la grille Work où le backdrop est aussi N&B.
+   Au hover : filter retiré → la photo passe en couleur, le sujet
+   (Moos) reste accroché au regard pendant que la vidéo indigo-cristal
+   joue en grand format derrière toute la page. */
+.ahome__cell--single .ahome__cell__rest {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: grayscale(1) contrast(1.05);
+  transition: filter 0.5s ease;
+  z-index: 1;
+}
+.ahome__cell--single .ahome__cell__rest > * {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ahome__cell--single.is-hovered .ahome__cell__rest {
+  filter: none;
+}
+
+/* ─── Bio (col droite) ────────────────────────────────────────────────
+   Typo strictement identique à la page About : .about-min__intro p
+   (var(--font-mono) · 13px · letter-spacing 0.08em · line-height 1.55 ·
+   uppercase · color var(--ink)). On garde les prompts > en jaune brand
+   pour le signal "terminal" mais le corps du texte est calé sur About.
+   ───────────────────────────────────────────────────────────────── */
+.talent-bio {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-self: stretch;
+  padding: 0;
+  color: var(--ink);
+}
+.talent-bio__head {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  font-weight: 400;
+  margin-bottom: 22px;
+}
+.talent-bio__body {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.talent-bio__body p,
+.talent-bio__body .talent-bio__p {
+  /* Bio prose 3e personne — typo strictement identique à .about-min__intro p
+     (var(--font-mono) 13px 0.08em line-height 1.55 uppercase). On garde le
+     max-width 62ch pour conserver une mesure de lecture confortable
+     puisque le texte est de la prose longue.
+     IMPORTANT : pas de coupure de mots automatique en fin de ligne
+     (hyphens: manual + word-break: normal). On ne veut JAMAIS voir un
+     mot scindé par un trait d'union — chaque mot reste entier, et si
+     besoin il passe à la ligne suivante. */
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+  color: var(--ink);
+  text-transform: uppercase;
+  text-wrap: pretty;
+  hyphens: manual;
+  -webkit-hyphens: manual;
+  word-break: normal;
+  overflow-wrap: normal;
+  margin: 0;
+  max-width: 62ch;
+}
+
+/* Reserve-space typewriter : .ghost contient le texte complet en
+   visibility: hidden pour réserver la place (le paragraphe a sa hauteur
+   et son layout final dès le mount). .typed contient le <Type> en absolute
+   par-dessus, qui s'écrit caractère par caractère. Le bloc ne bouge plus,
+   seul le curseur clignotant se déplace dans cet espace réservé. */
+.talent-bio__p {
+  position: relative;
+}
+.talent-bio__ghost {
+  visibility: hidden;
+  display: block;
+  /* Mêmes attributs typo que le <p> parent — hérités automatiquement,
+     donc rien à override ici. */
+}
+.talent-bio__typed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Lien handle (@mooscoulibaly) — hérite de la typo du paragraphe,
+   ajoute juste un soulignement subtil et un effet de couleur au hover
+   (jaune brand). Cohérent avec le pattern .about-min__col a. */
+.talent-bio__link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: color 0.2s ease;
+}
+.talent-bio__link:hover {
+  color: var(--yellow);
+}
+
+/* ─── Mobile ───────────────────────────────────────────────────────────
+   On force le wrapper à tenir dans 100vh (height + overflow hidden) pour
+   qu'il n'y ait PAS DE SCROLL sur la page Talent en mobile, comme la page
+   About. Conséquence : on dimensionne la photo en vh pour qu'elle s'adapte
+   à la hauteur disponible et la bio prend le reste.
+   ──────────────────────────────────────────────────────────────────── */
+@media (max-width: 820px) {
+  .ahome--talent {
+    height: 100vh;
+    min-height: 0;        /* override le min-height: 100vh de .ahome */
+    overflow: hidden;     /* zéro scroll */
+    padding: 0;           /* le padding est porté par .ahome__grid--talent */
+  }
+  .ahome__grid--talent {
+    grid-template-columns: 1fr !important;
+    /* Layout vertical : photo en haut (taille fixe), bio en bas (auto) */
+    grid-template-rows: auto 1fr;
+    gap: 22px;
+    /* Padding top 120px → garantit que la photo passe en dessous du
+       sticker mobile (.idcard ~95-100 px de haut + 10 px top = ~110 px).
+       Sur les petits viewports (sticker 130 px de large = ~65 px de haut),
+       120px reste safe. */
+    padding: 120px 5vw 70px;
+    height: 100vh;
+    justify-items: start;   /* photo alignée à gauche en mobile */
+    align-content: start;
+  }
+  .ahome__cell--single {
+    /* Photo PETITE en mobile par défaut : ~32 % de la hauteur viewport
+       → ~270 px sur iPhone 14 (852 px). Garde la place pour que la bio
+       s'affiche entièrement sans scroll. Alignée à GAUCHE (margin 0).
+       Transition height pour un toggle fluide vers le grand format. */
+    height: 32vh;
+    aspect-ratio: 3 / 4.2;
+    margin: 0;
+    transition: height 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+                width 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+                filter 0.5s ease;
+  }
+  /* TOGGLE GRAND FORMAT — au tap sur la photo en mobile :
+     - La cellule prend toute la hauteur dispo (~75vh).
+     - La bio sœur (aside.talent-bio) se masque (display: none).
+     Re-tap → retour à l'état par défaut. */
+  .ahome__cell--single.is-hovered {
+    height: 75vh;
+  }
+  .ahome__cell--single.is-hovered ~ .talent-bio {
+    display: none;
+  }
+  /* Cellule au repos : la photo doit bien remplir la cell — l'image
+     est en object-fit cover, on ne change rien à ce niveau. */
+  .talent-bio {
+    padding: 0;
+    width: 100%;
+    /* La bio occupe ce qu'il reste — overflow hidden pour qu'aucun
+       paragraphe ne fasse déborder le viewport. */
+    overflow: hidden;
+  }
+  .talent-bio__body {
+    gap: 14px;
+  }
+  .talent-bio__body p,
+  .talent-bio__body .talent-bio__p {
+    /* Typo un peu plus compacte sur mobile pour gagner de la place et
+       que les 2 paragraphes tiennent sans déborder. */
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    line-height: 1.5;
+    max-width: none;
   }
 }

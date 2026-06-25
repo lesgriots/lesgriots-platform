@@ -786,6 +786,772 @@ button {
   margin-left: calc(50% - 50vw);
   padding: 30px 16px 60px;
 }
+
+/* ===================================================================
+   BANNIÈRE CTA HORIZONTALE — bloc blanc qui chevauche le bas de la vidéo,
+   contient le tagline + colonnes (sessions, formateur, tarif) + bouton.
+   Style inspiré SCA/NABA.
+   =================================================================== */
+.lg__cta-banner {
+  position: relative;
+  z-index: 5;
+  margin: -200px auto 40px;   /* chevauche le bas de la vidéo */
+  max-width: 1200px;
+  width: calc(100% - 64px);
+  background: var(--paper);
+  padding: 40px 48px 32px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  font-family: var(--font-sans);
+}
+.lg__cta-banner__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(28px, 3vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin: 0 0 16px;
+}
+.lg__cta-banner__tagline {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--ink-2, #555);
+  margin: 0 0 28px;
+  max-width: 920px;
+}
+.lg__cta-banner__rule {
+  border: 0;
+  border-top: 1px solid var(--ink);
+  margin: 0 0 28px;
+  opacity: 0.4;
+}
+.lg__cta-banner__grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 0.8fr auto;
+  gap: 32px;
+  align-items: start;
+}
+.lg__cta-banner__col {
+  min-width: 0;
+}
+.lg__cta-banner__col__k {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3, #888);
+  margin: 0 0 8px;
+}
+.lg__cta-banner__col__v {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--ink);
+  margin: 0 0 4px;
+}
+.lg__cta-banner__col__v--muted {
+  font-weight: 400;
+  color: var(--ink-3, #888);
+}
+.lg__cta-banner__col__v--small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-3, #666);
+  margin-top: 4px;
+}
+.lg__cta-banner__col--cta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  align-self: stretch;
+}
+.lg__cta-banner__btn {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+  padding: 14px 24px;
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.lg__cta-banner__btn:hover {
+  background: var(--accent);
+  color: var(--ink);
+  outline: 1px solid var(--ink);
+  transform: translateY(-1px);
+}
+
+/* ===================================================================
+   MINI-CARTE CTA (style SENZA) — apparaît quand on scrolle au-delà de la
+   bannière CTA. Carte sticky fixed à droite avec prix + durée + badges
+   + dates + bouton réserver + lien financement. Mobile : barre compacte
+   en bas avec prix + bouton.
+   =================================================================== */
+/* ===================================================================
+   BLOC CTA FINAL pleine largeur — fond noir, dernier rappel en bas de
+   page. Inspiré de The Futur / Clearance Kit.
+   =================================================================== */
+.lg__cta-final {
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--paper);
+  margin: 60px -16px -60px;
+  padding: 100px 32px 110px;
+  font-family: var(--font-sans);
+  border-top: 1px solid var(--ink);
+}
+/* Vidéo (ou image) en background du CTA final — défile en loop muté. */
+.lg__cta-final__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+/* Voile sombre semi-transparent par-dessus la vidéo pour garder la
+   lisibilité du texte. */
+.lg__cta-final__veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.75) 100%
+  );
+  z-index: 1;
+}
+.lg__cta-final__inner {
+  position: relative;
+  z-index: 2;
+}
+.lg__cta-final__inner {
+  /* Wrapper centré dans la page (max-width + margin auto) mais texte
+     aligné à gauche à l'intérieur. */
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: left;
+}
+.lg__cta-final__kicker {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  opacity: 0.55;
+  margin: 0 0 24px;
+}
+.lg__cta-final__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(36px, 5vw, 72px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--paper);
+  margin: 0 0 10px;
+}
+.lg__cta-final__author {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--paper);
+  opacity: 0.6;
+  margin: 0 0 36px;
+}
+.lg__cta-final__price {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 40px;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  margin: 0 0 32px;
+  line-height: 1;
+}
+.lg__cta-final__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 16px 28px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.lg__cta-final__btn:hover {
+  background: var(--accent);
+  color: var(--ink);
+  outline: 1px solid var(--accent);
+  transform: translateY(-1px);
+}
+@media (max-width: 900px) {
+  /* Mobile : padding-bottom de .lg__formation = 96px (barre fixed bottom).
+     On compense par margin-bottom: -96px pour coller au footer. */
+  .lg__cta-final { margin-bottom: -96px; }
+}
+@media (max-width: 700px) {
+  .lg__cta-final { padding: 64px 20px 72px; margin-top: 40px; }
+  .lg__cta-final__title { font-size: clamp(28px, 8vw, 40px); }
+  .lg__cta-final__price { font-size: 30px; margin-bottom: 24px; }
+  .lg__cta-final__author { font-size: 15px; margin-bottom: 28px; }
+}
+
+/* ===================================================================
+   LAYOUT 2 COLONNES style SENZA / Clearance Kit (The Futur)
+   =================================================================== */
+.lg__formation__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 32px;
+  align-items: start;
+  margin-top: 8px;
+  /* Pousse tout le layout (et donc la sidebar) vers la gauche. */
+  padding-right: 180px;
+}
+.lg__formation__main { min-width: 0; }
+.lg__formation__side {
+  position: sticky;
+  /* Header (121) + titre sticky variable + menu d'onglets (~60) + marge.
+     Évite que la carte passe sous les onglets quand on scrolle. */
+  top: calc(121px + var(--lg-title-h, 80px) + 72px);
+  align-self: start;
+}
+@media (max-width: 700px) {
+  .lg__formation__side {
+    /* Mobile : header (85) + titre + onglets (~50). */
+    top: calc(85px + var(--lg-title-h, 60px) + 62px);
+  }
+}
+@media (min-width: 901px) {
+  /* Neutralise les "edge-to-edge" (margin: 0 -16px) qui sortiraient
+     de la colonne main dans un layout 2 cols. */
+  .lg__formation__main .lg__tabsec,
+  .lg__formation__main .lg__section,
+  .lg__formation__main .lg__formation__sections {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+@media (max-width: 900px) {
+  .lg__formation__layout { display: block; }
+  .lg__formation__side {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+  }
+  .lg__formation { padding-bottom: 96px; }
+}
+
+/* ===================================================================
+   CTA CARD (dans la sidebar) — style SENZA
+   =================================================================== */
+.lg__cta-mini {
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  padding: 22px 22px 20px;
+  font-family: var(--font-sans);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+  text-align: left;
+}
+.lg__cta-mini__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0 0 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink);
+}
+.lg__cta-mini__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink);
+  margin-bottom: 14px;
+}
+.lg__cta-mini__price {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ink);
+}
+.lg__cta-mini__price__ht {
+  font-size: 0.55em;
+  font-weight: 500;
+  color: var(--ink-3, #888);
+  letter-spacing: 0.04em;
+  margin-left: 4px;
+}
+.lg__cta-final__price__ht {
+  font-size: 0.5em;
+  font-weight: 400;
+  opacity: 0.55;
+  letter-spacing: 0.04em;
+  margin-left: 6px;
+}
+.lg__cta-mini__hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3, #888);
+}
+/* Mention "Formation certifiante" : ligne courte et lisible juste sous le
+   prix, avant les badges techniques (CPF / OPCO / RS). */
+.lg__cta-mini__cert {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+.lg__cta-mini__cert__code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3, #888);
+}
+.lg__cta-mini__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.lg__cta-mini__badges span {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 4px 8px;
+}
+.lg__cta-mini__meta {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.lg__cta-mini__meta li {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.lg__cta-mini__meta li:last-child { border-bottom: 0; }
+.lg__cta-mini__btn {
+  display: block;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 13px 18px;
+  text-align: center;
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  margin-bottom: 10px;
+  transition: background 0.15s ease, color 0.15s ease, outline 0.15s ease;
+}
+.lg__cta-mini__btn:hover {
+  background: var(--accent);
+  color: var(--ink);
+  outline: 1px solid var(--ink);
+}
+/* Variante "ghost" du bouton CTA dans la carte : fond clair, contour. */
+.lg__cta-mini__btn--ghost {
+  background: var(--paper);
+  color: var(--ink);
+  outline: 1px solid var(--ink);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  width: 100%;
+  text-align: center;
+}
+.lg__cta-mini__btn--ghost:hover {
+  background: var(--accent);
+  color: var(--ink);
+  outline: 1px solid var(--ink);
+}
+
+/* ===================================================================
+   MODALE "Télécharger le programme" — formulaire de capture de leads.
+   Overlay sombre + panneau central avec form épuré.
+   =================================================================== */
+.lg__modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: lg-modal-fade 0.18s ease;
+}
+@keyframes lg-modal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.lg__modal__panel {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  width: 100%;
+  max-width: 480px;
+  padding: 40px 36px 32px;
+  font-family: var(--font-sans);
+  color: var(--ink);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+.lg__modal__close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  padding: 4px 8px;
+}
+.lg__modal__close:hover { text-decoration: underline; }
+.lg__modal__kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3, #888);
+  margin: 0 0 8px;
+}
+.lg__modal__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+.lg__modal__intro {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2, #555);
+  margin: 0 0 24px;
+}
+.lg__modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.lg__modal__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 480px) {
+  .lg__modal__row { grid-template-columns: 1fr; gap: 14px; }
+}
+.lg__modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lg__modal__field__k {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3, #888);
+}
+.lg__modal__field input {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  padding: 10px 12px;
+  color: var(--ink);
+  outline: none;
+}
+.lg__modal__field input:focus {
+  outline: 2px solid var(--ink);
+  outline-offset: -1px;
+}
+.lg__modal__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-2, #555);
+  margin-top: 6px;
+}
+.lg__modal__consent input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.lg__modal__submit {
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+  padding: 14px 18px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.lg__modal__submit:hover {
+  background: var(--accent);
+  color: var(--ink);
+  outline: 1px solid var(--ink);
+}
+@media (max-width: 700px) {
+  .lg__modal__panel { padding: 32px 22px 24px; max-width: 100%; }
+  .lg__modal__title { font-size: 22px; }
+}
+.lg__cta-mini__sub {
+  display: block;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--ink);
+}
+.lg__cta-mini__sub:hover { color: var(--ink-3, #555); }
+
+/* Mobile : la sidebar parent passe en fixed bottom (.lg__formation__side).
+   La carte se compacte en barre prix + bouton. */
+@media (max-width: 900px) {
+  .lg__cta-mini {
+    border: 0;
+    border-top: 1px solid var(--ink);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  }
+  .lg__cta-mini__head {
+    padding-bottom: 0;
+    border-bottom: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  .lg__cta-mini__price { font-size: 18px; }
+  .lg__cta-mini__title,
+  .lg__cta-mini__hint,
+  .lg__cta-mini__badges,
+  .lg__cta-mini__meta,
+  .lg__cta-mini__sub { display: none; }
+  .lg__cta-mini__btn {
+    margin-bottom: 0;
+    padding: 12px 18px;
+    flex: 1 1 auto;
+    max-width: 60%;
+  }
+}
+
+@media (max-width: 900px) {
+  .lg__cta-banner {
+    margin: -100px 16px 32px;
+    width: auto;
+    padding: 28px 22px 24px;
+  }
+  .lg__cta-banner__tagline {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+  .lg__cta-banner__rule { margin-bottom: 20px; }
+  .lg__cta-banner__grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .lg__cta-banner__col--cta {
+    justify-content: stretch;
+  }
+  .lg__cta-banner__btn {
+    width: 100%;
+    text-align: center;
+    padding: 14px 18px;
+  }
+}
+.lg__cta-card__inner {
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  padding: 24px 22px 22px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+.lg__cta-card__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--ink);
+  margin-bottom: 16px;
+}
+.lg__cta-card__price {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.lg__cta-card__price__hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink-3, #888);
+  text-transform: uppercase;
+}
+.lg__cta-card__meta {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lg__cta-card__meta li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 13px;
+  line-height: 1.3;
+}
+.lg__cta-card__meta__k {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink-3, #888);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.lg__cta-card__meta__v {
+  text-align: right;
+  color: var(--ink);
+  font-weight: 500;
+}
+.lg__cta-card__btn {
+  display: block;
+  width: 100%;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+  padding: 14px 18px;
+  text-align: center;
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+.lg__cta-card__btn:hover {
+  background: var(--paper);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+.lg__cta-card__sub {
+  display: block;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lg__cta-card__sub:hover { color: var(--ink-3, #555); }
+
+/* Mobile : on neutralise le track et la carte devient une barre fixe en bas. */
+@media (max-width: 900px) {
+  .lg__cta-track {
+    position: static;
+    width: auto;
+    height: 0;
+  }
+  .lg__cta-card {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    z-index: 30;
+  }
+  .lg__cta-card__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 0;
+    border-top: 1px solid var(--ink);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  }
+  .lg__cta-card__head {
+    padding-bottom: 0;
+    border-bottom: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  .lg__cta-card__price { font-size: 22px; }
+  .lg__cta-card__price__hint { display: none; }
+  .lg__cta-card__meta { display: none; }
+  .lg__cta-card__sub { display: none; }
+  .lg__cta-card__btn {
+    margin-bottom: 0;
+    padding: 12px 18px;
+    flex: 1 1 auto;
+    max-width: 60%;
+  }
+}
+
 .lg__formation__stickybar {
   position: fixed;
   top: calc(121px + var(--lg-title-h, 60px)); /* sous le titre sticky */
@@ -1027,34 +1793,36 @@ button {
 .lg__formation__title {
   font-family: var(--font-sans);
   font-weight: 500;
-  /* font-size piloté par useFitOne via la variable --fit-size */
-  font-size: var(--fit-size, 80px);
-  line-height: 0.98;
+  /* Font-size responsive — autorise le wrap sur 2 lignes si le titre est long.
+     On garde useFitOne sur le ref mais le clamp prend le dessus visuellement. */
+  font-size: clamp(36px, 6vw, 80px);
+  /* line-height un peu plus généreux + padding-bottom suffisant pour que la
+     descendante des g/q/p/y/j ne soit pas coupée par le border-bottom. */
+  line-height: 1.1;
   letter-spacing: -0.035em;
-  /* Full bleed : on annule le padding latéral du parent .lg__formation (16px)
-     pour que le fond touche les bords du viewport */
   margin: 0 -16px 0;
-  padding: 4px 16px;
+  padding: 12px 16px 20px;
   color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
+  white-space: normal;
+  overflow: visible;
   display: block;
   width: auto;
   position: sticky;
-  top: 121px; /* sous le header (12 + 96 + 12 + 1) */
+  top: 121px;
   z-index: 30;
   background: var(--paper);
   border-bottom: 1px solid var(--ink);
   transition: font-size 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-/* En mode menu (stuck) : on shrink uniquement la font, la barre garde
-   sa pleine largeur (border-bottom edge-to-edge). */
+/* En mode stuck : taille réduite fixe pour rester compact en sticky. */
 .lg__formation__title.is-stuck {
-  font-size: calc(var(--fit-size, 80px) * 0.5);
+  font-size: clamp(20px, 2.4vw, 32px);
+  line-height: 1.1;
+  padding: 6px 16px 8px;
 }
 @media (max-width: 600px) {
-  .lg__formation__title { top: 85px; }
-  .lg__formation__title.is-stuck { font-size: calc(var(--fit-size, 80px) * 0.6); }
+  .lg__formation__title { top: 85px; font-size: clamp(26px, 7vw, 40px); }
+  .lg__formation__title.is-stuck { font-size: clamp(16px, 4.5vw, 22px); }
 }
 
 /* === Diviseur de section façon SUPSI / id-w =========================
@@ -1390,16 +2158,22 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   background: var(--paper);
   border-top: 1px solid var(--ink);
 }
+/* Section "Nos formations / Workshops" — typo alignée sur la
+   "souscrire à notre newsletter" du menu (.lg__menu__link dans la
+   première ligne du menu) : sans-serif, weight 500, lowercase, 13px.
+   Tabs + métadonnées + titre formation partagent la même grammaire
+   typographique pour un rendu sobre, éditorial, minimaliste. */
 .lg__latest__tabs {
   display: flex;
   justify-content: center;
-  gap: 28px;
-  font-family: var(--font-mono);
-  font-size: 11px;
+  gap: 24px;
+  font-family: var(--font-sans);
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin: 0 0 50px;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  text-transform: lowercase;
+  margin: 0 0 40px;
   color: var(--ink-3);
 }
 .lg__latest__tabs .is-active { color: var(--ink); }
@@ -1415,55 +2189,59 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 .lg__latest__row {
   display: grid;
-  grid-template-columns: 160px 1fr 160px;
+  grid-template-columns: 140px 1fr 140px;
   align-items: baseline;
   gap: 24px;
-  padding: 10px 0;
+  padding: 8px 0;
   text-decoration: none;
   color: var(--ink);
   transition: opacity 0.18s ease;
 }
 .lg__latest__row:hover { opacity: 0.55; }
-.lg__latest__row__left {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-  text-align: left;
-  align-self: center;
-}
+.lg__latest__row__left,
 .lg__latest__row__right {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-family: var(--font-sans);
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  text-transform: lowercase;
   color: var(--ink-2);
-  text-align: right;
   align-self: center;
 }
+.lg__latest__row__left  { text-align: left; }
+.lg__latest__row__right { text-align: right; }
 .lg__latest__row__title {
   font-family: var(--font-sans);
+  /* Même graisse que la typo menu (weight 500) — c'est juste la TAILLE
+     qui crée la hiérarchie : titre nettement plus gros que les méta
+     left/right (13px), ce qui le pose comme l'élément principal de
+     chaque ligne. */
   font-weight: 500;
-  font-size: clamp(36px, 6vw, 78px);
-  line-height: 1.02;
-  letter-spacing: -0.035em;
+  /* Taille intermédiaire entre la version actuelle (22-36) et l'ancienne
+     (36-78). Donne plus de présence sans tomber dans le titre énorme. */
+  font-size: clamp(30px, 4.5vw, 56px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   margin: 0;
   color: var(--ink);
   text-align: center;
+  /* On préserve la casse d'origine des titres (ex. "Stratégie de marque",
+     "Filmer au téléphone") qui commencent par une majuscule. Les tabs
+     et métadonnées restent en lowercase pour le côté "menu" sobre, mais
+     le titre formation respecte la casse éditoriale. */
   text-transform: none;
 }
 @media (max-width: 700px) {
   .lg__latest { padding: 50px 14px 60px; }
-  .lg__latest__tabs { font-size: 10px; gap: 18px; margin-bottom: 32px; }
-  .lg__latest__row { grid-template-columns: 1fr; gap: 4px; padding: 14px 0; }
-  .lg__latest__row__left, .lg__latest__row__right {
+  .lg__latest__tabs { font-size: 12px; gap: 16px; margin-bottom: 28px; }
+  .lg__latest__row { grid-template-columns: 1fr; gap: 4px; padding: 12px 0; }
+  .lg__latest__row__left,
+  .lg__latest__row__right {
     text-align: center;
-    font-size: 10px;
+    font-size: 12px;
   }
-  .lg__latest__row__title { font-size: clamp(28px, 9vw, 44px); }
+  .lg__latest__row__title { font-size: 32px; }
 }
 
 /* ----- NEEDS — section noire "Tout ce qu'un créatif a besoin" ----- */
@@ -1881,6 +2659,349 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   .lg__sommaire__panel { max-height: 60vh; padding: 18px 14px 24px; }
 }
 
+/* ===================================================================
+   Barre d'onglets sticky — remplace le sommaire dans la page formation.
+   4 boutons côte à côte sous le titre sticky, scrollables horizontalement
+   sur mobile si nécessaire.
+   =================================================================== */
+.lg__tabs {
+  position: sticky;
+  top: calc(121px + var(--lg-title-h, 80px));
+  z-index: 28;
+  margin: 0 -16px;
+  padding: 16px 24px;
+  background: var(--paper);
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 12px;
+  white-space: nowrap;
+}
+/* Wrapper scrollable interne — contient les onglets + séparateurs */
+.lg__tabs__scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  white-space: nowrap;
+  flex: 1 1 auto;
+}
+.lg__tabs__scroll::-webkit-scrollbar { display: none; }
+/* Flèches prev/next — masquées sur desktop, visibles sur mobile */
+.lg__tabs__nav {
+  display: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--ink);
+  padding: 4px 8px;
+  flex-shrink: 0;
+}
+.lg__tabs__nav:hover { opacity: 0.6; }
+.lg__tabs__btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  /* Typo proche du menu principal (.lg__menu__link) mais avec majuscule
+     initiale conservée ("Présentation", "Objectifs"…). */
+  font-family: var(--font-sans);
+  font-size: clamp(14px, 1.1vw, 18px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  text-transform: none;
+  color: var(--ink);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.lg__tabs__sep {
+  color: var(--ink);
+  font-weight: 500;
+  font-size: clamp(14px, 1.1vw, 18px);
+  line-height: 1.1;
+  user-select: none;
+}
+/* Bouton CTA "Réserver →" à la fin du menu sticky — toujours visible quand
+   le menu est collé en haut. */
+.lg__tabs__cta {
+  margin-left: auto;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 8px 16px;
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(13px, 1vw, 15px);
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.lg__tabs__cta:hover {
+  background: var(--accent);
+  color: var(--ink);
+  outline: 1px solid var(--ink);
+}
+/* Vestige : numéros 01/02… masqués (la nouvelle structure n'en a plus). */
+.lg__tabs__num { display: none; }
+.lg__tabs__btn:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lg__tabs__btn.is-active {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+@media (max-width: 700px) {
+  .lg__tabs {
+    top: calc(85px + var(--lg-title-h, 60px));
+    padding: 10px 6px;
+    gap: 4px;
+    align-items: center;
+  }
+  /* Flèches visibles, à gauche et à droite */
+  .lg__tabs__nav { display: inline-flex; align-items: center; }
+  /* Scroll interne centré sur le bouton actif (scrollIntoView au changement) */
+  .lg__tabs__scroll {
+    justify-content: flex-start;
+    gap: 10px;
+    /* Padding pour que le bouton actif puisse être centré visuellement */
+    scroll-padding-inline: 30%;
+  }
+  .lg__tabs__btn { font-size: 15px; }
+  .lg__tabs__sep { font-size: 15px; }
+  /* CTA mobile : version compacte */
+  .lg__tabs__cta { padding: 6px 10px; font-size: 12px; }
+}
+
+/* Liste à puces générique pour les contenus type pré-requis */
+.lg__formation__bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lg__formation__bullets li {
+  position: relative;
+  padding-left: 20px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.lg__formation__bullets li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Notre approche en mini-points dans l'onglet La Griothèque */
+.lg__approche-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 24px 0 28px;
+}
+.lg__approche-mini__point {
+  padding: 20px 0;
+  border-top: 1px solid var(--ink);
+}
+.lg__approche-mini__point:last-child {
+  border-bottom: 1px solid var(--ink);
+}
+.lg__approche-mini__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+.lg__approche-mini__point p {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .lg__approche-mini__title { font-size: 18px; }
+  .lg__approche-mini__point p { font-size: 14px; }
+}
+
+/* FAQ : style des questions H4 dans le body de l'onglet FAQ */
+.lg__faq h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.3;
+  margin: 20px 0 6px;
+  color: var(--ink);
+}
+.lg__faq h4:first-child { margin-top: 0; }
+.lg__faq p { margin: 0 0 12px; }
+
+/* ===================================================================
+   Sections affichées dans la zone de contenu de l'onglet actif.
+   Plus d'accordéon : tout est ouvert, empilé.
+   =================================================================== */
+.lg__tabsec {
+  margin: 0 -16px;
+  padding: 16px 16px;
+  animation: lg-section-in 0.2s ease;
+}
+.lg__tabsec:first-child { padding-top: 24px; }
+.lg__tabsec:last-child { padding-bottom: 40px; }
+.lg__tabsec__title {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(24px, 3.4vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  margin: 0 -16px 20px;
+  color: var(--ink);
+  text-transform: none;
+  padding: 12px 16px;
+  border-bottom: 0;
+  /* Sticky : reste sous le menu d'onglets pour qu'on sache toujours dans
+     quelle section on est en train de lire. */
+  position: sticky;
+  top: calc(121px + var(--lg-title-h, 80px) + 56px);
+  z-index: 22;
+  background: var(--paper);
+}
+@media (max-width: 700px) {
+  .lg__tabsec__title {
+    top: calc(85px + var(--lg-title-h, 60px) + 48px);
+  }
+}
+/* Sous-section : titres H3 pour les sections suivantes d'un même onglet
+   (ex : Public et Pré-requis dans l'onglet Présentation). Style accordéon
+   (déroulant), même pattern que les objectifs / programme. */
+.lg__tabsec--sub {
+  margin-top: 0;
+  padding: 0;
+  border-top: 1px solid var(--ink);
+}
+.lg__tabsec--sub:last-child {
+  border-bottom: 1px solid var(--ink);
+}
+/* Header cliquable du <details> — padding symétrique 16px haut/bas pour
+   un espacement homogène avec les autres blocs. */
+.lg__tabsec__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(18px, 1.8vw, 24px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.lg__tabsec__head::-webkit-details-marker { display: none; }
+.lg__tabsec__head::marker { display: none; }
+.lg__tabsec__head:hover { opacity: 0.7; }
+.lg__tabsec__chev {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ink);
+  transition: transform 0.2s ease;
+  margin-left: 16px;
+}
+.lg__tabsec--coll[open] .lg__tabsec__chev { transform: rotate(45deg); }
+.lg__tabsec--coll .lg__tabsec__body {
+  padding: 4px 16px 22px;
+}
+/* L'ancien style H3 reste pour les cas où on garde des sous-titres sans
+   accordéon (au cas où on veut un mix plus tard). */
+.lg__tabsec__title--sub {
+  font-size: clamp(18px, 1.8vw, 24px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0 0 12px;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.lg__tabsec__num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--ink-3, #888);
+  flex-shrink: 0;
+  min-width: 28px;
+  text-transform: none;
+}
+.lg__tabsec__label {
+  flex: 1;
+}
+.lg__tabsec__body {
+  padding-top: 4px;
+}
+.lg__tabsec__body .lg__formation__prose {
+  font-size: 18px;
+  line-height: 1.55;
+  margin: 0;
+}
+.lg__tabsec__body ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 28px;
+}
+.lg__tabsec__body li {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.lg__tabsec__body li .num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--ink-3, #888);
+  flex-shrink: 0;
+  min-width: 24px;
+}
+@media (max-width: 700px) {
+  .lg__tabsec { padding: 24px 14px 20px; }
+  .lg__tabsec:first-child { padding-top: 28px; }
+  .lg__tabsec__title { font-size: clamp(20px, 6vw, 28px); margin-bottom: 14px; }
+  .lg__tabsec__body .lg__formation__prose { font-size: 15px; line-height: 1.5; }
+  .lg__tabsec__body ol { grid-template-columns: 1fr; gap: 8px; }
+  .lg__tabsec__body li { font-size: 14px; }
+}
+
 /* Accordéon : titre cliquable + corps déplié au clic */
 .lg__section {
   border-top: 1px solid var(--ink);
@@ -2249,6 +3370,73 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 
 /* Programme en cartes 3 colonnes (jour 1 / jour 2 / jour 3) */
+/* Objectifs pédagogiques en accordéon — même pattern que .lg__program */
+.lg__obj {
+  display: flex;
+  flex-direction: column;
+  /* Pas de border-top : le titre h2 .lg__tabsec__title a déjà un border-bottom
+     qui fait office de séparateur (évite le double trait). */
+}
+.lg__obj__item {
+  border-bottom: 1px solid var(--ink);
+  background: var(--paper);
+}
+.lg__obj__head {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding: 18px 0;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.lg__obj__head::-webkit-details-marker { display: none; }
+.lg__obj__head::marker { display: none; }
+.lg__obj__head:hover { opacity: 0.7; }
+.lg__obj__num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--ink-3, #888);
+  flex-shrink: 0;
+  min-width: 28px;
+  padding-top: 4px;
+}
+.lg__obj__text {
+  flex: 1;
+}
+.lg__obj__chev {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ink);
+  transition: transform 0.2s ease;
+  margin-left: 16px;
+}
+.lg__obj__item[open] .lg__obj__chev { transform: rotate(45deg); }
+.lg__obj__body {
+  padding: 0 0 20px 46px;
+}
+.lg__obj__body p {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-2, #555);
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .lg__obj__head { font-size: 16px; gap: 12px; }
+  .lg__obj__num { min-width: 22px; }
+  .lg__obj__body { padding-left: 34px; }
+}
+
+/* Programme en grille de blocs (1 carte par jour) */
 .lg__program {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2276,6 +3464,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   border-bottom: 1px solid var(--ink);
   padding-bottom: 3px;
   color: var(--ink);
+}
+@media (max-width: 900px) {
+  .lg__program { grid-template-columns: 1fr; }
 }
 .lg__program__module {
   display: block;
@@ -3047,14 +4238,14 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__row__title {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(44px, 7vw, 110px);
-  line-height: 0.98;
-  letter-spacing: -0.03em;
+  font-size: clamp(28px, 4vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
   margin: 0;
   color: var(--ink);
   text-transform: none;
-  white-space: nowrap;
-  overflow: hidden;
+  white-space: normal;
+  overflow: visible;
   display: block;
   width: 100%;
 }
@@ -3767,7 +4958,14 @@ a.lg__partners__logo:hover {
   .lg__footer__mark { width: 56px; height: 56px; }
 }
 @media (max-width: 600px) {
+  /* Mobile : on retire les 2 premières colonnes du footer :
+     - Col 1 : menu principal (redondant avec le hamburger en haut)
+     - Col 2 : liens vers studio / plateforme / agence (sortie d'écosystème
+       moins utile en mobile, ces liens sont accessibles depuis Approche)
+     On garde les 2 dernières : social (instagram/linkedin/newsletter)
+     et mentions/CGV/Qualiopi qui apportent une vraie info. */
   .lg__footer__cols { grid-template-columns: 1fr; }
+  .lg__footer__col:nth-child(-n+2) { display: none; }
 }
 
 /* ----- DETAIL OVERLAY ----------------------------------------- */
@@ -4159,4 +5357,358 @@ a.lg__partners__logo:hover {
   .lg__resource__grid { grid-template-columns: 1fr; gap: var(--space-8); }
   .lg__resource__aside { position: static; max-width: 360px; }
   .lg__resource__title { font-size: var(--text-4xl); }
+}
+
+/* ===================================================================
+   PAGE CHECKOUT DÉMO — simulation Stripe Checkout, pas de vrai paiement.
+   2 colonnes : récap produit à gauche, formulaire à droite.
+   =================================================================== */
+.lg__checkout {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 16px 60px;
+  font-family: var(--font-sans);
+  color: var(--ink);
+}
+.lg__checkout__demo-banner {
+  background: #fff4b8;
+  border: 1px solid var(--ink);
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  margin-bottom: 28px;
+  text-align: center;
+}
+.lg__checkout__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .lg__checkout__grid { grid-template-columns: 1fr; gap: 32px; }
+}
+
+/* ----- colonne gauche : récap produit ----- */
+.lg__checkout__product {
+  padding: 0;
+}
+.lg__checkout__kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 14px;
+}
+.lg__checkout__product__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  margin: 0 0 12px;
+  color: var(--ink);
+}
+.lg__checkout__product__tagline {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  margin: 0 0 24px;
+}
+.lg__checkout__product__media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--ink);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.lg__checkout__product__media img,
+.lg__checkout__product__media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.lg__checkout__product__meta {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  border-top: 1px solid var(--ink);
+}
+.lg__checkout__product__meta li {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 14px;
+}
+.lg__checkout__product__meta li span:first-child {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.lg__checkout__product__meta li span:last-child {
+  text-align: right;
+  font-weight: 500;
+}
+.lg__checkout__product__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 18px 0 10px;
+  border-top: 1px solid var(--ink);
+  font-family: var(--font-sans);
+}
+.lg__checkout__product__total span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.lg__checkout__product__total strong {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.lg__checkout__product__hint {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin: 0;
+}
+
+/* ----- colonne droite : formulaire ----- */
+.lg__checkout__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.lg__checkout__form__section {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 15px;
+  margin: 18px 0 6px;
+  color: var(--ink);
+}
+.lg__checkout__form__section:first-child { margin-top: 0; }
+.lg__checkout__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lg__checkout__field span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.lg__checkout__field input {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  padding: 12px 14px;
+  color: var(--ink);
+  outline: none;
+}
+.lg__checkout__field input:focus {
+  outline: 2px solid var(--ink);
+  outline-offset: -1px;
+}
+.lg__checkout__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.lg__checkout__method {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+.lg__checkout__method--active {
+  background: var(--ink);
+  color: var(--paper);
+}
+.lg__checkout__method__radio { font-size: 14px; }
+.lg__checkout__method__label { font-weight: 500; }
+.lg__checkout__tos {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-2);
+  margin: 14px 0 6px;
+}
+.lg__checkout__tos input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.lg__checkout__tos a {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+/* ----- boutons checkout ----- */
+.lg__checkout__btn {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+  padding: 14px 18px;
+  text-align: center;
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, outline 0.15s ease;
+}
+.lg__checkout__btn:hover {
+  background: var(--accent);
+  color: var(--ink);
+  outline: 1px solid var(--ink);
+}
+.lg__checkout__btn--pay {
+  margin-top: 6px;
+  font-size: 16px;
+  padding: 16px 18px;
+}
+.lg__checkout__btn--ghost {
+  background: var(--paper);
+  color: var(--ink);
+  outline: 1px solid var(--ink);
+}
+.lg__checkout__btn--ghost:hover {
+  background: var(--accent);
+  color: var(--ink);
+}
+.lg__checkout__form__secured {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  text-align: center;
+  margin: 12px 0 0;
+}
+
+/* ----- page succès ----- */
+.lg__checkout__success {
+  text-align: center;
+  padding: 80px 16px 60px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.lg__checkout__demo-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 24px;
+}
+.lg__checkout__success__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin: 0 0 16px;
+}
+.lg__checkout__success__lede {
+  font-size: 18px;
+  line-height: 1.4;
+  color: var(--ink);
+  margin: 0 0 16px;
+}
+.lg__checkout__success__hint {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  margin: 0 0 36px;
+}
+.lg__checkout__success__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Décomposition HT + TVA dans la page checkout démo */
+.lg__checkout__product__breakdown {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  border-top: 1px solid var(--ink);
+}
+.lg__checkout__product__breakdown li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.lg__checkout__product__breakdown li span:first-child {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* ===================================================================
+   STRIPE ELEMENTS — overrides spécifiques à la page CheckoutStripe.
+   =================================================================== */
+.lg__checkout__stripe-mount {
+  margin: 6px 0 18px;
+  /* Stripe injecte ses iframes dedans ; on laisse ses appearance rules
+     prendre la main, on ne style que le padding du wrapper. */
+}
+.lg__checkout__loading {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 20px 0;
+  text-align: center;
+}
+.lg__checkout__alert {
+  background: #fff4b8;
+  border: 1px solid var(--ink);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.lg__checkout__alert p { margin: 0 0 6px; }
+.lg__checkout__alert p:last-child { margin-bottom: 0; }
+.lg__checkout__error {
+  background: #ffe8e8;
+  border: 1px solid #cc3333;
+  color: #cc3333;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin: 12px 0;
+}
+.lg__checkout__btn--pay:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }

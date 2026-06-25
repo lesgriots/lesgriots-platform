@@ -10,6 +10,86 @@
 
 const { useState: useStateE, useEffect: useEffectE, useRef: useRefE } = React;
 
+// Trackball / globe interactif — un disque 80×80 qu'on drag pour pivoter
+// la galaxie en 3D. Drag horizontal → rotateY, vertical → rotateX. Le
+// curseur indique la direction du nord (axe haut) → on voit où on en est.
+function Trackball({ rotX, rotY, setRotX, setRotY }) {
+  const ballRef = React.useRef(null);
+  const draggingRef = React.useRef(false);
+  const lastRef = React.useRef({ x: 0, y: 0 });
+
+  const onPointerDown = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    draggingRef.current = true;
+    lastRef.current = { x: e.clientX, y: e.clientY };
+    if (ballRef.current && ballRef.current.setPointerCapture) {
+      try { ballRef.current.setPointerCapture(e.pointerId); } catch (_) {}
+    }
+  };
+  const onPointerMove = (e) => {
+    if (!draggingRef.current) return;
+    const dx = e.clientX - lastRef.current.x;
+    const dy = e.clientY - lastRef.current.y;
+    lastRef.current = { x: e.clientX, y: e.clientY };
+    // 1 px de drag = 0.8° de rotation. dy positif = drag vers le bas → la
+    // galaxie bascule vers nous (rotateX positif).
+    setRotY((prev) => prev + dx * 0.8);
+    setRotX((prev) => prev + dy * 0.8);
+  };
+  const onPointerUp = () => { draggingRef.current = false; };
+
+  const reset = (e) => {
+    e.stopPropagation();
+    setRotX(0);
+    setRotY(0);
+  };
+
+  // Position du marqueur (le "nord" du trackball) — tourne avec rotY/rotX.
+  // On projette le vecteur (0, -1, 0) après rotations X et Y.
+  const rxRad = (rotX * Math.PI) / 180;
+  const ryRad = (rotY * Math.PI) / 180;
+  // (0, -1, 0) → après rotateX puis rotateY :
+  // après rotX :  (0, -cos(rx),  sin(rx))
+  // après rotY :  (-cos(rx)*0 + sin(ry)*sin(rx),  -cos(rx),  cos(ry)*sin(rx))
+  // → on garde le x et y projetés sur le disque
+  const px = Math.sin(ryRad) * Math.sin(rxRad);
+  const py = -Math.cos(rxRad);
+
+  return (
+    <div className="eco-solar__trackball" onPointerDown={(e) => e.stopPropagation()}>
+      <div
+        ref={ballRef}
+        className="eco-solar__trackball__ball"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        title="Drag pour pivoter la galaxie"
+        aria-label="Trackball — pivote la galaxie en 3D"
+      >
+        <span className="eco-solar__trackball__ring" aria-hidden="true" />
+        <span
+          className="eco-solar__trackball__pin"
+          aria-hidden="true"
+          style={{
+            transform: `translate(-50%, -50%) translate(${px * 28}px, ${py * 28}px)`,
+          }}
+        />
+      </div>
+      <button
+        type="button"
+        className="eco-solar__trackball__reset"
+        onClick={reset}
+        title="Remettre à plat"
+        aria-label="Reset rotation"
+      >
+        ↻
+      </button>
+    </div>
+  );
+}
+
 function EcoView() {
   const lang = useLang();
 
@@ -50,6 +130,7 @@ function EcoView() {
       startAngle: 200,
       period: 60,
       size: 14,
+      tiltX: 0, tiltZ: 0,     // planètes coplanaires (même plan d'orbite)
       poster: "img/p-monument.jpg",
       preview: "img/preview-lesgriots.png",  // screenshot homepage
       videoSrc: "img/indigo-cristal-thumb.mp4",
@@ -67,6 +148,7 @@ function EcoView() {
       startAngle: 40,
       period: 90,
       size: 18,
+      tiltX: 0, tiltZ: 0,
       poster: "img/atavisme-01.jpg",
       preview: "img/atavisme-01.jpg",
       videoSrc: "img/nike-thumb.mp4",
@@ -83,6 +165,7 @@ function EcoView() {
       startAngle: 290,
       period: 130,
       size: 12,
+      tiltX: 0, tiltZ: 0,
       poster: "img/florale-01.jpg",
       preview: "img/florale-01.jpg",
       videoSrc: "img/indigo-cristal-thumb.mp4",
@@ -94,8 +177,46 @@ function EcoView() {
 
   const [hovered, setHovered] = useStateE(null);
   const [pointer, setPointer] = useStateE({ x: 0, y: 0 });
+  const [boosted, setBoosted] = useStateE(false);
+  // Trackball / globe interactif — pivote la galaxie sur 2 axes (X et Y) en
+  // draggant dans un petit cercle. Drag horizontal = rotateY, drag vertical
+  // = rotateX. C'est le pattern naturel des contrôles de modèle 3D.
+  const [rotX, setRotX] = useStateE(0);
+  const [rotY, setRotY] = useStateE(0);
+  const rotXRef = useRefE(0);
+  const rotYRef = useRefE(0);
+  useEffectE(() => { rotXRef.current = rotX; }, [rotX]);
+  useEffectE(() => { rotYRef.current = rotY; }, [rotY]);
   const active = hovered != null ? sites[hovered] : null;
   const planeRef = useRefE(null);
+  const boostTimerRef = useRefE(null);
+
+  // Clic sur le griot/soleil → boost des orbites pendant 2s + le clic propre
+  // de MatrixGriot déclenche déjà window.binarizePage (les textes deviennent
+  // des 0/1 random), ce qui donne l'effet "rotation s'accélère + changement
+  // de forme" demandé.
+  const triggerBoost = () => {
+    setBoosted(true);
+    if (boostTimerRef.current) clearTimeout(boostTimerRef.current);
+    boostTimerRef.current = setTimeout(() => setBoosted(false), 2000);
+  };
+  useEffectE(() => () => {
+    if (boostTimerRef.current) clearTimeout(boostTimerRef.current);
+  }, []);
+
+  // Quand `boosted` change : on parle directement aux animations CSS via la
+  // Web Animations API et on modifie leur playbackRate (×6 ou ×1). Contraire
+  // ment à changer animationDuration, playbackRate préserve la phase courante
+  // → les planètes accélèrent depuis leur position actuelle, sans saut.
+  useEffectE(() => {
+    const plane = planeRef.current;
+    if (!plane) return;
+    const rate = boosted ? 6 : 1;
+    plane.querySelectorAll(".eco-solar__anchor").forEach((el) => {
+      const anims = el.getAnimations ? el.getAnimations() : [];
+      anims.forEach((a) => { a.playbackRate = rate; });
+    });
+  }, [boosted]);
 
   // Track mouse position to position the terminal next to the cursor.
   useEffectE(() => {
@@ -126,8 +247,12 @@ function EcoView() {
       // Slight tilt proportional to current motion for a subtle "lean"
       const tiltX = Math.max(-12, Math.min(12, -vel.y * 0.4));
       const tiltY = Math.max(-12, Math.min(12,  vel.x * 0.4));
+      // rotX / rotY = rotations persistantes pilotées par le trackball.
+      // On les additionne au tilt naturel du mouvement (vélocité du pan).
+      const ax = rotXRef.current || 0;
+      const ay = rotYRef.current || 0;
       plane.style.transform =
-        `translate3d(${x}px, ${y}px, ${z}px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+        `translate3d(${x}px, ${y}px, ${z}px) rotateX(${ax + tiltX}deg) rotateY(${ay + tiltY}deg)`;
     };
     apply();
 
@@ -323,36 +448,46 @@ function EcoView() {
       {/* The whole plane (sun + orbits + planets) — its transform is
           driven by the rAF loop above, written directly to the DOM. */}
       <div ref={planeRef} className="eco-solar__plane">
-        {/* Sun = the central griot */}
-        <div className="eco-solar__sun" aria-hidden="true">
+        {/* Sun = the central griot. Click → boost les orbites (rotation
+            s'accélère) ET déclenche la binarisation 0/1 (gérée dans
+            MatrixGriot.onClick). onClickCapture car MatrixGriot.onClick fait
+            un stopPropagation : on intercepte le clic en phase capture pour
+            déclencher le boost AVANT que l'enfant le bloque. */}
+        <div
+          className={"eco-solar__sun" + (boosted ? " is-boosted" : "")}
+          onClickCapture={triggerBoost}
+        >
           <MatrixGriot />
         </div>
 
-        {/* Orbits — elliptical, with rx/ry per site */}
-        {sites.map((s) => (
-          <div
-            key={"o-" + s.id}
-            className="eco-solar__orbit"
-            style={{
-              width: s.rx * 2 + "vmin",
-              height: s.ry * 2 + "vmin",
-            }}
-          />
-        ))}
-
-        {/* Planet anchors — translate-only animation around the ellipse,
-            so the planet itself stays upright and round (no rotation/scale). */}
+        {/* Chaque orbite a son propre plan 3D : un wrap parent applique le
+            tilt (rotateX/Z) de la planète, puis orbit ring + anchor partagent
+            ce plan incliné. Résultat : les trois orbites ne sont plus
+            coplanaires, on a une vraie galaxie 3D. */}
         {sites.map((s, i) => (
           <div
-            key={"p-" + s.id}
-            className="eco-solar__anchor"
+            key={"t-" + s.id}
+            className="eco-solar__orbit-tilt"
             style={{
-              "--rx": s.rx + "vmin",
-              "--ry": s.ry + "vmin",
-              animationDuration: s.period + "s",
-              animationDelay: `${-s.startAngle / 360 * s.period}s`,
+              transform: `rotateX(${s.tiltX || 0}deg) rotateZ(${s.tiltZ || 0}deg)`,
             }}
           >
+            <div
+              className="eco-solar__orbit"
+              style={{
+                width: s.rx * 2 + "vmin",
+                height: s.ry * 2 + "vmin",
+              }}
+            />
+            <div
+              className={"eco-solar__anchor" + (boosted ? " is-boosted" : "")}
+              style={{
+                "--rx": s.rx + "vmin",
+                "--ry": s.ry + "vmin",
+                animationDuration: s.period + "s",
+                animationDelay: `${-s.startAngle / 360 * s.period}s`,
+              }}
+            >
             <button
               className={
                 "eco-solar__planet" +
@@ -369,15 +504,35 @@ function EcoView() {
               onMouseLeave={() => setHovered((h) => (h === i ? null : h))}
               aria-label={s.name}
             >
+              {/* Billboard : annule la rotation du plane → la sphère reste
+                  face caméra et le radial-gradient (= illusion 3D) garde
+                  toujours le même angle d'éclairage, quel que soit le tilt. */}
               <span
-                className="eco-solar__planet__dot"
-                style={{ width: s.size + "px", height: s.size + "px" }}
-              />
+                className="eco-solar__planet__billboard"
+                style={{
+                  transform: `rotateY(${-rotY}deg) rotateX(${-rotX}deg)`,
+                }}
+              >
+                <span
+                  className="eco-solar__planet__dot"
+                  style={{ width: s.size + "px", height: s.size + "px" }}
+                />
+              </span>
               <span className="eco-solar__planet__label">{s.name}</span>
             </button>
+            </div>{/* /.eco-solar__anchor */}
           </div>
         ))}
       </div>
+
+      {/* Trackball / globe interactif — un cercle qu'on drag pour pivoter
+          la galaxie dans toutes les directions (style contrôle 3D Globe). */}
+      <Trackball
+        rotX={rotX}
+        rotY={rotY}
+        setRotX={setRotX}
+        setRotY={setRotY}
+      />
 
       {/* Fenêtre terminal au hover — bar mac-style + screenshot site + bio typewriter
           Position : suit le curseur, avec clamp pour rester dans le viewport */}

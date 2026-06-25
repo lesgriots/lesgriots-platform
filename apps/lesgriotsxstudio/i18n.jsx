@@ -34,6 +34,7 @@ const DICT = {
   // plus d'entrée HOME, le sticker assume seul ce rôle).
   "sticker.home":  { en: "HOME",      fr: "ACCUEIL" },
   "menu.work":     { en: "WORK",      fr: "PROJETS" },
+  "menu.talent":   { en: "TALENT",    fr: "TALENT" },
   "menu.about":    { en: "ABOUT",     fr: "À PROPOS" },
   "menu.eco":      { en: "ECOSYSTEM", fr: "ÉCOSYSTÈME" },
   "menu.view":     { en: "[VIEW]",    fr: "[VOIR]" },
@@ -80,26 +81,55 @@ const DICT = {
   "viewer.overview": { en: "GALLERY",     fr: "GALERIE" },
   "viewer.gallery":  { en: "GALLERY",     fr: "GALERIE" },
 
+  // About intro — aligné sur la bible LES GRIOTS (juin 2026) :
+  //   §1  Mission AGENCE = structurer et amplifier les récits (des autres)
+  //   §2  Méthode = ingénierie narrative (stratégie, DA, mouvement, prod AV)
+  //   §3  Perspective culturelle et traditionnelle (figure du griot) +
+  //       légitimité terrain (Universal, Sony, Warner, Accor Arena)
+  // Note interne : le fait que le studio ne porte qu'un seul talent (Moos)
+  // reste dans la bible/CRM, pas exposé sur la page About publique.
   "about.intro": {
     en: [
-      "LESGRIOTSxSTUDIO IS A TRANSDISCIPLINARY CREATIVE STUDIO.",
-      "WE COMBINE ARTISTIC DIRECTION, MOVEMENT, AND AUDIOVISUAL PRODUCTION TO DESIGN NARRATIVES THAT RESONATE ACROSS IMAGE, STORY, AND PERFORMANCE.",
-      "OUR PRACTICE IS ROOTED IN AFRO-DIASPORIC PERSPECTIVES AND DEDICATED TO BUILDING CULTURAL LEGACIES THROUGH POWERFUL VISUAL STORYTELLING.",
-      "WE ARE DRIVEN BY COLLABORATION AND THRIVE IN CREATIVE ENVIRONMENTS WHERE MEANING AND IMPACT ARE AT THE CORE.",
+      "LESGRIOTSxSTUDIO IS THE CREATIVE AGENCY OF LES GRIOTS. OUR MISSION: TO STRUCTURE AND AMPLIFY THE NARRATIVES OF THE BRANDS, ARTISTS AND INSTITUTIONS WHO ENTRUST THEIRS TO US.",
+      "WE PRACTICE NARRATIVE ENGINEERING — STRATEGY, CREATIVE DIRECTION, MOVEMENT, AUDIOVISUAL PRODUCTION — IN SERVICE OF A SINGLE GOAL: A STORY THAT HOLDS, ACROSS EVERY SURFACE, AGAINST EVERY DISTRACTION.",
+      "OUR PERSPECTIVE IS CULTURAL AND TRADITIONAL — ROOTED IN THE AFRICAN DIASPORA, DRAWING FROM THE FIGURE OF THE GRIOT. OUR LEGITIMACY COMES FROM THE FIELD — UNIVERSAL, SONY, WARNER, ACCOR ARENA — AND RETURNS THERE.",
     ],
     fr: [
-      "LESGRIOTSxSTUDIO EST UN STUDIO CRÉATIF TRANSDISCIPLINAIRE.",
-      "NOUS RÉUNISSONS DIRECTION ARTISTIQUE, MOUVEMENT ET PRODUCTION AUDIOVISUELLE POUR CONSTRUIRE DES RÉCITS QUI RÉSONNENT À TRAVERS L'IMAGE, L'HISTOIRE ET LA PERFORMANCE.",
-      "NOTRE PRATIQUE EST ANCRÉE DANS DES PERSPECTIVES AFRO-DIASPORIQUES ET DÉDIÉE À LA CONSTRUCTION D'HÉRITAGES CULTURELS PAR UN STORYTELLING VISUEL PUISSANT.",
-      "NOUS SOMMES MUS PAR LA COLLABORATION ET PROSPÉRONS DANS DES ENVIRONNEMENTS CRÉATIFS OÙ LE SENS ET L'IMPACT SONT AU CŒUR.",
+      "LESGRIOTSxSTUDIO EST L'AGENCE CRÉATIVE DE LES GRIOTS. NOTRE MISSION : STRUCTURER ET AMPLIFIER LES RÉCITS DES MARQUES, ARTISTES ET INSTITUTIONS QUI NOUS CONFIENT LES LEURS.",
+      "NOUS PRATIQUONS UNE INGÉNIERIE NARRATIVE — STRATÉGIE, DIRECTION CRÉATIVE, MOUVEMENT, PRODUCTION AUDIOVISUELLE — AU SERVICE D'UN SEUL OBJECTIF : QUE LE RÉCIT TIENNE DEBOUT, SUR TOUS LES SUPPORTS, FACE À TOUTES LES DISTRACTIONS.",
+      "NOTRE PERSPECTIVE EST CULTURELLE ET TRADITIONNELLE — ANCRÉE DANS LA DIASPORA AFRICAINE, INSPIRÉE PAR LA FIGURE DU GRIOT. NOTRE LÉGITIMITÉ VIENT DU TERRAIN — UNIVERSAL, SONY, WARNER, ACCOR ARENA — ET Y RETOURNE.",
     ],
   },
   "about.services":      { en: "SERVICES",       fr: "SERVICES" },
   "about.contact":       { en: "CONTACTS",       fr: "CONTACTS" },
-  "about.svc.brand":     { en: "BRAND STRATEGY",      fr: "STRATÉGIE DE MARQUE" },
-  "about.svc.creative":  { en: "CREATIVE DIRECTION",  fr: "DIRECTION CRÉATIVE" },
-  "about.svc.stage":     { en: "STAGE DIRECTION & MOVEMENT", fr: "DIRECTION SCÉNIQUE & MOUVEMENT" },
-  "about.svc.production":{ en: "PRODUCTION",          fr: "PRODUCTION" },
+  // Services alignés sur la nomenclature pricing de la bible (5 lignes).
+  // Les clés historiques (.brand / .creative / .stage / .production) sont
+  // conservées pour ne pas casser l'AboutView ; on en ajoute une 5e (.special).
+  "about.svc.brand":     { en: "STRATEGY & NARRATIVE",      fr: "STRATÉGIE & RÉCIT" },
+  "about.svc.creative":  { en: "CREATIVE DIRECTION",        fr: "DIRECTION CRÉATIVE" },
+  "about.svc.stage":     { en: "MOVEMENT DIRECTION",        fr: "DIRECTION DU MOUVEMENT" },
+  "about.svc.production":{ en: "AUDIOVISUAL PRODUCTION",    fr: "PRODUCTION AUDIOVISUELLE" },
+  "about.svc.special":   { en: "SPECIAL PROJECTS",          fr: "PROJETS SPÉCIAUX" },
+
+  // Page Talent — kicker + role + bio.
+  // Bio = prose narrative à la 3e personne, 2 paragraphes (background +
+  // structure / reconnaissances). Sentence case pour confort de lecture
+  // longue. Surchargeable via SITE_CONTENT.talent.bio dans data.jsx.
+  "talent.kicker": { en: "(02) — TALENT",            fr: "(02) — TALENT" },
+  "talent.role":   { en: "CREATIVE DIRECTOR · STORYTELLER",
+                     fr: "DIRECTEUR CRÉATIF · STORYTELLER" },
+  "talent.bio": {
+    en: [
+      "Moos Coulibaly is a multidisciplinary French-Senegalese artist and the founder of LES GRIOTS. A dancer turned choreographer for Rilès — whom he now accompanies on Zéniths and Accor Arena as movement director and co-live director — he then established himself as a director for Médine, Oumar (Sony Music France) and DONI M, before becoming creative director and brand strategist for Vacra (Universal Music France, Gold and Platinum), Eesah Yasuke (Warner), FILA and CCN Le Havre.",
+      "In 2021, he founded SASU LES GRIOTS, a narrative engineering platform structured around three pillars: a creative agency, an original IP studio rooted in Afro-diasporic perspectives, and La Griothèque — his Qualiopi-certified training body, now CPF-eligible through the RS7200 certification. French Tech Laureate. MansaLab incubation.",
+      "@mooscoulibaly",
+    ],
+    fr: [
+      "Moos Coulibaly est artiste multidisciplinaire franco-sénégalais et fondateur de LES GRIOTS. Danseur devenu chorégraphe pour Rilès — qu'il accompagne aujourd'hui sur Zéniths et Accor Arena en tant que directeur du mouvement et co-directeur live — il s'est ensuite imposé comme réalisateur auprès de Médine, Oumar (Sony Music France) et DONI M, puis comme directeur créatif et stratège de marque pour Vacra (Universal Music France, Disque d'Or et Platine), Eesah Yasuke (Warner), FILA et le CCN Le Havre.",
+      "En 2021, il fonde la SASU LES GRIOTS, plateforme d'ingénierie narrative articulée en trois piliers : une agence créative, une production originale d'IPs ancrée dans les perspectives afro-diasporiques, et La Griothèque — son organisme de formation Qualiopi certifié, désormais éligible CPF via la certification RS7200. Lauréat French Tech. Incubé MansaLab.",
+      "@mooscoulibaly",
+    ],
+  },
 
   "eco.title":      { en: "(03) — ECOSYSTEM",  fr: "(03) — ÉCOSYSTÈME" },
   "eco.lead": {

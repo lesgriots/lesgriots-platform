@@ -1,4 +1,4 @@
-/* global React, ReactDOM, BootLoader, MenuBar, HomeView, HomeMobile, ViewerView, AboutView, EcoView, useTweaks, TweaksPanel, TweakSection, TweakSlider, TweakToggle, useLang, tr, YellowCard, PROJECTS, MatrixGriot */
+/* global React, ReactDOM, BootLoader, MenuBar, HomeView, HomeMobile, ViewerView, AboutView, EcoView, TalentView, useTweaks, TweaksPanel, TweakSection, TweakSlider, TweakToggle, useLang, tr, Type, YellowCard, PROJECTS, MatrixGriot */
 
 const { useState, useEffect } = React;
 
@@ -23,6 +23,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 function firstActiveView() {
   const ap = (typeof window !== "undefined" && window.SITE_CONTENT && window.SITE_CONTENT.activePages) || {};
   if (ap.work !== false) return "home";
+  if (ap.talent !== false) return "talent";
   if (ap.about !== false) return "about";
   if (ap.eco !== false) return "eco";
   return "home";
@@ -30,9 +31,10 @@ function firstActiveView() {
 // Renvoie true si la vue passée existe ET n'a pas été désactivée.
 function isViewActive(v) {
   const ap = (typeof window !== "undefined" && window.SITE_CONTENT && window.SITE_CONTENT.activePages) || {};
-  if (v === "home")  return ap.work  !== false;
-  if (v === "about") return ap.about !== false;
-  if (v === "eco")   return ap.eco   !== false;
+  if (v === "home")   return ap.work   !== false;
+  if (v === "talent") return ap.talent !== false;
+  if (v === "about")  return ap.about  !== false;
+  if (v === "eco")    return ap.eco    !== false;
   return true; // viewer reste toujours accessible
 }
 
@@ -57,6 +59,9 @@ function urlToState(pathname) {
   if (pathname === "/about" || pathname === "/about/") {
     return { view: "about", projectId: null };
   }
+  if (pathname === "/talent" || pathname === "/talent/") {
+    return { view: "talent", projectId: null };
+  }
   if (pathname === "/eco" || pathname === "/eco/") {
     return { view: "eco", projectId: null };
   }
@@ -69,6 +74,7 @@ function urlToState(pathname) {
 function stateToUrl(view, projectId) {
   if (view === "viewer" && projectId) return `/work/${encodeURIComponent(projectId)}`;
   if (view === "about")  return "/about";
+  if (view === "talent") return "/talent";
   if (view === "eco")    return "/eco";
   return "/";
 }
@@ -233,12 +239,23 @@ function App() {
         />
       )}
       {view === "about" && <AboutView />}
+      {view === "talent" && <TalentView />}
       {view === "eco" && <EcoView />}
 
-      {(view === "about" || view === "eco") && (
+      {(view === "about" || view === "talent" || view === "eco") && (
         <div className="page-foot">
+          {/* Bouton back façon prompt terminal : `> back ▮` — cohérent
+              avec le menu (.menubar__items button .prompt) et avec la
+              page Talent. Type avec cursor="always" pour le marqueur
+              terminal clignotant après le label. */}
           <button onClick={() => navigate("home")}>
-            <span className="key">[X]</span> {tr("foot.back", lang)}
+            <span className="prompt" aria-hidden="true">&gt;</span>
+            <Type
+              text={tr("foot.back", lang)}
+              speed={32}
+              cursor="always"
+              key={"foot-back-" + lang}
+            />
           </button>
           <span key={"copy-" + lang}>{tr("foot.copy", lang)}</span>
           <span key={"locs-" + lang}>{tr("foot.locs", lang)}</span>

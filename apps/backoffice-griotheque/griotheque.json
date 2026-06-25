@@ -1,6 +1,169 @@
 {
   "formations": [
     {
+      "id": "communication-reseaux-sociaux-tpe",
+      "title": "Communiquer sur les réseaux sociaux pour promouvoir sa TPE",
+      "tagline": "28h pour piloter ta présence sociale TPE : stratégie, page entreprise, ligne édito et e-réputation — certifiée CPF (RS7200).",
+      "discipline": "STRATÉGIE · RÉSEAUX SOCIAUX",
+      "duration": "28H · 4 JOURNÉES",
+      "format": "PRÉSENTIEL · LE HAVRE / DISTANCIEL ZOOM",
+      "location": "En distanciel via Zoom (lien envoyé après inscription) ou en présentiel — salles louées en France sélectionnées pour leur conformité aux exigences réglementaires de la formation professionnelle (accessibilité, sécurité, équipements pédagogiques). Sessions intra-entreprise sur demande.",
+      "price": "900 € TTC",
+      "cpf": true,
+      "opco": true,
+      "rs": "RS7200",
+      "certifier": "CréActifs",
+      "cpfUrl": "https://www.moncompteformation.gouv.fr/espace-prive/html/#/formation/recherche?Code=RS7200",
+      "franceCompetencesUrl": "https://www.francecompetences.fr/recherche/rs/7200/",
+      "trainer_id": "moos-coulibaly",
+      "trainer": {
+        "name": "MOOS COULIBALY",
+        "role": "FONDATEUR · LES GRIOTS · RÉFÉRENT PÉDAGOGIQUE"
+      },
+      "media": {
+        "type": "image",
+        "src": "img/f-rs7200.jpg",
+        "credit": "LES GRIOTS"
+      },
+      "overview": [
+        [
+          "Une TPE qui maîtrise ses réseaux sociaux, c'est une TPE qui ne dépend plus du bouche-à-oreille.",
+          "Mais entre les algorithmes qui changent, les plateformes qui se multiplient et le temps qui manque, beaucoup d'entrepreneurs publient sans plan et finissent par décrocher. Cette formation est faite pour reprendre la main, méthodiquement."
+        ],
+        [
+          "Une certification reconnue par l'État.",
+          "Cette formation prépare au RS7200 « Communiquer sur les réseaux sociaux pour promouvoir sa TPE », enregistrée au Répertoire Spécifique de France Compétences (certificateur CréActifs). Elle est éligible au CPF — tu peux la financer via ton Compte Personnel de Formation."
+        ],
+        [
+          "Repars avec une stratégie sociale qui tient debout.",
+          "En 4 jours (28h), tu construis ta stratégie sur les réseaux que tu choisis (en t'appuyant sur ton activité, tes ressources, ta cible), tu paramètres ta page entreprise, tu poses ta ligne éditoriale, tu produis tes premiers contenus (y compris avec l'IA générative), et tu apprends à gérer ta e-réputation (publicité, modération, bad buzz, influenceurs)."
+        ]
+      ],
+      "description": "Formation certifiante (RS7200, France Compétences, certificateur CréActifs) éligible CPF. 28 heures réparties sur 4 journées de 7 heures, en distanciel (Zoom) ou en présentiel. Effectif limité à 12 stagiaires. Animée par Moos Coulibaly, fondateur de LES GRIOTS, qui structure depuis dix ans la communication digitale d'artistes signés en major et de TPE/PME créatives.",
+      "audience": "Dirigeants de TPE (auto-entrepreneurs, artisans, commerçants, créateurs d'activité) souhaitant développer leur visibilité en ligne, acquérir les bases de la communication digitale et utiliser efficacement les réseaux sociaux pour promouvoir leur activité. La certification s'adresse à des créateurs ou chefs d'entreprise qui veulent gérer eux-mêmes leur présence sur les réseaux sociaux.",
+      "prerequisites": "Maîtrise des outils bureautiques (traitement de texte, traitement des images, navigation internet, tableur). Aisance dans le rédactionnel et le traitement de données chiffrées. Disposer d'un ordinateur (PC ou Mac), d'une connexion internet haut-débit et d'un téléphone portable permettant de prendre photos et vidéos. Admission sur entretien téléphonique, visio ou présentiel.",
+      "objectives": [
+        "Définir une stratégie réseaux sociaux adaptée à la TPE (ressources, cible, objectifs commerciaux)",
+        "Sélectionner les plateformes pertinentes en analysant audience, algorithmes et concurrence",
+        "Créer et paramétrer la page entreprise sur les réseaux choisis (identité visuelle, fonctionnalités)",
+        "Élaborer une stratégie éditoriale et un planning de publication régulier",
+        "Produire des contenus engageants en s'appuyant sur l'IA générative et des outils de design (accessibles aux personnes en situation de handicap)",
+        "Cultiver la e-réputation (publicité, modération, bad buzz, e-influenceurs, KPIs)"
+      ],
+      "chapters": [
+        "Module 1 — Stratégie réseaux sociaux adaptée à la TPE",
+        "Module 2 — Sélection des plateformes cibles",
+        "Module 3 — Page entreprise : création et paramétrage",
+        "Module 4 — Stratégie éditoriale et planning",
+        "Module 5 — Création de contenus (IA, design, accessibilité)",
+        "Module 6 — E-réputation et publicité"
+      ],
+      "program": [
+        {
+          "day": "jour 1",
+          "modules": [
+            {
+              "title": "Module 1 — Stratégie réseaux sociaux",
+              "items": [
+                "Définir une stratégie adaptée aux ressources mobilisables par la TPE",
+                "Aligner stratégie, public cible et objectifs commerciaux",
+                "Élaborer un plan d'action réaliste (capacités financières et temporelles)"
+              ]
+            },
+            {
+              "title": "Module 2 — Sélection des plateformes",
+              "items": [
+                "Comparer les positionnements des plateformes (audience, algorithmes, fonctionnalités)",
+                "Vérifier la correspondance avec son public cible",
+                "Analyser les pratiques de la concurrence pour identifier les bonnes communautés"
+              ]
+            }
+          ],
+          "exercises": [
+            "Atelier : élaboration de la stratégie sociale du stagiaire",
+            "Cartographie comparée des plateformes pertinentes pour le projet"
+          ]
+        },
+        {
+          "day": "jour 2",
+          "modules": [
+            {
+              "title": "Module 3 — Page entreprise",
+              "items": [
+                "Créer une page de présentation de l'entreprise TPE",
+                "Exploiter les interfaces et fonctionnalités de la plateforme",
+                "Intégrer nom et identité visuelle pour ancrer la page dans le réseau social"
+              ]
+            }
+          ],
+          "exercises": [
+            "Création et paramétrage d'une page professionnelle complète",
+            "Optimisation des descriptions, fonctionnalités (messagerie, suivi des performances)"
+          ]
+        },
+        {
+          "day": "jour 3",
+          "modules": [
+            {
+              "title": "Module 4 — Stratégie éditoriale",
+              "items": [
+                "Définir objectifs qualitatifs, quantitatifs et temporels",
+                "Élaborer un planning éditorial basé sur la saisonnalité du projet",
+                "Organiser une régularité dans la ligne éditoriale"
+              ]
+            },
+            {
+              "title": "Module 5 — Création de contenus",
+              "items": [
+                "Concevoir des contenus visuels et textuels adaptés aux formats des plateformes",
+                "S'appuyer sur l'IA générative (prompts) et outils de design graphique",
+                "Garantir l'accessibilité (sous-titrage, descriptions alternatives, etc.)",
+                "Ajuster le ton à la communauté visée"
+              ]
+            }
+          ],
+          "exercises": [
+            "Planning éditorial du stagiaire (saisonnalité, cadence)",
+            "Production d'un post complet (texte + visuel) prêt à publier"
+          ]
+        },
+        {
+          "day": "jour 4",
+          "modules": [
+            {
+              "title": "Module 6 — E-réputation",
+              "items": [
+                "Construire une campagne publicitaire (durée, cible, budget, contenu)",
+                "Traiter avis, commentaires négatifs, bad buzz et crises d'image",
+                "Sélectionner et collaborer avec des e-influenceurs pertinents",
+                "Suivre et interpréter les données du réseau social (KPIs, performance)"
+              ]
+            },
+            {
+              "title": "Préparation à la certification",
+              "items": [
+                "Structuration du dossier écrit (stratégie, page, ligne édito, post, publicité)",
+                "Préparation du diaporama et de la soutenance orale",
+                "Simulation de jury"
+              ]
+            }
+          ],
+          "exercises": [
+            "Mise en place d'une campagne publicitaire sur le réseau choisi",
+            "Cas pratique : gestion d'un commentaire négatif et d'un bad buzz",
+            "Restitution finale + retours individualisés"
+          ]
+        }
+      ],
+      "methods": "Méthode pédagogique active et participative, en distanciel via Zoom ou en présentiel. Nombre de participants : de 1 à 12 maximum. Plateforme de contenus : Teachizy. Délai d'accès minimum : 2 semaines après l'inscription. Sessions permanentes. Encadrement par un formateur expérimenté (Moos Coulibaly, fondateur LES GRIOTS, référent pédagogique). Matériel requis : ordinateur PC ou Mac, connexion internet haut-débit, téléphone portable pour prises de vues. Formation adaptable et personnalisable (modalités à communiquer en amont de la signature).",
+      "evaluation": "Évaluation certifiante (RS7200) : conception et mise en place d'une stratégie de communication et éditoriale d'une entreprise TPE via les réseaux sociaux, avec remise d'un rapport écrit et soutenance orale devant un jury composé de 3 personnes (un représentant CréActifs + deux professionnels extérieurs, soit 66 % d'externes). Le candidat présente un diaporama et est questionné par le jury. Évaluation individuelle réalisée chez le certificateur. Référentiel d'évaluation complet sur francecompetences.fr (RS7200).",
+      "accessibility": "Des adaptations sont possibles pour les personnes en situation de handicap, après échange avec le référent handicap (Moos Coulibaly, lesgriots.of@gmail.com, 06 47 04 15 35). Supports, modalités d'évaluation et outils pédagogiques peuvent être ajustés en fonction des besoins identifiés, dans le respect du référentiel de certification.",
+      "available": true,
+      "position": 0,
+      "created_at": "2026-06-20T05:10:28.000Z",
+      "updated_at": "2026-06-20T05:10:28.000Z"
+    },
+    {
       "id": "strategie-marque",
       "title": "Stratégie de marque",
       "tagline": "Repars avec ta plateforme de marque écrite — identité, positionnement, récit — prête à pitcher dès lundi.",
@@ -114,7 +277,7 @@
       "accessibility": null,
       "next": "—",
       "available": true,
-      "position": 0,
+      "position": 1,
       "updated_at": "2026-05-25T10:37:44.829Z",
       "created_at": "2026-05-25T10:37:44.829Z"
     },
@@ -232,7 +395,7 @@
       "accessibility": null,
       "next": "—",
       "available": true,
-      "position": 1,
+      "position": 2,
       "updated_at": "2026-05-25T10:37:44.847Z",
       "created_at": "2026-05-25T10:37:44.847Z"
     },
@@ -366,7 +529,7 @@
       "accessibility": null,
       "next": "—",
       "available": false,
-      "position": 2,
+      "position": 3,
       "updated_at": "2026-05-25T17:21:03.826Z",
       "created_at": "2026-05-25T10:37:44.851Z"
     },
@@ -590,146 +753,58 @@
       "accessibility": null,
       "next": "—",
       "available": true,
-      "position": 3,
+      "position": 4,
       "updated_at": "2026-05-25T10:46:24.535Z",
       "created_at": "2026-05-25T10:37:44.857Z"
     }
   ],
   "workshops": [
     {
-      "id": "ws-residence-recit",
-      "title": "RÉSIDENCE — STRUCTURER SON RÉCIT",
-      "tagline": "Repars de la résidence avec le récit complet de ton projet — fondations, ton, supports — prêt à diffuser.",
-      "discipline": "RÉCIT · STRATÉGIE",
-      "media": {
-        "type": "image",
-        "src": "img/w-residence.jpg",
-        "credit": "Mains × LES GRIOTS"
-      },
-      "duration": "21H · 3 JOURS",
-      "format": "RÉSIDENCE · LIEU À CONFIRMER",
-      "location": "Résidence en région — lieu communiqué après sélection sur dossier.",
-      "price": "900 € HT",
+      "id": "ws-storytelling",
+      "title": "Stratégie et Storytelling",
+      "tagline": "Une journée pour structurer la stratégie de ton projet et transformer ton récit en outil qui embarque et fait vendre.",
+      "discipline": "STRATÉGIE · RÉCIT",
+      "duration": "7H · 1 JOURNÉE",
+      "format": "PRÉSENTIEL · PARIS",
+      "location": null,
+      "price": "300 €",
       "cpf": false,
-      "opco": true,
+      "opco": false,
+      "stripePaymentLink": "https://buy.stripe.com/test_4gMcN52DS4kO4oifYx83C00",
+      "trainer_id": "moos-coulibaly",
       "trainer": {
         "name": "MOOS COULIBALY",
         "role": "FONDATEUR · LES GRIOTS"
       },
-      "description": "Trois jours d'immersion totale en résidence pour structurer le récit de ton projet — idée, fondations, positionnement, ton, matrices narratives, supports de diffusion. Petit groupe (8 max), accompagnement individuel sur ton cas réel.",
-      "audience": "Porteurs de projet créatif ou culturel ayant une idée à structurer et la volonté de la déployer publiquement dans les 12 mois.",
-      "prerequisites": "Sur sélection de dossier (court pitch écrit envoyé par mail). Avoir un projet à structurer ou un lancement à préparer.",
-      "objectives": [
-        "Clarifier le récit fondateur d'un projet",
-        "Construire ses matrices narratives (story, positionnement, ton)",
-        "Identifier ses publics et leurs entrées",
-        "Adapter le récit à chaque support de diffusion",
-        "Repartir avec un kit récit applicable immédiatement"
-      ],
-      "chapters": [
-        "Idée & fondations",
-        "Positionnement & ton",
-        "Matrices narratives",
-        "Publics & entrées",
-        "Supports & diffusion",
-        "Kit récit final"
-      ],
-      "methods": null,
-      "evaluation": null,
-      "accessibility": null,
-      "next": "—",
-      "available": false,
-      "position": 0,
-      "updated_at": "2026-05-25T10:37:44.863Z",
-      "created_at": "2026-05-25T10:37:44.863Z"
-    },
-    {
-      "id": "ws-bootcamp-marque",
-      "title": "BOOTCAMP MARQUE — 48H",
-      "tagline": "Repars en 2 jours avec ta marque écrite — pas une idée, un document utilisable dès lundi.",
-      "discipline": "MARQUE · POSITIONNEMENT",
       "media": {
         "type": "image",
         "src": "img/w-bootcamp.jpg",
-        "credit": "Atavisme × LES GRIOTS"
+        "credit": "LES GRIOTS"
       },
-      "duration": "14H · 2 JOURS",
-      "format": "PRÉSENTIEL · PARIS",
-      "location": null,
-      "price": "600 € HT",
-      "cpf": false,
-      "opco": true,
-      "trainer": {
-        "name": "MOOS COULIBALY",
-        "role": "FONDATEUR · LES GRIOTS"
-      },
-      "description": "Format bootcamp 48h pour poser en deux jours les fondations d'une marque solide : identité, positionnement, récit, plateforme de marque opérationnelle. Versus la formation Stratégie de Marque, le bootcamp pousse plus loin la mise en pratique sur ton cas réel.",
-      "audience": "Fondateurs, entrepreneurs, créatifs en phase de lancement ou de refonte de marque. Idéal pour aller vite et profond en 48h.",
-      "prerequisites": "Avoir un projet de marque en cours (lancement, refonte, pivot). Aucun prérequis technique.",
+      "description": "Une journée intensive pour structurer le récit de ton projet. On part de tes intuitions, on les transforme en récit clair, incarné, déclinable sur tous tes supports (pitch, site, prises de parole, réseaux). Groupe restreint, retours individuels.",
+      "audience": "Indépendants, dirigeant·es, créatifs et porteurs de projet qui veulent raconter ce qu'ils font sans se perdre dans le jargon ou la modestie.",
+      "prerequisites": "Avoir un projet ou une activité en cours. Aucun pré-requis technique.",
       "objectives": [
-        "Poser identité, positionnement, récit en 48h",
-        "Construire sa plateforme de marque complète",
-        "Tester et défendre son positionnement",
-        "Repartir avec un kit marque opérationnel"
+        "Identifier l'angle narratif unique de son projet",
+        "Construire un pitch de 30 secondes et de 3 minutes",
+        "Décliner son récit sur 3 supports (oral, écrit, social)",
+        "Pratiquer la prise de parole sur son propre récit"
       ],
       "chapters": [
-        "J1 — Diagnostic & fondations",
-        "J1 — Positionnement & territoire",
-        "J2 — Récit & ton de voix",
-        "J2 — Plateforme & application"
+        "Pourquoi raconter ?",
+        "Trouver son angle",
+        "Pitch 30 secondes & 3 minutes",
+        "Déclinaisons par support",
+        "Restitutions & retours"
       ],
       "methods": null,
       "evaluation": null,
       "accessibility": null,
+      "available": true,
       "next": "—",
-      "available": false,
-      "position": 1,
-      "updated_at": "2026-05-25T10:37:44.869Z",
-      "created_at": "2026-05-25T10:37:44.869Z"
-    },
-    {
-      "id": "ws-intensif-mobile",
-      "title": "INTENSIF VIDÉO MOBILE",
-      "tagline": "Repars en 2 jours avec ton workflow vidéo en main — produire et publier régulièrement, avec ton téléphone.",
-      "discipline": "VIDÉO · TERRAIN",
-      "media": {
-        "type": "image",
-        "src": "img/w-mobile.jpg",
-        "credit": "Monument × LES GRIOTS"
-      },
-      "duration": "14H · 2 JOURS",
-      "format": "PRÉSENTIEL · PARIS",
-      "location": null,
-      "price": "600 € HT",
-      "cpf": false,
-      "opco": true,
-      "trainer": {
-        "name": "MOOS COULIBALY",
-        "role": "RÉALISATEUR · LES GRIOTS"
-      },
-      "description": "Deux jours intensifs pour produire, monter et publier une vidéo complète au téléphone : tournage sur le terrain, captation son, montage mobile, étalonnage basique, exports plateforme. Tu repars avec une vidéo publiable.",
-      "audience": "Créatifs, communicants, journalistes, entrepreneurs qui veulent produire de la vidéo régulière au mobile sans dépendre d'une équipe technique.",
-      "prerequisites": "Posséder un smartphone capable de filmer en Full HD ou 4K. Bases vidéo bienvenues mais pas obligatoires.",
-      "objectives": [
-        "Réaliser une vidéo complète au téléphone en 48h",
-        "Maîtriser captation image et son en terrain",
-        "Monter, étalonner et exporter sur mobile",
-        "Publier au format adapté à chaque plateforme"
-      ],
-      "chapters": [
-        "J1 — Image & captation son terrain",
-        "J1 — Tournage sur cas réel",
-        "J2 — Montage mobile & étalonnage",
-        "J2 — Export & publication"
-      ],
-      "methods": null,
-      "evaluation": null,
-      "accessibility": null,
-      "next": "—",
-      "available": false,
-      "position": 2,
-      "updated_at": "2026-05-25T10:37:44.874Z",
-      "created_at": "2026-05-25T10:37:44.874Z"
+      "position": 0,
+      "created_at": "2026-06-20T05:08:49.000Z",
+      "updated_at": "2026-06-20T05:08:49.000Z"
     }
   ],
   "trainers": [
@@ -776,22 +851,6 @@
   ],
   "sessions": [
     {
-      "id": "ws-ses-intensif-mobile-sept",
-      "kind": "workshop",
-      "targetId": "ws-intensif-mobile",
-      "date": "2026-09-27",
-      "dateLabel": "Jeu. 24 → Ven. 25 septembre 2026",
-      "format": "PRÉSENTIEL · PARIS",
-      "seats": 10,
-      "status": "À VENIR",
-      "position": 9,
-      "updated_at": "2026-05-25T12:24:43.735Z",
-      "created_at": "2026-05-25T10:37:44.927Z",
-      "formation_id": "",
-      "places": "10",
-      "workshop_id": "ws-intensif-mobile"
-    },
-    {
       "id": "ses-strategie-marque-2026-04-15",
       "date": "2026-04-15",
       "formation_id": "strategie-marque",
@@ -814,29 +873,6 @@
       "created_at": "2026-05-25T12:44:18.093982Z",
       "updated_at": "2026-05-25T12:44:18.093982Z",
       "position": 2
-    },
-    {
-      "id": "ws-ses-bootcamp-marque-2026-05-20",
-      "date": "2026-05-20",
-      "formation_id": "",
-      "workshop_id": "ws-bootcamp-marque",
-      "places": "6 / 8",
-      "status": "OUVERTE",
-      "format": "PRÉSENTIEL · PARIS",
-      "created_at": "2026-05-25T12:44:18.093982Z",
-      "updated_at": "2026-05-25T12:44:18.093982Z",
-      "position": 3
-    },
-    {
-      "id": "ses-ws-bootcamp-marque-260529",
-      "date": "2026-05-29",
-      "formation_id": "",
-      "workshop_id": "ws-bootcamp-marque",
-      "places": "10",
-      "status": "À VENIR",
-      "position": 0,
-      "updated_at": "2026-05-25T12:46:15.530Z",
-      "created_at": "2026-05-25T12:45:23.513Z"
     }
   ],
   "resources": [

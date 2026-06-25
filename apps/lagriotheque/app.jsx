@@ -3,6 +3,47 @@
 
 const { useState, useEffect, useRef, useLayoutEffect } = React;
 
+// Helper de contenu éditorial — lit window.SITE_CONTENT généré par le BO
+// (apps/backoffice-griotheque → data.jsx) avec fallback sur les textes en
+// dur dans les composants. Permet d'éditer la totalité du contenu depuis le
+// back office sans avoir à toucher au code.
+//
+//   text("home.manifesto", "Texte par défaut...")  → string
+//
+// Si la clé existe en BO ET est non-vide, on la prend. Sinon on retombe sur
+// le fallback. Donc on peut migrer les blocs un par un sans rien casser :
+// tant que le BO n'a pas la clé, l'ancien texte hardcodé continue de vivre.
+function text(path, fallback = "") {
+  if (typeof window === "undefined" || !window.SITE_CONTENT) return fallback;
+  const parts = path.split(".");
+  let v = window.SITE_CONTENT;
+  for (const p of parts) {
+    if (v == null || typeof v !== "object") return fallback;
+    v = v[p];
+  }
+  if (v === undefined || v === null || v === "") return fallback;
+  return v;
+}
+
+// Habille la première occurrence de "LA GRIOTHÈQUE" dans un texte avec un
+// span .lg-brand (qui applique le style typographique brand : police mono,
+// letter-spacing serré). Sert quand on saisit du texte brut côté BO mais
+// qu'on veut conserver la mise en forme du nom de marque.
+function renderManifestoBrand(str) {
+  if (!str) return null;
+  const idx = str.indexOf("LA GRIOTHÈQUE");
+  if (idx === -1) return str;
+  const before = str.slice(0, idx);
+  const after = str.slice(idx + "LA GRIOTHÈQUE".length);
+  return (
+    <>
+      {before}
+      <span className="lg-brand">LA GRIOTHÈQUE</span>
+      {after}
+    </>
+  );
+}
+
 // Hook qui mesure UN titre et règle font-size pour qu'il remplisse
 // la largeur du parent sur une seule ligne (sans dépasser maxSize).
 function useFitOne(maxSize = 200) {
@@ -226,9 +267,10 @@ function GriotRing() {
 function Splash({ onEnter }) {
   const [loadingText, setLoadingText] = useState("░░░░░░░");
 
-  // Scramble pixel : ░ ▒ ▓ █ qui se résolvent progressivement en LOADING
+  // Scramble pixel : ░ ▒ ▓ █ qui se résolvent progressivement en LOADING.
+  // Le mot final est éditable depuis le BO (splash.loading_target).
   useEffect(() => {
-    const target = "LOADING";
+    const target = text("splash.loading_target", "LOADING");
     const blocks = "░▒▓█";
     let frame = 0;
     const id = setInterval(() => {
@@ -262,7 +304,7 @@ function Splash({ onEnter }) {
         <GriotRing />
       </div>
       <p className="lg__splash__sub">{loadingText}</p>
-      <div className="lg__splash__cue" aria-hidden="true">[ ENTRER ]</div>
+      <div className="lg__splash__cue" aria-hidden="true">{text("splash.cue", "[ ENTRER ]")}</div>
     </section>
   );
 }
@@ -342,13 +384,9 @@ function Manifesto() {
             onLoadedData={() => setVideoReady(true)}
           />
         </div>
-        <button
-          type="button"
-          className="lg__hero-yard__watch"
-          onClick={playFullVideo}
-        >
-          ▶ Voir la vidéo
-        </button>
+        {/* Bouton "Voir la vidéo" retiré — la vidéo joue déjà en autoplay
+            loop muted sur le hero. Le code playFullVideo est conservé au
+            cas où on voudrait le réactiver plus tard. */}
         {!videoReady && (
           <div className="lg__hero-yard__loading" aria-live="polite">
             {loadingText}
@@ -358,14 +396,13 @@ function Manifesto() {
           <GriotRing />
         </div>
         <p className="lg__hero-yard__wordmark" aria-hidden="true">LA&nbsp;GRIOTHÈQUE</p>
-        <a className="lg__hero-yard__play" href="#/agenda">
-          ▶ Prochaines sessions
-        </a>
+        {/* Lien "Prochaines sessions" désactivé sur le hero d'arrivée —
+            redondant avec la nav et l'agenda accessible depuis le menu. */}
         <div className="lg__hero-yard__tagline">
           <p>
-            L'école de transmission<br />
-            pour la nouvelle génération<br />
-            créative.
+            {text("home.hero_tagline_line1", "L'école de transmission")}<br />
+            {text("home.hero_tagline_line2", "pour la nouvelle génération")}<br />
+            {text("home.hero_tagline_line3", "créative.")}
           </p>
         </div>
         <div className="lg__hero-yard__scrollhint" aria-hidden="true">
@@ -374,29 +411,29 @@ function Manifesto() {
         <PromoSticker />
       </section>
 
-      {/* Manifeste — prose sous le hero */}
+      {/* Manifeste — prose sous le hero. Le texte est éditable depuis le BO
+          (section "home" → manifesto). On remplace ici le 1er "LA GRIOTHÈQUE"
+          par un span .lg-brand pour conserver le style typographique
+          historique, indépendamment du texte saisi en BO. */}
       <section className="lg__manifesto">
         <div className="lg__manifeste lg__manifeste--hero">
           <div className="lg__manifeste__prose">
-            <p>
-              <span className="lg-brand">LA GRIOTHÈQUE</span> est une école
-              dédiée à la transmission de méthodes éprouvées sur le terrain,
-              au croisement de la direction artistique, du récit de marque
-              et de la production. Dans un paysage culturel saturé, où trop
-              de talents avancent sans cadre et trop de récits puissants se
-              dissipent faute de structure, nous offrons aux artistes, aux
-              créatifs et aux entrepreneurs de la prochaine génération les
-              outils pour bâtir leur récit et créer de nouveaux imaginaires.
-            </p>
+            <p>{renderManifestoBrand(text(
+              "home.manifesto",
+              "LA GRIOTHÈQUE est une école dédiée à la transmission de méthodes éprouvées sur le terrain, au croisement de la direction artistique, du récit de marque et de la production. Dans un paysage culturel saturé, où trop de talents avancent sans cadre et trop de récits puissants se dissipent faute de structure, nous offrons aux artistes, aux créatifs et aux entrepreneurs de la prochaine génération les outils pour bâtir leur récit et créer de nouveaux imaginaires."
+            ))}</p>
           </div>
         </div>
       </section>
 
-      {/* LATEST — liste des formations à l'affiche, style YARD */}
+      {/* LATEST — liste des formations à l'affiche, style YARD. L'onglet
+          Workshops n'apparaît que s'il y a au moins un workshop dispo. */}
       <section className="lg__latest">
         <div className="lg__latest__tabs">
-          <span className="is-active">Nos formations</span>
-          <a href="#/workshops">Workshops</a>
+          <span className="is-active">{text("home.latest_tab_formations", "Nos formations")}</span>
+          {typeof WORKSHOPS !== "undefined" && WORKSHOPS.some((w) => w.available) && (
+            <a href="#/workshops">{text("home.latest_tab_workshops", "Workshops")}</a>
+          )}
         </div>
         <div className="lg__latest__list">
           {FORMATIONS.filter((f) => f.available).map((f) => (
@@ -584,6 +621,346 @@ function bookingHref(item, session) {
   return `mailto:formations@lesgriots.com?subject=${subject}&body=${body}`;
 }
 
+// Détecte si un workshop / une formation est gratuit. Une valeur vide, "0€",
+// "0 €", "gratuit" ou "free" (insensible à la casse) compte comme gratuit.
+function isFree(item) {
+  if (!item || !item.price) return true;
+  const p = String(item.price).trim().toLowerCase();
+  if (p === "") return true;
+  if (p.includes("gratuit") || p === "free" || p.includes("offert")) return true;
+  if (/^0\s*€?$/.test(p)) return true;
+  return false;
+}
+
+// Pour les workshops payants avec un lien de paiement Stripe (Payment Link)
+// configuré dans le backoffice, on renvoie ce lien direct ; sinon on retombe
+// sur le mailto de réservation classique.
+function ctaHref(item, session) {
+  if (!isFree(item) && item.stripePaymentLink) {
+    return item.stripePaymentLink;
+  }
+  return bookingHref(item, session);
+}
+function ctaLabel(item) {
+  // Libellés des CTA — éditables depuis le BO (section "cta"). Le template
+  // payer_template peut contenir {price} qui est remplacé par le prix de
+  // l'item courant. La flèche → est ajoutée systématiquement.
+  if (isFree(item)) {
+    return text("cta.demande_label", "Réserver gratuitement") + " →";
+  }
+  if (item.stripePaymentLink) {
+    const tmpl = text("cta.payer_template", "Payer {price}");
+    return tmpl.replace("{price}", item.price || "") + " →";
+  }
+  return text("cta.reserve_label", "Réserver une place") + " →";
+}
+function ctaIsExternal(item) {
+  if (isFree(item) || !item.stripePaymentLink) return false;
+  // Hash internes (page checkout démo) → on reste dans le même onglet
+  return /^https?:\/\//i.test(item.stripePaymentLink);
+}
+
+// Bannière CTA horizontale (style SCA NABA) qui chevauche le bas de la vidéo.
+// Tagline en haut, séparateur, puis colonnes : prochaines sessions / formateur
+// / tarif + bouton réserver. Sur mobile, tout passe en stack vertical.
+function CtaBanner({ item, nextSession, tagline, upcoming, title, kind }) {
+  // Workshops : vente directe, on n'affiche pas le contexte Qualiopi (CPF /
+  // OPCO / mentions fiscales formelles).
+  const isQualiopi = kind !== "workshop";
+  const finance = isQualiopi
+    ? [item.cpf && "CPF", item.opco && "OPCO"].filter(Boolean).join(" · ")
+    : "";
+  // 2-3 prochaines dates max dans la colonne sessions
+  const sessionDates = (upcoming || []).slice(0, 3);
+  // Formateur(s) : peut être objet seul ou tableau
+  const trainers = Array.isArray(item.trainer)
+    ? item.trainer
+    : item.trainer
+      ? [item.trainer]
+      : [];
+  return (
+    <div className="lg__cta-banner" aria-label="Informations clés et réservation">
+      {title && <h2 className="lg__cta-banner__title">{title}</h2>}
+      {tagline && <p className="lg__cta-banner__tagline">{tagline}</p>}
+      <hr className="lg__cta-banner__rule" />
+      <div className="lg__cta-banner__grid">
+        <div className="lg__cta-banner__col">
+          <p className="lg__cta-banner__col__k">Prochaines sessions</p>
+          {sessionDates.length > 0 ? (
+            sessionDates.map((s) => (
+              <p key={s.id} className="lg__cta-banner__col__v">
+                {sessionDateLabel(s)}
+              </p>
+            ))
+          ) : (
+            <p className="lg__cta-banner__col__v lg__cta-banner__col__v--muted">
+              Dates à venir
+            </p>
+          )}
+        </div>
+        {trainers.length > 0 && (
+          <div className="lg__cta-banner__col">
+            <p className="lg__cta-banner__col__k">
+              {trainers.length > 1 ? "Formateurs" : "Formateur"}
+            </p>
+            {trainers.map((t, i) => (
+              <p key={t.id || t.name || i} className="lg__cta-banner__col__v">
+                {t.name}
+              </p>
+            ))}
+          </div>
+        )}
+        <div className="lg__cta-banner__col">
+          <p className="lg__cta-banner__col__k">Tarif</p>
+          <p className="lg__cta-banner__col__v">
+            {item.price || "—"}
+          </p>
+          <p className="lg__cta-banner__col__v lg__cta-banner__col__v--small">
+            {isQualiopi
+              ? `Exonéré de TVA (art. 293 B CGI)${finance ? " · " + finance : ""}`
+              : "TVA 20 % incluse · paiement unique"}
+          </p>
+        </div>
+        <div className="lg__cta-banner__col lg__cta-banner__col--cta">
+          <a
+            className="lg__cta-banner__btn"
+            href={ctaHref(item, nextSession)}
+            {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
+            {ctaLabel(item)}
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Modale de capture de leads pour télécharger le programme PDF. L'utilisateur
+// renseigne nom + email + téléphone (optionnel). Submit → ouvre un mailto vers
+// formations@lesgriots.com avec les infos préremplies (côté Moos : répondre
+// avec le PDF en pièce jointe). Confirmation affichée après envoi.
+function DownloadModal({ item, onClose }) {
+  // URL du webhook Make.com qui orchestre : Notion (stockage lead) +
+  // Gmail (envoi PDF programme) + Slack (notification Moos). Configurable via
+  // window.SITE_CONFIG.leadsWebhookUrl ; fallback mailto si non défini ou
+  // si la requête échoue (l'utilisateur n'est jamais bloqué).
+  const WEBHOOK_URL =
+    (typeof window !== "undefined" &&
+      window.SITE_CONFIG &&
+      window.SITE_CONFIG.leadsWebhookUrl) ||
+    null;
+  const [step, setStep] = useState("form"); // "form" | "sending" | "sent" | "error"
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [consent, setConsent] = useState(false);
+
+  // Fermer à Escape
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  // URL du PDF programme — par défaut on cherche dans /img/programmes/{id}.pdf
+  // (convention). On peut override via item.programmePdfUrl côté data.
+  const programmePdfUrl =
+    item.programmePdfUrl || `img/programmes/${item.id}.pdf`;
+
+  // Déclenche le téléchargement direct du PDF côté client (pas d'envoi mail).
+  const triggerPdfDownload = () => {
+    try {
+      const a = document.createElement("a");
+      a.href = programmePdfUrl;
+      a.download = `programme-${item.id}.pdf`;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (e) {
+      console.warn("[pdf download] failed", e);
+    }
+  };
+
+  // Fallback : ouvre un mailto si le webhook ne répond pas (réseau, blocage,
+  // env non configuré). Le lead n'est pas perdu, le PDF est quand même
+  // téléchargé côté client.
+  const fallbackMailto = () => {
+    const subject = encodeURIComponent(`Demande du programme — ${item.title}`);
+    const body = encodeURIComponent(
+      "Bonjour,\n\n" +
+      `Je viens de télécharger le programme « ${item.title} » et je souhaite être recontacté·e pour prendre rendez-vous.\n\n` +
+      "Mes coordonnées :\n" +
+      `Prénom : ${firstName}\n` +
+      `Nom : ${lastName}\n` +
+      `Téléphone : ${phone}\n` +
+      `Email : ${email}\n` +
+      "\nMerci !\n"
+    );
+    window.location.href = `mailto:formations@lesgriots.com?subject=${subject}&body=${body}`;
+  };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    // Payload envoyé au webhook Make. Make crée le lead dans Notion et
+    // envoie un mail de remerciement + prise de RDV (Cal.com / Calendly).
+    // Le PDF programme n'est PAS envoyé par mail — il est téléchargé
+    // directement côté client juste après.
+    const payload = {
+      firstName,
+      lastName,
+      email,
+      phone,
+      formation: {
+        id: item.id,
+        title: item.title,
+        cpf: !!item.cpf,
+        rs: item.rs || null,
+        price: item.price || null,
+      },
+      consent: true,
+      source: "lagriotheque-download-modal",
+      submittedAt: new Date().toISOString(),
+      pageUrl: typeof window !== "undefined" ? window.location.href : null,
+    };
+
+    // 1) Déclenche le téléchargement direct du PDF (priorité user).
+    triggerPdfDownload();
+
+    // 2) Notifie le backend (Make webhook) — crée le lead + mail RDV.
+    if (!WEBHOOK_URL) {
+      fallbackMailto();
+      setStep("sent");
+      return;
+    }
+    setStep("sending");
+    try {
+      const r = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) throw new Error("Webhook returned " + r.status);
+      setStep("sent");
+    } catch (err) {
+      console.warn("[lead webhook] failed, falling back to mailto", err);
+      fallbackMailto();
+      setStep("sent");
+    }
+  };
+
+  return (
+    <div className="lg__modal" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="lg__modal__panel" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          className="lg__modal__close"
+          onClick={onClose}
+          aria-label="Fermer"
+        >
+          [ × Fermer ]
+        </button>
+        {(step === "form" || step === "sending") ? (
+          <>
+            <p className="lg__modal__kicker">Programme détaillé</p>
+            <h2 className="lg__modal__title">{item.title}</h2>
+            <p className="lg__modal__intro">
+              Télécharge le programme PDF complet — contenu, objectifs,
+              modalités, tarifs et démarches de financement. On te recontacte
+              ensuite par email pour prendre rendez-vous.
+            </p>
+            <form className="lg__modal__form" onSubmit={submit}>
+              <div className="lg__modal__row">
+                <label className="lg__modal__field">
+                  <span className="lg__modal__field__k">Prénom *</span>
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                    autoFocus
+                  />
+                </label>
+                <label className="lg__modal__field">
+                  <span className="lg__modal__field__k">Nom *</span>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                  />
+                </label>
+              </div>
+              <label className="lg__modal__field">
+                <span className="lg__modal__field__k">Téléphone *</span>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+              </label>
+              <label className="lg__modal__field">
+                <span className="lg__modal__field__k">Email *</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </label>
+              <label className="lg__modal__consent">
+                <input
+                  type="checkbox"
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
+                  required
+                />
+                <span>
+                  J'accepte d'être recontacté·e par LES GRIOTS au sujet de cette
+                  formation. Tes données ne sont jamais partagées.
+                </span>
+              </label>
+              <button
+                type="submit"
+                className="lg__modal__submit"
+                disabled={step === "sending"}
+              >
+                {step === "sending" ? "Envoi en cours…" : "↓ Télécharger le programme"}
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <p className="lg__modal__kicker">C'est parti</p>
+            <h2 className="lg__modal__title">Merci, {firstName} 👋</h2>
+            <p className="lg__modal__intro">
+              Le programme PDF se télécharge sur ton appareil maintenant.
+              Si le téléchargement n'a pas démarré,{" "}
+              <a href={programmePdfUrl} download={`programme-${item.id}.pdf`}>
+                clique ici
+              </a>.
+            </p>
+            <p className="lg__modal__intro">
+              On te recontacte par email à <strong>{email}</strong> pour te
+              proposer un créneau d'échange et répondre à tes questions sur la
+              formation.
+            </p>
+            <button
+              type="button"
+              className="lg__modal__submit"
+              onClick={onClose}
+            >
+              Fermer
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ProgramPage({ item, kind }) {
   const titleRef = useFitOne(160);
   const titleSentinelRef = useRef(null);
@@ -591,48 +968,27 @@ function ProgramPage({ item, kind }) {
   const heroRef = useRef(null);
   const [showTitleInNav, setShowTitleInNav] = useState(false);
   const [pastVideo, setPastVideo] = useState(false);
-  const [activeSection, setActiveSection] = useState(null);
-  const [openSection, setOpenSection] = useState(null);
-  const [showSommaire, setShowSommaire] = useState(false);
+  const [activeTab, setActiveTab] = useState("presentation");
   const [titleStuck, setTitleStuck] = useState(false);
-  const sommaireRef = useRef(null);
-  const toggleSection = (id) =>
-    setOpenSection((prev) => (prev === id ? null : id));
+  const [downloadOpen, setDownloadOpen] = useState(false);
+  const tabContentRef = useRef(null);
 
-  // Fermer le sommaire au clic extérieur ou à Escape
-  useEffect(() => {
-    if (!showSommaire) return;
-    const onClick = (e) => {
-      if (sommaireRef.current && !sommaireRef.current.contains(e.target)) {
-        setShowSommaire(false);
-      }
-    };
-    const onKey = (e) => { if (e.key === "Escape") setShowSommaire(false); };
-    document.addEventListener("mousedown", onClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [showSommaire]);
-
-  // Ouvre une section puis scroll dessus (utilisé par le menu sticky).
-  const openAndScrollTo = (id) => {
-    setOpenSection(id);
-    requestAnimationFrame(() => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const isMobile = window.matchMedia("(max-width: 600px)").matches;
-      // hauteur du header + de la barre titre (variable) + du nav sections
-      const titleH = parseInt(
-        getComputedStyle(document.documentElement).getPropertyValue("--lg-title-h") || "80",
-        10
-      );
-      const offset = (isMobile ? 85 : 121) + titleH + 48;
-      const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    });
+  // Au clic sur un onglet : change l'onglet actif. Pas de scroll auto — le
+  // menu sticky est un sélecteur de contenu, pas une nav par ancre. Le
+  // contenu de l'onglet remplace l'ancien à la même position dans la page.
+  const selectTab = (tabId) => {
+    setActiveTab(tabId);
   };
+
+  // Quand on change d'onglet, on scrolle horizontalement la barre d'onglets
+  // pour amener le bouton actif au centre (utile sur mobile où les onglets
+  // sont en scroll horizontal).
+  useEffect(() => {
+    const btn = document.querySelector(".lg__tabs .lg__tabs__btn.is-active");
+    if (btn && typeof btn.scrollIntoView === "function") {
+      btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     const el = headerRef.current;
@@ -703,76 +1059,63 @@ function ProgramPage({ item, kind }) {
   }, [item && item.id]);
 
 
-  // Track which section is currently in view (à droite du titre dans la sticky bar)
-  useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") return;
-    const ids = [
-      "description",
-      "objectifs",
-      "programme",
-      "public",
-      "prerequis",
-      "duree",
-      "lieu",
-      "formateur",
-      "moyens",
-      "evaluation",
-      "indicateurs",
-      "delai",
-      "accessibilite",
-      "tarif",
-    ];
-    const seen = new Map();
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          seen.set(entry.target.id, entry.isIntersecting);
-        });
-        // Choisir la dernière section visible (dans l'ordre)
-        const lastActive = ids.filter((id) => seen.get(id)).pop();
-        setActiveSection(lastActive || null);
-      },
-      { rootMargin: "-180px 0px -55% 0px", threshold: 0 }
-    );
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) obs.observe(el);
-    });
-    return () => obs.disconnect();
-  }, [item && item.id]);
-
-  const SECTIONS_ORDER = [
-    "description",
-    "objectifs",
-    "programme",
-    "public",
-    "prerequis",
-    "duree",
-    "lieu",
-    "formateur",
-    "moyens",
-    "evaluation",
-    "indicateurs",
-    "delai",
-    "accessibilite",
-    "tarif",
-  ];
-  const SECTION_LABELS = {
-    description: "Description",
-    objectifs: "Objectifs pédagogiques",
-    programme: "Programme",
-    public: "Public",
-    prerequis: "Pré-requis",
-    duree: "Durée",
-    lieu: "Lieu",
-    formateur: "Formateur",
-    moyens: "Moyens pédagogiques",
-    evaluation: "Évaluation",
-    indicateurs: "Indicateurs",
-    delai: "Délai d'accès",
-    accessibilite: "Accessibilité",
-    tarif: "Tarif",
-  };
+  // Onglets style SENZA — 10 onglets qui couvrent toute l'info nécessaire à
+  // la décision d'achat. Chaque onglet rend un sous-ensemble de sections
+  // empilées. Certains onglets sont masqués dynamiquement (ex : Certification
+  // si la formation n'est ni CPF ni certifiante).
+  // Onglets différents selon le KIND :
+  // - "workshop" → vue commerciale épurée (vente pure, pas de cadre Qualiopi).
+  // - "formation" → vue complète Qualiopi (présentation, certif, indicateurs,
+  //   financement OPCO/CPF, accessibilité, etc.).
+  const TAB_GROUPS = kind === "workshop"
+    ? [
+        {
+          id: "presentation",
+          label: "Présentation",
+          sections: ["description", "public", "prerequis"],
+        },
+        {
+          id: "programme",
+          label: "Programme",
+          sections: ["programme", "objectifs"],
+        },
+        {
+          id: "sessions",
+          label: "Sessions / Lieu",
+          sections: ["lieu", "formateur"],
+        },
+        { id: "contact", label: "Contact", sections: ["contact"] },
+      ]
+    : [
+        {
+          id: "presentation",
+          label: "Présentation",
+          sections: ["description", "public", "prerequis"],
+        },
+        { id: "objectifs", label: "Objectifs", sections: ["objectifs"] },
+        {
+          id: "programme",
+          label: "Programme",
+          sections: ["programme", "duree", "moyens"],
+        },
+        ...((item.cpf || item.rs)
+          ? [{ id: "certification", label: "Certification", sections: ["certification"] }]
+          : []),
+        { id: "griotheque", label: "La Griothèque", sections: ["griotheque", "indicateurs"] },
+        {
+          id: "financement",
+          label: "Financement",
+          sections: ["tarif", "delai"],
+        },
+        { id: "avis", label: "Avis", sections: ["avis"] },
+        {
+          id: "sessions",
+          label: "Sessions / Lieu",
+          sections: ["lieu", "formateur", "accessibilite", "evaluation"],
+        },
+        { id: "faq", label: "FAQ", sections: ["faq"] },
+        { id: "contact", label: "Contact", sections: ["contact"] },
+      ];
 
   if (!item) return null;
   // Sessions associées à ce programme : on tolère les deux schémas
@@ -807,6 +1150,62 @@ function ProgramPage({ item, kind }) {
       <div ref={titleSentinelRef} aria-hidden="true" style={{ height: 0, margin: 0, padding: 0 }} />
       <h1 className="lg__formation__title" ref={titleRef}>{f.title}</h1>
 
+      {/* Barre d'onglets sticky — placée juste sous le titre. Sur desktop :
+          tous les onglets affichés avec points • entre eux (style menu).
+          Sur mobile : flèches ← → pour naviguer onglet par onglet (style SUPSI). */}
+      <div className="lg__tabs" role="tablist" aria-label="Sections de la formation">
+        <button
+          type="button"
+          className="lg__tabs__nav lg__tabs__nav--prev"
+          aria-label="Onglet précédent"
+          onClick={() => {
+            const idx = TAB_GROUPS.findIndex((g) => g.id === activeTab);
+            const prev = (idx - 1 + TAB_GROUPS.length) % TAB_GROUPS.length;
+            selectTab(TAB_GROUPS[prev].id);
+          }}
+        >
+          ←
+        </button>
+        <div className="lg__tabs__scroll">
+          {TAB_GROUPS.map((g, i) => (
+            <React.Fragment key={g.id}>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === g.id}
+                aria-controls="tab-content"
+                className={"lg__tabs__btn" + (activeTab === g.id ? " is-active" : "")}
+                onClick={() => selectTab(g.id)}
+              >
+                {g.label}
+              </button>
+              {i < TAB_GROUPS.length - 1 && (
+                <span className="lg__tabs__sep" aria-hidden="true">•</span>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+        <a
+          className="lg__tabs__cta"
+          href={ctaHref(item, nextSession)}
+          {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        >
+          {isFree(item) ? "Réserver →" : (item.stripePaymentLink ? "Payer →" : "Réserver →")}
+        </a>
+        <button
+          type="button"
+          className="lg__tabs__nav lg__tabs__nav--next"
+          aria-label="Onglet suivant"
+          onClick={() => {
+            const idx = TAB_GROUPS.findIndex((g) => g.id === activeTab);
+            const next = (idx + 1) % TAB_GROUPS.length;
+            selectTab(TAB_GROUPS[next].id);
+          }}
+        >
+          →
+        </button>
+      </div>
+
       {f.media && (
         <div className="lg__formation__hero" ref={heroRef}>
           {f.media.type === "video" ? (
@@ -821,9 +1220,6 @@ function ProgramPage({ item, kind }) {
           ) : (
             <img src={f.media.src} alt={f.title} />
           )}
-          {f.tagline && (
-            <p className="lg__formation__hero__tagline">{f.tagline}</p>
-          )}
           {f.media.credit && (
             <p className="lg__formation__hero__credit">{f.media.credit}</p>
           )}
@@ -831,143 +1227,62 @@ function ProgramPage({ item, kind }) {
         </div>
       )}
 
-      {/* Prochaines sessions — visible en permanence sous la vidéo */}
-      <div className="lg__formation__upcoming">
-        <div className="lg__formation__upcoming__head">
-          <h2 className="lg__formation__upcoming__title">Prochaines sessions</h2>
-          <a className="lg__formation__upcoming__more" href="#/agenda">voir l'agenda complet →</a>
-        </div>
-        {/* Modalité : on précise que les formations sont en INTER (groupe ouvert,
-            stagiaires de structures différentes) — info clé pour le prospect.
-            Pas affiché sur les workshops (qui ont leur propre format). */}
-        {kind === "formation" && (
-          <p className="lg__formation__upcoming__modality">
-            Formation inter-entreprises · groupe restreint · sessions à dates fixes
-          </p>
-        )}
-        {upcoming.length > 0 ? (
-          <ul className="lg__formation__sessions">
-            {upcoming.map((s) => {
-              // Normalise pour supporter ancien + nouveau schéma de session.
-              const dateLabel = sessionDateLabel(s);
-              const status = normalizeStatus(s.status);
-              const places = s.places || s.seats;
-              const format = s.format || (s.online ? "en ligne" : "présentiel");
-              return (
-                <li key={s.id} className={"lg__formation__session is-" + status.class}>
-                  <span className="lg__formation__session__date">{dateLabel}</span>
-                  <span className="lg__formation__session__format">{format}</span>
-                  <span className="lg__formation__session__status">
-                    {status.class === "open" && places ? `${places} place${Number(places) > 1 ? "s" : ""}` : ""}
-                    {status.class === "full" && "complet"}
-                    {status.class === "soon" && "date à confirmer"}
-                    {status.class === "cancel" && "annulée"}
-                  </span>
-                  {status.class === "open" ? (
-                    <a className="lg__formation__session__book" href={bookingHref(item, s)}>
-                      Réserver →
-                    </a>
-                  ) : (
-                    <span className="lg__formation__session__book lg__formation__session__book--soon">
-                      Bientôt
-                    </span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="lg__formation__upcoming__empty">
-            Aucune date confirmée pour le moment.{" "}
-            <a href={bookingHref(item, null)}>Écris-nous</a>{" "}
-            pour être prévenu·e dès l'ouverture des inscriptions.
-          </p>
-        )}
-      </div>
+      {/* Bannière CTA horizontale qui chevauche le bas de la vidéo. */}
+      <CtaBanner
+        item={item}
+        title={f.title}
+        nextSession={nextSession}
+        tagline={f.tagline}
+        upcoming={upcoming}
+        kind={kind}
+      />
 
-      {/* Sommaire sticky plié — un bouton, click ouvre le panneau des 14 sections */}
-      {pastVideo && (
-        <div className="lg__sommaire" ref={sommaireRef}>
-          <button
-            type="button"
-            className={"lg__sommaire__btn" + (showSommaire ? " is-open" : "")}
-            onClick={() => setShowSommaire((v) => !v)}
-            aria-expanded={showSommaire}
-            aria-controls="sommaire-panel"
-          >
-            <span>[ Sommaire {activeSection ? `· ${SECTION_LABELS[activeSection]}` : ""} ]</span>
-            <span className="lg__sommaire__btn__arrow" aria-hidden="true">{showSommaire ? "↑" : "↓"}</span>
-          </button>
-          {showSommaire && (
-            <div id="sommaire-panel" className="lg__sommaire__panel" role="menu">
-              <ol className="lg__sommaire__list">
-                {SECTIONS_ORDER.map((id, i) => (
-                  <li key={id}>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      className={
-                        "lg__sommaire__item" +
-                        (openSection === id ? " is-open" : "") +
-                        (activeSection === id ? " is-active" : "")
-                      }
-                      onClick={() => {
-                        openAndScrollTo(id);
-                        setShowSommaire(false);
-                      }}
-                    >
-                      <span className="lg__sommaire__num">{String(i + 1).padStart(2, "0")}</span>
-                      <span className="lg__sommaire__label">{SECTION_LABELS[id]}</span>
-                    </button>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Layout 2 colonnes style SENZA / Clearance Kit : contenu de l'onglet
+          à gauche, sidebar CTA sticky à droite. Sur mobile : 1 col + sidebar
+          en bas en barre fixe. */}
+      <div className="lg__formation__layout">
+      <div className="lg__formation__main">
 
-      {/* OVERVIEW — narratif style "The Futur" : hook + paragraphe alternés
-          en pleine largeur, AVANT l'accordéon des sections détaillées */}
-      {f.overview && f.overview.length > 0 && (
-        <div className="lg__formation__overview">
-          <p className="lg__formation__overview__kicker">Overview</p>
-          {f.overview.map((pair, i) => (
-            <div key={i} className="lg__formation__overview__block">
-              <h3 className="lg__formation__overview__hook">{pair[0]}</h3>
-              <p className="lg__formation__overview__p">{pair[1]}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* 14 sections en accordéon — clic sur le titre pour déplier.
-          L'ensemble du bloc des sections fermées prend 1/3 du viewport. */}
-      <div className="lg__formation__sections">
-      {[
+      {/* Zone de contenu des onglets — affiche les sections du groupe actif,
+          empilées les unes sous les autres (plus d'accordéon). Le filtrage se
+          fait via TAB_GROUPS plus haut. */}
+      <div className="lg__formation__sections" id="tab-content" ref={tabContentRef}>
+      {(() => {
+        const allSections = [
         {
           id: "description",
-          title: "description",
+          title: "Description",
           body: f.description ? <p className="lg__formation__prose">{f.description}</p> : null,
         },
         {
           id: "objectifs",
-          title: "objectifs pédagogiques",
+          title: "Objectifs pédagogiques",
           body:
             f.objectives && f.objectives.length > 0 ? (
-              <ol>
+              <div className="lg__obj">
                 {f.objectives.map((o, i) => (
-                  <li key={i}>
-                    <span className="num">{String(i + 1).padStart(2, "0")}</span>
-                    <span>{o}</span>
-                  </li>
+                  <details key={i} className="lg__obj__item" open={i === 0}>
+                    <summary className="lg__obj__head">
+                      <span className="lg__obj__num">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="lg__obj__text">{o}</span>
+                      <span className="lg__obj__chev" aria-hidden="true">+</span>
+                    </summary>
+                    <div className="lg__obj__body">
+                      <p>
+                        À l'issue de cet objectif, l'apprenant·e est capable de
+                        mettre en œuvre cette compétence dans un cadre
+                        professionnel concret. Les indicateurs de réussite sont
+                        évalués lors des mises en situation prévues au programme.
+                      </p>
+                    </div>
+                  </details>
                 ))}
-              </ol>
+              </div>
             ) : null,
         },
         {
           id: "programme",
-          title: "programme",
+          title: "Programme",
           body:
             f.program && f.program.length > 0 ? (
               <div className="lg__program">
@@ -1005,17 +1320,27 @@ function ProgramPage({ item, kind }) {
         },
         {
           id: "public",
-          title: "public",
+          title: "Public",
           body: f.audience ? <p className="lg__formation__prose">{f.audience}</p> : null,
         },
         {
           id: "prerequis",
-          title: "pré-requis",
-          body: f.prerequisites ? <p className="lg__formation__prose">{f.prerequisites}</p> : null,
+          title: "Pré-requis",
+          body: f.prerequisites ? (
+            <ul className="lg__formation__bullets">
+              {f.prerequisites
+                .split(/\.\s+/)
+                .map((s) => s.trim().replace(/\.$/, ""))
+                .filter((s) => s.length > 0)
+                .map((s, i) => (
+                  <li key={i}>{s}.</li>
+                ))}
+            </ul>
+          ) : null,
         },
         {
           id: "duree",
-          title: "durée",
+          title: "Durée",
           body: (
             <p className="lg__formation__prose">
               {formatDuration(f.duration) || "—"}
@@ -1025,27 +1350,27 @@ function ProgramPage({ item, kind }) {
         },
         {
           id: "lieu",
-          title: "lieu",
+          title: "Lieu",
           body: f.location ? <p className="lg__formation__prose">{f.location}</p> : null,
         },
         {
           id: "formateur",
-          title: "formateur",
+          title: "Formateur",
           body: f.trainer ? <TrainerCard trainer={f.trainer} /> : null,
         },
         {
           id: "moyens",
-          title: "moyens pédagogiques",
+          title: "Moyens pédagogiques",
           body: f.methods ? <p className="lg__formation__prose">{f.methods}</p> : null,
         },
         {
           id: "evaluation",
-          title: "évaluation",
+          title: "Évaluation",
           body: f.evaluation ? <p className="lg__formation__prose">{f.evaluation}</p> : null,
         },
         {
           id: "indicateurs",
-          title: "indicateurs",
+          title: "Indicateurs",
           body: (
             <p className="lg__formation__prose">
               Indicateurs de satisfaction et de recommandation publiés après
@@ -1056,7 +1381,7 @@ function ProgramPage({ item, kind }) {
         },
         {
           id: "delai",
-          title: "délai d'accès",
+          title: "Délai d'accès",
           body: (
             <p className="lg__formation__prose">
               Réponse à toute demande sous 48h ouvrées. Inscription possible
@@ -1067,65 +1392,330 @@ function ProgramPage({ item, kind }) {
         },
         {
           id: "accessibilite",
-          title: "accessibilité",
+          title: "Accessibilité",
           body: f.accessibility ? <p className="lg__formation__prose">{f.accessibility}</p> : null,
         },
         {
           id: "tarif",
-          title: "tarif",
+          title: "Tarif",
           body: (
             <p className="lg__formation__prose">
-              {f.price || "—"} — TVA non applicable (art. 293 B du CGI).
+              <strong>{f.price || "—"} HT</strong> — montant net à payer.
+              {" "}LES GRIOTS bénéficie de la franchise en base de TVA
+              (art. 293 B du CGI), aucune TVA n'est ajoutée.
               {(f.cpf || f.opco) && (
                 <> Prise en charge possible {f.opco ? "OPCO" : ""}{f.cpf && f.opco ? " · " : ""}{f.cpf ? "CPF" : ""}.</>
               )}
             </p>
           ),
         },
-      ].map((s, i) => (
-        <SectionRow
-          key={s.id}
-          id={s.id}
-          title={s.title}
-          index={i + 1}
-          open={openSection === s.id}
-          onToggle={() => toggleSection(s.id)}
-        >
-          {s.body}
-        </SectionRow>
-      ))}
+        // ============== Nouvelles sections style SENZA ==============
+        {
+          id: "certification",
+          title: "Certification",
+          body: f.cpf ? (
+            <div className="lg__formation__prose">
+              <p>
+                Cette formation est <strong>éligible CPF</strong>.
+                {f.rs && (
+                  <> Elle prépare à la certification <strong>{f.rs}</strong>
+                    {f.certifier && <> délivrée par <strong>{f.certifier}</strong></>}.
+                  </>
+                )}
+              </p>
+              {f.franceCompetencesUrl && (
+                <p>
+                  <a href={f.franceCompetencesUrl} target="_blank" rel="noopener noreferrer">
+                    Consulter la fiche France Compétences →
+                  </a>
+                </p>
+              )}
+              {f.cpfUrl && (
+                <p>
+                  <a href={f.cpfUrl} target="_blank" rel="noopener noreferrer">
+                    S'inscrire directement via Mon Compte Formation →
+                  </a>
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="lg__formation__prose">
+              Cette formation n'est pas certifiante. Pour nos formations éligibles
+              CPF, consulte le <a href="#/catalogue">catalogue</a>.
+            </p>
+          ),
+        },
+        {
+          id: "griotheque",
+          title: "La Griothèque",
+          body: (
+            <div className="lg__formation__prose">
+              <p className="lg__approche__lede">
+                Trois points qui définissent l'ADN de <span className="lg-brand">LA GRIOTHÈQUE</span>
+                {" "}— ce qui nous rend différents d'un centre de formation comme les autres.
+              </p>
+              <div className="lg__approche-mini">
+                <div className="lg__approche-mini__point">
+                  <h4 className="lg__approche-mini__title">Le storytelling au centre</h4>
+                  <p>
+                    Le <strong>récit comme boussole</strong>. Stratégie,
+                    direction artistique, structure — tout en découle. Avant les
+                    outils, avant les formats, avant les plateformes, il y a
+                    l'histoire que tu portes et la façon dont les autres se la
+                    racontent.
+                  </p>
+                </div>
+                <div className="lg__approche-mini__point">
+                  <h4 className="lg__approche-mini__title">Par des professionnels en activité</h4>
+                  <p>
+                    Universal, Sony, Accor Arena, Zéniths. Tes formateurs{" "}
+                    <strong>livrent maintenant — pas en 2015</strong>. La
+                    méthode arrive du terrain et y retourne. Pas de théorie
+                    hors-sol : ce qu'on enseigne, on le pratique encore.
+                  </p>
+                </div>
+                <div className="lg__approche-mini__point">
+                  <h4 className="lg__approche-mini__title">Formations pratiques</h4>
+                  <p>
+                    <strong>Pédagogie par le faire</strong> — tes propres récits
+                    comme matière. Tu repars avec un livrable concret, pas un
+                    certificat. Plateforme de marque, plan éditorial, vidéo
+                    finie, calendrier — utilisable dès le lundi matin.
+                  </p>
+                </div>
+              </div>
+              <p>
+                <strong>LA GRIOTHÈQUE</strong> est le pilier formation de la
+                SASU LES GRIOTS, certifié <strong>Qualiopi</strong> (Actions de
+                formation), Lauréat French Tech, et déclaré sous le numéro NDA
+                28760747176 auprès de la DREETS Normandie.
+              </p>
+            </div>
+          ),
+        },
+        {
+          id: "avis",
+          title: "Avis",
+          body: (
+            <p className="lg__formation__prose">
+              Les premiers avis seront publiés à l'issue des sessions 2025-2026.
+              La Griothèque démarre sa première promotion en 2025 — les
+              indicateurs de satisfaction et de recommandation seront accessibles
+              ici dès le bilan de la promo.
+            </p>
+          ),
+        },
+        {
+          id: "faq",
+          title: "Questions fréquentes",
+          body: (
+            <div className="lg__formation__prose lg__faq">
+              {/* FAQ générique — toutes les questions/réponses sont éditables
+                  depuis le BO (section "faq"). Les réponses 1 (CPF) et 4
+                  (accessibilité) ont une logique conditionnelle :
+                  - CPF : on prend a_cpf_yes ou a_cpf_no selon f.cpf
+                  - Handicap : on prend le texte custom de la formation si défini,
+                    sinon le fallback générique du BO. */}
+              <h4>{text("faq.q_cpf", "Puis-je financer cette formation via mon CPF ?")}</h4>
+              <p>
+                {f.cpf
+                  ? text("faq.a_cpf_yes", "Oui, cette formation est éligible CPF. Tu peux t'inscrire directement depuis Mon Compte Formation.")
+                  : text("faq.a_cpf_no", "Cette formation n'est pas éligible CPF, mais des prises en charge OPCO ou FAF sont possibles selon ton statut. Contacte-nous pour étudier un montage.")}
+              </p>
+              <h4>{text("faq.q_delais", "Quels sont les délais d'inscription ?")}</h4>
+              <p>
+                {text("faq.a_delais", "Réponse à toute demande sous 48h ouvrées. Inscription possible jusqu'à 14 jours avant le démarrage de la session, dans la limite des places disponibles.")}
+              </p>
+              <h4>{text("faq.q_apres", "Que se passe-t-il après la formation ?")}</h4>
+              <p>
+                {text("faq.a_apres", "Tu reçois une attestation de fin de formation. Pour les formations certifiantes, le passage de certification est intégré. Nous gardons le contact via notre newsletter et l'accès à la communauté Griothèque.")}
+              </p>
+              <h4>{text("faq.q_handicap", "La formation est-elle accessible aux personnes en situation de handicap ?")}</h4>
+              <p>
+                {f.accessibility
+                  ? f.accessibility
+                  : text("faq.a_handicap_fallback", "Oui. Contacte notre référent handicap pour un entretien préalable et adapter les modalités à ta situation.")}
+              </p>
+            </div>
+          ),
+        },
+        {
+          id: "contact",
+          title: "Contact",
+          body: (
+            <div className="lg__formation__prose">
+              <p>
+                Une question sur cette formation, sur le financement, ou sur
+                l'inscription ? Écris-nous.
+              </p>
+              <ul>
+                <li>
+                  <strong>Email :</strong>{" "}
+                  <a href={`mailto:formations@lesgriots.com?subject=Question%20—%20${encodeURIComponent(f.title)}`}>
+                    formations@lesgriots.com
+                  </a>
+                </li>
+                <li>
+                  <strong>Référent handicap :</strong>{" "}
+                  <a href="mailto:formations@lesgriots.com?subject=Accessibilité">
+                    formations@lesgriots.com
+                  </a>
+                </li>
+                <li>
+                  <strong>Réserver :</strong>{" "}
+                  <a
+                    href={ctaHref(item, nextSession)}
+                    {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  >
+                    {ctaLabel(item)}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          ),
+        },
+      ];
+        const activeGroup = TAB_GROUPS.find((g) => g.id === activeTab) || TAB_GROUPS[0];
+        const visible = activeGroup.sections
+          .map((id) => allSections.find((s) => s.id === id))
+          .filter(Boolean);
+        return visible.map((s, i) => {
+          // Première section : titre H2 principal (toujours visible).
+          if (i === 0) {
+            return (
+              <div className="lg__tabsec" id={s.id} key={s.id}>
+                <h2 className="lg__tabsec__title">
+                  <span className="lg__tabsec__label">{s.title}</span>
+                </h2>
+                <div className="lg__tabsec__body">{s.body}</div>
+              </div>
+            );
+          }
+          // Sections suivantes : accordéon déroulant (style objectifs).
+          return (
+            <details
+              className="lg__tabsec lg__tabsec--sub lg__tabsec--coll"
+              id={s.id}
+              key={s.id}
+            >
+              <summary className="lg__tabsec__head">
+                <span className="lg__tabsec__label">{s.title}</span>
+                <span className="lg__tabsec__chev" aria-hidden="true">+</span>
+              </summary>
+              <div className="lg__tabsec__body">{s.body}</div>
+            </details>
+          );
+        });
+      })()}
       </div>
 
-      {/* CTA discret — apparait dans la barre du titre quand elle est sticky */}
-      {titleStuck && (
-        <a
-          className="lg__formation__cta-reserve"
-          href={bookingHref(item, nextSession)}
-        >
-          Réserver →
-        </a>
+      </div>{/* /.lg__formation__main */}
+
+      <aside className="lg__formation__side" aria-label="Réservation">
+        <div className="lg__cta-mini">
+          {/* Nom de la formation tout en haut de la carte — repère pour le
+              lecteur qui scrolle dans le contenu. */}
+          <p className="lg__cta-mini__title">{f.title}</p>
+          <div className="lg__cta-mini__head">
+            <strong className="lg__cta-mini__price">
+              {f.price || "—"}
+            </strong>
+            <span className="lg__cta-mini__hint">
+              {f.duration ? formatDuration(f.duration) : ""}
+              {f.duration ? " · " : ""}
+              {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
+            </span>
+          </div>
+          {kind !== "workshop" && (f.cpf || f.rs) && (
+            <p className="lg__cta-mini__cert">
+              <span aria-hidden="true">✓</span> Formation certifiante
+              {f.rs && <span className="lg__cta-mini__cert__code"> · RS {f.rs}</span>}
+            </p>
+          )}
+          {kind !== "workshop" && (f.cpf || f.opco || f.rs) && (
+            <div className="lg__cta-mini__badges">
+              {f.cpf && <span>CPF</span>}
+              {f.opco && <span>OPCO</span>}
+              {f.rs && <span>RS {f.rs}</span>}
+            </div>
+          )}
+          <ul className="lg__cta-mini__meta">
+            {f.format && <li>{f.format}</li>}
+            {nextSession && <li>{sessionDateLabel(nextSession)}</li>}
+          </ul>
+          <a
+            className="lg__cta-mini__btn"
+            href={ctaHref(item, nextSession)}
+            {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
+            {ctaLabel(item)}
+          </a>
+          <button
+            type="button"
+            className="lg__cta-mini__btn lg__cta-mini__btn--ghost"
+            onClick={() => setDownloadOpen(true)}
+          >
+            ↓ Télécharger le programme
+          </button>
+          <a
+            className="lg__cta-mini__sub"
+            href="mailto:formations@lesgriots.com?subject=Devis%20OPCO%20%2F%20FAF"
+          >
+            Étudier un financement
+          </a>
+        </div>
+      </aside>
+      </div>{/* /.lg__formation__layout */}
+
+      {downloadOpen && (
+        <DownloadModal
+          item={item}
+          onClose={() => setDownloadOpen(false)}
+        />
       )}
 
-      <div className="lg__formation__actions">
-        <a className="lg__btn lg__btn--primary" href={bookingHref(item, nextSession)}>
-          Réserver une place
-        </a>
-        <a className="lg__btn" href="mailto:formations@lesgriots.com?subject=Devis%20OPCO%20%2F%20FAF">
-          Étudier un financement
-        </a>
-        <button
-          type="button"
-          className="lg__btn"
-          onClick={() => {
-            document.title = `LA GRIOTHÈQUE — ${f.title}`;
-            window.print();
-          }}
-        >
-          ↓ Télécharger le programme
-        </button>
-        <a className="lg__btn lg__btn--ghost" href={backHref}>
-          {backLabel}
-        </a>
+      {/* Bloc CTA final pleine largeur en bas de page — la vidéo de la
+          formation tourne en background avec un voile sombre par-dessus. */}
+      <div className="lg__cta-final">
+        {f.media && f.media.type === "video" ? (
+          <video
+            className="lg__cta-final__bg"
+            src={f.media.src}
+            poster={f.media.poster}
+            autoPlay
+            loop
+            muted
+            playsInline
+            aria-hidden="true"
+          />
+        ) : f.media && (
+          <img
+            className="lg__cta-final__bg"
+            src={f.media.src}
+            alt=""
+            aria-hidden="true"
+          />
+        )}
+        <div className="lg__cta-final__veil" aria-hidden="true" />
+        <div className="lg__cta-final__inner">
+          <p className="lg__cta-final__kicker">Prêt à commencer ?</p>
+          <h2 className="lg__cta-final__title">{f.title}</h2>
+          {f.price && (
+            <p className="lg__cta-final__price">
+              {f.price}
+              <span className="lg__cta-final__price__ht">
+                {" "}{kind === "workshop" ? "TTC" : "HT"}
+              </span>
+            </p>
+          )}
+          <a
+            className="lg__cta-final__btn"
+            href={ctaHref(item, nextSession)}
+            {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
+            {ctaLabel(item)}
+          </a>
+        </div>
       </div>
     </section>
   );
@@ -1271,6 +1861,463 @@ function PageIntro({ text, sub }) {
   );
 }
 
+// Page de checkout custom alimentée par Stripe Elements — le visiteur
+// paie SUR le site lagriotheque, on n'envoie plus vers buy.stripe.com.
+// Flow :
+//   1. La page POST /api/stripe/create-payment-intent (backoffice) →
+//      reçoit un client_secret Stripe
+//   2. Stripe Elements monte un Payment Element (champs CB sécurisés,
+//      Apple Pay, Google Pay, Link…) avec ce client_secret
+//   3. Au submit : stripe.confirmPayment() valide le paiement et redirige
+//      vers la page de merci (return_url)
+function CheckoutStripe({ item }) {
+  const PK = (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.stripePublishableKey) || null;
+  const ENDPOINT = (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.stripeCheckoutEndpoint) || null;
+
+  const [step, setStep] = useState("init"); // init | ready | submitting | error
+  const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const stripeRef = useRef(null);
+  const elementsRef = useRef(null);
+  const paymentElementRef = useRef(null);
+  const linkAuthRef = useRef(null);
+  const addressRef = useRef(null);
+
+  // Initialisation : charge Stripe.js → crée le PaymentIntent → monte les Elements
+  useEffect(() => {
+    if (!PK || !ENDPOINT) {
+      setStep("error");
+      setError("Configuration Stripe manquante (clé publique ou endpoint).");
+      return;
+    }
+    if (typeof window.Stripe !== "function") {
+      setStep("error");
+      setError("Stripe.js n'a pas pu être chargé. Vérifie ta connexion.");
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        // 1. POST au backend pour créer le PaymentIntent
+        const r = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workshopId: item.id }),
+        });
+        if (!r.ok) {
+          const j = await r.json().catch(() => ({}));
+          throw new Error(j.error || ("Backend error " + r.status));
+        }
+        const { clientSecret } = await r.json();
+        if (cancelled) return;
+
+        // 2. Init Stripe + Elements avec le client_secret
+        const stripe = window.Stripe(PK, { locale: "fr" });
+        stripeRef.current = stripe;
+        const elements = stripe.elements({
+          clientSecret,
+          // Style : aligne sur la palette du site
+          appearance: {
+            theme: "stripe",
+            variables: {
+              fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              colorPrimary: "#000000",
+              colorBackground: "#ffffff",
+              colorText: "#000000",
+              colorDanger: "#cc3333",
+              fontSizeBase: "15px",
+              spacingUnit: "4px",
+              borderRadius: "0px",
+            },
+            rules: {
+              ".Input": {
+                border: "1px solid #000000",
+                boxShadow: "none",
+                padding: "12px 14px",
+              },
+              ".Input:focus": {
+                border: "2px solid #000000",
+                boxShadow: "none",
+              },
+              ".Label": {
+                fontFamily: '"Geist Mono", monospace',
+                fontSize: "10px",
+                fontWeight: "500",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: "#6b6b6b",
+              },
+              ".Tab": {
+                border: "1px solid #000000",
+                borderRadius: "0px",
+              },
+              ".Tab--selected": {
+                borderColor: "#000000",
+                backgroundColor: "#000000",
+                color: "#ffffff",
+              },
+            },
+          },
+        });
+        elementsRef.current = elements;
+
+        // 3. Monte les Elements
+        // - linkAuthentication : email + auto-login Stripe Link
+        // - paymentElement : carte, Apple Pay, Google Pay, etc.
+        // - addressElement : adresse de facturation
+        const linkAuth = elements.create("linkAuthentication");
+        linkAuth.mount("#lg-link-auth");
+        linkAuth.on("change", (e) => setEmail(e.value.email || ""));
+        linkAuthRef.current = linkAuth;
+
+        const payment = elements.create("payment", {
+          layout: "tabs",
+          defaultValues: { billingDetails: { name: "" } },
+        });
+        payment.mount("#lg-payment");
+        paymentElementRef.current = payment;
+
+        const address = elements.create("address", {
+          mode: "billing",
+          allowedCountries: ["FR", "BE", "CH", "LU", "DE", "ES", "IT", "GB"],
+          defaultValues: { country: "FR" },
+          fields: { phone: "auto" },
+        });
+        address.mount("#lg-address");
+        address.on("change", (e) => {
+          if (e.value?.name) setName(e.value.name);
+        });
+        addressRef.current = address;
+
+        setStep("ready");
+      } catch (err) {
+        console.error("[checkout] init failed", err);
+        if (!cancelled) {
+          setStep("error");
+          setError(err.message || "Impossible d'initialiser le paiement.");
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line
+  }, [item.id]);
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    if (step !== "ready") return;
+    if (!stripeRef.current || !elementsRef.current) return;
+    setStep("submitting");
+    setError("");
+    const { error: stripeErr } = await stripeRef.current.confirmPayment({
+      elements: elementsRef.current,
+      confirmParams: {
+        return_url: window.location.origin + window.location.pathname + "#/merci?ws=" + encodeURIComponent(item.id),
+        receipt_email: email || undefined,
+      },
+    });
+    if (stripeErr) {
+      setError(stripeErr.message || "Paiement refusé.");
+      setStep("ready");
+    }
+    // Si succès, Stripe redirige automatiquement vers return_url
+  };
+
+  // Décomposition HT / TVA / TTC à partir du prix
+  const breakdown = (() => {
+    const m = (item.price || "").match(/(\d[\d.,\s]*)/);
+    const ttc = m ? parseFloat(m[1].replace(/\s/g, "").replace(",", ".")) : null;
+    if (ttc == null) return null;
+    const ht = ttc / 1.2;
+    const vat = ttc - ht;
+    const fmt = (n) => n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+    return { ht: fmt(ht), vat: fmt(vat), ttc: fmt(ttc) };
+  })();
+
+  return (
+    <section className="lg__checkout">
+      <div className="lg__checkout__grid">
+        {/* === Colonne gauche : récap produit === */}
+        <div className="lg__checkout__product">
+          <p className="lg__checkout__kicker">LA GRIOTHÈQUE · {item.discipline || "WORKSHOP"}</p>
+          <h1 className="lg__checkout__product__title">{item.title}</h1>
+          {item.tagline && (
+            <p className="lg__checkout__product__tagline">{item.tagline}</p>
+          )}
+          {item.media && (
+            <div className="lg__checkout__product__media">
+              {item.media.type === "video" ? (
+                <video src={item.media.src} poster={item.media.poster} autoPlay loop muted playsInline />
+              ) : (
+                <img src={item.media.src} alt={item.title} />
+              )}
+            </div>
+          )}
+          <ul className="lg__checkout__product__meta">
+            {item.duration && <li><span>Durée</span><span>{formatDuration(item.duration)}</span></li>}
+            {item.format && <li><span>Format</span><span>{item.format}</span></li>}
+            {item.trainer && <li><span>Formateur</span><span>{Array.isArray(item.trainer) ? item.trainer.map((t) => t.name).join(", ") : item.trainer.name}</span></li>}
+            {item.location && <li><span>Lieu</span><span>{item.location.split(".")[0]}</span></li>}
+          </ul>
+          {breakdown && (
+            <ul className="lg__checkout__product__breakdown">
+              <li><span>Sous-total HT</span><span>{breakdown.ht}</span></li>
+              <li><span>TVA 20 %</span><span>{breakdown.vat}</span></li>
+            </ul>
+          )}
+          <div className="lg__checkout__product__total">
+            <span>Total à payer</span>
+            <strong>{item.price || "—"}</strong>
+          </div>
+          <p className="lg__checkout__product__hint">
+            TVA 20 % incluse — paiement unique, sans abonnement.
+          </p>
+        </div>
+
+        {/* === Colonne droite : Stripe Elements === */}
+        <form className="lg__checkout__form" onSubmit={onSubmit}>
+          {step === "init" && (
+            <p className="lg__checkout__loading">Chargement du paiement sécurisé…</p>
+          )}
+          {step === "error" && (
+            <div className="lg__checkout__alert">
+              <p><strong>Une erreur est survenue.</strong></p>
+              <p>{error}</p>
+            </div>
+          )}
+
+          <h2 className="lg__checkout__form__section">Email</h2>
+          <div id="lg-link-auth" className="lg__checkout__stripe-mount" />
+
+          <h2 className="lg__checkout__form__section">Adresse de facturation</h2>
+          <div id="lg-address" className="lg__checkout__stripe-mount" />
+
+          <h2 className="lg__checkout__form__section">Paiement</h2>
+          <div id="lg-payment" className="lg__checkout__stripe-mount" />
+
+          {error && step === "ready" && (
+            <p className="lg__checkout__error">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            className="lg__checkout__btn lg__checkout__btn--pay"
+            disabled={step !== "ready"}
+          >
+            {step === "submitting" ? "Paiement en cours…" : `🔒 Payer ${item.price || ""}`}
+          </button>
+
+          <p className="lg__checkout__form__secured">
+            Paiement sécurisé par Stripe · PCI DSS · 3D Secure
+          </p>
+        </form>
+      </div>
+    </section>
+  );
+}
+
+// Ancienne page démo gardée comme fallback si la config Stripe manque.
+function CheckoutDemo({ item }) {
+  const [email, setEmail] = useState("");
+  const [cardNum, setCardNum] = useState("");
+  const [exp, setExp] = useState("");
+  const [cvc, setCvc] = useState("");
+  const [name, setName] = useState("");
+  const [tos, setTos] = useState(false);
+  const [step, setStep] = useState("form"); // "form" | "success"
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    setStep("success");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (step === "success") {
+    return (
+      <section className="lg__checkout">
+        <div className="lg__checkout__success">
+          <p className="lg__checkout__demo-tag">DÉMO — paiement non réel</p>
+          <h1 className="lg__checkout__success__title">Merci !</h1>
+          <p className="lg__checkout__success__lede">
+            Ta réservation pour <strong>« {item.title} »</strong> est confirmée.
+          </p>
+          <p className="lg__checkout__success__hint">
+            Un email de confirmation a été envoyé à{" "}
+            <strong>{email || "ton.email@exemple.com"}</strong> (simulé).
+            Tu vas recevoir les détails pratiques (date, lieu, support) dans les
+            48h.
+          </p>
+          <div className="lg__checkout__success__actions">
+            <a href="#/" className="lg__checkout__btn lg__checkout__btn--ghost">
+              ← Retour à l'accueil
+            </a>
+            <a
+              href={`#/${item.id.startsWith("ws-") ? "workshops" : "formations"}/${item.id}`}
+              className="lg__checkout__btn lg__checkout__btn--ghost"
+            >
+              Revoir la fiche
+            </a>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="lg__checkout">
+      <div className="lg__checkout__demo-banner">
+        ⚠ Page de DÉMO — aucune transaction réelle n'est effectuée. Aucune CB
+        n'est nécessaire (tu peux laisser les champs vides).
+      </div>
+      <div className="lg__checkout__grid">
+        {/* Colonne gauche : récap produit */}
+        <div className="lg__checkout__product">
+          <p className="lg__checkout__kicker">LA GRIOTHÈQUE · {item.discipline || "FORMATION"}</p>
+          <h1 className="lg__checkout__product__title">{item.title}</h1>
+          {item.tagline && (
+            <p className="lg__checkout__product__tagline">{item.tagline}</p>
+          )}
+          {item.media && (
+            <div className="lg__checkout__product__media">
+              {item.media.type === "video" ? (
+                <video src={item.media.src} poster={item.media.poster} autoPlay loop muted playsInline />
+              ) : (
+                <img src={item.media.src} alt={item.title} />
+              )}
+            </div>
+          )}
+          <ul className="lg__checkout__product__meta">
+            {item.duration && <li><span>Durée</span><span>{formatDuration(item.duration)}</span></li>}
+            {item.format && <li><span>Format</span><span>{item.format}</span></li>}
+            {item.trainer && <li><span>Formateur</span><span>{Array.isArray(item.trainer) ? item.trainer.map((t) => t.name).join(", ") : item.trainer.name}</span></li>}
+            {item.location && <li><span>Lieu</span><span>{item.location.split(".")[0]}</span></li>}
+          </ul>
+          {(() => {
+            // Décompose le prix TTC en HT + TVA 20 % pour la transparence.
+            // Marche si item.price est une chaîne du type "300 €", "300€",
+            // "300 EUR". Si on ne parvient pas à parser, on n'affiche que le
+            // total tel quel.
+            const m = (item.price || "").match(/(\d[\d.,\s]*)/);
+            const ttc = m ? parseFloat(m[1].replace(/\s/g, "").replace(",", ".")) : null;
+            const ht = ttc != null ? ttc / 1.2 : null;
+            const vat = ttc != null ? ttc - ht : null;
+            const fmt = (n) =>
+              n != null
+                ? n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+                : "—";
+            return (
+              <>
+                {ttc != null && (
+                  <ul className="lg__checkout__product__breakdown">
+                    <li>
+                      <span>Sous-total HT</span>
+                      <span>{fmt(ht)}</span>
+                    </li>
+                    <li>
+                      <span>TVA 20 %</span>
+                      <span>{fmt(vat)}</span>
+                    </li>
+                  </ul>
+                )}
+                <div className="lg__checkout__product__total">
+                  <span>Total à payer (TTC)</span>
+                  <strong>{item.price || "—"}</strong>
+                </div>
+                <p className="lg__checkout__product__hint">
+                  TVA 20 % incluse — paiement unique, sans abonnement.
+                </p>
+              </>
+            );
+          })()}
+        </div>
+
+        {/* Colonne droite : formulaire de paiement (faux) */}
+        <form className="lg__checkout__form" onSubmit={onSubmit}>
+          <h2 className="lg__checkout__form__section">Ton compte</h2>
+          <label className="lg__checkout__field">
+            <span>Email</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="ton.email@exemple.com"
+            />
+          </label>
+
+          <h2 className="lg__checkout__form__section">Paiement</h2>
+          <div className="lg__checkout__method lg__checkout__method--active">
+            <span className="lg__checkout__method__radio" aria-hidden="true">●</span>
+            <span className="lg__checkout__method__label">💳 Carte bancaire</span>
+          </div>
+          <label className="lg__checkout__field">
+            <span>Numéro de carte</span>
+            <input
+              type="text"
+              value={cardNum}
+              onChange={(e) => setCardNum(e.target.value)}
+              placeholder="1234 1234 1234 1234"
+              maxLength={19}
+            />
+          </label>
+          <div className="lg__checkout__row">
+            <label className="lg__checkout__field">
+              <span>Expiration</span>
+              <input
+                type="text"
+                value={exp}
+                onChange={(e) => setExp(e.target.value)}
+                placeholder="MM / AA"
+                maxLength={7}
+              />
+            </label>
+            <label className="lg__checkout__field">
+              <span>CVC</span>
+              <input
+                type="text"
+                value={cvc}
+                onChange={(e) => setCvc(e.target.value)}
+                placeholder="CVC"
+                maxLength={4}
+              />
+            </label>
+          </div>
+
+          <h2 className="lg__checkout__form__section">Coordonnées</h2>
+          <label className="lg__checkout__field">
+            <span>Nom complet</span>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Prénom Nom"
+            />
+          </label>
+
+          <label className="lg__checkout__tos">
+            <input
+              type="checkbox"
+              checked={tos}
+              onChange={(e) => setTos(e.target.checked)}
+            />
+            <span>
+              J'accepte les <a href="#/cgv">CGV</a> et la{" "}
+              <a href="#/confidentialite">politique de confidentialité</a>.
+            </span>
+          </label>
+
+          <button type="submit" className="lg__checkout__btn lg__checkout__btn--pay">
+            🔒 Payer {item.price || "—"}
+          </button>
+
+          <p className="lg__checkout__form__secured">
+            Paiement sécurisé — démo. En prod ce bouton ouvrira Stripe Checkout.
+          </p>
+        </form>
+      </div>
+    </section>
+  );
+}
+
 function Catalogue() {
   const [bg, setBg] = useState(null);
   const [category, setCategory] = useState("all");
@@ -1301,15 +2348,11 @@ function Catalogue() {
     <section className="lg__catalogue" id="catalogue">
       <HoverBg src={bg} />
       <PageIntro
-        text={
-          <>
-            Des formations courtes et intensives pour les créatifs,
-            entrepreneurs et institutions — pensées comme des fondations
-            applicables immédiatement. Trois disciplines, trois journées&nbsp;:
-            la marque, le contenu, l'image.
-          </>
-        }
-        sub="Sessions 2026 · Paris & en ligne"
+        text={text(
+          "catalogue.intro",
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        )}
+        sub={text("catalogue.sub", "Lorem ipsum · dolor sit amet · consectetur")}
       />
 
       {/* Filtres par catégorie — petits tabs au-dessus de la liste */}
@@ -1389,14 +2432,14 @@ function Workshops() {
     <section className="lg__catalogue" id="workshops">
       <HoverBg src={bg} />
       <PageIntro
-        text={
-          <>
-            Workshops résidentiels et intensifs courts pour les indépendants
-            déjà en activité — format immersif, groupes restreints,
-            accompagnement individuel sur projet réel.
-          </>
-        }
-        sub="2026. Paris & en résidence. Sur sélection de dossier."
+        text={text(
+          "workshops_page.intro",
+          "Workshops résidentiels et intensifs courts pour les indépendants déjà en activité — format immersif, groupes restreints, accompagnement individuel sur projet réel."
+        )}
+        sub={text(
+          "workshops_page.sub",
+          "2026. Paris & en résidence. Sur sélection de dossier."
+        )}
       />
       <div className="lg__rows">
         {WORKSHOPS.map((w) => (
@@ -2156,14 +3199,11 @@ function Ressources() {
   return (
     <section className="lg__catalogue" id="ressources">
       <PageIntro
-        text={
-          <>
-            Worksheets, templates et guides — des outils gratuits pour
-            structurer ton récit, affûter ta méthode et renforcer ta marque
-            personnelle. À télécharger et à utiliser dès aujourd'hui.
-          </>
-        }
-        sub="Gratuites · mises à jour régulièrement"
+        text={text(
+          "ressources.intro",
+          "Worksheets, templates et guides — des outils gratuits pour structurer ton récit, affûter ta méthode et renforcer ta marque personnelle. À télécharger et à utiliser dès aujourd'hui."
+        )}
+        sub={text("ressources.sub", "Gratuites · mises à jour régulièrement")}
       />
       <div className="lg__rows">
         {RESOURCES.map((r) => (
@@ -2246,12 +3286,12 @@ function ResourcePage({ r }) {
 function CGV() {
   return (
     <section className="lg__cgv" id="cgv">
-      <h1 className="lg__cgv__title">Conditions générales de vente</h1>
+      <h1 className="lg__cgv__title">{text("cgv.title", "Conditions générales de vente")}</h1>
       <p className="lg__cgv__lede">
-        Applicables aux prestations de formation et d'accompagnement
-        proposées par <span className="lg-brand">LA GRIOTHÈQUE</span>,
-        pilier formation de la SASU LES GRIOTS. Version mise à jour le
-        14 mars 2026.
+        {renderManifestoBrand(text(
+          "cgv.lede",
+          "Applicables aux prestations de formation et d'accompagnement proposées par LA GRIOTHÈQUE, pilier formation de la SASU LES GRIOTS. Version mise à jour le 14 mars 2026."
+        ))}
       </p>
 
       <ol className="lg__cgv__list">
@@ -2416,9 +3456,10 @@ function CGV() {
       </ol>
 
       <p className="lg__cgv__footer">
-        Pour toute question relative aux présentes CGV, contacter
-        LA GRIOTHÈQUE à
-        <a href="mailto:formations@lesgriots.com"> formations@lesgriots.com</a>.
+        {text(
+          "cgv.footer_contact",
+          "Pour toute question relative aux présentes CGV, contacter LA GRIOTHÈQUE à formations@lesgriots.com."
+        )}
       </p>
     </section>
   );
@@ -2430,12 +3471,12 @@ function CGV() {
 function MentionsLegales() {
   return (
     <section className="lg__cgv" id="mentions-legales">
-      <h1 className="lg__cgv__title">Mentions légales</h1>
+      <h1 className="lg__cgv__title">{text("mentions_legales.title", "Mentions légales")}</h1>
       <p className="lg__cgv__lede">
-        Informations légales relatives au site lagriotheque.com,
-        édité par la <span className="lg-brand">SASU LES GRIOTS</span>.
-        Conformément à la loi n° 2004-575 du 21 juin 2004 pour la confiance
-        dans l'économie numérique (LCEN). Version au 25 mai 2026.
+        {text(
+          "mentions_legales.lede",
+          "Informations légales relatives au site lagriotheque.com, édité par la SASU LES GRIOTS. Conformément à la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN). Version au 25 mai 2026."
+        )}
       </p>
 
       <ol className="lg__cgv__list">
@@ -2546,8 +3587,10 @@ function MentionsLegales() {
       </ol>
 
       <p className="lg__cgv__footer">
-        Pour toute question relative à ces mentions, contacter
-        <a href="mailto:formations@lesgriots.com"> formations@lesgriots.com</a>.
+        {text(
+          "mentions_legales.footer_contact",
+          "Pour toute question relative à ces mentions, contacter formations@lesgriots.com."
+        )}
       </p>
     </section>
   );
@@ -2559,12 +3602,12 @@ function MentionsLegales() {
 function Confidentialite() {
   return (
     <section className="lg__cgv" id="confidentialite">
-      <h1 className="lg__cgv__title">Politique de confidentialité</h1>
+      <h1 className="lg__cgv__title">{text("confidentialite.title", "Politique de confidentialité")}</h1>
       <p className="lg__cgv__lede">
-        Comment <span className="lg-brand">LA GRIOTHÈQUE</span> traite les
-        données personnelles collectées via ce site. Conforme au Règlement
-        général sur la protection des données (RGPD, UE 2016/679) et à la
-        Loi Informatique et Libertés. Version au 25 mai 2026.
+        {renderManifestoBrand(text(
+          "confidentialite.lede",
+          "Comment LA GRIOTHÈQUE traite les données personnelles collectées via ce site. Conforme au Règlement général sur la protection des données (RGPD, UE 2016/679) et à la Loi Informatique et Libertés. Version au 25 mai 2026."
+        ))}
       </p>
 
       <ol className="lg__cgv__list">
@@ -2718,12 +3761,17 @@ function Confidentialite() {
 }
 
 function Approche() {
+  // Le lede contient le nom de marque qu'on veut habiller en .lg-brand ;
+  // on utilise renderManifestoBrand pour le faire automatiquement à partir
+  // du texte saisi en BO.
   return (
     <section className="lg__approche" id="approche">
-      <h1 className="lg__approche__title">Notre approche</h1>
+      <h1 className="lg__approche__title">{text("approche.title", "Notre approche")}</h1>
       <p className="lg__approche__lede">
-        Trois points qui définissent l'ADN de <span className="lg-brand">LA GRIOTHÈQUE</span> —
-        ce qui nous rend différents d'un centre de formation comme les autres.
+        {renderManifestoBrand(text(
+          "approche.lede",
+          "Trois points qui définissent l'ADN de LA GRIOTHÈQUE — ce qui nous rend différents d'un centre de formation comme les autres."
+        ))}
       </p>
 
       <ApprocheAccordion />
@@ -2735,23 +3783,34 @@ function Approche() {
 
 // Accordion 3 points — exactement comme les sections des pages formation.
 // Click sur le titre = ouvre/ferme le bloc. Fermé = ligne tight ; ouvert = gros titre + body.
+// Les titres et corps des 3 piliers viennent du BO (section "approche" →
+// pilier1_title / pilier1_body / ...). Fallback : les textes historiques.
 function ApprocheAccordion() {
   const [open, setOpen] = useState(null);
   const points = [
     {
       id: "storytelling",
-      title: "Le storytelling au centre",
-      intro: <>Le <strong>récit comme boussole</strong>. Stratégie, direction artistique, structure — tout en découle. Avant les outils, avant les formats, avant les plateformes, il y a l'histoire que tu portes et la façon dont les autres se la racontent.</>,
+      title: text("approche.pilier1_title", "Le storytelling au centre"),
+      intro: text(
+        "approche.pilier1_body",
+        "Le récit comme boussole. Stratégie, direction artistique, structure — tout en découle. Avant les outils, avant les formats, avant les plateformes, il y a l'histoire que tu portes et la façon dont les autres se la racontent."
+      ),
     },
     {
       id: "professionnels",
-      title: "Par des professionnels en activité",
-      intro: <>Universal, Sony, Accor Arena, Zéniths. Tes formateurs <strong>livrent maintenant — pas en 2015</strong>. La méthode arrive du terrain et y retourne. Pas de théorie hors-sol : ce qu'on enseigne, on le pratique encore.</>,
+      title: text("approche.pilier2_title", "Par des professionnels en activité"),
+      intro: text(
+        "approche.pilier2_body",
+        "Universal, Sony, Accor Arena, Zéniths. Tes formateurs livrent maintenant — pas en 2015. La méthode arrive du terrain et y retourne. Pas de théorie hors-sol : ce qu'on enseigne, on le pratique encore."
+      ),
     },
     {
       id: "pratiques",
-      title: "Formations pratiques",
-      intro: <><strong>Pédagogie par le faire</strong> — tes propres récits comme matière. Tu repars avec un livrable concret, pas un certificat. Plateforme de marque, plan éditorial, vidéo finie, calendrier — utilisable dès le lundi matin.</>,
+      title: text("approche.pilier3_title", "Formations pratiques"),
+      intro: text(
+        "approche.pilier3_body",
+        "Pédagogie par le faire — tes propres récits comme matière. Tu repars avec un livrable concret, pas un certificat. Plateforme de marque, plan éditorial, vidéo finie, calendrier — utilisable dès le lundi matin."
+      ),
     },
   ];
   return (
@@ -2815,46 +3874,38 @@ function Financement() {
   return (
     <section className="lg__financement" id="financement">
       <h2 className="lg__financement__title">
-        Comment s'inscrire et quel financement&nbsp;?
+        {text("financement.title", "Comment s'inscrire et quel financement ?")}
       </h2>
       <div className="lg__financement__cols">
         <div className="lg__financement__col">
+          <p>{text("financement.col1_intro", "Pour toute question et inscription, écris-nous par mail :")}</p>
           <p>
-            Pour toute question et inscription, écris-nous par mail&nbsp;:
-          </p>
-          <p>
-            <a className="lg__financement__email" href="mailto:formations@lesgriots.com">
-              formations@lesgriots.com
+            <a
+              className="lg__financement__email"
+              href={"mailto:" + text("financement.col1_email", "formations@lesgriots.com")}
+            >
+              {text("financement.col1_email", "formations@lesgriots.com")}
             </a>
           </p>
-          <p>
-            Nous répondons systématiquement sous deux jours ouvrés.
-          </p>
-          <p>
-            Que tu sois inscrit·e à la MDA / Agessa, auto-entrepreneur·euse,
-            entreprise individuelle ou dirigeant·e non salarié·e de SASU/EURL,
-            tu cotises déjà pour ta formation professionnelle continue et tu
-            disposes de possibilités de financement.
-          </p>
+          <p>{text("financement.col1_response", "Nous répondons systématiquement sous deux jours ouvrés.")}</p>
+          <p>{text(
+            "financement.col1_eligibility",
+            "Que tu sois inscrit·e à la MDA / Agessa, auto-entrepreneur·euse, entreprise individuelle ou dirigeant·e non salarié·e de SASU/EURL, tu cotises déjà pour ta formation professionnelle continue et tu disposes de possibilités de financement."
+          )}</p>
         </div>
         <div className="lg__financement__col">
-          <p>
-            Nous t'accompagnons et simplifions tes démarches administratives
-            auprès des organismes de référence — OPCO (salariés), FAF /
-            FIF-PL / AGEFICE / AFDAS (indépendants selon ton statut).
-            EDOF en cours, CPF à venir.
-          </p>
-          <p>
-            <span className="lg-brand">LA GRIOTHÈQUE</span> est le pilier
-            formation de la SASU LES GRIOTS, certifié Qualiopi (Actions de
-            formation), Lauréat French Tech, et déclaré sous le numéro NDA
-            28760747176 auprès de la DREETS Normandie — spécialité techniques
-            de l'image et du son, métiers connexes du spectacle.
-          </p>
-          <p>
-            Pour toute question d'accessibilité ou d'adaptation, merci de
-            nous contacter par mail en amont de l'inscription.
-          </p>
+          <p>{text(
+            "financement.col2_intro",
+            "Nous t'accompagnons et simplifions tes démarches administratives auprès des organismes de référence — OPCO (salariés), FAF / FIF-PL / AGEFICE / AFDAS (indépendants selon ton statut). EDOF en cours, CPF à venir."
+          )}</p>
+          <p>{renderManifestoBrand(text(
+            "financement.col2_qualiopi",
+            "LA GRIOTHÈQUE est le pilier formation de la SASU LES GRIOTS, certifié Qualiopi (Actions de formation), Lauréat French Tech, et déclaré sous le numéro NDA 28760747176 auprès de la DREETS Normandie — spécialité techniques de l'image et du son, métiers connexes du spectacle."
+          ))}</p>
+          <p>{text(
+            "financement.col2_accessibility",
+            "Pour toute question d'accessibilité ou d'adaptation, merci de nous contacter par mail en amont de l'inscription."
+          )}</p>
         </div>
       </div>
     </section>
@@ -2862,22 +3913,38 @@ function Financement() {
 }
 
 function Contact() {
+  // Tout est éditable depuis le BO (section "contact"). On ré-applique le
+  // span .lg-brand sur la 1re ligne via renderManifestoBrand pour garder le
+  // style typographique du nom de marque.
+  const email = text("contact.email", "formations@lesgriots.com");
   return (
     <section className="lg__contact" id="contact">
       <div className="lg__contact__info">
-        <p><span className="lg-brand">LA GRIOTHÈQUE</span></p>
-        <p>Organisme de formation</p>
-        <p>de la SASU LES GRIOTS</p>
-        <p>Certifié Qualiopi</p>
+        <p>{renderManifestoBrand(text("contact.line1", "LA GRIOTHÈQUE"))}</p>
+        <p>{text("contact.line2", "Organisme de formation")}</p>
+        <p>{text("contact.line3", "de la SASU LES GRIOTS")}</p>
+        <p>{text("contact.line4", "Certifié Qualiopi")}</p>
         <p>&nbsp;</p>
-        <p>Présentiel à Paris</p>
-        <p>Siège social — Le Havre</p>
+        <p>{text("contact.location_main", "Présentiel à Paris")}</p>
+        <p>{text("contact.location_hq", "Siège social — Le Havre")}</p>
         <p>&nbsp;</p>
-        <p><a href="mailto:formations@lesgriots.com">formations@lesgriots.com</a></p>
+        <p><a href={"mailto:" + email}>{email}</a></p>
         <p>&nbsp;</p>
-        <p><a href="https://instagram.com/lagriotheque" target="_blank" rel="noopener">instagram</a></p>
-        <p><a href="https://linkedin.com" target="_blank" rel="noopener">linkedin</a></p>
-        <p><a href="https://lesgriotsxstudio.com" target="_blank" rel="noopener">lesgriotsxstudio.com</a></p>
+        <p>
+          <a href={text("contact.instagram_url", "https://instagram.com/lagriotheque")} target="_blank" rel="noopener">
+            {text("contact.instagram_label", "instagram")}
+          </a>
+        </p>
+        <p>
+          <a href={text("contact.linkedin_url", "https://linkedin.com")} target="_blank" rel="noopener">
+            {text("contact.linkedin_label", "linkedin")}
+          </a>
+        </p>
+        <p>
+          <a href={text("contact.studio_url", "https://lesgriotsxstudio.com")} target="_blank" rel="noopener">
+            {text("contact.studio_label", "lesgriotsxstudio.com")}
+          </a>
+        </p>
       </div>
       <div className="lg__contact__griot" aria-hidden="true">
         <GriotRing />
@@ -2980,7 +4047,19 @@ function Partners() {
 }
 
 function App() {
-  const [entered, setEntered] = useState(false);
+  // Splash affiché uniquement à la première arrivée dans la session du navigateur.
+  // Au refresh ou navigation interne, sessionStorage retient qu'on l'a déjà vu.
+  const [entered, setEntered] = useState(() => {
+    try {
+      return sessionStorage.getItem("lg:splashSeen") === "1";
+    } catch (e) {
+      return false;
+    }
+  });
+  const markEntered = () => {
+    setEntered(true);
+    try { sessionStorage.setItem("lg:splashSeen", "1"); } catch (e) {}
+  };
   const [route, setRoute] = useState(parseRoute);
   const [open, setOpen] = useState(null);
   const [scrolled, setScrolled] = useState(false);
@@ -3019,7 +4098,7 @@ function App() {
   // Pendant le splash : scroll / molette / touchmove / Enter / espace = entrée site
   useEffect(() => {
     if (entered) return;
-    const enter = () => setEntered(true);
+    const enter = () => markEntered();
     const onKey = (e) => {
       if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
         e.preventDefault();
@@ -3037,7 +4116,7 @@ function App() {
   }, [entered]);
 
   if (!entered) {
-    return <Splash onEnter={() => setEntered(true)} />;
+    return <Splash onEnter={() => markEntered()} />;
   }
 
   // Garde des routes désactivées : si window.SITE_CONFIG.activePages.X === false,
@@ -3086,6 +4165,21 @@ function App() {
     const id = route.slice("workshops/".length);
     const w = WORKSHOPS.find((x) => x.id === id);
     page = w ? <WorkshopPage w={w} /> : <Workshops />;
+  } else if (route.startsWith("checkout/")) {
+    // Page de checkout démo (simulation Stripe) — pour tester l'expérience
+    // d'achat sans configurer un vrai compte Stripe.
+    const id = route.slice("checkout/".length);
+    const item =
+      (typeof WORKSHOPS !== "undefined" && WORKSHOPS.find((x) => x.id === id)) ||
+      (typeof FORMATIONS !== "undefined" && FORMATIONS.find((x) => x.id === id));
+    // Stripe Elements (custom checkout sur le site). Si la config est absente,
+    // on retombe sur la page démo.
+    const hasStripe = typeof window !== "undefined" && window.SITE_CONFIG
+      && window.SITE_CONFIG.stripePublishableKey
+      && window.SITE_CONFIG.stripeCheckoutEndpoint;
+    page = item
+      ? (hasStripe ? <CheckoutStripe item={item} /> : <CheckoutDemo item={item} />)
+      : <Catalogue />;
   } else if (route.startsWith("ressources/")) {
     const id = route.slice("ressources/".length);
     const r = RESOURCES.find((x) => x.id === id);
@@ -3122,9 +4216,9 @@ function App() {
               <a href="#/contact">contact</a>
             </div>
             <div className="lg__footer__col">
-              <a href="https://lesgriotsxstudio.com" target="_blank" rel="noopener">les griots studio</a>
-              <a href="https://lesgriotsxstudio.com" target="_blank" rel="noopener">plateforme éditoriale</a>
-              <a href="https://lesgriotsxstudio.com" target="_blank" rel="noopener">agence créative</a>
+              <a href="https://lesgriotsxstudio.com" target="_blank" rel="noopener">{text("footer.col2_studio_label", "les griots studio")}</a>
+              <a href="https://lesgriotsxstudio.com" target="_blank" rel="noopener">{text("footer.col2_plateforme_label", "plateforme éditoriale")}</a>
+              <a href="https://lesgriotsxstudio.com" target="_blank" rel="noopener">{text("footer.col2_agence_label", "agence créative")}</a>
             </div>
             <div className="lg__footer__col">
               <a href="https://instagram.com/lagriotheque" target="_blank" rel="noopener">instagram</a>
@@ -3145,18 +4239,23 @@ function App() {
                   alt="Qualiopi — processus certifié"
                 />
                 <em className="lg__qualiopi__text">
-                  La certification qualité a été délivrée au titre de la catégorie d'action&nbsp;: Actions de formation
+                  {text("footer.qualiopi_caption", "La certification qualité a été délivrée au titre de la catégorie d'action : Actions de formation")}
                 </em>
               </div>
             </div>
           </div>
 
+          {/* Marquee : on duplique le texte 4× pour que le défilement
+              CSS soit fluide sans saut, peu importe la longueur du texte
+              saisi côté BO. */}
           <div className="lg__footer__marquee" aria-hidden="true">
             <div className="lg__footer__marquee__track">
-              <span>TRANSMETTRE — ET PERMETTRE À UNE NOUVELLE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DES IMAGINAIRES&nbsp;·&nbsp;</span>
-              <span>TRANSMETTRE — ET PERMETTRE À UNE NOUVELLE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DES IMAGINAIRES&nbsp;·&nbsp;</span>
-              <span>TRANSMETTRE — ET PERMETTRE À UNE NOUVELLE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DES IMAGINAIRES&nbsp;·&nbsp;</span>
-              <span>TRANSMETTRE — ET PERMETTRE À UNE NOUVELLE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DES IMAGINAIRES&nbsp;·&nbsp;</span>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <span key={i}>
+                  {text("footer.marquee", "TRANSMETTRE — ET PERMETTRE À UNE NOUVELLE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DES IMAGINAIRES")}
+                  &nbsp;·&nbsp;
+                </span>
+              ))}
             </div>
           </div>
         </footer>

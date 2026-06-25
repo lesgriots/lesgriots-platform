@@ -35,6 +35,7 @@ function AboutView() {
         tr("about.svc.creative",   lang),
         tr("about.svc.stage",      lang),
         tr("about.svc.production", lang),
+        tr("about.svc.special",    lang),
       ];
   const servicesItems = [
     { text: tr("about.services", lang), speed: 40, key: "sv" },

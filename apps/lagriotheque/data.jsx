@@ -756,129 +756,50 @@ const FORMATIONS = [
 
 const WORKSHOPS = [
   {
-    id: "ws-residence-recit",
-    title: "RÉSIDENCE — STRUCTURER SON RÉCIT",
-    tagline: "Repars de la résidence avec le récit complet de ton projet — fondations, ton, supports — prêt à diffuser.",
-    discipline: "RÉCIT · STRATÉGIE",
-    duration: "21H · 3 JOURS",
-    format: "RÉSIDENCE · LIEU À CONFIRMER",
-    location: "Résidence en région — lieu communiqué après sélection sur dossier.",
-    price: "900 € HT",
-    cpf: false,
-    opco: true,
-    trainer: {
-    "name": "MOOS COULIBALY",
-    "role": "FONDATEUR · LES GRIOTS"
-  },
-    media: {
-    "type": "image",
-    "src": "img/w-residence.jpg",
-    "credit": "Mains × LES GRIOTS"
-  },
-    description: "Trois jours d'immersion totale en résidence pour structurer le récit de ton projet — idée, fondations, positionnement, ton, matrices narratives, supports de diffusion. Petit groupe (8 max), accompagnement individuel sur ton cas réel.",
-    audience: "Porteurs de projet créatif ou culturel ayant une idée à structurer et la volonté de la déployer publiquement dans les 12 mois.",
-    prerequisites: "Sur sélection de dossier (court pitch écrit envoyé par mail). Avoir un projet à structurer ou un lancement à préparer.",
-    objectives: [
-    "Clarifier le récit fondateur d'un projet",
-    "Construire ses matrices narratives (story, positionnement, ton)",
-    "Identifier ses publics et leurs entrées",
-    "Adapter le récit à chaque support de diffusion",
-    "Repartir avec un kit récit applicable immédiatement"
-  ],
-    chapters: [
-    "Idée & fondations",
-    "Positionnement & ton",
-    "Matrices narratives",
-    "Publics & entrées",
-    "Supports & diffusion",
-    "Kit récit final"
-  ],
-    methods: DEFAULT_METHODS,
-    evaluation: DEFAULT_EVALUATION,
-    accessibility: DEFAULT_ACCESSIBILITY,
-    available: false,
-    next: "—",
-  },
-  {
-    id: "ws-bootcamp-marque",
-    title: "BOOTCAMP MARQUE — 48H",
-    tagline: "Repars en 2 jours avec ta marque écrite — pas une idée, un document utilisable dès lundi.",
-    discipline: "MARQUE · POSITIONNEMENT",
-    duration: "14H · 2 JOURS",
+    id: "ws-storytelling",
+    title: "Stratégie et Storytelling",
+    tagline: "Une journée pour structurer la stratégie de ton projet et transformer ton récit en outil qui embarque et fait vendre.",
+    discipline: "STRATÉGIE · RÉCIT",
+    duration: "7H · 1 JOURNÉE",
     format: "PRÉSENTIEL · PARIS",
     location: DEFAULT_LOCATION,
-    price: "600 € HT",
+    price: "300 €",
     cpf: false,
-    opco: true,
+    opco: false,
+    // Stripe Payment Link officiel — page Stripe Checkout hostée (= ce que
+    // The Futur utilise). Rendu standard 2 colonnes en grand écran desktop,
+    // récap produit + cover à gauche, formulaire de paiement à droite.
+    // Code Stripe Elements custom conservé dans app.jsx mais non utilisé.
+    stripePaymentLink: "https://buy.stripe.com/test_4gMcN52DS4kO4oifYx83C00",
     trainer: {
-    "name": "MOOS COULIBALY",
-    "role": "FONDATEUR · LES GRIOTS"
-  },
+      name: "MOOS COULIBALY",
+      role: "FONDATEUR · LES GRIOTS",
+    },
     media: {
-    "type": "image",
-    "src": "img/w-bootcamp.jpg",
-    "credit": "Atavisme × LES GRIOTS"
-  },
-    description: "Format bootcamp 48h pour poser en deux jours les fondations d'une marque solide : identité, positionnement, récit, plateforme de marque opérationnelle. Versus la formation Stratégie de Marque, le bootcamp pousse plus loin la mise en pratique sur ton cas réel.",
-    audience: "Fondateurs, entrepreneurs, créatifs en phase de lancement ou de refonte de marque. Idéal pour aller vite et profond en 48h.",
-    prerequisites: "Avoir un projet de marque en cours (lancement, refonte, pivot). Aucun prérequis technique.",
+      type: "image",
+      src: "img/w-bootcamp.jpg",
+      credit: "LES GRIOTS",
+    },
+    description: "Une journée intensive pour structurer le récit de ton projet. On part de tes intuitions, on les transforme en récit clair, incarné, déclinable sur tous tes supports (pitch, site, prises de parole, réseaux). Groupe restreint, retours individuels.",
+    audience: "Indépendants, dirigeant·es, créatifs et porteurs de projet qui veulent raconter ce qu'ils font sans se perdre dans le jargon ou la modestie.",
+    prerequisites: "Avoir un projet ou une activité en cours. Aucun pré-requis technique.",
     objectives: [
-    "Poser identité, positionnement, récit en 48h",
-    "Construire sa plateforme de marque complète",
-    "Tester et défendre son positionnement",
-    "Repartir avec un kit marque opérationnel"
-  ],
+      "Identifier l'angle narratif unique de son projet",
+      "Construire un pitch de 30 secondes et de 3 minutes",
+      "Décliner son récit sur 3 supports (oral, écrit, social)",
+      "Pratiquer la prise de parole sur son propre récit",
+    ],
     chapters: [
-    "J1 — Diagnostic & fondations",
-    "J1 — Positionnement & territoire",
-    "J2 — Récit & ton de voix",
-    "J2 — Plateforme & application"
-  ],
+      "Pourquoi raconter ?",
+      "Trouver son angle",
+      "Pitch 30 secondes & 3 minutes",
+      "Déclinaisons par support",
+      "Restitutions & retours",
+    ],
     methods: DEFAULT_METHODS,
     evaluation: DEFAULT_EVALUATION,
     accessibility: DEFAULT_ACCESSIBILITY,
-    available: false,
-    next: "—",
-  },
-  {
-    id: "ws-intensif-mobile",
-    title: "INTENSIF VIDÉO MOBILE",
-    tagline: "Repars en 2 jours avec ton workflow vidéo en main — produire et publier régulièrement, avec ton téléphone.",
-    discipline: "VIDÉO · TERRAIN",
-    duration: "14H · 2 JOURS",
-    format: "PRÉSENTIEL · PARIS",
-    location: DEFAULT_LOCATION,
-    price: "600 € HT",
-    cpf: false,
-    opco: true,
-    trainer: {
-    "name": "MOOS COULIBALY",
-    "role": "RÉALISATEUR · LES GRIOTS"
-  },
-    media: {
-    "type": "image",
-    "src": "img/w-mobile.jpg",
-    "credit": "Monument × LES GRIOTS"
-  },
-    description: "Deux jours intensifs pour produire, monter et publier une vidéo complète au téléphone : tournage sur le terrain, captation son, montage mobile, étalonnage basique, exports plateforme. Tu repars avec une vidéo publiable.",
-    audience: "Créatifs, communicants, journalistes, entrepreneurs qui veulent produire de la vidéo régulière au mobile sans dépendre d'une équipe technique.",
-    prerequisites: "Posséder un smartphone capable de filmer en Full HD ou 4K. Bases vidéo bienvenues mais pas obligatoires.",
-    objectives: [
-    "Réaliser une vidéo complète au téléphone en 48h",
-    "Maîtriser captation image et son en terrain",
-    "Monter, étalonner et exporter sur mobile",
-    "Publier au format adapté à chaque plateforme"
-  ],
-    chapters: [
-    "J1 — Image & captation son terrain",
-    "J1 — Tournage sur cas réel",
-    "J2 — Montage mobile & étalonnage",
-    "J2 — Export & publication"
-  ],
-    methods: DEFAULT_METHODS,
-    evaluation: DEFAULT_EVALUATION,
-    accessibility: DEFAULT_ACCESSIBILITY,
-    available: false,
+    available: true,
     next: "—",
   },
 ];
@@ -919,14 +840,6 @@ const TRAINERS = [
 
 const SESSIONS = [
   {
-    id: "ses-ws-bootcamp-marque-260529",
-    formation_id: "",
-    workshop_id: "ws-bootcamp-marque",
-    date: "2026-05-29",
-    places: "10",
-    status: "À VENIR",
-  },
-  {
     id: "ses-strategie-marque-2026-04-15",
     format: "PRÉSENTIEL · PARIS",
     formation_id: "strategie-marque",
@@ -943,28 +856,6 @@ const SESSIONS = [
     date: "2026-06-10",
     places: "10",
     status: "OUVERTE",
-  },
-  {
-    id: "ws-ses-bootcamp-marque-2026-05-20",
-    format: "PRÉSENTIEL · PARIS",
-    formation_id: "",
-    workshop_id: "ws-bootcamp-marque",
-    date: "2026-05-20",
-    places: "6 / 8",
-    status: "OUVERTE",
-  },
-  {
-    id: "ws-ses-intensif-mobile-sept",
-    format: "PRÉSENTIEL · PARIS",
-    formation_id: "",
-    workshop_id: "ws-intensif-mobile",
-    date: "2026-09-27",
-    places: "10",
-    status: "À VENIR",
-    kind: "workshop",
-    targetId: "ws-intensif-mobile",
-    dateLabel: "Jeu. 24 → Ven. 25 septembre 2026",
-    seats: 10,
   },
 ];
 
@@ -1008,14 +899,25 @@ const SITE_CONFIG = {
     "home": true,
     "approche": true,
     "formations": true,
-    "workshops": false,
+    "workshops": true,
     "agenda": true,
     "financement": false,
     "ressources": true,
     "cgv": true,
     "contact": true
   },
-  "leadsEndpoint": "http://localhost:3031/api/leads"
+  "leadsEndpoint": "http://localhost:3031/api/leads",
+  // Webhook Make.com qui reçoit le formulaire "Télécharger le programme".
+  // Scénario : https://eu2.make.com (id 9397890) — pour l'instant trigger seul,
+  // Moos finit le câblage Notion + Gmail dans l'UI Make, puis active.
+  "leadsWebhookUrl": "https://hook.eu2.make.com/4cto3sd9wfc4sddpryb0h34hf7793i31",
+  // Clé PUBLIQUE Stripe (pk_test_...) — sûr d'être exposée en clair côté
+  // navigateur, c'est son rôle. Utilisée par Stripe Elements pour charger
+  // les champs de paiement sécurisés.
+  "stripePublishableKey": "pk_test_51BXqM3FH2nz3KLDHY3EShVfwuOw6mrSHsJt6Clw6nFifhKFJ7piIYs33078TPQC4PLeg0YlKRCTbw6Bcqm1ehekP009Vi2XUzU",
+  // Endpoint backoffice qui crée le PaymentIntent (Stripe Elements).
+  // Doit être HTTPS en prod. En local le BO tourne sur 3031.
+  "stripeCheckoutEndpoint": "http://localhost:3031/api/stripe/create-payment-intent"
 };
 
 if (typeof window !== "undefined") {

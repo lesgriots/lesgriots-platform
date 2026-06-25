@@ -17,6 +17,7 @@ import {
   listResources,
   getDefaults,
   getActivePages,
+  getSiteContent,
 } from "./db.js";
 
 const SITE_ROOT = path.resolve(process.cwd(), "..", "lagriotheque");
@@ -152,6 +153,11 @@ export async function exportToDataJsx() {
     leadsEndpoint: "http://localhost:3031/api/leads",
   }, null, 2)};\n`;
 
+  // Contenu marketing éditable (manifeste, approche, FAQ, headers de page).
+  // Lu côté site via le helper text("home.manifesto", fallback).
+  const siteContent = getSiteContent();
+  const contentBlock = `\nconst SITE_CONTENT = ${JSON.stringify(siteContent, null, 2)};\n`;
+
   const footer = `
 if (typeof window !== "undefined") {
   window.FORMATIONS = FORMATIONS;
@@ -160,10 +166,11 @@ if (typeof window !== "undefined") {
   window.SESSIONS = SESSIONS;
   window.RESOURCES = RESOURCES;
   window.SITE_CONFIG = SITE_CONFIG;
+  window.SITE_CONTENT = SITE_CONTENT;
 }
 `;
 
-  const content = header + defaultsBlock + blocks + configBlock + footer;
+  const content = header + defaultsBlock + blocks + configBlock + contentBlock + footer;
   await fs.writeFile(DATA_PATH, content, "utf8");
   return {
     path: DATA_PATH,
