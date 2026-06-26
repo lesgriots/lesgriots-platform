@@ -37,6 +37,17 @@ ask()  { read -rp "$(echo -e "${YELLOW}?${NC} $1 ")" "$2"; }
 [[ $EUID -ne 0 ]] && { err "Lance en root : sudo bash $0"; exit 1; }
 [[ ! -d "$REPO_PATH/.git" ]] && { err "Repo introuvable à $REPO_PATH — ce script suppose un VPS déjà setup"; exit 1; }
 
+# Dépendances système requises (apache2-utils = htpasswd).
+# Idempotent : apt skip ce qui est déjà installé.
+for cmd in htpasswd nginx node npm certbot; do
+  if ! command -v "$cmd" &>/dev/null; then
+    warn "$cmd manquant — installation"
+    apt-get update -qq
+    apt-get install -y apache2-utils nginx nodejs npm certbot python3-certbot-nginx
+    break
+  fi
+done
+
 log "Ajout BO Studio sur VPS déjà setup — $(date)"
 echo
 
