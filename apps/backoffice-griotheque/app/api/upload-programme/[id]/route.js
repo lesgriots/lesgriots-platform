@@ -19,12 +19,6 @@ import path from "path";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
-export const config = {
-  api: {
-    bodyParser: false,
-    responseLimit: false,
-  },
-};
 
 const PROGRAMMES_DIR = path.resolve(
   process.cwd(),

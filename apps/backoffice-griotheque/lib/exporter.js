@@ -172,6 +172,19 @@ if (typeof window !== "undefined") {
 
   const content = header + defaultsBlock + blocks + configBlock + contentBlock + footer;
   await fs.writeFile(DATA_PATH, content, "utf8");
+
+  // ── SEO : pages HTML statiques (1 par formation) + sitemap + robots ──────
+  // Le site est rendu côté navigateur (Babel standalone) → invisible pour
+  // Google. On génère donc, à chaque export, une vraie page HTML par
+  // formation (contenu réel + meta + Open Graph + JSON-LD Course) que les
+  // moteurs peuvent indexer sans exécuter de JS.
+  let seo = { pages: 0 };
+  try {
+    seo = await generateSeoPages(formationsResolved);
+  } catch (e) {
+    seo = { pages: 0, error: e.message };
+  }
+
   return {
     path: DATA_PATH,
     counts: {
@@ -181,6 +194,195 @@ if (typeof window !== "undefined") {
       sessions: sessions.length,
       resources: resources.length,
     },
+    seo,
     bytes: content.length,
   };
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// GÉNÉRATION SEO — pages statiques indexables + sitemap.xml + robots.txt
+// ════════════════════════════════════════════════════════════════════════
+const BASE_URL = "https://lagriotheque.com";
+
+function esc(v) {
+  return String(v == null ? "" : v)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+// Réduit un champ (string | array | array d'arrays) en texte lisible.
+function asText(v) {
+  if (v == null) return "";
+  if (Array.isArray(v)) return v.map(asText).filter(Boolean).join(" ");
+  if (typeof v === "object") return "";
+  return String(v).trim();
+}
+// Tronque pour une meta description (≈155 caractères).
+function metaDesc(s) {
+  const t = asText(s).replace(/\s+/g, " ").trim();
+  return t.length > 158 ? t.slice(0, 155).trimEnd() + "…" : t;
+}
+// Extrait le 1er nombre d'un prix ("900 € TTC" → 900).
+function priceNumber(p) {
+  const m = String(p || "").replace(/\s/g, "").match(/(\d+(?:[.,]\d+)?)/);
+  return m ? Number(m[1].replace(",", ".")) : null;
+}
+function absUrl(src) {
+  if (!src) return null;
+  if (/^https?:\/\//i.test(src)) return src;
+  return `${BASE_URL}/${String(src).replace(/^\//, "")}`;
+}
+
+function buildFormationHtml(f) {
+  const id = f.id;
+  const url = `${BASE_URL}/formation/${id}/`;
+  const title = asText(f.title) || id;
+  const desc = metaDesc(f.description || f.tagline || title);
+  const img = absUrl(f.media && f.media.src);
+  const priceN = priceNumber(f.price);
+
+  // Facts (paire label/valeur) affichés en haut.
+  const facts = [
+    ["Discipline", asText(f.discipline)],
+    ["Durée", asText(f.duration)],
+    ["Format", asText(f.format)],
+    ["Lieu", asText(f.location)],
+    ["Tarif", asText(f.price)],
+    ["Financement", [f.cpf ? "CPF" : "", f.opco ? "OPCO" : ""].filter(Boolean).join(" · ")],
+    ["Certification", [asText(f.rs), asText(f.certifier)].filter(Boolean).join(" — ")],
+    ["Formateur", f.trainer ? [asText(f.trainer.name), asText(f.trainer.role)].filter(Boolean).join(" · ") : ""],
+  ].filter(([, v]) => v);
+
+  const section = (heading, body) => body ? `<section><h2>${esc(heading)}</h2>${body}</section>` : "";
+  const para = (v) => { const t = asText(v); return t ? `<p>${esc(t)}</p>` : ""; };
+  const ul = (arr) => Array.isArray(arr) && arr.length
+    ? `<ul>${arr.map((x) => `<li>${esc(asText(x))}</li>`).join("")}</ul>` : "";
+
+  // Programme structuré (jours → modules → items), avec repli sur chapters.
+  let programHtml = "";
+  if (Array.isArray(f.program) && f.program.length && typeof f.program[0] === "object") {
+    programHtml = f.program.map((d) => {
+      const mods = Array.isArray(d.modules) ? d.modules.map((m) => {
+        const items = ul(m.items);
+        return `<h3>${esc(asText(m.title))}</h3>${items}`;
+      }).join("") : "";
+      return `<div class="day"><h3 class="day-title">${esc(asText(d.day))}</h3>${mods}</div>`;
+    }).join("");
+  } else if (Array.isArray(f.chapters)) {
+    programHtml = ul(f.chapters);
+  }
+
+  // JSON-LD Course
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: title,
+    description: desc,
+    url,
+    inLanguage: "fr",
+    provider: { "@type": "EducationalOrganization", name: "La Griothèque", url: BASE_URL },
+  };
+  if (img) ld.image = img;
+  if (asText(f.duration)) ld.timeRequired = asText(f.duration);
+  if (asText(f.rs) || asText(f.certifier)) {
+    ld.educationalCredentialAwarded = [asText(f.rs), asText(f.certifier)].filter(Boolean).join(" — ");
+  }
+  ld.hasCourseInstance = {
+    "@type": "CourseInstance",
+    courseMode: "blended",
+    ...(asText(f.duration) ? { courseWorkload: asText(f.duration) } : {}),
+  };
+  if (priceN != null) {
+    ld.offers = { "@type": "Offer", price: priceN, priceCurrency: "EUR", category: "Paid", availability: "https://schema.org/InStock", url };
+  }
+
+  const factsHtml = facts.map(([k, v]) => `<div class="fact"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("");
+
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)} — La Griothèque</title>
+<meta name="description" content="${esc(desc)}">
+<link rel="canonical" href="${url}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${esc(title)} — La Griothèque">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:url" content="${url}">
+${img ? `<meta property="og:image" content="${esc(img)}">` : ""}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(title)} — La Griothèque">
+<meta name="twitter:description" content="${esc(desc)}">
+${img ? `<meta name="twitter:image" content="${esc(img)}">` : ""}
+<script type="application/ld+json">${JSON.stringify(ld)}</script>
+<style>
+:root{--bg:#0b0b0c;--fg:#e9e6dd;--dim:#9b968a;--accent:#f0c419;--rule:#26241f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:780px;margin:0 auto;padding:48px 22px 80px}
+a{color:var(--accent)}
+.tag{color:var(--dim);text-transform:uppercase;letter-spacing:.14em;font-size:12px}
+h1{font-size:30px;line-height:1.2;margin:.4em 0 .2em}
+.lede{color:var(--dim);font-size:18px;margin:0 0 28px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);margin:0 0 32px}
+.fact{background:var(--bg);padding:12px 14px}
+.fact dt{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+.fact dd{margin:4px 0 0;font-size:15px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);margin:36px 0 10px;border-bottom:1px solid var(--rule);padding-bottom:6px}
+h3{font-size:15px;margin:18px 0 6px}
+.day-title{color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-size:12px}
+ul{margin:6px 0;padding-left:20px}li{margin:4px 0}
+.cta{display:inline-block;margin-top:36px;background:var(--accent);color:#000;font-weight:700;padding:12px 22px;border-radius:2px;text-decoration:none}
+.fin a{color:var(--accent)}
+footer{margin-top:48px;border-top:1px solid var(--rule);padding-top:18px;color:var(--dim);font-size:13px}
+@media(max-width:560px){.facts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<p class="tag">La Griothèque · Formation${f.cpf ? " · éligible CPF" : ""}</p>
+<h1>${esc(title)}</h1>
+${f.tagline ? `<p class="lede">${esc(asText(f.tagline))}</p>` : ""}
+${factsHtml ? `<dl class="facts">${factsHtml}</dl>` : ""}
+${(f.cpfUrl || f.franceCompetencesUrl) ? `<p class="fin">${f.cpfUrl ? `<a href="${esc(f.cpfUrl)}" rel="nofollow">Voir sur Mon Compte Formation</a>` : ""}${(f.cpfUrl && f.franceCompetencesUrl) ? " · " : ""}${f.franceCompetencesUrl ? `<a href="${esc(f.franceCompetencesUrl)}" rel="nofollow">Fiche France Compétences</a>` : ""}</p>` : ""}
+${section("Présentation", para(f.description))}
+${section("Objectifs", ul(f.objectives))}
+${section("Public visé", para(f.audience))}
+${section("Prérequis", para(f.prerequisites))}
+${section("Programme", programHtml)}
+${section("Méthodes pédagogiques", para(f.methods))}
+${section("Évaluation", para(f.evaluation))}
+${section("Accessibilité", para(f.accessibility))}
+<a class="cta" href="${BASE_URL}/#formation-${esc(id)}">S'informer / s'inscrire →</a>
+<footer>La Griothèque — organisme de formation. <a href="${BASE_URL}/">Toutes les formations</a></footer>
+</main>
+</body>
+</html>
+`;
+}
+
+async function generateSeoPages(formations) {
+  const list = (formations || []).filter((f) => f && f.id && f.available !== false);
+  let pages = 0;
+  for (const f of list) {
+    const dir = path.join(SITE_ROOT, "formation", String(f.id));
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(path.join(dir, "index.html"), buildFormationHtml(f), "utf8");
+    pages++;
+  }
+
+  // sitemap.xml : accueil + 1 url par formation.
+  const urls = [`${BASE_URL}/`, ...list.map((f) => `${BASE_URL}/formation/${f.id}/`)];
+  const today = new Date().toISOString().slice(0, 10);
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((u) => `  <url><loc>${u}</loc><lastmod>${today}</lastmod></url>`).join("\n")}
+</urlset>
+`;
+  await fs.writeFile(path.join(SITE_ROOT, "sitemap.xml"), sitemap, "utf8");
+
+  // robots.txt : autorise tout + pointe le sitemap.
+  const robots = `User-agent: *\nAllow: /\nSitemap: ${BASE_URL}/sitemap.xml\n`;
+  await fs.writeFile(path.join(SITE_ROOT, "robots.txt"), robots, "utf8");
+
+  return { pages, sitemap: urls.length };
 }

@@ -14,12 +14,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 // Permet d'uploader jusqu'à 500 Mo (largement suffisant pour une vidéo HD)
 export const maxDuration = 60;
-export const config = {
-  api: {
-    bodyParser: false,
-    responseLimit: false,
-  },
-};
 
 const IMG_DIR = path.resolve(process.cwd(), "..", "lagriotheque", "img");
 

@@ -81,6 +81,8 @@ export default function RootLayout({ children }) {
               <a href="/site/pages">Pages actives</a>
               <span className="bo-nav__sep">·</span>
               <a href="/site/kora">Son du Griot</a>
+              <span className="bo-nav__sep">·</span>
+              <a href="https://lesgriotsxstudio.com" target="_blank" rel="noopener noreferrer">Voir le site ↗</a>
             </nav>
           </header>
           <main>{children}</main>

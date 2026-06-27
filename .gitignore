@@ -51,6 +51,14 @@ uploads/
 # (le projet est utilisable dès le clone). En prod, ils sont écrasés
 # par les données du back-office.
 
+# Pages SEO générées automatiquement par le back-office à chaque Sync
+# (regénérées en prod, inutile de les versionner).
+apps/lagriotheque/formation/
+apps/lagriotheque/sitemap.xml
+apps/lagriotheque/robots.txt
+apps/lesgriotsxstudio/sitemap.xml
+apps/lesgriotsxstudio/robots.txt
+
 # Médias lourds — hébergés sur le VPS, pas dans git
 # (sinon repo > 400 Mo et GitHub refuse > 100 Mo par fichier)
 *.mp4

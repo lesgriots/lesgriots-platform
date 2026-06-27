@@ -312,6 +312,9 @@ function Splash({ onEnter }) {
 function Manifesto() {
   const [videoReady, setVideoReady] = useState(false);
   const [loadingText, setLoadingText] = useState("00000000");
+  // Onglet actif de la section "LATEST" : formations (défaut) ou workshops.
+  // Cliquer "Workshops" affiche la liste juste en dessous, sans changer de page.
+  const [latestTab, setLatestTab] = useState("formations");
   const heroVideoRef = useRef(null);
 
   // Bouton "plein écran" : passe la vidéo en fullscreen avec controls + son
@@ -430,24 +433,43 @@ function Manifesto() {
           Workshops n'apparaît que s'il y a au moins un workshop dispo. */}
       <section className="lg__latest">
         <div className="lg__latest__tabs">
-          <span className="is-active">{text("home.latest_tab_formations", "Nos formations")}</span>
+          <span
+            className={latestTab === "formations" ? "is-active" : ""}
+            role="button"
+            tabIndex={0}
+            style={{ cursor: "pointer", color: latestTab === "formations" ? undefined : "var(--ink-3)" }}
+            onClick={() => setLatestTab("formations")}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLatestTab("formations"); } }}
+          >{text("home.latest_tab_formations", "Nos formations")}</span>
           {typeof WORKSHOPS !== "undefined" && WORKSHOPS.some((w) => w.available) && (
-            <a href="#/workshops">{text("home.latest_tab_workshops", "Workshops")}</a>
+            <span
+              className={latestTab === "workshops" ? "is-active" : ""}
+              role="button"
+              tabIndex={0}
+              style={{ cursor: "pointer", color: latestTab === "workshops" ? undefined : "var(--ink-3)" }}
+              onClick={() => setLatestTab("workshops")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLatestTab("workshops"); } }}
+            >{text("home.latest_tab_workshops", "Workshops")}</span>
           )}
         </div>
         <div className="lg__latest__list">
-          {FORMATIONS.filter((f) => f.available).map((f) => (
+          {(latestTab === "workshops"
+            ? WORKSHOPS.filter((w) => w.available)
+            : FORMATIONS.filter((f) => f.available)
+          ).map((item) => (
             <a
-              key={f.id}
-              href={"#/formations/" + f.id}
+              key={item.id}
+              href={(latestTab === "workshops" ? "#/workshops/" : "#/formations/") + item.id}
               className="lg__latest__row"
             >
               <span className="lg__latest__row__left">
-                {f.discipline ? f.discipline.split(" · ")[0].toLowerCase() : "formation"}
+                {item.discipline
+                  ? item.discipline.split(" · ")[0].toLowerCase()
+                  : (latestTab === "workshops" ? "workshop" : "formation")}
               </span>
-              <h3 className="lg__latest__row__title">{f.title}</h3>
+              <h3 className="lg__latest__row__title">{item.title}</h3>
               <span className="lg__latest__row__right">
-                {f.duration ? f.duration.split(" · ").pop().toLowerCase() : ""}
+                {item.duration ? item.duration.split(" · ").pop().toLowerCase() : ""}
               </span>
             </a>
           ))}
