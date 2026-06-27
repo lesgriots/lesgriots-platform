@@ -14,7 +14,10 @@ const MIN_DURATION = 3000;
 // n'a pas encore fired.
 const MAX_DURATION = 8000;
 
-function BootLoader({ onDone }) {
+// persist=true : écran de chargement PERMANENT (mode veille du site, utilisé
+// quand toutes les pages sont désactivées dans le back office). Pas d'auto-
+// dismiss, pas de skip au clic/touche — il reste affiché tel quel.
+function BootLoader({ onDone, persist = false }) {
   const [leaving, setLeaving] = React.useState(false);
   // Texte qui se construit lettre par lettre, style terminal
   const [typed, setTyped] = React.useState("");
@@ -48,6 +51,7 @@ function BootLoader({ onDone }) {
   // Si window.load a déjà fired (document.readyState === "complete"),
   // on planifie juste le dismiss à MIN_DURATION.
   React.useEffect(() => {
+    if (persist) return; // mode veille permanent : jamais de dismiss auto
     const startTime = Date.now();
     let dismissTimer = null;
     let safetyTimer = null;
@@ -80,10 +84,11 @@ function BootLoader({ onDone }) {
   }, [dismiss]);
 
   React.useEffect(() => {
+    if (persist) return; // pas de skip clavier en mode veille
     const onKey = (e) => { e.preventDefault(); dismiss(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [dismiss]);
+  }, [dismiss, persist]);
 
   const done = typed === LOADING_WORD;
 
@@ -91,9 +96,9 @@ function BootLoader({ onDone }) {
     <div
       className={"boot-matrix" + (leaving ? " is-leaving" : "")}
       aria-hidden={leaving}
-      onClick={dismiss}
-      role="button"
-      tabIndex={0}>
+      onClick={persist ? undefined : dismiss}
+      role={persist ? undefined : "button"}
+      tabIndex={persist ? undefined : 0}>
       {/* Backdrop : film grain animé + veil radial.
           La vidéo de fond (riles-survival.mp4) a été retirée le 2026-06-13
           à la demande de Moos — on garde uniquement les couches grain et

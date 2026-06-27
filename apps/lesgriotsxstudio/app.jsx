@@ -214,6 +214,15 @@ function App() {
     "--bg-distort-url": t.crtOn && t.bgDistort > 0 ? "url(#crt-distort)" : "none",
   };
 
+  // Mode veille : si TOUTES les pages sont désactivées dans le back office,
+  // on n'affiche pas un site vide mais un écran de chargement permanent.
+  const ap = (typeof window !== "undefined" && window.SITE_CONTENT && window.SITE_CONTENT.activePages) || {};
+  const allPagesOff =
+    ap.work === false && ap.talent === false && ap.about === false && ap.eco === false;
+  if (allPagesOff) {
+    return <BootLoader persist />;
+  }
+
   return (
     <React.Fragment>
       {!booted && <BootLoader onDone={() => {
