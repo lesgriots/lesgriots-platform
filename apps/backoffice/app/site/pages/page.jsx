@@ -6,14 +6,15 @@ import { useEffect, useState } from "react";
 import Type from "../../components/Type";
 
 const PAGES = [
-  { id: "work",  label: "WORK / PROJETS", description: "La grille principale des projets — la home du site." },
-  { id: "about", label: "ABOUT",          description: "Page À propos avec services + contact + intro éditoriale." },
-  { id: "eco",   label: "ECOSYSTEM",      description: "Vue solaire des collaborateurs, studios partenaires, clients." },
+  { id: "work",   label: "WORK / PROJETS", description: "La grille principale des projets — la home du site." },
+  { id: "talent", label: "TALENT",         description: "Page Talent (portrait, bio, vidéo de survol). Éditable dans l'onglet Talent." },
+  { id: "about",  label: "ABOUT",          description: "Page À propos avec services + contact + intro éditoriale." },
+  { id: "eco",    label: "ECOSYSTEM",      description: "Vue solaire des collaborateurs, studios partenaires, clients." },
 ];
 
 // Par défaut tout est actif (rétrocompatibilité avec l'état avant l'ajout
 // du toggle — si aucune valeur en DB, on considère que les 3 pages sont ON).
-const DEFAULT_ACTIVE = { work: true, about: true, eco: true };
+const DEFAULT_ACTIVE = { work: true, talent: true, about: true, eco: true };
 
 export default function PagesEditorPage() {
   const [loading, setLoading] = useState(true);
@@ -81,7 +82,7 @@ export default function PagesEditorPage() {
         ))}
       </div>
 
-      {offCount === 3 && (
+      {offCount === PAGES.length && (
         <p className="note" style={{ marginTop: 14, color: "var(--danger)" }}>
           ⚠ Tout est désactivé — le menu du site va être vide. Réactive au moins une page.
         </p>
