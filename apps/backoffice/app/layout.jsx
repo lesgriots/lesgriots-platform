@@ -72,6 +72,8 @@ export default function RootLayout({ children }) {
               <span className="bo-nav__sep">·</span>
               <a href="/site/about">Page About</a>
               <span className="bo-nav__sep">·</span>
+              <a href="/site/talent">Talent</a>
+              <span className="bo-nav__sep">·</span>
               <a href="/site/services">Services</a>
               <span className="bo-nav__sep">·</span>
               <a href="/site/ecosysteme">Écosystème</a>
