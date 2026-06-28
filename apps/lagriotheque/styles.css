@@ -1065,7 +1065,9 @@ button {
   }
 }
 @media (max-width: 900px) {
-  .lg__formation__layout { display: block; }
+  /* 1 colonne pleine largeur : on annule le padding-right desktop (180px)
+     qui poussait le contenu à gauche avec du vide à droite sur mobile. */
+  .lg__formation__layout { display: block; padding-right: 0; }
   .lg__formation__side {
     position: fixed;
     top: auto;
