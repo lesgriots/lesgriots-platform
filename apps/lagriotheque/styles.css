@@ -1401,12 +1401,14 @@ button {
   .lg__cta-mini__hint,
   .lg__cta-mini__badges,
   .lg__cta-mini__meta,
+  .lg__cta-mini__btn--ghost,
   .lg__cta-mini__sub { display: none; }
   .lg__cta-mini__btn {
     margin-bottom: 0;
     padding: 12px 18px;
-    flex: 1 1 auto;
-    max-width: 60%;
+    flex: 1;
+    max-width: none;
+    white-space: nowrap;
   }
 }
 
