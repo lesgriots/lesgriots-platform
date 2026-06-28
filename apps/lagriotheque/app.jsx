@@ -173,7 +173,8 @@ function Header({ route }) {
   // Si la page est désactivée, son lien disparaît du menu et l'accès URL
   // est bloqué (cf. route guard plus bas dans le router).
   const allNavLinks = [
-    { key: "home", node: homeLink },
+    // Pas de lien texte "la griothèque" : le logo (mot-marque) en tête du menu
+    // sert déjà de lien vers l'accueil — on évite le doublon.
     { key: "formations", node: navLink("catalogue", "formations") },
     { key: "workshops", node: navLink("workshops", "workshops") },
     { key: "agenda", node: navLink("agenda", "agenda") },
