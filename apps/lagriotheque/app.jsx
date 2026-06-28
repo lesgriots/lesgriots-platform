@@ -245,7 +245,7 @@ function GriotRing() {
     <div className="lg__hero__griot__wrap">
       <svg
         className="lg__wordmark-svg"
-        viewBox="0 0 620 130"
+        viewBox="0 0 620 86"
         width="100%"
         height="100%"
         role="img"
@@ -255,7 +255,7 @@ function GriotRing() {
       >
         <text
           x="310"
-          y="82"
+          y="60"
           textAnchor="middle"
           fontFamily='"Geist","Inter",system-ui,sans-serif'
           fontWeight="700"
