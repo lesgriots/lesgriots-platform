@@ -244,7 +244,7 @@ function GriotRing() {
     <div className="lg__hero__griot__wrap">
       <svg
         className="lg__wordmark-svg"
-        viewBox="0 0 400 220"
+        viewBox="0 0 430 120"
         width="100%"
         height="100%"
         role="img"
@@ -252,15 +252,14 @@ function GriotRing() {
         style={{ display: "block" }}
       >
         <text
+          x="210"
+          y="78"
           textAnchor="middle"
-          fontFamily='"Geist Mono","JetBrains Mono",monospace'
+          fontFamily='"Geist","Inter",system-ui,sans-serif'
           fontWeight="700"
+          fontSize="58"
           fill="currentColor"
-          letterSpacing="1"
-        >
-          <tspan x="200" y="90" fontSize="62">LA</tspan>
-          <tspan x="200" y="170" fontSize="50">GRIOTHÈQUE</tspan>
-        </text>
+        >LA GRIOTHÈQUE<tspan fontSize="20" dy="-24">™</tspan></text>
       </svg>
     </div>
   );
