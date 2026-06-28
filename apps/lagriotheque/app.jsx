@@ -235,29 +235,31 @@ function Header({ route }) {
   );
 }
 
+// Mot-marque statique « LA GRIOTHÈQUE ». Rendu en SVG pour s'adapter
+// automatiquement à toutes les tailles (splash, hero, header) via le viewBox.
+// fill=currentColor → s'adapte au contexte clair/sombre. Plus de rotation,
+// plus d'anneau, plus de griot ASCII.
 function GriotRing() {
   return (
     <div className="lg__hero__griot__wrap">
-      <MatrixGriot />
       <svg
-        className="lg__hero__griot__ring"
-        viewBox="0 0 400 400"
-        aria-hidden="true"
+        className="lg__wordmark-svg"
+        viewBox="0 0 400 220"
+        width="100%"
+        height="100%"
+        role="img"
+        aria-label="LA GRIOTHÈQUE"
+        style={{ display: "block" }}
       >
-        <defs>
-          <path
-            id="lg-ring-path"
-            d="M 200,200 m -155,0 a 155,155 0 1,1 310,0 a 155,155 0 1,1 -310,0"
-          />
-        </defs>
-        <text>
-          <textPath href="#lg-ring-path" startOffset="0%">LA GRIOTHÈQUE</textPath>
-        </text>
-        <text>
-          <textPath href="#lg-ring-path" startOffset="33.333%">LA GRIOTHÈQUE</textPath>
-        </text>
-        <text>
-          <textPath href="#lg-ring-path" startOffset="66.666%">LA GRIOTHÈQUE</textPath>
+        <text
+          textAnchor="middle"
+          fontFamily='"Geist Mono","JetBrains Mono",monospace'
+          fontWeight="700"
+          fill="currentColor"
+          letterSpacing="1"
+        >
+          <tspan x="200" y="90" fontSize="62">LA</tspan>
+          <tspan x="200" y="170" fontSize="50">GRIOTHÈQUE</tspan>
         </text>
       </svg>
     </div>
