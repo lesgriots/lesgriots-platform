@@ -4137,8 +4137,14 @@ function App() {
     };
   }, [entered]);
 
-  if (!entered) {
-    return <Splash onEnter={() => markEntered()} />;
+  // Écran de chargement = mode VEILLE. Il ne s'affiche QUE si TOUTES les pages
+  // sont désactivées dans le back office (sinon le site s'ouvre directement,
+  // plus de splash d'intro à chaque visite). onEnter no-op → écran permanent.
+  const veillePages = (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.activePages) || {};
+  const VEILLE_KEYS = ["home", "approche", "formations", "workshops", "agenda", "financement", "ressources", "cgv", "contact"];
+  const allPagesOff = VEILLE_KEYS.every((k) => veillePages[k] === false);
+  if (allPagesOff) {
+    return <Splash onEnter={() => {}} />;
   }
 
   // Garde des routes désactivées : si window.SITE_CONFIG.activePages.X === false,
