@@ -293,6 +293,11 @@ button {
   .lg__header { min-height: 121px; }
   .lg__header__griot { transform: translateY(12px); }
 }
+@media (max-width: 600px) {
+  /* Sur mobile, le titre des fiches colle à top:85px → on fixe la hauteur du
+     header mobile à 85px pour éviter le vide sous le menu. */
+  .lg__header { min-height: 85px; }
+}
 /* Wordmark texte — affiché uniquement sur mobile, masqué desktop */
 .lg__header__wordmark {
   display: none;
