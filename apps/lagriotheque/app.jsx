@@ -244,22 +244,23 @@ function GriotRing() {
     <div className="lg__hero__griot__wrap">
       <svg
         className="lg__wordmark-svg"
-        viewBox="0 0 430 120"
+        viewBox="0 0 620 130"
         width="100%"
         height="100%"
         role="img"
         aria-label="LA GRIOTHÈQUE"
-        style={{ display: "block" }}
+        preserveAspectRatio="xMidYMid meet"
+        style={{ display: "block", overflow: "visible" }}
       >
         <text
-          x="210"
-          y="78"
+          x="310"
+          y="82"
           textAnchor="middle"
           fontFamily='"Geist","Inter",system-ui,sans-serif'
           fontWeight="700"
-          fontSize="58"
+          fontSize="54"
           fill="currentColor"
-        >LA GRIOTHÈQUE<tspan fontSize="20" dy="-24">™</tspan></text>
+        >LA GRIOTHÈQUE<tspan fontSize="20" dy="-22">™</tspan></text>
       </svg>
     </div>
   );
