@@ -287,6 +287,10 @@ button {
    On le redescend pour le centrer sur "formations…". Desktop uniquement
    (le décalage n'affecte pas la hauteur du header). */
 @media (min-width: 601px) {
+  /* Le reste du site (titre sticky des fiches, barres de sections) suppose un
+     header de 121 px. Mon logo plat l'avait raccourci → 39 px de vide sous le
+     menu. On restaure 121 px pour que tout se cale correctement. */
+  .lg__header { min-height: 121px; }
   .lg__header__griot { transform: translateY(12px); }
 }
 /* Wordmark texte — affiché uniquement sur mobile, masqué desktop */
