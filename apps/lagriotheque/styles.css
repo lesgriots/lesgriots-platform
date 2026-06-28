@@ -2794,8 +2794,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   }
   .lg__tabs__btn { font-size: 15px; }
   .lg__tabs__sep { font-size: 15px; }
-  /* CTA mobile : version compacte */
-  .lg__tabs__cta { padding: 6px 10px; font-size: 12px; }
+  /* CTA masqué sur mobile : on garde la barre d'onglets seule (le bouton
+     Réserver/Payer reste accessible dans la page et la sidebar). */
+  .lg__tabs__cta { display: none; }
 }
 
 /* Liste à puces générique pour les contenus type pré-requis */
