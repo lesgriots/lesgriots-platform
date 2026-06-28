@@ -447,9 +447,11 @@ button {
   justify-content: center;
 }
 .lg__drawer__griot .lg__hero__griot__wrap {
-  width: 220px;
-  height: 220px;
-  aspect-ratio: 1 / 1;
+  /* Mot-marque large (remplace l'ancien anneau carré) : on donne un cadre
+     large pour que "LA GRIOTHÈQUE" s'affiche en grand dans le menu. */
+  width: min(82%, 360px);
+  height: auto;
+  aspect-ratio: 620 / 130;
 }
 .lg__drawer__griot .matrix-griot {
   font-size: 1.8px;
