@@ -1,6 +1,8 @@
 // Layout racine du back office.
 // Aligné sur le style du site studio : Geist Mono, palette ink/yellow,
 // sticker top-left, griot ASCII bottom-right.
+import SyncButton from "./components/SyncButton";
+
 export const metadata = {
   title: "LESGRIOTSxSTUDIO — Back Office",
 };
@@ -83,6 +85,8 @@ export default function RootLayout({ children }) {
               <a href="/site/kora">Son du Griot</a>
               <span className="bo-nav__sep">·</span>
               <a href="https://lesgriotsxstudio.com" target="_blank" rel="noopener noreferrer">Voir le site ↗</a>
+              <span className="bo-nav__sep">·</span>
+              <SyncButton />
             </nav>
           </header>
           <main>{children}</main>
