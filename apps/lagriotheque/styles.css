@@ -256,19 +256,20 @@ button {
   z-index: 50;
 }
 .lg__header__griot {
-  width: 96px;
-  height: 96px;
+  /* Mot-marque large — même largeur que le logo d'accueil (320 px). */
+  width: min(320px, 70vw);
+  height: auto;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 620 / 130;
   text-decoration: none;
 }
 .lg__header__griot .lg__hero__griot__wrap {
   width: 100%;
   height: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 620 / 130;
 }
 .lg__header__griot .matrix-griot {
   font-size: 0.85px;
