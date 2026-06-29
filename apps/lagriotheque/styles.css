@@ -1870,7 +1870,8 @@ button {
 
 /* Sur la home, le header est fixed pour que le hero touche le haut.
    Caché en splash mode, visible dès qu'on scroll. */
-body.is-home .lg__header {
+body.is-home .lg__header,
+body.is-heropage .lg__header {
   position: fixed;
   top: 0;
   left: 0;
@@ -1878,7 +1879,8 @@ body.is-home .lg__header {
   z-index: 50;
   background: var(--paper);
 }
-body.is-home:not(.is-scrolled) .lg__header {
+body.is-home:not(.is-scrolled) .lg__header,
+body.is-heropage:not(.is-scrolled) .lg__header {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-12px);
