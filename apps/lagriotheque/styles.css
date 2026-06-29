@@ -4216,6 +4216,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   position: relative;
   width: 100vw;
   margin-left: calc(50% - 50vw);
+  /* Annule le padding-top de la section pour coller le média sous le menu
+     (supprime la barre blanche au-dessus). */
+  margin-top: -40px;
   aspect-ratio: 16 / 9;
   max-height: 60vh;
   overflow: hidden;
