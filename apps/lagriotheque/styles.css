@@ -1920,8 +1920,10 @@ body.is-listhero:not(.past-hero) .lg__header__wordmark {
   overflow: hidden;
   background: var(--ink);
 }
-/* En mode splash, le hero remplit tout le viewport */
-body.is-home:not(.is-scrolled) .lg__hero-yard {
+/* Hero plein écran tant qu'on ne l'a pas dépassé (il défile ensuite
+   naturellement au lieu de rétrécir au scroll → plus de contenu qui
+   "passe par-dessus" la vidéo). */
+body.is-home:not(.past-hero) .lg__hero-yard {
   height: 100vh;
   max-height: 100vh;
   aspect-ratio: auto;
