@@ -1896,9 +1896,18 @@ function PageIntro({ text, sub }) {
 // Bandeau média en haut d'une page-liste (catalogue, workshops).
 // src éditable depuis le back office (SITE_CONTENT) ; vidéo ou image selon
 // l'extension. Rien rendu si src vide.
-function PageHero({ src, poster, children }) {
+function PageHero({ src, poster, title, children }) {
   const isVideo = /\.(mp4|webm|mov|m4v)$/i.test(src || "");
-  if (!src) return children ? <>{children}</> : null;
+  const overlay = (title || children) && (
+    <div className="lg__pagehero__overlay">
+      {title && <h1 className="lg__pagehero__title">{title}</h1>}
+      {children}
+    </div>
+  );
+  if (!src) {
+    // Pas de média : on affiche quand même le titre + l'intro, sans bandeau.
+    return (title || children) ? <>{title && <h1 className="lg__pagehero__title lg__pagehero__title--plain">{title}</h1>}{children}</> : null;
+  }
   return (
     <div className="lg__pagehero">
       {isVideo ? (
@@ -1907,7 +1916,7 @@ function PageHero({ src, poster, children }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" />
       )}
-      {children && <div className="lg__pagehero__overlay">{children}</div>}
+      {overlay}
     </div>
   );
 }
@@ -2398,7 +2407,7 @@ function Catalogue() {
   return (
     <section className="lg__catalogue" id="catalogue">
       <HoverBg src={bg} />
-      <PageHero src={text("catalogue.media", "img/hero.mp4")}>
+      <PageHero src={text("catalogue.media", "img/hero.mp4")} title={text("catalogue.heading", "Formations")}>
         <PageIntro
           text={text(
             "catalogue.intro",
@@ -2484,7 +2493,7 @@ function Workshops() {
   return (
     <section className="lg__catalogue" id="workshops">
       <HoverBg src={bg} />
-      <PageHero src={text("workshops_page.media", "img/hero.mp4")}>
+      <PageHero src={text("workshops_page.media", "img/hero.mp4")} title={text("workshops_page.heading", "Workshops")}>
         <PageIntro
           text={text(
             "workshops_page.intro",

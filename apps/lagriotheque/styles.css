@@ -4254,6 +4254,19 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__pagehero__overlay .lg__intro__sub {
   color: #fff;
 }
+.lg__pagehero__title {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: clamp(40px, 7vw, 96px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: #fff;
+  margin: 0 0 14px;
+}
+.lg__pagehero__title--plain { color: var(--ink); margin: 0 0 18px; }
+@media (max-width: 700px) {
+  .lg__pagehero__title { font-size: clamp(32px, 11vw, 56px); margin-bottom: 8px; }
+}
 @media (max-width: 700px) {
   .lg__pagehero { aspect-ratio: 3 / 2; margin-bottom: 22px; }
   .lg__pagehero__overlay { padding: 24px 18px 20px; }
