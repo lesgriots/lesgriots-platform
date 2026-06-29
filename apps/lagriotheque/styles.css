@@ -1870,8 +1870,7 @@ button {
 
 /* Sur la home, le header est fixed pour que le hero touche le haut.
    Caché en splash mode, visible dès qu'on scroll. */
-body.is-home .lg__header,
-body.is-heropage .lg__header {
+body.is-home .lg__header {
   position: fixed;
   top: 0;
   left: 0;
@@ -1879,14 +1878,36 @@ body.is-heropage .lg__header {
   z-index: 50;
   background: var(--paper);
 }
-body.is-home:not(.is-scrolled) .lg__header,
-body.is-heropage:not(.is-scrolled) .lg__header {
+body.is-home:not(.is-scrolled) .lg__header {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-12px);
 }
 .lg__header {
-  transition: opacity 0.35s ease, transform 0.35s ease;
+  transition: opacity 0.35s ease, transform 0.35s ease,
+              background 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+}
+
+/* Pages-listes : le menu reste VISIBLE sur le média (texte blanc, sans barre),
+   et devient une barre solide (papier, texte encre) dès qu'on scrolle. */
+body.is-listhero .lg__header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--paper);
+}
+body.is-listhero:not(.is-scrolled) .lg__header {
+  background: transparent;
+  border-bottom-color: transparent;
+}
+body.is-listhero:not(.is-scrolled) .lg__menu__link,
+body.is-listhero:not(.is-scrolled) .lg__menu__sep,
+body.is-listhero:not(.is-scrolled) .lg__header__griot,
+body.is-listhero:not(.is-scrolled) .lg__header__menubtn,
+body.is-listhero:not(.is-scrolled) .lg__header__wordmark {
+  color: #fff;
 }
 
 .lg__hero-yard {
@@ -4268,6 +4289,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   opacity: 0.85;
 }
 .lg__pagehero__brand {
+  /* Le logo est désormais porté par le menu (visible sur le média) → on
+     masque ce mot-marque pour éviter le doublon. */
+  display: none;
   position: absolute;
   top: 24px;
   left: 24px;
@@ -4312,7 +4336,7 @@ body.is-scrolled .lg__pagehero__brand {
 @media (max-width: 600px) {
   /* Hero pleine page au repos, se réduit au scroll — comme la home. */
   .lg__pagehero { transition: height 0.5s ease, max-height 0.5s ease; }
-  body.is-heropage:not(.is-scrolled) .lg__pagehero {
+  body.is-listhero:not(.is-scrolled) .lg__pagehero {
     height: 100vh;
     max-height: 100vh;
     aspect-ratio: auto;

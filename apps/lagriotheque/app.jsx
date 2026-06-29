@@ -4155,11 +4155,11 @@ function App() {
   // Toggle classes sur <body> pour pilotage CSS du splash sur la home
   useEffect(() => {
     const isHome = route === "";
-    // Pages avec un média hero en haut → menu caché au-dessus du hero,
-    // apparaît au scroll (même comportement que la home).
-    const heroRoutes = ["", "catalogue", "workshops", "agenda", "ressources"];
+    // Pages-listes avec média hero : menu visible en blanc sur le média,
+    // puis barre solide au scroll.
+    const listRoutes = ["catalogue", "workshops", "agenda", "ressources"];
     document.body.classList.toggle("is-home", isHome);
-    document.body.classList.toggle("is-heropage", heroRoutes.includes(route));
+    document.body.classList.toggle("is-listhero", listRoutes.includes(route));
     document.body.classList.toggle("is-scrolled", scrolled);
   }, [route, scrolled]);
 
