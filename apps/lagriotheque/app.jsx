@@ -406,9 +406,9 @@ function Manifesto() {
             redondant avec la nav et l'agenda accessible depuis le menu. */}
         <div className="lg__hero-yard__tagline">
           <p>
-            {text("home.hero_tagline_line1", "L'école de transmission")}<br />
-            {text("home.hero_tagline_line2", "pour la nouvelle génération")}<br />
-            {text("home.hero_tagline_line3", "créative.")}
+            {text("home.hero_tagline_line1", "Bâtis ton récit.")}<br />
+            {text("home.hero_tagline_line2", "Vis de ta passion.")}<br />
+            {text("home.hero_tagline_line3", "")}
           </p>
         </div>
         <div className="lg__hero-yard__scrollhint" aria-hidden="true">
@@ -426,7 +426,7 @@ function Manifesto() {
           <div className="lg__manifeste__prose">
             <p>{renderManifestoBrand(text(
               "home.manifesto",
-              "LA GRIOTHÈQUE est une école dédiée à la transmission de méthodes éprouvées sur le terrain, au croisement de la direction artistique, du récit de marque et de la production. Dans un paysage culturel saturé, où trop de talents avancent sans cadre et trop de récits puissants se dissipent faute de structure, nous offrons aux artistes, aux créatifs et aux entrepreneurs de la prochaine génération les outils pour bâtir leur récit et créer de nouveaux imaginaires."
+              "LA GRIOTHÈQUE est une école dédiée à la transmission de méthodes éprouvées sur le terrain, au croisement de la direction artistique, du récit de marque et de la production. Dans un paysage culturel saturé, où trop de talents avancent sans cadre et trop de récits puissants se dissipent faute de structure, notre mission est de transmettre à une nouvelle génération de créatifs les outils pour bâtir leur récit et vivre de leur passion."
             ))}</p>
           </div>
         </div>
