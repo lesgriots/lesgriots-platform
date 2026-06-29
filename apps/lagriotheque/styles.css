@@ -4341,19 +4341,13 @@ body.is-scrolled .lg__pagehero__brand {
     max-height: 100vh;
     aspect-ratio: auto;
   }
-  /* Agenda & Ressources : média plus court (pas plein écran). */
-  body.is-listhero:not(.is-scrolled) #agenda .lg__pagehero,
-  body.is-listhero:not(.is-scrolled) #ressources .lg__pagehero {
-    height: auto;
-    max-height: none;
-    aspect-ratio: 4 / 3;
-  }
-  #agenda .lg__pagehero__overlay,
-  #ressources .lg__pagehero__overlay { padding-bottom: 22px; }
 }
-/* Desktop : média plus court pour Agenda & Ressources. */
-#agenda .lg__pagehero,
-#ressources .lg__pagehero { max-height: 44vh; }
+/* Desktop uniquement : média plus court pour Agenda & Ressources.
+   (Mobile inchangé : plein écran comme les autres pages-listes.) */
+@media (min-width: 601px) {
+  #agenda .lg__pagehero,
+  #ressources .lg__pagehero { max-height: 44vh; }
+}
 .lg__intro__text,
 .lg__intro__sub {
   font-family: var(--font-sans);
