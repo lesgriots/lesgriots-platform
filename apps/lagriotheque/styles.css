@@ -1878,10 +1878,11 @@ body.is-home .lg__header {
   z-index: 50;
   background: var(--paper);
 }
-body.is-home:not(.is-scrolled) .lg__header {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-12px);
+/* La home utilise désormais le même menu blanc-sur-média que les pages-listes
+   (plus de menu caché). Le gros logo du hero est masqué : le logo du menu sert. */
+body.is-home .lg__hero-yard__brand,
+body.is-home .lg__hero-yard__wordmark {
+  display: none !important;
 }
 .lg__header {
   transition: opacity 0.35s ease, transform 0.35s ease,
@@ -1898,15 +1899,15 @@ body.is-listhero .lg__header {
   z-index: 50;
   background: var(--paper);
 }
-body.is-listhero:not(.is-scrolled) .lg__header {
+body.is-listhero:not(.past-hero) .lg__header {
   background: transparent;
   border-bottom-color: transparent;
 }
-body.is-listhero:not(.is-scrolled) .lg__menu__link,
-body.is-listhero:not(.is-scrolled) .lg__menu__sep,
-body.is-listhero:not(.is-scrolled) .lg__header__griot,
-body.is-listhero:not(.is-scrolled) .lg__header__menubtn,
-body.is-listhero:not(.is-scrolled) .lg__header__wordmark {
+body.is-listhero:not(.past-hero) .lg__menu__link,
+body.is-listhero:not(.past-hero) .lg__menu__sep,
+body.is-listhero:not(.past-hero) .lg__header__griot,
+body.is-listhero:not(.past-hero) .lg__header__menubtn,
+body.is-listhero:not(.past-hero) .lg__header__wordmark {
   color: #fff;
 }
 
@@ -4336,7 +4337,7 @@ body.is-scrolled .lg__pagehero__brand {
 @media (max-width: 600px) {
   /* Hero pleine page au repos, se réduit au scroll — comme la home. */
   .lg__pagehero { transition: height 0.5s ease, max-height 0.5s ease; }
-  body.is-listhero:not(.is-scrolled) .lg__pagehero {
+  body.is-listhero:not(.past-hero) .lg__pagehero {
     height: 100vh;
     max-height: 100vh;
     aspect-ratio: auto;

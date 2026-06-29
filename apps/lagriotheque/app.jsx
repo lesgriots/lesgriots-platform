@@ -4146,7 +4146,17 @@ function App() {
   // Tracking du scroll pour basculer le mode "splash hero" sur la home.
   // Le menu apparaît dès que l'utilisateur commence à scroller (~30px).
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 30);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 30);
+      // "past-hero" : vrai quand on a dépassé le média hero (son bas passe
+      // sous le header). Tant qu'on est sur le média → menu blanc transparent ;
+      // une fois dépassé → barre solide.
+      const hero = document.querySelector(".lg__pagehero, .lg__hero-yard");
+      const header = document.querySelector(".lg__header");
+      const hH = header ? header.offsetHeight : 0;
+      const past = hero ? hero.getBoundingClientRect().bottom <= hH + 4 : false;
+      document.body.classList.toggle("past-hero", past);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
@@ -4155,11 +4165,11 @@ function App() {
   // Toggle classes sur <body> pour pilotage CSS du splash sur la home
   useEffect(() => {
     const isHome = route === "";
-    // Pages-listes avec média hero : menu visible en blanc sur le média,
-    // puis barre solide au scroll.
-    const listRoutes = ["catalogue", "workshops", "agenda", "ressources"];
+    // Pages avec média hero (home incluse) : menu visible en blanc sur le
+    // média, puis barre solide une fois le média dépassé.
+    const heroRoutes = ["", "catalogue", "workshops", "agenda", "ressources"];
     document.body.classList.toggle("is-home", isHome);
-    document.body.classList.toggle("is-listhero", listRoutes.includes(route));
+    document.body.classList.toggle("is-listhero", heroRoutes.includes(route));
     document.body.classList.toggle("is-scrolled", scrolled);
   }, [route, scrolled]);
 
