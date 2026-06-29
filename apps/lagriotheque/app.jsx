@@ -1896,9 +1896,9 @@ function PageIntro({ text, sub }) {
 // Bandeau média en haut d'une page-liste (catalogue, workshops).
 // src éditable depuis le back office (SITE_CONTENT) ; vidéo ou image selon
 // l'extension. Rien rendu si src vide.
-function PageHero({ src, poster }) {
-  if (!src) return null;
-  const isVideo = /\.(mp4|webm|mov|m4v)$/i.test(src);
+function PageHero({ src, poster, children }) {
+  const isVideo = /\.(mp4|webm|mov|m4v)$/i.test(src || "");
+  if (!src) return children ? <>{children}</> : null;
   return (
     <div className="lg__pagehero">
       {isVideo ? (
@@ -1907,6 +1907,7 @@ function PageHero({ src, poster }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" />
       )}
+      {children && <div className="lg__pagehero__overlay">{children}</div>}
     </div>
   );
 }
@@ -2397,14 +2398,15 @@ function Catalogue() {
   return (
     <section className="lg__catalogue" id="catalogue">
       <HoverBg src={bg} />
-      <PageHero src={text("catalogue.media", "img/hero.mp4")} />
-      <PageIntro
-        text={text(
-          "catalogue.intro",
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-        )}
-        sub={text("catalogue.sub", "Lorem ipsum · dolor sit amet · consectetur")}
-      />
+      <PageHero src={text("catalogue.media", "img/hero.mp4")}>
+        <PageIntro
+          text={text(
+            "catalogue.intro",
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+          )}
+          sub={text("catalogue.sub", "Lorem ipsum · dolor sit amet · consectetur")}
+        />
+      </PageHero>
 
       {/* Filtres par catégorie — petits tabs au-dessus de la liste */}
       <nav className="lg__cat-filters" aria-label="Filtrer par catégorie">
@@ -2482,17 +2484,18 @@ function Workshops() {
   return (
     <section className="lg__catalogue" id="workshops">
       <HoverBg src={bg} />
-      <PageHero src={text("workshops_page.media", "img/hero.mp4")} />
-      <PageIntro
-        text={text(
-          "workshops_page.intro",
-          "Workshops résidentiels et intensifs courts pour les indépendants déjà en activité — format immersif, groupes restreints, accompagnement individuel sur projet réel."
-        )}
-        sub={text(
-          "workshops_page.sub",
-          "2026. Paris & en résidence. Sur sélection de dossier."
-        )}
-      />
+      <PageHero src={text("workshops_page.media", "img/hero.mp4")}>
+        <PageIntro
+          text={text(
+            "workshops_page.intro",
+            "Workshops résidentiels et intensifs courts pour les indépendants déjà en activité — format immersif, groupes restreints, accompagnement individuel sur projet réel."
+          )}
+          sub={text(
+            "workshops_page.sub",
+            "2026. Paris & en résidence. Sur sélection de dossier."
+          )}
+        />
+      </PageHero>
       <div className="lg__rows">
         {WORKSHOPS.map((w) => (
           <WorkshopRow key={w.id} w={w} onHover={setBg} />
