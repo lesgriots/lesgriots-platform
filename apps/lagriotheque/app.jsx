@@ -4154,7 +4154,9 @@ function App() {
       const hero = document.querySelector(".lg__pagehero, .lg__hero-yard");
       const header = document.querySelector(".lg__header");
       const hH = header ? header.offsetHeight : 0;
-      const past = hero ? hero.getBoundingClientRect().bottom <= hH + 4 : false;
+      // Basé sur le scroll vs hauteur du hero → fonctionne aussi quand le hero
+      // est "sticky" (effet de superposition : le contenu monte par-dessus).
+      const past = hero ? window.scrollY > hero.offsetHeight - hH - 8 : false;
       document.body.classList.toggle("past-hero", past);
     };
     window.addEventListener("scroll", onScroll, { passive: true });

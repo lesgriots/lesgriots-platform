@@ -1931,6 +1931,21 @@ body.is-home:not(.past-hero) .lg__hero-yard {
 .lg__hero-yard {
   transition: max-height 0.5s ease, height 0.5s ease;
 }
+/* Effet de superposition : le hero reste fixé (sticky) plein écran, et le
+   contenu en dessous (opaque) remonte par-dessus au scroll. */
+body.is-home .lg__hero-yard {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  height: 100vh;
+  max-height: 100vh;
+}
+body.is-home .lg__manifesto,
+body.is-home .lg__latest {
+  position: relative;
+  z-index: 1;
+  background: var(--paper);
+}
 
 /* GRIOT — overlay top-left du hero, même taille que sur la page contact */
 .lg__hero-yard__brand {
