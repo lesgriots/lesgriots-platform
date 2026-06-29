@@ -2067,6 +2067,7 @@ body.is-scrolled .lg__hero-yard__brand {
 
 /* LOADING — scramble sous le griot pendant que la vidéo charge */
 .lg__hero-yard__loading {
+  display: none; /* petit indicateur de chargement retiré du hero d'accueil */
   position: absolute;
   top: 356px;
   left: 24px;
