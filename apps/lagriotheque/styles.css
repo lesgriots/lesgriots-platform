@@ -4246,9 +4246,10 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   z-index: 2;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 6vw 5vw 5vw;
-  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 45%, rgba(0,0,0,0) 78%);
+  /* Titre en haut, intro en bas — même disposition que le hero d'accueil. */
+  justify-content: space-between;
+  padding: 32px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 56%, rgba(0,0,0,0.65) 100%);
 }
 .lg__pagehero__overlay .lg__intro {
   margin: 0;
@@ -4281,8 +4282,8 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   .lg__pagehero__overlay .lg__intro__text { font-size: 15px; }
 }
 @media (max-width: 700px) {
-  .lg__pagehero { aspect-ratio: 3 / 2; margin-bottom: 22px; }
-  .lg__pagehero__overlay { padding: 24px 18px 20px; }
+  .lg__pagehero { aspect-ratio: 3 / 2; margin-bottom: 22px; margin-top: -50px; }
+  .lg__pagehero__overlay { padding: 18px; }
 }
 .lg__intro__text,
 .lg__intro__sub {
