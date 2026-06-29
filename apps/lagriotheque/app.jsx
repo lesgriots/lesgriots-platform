@@ -2899,10 +2899,12 @@ function Agenda() {
   // Même structure exacte que Catalogue : section + intro + filtres + rows
   return (
     <section className="lg__catalogue" id="agenda">
-      <PageIntro
-        text={<>Les dates des prochains événements — formations, workshops et sessions à venir.</>}
-        sub="Présentiel à Paris · en ligne · en résidence. Groupes restreints."
-      />
+      <PageHero src={text("agenda.media", "img/hero.mp4")} title={text("agenda.heading", "Agenda")}>
+        <PageIntro
+          text={<>Les dates des prochains événements — formations, workshops et sessions à venir.</>}
+          sub="Présentiel à Paris · en ligne · en résidence. Groupes restreints."
+        />
+      </PageHero>
 
       {/* Filtres tous/formations/workshops — même style que les catégories du Catalogue */}
       <nav className="lg__cat-filters" aria-label="Filtrer par type">
@@ -3262,13 +3264,15 @@ function ResourceModal({ resource, onClose }) {
 function Ressources() {
   return (
     <section className="lg__catalogue" id="ressources">
-      <PageIntro
-        text={text(
-          "ressources.intro",
-          "Worksheets, templates et guides — des outils gratuits pour structurer ton récit, affûter ta méthode et renforcer ta marque personnelle. À télécharger et à utiliser dès aujourd'hui."
-        )}
-        sub={text("ressources.sub", "Gratuites · mises à jour régulièrement")}
-      />
+      <PageHero src={text("ressources.media", "img/hero.mp4")} title={text("ressources.heading", "Ressources")}>
+        <PageIntro
+          text={text(
+            "ressources.intro",
+            "Worksheets, templates et guides — des outils gratuits pour structurer ton récit, affûter ta méthode et renforcer ta marque personnelle. À télécharger et à utiliser dès aujourd'hui."
+          )}
+          sub={text("ressources.sub", "Gratuites · mises à jour régulièrement")}
+        />
+      </PageHero>
       <div className="lg__rows">
         {RESOURCES.map((r) => (
           <ResourceRow key={r.id} r={r} />
