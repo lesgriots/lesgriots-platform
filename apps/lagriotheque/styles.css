@@ -4267,6 +4267,28 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   font-size: clamp(12px, 1.1vw, 15px);
   opacity: 0.85;
 }
+.lg__pagehero__brand {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  width: 240px;
+  z-index: 3;
+  color: var(--paper);
+  text-decoration: none;
+  transition: opacity 0.35s ease;
+}
+.lg__pagehero__brand .lg__hero__griot__wrap {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 620 / 86;
+}
+body.is-scrolled .lg__pagehero__brand {
+  opacity: 0;
+  pointer-events: none;
+}
+@media (max-width: 700px) {
+  .lg__pagehero__brand { top: 16px; left: 16px; width: 190px; }
+}
 .lg__pagehero__title {
   font-family: var(--font-sans);
   font-weight: 700;

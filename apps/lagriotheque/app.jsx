@@ -1916,6 +1916,8 @@ function PageHero({ src, poster, title, children }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" />
       )}
+      {/* Mot-marque en haut à gauche, comme la home (se fond au scroll). */}
+      <a className="lg__pagehero__brand" href="#/" aria-label="Accueil"><GriotRing /></a>
       {overlay}
     </div>
   );
