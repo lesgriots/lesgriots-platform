@@ -4285,6 +4285,15 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   .lg__pagehero { aspect-ratio: 3 / 2; margin-bottom: 22px; margin-top: -50px; }
   .lg__pagehero__overlay { padding: 18px; }
 }
+@media (max-width: 600px) {
+  /* Hero pleine page au repos, se réduit au scroll — comme la home. */
+  .lg__pagehero { transition: height 0.5s ease, max-height 0.5s ease; }
+  body.is-heropage:not(.is-scrolled) .lg__pagehero {
+    height: 100vh;
+    max-height: 100vh;
+    aspect-ratio: auto;
+  }
+}
 .lg__intro__text,
 .lg__intro__sub {
   font-family: var(--font-sans);
