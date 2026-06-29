@@ -1893,6 +1893,24 @@ function PageIntro({ text, sub }) {
   );
 }
 
+// Bandeau média en haut d'une page-liste (catalogue, workshops).
+// src éditable depuis le back office (SITE_CONTENT) ; vidéo ou image selon
+// l'extension. Rien rendu si src vide.
+function PageHero({ src, poster }) {
+  if (!src) return null;
+  const isVideo = /\.(mp4|webm|mov|m4v)$/i.test(src);
+  return (
+    <div className="lg__pagehero">
+      {isVideo ? (
+        <video src={src} poster={poster || undefined} autoPlay loop muted playsInline />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" />
+      )}
+    </div>
+  );
+}
+
 // Page de checkout custom alimentée par Stripe Elements — le visiteur
 // paie SUR le site lagriotheque, on n'envoie plus vers buy.stripe.com.
 // Flow :
@@ -2379,6 +2397,7 @@ function Catalogue() {
   return (
     <section className="lg__catalogue" id="catalogue">
       <HoverBg src={bg} />
+      <PageHero src={text("catalogue.media", "img/hero.mp4")} />
       <PageIntro
         text={text(
           "catalogue.intro",
@@ -2463,6 +2482,7 @@ function Workshops() {
   return (
     <section className="lg__catalogue" id="workshops">
       <HoverBg src={bg} />
+      <PageHero src={text("workshops_page.media", "img/hero.mp4")} />
       <PageIntro
         text={text(
           "workshops_page.intro",
