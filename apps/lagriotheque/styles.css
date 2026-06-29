@@ -1041,6 +1041,10 @@ button {
   padding-right: 180px;
 }
 .lg__formation__main { min-width: 0; }
+/* Cible de scroll des onglets : on s'arrête pile sous la pile sticky
+   (header + titre collé + barre d'onglets). */
+#tab-content { scroll-margin-top: 232px; }
+@media (max-width: 600px) { #tab-content { scroll-margin-top: 176px; } }
 .lg__formation__side {
   position: sticky;
   /* Header (121) + titre sticky variable + menu d'onglets (~60) + marge.
@@ -1431,9 +1435,9 @@ button {
     justify-content: stretch;
   }
   .lg__cta-banner__btn {
-    width: 100%;
-    text-align: center;
-    padding: 14px 18px;
+    /* Sur mobile, le CTA est assuré par la barre fixe en bas → on masque le
+       bouton de la carte pour éviter deux boutons identiques superposés. */
+    display: none;
   }
 }
 .lg__cta-card__inner {
@@ -2009,6 +2013,11 @@ body.is-scrolled .lg__hero-yard__brand {
   animation: lg-sticker-spin 22s linear infinite;
   filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.35));
   transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.3s ease;
+}
+@media (max-width: 700px) {
+  /* Sceau jaune masqué sur mobile (il dépassait derrière la carte + il tourne
+     en continu = bruit visuel et un peu de calcul inutile). */
+  .lg__yellow-sticker { display: none; }
 }
 .lg__yellow-sticker:hover {
   transform: scale(1.08);
@@ -2798,6 +2807,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   .lg__tabs__scroll {
     justify-content: flex-start;
     gap: 10px;
+    /* Fondu sur les bords pour indiquer qu'on peut scroller les onglets. */
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 calc(100% - 26px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 calc(100% - 26px), transparent 100%);
     /* Padding pour que le bouton actif puisse être centré visuellement */
     scroll-padding-inline: 30%;
   }

@@ -1003,6 +1003,13 @@ function ProgramPage({ item, kind }) {
   // contenu de l'onglet remplace l'ancien à la même position dans la page.
   const selectTab = (tabId) => {
     setActiveTab(tabId);
+    // Scroll vers le contenu de l'onglet pour qu'on voie directement la section
+    // (ex. clic "Programme" → on arrive sur le programme). L'offset sous la
+    // barre sticky est géré en CSS via scroll-margin-top sur #tab-content.
+    requestAnimationFrame(() => {
+      const c = document.getElementById("tab-content");
+      if (c && c.scrollIntoView) c.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
 
   // Quand on change d'onglet, on scrolle horizontalement la barre d'onglets
