@@ -4220,8 +4220,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   /* Annule le padding-top de la section pour coller le média sous le menu
      (supprime la barre blanche au-dessus). */
   margin-top: -40px;
+  /* Même gabarit que le hero d'accueil (16/9, max 78vh). */
   aspect-ratio: 16 / 9;
-  max-height: 60vh;
+  max-height: 78vh;
   overflow: hidden;
   background: #0b0b0c;
   margin-bottom: 36px;
