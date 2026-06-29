@@ -4252,22 +4252,31 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   margin: 0;
   max-width: 1000px;
 }
-.lg__pagehero__overlay .lg__intro__text,
+.lg__pagehero__overlay .lg__intro__text {
+  color: #fff;
+  font-size: clamp(15px, 1.7vw, 22px);
+  line-height: 1.4;
+  font-weight: 500;
+  max-width: 720px;
+}
 .lg__pagehero__overlay .lg__intro__sub {
   color: #fff;
+  font-size: clamp(12px, 1.1vw, 15px);
+  opacity: 0.85;
 }
 .lg__pagehero__title {
   font-family: var(--font-sans);
   font-weight: 700;
-  font-size: clamp(40px, 7vw, 96px);
-  line-height: 0.95;
+  font-size: clamp(28px, 4vw, 56px);
+  line-height: 1;
   letter-spacing: -0.03em;
   color: #fff;
-  margin: 0 0 14px;
+  margin: 0 0 12px;
 }
 .lg__pagehero__title--plain { color: var(--ink); margin: 0 0 18px; }
 @media (max-width: 700px) {
-  .lg__pagehero__title { font-size: clamp(32px, 11vw, 56px); margin-bottom: 8px; }
+  .lg__pagehero__title { font-size: clamp(26px, 8vw, 40px); margin-bottom: 8px; }
+  .lg__pagehero__overlay .lg__intro__text { font-size: 15px; }
 }
 @media (max-width: 700px) {
   .lg__pagehero { aspect-ratio: 3 / 2; margin-bottom: 22px; }
