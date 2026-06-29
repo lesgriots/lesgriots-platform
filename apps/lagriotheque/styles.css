@@ -4287,7 +4287,8 @@ body.is-scrolled .lg__pagehero__brand {
   pointer-events: none;
 }
 @media (max-width: 700px) {
-  .lg__pagehero__brand { top: 16px; left: 16px; width: 190px; }
+  /* Même taille / position que le mot-marque de la home sur mobile. */
+  .lg__pagehero__brand { top: 18px; left: 18px; width: 175px; }
 }
 .lg__pagehero__title {
   font-family: var(--font-sans);
