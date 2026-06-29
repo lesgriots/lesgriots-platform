@@ -4246,8 +4246,8 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   z-index: 2;
   display: flex;
   flex-direction: column;
-  /* Titre en haut, intro en bas — même disposition que le hero d'accueil. */
-  justify-content: space-between;
+  /* Titre + intro regroupés en bas (le titre est ainsi placé bas). */
+  justify-content: flex-end;
   padding: 32px;
   background: linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 56%, rgba(0,0,0,0.65) 100%);
 }
