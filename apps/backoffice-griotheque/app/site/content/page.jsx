@@ -12,6 +12,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Type from "../../components/Type";
+import FileInput from "../../components/FileInput.jsx";
 
 export default function ContentPage() {
   const [data, setData] = useState(null); // { content, sections }
@@ -115,7 +116,14 @@ export default function ContentPage() {
                   {section.fields.map((f) => (
                     <div key={f.key} className="field">
                       <label>{f.label}</label>
-                      {f.type === "textarea" ? (
+                      {f.type === "upload" ? (
+                        <FileInput
+                          value={sectionContent[f.key] || ""}
+                          onChange={(val) => updateField(section.key, f.key, val)}
+                          accept=".mp4,.mov,.webm,.m4v,.jpg,.jpeg,.png,.webp"
+                          placeholder="img/hero.mp4 ou upload une vidéo"
+                        />
+                      ) : f.type === "textarea" ? (
                         <textarea
                           rows={f.rows || 4}
                           value={sectionContent[f.key] || ""}

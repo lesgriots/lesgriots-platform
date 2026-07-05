@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Type from "../components/Type";
 
 const PAGE_LABELS = {
+  launch: { label: "Page de lancement (Bientôt)", desc: "ON = tout le site est masqué et remplacé par la page de capture email. OFF = site normal. C'est CET interrupteur qui active la page de capture." },
   home: { label: "Accueil", desc: "Page d'entrée avec splash vidéo + manifeste" },
   approche: { label: "Notre Approche", desc: "6 critères ADN de la pédagogie" },
   formations: { label: "Formations", desc: "Catalogue des formations longues" },
