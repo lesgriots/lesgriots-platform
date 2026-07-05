@@ -12,12 +12,17 @@
 
 import fs from "fs";
 import path from "path";
+import { validateEntity } from "./validate.js";
 
 const STORE_PATH = path.join(process.cwd(), "griotheque.json");
 
 // Pages du site lagriotheque qu'on peut activer/désactiver depuis le backoffice.
 // true = visible dans le menu et accessible ; false = masquée du menu (URL bloquée).
 const DEFAULT_ACTIVE_PAGES = {
+  // Page de lancement "Bientôt" (capture email). Sémantique INVERSE des autres :
+  // launch:true = le site entier est masqué et remplacé par la page de capture.
+  // Désactivé par défaut (false) pour que le site normal s'affiche.
+  launch: false,
   home: true,
   approche: true,
   formations: true,
@@ -46,25 +51,72 @@ const EMPTY = {
 };
 
 // Lit le store. Le crée vide s'il n'existe pas encore.
+//
+// SÉCURITÉ DONNÉES : si le fichier EXISTE mais est corrompu, on THROW au lieu
+// de retourner un store vide. Ancien comportement = retour vide silencieux →
+// la sauvegarde suivante écrasait toutes les données. Maintenant : le fichier
+// corrompu est mis en quarantaine (copie horodatée) et l'API renvoie une
+// erreur claire. Les données restent récupérables depuis backups/.
 function load() {
   if (!fs.existsSync(STORE_PATH)) return { ...EMPTY, defaults: { ...EMPTY.defaults } };
+  const raw = fs.readFileSync(STORE_PATH, "utf8");
+  let parsed;
   try {
-    const raw = fs.readFileSync(STORE_PATH, "utf8");
-    const parsed = JSON.parse(raw);
-    // Merge avec EMPTY pour garantir que toutes les collections existent
-    return {
-      ...EMPTY,
-      ...parsed,
-      defaults: { ...EMPTY.defaults, ...(parsed.defaults || {}) },
-    };
+    parsed = JSON.parse(raw);
   } catch (e) {
-    console.error("griotheque.json corrompu :", e.message);
-    return { ...EMPTY, defaults: { ...EMPTY.defaults } };
+    const quarantine = `${STORE_PATH}.corrupted-${Date.now()}`;
+    try { fs.copyFileSync(STORE_PATH, quarantine); } catch { /* best effort */ }
+    console.error(`griotheque.json corrompu (copie: ${quarantine}) :`, e.message);
+    throw new Error(
+      "griotheque.json est corrompu. Aucune écriture possible pour protéger les données. " +
+      "Restaurer depuis backups/ ou réparer le JSON."
+    );
+  }
+  // Merge avec EMPTY pour garantir que toutes les collections existent
+  return {
+    ...EMPTY,
+    ...parsed,
+    defaults: { ...EMPTY.defaults, ...(parsed.defaults || {}) },
+  };
+}
+
+// --- Backups rotatifs -------------------------------------------------------
+// À chaque écriture, on copie l'état ACTUEL dans backups/ avant de le
+// remplacer. On garde les MAX_BACKUPS plus récents. Skip si identique au
+// dernier backup (évite d'empiler des copies pendant une session d'édition).
+const BACKUP_DIR = path.join(process.cwd(), "backups");
+const MAX_BACKUPS = 30;
+
+function backupCurrent() {
+  if (!fs.existsSync(STORE_PATH)) return;
+  try {
+    fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    const current = fs.readFileSync(STORE_PATH, "utf8");
+    const existing = fs.readdirSync(BACKUP_DIR)
+      .filter((f) => f.startsWith("griotheque-") && f.endsWith(".json"))
+      .sort(); // timestamps ISO → tri lexicographique = tri chronologique
+    const latest = existing[existing.length - 1];
+    if (latest && fs.readFileSync(path.join(BACKUP_DIR, latest), "utf8") === current) {
+      return; // rien n'a changé depuis le dernier backup
+    }
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+    fs.writeFileSync(path.join(BACKUP_DIR, `griotheque-${stamp}.json`), current, "utf8");
+    // Rotation : supprime les plus anciens au-delà de MAX_BACKUPS
+    const all = fs.readdirSync(BACKUP_DIR)
+      .filter((f) => f.startsWith("griotheque-") && f.endsWith(".json"))
+      .sort();
+    for (const f of all.slice(0, Math.max(0, all.length - MAX_BACKUPS))) {
+      fs.unlinkSync(path.join(BACKUP_DIR, f));
+    }
+  } catch (e) {
+    // Un backup raté ne doit pas bloquer la sauvegarde elle-même
+    console.error("backup griotheque.json échoué :", e.message);
   }
 }
 
 // Écrit le store de façon atomique (tempfile + rename) pour pas le corrompre.
 function save(store) {
+  backupCurrent();
   const tmp = STORE_PATH + ".tmp";
   fs.writeFileSync(tmp, JSON.stringify(store, null, 2), "utf8");
   fs.renameSync(tmp, STORE_PATH);
@@ -95,6 +147,10 @@ function getInCollection(name, id) {
 
 function upsertInCollection(name, item) {
   if (!item || !item.id) throw new Error(`upsert ${name}: id required`);
+  // Validation centralisée : tout écriture (routes API, scripts seed) passe
+  // ici — un payload malformé est rejeté avant de toucher le store.
+  const invalid = validateEntity(name, item);
+  if (invalid) throw new Error(`${name}: ${invalid}`);
   const store = load();
   const arr = store[name] || [];
   const i = arr.findIndex((x) => x.id === item.id);
@@ -163,9 +219,24 @@ export function listLeads({ sort = true } = {}) {
   return arr;
 }
 
+const MAX_LEADS = 10000; // garde-fou anti-spam : évite un JSON qui explose
+
 export function addLead({ email, name, resource_id, consent, source }) {
   if (!email) throw new Error("addLead: email required");
   const store = load();
+  const normalized = String(email).trim().toLowerCase();
+  // Dédoublonnage : même email + même contexte (ressource/source) = on
+  // retourne le lead existant au lieu d'empiler des doublons.
+  const existing = (store.leads || []).find(
+    (l) =>
+      l.email === normalized &&
+      (l.resource_id || "") === (resource_id || "") &&
+      (l.source || "site") === (source || "site")
+  );
+  if (existing) return existing;
+  if ((store.leads || []).length >= MAX_LEADS) {
+    throw new Error("addLead: limite de leads atteinte");
+  }
   const id = `lead-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
   const lead = {
     id,

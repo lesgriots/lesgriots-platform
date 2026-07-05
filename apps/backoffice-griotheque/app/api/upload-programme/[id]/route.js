@@ -64,6 +64,23 @@ export async function POST(req, { params }) {
     await fs.mkdir(PROGRAMMES_DIR, { recursive: true });
     const targetPath = path.join(PROGRAMMES_DIR, `${id}.pdf`);
     const bytes = Buffer.from(await file.arrayBuffer());
+
+    // Taille max 20 Mo — un programme PDF ne devrait jamais dépasser ça
+    if (bytes.length > 20 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: "PDF trop lourd (max 20 Mo)" },
+        { status: 413 }
+      );
+    }
+    // Vérifie les magic bytes : un vrai PDF commence par "%PDF".
+    // L'extension seule ne suffit pas (fichier renommé).
+    if (bytes.length < 4 || bytes.toString("latin1", 0, 4) !== "%PDF") {
+      return NextResponse.json(
+        { error: "Le fichier n'est pas un vrai PDF (contenu invalide)" },
+        { status: 400 }
+      );
+    }
+
     await fs.writeFile(targetPath, bytes);
 
     return NextResponse.json({

@@ -6,3 +6,8 @@ studio.json.tmp
 studio.db
 studio.db-journal
 *.log
+griotheque.json
+griotheque.json.tmp
+griotheque.json.bak
+griotheque.json.corrupted-*
+backups/

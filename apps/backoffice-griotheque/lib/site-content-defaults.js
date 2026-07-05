@@ -22,6 +22,8 @@ export const SITE_CONTENT_DEFAULTS = {
       "LA GRIOTHÈQUE est une école dédiée à la transmission de méthodes éprouvées sur le terrain, au croisement de la direction artistique, du récit de marque et de la production. Dans un paysage culturel saturé, où trop de talents avancent sans cadre et trop de récits puissants se dissipent faute de structure, nous offrons aux artistes, aux créatifs et aux entrepreneurs de la prochaine génération les outils pour bâtir leur récit et créer de nouveaux imaginaires.",
     latest_tab_formations: "Nos formations",
     latest_tab_workshops: "Workshops",
+    // Vidéo (ou image) de fond du hero. Vide = img/hero.mp4 hardcodé du site.
+    hero_video: "",
   },
 
   approche: {
@@ -43,24 +45,28 @@ export const SITE_CONTENT_DEFAULTS = {
     intro:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     sub: "Lorem ipsum · dolor sit amet · consectetur",
+    media: "", // vidéo/image du hero de page (vide = img/hero.mp4)
   },
 
   workshops_page: {
     intro:
       "Des formats courts, intenses, pour passer à l'action sur un sujet précis : récit de marque, structure éditoriale, négociation, propriété intellectuelle. Une journée pour repartir avec un livrable.",
     sub: "Formats courts · livrable concret · sans pré-requis",
+    media: "",
   },
 
   ressources: {
     intro:
       "Outils, guides et frameworks issus de la méthode LA GRIOTHÈQUE. Téléchargeables après inscription — on garde le contact pour t'envoyer les mises à jour.",
     sub: "Méthodes · templates · études de cas",
+    media: "",
   },
 
   agenda: {
     intro:
       "Les prochaines sessions ouvertes — formations longues et workshops. Inscription en ligne, financement CPF/OPCO possible sur la majorité des formats.",
     sub: "Sessions ouvertes · inscription en ligne",
+    media: "",
   },
 
   contact: {
@@ -174,6 +180,19 @@ export const SITE_CONTENT_DEFAULTS = {
     a_handicap_fallback:
       "Oui. Contacte notre référent handicap pour un entretien préalable et adapter les modalités à ta situation.",
   },
+  // Page "Bientôt" (coming soon). S'affiche sur tout le site quand l'accueil
+  // est désactivé (Pages → Accueil OFF). Modifiable ici.
+  launch: {
+    media: "img/hero.mp4",
+    brand: "LA GRIOTHÈQUE",
+    title: "Transmettre à une nouvelle génération de créatifs les outils pour bâtir leur récit et vivre de leur passion.",
+    text: "Le site arrive très bientôt. Laisse ton email pour être prévenu en premier.",
+    cta: "Me prévenir →",
+    success: "Merci. On te tient au courant.",
+    placeholder: "ton@email.com",
+    invalid: "Email invalide, vérifie l'adresse.",
+    error: "Une erreur est survenue, réessaie dans un instant.",
+  },
 };
 
 // Description de la structure pour l'UI du back office.
@@ -192,6 +211,7 @@ export const SITE_CONTENT_SECTIONS = [
       { key: "manifesto", label: "Manifeste (paragraphe sous le hero)", type: "textarea", rows: 8 },
       { key: "latest_tab_formations", label: "Onglet « Nos formations »", type: "text" },
       { key: "latest_tab_workshops", label: "Onglet « Workshops »", type: "text" },
+      { key: "hero_video", label: "Vidéo hero (fond plein écran — vide = hero.mp4 par défaut)", type: "upload" },
     ],
   },
   {
@@ -216,6 +236,7 @@ export const SITE_CONTENT_SECTIONS = [
     fields: [
       { key: "intro", label: "Texte d'intro", type: "textarea", rows: 4 },
       { key: "sub", label: "Sous-titre court (· · ·)", type: "text" },
+      { key: "media", label: "Vidéo/image du hero de page (vide = défaut)", type: "upload" },
     ],
   },
   {
@@ -225,6 +246,7 @@ export const SITE_CONTENT_SECTIONS = [
     fields: [
       { key: "intro", label: "Texte d'intro", type: "textarea", rows: 4 },
       { key: "sub", label: "Sous-titre court", type: "text" },
+      { key: "media", label: "Vidéo/image du hero de page (vide = défaut)", type: "upload" },
     ],
   },
   {
@@ -234,6 +256,7 @@ export const SITE_CONTENT_SECTIONS = [
     fields: [
       { key: "intro", label: "Texte d'intro", type: "textarea", rows: 4 },
       { key: "sub", label: "Sous-titre court", type: "text" },
+      { key: "media", label: "Vidéo/image du hero de page (vide = défaut)", type: "upload" },
     ],
   },
   {
@@ -243,6 +266,7 @@ export const SITE_CONTENT_SECTIONS = [
     fields: [
       { key: "intro", label: "Texte d'intro", type: "textarea", rows: 4 },
       { key: "sub", label: "Sous-titre court", type: "text" },
+      { key: "media", label: "Vidéo/image du hero de page (vide = défaut)", type: "upload" },
     ],
   },
   {
@@ -370,6 +394,20 @@ export const SITE_CONTENT_SECTIONS = [
       { key: "lead_gate_subject", label: "Mail lead-gate (téléchargement ressource) — sujet", type: "text" },
       { key: "lead_gate_intro", label: "Mail lead-gate — intro", type: "textarea", rows: 4 },
       { key: "lead_gate_signoff", label: "Mail lead-gate — signature", type: "textarea", rows: 3 },
+    ],
+  },
+  {
+    key: "launch",
+    title: "Page « Bientôt » (coming soon)",
+    desc: "S'affiche sur tout le site quand l'accueil est désactivé (Pages → Accueil OFF). Les emails saisis arrivent dans les Leads.",
+    fields: [
+      { key: "media", label: "Vidéo / image de fond", type: "upload" },
+      { key: "brand", label: "Nom de marque (haut)", type: "text" },
+      { key: "title", label: "Titre", type: "text" },
+      { key: "text", label: "Texte sous le titre", type: "textarea", rows: 3 },
+      { key: "cta", label: "Bouton", type: "text" },
+      { key: "success", label: "Message de remerciement (après envoi)", type: "text" },
+      { key: "placeholder", label: "Placeholder du champ email", type: "text" },
     ],
   },
 ];

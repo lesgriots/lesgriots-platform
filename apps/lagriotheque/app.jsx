@@ -13,16 +13,36 @@ const { useState, useEffect, useRef, useLayoutEffect } = React;
 // Si la clé existe en BO ET est non-vide, on la prend. Sinon on retombe sur
 // le fallback. Donc on peut migrer les blocs un par un sans rien casser :
 // tant que le BO n'a pas la clé, l'ancien texte hardcodé continue de vivre.
+// Orthotypographie française appliquée à tout le texte affiché :
+// apostrophe courbe, points de suspension, fine insécable avant ! ? ;,
+// insécable avant : et autour des guillemets « ». Ne touche pas aux
+// chemins / URLs / fichiers médias (href, src…).
+function frTypo(s) {
+  if (typeof s !== "string" || !s) return s;
+  const t = s.trim();
+  if (/^(https?:|mailto:|tel:|\.?\/|img\/)/i.test(t)
+      || /\.(mp4|webm|mov|m4v|jpg|jpeg|png|svg|webp|gif|pdf)$/i.test(t)) return s;
+  return s
+    .replace(/'/g, "’")                       // apostrophe courbe
+    .replace(/\.\.\./g, "…")                  // points de suspension
+    .replace(/\s*([!?;])/g, " $1")            // fine insécable avant ! ? ;
+    .replace(/([^\s\d]) ?: /g, "$1 : ")       // insécable avant : (hors 14:00)
+    .replace(/«\s*/g, "« ")                    // insécable après «
+    .replace(/\s*»/g, " »");                   // insécable avant »
+}
+
 function text(path, fallback = "") {
-  if (typeof window === "undefined" || !window.SITE_CONTENT) return fallback;
-  const parts = path.split(".");
-  let v = window.SITE_CONTENT;
-  for (const p of parts) {
-    if (v == null || typeof v !== "object") return fallback;
-    v = v[p];
+  let v = fallback;
+  if (typeof window !== "undefined" && window.SITE_CONTENT) {
+    const parts = path.split(".");
+    let cur = window.SITE_CONTENT;
+    for (const p of parts) {
+      if (cur == null || typeof cur !== "object") { cur = undefined; break; }
+      cur = cur[p];
+    }
+    if (cur !== undefined && cur !== null && cur !== "") v = cur;
   }
-  if (v === undefined || v === null || v === "") return fallback;
-  return v;
+  return frTypo(v);
 }
 
 // Habille la première occurrence de "LA GRIOTHÈQUE" dans un texte avec un
@@ -156,12 +176,12 @@ function Header({ route }) {
       href="#/"
       className={"lg__menu__link" + (route === "" ? " is-active" : "")}
       onClick={closeDrawer}
-    >la griothèque</a>
+    >La Griothèque</a>
   );
   const utilityLinks = [
-    <a key="news" href="mailto:formations@lesgriots.com?subject=Newsletter" className="lg__menu__link">souscrire à notre newsletter</a>,
-    <a key="ig" href="https://instagram.com/lagriotheque" className="lg__menu__link" target="_blank" rel="noopener">instagram</a>,
-    <a key="li" href="https://linkedin.com" className="lg__menu__link" target="_blank" rel="noopener">linkedin</a>,
+    <a key="news" href="mailto:formations@lesgriots.com?subject=Newsletter" className="lg__menu__link">Souscrire à notre newsletter</a>,
+    <a key="ig" href="https://instagram.com/lagriotheque" className="lg__menu__link" target="_blank" rel="noopener">Instagram</a>,
+    <a key="li" href="https://linkedin.com" className="lg__menu__link" target="_blank" rel="noopener">Linkedin</a>,
   ];
   // Filtre les liens de nav selon les pages actives configurées dans le backoffice.
   // window.SITE_CONFIG.activePages = { home: true, formations: false, ... }
@@ -175,12 +195,12 @@ function Header({ route }) {
   const allNavLinks = [
     // Pas de lien texte "la griothèque" : le logo (mot-marque) en tête du menu
     // sert déjà de lien vers l'accueil — on évite le doublon.
-    { key: "formations", node: navLink("catalogue", "formations") },
-    { key: "workshops", node: navLink("workshops", "workshops") },
-    { key: "agenda", node: navLink("agenda", "agenda") },
-    { key: "ressources", node: navLink("ressources", "ressources") },
-    { key: "approche", node: navLink("approche", "notre approche") },
-    { key: "contact", node: navLink("contact", "à propos") },
+    { key: "formations", node: navLink("catalogue", "Formations") },
+    { key: "workshops", node: navLink("workshops", "Workshops") },
+    { key: "agenda", node: navLink("agenda", "Agenda") },
+    { key: "ressources", node: navLink("ressources", "Ressources") },
+    { key: "approche", node: navLink("approche", "Notre approche") },
+    { key: "contact", node: navLink("contact", "À propos") },
   ];
   const navLinks = allNavLinks.filter((l) => isActive(l.key)).map((l) => l.node);
 
@@ -381,7 +401,7 @@ function Manifesto() {
         <div className="lg__hero-yard__media">
           <video
             ref={heroVideoRef}
-            src="img/hero.mp4"
+            src={text("home.hero_video", "img/hero.mp4")}
             autoPlay
             loop
             muted
@@ -406,9 +426,9 @@ function Manifesto() {
             redondant avec la nav et l'agenda accessible depuis le menu. */}
         <div className="lg__hero-yard__tagline">
           <p>
-            {text("home.hero_tagline_line1", "Bâtis ton récit.")}<br />
-            {text("home.hero_tagline_line2", "Vis de ta passion.")}<br />
-            {text("home.hero_tagline_line3", "")}
+            {text("home.hero_tagline_line1", "Transmettre à une nouvelle génération de créatifs")}<br />
+            {text("home.hero_tagline_line2", "les outils pour bâtir leur récit")}<br />
+            {text("home.hero_tagline_line3", "et vivre de leur passion.")}
           </p>
         </div>
         <div className="lg__hero-yard__scrollhint" aria-hidden="true">
@@ -426,7 +446,7 @@ function Manifesto() {
           <div className="lg__manifeste__prose">
             <p>{renderManifestoBrand(text(
               "home.manifesto",
-              "LA GRIOTHÈQUE est une école dédiée à la transmission de méthodes éprouvées sur le terrain, au croisement de la direction artistique, du récit de marque et de la production. Dans un paysage culturel saturé, où trop de talents avancent sans cadre et trop de récits puissants se dissipent faute de structure, notre mission est de transmettre à une nouvelle génération de créatifs les outils pour bâtir leur récit et vivre de leur passion."
+              "Dans un monde où trop de talents avancent sans cadre et trop de récits puissants se dissipent faute de structure, LA GRIOTHÈQUE offre aux créatifs de la prochaine génération les outils pour bâtir leur récit, créer de nouveaux imaginaires et vivre de leurs passions."
             ))}</p>
           </div>
         </div>
@@ -530,7 +550,7 @@ function TrainerCard({ trainer }) {
 
 function FormationRow({ f, onHover }) {
   const titleRef = useMarqueeOverflow([f.title]);
-  const handleEnter = onHover ? () => onHover(f.video || "img/hero.mp4") : undefined;
+  const handleEnter = onHover ? () => onHover(f.video || text("home.hero_video", "img/hero.mp4")) : undefined;
   const handleLeave = onHover ? () => onHover(null) : undefined;
   return (
     <a
@@ -1178,6 +1198,11 @@ function ProgramPage({ item, kind }) {
 
   return (
     <section className="lg__formation">
+      <PageHero src={(f.media && /\.(mp4|webm|mov|m4v)$/i.test(f.media.src || "")) ? f.media.src : text("home.hero_video", "img/hero.mp4")} poster={(f.media && f.media.poster) ? f.media.poster : undefined} title={f.title}>
+        {(f.tagline || disciplineLabel) && (
+          <p className="lg__formation__herosub">{f.tagline || disciplineLabel}</p>
+        )}
+      </PageHero>
       <div className="lg__formation__head" ref={headerRef} aria-hidden="true" />
       <div ref={titleSentinelRef} aria-hidden="true" style={{ height: 0, margin: 0, padding: 0 }} />
       <h1 className="lg__formation__title" ref={titleRef}>{f.title}</h1>
@@ -1238,36 +1263,7 @@ function ProgramPage({ item, kind }) {
         </button>
       </div>
 
-      {f.media && (
-        <div className="lg__formation__hero" ref={heroRef}>
-          {f.media.type === "video" ? (
-            <video
-              src={f.media.src}
-              poster={f.media.poster}
-              autoPlay
-              loop
-              muted
-              playsInline
-            />
-          ) : (
-            <img src={f.media.src} alt={f.title} />
-          )}
-          {f.media.credit && (
-            <p className="lg__formation__hero__credit">{f.media.credit}</p>
-          )}
-          <PromoSticker />
-        </div>
-      )}
 
-      {/* Bannière CTA horizontale qui chevauche le bas de la vidéo. */}
-      <CtaBanner
-        item={item}
-        title={f.title}
-        nextSession={nextSession}
-        tagline={f.tagline}
-        upcoming={upcoming}
-        kind={kind}
-      />
 
       {/* Layout 2 colonnes style SENZA / Clearance Kit : contenu de l'onglet
           à gauche, sidebar CTA sticky à droite. Sur mobile : 1 col + sidebar
@@ -1893,6 +1889,28 @@ function PageIntro({ text, sub }) {
   );
 }
 
+// Bande horizontale d'une étape de la méthode (home) — média d'un côté,
+// texte de l'autre (côtés alternés via CSS). Média éditable via BO
+// (method.stepN_media) ; sans média, placeholder sombre avec le numéro.
+function MethodBand({ num, media, title, txt }) {
+  const isVideo = /\.(mp4|webm|mov|m4v)$/i.test(media || "");
+  return (
+    <div className="lg__method__band">
+      <div className="lg__method__band__media">
+        {media ? (isVideo
+          ? <video src={media} autoPlay loop muted playsInline />
+          // eslint-disable-next-line @next/next/no-img-element
+          : <img src={media} alt="" loading="lazy" />) : null}
+        <span className="lg__method__band__num">{num}</span>
+      </div>
+      <div className="lg__method__band__body">
+        <h3 className="lg__method__band__title">{title}</h3>
+        <p className="lg__method__band__text">{txt}</p>
+      </div>
+    </div>
+  );
+}
+
 // Bandeau média en haut d'une page-liste (catalogue, workshops).
 // src éditable depuis le back office (SITE_CONTENT) ; vidéo ou image selon
 // l'extension. Rien rendu si src vide.
@@ -2413,9 +2431,9 @@ function Catalogue() {
         <PageIntro
           text={text(
             "catalogue.intro",
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+            "Apprends à raconter ton talent et à en vivre. Des formations courtes et pratiques, animées par des professionnels qui transmettent ce qu'ils ont construit."
           )}
-          sub={text("catalogue.sub", "Lorem ipsum · dolor sit amet · consectetur")}
+          sub={text("catalogue.sub", "Certifiantes · finançables CPF, OPCO & perso · présentiel et distanciel")}
         />
       </PageHero>
 
@@ -2470,7 +2488,7 @@ function Catalogue() {
 
 function WorkshopRow({ w, onHover }) {
   const titleRef = useMarqueeOverflow([w.title]);
-  const handleEnter = onHover ? () => onHover(w.video || "img/hero.mp4") : undefined;
+  const handleEnter = onHover ? () => onHover(w.video || text("home.hero_video", "img/hero.mp4")) : undefined;
   const handleLeave = onHover ? () => onHover(null) : undefined;
   return (
     <a
@@ -2479,10 +2497,11 @@ function WorkshopRow({ w, onHover }) {
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
     >
-      <p className="lg__row__label">
-        WORKSHOP · 2026
-        {!w.available && <span className="lg__row__soon"> · PROCHAINEMENT</span>}
-      </p>
+      {!w.available && (
+        <p className="lg__row__label">
+          <span className="lg__row__soon">PROCHAINEMENT</span>
+        </p>
+      )}
       <h3 className="lg__row__title" ref={titleRef}>
         <span className="lg__marquee__inner">{w.title}</span>
       </h3>
@@ -2499,11 +2518,11 @@ function Workshops() {
         <PageIntro
           text={text(
             "workshops_page.intro",
-            "Workshops résidentiels et intensifs courts pour les indépendants déjà en activité — format immersif, groupes restreints, accompagnement individuel sur projet réel."
+            "Des formats courts et intensifs pour les créatifs. Immersion totale, groupes restreints, accompagnement sur ton projet réel."
           )}
           sub={text(
             "workshops_page.sub",
-            "2026. Paris & en résidence. Sur sélection de dossier."
+            "2026 · Paris & en résidence · sur sélection de dossier"
           )}
         />
       </PageHero>
@@ -2903,8 +2922,8 @@ function Agenda() {
     <section className="lg__catalogue" id="agenda">
       <PageHero src={text("agenda.media", "img/hero.mp4")} title={text("agenda.heading", "Agenda")}>
         <PageIntro
-          text={<>Les dates des prochains événements — formations, workshops et sessions à venir.</>}
-          sub="Présentiel à Paris · en ligne · en résidence. Groupes restreints."
+          text={text("agenda.intro", "Les prochaines dates : formations, workshops et événements à venir.")}
+          sub={<a className="lg__intro__sublink" href="mailto:formations@lesgriots.com?subject=Recevoir%20les%20prochaines%20dates">Recevoir les prochaines dates →</a>}
         />
       </PageHero>
 
@@ -2985,10 +3004,11 @@ function ResourceRow({ r }) {
       className={"lg__row" + (r.available ? "" : " is-soon")}
       href={`#/ressources/${r.id}`}
     >
-      <p className="lg__row__label">
-        {typeLabel} · {r.format}
-        {!r.available && <span className="lg__row__soon"> · BIENTÔT</span>}
-      </p>
+      {!r.available && (
+        <p className="lg__row__label">
+          <span className="lg__row__soon">BIENTÔT</span>
+        </p>
+      )}
       <h3 className="lg__row__title" ref={titleRef}>
         <span className="lg__marquee__inner">{r.title}</span>
       </h3>
@@ -3270,7 +3290,7 @@ function Ressources() {
         <PageIntro
           text={text(
             "ressources.intro",
-            "Worksheets, templates et guides — des outils gratuits pour structurer ton récit, affûter ta méthode et renforcer ta marque personnelle. À télécharger et à utiliser dès aujourd'hui."
+            "Des outils gratuits : worksheets, templates et guides pour structurer ton récit, affûter ta méthode et porter ta marque. À télécharger et utiliser dès aujourd'hui."
           )}
           sub={text("ressources.sub", "Gratuites · mises à jour régulièrement")}
         />
@@ -3996,7 +4016,7 @@ function Contact() {
         <p>{text("contact.line4", "Certifié Qualiopi")}</p>
         <p>&nbsp;</p>
         <p>{text("contact.location_main", "Présentiel à Paris")}</p>
-        <p>{text("contact.location_hq", "Siège social — Le Havre")}</p>
+        <p>{text("contact.location_hq", "Siège social · Le Havre")}</p>
         <p>&nbsp;</p>
         <p><a href={"mailto:" + email}>{email}</a></p>
         <p>&nbsp;</p>
@@ -4116,6 +4136,87 @@ function Partners() {
   );
 }
 
+// Page de lancement "Bientôt" — coming soon plein écran + capture email.
+// L'email part vers l'endpoint d'inscription (BO Griothèque), puis Systeme.io.
+function LaunchPage() {
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState("idle"); // idle | loading | ok | invalid | error
+  async function submit(e) {
+    e.preventDefault();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setState("invalid"); return; }
+    setState("loading");
+    const endpoints = [
+      (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.subscribeEndpoint),
+      "https://admin.lagriotheque.com/api/subscribe",
+      "https://admin.lagriotheque.com/api/leads",
+    ].filter(Boolean);
+    for (const endpoint of endpoints) {
+      try {
+        const r = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, source: "launch", consent: true }),
+        });
+        if (r.ok) { setState("ok"); return; }
+      } catch (err) { /* try next endpoint */ }
+    }
+    setState("error");
+  }
+  const media = text("launch.media", "img/hero.mp4");
+  const isVideo = /\.(mp4|webm|mov|m4v)$/i.test(media || "");
+  return (
+    <div className="lg__launch">
+      {/* Fond plein écran : vidéo hero banner */}
+      {isVideo
+        ? <video className="lg__launch__bg" src={media} autoPlay loop muted playsInline />
+        // eslint-disable-next-line @next/next/no-img-element
+        : <img className="lg__launch__bg" src={media} alt="" />}
+      <div className="lg__launch__scrim" aria-hidden="true" />
+
+      {/* Barre du haut : marque à gauche, réseaux à droite (comme le header) */}
+      <header className="lg__launch__top">
+        <a className="lg__launch__logo" href="#/">{text("launch.brand", "LA GRIOTHÈQUE")}</a>
+        <nav className="lg__launch__social" aria-label="Réseaux">
+          <a href="mailto:formations@lesgriots.com?subject=Newsletter">Souscrire à notre newsletter</a>
+          <span aria-hidden="true">·</span>
+          <a href="https://instagram.com/lagriotheque" target="_blank" rel="noopener">Instagram</a>
+          <span aria-hidden="true">·</span>
+          <a href="https://linkedin.com" target="_blank" rel="noopener">Linkedin</a>
+        </nav>
+      </header>
+
+      <div className="lg__launch__inner">
+        <h1 className="lg__launch__title">{text("launch.title", "Transmettre à une nouvelle génération de créatifs les outils pour bâtir leur récit et vivre de leur passion.")}</h1>
+        <p className="lg__launch__text">{text("launch.text", "Le site arrive très bientôt. Laisse ton email pour être prévenu en premier.")}</p>
+        {state === "ok" ? (
+          <p className="lg__launch__ok">{text("launch.success", "Merci. On te tient au courant.")}</p>
+        ) : (
+          <form className="lg__launch__form" onSubmit={submit}>
+            <input
+              type="email"
+              required
+              placeholder={text("launch.placeholder", "ton@email.com")}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="lg__launch__input"
+              aria-label="Email"
+            />
+            <button type="submit" className="lg__launch__btn" disabled={state === "loading"}>
+              {state === "loading" ? "…" : text("launch.cta", "Me prévenir →")}
+            </button>
+          </form>
+        )}
+        {state === "invalid" && (
+          <p className="lg__launch__err">{text("launch.invalid", "Email invalide, vérifie l'adresse.")}</p>
+        )}
+        {state === "error" && (
+          <p className="lg__launch__err">{text("launch.error", "Une erreur est survenue, réessaie dans un instant.")}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   // Splash affiché uniquement à la première arrivée dans la session du navigateur.
   // Au refresh ou navigation interne, sessionStorage retient qu'on l'a déjà vu.
@@ -4170,8 +4271,10 @@ function App() {
     // Pages avec média hero (home incluse) : menu visible en blanc sur le
     // média, puis barre solide une fois le média dépassé.
     const heroRoutes = ["", "catalogue", "workshops", "agenda", "ressources"];
+    // Les fiches (formations/<id>, workshops/<id>) ont aussi un hero banner.
+    const isDetailHero = route.startsWith("formations/") || route.startsWith("workshops/");
     document.body.classList.toggle("is-home", isHome);
-    document.body.classList.toggle("is-listhero", heroRoutes.includes(route));
+    document.body.classList.toggle("is-listhero", heroRoutes.includes(route) || isDetailHero);
     document.body.classList.toggle("is-scrolled", scrolled);
   }, [route, scrolled]);
 
@@ -4292,6 +4395,15 @@ function App() {
     }
   }
 
+  // Page "Bientôt" : rendu autonome plein écran (sans header ni footer).
+  // Mode lancement : la page s'active automatiquement quand l'accueil est
+  // désactivé dans le BO (activePages.home === false), ou via un toggle
+  // explicite activePages.launch === true. Dans ce cas, tout le site affiche
+  // la page "Bientôt". L'URL /#/bientot l'affiche toujours (preview).
+  const _ap = (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.activePages) || {};
+  const launchMode = _ap.launch === true || _ap.home === false;
+  if (route === "bientot" || launchMode) return <LaunchPage />;
+
   return (
     <>
       <Header route={route} />
@@ -4344,7 +4456,7 @@ function App() {
             <div className="lg__footer__marquee__track">
               {Array.from({ length: 4 }).map((_, i) => (
                 <span key={i}>
-                  {text("footer.marquee", "TRANSMETTRE — ET PERMETTRE À UNE NOUVELLE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DES IMAGINAIRES")}
+                  {text("footer.marquee", "TRANSMETTRE ET PERMETTRE À UNE NOUVELLE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DES IMAGINAIRES")}
                   &nbsp;·&nbsp;
                 </span>
               ))}

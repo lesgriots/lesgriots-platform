@@ -26,6 +26,10 @@ const ALLOWED_EXTS = new Set([
 
 const VIDEO_EXTS = new Set([".mp4", ".mov", ".webm", ".m4v"]);
 
+// Limites de taille par type (en octets)
+const MAX_VIDEO_BYTES = 500 * 1024 * 1024; // 500 Mo
+const MAX_OTHER_BYTES = 50 * 1024 * 1024;  // 50 Mo (images, PDF, zip, fig)
+
 export async function POST(req) {
   try {
     const formData = await req.formData();
@@ -55,6 +59,13 @@ export async function POST(req) {
     const targetPath = path.join(targetDir, safeName);
 
     const bytes = Buffer.from(await file.arrayBuffer());
+    const maxBytes = VIDEO_EXTS.has(ext) ? MAX_VIDEO_BYTES : MAX_OTHER_BYTES;
+    if (bytes.length > maxBytes) {
+      return NextResponse.json(
+        { error: `Fichier trop lourd (${Math.round(bytes.length / 1e6)} Mo, max ${Math.round(maxBytes / 1e6)} Mo)` },
+        { status: 413 }
+      );
+    }
     await fs.writeFile(targetPath, bytes);
 
     const rel = subdir ? `img/${subdir}/${safeName}` : `img/${safeName}`;

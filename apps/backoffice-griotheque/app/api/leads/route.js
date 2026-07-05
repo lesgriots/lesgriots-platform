@@ -5,6 +5,7 @@
 // pour que le site puisse POSTer depuis un domaine différent.
 import { NextResponse } from "next/server";
 import { listLeads, addLead } from "../../../lib/db.js";
+import { rateLimit, clientIp, tooMany } from "../../../lib/rate-limit.js";
 
 // Origines autorisées à POST sur cette route (cross-origin)
 const ALLOWED_ORIGINS = [
@@ -16,12 +17,15 @@ const ALLOWED_ORIGINS = [
 ];
 
 function corsHeaders(origin) {
-  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  // Fallback = origine PROD (pas localhost) : une origine inconnue ne doit
+  // jamais recevoir un Allow-Origin qui lui permette de lire la réponse.
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : "https://lagriotheque.com";
   return {
     "Access-Control-Allow-Origin": allowed,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Max-Age": "86400",
+    "Vary": "Origin",
   };
 }
 
@@ -40,6 +44,11 @@ export async function POST(req) {
   const origin = req.headers.get("origin");
   const headers = corsHeaders(origin);
 
+  // Anti-spam : 5 leads/minute max par IP
+  if (!rateLimit(`${clientIp(req)}:leads`, { limit: 5, windowMs: 60_000 })) {
+    return tooMany(headers);
+  }
+
   try {
     const body = await req.json();
     const { email, name, resource_id, consent } = body || {};
@@ -53,6 +62,8 @@ export async function POST(req) {
 
     return NextResponse.json({ ok: true, id: lead.id }, { headers });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500, headers });
+    // Route publique : on log le détail côté serveur, message générique côté client
+    console.error("leads POST error:", err);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500, headers });
   }
 }

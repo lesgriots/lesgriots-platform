@@ -41,6 +41,8 @@ export default function RootLayout({ children }) {
             <span className="bo-nav__sep">·</span>
             <a href="/defaults">textes</a>
             <span className="bo-nav__sep">·</span>
+            <a href="/site/content">contenus site</a>
+            <span className="bo-nav__sep">·</span>
             <a href="/pages">pages</a>
             <span className="bo-nav__sep">·</span>
             <a href="https://lagriotheque.com" target="_blank" rel="noopener noreferrer">voir le site ↗</a>

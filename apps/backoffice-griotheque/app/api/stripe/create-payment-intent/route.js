@@ -13,6 +13,7 @@
 // publishable key + le client_secret côté navigateur).
 import { NextResponse } from "next/server";
 import { listWorkshops } from "../../../../lib/db.js";
+import { rateLimit, clientIp, tooMany } from "../../../../lib/rate-limit.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -62,6 +63,13 @@ function priceToCents(priceStr) {
 export async function POST(req) {
   const origin = req.headers.get("origin") || "";
   const corsH = corsHeaders(origin);
+
+  // Anti-abus : 10 PaymentIntents/minute max par IP (un checkout normal en
+  // crée 1-2 ; au-delà c'est un bot qui pollue le dashboard Stripe).
+  if (!rateLimit(`${clientIp(req)}:stripe`, { limit: 10, windowMs: 60_000 })) {
+    return tooMany(corsH);
+  }
+
   try {
     const { workshopId, customerEmail, customerName } = await req.json();
     if (!workshopId) {
@@ -119,8 +127,11 @@ export async function POST(req) {
     });
     const j = await r.json();
     if (!r.ok) {
+      // On log le détail complet côté serveur ; le client n'a pas besoin
+      // de la réponse brute Stripe (peut contenir des infos de config).
+      console.error("Stripe error:", JSON.stringify(j));
       return NextResponse.json(
-        { error: j.error?.message || "Erreur Stripe", details: j },
+        { error: j.error?.message || "Erreur Stripe" },
         { status: 500, headers: corsH }
       );
     }
@@ -138,7 +149,7 @@ export async function POST(req) {
   } catch (err) {
     console.error("create-payment-intent error:", err);
     return NextResponse.json(
-      { error: err.message || "Erreur serveur" },
+      { error: "Erreur serveur" },
       { status: 500, headers: corsH }
     );
   }
