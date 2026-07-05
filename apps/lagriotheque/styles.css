@@ -246,7 +246,7 @@ button {
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 12px 16px;
+  padding: 12px 24px;
   border-bottom: 1px solid var(--ink);
   position: sticky;
   top: 0;
@@ -350,7 +350,7 @@ button {
 .lg__menu__link {
   color: inherit;
   text-decoration: none;
-  text-transform: lowercase;
+  text-transform: none;
 }
 .lg__menu__link:hover {
   /* Override la règle globale `a:hover { color: var(--accent); }` qui rendait
@@ -441,7 +441,7 @@ button {
   font-size: 22px;
   letter-spacing: -0.01em;
   color: var(--paper);
-  text-transform: lowercase;
+  text-transform: none;
   text-decoration: none;
 }
 .lg__drawer__nav--utility .lg__menu__link {
@@ -570,6 +570,108 @@ button {
   margin-left: calc(50% - 50vw);
   padding: 12px 16px 24px;
   position: relative;
+}
+
+/* ----- MÉTHODE EN 3 ÉTAPES (home) ----- */
+.lg__method {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding: 90px 24px;
+  background: var(--paper);
+  border-top: 1px solid var(--ink);
+}
+.lg__method__kicker {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3, #888);
+  margin: 0 0 18px;
+}
+.lg__method__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(28px, 4vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  margin: 0 0 56px;
+  max-width: 18ch;
+}
+.lg__method__bands {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.lg__method__band {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  min-height: 360px;
+  border-top: 1px solid var(--ink);
+}
+/* Côtés alternés : étape paire → média à droite, texte à gauche. */
+.lg__method__band:nth-child(even) .lg__method__band__media { order: 2; }
+.lg__method__band__media {
+  position: relative;
+  background: var(--ink);
+  overflow: hidden;
+  min-height: 280px;
+}
+.lg__method__band__media img,
+.lg__method__band__media video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.lg__method__band__num {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--paper);
+}
+.lg__method__band__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px clamp(24px, 4vw, 72px);
+}
+.lg__method__band__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(26px, 3vw, 44px);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  margin: 0 0 16px;
+}
+.lg__method__band__text {
+  font-family: var(--font-sans);
+  font-size: clamp(15px, 1.2vw, 19px);
+  line-height: 1.5;
+  color: var(--ink-2, #555);
+  margin: 0;
+  max-width: 42ch;
+}
+@media (max-width: 700px) {
+  .lg__method { padding: 56px 24px; }
+  .lg__method__title { margin-bottom: 40px; }
+  .lg__method__band {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  /* Sur mobile, média toujours au-dessus du texte (pas d'alternance). */
+  .lg__method__band:nth-child(even) .lg__method__band__media { order: 0; }
+  .lg__method__band__media { aspect-ratio: 16 / 10; min-height: 0; }
+  .lg__method__band__body { padding: 24px 0 8px; }
 }
 .lg__manifeste {
   margin-top: 60px;
@@ -814,7 +916,7 @@ button {
 .lg__cta-banner {
   position: relative;
   z-index: 5;
-  margin: -200px auto 40px;   /* chevauche le bas de la vidéo */
+  margin: 0 auto 40px;   /* le média est désormais en hero banner en haut */
   max-width: 1200px;
   width: calc(100% - 64px);
   background: var(--paper);
@@ -1419,7 +1521,7 @@ button {
 
 @media (max-width: 900px) {
   .lg__cta-banner {
-    margin: -100px 16px 32px;
+    margin: 0 16px 32px;
     width: auto;
     padding: 28px 22px 24px;
   }
@@ -1759,6 +1861,49 @@ button {
   object-fit: cover;
   display: block;
 }
+/* Hero banner de fiche : titre + type en overlay (style pages liste).
+   Placé en HAUT du média (le bas est occupé par la bannière CTA). */
+.lg__formation__hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: clamp(24px, 4vw, 56px);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 55%);
+  pointer-events: none;
+}
+.lg__formation__hero__kind {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #fff;
+  opacity: 0.85;
+  margin: 0 0 10px;
+}
+.lg__formation__hero__name {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(28px, 4.5vw, 64px);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: #fff;
+  margin: 0;
+  max-width: 20ch;
+}
+/* Le titre vit dans le hero banner ; la barre titre n'apparaît qu'au scroll.
+   useFitOne pose une taille inline → on masque par la hauteur (pas le font-size)
+   pour que le bloc soit réellement à 0 (sinon trou sous le banner). */
+.lg__formation__title:not(.is-stuck) {
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  border-bottom: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
 .lg__formation__hero__tagline {
   position: absolute;
   bottom: 32px;
@@ -1942,6 +2087,7 @@ body.is-home .lg__hero-yard {
   max-height: 100vh;
 }
 body.is-home .lg__manifesto,
+body.is-home .lg__method,
 body.is-home .lg__latest {
   position: relative;
   z-index: 1;
@@ -2196,7 +2342,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 .lg__hero-yard__tagline {
   position: absolute;
-  bottom: 32px;
+  bottom: 16vh;
   left: 32px;
   right: 32px;
   z-index: 2;
@@ -4201,7 +4347,8 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   /* Full-bleed : sort du gutter .lg */
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  padding: 40px 16px 80px;
+  /* Contenu bord à bord, sans marge latérale (look éditorial plein cadre). */
+  padding: 40px 0 80px;
   min-height: calc(100vh - 200px);
   position: relative;
 }
@@ -4268,6 +4415,41 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   overflow: hidden;
   background: #0b0b0c;
   margin-bottom: 36px;
+}
+/* Effet de superposition au scroll sur les pages liste (Formations,
+   Workshops, Agenda, Ressources) — identique à la home : le média du hero
+   reste fixé (sticky) et le contenu opaque en dessous remonte par-dessus.
+   NB : la vidéo-au-survol des lignes (.lg__page-bg) est retirée sur ces pages
+   car elle entrerait en conflit avec le contenu devenu opaque. */
+body.is-listhero:not(.is-home) .lg__catalogue .lg__pagehero {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  margin-bottom: 0;
+}
+body.is-listhero:not(.is-home) .lg__catalogue .lg__pagehero ~ * {
+  position: relative;
+  z-index: 1;
+  background: var(--paper);
+}
+/* Fiche formation/workshop : banner normal (pas de superposition).
+   Le contenu de la fiche ne couvre pas toute la largeur (onglets + 2 colonnes),
+   donc un banner sticky transparaîtrait dans les zones non couvertes (bandes
+   sombres). On le laisse défiler normalement. */
+/* Marge tampon en haut du 1er bloc de contenu : quand il remonte au scroll,
+   c'est une bande de papier propre qui glisse par-dessus le média (et l'intro),
+   au lieu d'un texte qui en percute un autre. */
+body.is-listhero:not(.is-home) .lg__catalogue .lg__pagehero + * {
+  padding-top: 40px;
+}
+/* Pas de marge transparente entre blocs opaques (sinon le hero sticky
+   apparaît dans la bande). La marge-bas des filtres devient du padding. */
+body.is-listhero:not(.is-home) .lg__cat-filters {
+  margin-bottom: 0;
+  padding-bottom: 28px;
+}
+body.is-listhero:not(.is-home) .lg__page-bg {
+  display: none;
 }
 .lg__pagehero video,
 .lg__pagehero img {
@@ -4361,11 +4543,16 @@ body.is-scrolled .lg__pagehero__brand {
     aspect-ratio: auto;
   }
 }
-/* Desktop uniquement : média plus court pour Agenda & Ressources.
+/* Desktop uniquement : média plus court, identique sur les 4 pages-listes
+   (Formations, Workshops, Agenda, Ressources).
    (Mobile inchangé : plein écran comme les autres pages-listes.) */
 @media (min-width: 601px) {
+  #catalogue .lg__pagehero,
+  #workshops .lg__pagehero,
   #agenda .lg__pagehero,
   #ressources .lg__pagehero { max-height: 44vh; }
+  /* Fiche formation/workshop : un peu plus grand que les pages liste. */
+  .lg__formation .lg__pagehero { max-height: 50vh; }
 }
 .lg__intro__text,
 .lg__intro__sub {
@@ -4380,6 +4567,23 @@ body.is-scrolled .lg__pagehero__brand {
 .lg__intro__sub {
   margin-top: 6px;
 }
+/* Lien cliquable dans le sous-titre (ex. Agenda → recevoir les prochaines dates) */
+.lg__intro__sublink {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+/* Petit texte sous le titre dans le hero banner d'une fiche formation. */
+.lg__formation__herosub {
+  margin: 14px 0 0;
+  font-family: var(--font-sans);
+  font-size: clamp(14px, 1.4vw, 19px);
+  line-height: 1.4;
+  color: #fff;
+  opacity: 0.92;
+  max-width: 48ch;
+}
+.lg__intro__sublink:hover { color: inherit; opacity: 0.75; }
 .lg__catalogue__head {
   margin: 0 0 40px;
 }
@@ -4410,7 +4614,8 @@ body.is-scrolled .lg__pagehero__brand {
 }
 .lg__row {
   border-top: 1px solid var(--ink);
-  padding: 10px 0 14px;
+  /* Léger retrait du texte à gauche (la ligne de séparation reste bord à bord). */
+  padding: 10px 0 14px 24px;
   cursor: pointer;
   transition: opacity 0.18s ease;
   display: block;
@@ -4453,7 +4658,8 @@ body.is-scrolled .lg__pagehero__brand {
   align-items: baseline;
   gap: 14px;
   margin: 0 0 28px;
-  padding: 16px 0;
+  /* Retrait à gauche aligné sur les titres (les lignes restent bord à bord). */
+  padding: 16px 0 16px 24px;
   border-top: 1px solid var(--ink);
   border-bottom: 1px solid var(--ink);
   font-family: var(--font-sans);
@@ -4847,6 +5053,52 @@ body.is-scrolled .lg__pagehero__brand {
   padding: 30px 16px 60px;
   min-height: calc(100vh - 200px);
 }
+/* ---- Gouttière gauche uniforme (24px) sur toutes les pages ----
+   Aligne le bord gauche du contenu de chaque page (réf. YARD mobile).
+   .lg__catalogue est géré à part (lignes bord à bord, texte en retrait via
+   .lg__row / .lg__cat-filters). .lg__latest est centré → non concerné. */
+.lg__manifesto,
+.lg__formation,
+.lg__trainers,
+.lg__cgv,
+.lg__approche,
+.lg__financement,
+.lg__contact { padding-left: 24px; }
+/* Desktop : gouttière SYMÉTRIQUE 24px gauche + droite sur toutes les pages
+   (y compris les listes). Sur les listes, la gouttière vient de la section,
+   donc on annule le retrait des lignes/filtres pour ne pas doubler à 48px. */
+@media (min-width: 601px) {
+  .lg__catalogue,
+  .lg__manifesto,
+  .lg__formation,
+  .lg__trainers,
+  .lg__cgv,
+  .lg__approche,
+  .lg__financement,
+  .lg__contact,
+  .lg__latest {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .lg__catalogue .lg__row,
+  .lg__catalogue .lg__cat-filters {
+    padding-left: 0;
+  }
+  /* Fiche : aligner les éléments edge-to-edge (lignes, onglets, sections)
+     sur la même gouttière 24px (annule les margin: 0 -16px). */
+  .lg__formation .lg__sommaire,
+  .lg__formation .lg__tabs,
+  .lg__formation .lg__tabsec,
+  .lg__formation .lg__tabsec__title,
+  .lg__formation .lg__section,
+  .lg__formation .lg__section.is-open,
+  .lg__formation .lg__formation__upcoming__head {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
 .lg__contact__info {
   font-family: var(--font-sans);
   font-weight: 500;
@@ -5026,7 +5278,7 @@ a.lg__partners__logo:hover {
 .lg__footer {
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  padding: 18px 16px 0;
+  padding: 18px 24px 0;
   border-top: 1px solid var(--paper);
   font-family: var(--font-sans);
   color: var(--paper);
@@ -5401,6 +5653,44 @@ a.lg__partners__logo:hover {
   .lg__splash .lg__hero__griot__wrap { width: 320px; height: 320px; }
   .lg__splash .matrix-griot { font-size: 2.5px; }
   .lg__splash .lg__hero__griot__ring text { font-size: 24px; letter-spacing: 0.04em; }
+}
+
+/* Mobile : gouttière latérale UNIFORME 24px partout (gauche = droite), comme
+   sur desktop et le footer. Uniformise le retrait du texte sur toutes les
+   pages et sections. Les médias/héros restent plein cadre (full-bleed). */
+@media (max-width: 600px) {
+  .lg { padding-left: 24px; padding-right: 24px; }
+  .lg__catalogue,
+  .lg__manifesto,
+  .lg__approche,
+  .lg__financement,
+  .lg__contact,
+  .lg__cgv,
+  .lg__trainers,
+  .lg__formation,
+  .lg__latest {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  /* Les lignes/filtres des listes s'alignent sur la gouttière (pas de double retrait). */
+  .lg__catalogue .lg__row,
+  .lg__catalogue .lg__cat-filters {
+    padding-left: 0;
+  }
+  /* Fiche formation : annule les breakouts edge-to-edge internes pour rester
+     dans la même gouttière 24px (mêmes sélecteurs que la règle desktop). */
+  .lg__formation .lg__sommaire,
+  .lg__formation .lg__tabs,
+  .lg__formation .lg__tabsec,
+  .lg__formation .lg__tabsec__title,
+  .lg__formation .lg__section,
+  .lg__formation .lg__section.is-open,
+  .lg__formation .lg__formation__upcoming__head {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 /* ============================================================
@@ -5903,4 +6193,119 @@ a.lg__partners__logo:hover {
 .lg__checkout__btn--pay:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+/* ===== Page de lancement "Bientôt" (coming soon plein écran) ===== */
+.lg__launch {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--paper, #f6f5f3);
+  padding: 32px;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--ink, #111111);
+}
+/* Vidéo (ou image) en fond plein écran */
+.lg__launch__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+/* Voile sombre pour la lisibilité du texte */
+.lg__launch__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 38%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+}
+/* Barre du haut : marque à gauche, réseaux à droite (comme le header) */
+.lg__launch__top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 24px;
+}
+.lg__launch__logo {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: clamp(15px, 1.5vw, 19px);
+  letter-spacing: 0.02em;
+  color: var(--paper);
+  text-decoration: none;
+}
+.lg__launch__social {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--paper);
+}
+.lg__launch__social a { color: var(--paper); text-decoration: none; }
+.lg__launch__social a:hover { color: var(--paper); text-decoration: underline; text-underline-offset: 3px; }
+.lg__launch__social span { opacity: 0.55; }
+.lg__launch__inner { position: relative; z-index: 2; max-width: 860px; width: 100%; text-align: center; }
+.lg__launch__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(26px, 3.4vw, 42px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0 auto 22px;
+  max-width: 100%;
+  text-wrap: balance;
+}
+.lg__launch__text {
+  font-family: var(--font-sans);
+  font-size: clamp(15px, 1.4vw, 19px);
+  line-height: 1.5;
+  opacity: 0.85;
+  max-width: 38ch;
+  margin: 0 auto 32px;
+}
+.lg__launch__form { display: flex; gap: 8px; max-width: 420px; margin: 0 auto; }
+.lg__launch__input {
+  flex: 1;
+  background: transparent;
+  border: 1px solid rgba(246, 245, 243, 0.4);
+  color: var(--paper);
+  padding: 14px 16px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  outline: none;
+}
+.lg__launch__input:focus { border-color: var(--paper); }
+.lg__launch__input::placeholder { color: rgba(246, 245, 243, 0.5); }
+.lg__launch__btn {
+  background: var(--paper);
+  color: var(--ink);
+  border: 0;
+  padding: 14px 20px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.lg__launch__btn:disabled { opacity: 0.6; cursor: default; }
+.lg__launch__ok { font-size: 18px; font-weight: 500; }
+.lg__launch__err { color: #ff9b9b; font-size: 13px; margin-top: 12px; }
+@media (max-width: 560px) {
+  .lg__launch__form { flex-direction: column; }
+  .lg__launch__top { flex-direction: column; gap: 10px; padding: 18px 18px; }
+  .lg__launch__social { justify-content: flex-start; font-size: 12px; }
 }
