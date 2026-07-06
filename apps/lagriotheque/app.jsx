@@ -4146,6 +4146,7 @@ function Partners() {
 function LaunchPage() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState("idle"); // idle | loading | ok | invalid | error
+  const [videoPlaying, setVideoPlaying] = useState(false);
   const bgVideoRef = useRef(null);
 
   // iOS en mode économie d'énergie bloque l'autoplay et affiche un bouton play.
@@ -4185,11 +4186,24 @@ function LaunchPage() {
   const isVideo = /\.(mp4|webm|mov|m4v)$/i.test(media || "");
   return (
     <div className="lg__launch">
-      {/* Fond plein écran : vidéo hero banner */}
-      {isVideo
-        ? <video ref={bgVideoRef} className="lg__launch__bg" src={media} autoPlay loop muted playsInline preload="auto" />
-        // eslint-disable-next-line @next/next/no-img-element
-        : <img className="lg__launch__bg" src={media} alt="" />}
+      {/* Fond plein écran : image fixe toujours présente + vidéo par-dessus,
+          révélée seulement quand elle joue vraiment. Si iOS bloque l'autoplay
+          (mode économie d'énergie), on voit l'image — jamais de bouton play. */}
+      <img className="lg__launch__bg" src={text("launch.poster", "img/launch-poster.jpg")} alt="" />
+      {isVideo && (
+        <video
+          ref={bgVideoRef}
+          className={"lg__launch__bg lg__launch__bg--video" + (videoPlaying ? " is-playing" : "")}
+          src={media}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          onPlaying={() => setVideoPlaying(true)}
+          onPause={() => setVideoPlaying(false)}
+        />
+      )}
       <div className="lg__launch__scrim" aria-hidden="true" />
 
       {/* Barre du haut : marque à gauche, réseaux à droite (comme le header) */}

@@ -6317,3 +6317,13 @@ a.lg__partners__logo:hover {
   display: none !important;
   -webkit-appearance: none;
 }
+
+/* Vidéo de fond launch : invisible tant qu'elle ne joue pas (l'image poster
+   dessous prend le relais) → le bouton play iOS n'est jamais visible. */
+.lg__launch__bg--video {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.lg__launch__bg--video.is-playing {
+  opacity: 1;
+}
