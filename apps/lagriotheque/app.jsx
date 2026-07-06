@@ -4182,8 +4182,6 @@ function LaunchPage() {
       <header className="lg__launch__top">
         <a className="lg__launch__logo" href="#/">{text("launch.brand", "LA GRIOTHÈQUE")}</a>
         <nav className="lg__launch__social" aria-label="Réseaux">
-          <a href="mailto:formations@lesgriots.com?subject=Newsletter">Souscrire à notre newsletter</a>
-          <span aria-hidden="true">·</span>
           <a href="https://instagram.com/lagriotheque" target="_blank" rel="noopener">Instagram</a>
           <span aria-hidden="true">·</span>
           <a href="https://linkedin.com" target="_blank" rel="noopener">Linkedin</a>
