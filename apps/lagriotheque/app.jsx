@@ -4146,6 +4146,20 @@ function Partners() {
 function LaunchPage() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState("idle"); // idle | loading | ok | invalid | error
+  const bgVideoRef = useRef(null);
+
+  // iOS en mode économie d'énergie bloque l'autoplay et affiche un bouton play.
+  // Contournement : on retente play() au chargement puis au premier toucher /
+  // clic / scroll de l'utilisateur (interaction = autorisation de lecture).
+  useEffect(() => {
+    const v = bgVideoRef.current;
+    if (!v) return;
+    const tryPlay = () => { v.play().catch(() => {}); };
+    tryPlay();
+    const events = ["touchstart", "click", "scroll"];
+    events.forEach((e) => window.addEventListener(e, tryPlay, { passive: true }));
+    return () => events.forEach((e) => window.removeEventListener(e, tryPlay));
+  }, []);
   async function submit(e) {
     e.preventDefault();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setState("invalid"); return; }
@@ -4173,7 +4187,7 @@ function LaunchPage() {
     <div className="lg__launch">
       {/* Fond plein écran : vidéo hero banner */}
       {isVideo
-        ? <video className="lg__launch__bg" src={media} autoPlay loop muted playsInline />
+        ? <video ref={bgVideoRef} className="lg__launch__bg" src={media} autoPlay loop muted playsInline preload="auto" />
         // eslint-disable-next-line @next/next/no-img-element
         : <img className="lg__launch__bg" src={media} alt="" />}
       <div className="lg__launch__scrim" aria-hidden="true" />

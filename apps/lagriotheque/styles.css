@@ -6309,3 +6309,11 @@ a.lg__partners__logo:hover {
   .lg__launch__top { flex-direction: column; gap: 10px; padding: 18px 18px; }
   .lg__launch__social { justify-content: flex-start; font-size: 12px; }
 }
+
+/* iOS (mode économie d'énergie) : masque le gros bouton play superposé sur la
+   vidéo de fond quand l'autoplay est bloqué — la lecture reprend au 1er toucher. */
+.lg__launch__bg::-webkit-media-controls-start-playback-button,
+.lg__launch__bg::-webkit-media-controls {
+  display: none !important;
+  -webkit-appearance: none;
+}
