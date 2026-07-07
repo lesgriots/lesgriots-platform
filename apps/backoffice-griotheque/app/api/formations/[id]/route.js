@@ -4,6 +4,10 @@
 import { NextResponse } from "next/server";
 import { getFormation, upsertFormation, deleteFormation } from "../../../../lib/db.js";
 
+// Empêche next build de figer le GET en statique (cf. bug 405 /api/pages).
+export const dynamic = "force-dynamic";
+
+
 export async function GET(_req, { params }) {
   const f = getFormation(params.id);
   if (!f) return NextResponse.json({ error: "not found" }, { status: 404 });

@@ -6,6 +6,10 @@ import { NextResponse } from "next/server";
 import { addLead } from "../../../lib/db.js";
 import { rateLimit, clientIp, tooMany } from "../../../lib/rate-limit.js";
 
+// Empêche next build de figer le GET en statique (cf. bug 405 /api/pages).
+export const dynamic = "force-dynamic";
+
+
 const ALLOWED_ORIGINS = [
   "http://localhost:8082",
   "http://localhost:8081",

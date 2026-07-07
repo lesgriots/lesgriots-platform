@@ -4,6 +4,10 @@
 import fs from "fs/promises";
 import path from "path";
 
+// Empêche next build de figer le GET en statique (cf. bug 405 /api/pages).
+export const dynamic = "force-dynamic";
+
+
 const SITE_ROOT = path.resolve(process.cwd(), "..", "lagriotheque");
 
 const MIME = {

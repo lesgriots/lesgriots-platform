@@ -2,6 +2,10 @@
 import { NextResponse } from "next/server";
 import { exportToDataJsx } from "../../../lib/exporter.js";
 
+// Empêche next build de figer le GET en statique (cf. bug 405 /api/pages).
+export const dynamic = "force-dynamic";
+
+
 export async function POST() {
   try {
     const result = await exportToDataJsx();

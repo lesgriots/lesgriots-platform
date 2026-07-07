@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { listSessions, upsertSession } from "../../../lib/db.js";
 
+// Empêche next build de figer le GET en statique (cf. bug 405 /api/pages).
+export const dynamic = "force-dynamic";
+
+
 export async function GET() {
   return NextResponse.json(listSessions());
 }

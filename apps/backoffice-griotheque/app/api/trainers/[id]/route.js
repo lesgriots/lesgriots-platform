@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getTrainer, upsertTrainer, deleteTrainer } from "../../../../lib/db.js";
 
+// Empêche next build de figer le GET en statique (cf. bug 405 /api/pages).
+export const dynamic = "force-dynamic";
+
+
 export async function GET(_req, { params }) {
   const t = getTrainer(params.id);
   if (!t) return NextResponse.json({ error: "not found" }, { status: 404 });
