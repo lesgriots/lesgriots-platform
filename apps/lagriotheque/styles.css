@@ -6244,8 +6244,9 @@ a.lg__partners__logo:hover {
   display: block;
 }
 .lg__launch__logo svg {
-  height: clamp(14px, 1.4vw, 18px);
-  width: auto;
+  /* Même taille que le logo du header du site (320px de large) */
+  width: min(320px, 70vw);
+  height: auto;
   display: block;
 }
 .lg__launch__social {
