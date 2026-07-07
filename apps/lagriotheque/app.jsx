@@ -439,7 +439,7 @@ function Manifesto() {
         <div className="lg__hero-yard__scrollhint" aria-hidden="true">
           ↓ scroll
         </div>
-        <PromoSticker />
+        {/* PromoSticker (pastille jaune rotative) retiré à la demande de Moos — 2026-07-07 */}
       </section>
 
       {/* Manifeste — prose sous le hero. Le texte est éditable depuis le BO
