@@ -257,7 +257,7 @@ button {
 }
 .lg__header__griot {
   /* Mot-marque large — même largeur que le logo d'accueil (320 px). */
-  width: min(280px, 62vw);
+  width: min(240px, 55vw);
   height: auto;
   flex-shrink: 0;
   display: flex;
@@ -466,7 +466,7 @@ button {
 }
 .lg__drawer__griot .lg__hero__griot__wrap {
   /* Même largeur que le logo d'accueil (320 px) → taille identique. */
-  width: min(280px, 80%);
+  width: min(240px, 75%);
   height: auto;
   aspect-ratio: 620 / 86;
 }
@@ -6245,7 +6245,7 @@ a.lg__partners__logo:hover {
 }
 .lg__launch__logo svg {
   /* Même taille que le logo du header du site */
-  width: min(280px, 62vw);
+  width: min(240px, 55vw);
   height: auto;
   display: block;
 }
