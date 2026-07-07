@@ -335,8 +335,8 @@ button {
 }
 /* Première ligne : utilitaires, petit */
 .lg__menu__row:first-child {
-  font-size: 13px;
-  gap: 6px;
+  font-size: 17px;
+  gap: 10px;
 }
 /* Deuxième ligne : nav principale, gros — fluide pour rester sur 1 ligne */
 .lg__menu__row:last-child {
