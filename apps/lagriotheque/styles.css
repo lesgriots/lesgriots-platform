@@ -6239,12 +6239,14 @@ a.lg__partners__logo:hover {
   padding: 22px 24px;
 }
 .lg__launch__logo {
-  font-family: var(--font-sans);
-  font-weight: 700;
-  font-size: clamp(15px, 1.5vw, 19px);
-  letter-spacing: 0.02em;
   color: var(--paper);
   text-decoration: none;
+  display: block;
+}
+.lg__launch__logo svg {
+  height: clamp(14px, 1.4vw, 18px);
+  width: auto;
+  display: block;
 }
 .lg__launch__social {
   display: flex;
