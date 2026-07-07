@@ -4145,6 +4145,7 @@ function Partners() {
 // L'email part vers l'endpoint d'inscription (BO Griothèque), puis Systeme.io.
 function LaunchPage() {
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
   const [state, setState] = useState("idle"); // idle | loading | ok | invalid | error
   const [videoPlaying, setVideoPlaying] = useState(false);
   const bgVideoRef = useRef(null);
@@ -4175,7 +4176,7 @@ function LaunchPage() {
         const r = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, source: "launch", consent: true }),
+          body: JSON.stringify({ email, name: firstName.trim(), source: "launch", consent: true }),
         });
         if (r.ok) { setState("ok"); return; }
       } catch (err) { /* try next endpoint */ }
@@ -4224,6 +4225,16 @@ function LaunchPage() {
         ) : (
           <form className="lg__launch__form" onSubmit={submit}>
             <input
+              type="text"
+              required
+              placeholder={text("launch.name_placeholder", "Ton prénom")}
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="lg__launch__input"
+              aria-label="Prénom"
+              autoComplete="given-name"
+            />
+            <input
               type="email"
               required
               placeholder={text("launch.placeholder", "ton@email.com")}
@@ -4231,11 +4242,17 @@ function LaunchPage() {
               onChange={(e) => setEmail(e.target.value)}
               className="lg__launch__input"
               aria-label="Email"
+              autoComplete="email"
             />
             <button type="submit" className="lg__launch__btn" disabled={state === "loading"}>
               {state === "loading" ? "…" : text("launch.cta", "Me prévenir →")}
             </button>
           </form>
+        )}
+        {state !== "ok" && (
+          <p className="lg__launch__legal">
+            {text("launch.legal", "En t'inscrivant, tu acceptes de recevoir les actualités de LA GRIOTHÈQUE. Désinscription en 1 clic, à tout moment.")}
+          </p>
         )}
         {state === "invalid" && (
           <p className="lg__launch__err">{text("launch.invalid", "Email invalide, vérifie l'adresse.")}</p>

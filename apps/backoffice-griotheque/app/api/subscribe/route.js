@@ -52,10 +52,15 @@ export async function POST(req) {
     const key = process.env.SYSTEME_API_KEY;
     if (key) {
       try {
+        const payload = { email };
+        // Prénom transmis à Systeme.io pour personnaliser les emails
+        if (name && typeof name === "string" && name.trim()) {
+          payload.fields = [{ slug: "first_name", value: name.trim().slice(0, 80) }];
+        }
         await fetch("https://api.systeme.io/api/contacts", {
           method: "POST",
           headers: { "Content-Type": "application/json", "X-API-Key": key },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify(payload),
         });
       } catch (e) { /* on garde quand même le lead local */ }
     }

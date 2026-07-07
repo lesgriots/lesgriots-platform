@@ -6277,7 +6277,7 @@ a.lg__partners__logo:hover {
   max-width: 38ch;
   margin: 0 auto 32px;
 }
-.lg__launch__form { display: flex; gap: 8px; max-width: 420px; margin: 0 auto; }
+.lg__launch__form { display: flex; flex-direction: column; gap: 10px; max-width: 420px; margin: 0 auto; }
 .lg__launch__input {
   flex: 1;
   background: transparent;
@@ -6326,4 +6326,14 @@ a.lg__partners__logo:hover {
 }
 .lg__launch__bg--video.is-playing {
   opacity: 1;
+}
+
+/* Mention légale sous le formulaire launch (consentement newsletter) */
+.lg__launch__legal {
+  margin: 14px auto 0;
+  max-width: 420px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(246, 245, 243, 0.55);
+  text-align: center;
 }
