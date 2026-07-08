@@ -20,9 +20,11 @@ const REQUIRED = {
 };
 
 // Champs qui, s'ils sont présents, doivent être des strings (pas objets/arrays).
+// NB : overview / description / chapters / program ne sont PAS listés — ils
+// peuvent légitimement être des tableaux (paragraphes, modules).
 const STRING_FIELDS = {
-  formations: ["title", "tagline", "discipline", "duration", "format", "location", "price", "trainer_id", "overview", "description"],
-  workshops: ["title", "tagline", "discipline", "duration", "format", "location", "price", "trainer_id", "overview", "description"],
+  formations: ["title", "tagline", "discipline", "duration", "format", "location", "price", "trainer_id"],
+  workshops: ["title", "tagline", "discipline", "duration", "format", "location", "price", "trainer_id"],
   trainers: ["name", "role", "bio", "photo"],
   sessions: ["date", "formation_id", "workshop_id", "status"],
   resources: ["title", "type", "format", "href"],
