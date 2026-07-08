@@ -1,7 +1,7 @@
 // Layout racine du back office.
 // Aligné sur le style du site studio : Geist Mono, palette ink/yellow,
 // sticker top-left, griot ASCII bottom-right.
-import SyncButton from "./components/SyncButton";
+import NavShell from "./components/NavShell";
 
 export const metadata = {
   title: "LESGRIOTSxSTUDIO — Back Office",
@@ -58,37 +58,9 @@ export default function RootLayout({ children }) {
         <style>{globalCss}</style>
       </head>
       <body>
-        {/* Sticker top-left — même image que le site studio */}
-        <a href="/" className="bo-sticker" aria-label="Back office home">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/api/preview?p=img/sticker.png" alt="LESGRIOTSXSTUDIO" />
-        </a>
+        <NavShell />
 
         <div className="shell">
-          <header className="bo-topbar">
-            <span className="bo-topbar__tag">BACK · OFFICE</span>
-            <nav className="bo-nav">
-              <a href="/">Projets</a>
-              <span className="bo-nav__sep">·</span>
-              <a href="/projects/new">+ Nouveau</a>
-              <span className="bo-nav__sep">·</span>
-              <a href="/site/about">Page About</a>
-              <span className="bo-nav__sep">·</span>
-              <a href="/site/talent">Talent</a>
-              <span className="bo-nav__sep">·</span>
-              <a href="/site/services">Services</a>
-              <span className="bo-nav__sep">·</span>
-              <a href="/site/ecosysteme">Écosystème</a>
-              <span className="bo-nav__sep">·</span>
-              <a href="/site/pages">Pages actives</a>
-              <span className="bo-nav__sep">·</span>
-              <a href="/site/kora">Son du Griot</a>
-              <span className="bo-nav__sep">·</span>
-              <a href="https://lesgriotsxstudio.com" target="_blank" rel="noopener noreferrer">Voir le site ↗</a>
-              <span className="bo-nav__sep">·</span>
-              <SyncButton />
-            </nav>
-          </header>
           <main>{children}</main>
         </div>
 
@@ -176,15 +148,6 @@ const globalCss = `
     50%, 100% { opacity: 0; }
   }
 
-  /* ---- Préfixe prompt > devant la nav et les liens-actions ---------- */
-  .bo-nav a::before {
-    content: "> ";
-    color: var(--ink-dim);
-    opacity: 0.6;
-    margin-right: 1px;
-  }
-  .bo-nav a:hover::before { color: var(--yellow); opacity: 1; }
-
   /* ---- Scanlines CRT — overlay très subtil, plein viewport ---------- */
   body::after {
     content: "";
@@ -215,19 +178,86 @@ const globalCss = `
       rgba(0,0,0,0.4) 100%);
   }
 
-  /* ---- Sticker top-left (même position que sur le site) ------------- */
-  .bo-sticker {
+  /* ---- Sidebar (desktop) / drawer (mobile) -------------------------- */
+  .bo-sidebar {
     position: fixed;
-    top: 14px;
-    left: 14px;
-    width: 220px;
-    z-index: 90;
+    top: 0; left: 0; bottom: 0;
+    width: 232px;
+    z-index: 95;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 16px 24px;
+    background: #070604;
+    border-right: 1px solid var(--rule);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .bo-sidebar__brand {
     display: block;
-    filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, 0.35));
+    margin: 4px 6px 22px;
+    filter: drop-shadow(2px 4px 0 rgba(0,0,0,0.35));
     transition: transform 0.35s cubic-bezier(0.2,0.7,0.2,1);
   }
-  .bo-sticker:hover { transform: translate(-2px, -2px); }
-  .bo-sticker img { display: block; width: 100%; height: auto; }
+  .bo-sidebar__brand:hover { transform: translate(-2px,-2px); }
+  .bo-sidebar__brand img { display: block; width: 150px; max-width: 78%; height: auto; }
+  .bo-sidebar__tag {
+    display: block;
+    margin-top: 10px;
+    font-size: 10px;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+  }
+
+  /* Groupes + liens de nav */
+  .bo-navgroup { margin-bottom: 18px; }
+  .bo-navgroup__title {
+    font-size: 9px;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    padding: 0 8px 6px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .bo-navlink {
+    display: block;
+    padding: 7px 8px;
+    color: var(--ink);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    border-left: 2px solid transparent;
+    transition: color 0.12s, background 0.12s, border-color 0.12s;
+  }
+  .bo-navlink::before {
+    content: "> ";
+    color: var(--ink-dim);
+    opacity: 0.5;
+    margin-right: 2px;
+  }
+  .bo-navlink:hover {
+    color: var(--yellow);
+    background: #100e09;
+  }
+  .bo-navlink:hover::before { color: var(--yellow); opacity: 1; }
+  .bo-navlink--active {
+    color: var(--yellow);
+    background: #14110a;
+    border-left-color: var(--yellow);
+    font-weight: 500;
+  }
+  .bo-navlink--active::before { content: "$ "; color: var(--yellow); opacity: 1; }
+  .bo-sidenav__actions { display: flex; flex-direction: column; gap: 8px; padding: 4px 8px 0; }
+  .bo-navlink--ext { padding-left: 0; }
+  .bo-navlink--ext::before { content: ""; margin: 0; }
+
+  /* Barre mobile (cachée en desktop) */
+  .bo-mobilebar { display: none; }
+  .bo-scrim {
+    position: fixed; inset: 0; z-index: 94;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(1px);
+  }
 
   /* ---- Griot ASCII bottom-right ------------------------------------- */
   .bo-griot {
@@ -253,57 +283,58 @@ const globalCss = `
   .shell {
     position: relative;
     z-index: 1;
-    width: 100%;
-    margin: 0;
-    padding: 24px 60px 200px 260px;
+    margin-left: 232px;
+    padding: 32px 60px 200px 48px;
+    max-width: 1180px;
   }
+
+  /* Tablette / mobile : la sidebar devient un drawer, barre mobile visible. */
   @media (max-width: 900px) {
-    .bo-sticker { width: 120px; top: 10px; left: 12px; }
-    .shell { padding: 96px 18px 120px; }
-    .bo-topbar {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 12px 0 18px;
-      margin-bottom: 22px;
+    .bo-mobilebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 93;
+      padding: 10px 14px;
+      background: rgba(7,6,4,0.92);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--rule);
     }
-    .bo-nav { flex-wrap: wrap; gap: 8px 12px; font-size: 13px; }
+    .bo-mobilebar__brand img { display: block; width: 104px; height: auto; }
+    .bo-burger {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--rule);
+      padding: 7px 12px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .bo-burger span { font-size: 11px; }
+    .bo-burger:hover { color: var(--yellow); border-color: var(--yellow); }
+
+    .bo-sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.28s cubic-bezier(0.3,0.7,0.2,1);
+      width: 264px;
+      box-shadow: 8px 0 40px rgba(0,0,0,0.6);
+    }
+    .bo-sidebar--open { transform: translateX(0); }
+
+    .shell { margin-left: 0; padding: 22px 18px 120px; }
     .bo-griot { display: none; }
   }
   @media (max-width: 600px) {
-    .bo-sticker { width: 96px; top: 8px; left: 10px; }
-    .shell { padding: 78px 14px 100px; }
-    .bo-nav { gap: 6px 12px; font-size: 12px; }
-    .bo-nav__sep { display: none; }
+    .shell { padding: 18px 14px 100px; }
+    .bo-sidebar { width: 84vw; }
   }
-
-  /* ---- Topbar / nav ------------------------------------------------- */
-  .bo-topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 0 24px;
-    border-bottom: 1px solid var(--rule);
-    margin-bottom: 28px;
-  }
-  .bo-topbar__tag {
-    font-size: 11px;
-    color: var(--ink-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-weight: 500;
-  }
-  .bo-nav { display: flex; gap: 12px; align-items: center; }
-  .bo-nav a {
-    color: var(--ink);
-    text-decoration: none;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    transition: color 0.15s;
-  }
-  .bo-nav a:hover { color: var(--yellow); }
-  .bo-nav__sep { color: var(--ink-dim); opacity: 0.6; font-size: 11px; }
+  /* En desktop, le voile mobile ne doit jamais s'afficher. */
+  @media (min-width: 901px) { .bo-scrim { display: none; } }
 
   /* ---- Liens, boutons, formulaires ---------------------------------- */
   a { color: var(--ink); text-decoration: none; }
@@ -311,11 +342,17 @@ const globalCss = `
   button { font: inherit; cursor: pointer; }
   input, textarea, select {
     font: inherit; color: var(--ink); background: #0f0e0a;
-    border: 1px solid var(--rule); padding: 8px 10px; border-radius: 0;
+    border: 1px solid var(--rule); padding: 9px 11px; border-radius: 0;
     width: 100%;
+    transition: border-color 0.12s, box-shadow 0.12s, background 0.12s;
   }
+  input::placeholder, textarea::placeholder { color: #4a4418; opacity: 1; }
+  input:hover, textarea:hover, select:hover { border-color: var(--ink-dim); }
   input:focus, textarea:focus, select:focus {
-    outline: none; border-color: var(--ink);
+    outline: none;
+    border-color: var(--yellow);
+    background: #12100a;
+    box-shadow: 0 0 0 2px rgba(246,226,28,0.18);
   }
   textarea { font-family: var(--font-sans); resize: vertical; min-height: 80px; }
   label {
@@ -360,6 +397,7 @@ const globalCss = `
 
   /* ---- Grille de formulaires --------------------------------------- */
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .row { grid-template-columns: 1fr; gap: 4px; } }
 
   /* ---- Boutons ----------------------------------------------------- */
   .btn {
