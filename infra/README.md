@@ -8,12 +8,18 @@ infra/
 │   ├── lesgriots.conf
 │   ├── lagriotheque.conf
 │   ├── lesgriotsxstudio.conf
-│   └── admin.conf          # reverse proxy vers le dashboard (port 3000)
+│   ├── admin.conf          # hub admin (Basic auth) — BO Studio port 3030
+│   └── lesgriots-os.conf   # LES GRIOTS OS → os.lesgriots.com (port 3010, pas de Basic auth)
 ├── systemd/
-│   └── dashboard.service   # fait tourner le dashboard en permanence
+│   ├── lesgriotsxstudio-backoffice.service   # BO Studio (port 3030)
+│   ├── lesgriots-os.service                  # LES GRIOTS OS (port 3010)
+│   └── dashboard.service                     # obsolète (remplacé par lesgriots-os)
 └── scripts/
+    ├── install-vps.sh      # provisioning initial du VPS (root, une fois)
+    ├── add-bo-studio.sh    # ajout du BO Studio sur VPS déjà setup
     ├── deploy.sh           # déployer une app (depuis ta machine)
-    └── backup.sh           # sauvegarder la base SQLite (sur le VPS)
+    ├── deploy-videos.sh    # rsync des vidéos du site Studio
+    └── backup.sh           # sauvegarde de la base SQLite de l'OS (sur le VPS, cron)
 ```
 
 ## Cible
@@ -22,10 +28,14 @@ VPS OVH (Strasbourg) — Ubuntu 24.04 LTS — `51.210.4.77`.
 
 ## Mémo
 
-- Déployer un site : `./scripts/deploy.sh lesgriots` (depuis ta machine, après `git push`)
-- Déployer le dashboard : `./scripts/deploy.sh dashboard`
+- Déployer un site statique : `./scripts/deploy.sh lesgriots` (depuis ta machine, après `git push`)
+- Déployer le BO Studio : `./scripts/deploy.sh studio-bo`
+- Déployer LES GRIOTS OS : `./scripts/deploy.sh os`
 - Les confs nginx vont dans `/etc/nginx/sites-available/` (lien dans `sites-enabled/`)
-- Le service systemd va dans `/etc/systemd/system/dashboard.service`
+- Les services systemd vont dans `/etc/systemd/system/`
+- Les secrets de prod vont dans `/etc/<nom>.env` (chmod 600, chargés par systemd)
 - HTTPS : géré par Certbot (il édite les confs nginx tout seul)
+- Backup DB de l'OS : cron quotidien → `./scripts/backup.sh` (rotation 30)
 
-Procédure complète : [../docs/DEPLOY.md](../docs/DEPLOY.md).
+Procédures complètes : [../docs/DEPLOY.md](../docs/DEPLOY.md) (sites + BO Studio)
+et [../docs/DEPLOY-OS.md](../docs/DEPLOY-OS.md) (LES GRIOTS OS).

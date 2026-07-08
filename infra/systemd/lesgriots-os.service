@@ -1,0 +1,42 @@
+# Service systemd pour LES GRIOTS OS (Next.js + SQLite)
+# À copier sur le VPS dans /etc/systemd/system/lesgriots-os.service
+# puis :
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now lesgriots-os
+#
+# Logs : sudo journalctl -u lesgriots-os -f
+#
+# Pré-requis :
+#   - l'app buildée dans apps/lesgriots-os (npm ci && npm run build)
+#   - le fichier /etc/lesgriots-os.env (secrets, cf. docs/DEPLOY-OS.md) — chmod 600
+#   - la base data/lesgriots.db transférée (cf. docs/DEPLOY-OS.md)
+
+[Unit]
+Description=LES GRIOTS OS — pilotage Agence + Production + Formations (Next.js)
+After=network.target
+
+[Service]
+Type=simple
+User=deployment
+WorkingDirectory=/var/www/ecosystem/production/lesgriots-platform/apps/lesgriots-os
+# Variables d'environnement (secrets) hors-Git — fichier REQUIS :
+# AUTH_ENABLED, AUTH_SECRET, OS_API_KEY, GOOGLE_CLIENT_ID/SECRET, NEXTAUTH_URL
+EnvironmentFile=/etc/lesgriots-os.env
+ExecStart=/usr/bin/npm run start
+Restart=always
+RestartSec=5
+# L'app écoute en local sur 3010, nginx l'expose en HTTPS sur os.lesgriots.com
+# (convention ports : 3030 BO Studio · 3031 BO Griothèque · 3010 OS)
+Environment=NODE_ENV=production
+Environment=PORT=3010
+
+# Hardening (même profil que lesgriotsxstudio-backoffice)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+# L'app doit pouvoir écrire : data/ (SQLite + WAL + backups) et .next/ (cache)
+ReadWritePaths=/var/www/ecosystem/production/lesgriots-platform/apps/lesgriots-os
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

@@ -86,3 +86,14 @@ LESGRIOTSxSTUDIO.com/
 # Assets de test à la racine (ne pas commiter)
 /Logo-remove.png
 /Screenshot*.png
+
+# Reconciliation 2026-07 — assets lourds servis directement depuis le VPS (a optimiser, pas dans git)
+apps/lesgriotsxstudio/img/b-n-mr0cdnmc.PNG
+apps/lesgriotsxstudio/img/sdcvd_1-1-mqwudyeq.jpg
+
+# Artefacts hors-projet (notes, skills, residus)
+ziRjUTlQ
+*.skill
+/skills/
+/bio-*.md
+.tmp_sync*.sh

@@ -120,13 +120,11 @@ const DICT = {
                      fr: "DIRECTEUR CRÉATIF · STORYTELLER" },
   "talent.bio": {
     en: [
-      "Moos Coulibaly is a multidisciplinary French-Senegalese artist and the founder of LES GRIOTS. A dancer turned choreographer for Rilès — whom he now accompanies on Zéniths and Accor Arena as movement director and co-live director — he then established himself as a director for Médine, Oumar (Sony Music France) and DONI M, before becoming creative director and brand strategist for Vacra (Universal Music France, Gold and Platinum), Eesah Yasuke (Warner), FILA and CCN Le Havre.",
-      "In 2021, he founded SASU LES GRIOTS, a narrative engineering platform structured around three pillars: a creative agency, an original IP studio rooted in Afro-diasporic perspectives, and La Griothèque — his Qualiopi-certified training body, now CPF-eligible through the RS7200 certification. French Tech Laureate. MansaLab incubation.",
+      "Moos Coulibaly is a multidisciplinary French-Senegalese artist and the founder of LES GRIOTS. At the intersection of image, movement and strategy, one obsession drives him: the story, the raw material of everything that lasts.",
       "@mooscoulibaly",
     ],
     fr: [
-      "Moos Coulibaly est artiste multidisciplinaire franco-sénégalais et fondateur de LES GRIOTS. Danseur devenu chorégraphe pour Rilès — qu'il accompagne aujourd'hui sur Zéniths et Accor Arena en tant que directeur du mouvement et co-directeur live — il s'est ensuite imposé comme réalisateur auprès de Médine, Oumar (Sony Music France) et DONI M, puis comme directeur créatif et stratège de marque pour Vacra (Universal Music France, Disque d'Or et Platine), Eesah Yasuke (Warner), FILA et le CCN Le Havre.",
-      "En 2021, il fonde la SASU LES GRIOTS, plateforme d'ingénierie narrative articulée en trois piliers : une agence créative, une production originale d'IPs ancrée dans les perspectives afro-diasporiques, et La Griothèque — son organisme de formation Qualiopi certifié, désormais éligible CPF via la certification RS7200. Lauréat French Tech. Incubé MansaLab.",
+      "Moos Coulibaly est artiste multidisciplinaire franco-sénégalais et fondateur de LES GRIOTS. À l'intersection de l'image, du mouvement et de la stratégie, une seule obsession le guide : le récit, matière première de tout ce qui marque.",
       "@mooscoulibaly",
     ],
   },

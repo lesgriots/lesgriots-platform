@@ -17,6 +17,11 @@ ADMIN (centralisé) :
     ├── /studio/                   → BO Studio        (Next.js port 3030)
     ├── /griotheque/               → BO Griothèque    (à venir, port 3031)
     └── ...                        → futurs BO
+
+OUTIL DE PILOTAGE :
+  os.lesgriots.com                 → LES GRIOTS OS    (Next.js port 3010,
+                                     auth applicative propre, pas de Basic auth
+                                     → procédure dédiée : DEPLOY-OS.md)
 ```
 
 Un seul certificat SSL pour `admin.lesgriots.com`, isolation des cookies des sites publics, hub admin unique.
@@ -49,6 +54,7 @@ Chez OVH, pour chaque domaine :
 - `lesgriotsxstudio.com`     → A `51.210.4.77` + AAAA `2001:41d0:404:200::4537`
 - `www.lesgriotsxstudio.com` → A `51.210.4.77` + AAAA même
 - `admin.lesgriots.com`      → A `51.210.4.77` + AAAA même
+- `os.lesgriots.com`         → A `51.210.4.77` + AAAA même (LES GRIOTS OS, cf. [DEPLOY-OS.md](DEPLOY-OS.md))
 
 > ⚠️ Toucher au DNS a un effet immédiat (TTL = 1h). À faire posément, domaine par domaine.
 

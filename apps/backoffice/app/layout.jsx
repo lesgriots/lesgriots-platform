@@ -117,6 +117,23 @@ const globalCss = `
     font-weight: 700; font-display: swap;
   }
 
+  /* ---- Fonts Geist Sans (typo principale du back office) ------------- */
+  @font-face {
+    font-family: "Geist";
+    src: url("/api/preview?p=fonts/Geist-Regular.woff2") format("woff2");
+    font-weight: 400; font-display: swap;
+  }
+  @font-face {
+    font-family: "Geist";
+    src: url("/api/preview?p=fonts/Geist-Medium.woff2") format("woff2");
+    font-weight: 500; font-display: swap;
+  }
+  @font-face {
+    font-family: "Geist";
+    src: url("/api/preview?p=fonts/Geist-Bold.woff2") format("woff2");
+    font-weight: 700; font-display: swap;
+  }
+
   /* ---- Palette du site studio --------------------------------------- */
   :root {
     --bg: #050505;
@@ -127,6 +144,7 @@ const globalCss = `
     --yellow-deep: #d9c510;
     --danger: #ff5f56;
     --font-mono: "Geist Mono", "JetBrains Mono", "Courier New", monospace;
+    --font-sans: "Geist", "Inter", system-ui, -apple-system, sans-serif;
     /* Aliases — utilisés par les pages/composants. Avant ils n'étaient pas
        définis → les couleurs tombaient en fallback navigateur (bug). */
     --dim: var(--ink-dim);
@@ -137,7 +155,7 @@ const globalCss = `
   html, body {
     background: var(--bg);
     color: var(--ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 14px;
     line-height: 1.45;
     -webkit-font-smoothing: antialiased;
@@ -240,7 +258,23 @@ const globalCss = `
     padding: 24px 60px 200px 260px;
   }
   @media (max-width: 900px) {
-    .shell { padding: 200px 18px 200px; }
+    .bo-sticker { width: 120px; top: 10px; left: 12px; }
+    .shell { padding: 96px 18px 120px; }
+    .bo-topbar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0 18px;
+      margin-bottom: 22px;
+    }
+    .bo-nav { flex-wrap: wrap; gap: 8px 12px; font-size: 13px; }
+    .bo-griot { display: none; }
+  }
+  @media (max-width: 600px) {
+    .bo-sticker { width: 96px; top: 8px; left: 10px; }
+    .shell { padding: 78px 14px 100px; }
+    .bo-nav { gap: 6px 12px; font-size: 12px; }
+    .bo-nav__sep { display: none; }
   }
 
   /* ---- Topbar / nav ------------------------------------------------- */
@@ -283,7 +317,7 @@ const globalCss = `
   input:focus, textarea:focus, select:focus {
     outline: none; border-color: var(--ink);
   }
-  textarea { font-family: var(--font-mono); resize: vertical; min-height: 80px; }
+  textarea { font-family: var(--font-sans); resize: vertical; min-height: 80px; }
   label {
     display: block; margin: 14px 0 6px;
     font-size: 11px; color: var(--ink-dim);

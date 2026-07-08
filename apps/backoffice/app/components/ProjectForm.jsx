@@ -109,14 +109,29 @@ function formToProject(f) {
 }
 
 // Upload helper : POST multipart vers /api/upload, renvoie le path relatif.
-async function uploadFile(file, subdir = "") {
-  const fd = new FormData();
-  fd.append("file", file);
-  if (subdir) fd.append("subdir", subdir);
-  const r = await fetch("/api/upload", { method: "POST", body: fd });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.error || `upload échoué (${r.status})`);
-  return j.path;
+// Utilise XMLHttpRequest (et pas fetch) pour exposer la progression réelle
+// du transfert via xhr.upload.onprogress → onProgress(pourcentage 0..100).
+function uploadFile(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/upload");
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(Math.min(100, Math.round((e.loaded / e.total) * 100)));
+      }
+    };
+    xhr.onload = () => {
+      let j = {};
+      try { j = JSON.parse(xhr.responseText); } catch { /* ignore */ }
+      if (xhr.status >= 200 && xhr.status < 300) resolve(j.path);
+      else reject(new Error(j.error || `upload échoué (${xhr.status})`));
+    };
+    xhr.onerror = () => reject(new Error("erreur réseau pendant l'upload"));
+    xhr.ontimeout = () => reject(new Error("temps dépassé pendant l'upload"));
+    xhr.send(fd);
+  });
 }
 
 // Slugifie un nom de projet → id propre (minuscules, tirets, sans accents).
@@ -149,17 +164,10 @@ export default function ProjectForm({ initial, isNew }) {
   }
 
   // ---- COVER -----------------------------------------------------------
-  async function handleCover(file) {
-    if (!file) return;
-    try { set("cover", await uploadFile(file)); }
-    catch (e) { setErr(e.message); }
-  }
+  // MediaInput gère l'upload + la progression, et nous renvoie le path final.
+  function handleCover(path) { if (path) set("cover", path); }
   // ---- THUMB VIDEO -----------------------------------------------------
-  async function handleThumbVideo(file) {
-    if (!file) return;
-    try { set("thumbVideo", await uploadFile(file)); }
-    catch (e) { setErr(e.message); }
-  }
+  function handleThumbVideo(path) { if (path) set("thumbVideo", path); }
   // ---- RESOURCES (médias détaillés du projet) -------------------------
   function resourceAdd(type) {
     let blank;
@@ -200,12 +208,8 @@ export default function ProjectForm({ initial, isNew }) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
     set("resources", arr);
   }
-  async function resourceUpload(i, field, file) {
-    if (!file) return;
-    try {
-      const p = await uploadFile(file);
-      resourcePatch(i, { [field]: p });
-    } catch (e) { setErr(e.message); }
+  function resourceUpload(i, field, path) {
+    if (path) resourcePatch(i, { [field]: path });
   }
   function resourceSetUrl(i, field, url) {
     resourcePatch(i, { [field]: url });
@@ -624,7 +628,23 @@ const btnTiny = { padding: "2px 8px", fontSize: 11, marginLeft: 4 };
 function MediaInput({ value, onUpload, onUrl, onClear, accept, isVideo, urlHint }) {
   const [urlMode, setUrlMode] = useState(false);
   const [urlDraft, setUrlDraft] = useState("");
+  // État d'upload local : idle | uploading (avec pct) | done | error.
+  const [up, setUp] = useState({ status: "idle", pct: 0, err: "" });
   const external = isExternalUrl(value);
+
+  async function doUpload(file) {
+    if (!file) return;
+    setUp({ status: "uploading", pct: 0, err: "" });
+    try {
+      const path = await uploadFile(file, (pct) => setUp((s) => ({ ...s, pct })));
+      setUp({ status: "done", pct: 100, err: "" });
+      onUpload(path);
+      // Repasse en idle après 2,5 s (le ✓ reste visible un instant).
+      setTimeout(() => setUp((s) => (s.status === "done" ? { status: "idle", pct: 0, err: "" } : s)), 2500);
+    } catch (e) {
+      setUp({ status: "error", pct: 0, err: e.message || "échec de l'upload" });
+    }
+  }
   // Source à afficher dans la preview : URL direct si externe, sinon proxy backend.
   const previewSrc = value
     ? (external ? value : `/api/preview?p=${encodeURIComponent(value)}`)
@@ -652,12 +672,22 @@ function MediaInput({ value, onUpload, onUrl, onClear, accept, isVideo, urlHint 
             // eslint-disable-next-line @next/next/no-img-element
             : <img src={previewSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : <span style={{ color: "var(--dim)", fontSize: 11 }}>—</span>}
-        {external && (
+        {external && up.status === "idle" && (
           <span style={{
             position: "absolute", top: 2, left: 2, padding: "1px 4px",
             background: "var(--accent)", color: "#000", fontSize: 9, fontWeight: 700,
             letterSpacing: "0.05em",
           }}>URL</span>
+        )}
+        {(up.status === "uploading" || up.status === "done") && (
+          <div style={{
+            position: "absolute", inset: 0, background: "rgba(5,5,5,0.72)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: up.status === "done" ? "var(--accent)" : "var(--ink)",
+            fontSize: 15, fontWeight: 700, letterSpacing: "0.02em",
+          }}>
+            {up.status === "done" ? "✓" : `${up.pct}%`}
+          </div>
         )}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -683,12 +713,13 @@ function MediaInput({ value, onUpload, onUrl, onClear, accept, isVideo, urlHint 
           </div>
         ) : (
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            <label className="btn btn--ghost" style={{ padding: "4px 10px", fontSize: 11, cursor: "pointer" }}>
-              Upload
+            <label className="btn btn--ghost" style={{ padding: "4px 10px", fontSize: 11, cursor: up.status === "uploading" ? "wait" : "pointer", opacity: up.status === "uploading" ? 0.6 : 1 }}>
+              {up.status === "uploading" ? `Upload… ${up.pct}%` : up.status === "done" ? "✓ Uploadé" : "Upload"}
               <input
                 type="file"
                 accept={accept}
-                onChange={(e) => { onUpload(e.target.files[0]); e.target.value = ""; }}
+                disabled={up.status === "uploading"}
+                onChange={(e) => { const file = e.target.files[0]; e.target.value = ""; doUpload(file); }}
                 style={{ display: "none" }}
               />
             </label>
@@ -704,6 +735,21 @@ function MediaInput({ value, onUpload, onUrl, onClear, accept, isVideo, urlHint 
               <span style={{ fontSize: 10, color: "var(--dim)", alignSelf: "center" }}>{urlHint}</span>
             )}
           </div>
+        )}
+
+        {up.status === "uploading" && (
+          <div style={{ marginTop: 6 }}>
+            <div style={{ height: 4, background: "var(--rule)", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${up.pct}%`, background: "var(--accent)", transition: "width 0.15s ease" }} />
+            </div>
+            <span style={{ fontSize: 10, color: "var(--dim)" }}>Upload en cours… {up.pct}%</span>
+          </div>
+        )}
+        {up.status === "done" && (
+          <span style={{ display: "inline-block", marginTop: 6, fontSize: 10, color: "var(--accent)" }}>✓ Vidéo uploadée</span>
+        )}
+        {up.status === "error" && (
+          <span style={{ display: "inline-block", marginTop: 6, fontSize: 10, color: "var(--danger)" }}>✗ {up.err}</span>
         )}
       </div>
     </div>

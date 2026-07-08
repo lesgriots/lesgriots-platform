@@ -6,15 +6,16 @@ import { useEffect, useState } from "react";
 import Type from "../../components/Type";
 
 const PAGES = [
+  { id: "countdown", label: "PAGE COMPTE À REBOURS", description: "ON = tout le site est masqué et remplacé par le compte à rebours (pré-lancement). OFF = site normal. Se remet automatiquement sur le site à l'heure du lancement." },
   { id: "work",   label: "WORK / PROJETS", description: "La grille principale des projets — la home du site." },
   { id: "talent", label: "TALENT",         description: "Page Talent (portrait, bio, vidéo de survol). Éditable dans l'onglet Talent." },
   { id: "about",  label: "ABOUT",          description: "Page À propos avec services + contact + intro éditoriale." },
   { id: "eco",    label: "ECOSYSTEM",      description: "Vue solaire des collaborateurs, studios partenaires, clients." },
 ];
 
-// Par défaut tout est actif (rétrocompatibilité avec l'état avant l'ajout
-// du toggle — si aucune valeur en DB, on considère que les 3 pages sont ON).
-const DEFAULT_ACTIVE = { work: true, talent: true, about: true, eco: true };
+// Par défaut les pages du site sont actives ; le compte à rebours est OFF
+// (il ne s'affiche que si on l'active explicitement).
+const DEFAULT_ACTIVE = { countdown: false, work: true, talent: true, about: true, eco: true };
 
 export default function PagesEditorPage() {
   const [loading, setLoading] = useState(true);

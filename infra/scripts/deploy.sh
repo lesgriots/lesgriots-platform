@@ -5,6 +5,7 @@
 # Usage :
 #   ./deploy.sh studio          # = lesgriotsxstudio (site statique)
 #   ./deploy.sh studio-bo       # = BO Studio Next.js (git pull + build + restart)
+#   ./deploy.sh os              # = LES GRIOTS OS Next.js (git pull + build + restart)
 #   ./deploy.sh lesgriots
 #   ./deploy.sh lagriotheque
 #   ./deploy.sh all             # toutes les apps statiques (un seul git pull)
@@ -30,7 +31,7 @@ DEPLOY_USER="deployment"                                        # owns le clone
 
 APP="${1:-}"
 if [[ -z "$APP" ]]; then
-  echo "Usage : ./deploy.sh <studio|lesgriots|lagriotheque|all>"
+  echo "Usage : ./deploy.sh <studio|studio-bo|os|lesgriots|lagriotheque|all>"
   exit 1
 fi
 
@@ -77,9 +78,32 @@ case "$APP" in
     echo "✓ BO Studio à jour sur https://admin.lesgriots.com/studio/"
     ;;
 
+  os)
+    # LES GRIOTS OS = app Next.js (apps/lesgriots-os) servie par systemd sur :3010,
+    # exposée par nginx sur https://os.lesgriots.com (cf. docs/DEPLOY-OS.md).
+    # ⚠️ La base data/lesgriots.db n'est PAS touchée par un déploiement
+    #    (gitignorée, elle vit uniquement sur le VPS + sauvegardes).
+    OS_PATH="$REPO_PATH/apps/lesgriots-os"
+
+    echo "  → git pull (user $DEPLOY_USER)"
+    ssh -t "$VPS_USER@$VPS_HOST" "sudo -u $DEPLOY_USER git -C $REPO_PATH pull --ff-only"
+
+    echo "  → npm ci + build (npm ci COMPLET : next build a besoin des devDeps,"
+    echo "    et better-sqlite3 est un module natif recompilé si l'ABI Node change)"
+    ssh -t "$VPS_USER@$VPS_HOST" "sudo -u $DEPLOY_USER bash -c 'cd $OS_PATH && npm ci && npm run build'"
+
+    echo "  → restart du service systemd"
+    ssh -t "$VPS_USER@$VPS_HOST" "sudo systemctl restart lesgriots-os"
+
+    echo "  → vérification (doit être 'active')"
+    ssh -t "$VPS_USER@$VPS_HOST" "systemctl is-active lesgriots-os"
+
+    echo "✓ LES GRIOTS OS à jour sur https://os.lesgriots.com"
+    ;;
+
   *)
     echo "App inconnue : '$APP'"
-    echo "Apps connues : studio (= lesgriotsxstudio), studio-bo (= BO Next.js), lesgriots, lagriotheque, all"
+    echo "Apps connues : studio (= lesgriotsxstudio), studio-bo (= BO Next.js), os (= LES GRIOTS OS), lesgriots, lagriotheque, all"
     exit 1
     ;;
 esac

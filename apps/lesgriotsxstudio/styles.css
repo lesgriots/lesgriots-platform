@@ -6209,3 +6209,96 @@ body.overview-open .utilbar {
     max-width: none;
   }
 }
+
+
+/* ============================================================
+   PAGE COMPTE À REBOURS (pré-lancement) — même moule que About
+   Le conteneur porte .about-min (layout/typo/griot hérités) + .lx-cd.
+   Ici on ne style QUE le timer ; le reste vient de .about-min.
+   ============================================================ */
+.lx-cd__timer {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(14px, 2.2vw, 30px);
+  margin-top: 2px;
+}
+.lx-cd__unit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 2.3em;
+}
+.lx-cd__num {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: clamp(30px, 4.4vw, 52px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.lx-cd__lab {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-dim, #5a5018);
+}
+@media (max-width: 640px) {
+  .lx-cd__timer { gap: 18px; }
+  .lx-cd__unit { min-width: 2.6em; }
+  .lx-cd__num { font-size: 34px; }
+}
+
+/* Switch FR/EN sur la page compte à rebours (menu du site absent ici). */
+.lx-cd__lang {
+  position: fixed;
+  top: 24px;
+  right: 28px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.lx-cd__lang button {
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--ink-dim, #5a5018);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.lx-cd__lang button:hover { color: var(--ink); }
+.lx-cd__lang button.is-active {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lx-cd__lang__sep { color: var(--ink-dim, #5a5018); opacity: 0.6; }
+@media (max-width: 640px) {
+  .lx-cd__lang { top: 16px; right: 16px; }
+}
+
+/* Sticker (artwork jaune) sur la page compte à rebours — même look que le boot. */
+.lx-cd__sticker {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  width: 280px;
+  height: auto;
+  z-index: 35;
+  pointer-events: none;
+  filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, 0.5));
+}
+@media (max-width: 1200px) {
+  .lx-cd__sticker { width: 180px; }
+}
+@media (max-width: 640px) {
+  .lx-cd__sticker { width: 150px; top: 12px; left: 12px; }
+}

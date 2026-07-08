@@ -312,4 +312,7 @@ function App() {
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
+// LaunchGate : affiche le compte à rebours avant l'heure H, puis le site.
+// Fallback si countdown.jsx n'est pas chargé → on rend le site directement.
+const Gate = (typeof window !== "undefined" && window.LaunchGate) || (({ children }) => children);
+root.render(<Gate><App /></Gate>);

@@ -184,6 +184,11 @@ function useTweaks(defaults) {
 // flips off in lockstep; the host echoes __deactivate_edit_mode back which
 // is what actually hides the panel.
 function TweaksPanel({ title = 'Tweaks', noDeckControls = false, children }) {
+  // Panneau de dev — jamais rendu hors localhost. Le hostname ne change pas
+  // pendant la session, donc ce early-return est stable vis-à-vis des hooks.
+  if (typeof window !== "undefined" && !/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
+    return null;
+  }
   const [open, setOpen] = React.useState(false);
   const dragRef = React.useRef(null);
   // Auto-inject a rail toggle when a <deck-stage> is on the page. The

@@ -8,7 +8,8 @@ Le `.gitignore` couvre déjà `.env*`, `*.key`, `*.pem`, `*.db`. Si un secret es
 
 | Secret | En local | En prod | Régénération |
 |--------|----------|---------|--------------|
-| Variables du dashboard | `apps/dashboard/.env.local` | `/etc/dashboard.env` (chargé par systemd) | éditer les 2 fichiers, `systemctl restart dashboard` |
+| Variables de LES GRIOTS OS (`AUTH_SECRET`, `OS_API_KEY`, Google OAuth) | `apps/lesgriots-os/.env.local` | `/etc/lesgriots-os.env` (chargé par systemd) | `openssl rand -hex 32`, éditer les 2 fichiers, `systemctl restart lesgriots-os` — cf. [DEPLOY-OS.md](DEPLOY-OS.md) |
+| Variables du BO Studio | — | `/etc/lesgriotsxstudio-backoffice.env` | éditer, `systemctl restart lesgriotsxstudio-backoffice` |
 | Clé SSH de déploiement | `~/.ssh/id_ed25519` | clé publique dans `authorized_keys` du VPS | `ssh-keygen -t ed25519` puis `ssh-copy-id` |
 | HTTP Basic admin | — | `/etc/nginx/.htpasswd` | `sudo htpasswd /etc/nginx/.htpasswd moos` |
 
@@ -16,11 +17,11 @@ Le `.gitignore` couvre déjà `.env*`, `*.key`, `*.pem`, `*.db`. Si un secret es
 
 Les vraies valeurs vont dans un gestionnaire de mots de passe (1Password, Bitwarden, ou ton trousseau). Pas dans une note, pas dans un fichier texte, pas dans un message.
 
-## ⚠️ La base SQLite du dashboard = donnée critique non versionnée
+## ⚠️ La base SQLite de LES GRIOTS OS = donnée critique non versionnée
 
-`data/lesgriots.db` contient toute ta donnée métier (clients, projets, devis) et **n'est pas dans Git**. Sa seule protection est la sauvegarde :
+`apps/lesgriots-os/data/lesgriots.db` contient toute ta donnée métier (clients, projets, devis, formations) et **n'est pas dans Git**. Sa seule protection est la sauvegarde :
 
-- En prod : cron quotidien via `infra/scripts/backup.sh` (garde 14 jours).
+- En prod : cron quotidien via `infra/scripts/backup.sh` (sqlite3 `.backup` à chaud, rotation 30).
 - Idéalement : copier aussi les sauvegardes hors du VPS (Dropbox, un autre serveur) pour survivre à une panne disque OVH.
 - Snapshot OVH du VPS activé en complément.
 
