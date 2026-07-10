@@ -33,10 +33,12 @@ export default function LeadsPage() {
 
   function exportCsv() {
     const rows = [
-      ["email", "name", "resource_id", "resource_title", "consent", "date"],
+      ["email", "name", "phone", "source", "resource_id", "resource_title", "consent", "date"],
       ...leads.map((l) => [
         l.email,
         l.name || "",
+        l.phone || "",
+        l.source || "",
         l.resource_id || "",
         resourcesById[l.resource_id]?.title || "",
         l.consent ? "oui" : "non",
@@ -86,6 +88,8 @@ export default function LeadsPage() {
             <tr>
               <th>Email</th>
               <th>Nom</th>
+              <th>Téléphone</th>
+              <th style={{ width: 80 }}>Source</th>
               <th>Ressource</th>
               <th style={{ width: 100 }}>RGPD</th>
               <th style={{ width: 160 }}>Date</th>
@@ -97,6 +101,8 @@ export default function LeadsPage() {
               <tr key={l.id}>
                 <td>{l.email}</td>
                 <td>{l.name || "—"}</td>
+                <td>{l.phone || "—"}</td>
+                <td><span className="pill">{l.source || "site"}</span></td>
                 <td>
                   {l.resource_id ? (resourcesById[l.resource_id]?.title || l.resource_id) : "—"}
                 </td>

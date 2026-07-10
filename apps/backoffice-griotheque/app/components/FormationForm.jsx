@@ -189,6 +189,18 @@ export default function FormationForm({
             </div>
           </Field>
         </Row>
+        {data.cpf && (
+          <Field
+            label="Lien Mon Compte Formation"
+            hint="URL de la fiche sur moncompteformation.gouv.fr — le bouton « S'inscrire via Mon Compte Formation » du site y redirige après capture des coordonnées."
+          >
+            <input
+              value={data.cpfUrl || ""}
+              onChange={(e) => set("cpfUrl", e.target.value)}
+              placeholder="https://www.moncompteformation.gouv.fr/espace-prive/html/#/formation/..."
+            />
+          </Field>
+        )}
         <DefaultAwareField
           label="Lieu"
           field="location"

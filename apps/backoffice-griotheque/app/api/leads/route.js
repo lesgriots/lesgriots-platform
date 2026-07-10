@@ -55,14 +55,16 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { email, name, resource_id, consent } = body || {};
+    const { email, name, phone, resource_id, consent, source } = body || {};
 
     // Validation basique de l'email
     if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Email invalide" }, { status: 400, headers });
     }
 
-    const lead = addLead({ email, name, resource_id, consent, source: "site" });
+    // source limité à une liste connue (pas de valeur arbitraire en base)
+    const src = ["site", "launch", "cpf"].includes(source) ? source : "site";
+    const lead = addLead({ email, name, phone, resource_id, consent, source: src });
 
     return NextResponse.json({ ok: true, id: lead.id }, { headers });
   } catch (err) {

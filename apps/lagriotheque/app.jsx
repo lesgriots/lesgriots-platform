@@ -789,6 +789,95 @@ function CtaBanner({ item, nextSession, tagline, upcoming, title, kind }) {
 // renseigne nom + email + téléphone (optionnel). Submit → ouvre un mailto vers
 // formations@lesgriots.com avec les infos préremplies (côté Moos : répondre
 // avec le PDF en pièce jointe). Confirmation affichée après envoi.
+// Modale d'inscription CPF — capture prénom/nom/email/téléphone puis redirige
+// vers la page Mon Compte Formation de la formation (f.cpfUrl, sinon le
+// portail MCF). Le lead part vers le BO Griothèque (source "cpf").
+function CpfModal({ item, onClose }) {
+  const [step, setStep] = useState("form"); // "form" | "sending"
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [consent, setConsent] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const mcfUrl = item.cpfUrl || "https://www.moncompteformation.gouv.fr";
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setStep("sending");
+    // Capture du lead — best effort : même si l'appel échoue, on redirige
+    // (l'utilisateur ne doit jamais être bloqué avant Mon Compte Formation).
+    try {
+      await fetch("https://admin.lagriotheque.com/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          name: `${firstName} ${lastName}`.trim(),
+          phone,
+          resource_id: `cpf-${item.id}`,
+          consent: true,
+          source: "cpf",
+        }),
+      });
+    } catch (err) { /* on redirige quand même */ }
+    window.location.href = mcfUrl;
+  };
+
+  return (
+    <div className="lg__modal" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="lg__modal__panel" onClick={(e) => e.stopPropagation()}>
+        <button type="button" className="lg__modal__close" onClick={onClose} aria-label="Fermer">
+          [ × Fermer ]
+        </button>
+        <p className="lg__modal__kicker">Inscription CPF</p>
+        <h2 className="lg__modal__title">{item.title}</h2>
+        <p className="lg__modal__intro">
+          Laisse tes coordonnées pour qu'on puisse t'accompagner dans ta
+          démarche, puis tu seras redirigé·e vers Mon Compte Formation pour
+          finaliser ton inscription.
+        </p>
+        <form className="lg__modal__form" onSubmit={submit}>
+          <div className="lg__modal__row">
+            <label className="lg__modal__field">
+              <span className="lg__modal__field__k">Prénom *</span>
+              <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} required autoFocus autoComplete="given-name" />
+            </label>
+            <label className="lg__modal__field">
+              <span className="lg__modal__field__k">Nom *</span>
+              <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} required autoComplete="family-name" />
+            </label>
+          </div>
+          <label className="lg__modal__field">
+            <span className="lg__modal__field__k">Téléphone *</span>
+            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required autoComplete="tel" />
+          </label>
+          <label className="lg__modal__field">
+            <span className="lg__modal__field__k">Email *</span>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
+          </label>
+          <label className="lg__modal__consent">
+            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} required />
+            <span>
+              J'accepte d'être recontacté·e par LES GRIOTS au sujet de cette
+              formation. Tes données ne sont jamais partagées.
+            </span>
+          </label>
+          <button type="submit" className="lg__modal__submit" disabled={step === "sending"}>
+            {step === "sending" ? "Redirection…" : "Continuer vers Mon Compte Formation →"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 function DownloadModal({ item, onClose }) {
   // URL du webhook Make.com qui orchestre : Notion (stockage lead) +
   // Gmail (envoi PDF programme) + Slack (notification Moos). Configurable via
@@ -1021,6 +1110,7 @@ function ProgramPage({ item, kind }) {
   const [activeTab, setActiveTab] = useState("presentation");
   const [titleStuck, setTitleStuck] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
+  const [cpfOpen, setCpfOpen] = useState(false);
   const tabContentRef = useRef(null);
 
   // Au clic sur un onglet : change l'onglet actif. Pas de scroll auto — le
@@ -1683,6 +1773,15 @@ function ProgramPage({ item, kind }) {
           >
             {ctaLabel(item)}
           </a>
+          {kind !== "workshop" && f.cpf && (
+            <button
+              type="button"
+              className="lg__cta-mini__btn"
+              onClick={() => setCpfOpen(true)}
+            >
+              S'inscrire via Mon Compte Formation
+            </button>
+          )}
           <button
             type="button"
             className="lg__cta-mini__btn lg__cta-mini__btn--ghost"
@@ -1704,6 +1803,13 @@ function ProgramPage({ item, kind }) {
         <DownloadModal
           item={item}
           onClose={() => setDownloadOpen(false)}
+        />
+      )}
+
+      {cpfOpen && (
+        <CpfModal
+          item={item}
+          onClose={() => setCpfOpen(false)}
         />
       )}
 
