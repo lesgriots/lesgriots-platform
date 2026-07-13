@@ -41,7 +41,7 @@ const MAX_ZOOM = 4;
 //   VwPct = zoom × max(1, A/C) × 100   (A = ratio vidéo, C = ratio conteneur)
 //   VhPct = zoom × max(1, C/A) × 100
 //   left  = 50% − cx × VwPct ;  top = 50% − cy × VhPct
-function SitePreview({ label, width, cellAspect, videoAR, zoom, cx, cy, previewSrc, start, end, videoFilter, containerFilter, veil, extraScale = 1, note }) {
+function SitePreview({ label, width, cellAspect, videoAR, cropRatio, wFrac, hFrac, cx, cy, previewSrc, start, end, videoFilter, containerFilter, veil, extraScale = 1, note }) {
   const vRef = useRef(null);
   // Boucle la lecture dans [start, end], comme le fera le clip généré.
   useEffect(() => {
@@ -65,11 +65,17 @@ function SitePreview({ label, width, cellAspect, videoAR, zoom, cx, cy, previewS
     }
   }, [start, end]);
 
+  // Le clip généré aura le ratio R (format device ou ratio source) et sera
+  // affiché en object-fit cover dans un conteneur de ratio C. La vidéo
+  // SOURCE est positionnée pour que la zone croppée (fractions visibles
+  // wFrac × hFrac, centrée sur cx/cy) occupe exactement la place du clip.
   const A = videoAR || 16 / 9;
-  const C = cellAspect || A;
-  const z = (zoom || 1) * extraScale;
-  const VwPct = z * Math.max(1, A / C) * 100;
-  const VhPct = z * Math.max(1, C / A) * 100;
+  const R = cropRatio || A;
+  const C = cellAspect || R;
+  const wf = wFrac ?? 1;
+  const hf = hFrac ?? 1;
+  const VwPct = (extraScale * Math.max(1, R / C) * 100) / wf;
+  const VhPct = (extraScale * Math.max(1, C / R) * 100) / hf;
   const leftPct = 50 - (cx ?? 0.5) * VwPct;
   const topPct = 50 - (cy ?? 0.5) * VhPct;
 
@@ -136,13 +142,34 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   const [cy, setCy] = useState(0.5);
   const [panning, setPanning] = useState(false);
 
-  const clampC = (c, z) => Math.max(1 / (2 * z), Math.min(1 - 1 / (2 * z), c));
+  // Format de cadrage « device » : null = ratio original de la vidéo,
+  // sinon ratio cible (16/9 PC, 9/16 mobile, 1:1, 4:5). Le clip généré
+  // aura ce ratio — la grille du site (aspect détecté au load) suivra.
+  const [cropAR, setCropAR] = useState(null);
+
+  // Fractions VISIBLES de l'image source dans le cadrage (largeur/hauteur).
+  // R = ratio cible, A = ratio source :
+  //   wFrac = min(1, R/A)/zoom ; hFrac = min(1, A/R)/zoom
+  // (si R plus étroit que A, on ne voit qu'une tranche horizontale, etc.)
+  const fracs = (z, Rr, A) => ({
+    wFrac: Math.min(1, Rr / A) / z,
+    hFrac: Math.min(1, A / Rr) / z,
+  });
+  const clampAxis = (c, frac) => Math.max(frac / 2, Math.min(1 - frac / 2, c));
 
   function applyZoom(zRaw) {
     const z = Math.max(1, Math.min(MAX_ZOOM, zRaw));
+    const f = fracs(z, cropAR || vidAR, vidAR);
     setZoom(z);
-    setCx((c) => clampC(c, z));
-    setCy((c) => clampC(c, z));
+    setCx((c) => clampAxis(c, f.wFrac));
+    setCy((c) => clampAxis(c, f.hFrac));
+  }
+
+  function applyRatio(Rr) {
+    setCropAR(Rr);
+    const f = fracs(zoom, Rr || vidAR, vidAR);
+    setCx((c) => clampAxis(c, f.wFrac));
+    setCy((c) => clampAxis(c, f.hFrac));
   }
 
   // Métadonnées chargées → durée connue, sélection = clip entier par défaut.
@@ -219,7 +246,7 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   function cropPointerDown(e) {
     e.preventDefault();
     panRef.current = { x: e.clientX, y: e.clientY, cx, cy, moved: false };
-    if (zoom > 1.001) setPanning(true);
+    if (canPan) setPanning(true);
     e.currentTarget.setPointerCapture?.(e.pointerId);
   }
   function cropPointerMove(e) {
@@ -228,12 +255,13 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
     const dx = e.clientX - p.x;
     const dy = e.clientY - p.y;
     if (Math.abs(dx) + Math.abs(dy) > 4) p.moved = true;
-    if (zoom <= 1.001 || !cropRef.current) return;
+    if (!canPan || !cropRef.current) return;
     const r = cropRef.current.getBoundingClientRect();
-    // Déplacer le doigt de r.width px = traverser toute la LARGEUR VISIBLE,
-    // soit 1/zoom de l'image → dcx = dx / (width * zoom).
-    setCx(clampC(p.cx - dx / (r.width * zoom), zoom));
-    setCy(clampC(p.cy - dy / (r.height * zoom), zoom));
+    // La vidéo affichée fait r.width / wFrac px de large → déplacer le
+    // pointeur de dx px = déplacer le centre de dx × wFrac / r.width
+    // (en fraction de l'image source).
+    setCx(clampAxis(p.cx - (dx * wFrac) / r.width, wFrac));
+    setCy(clampAxis(p.cy - (dy * hFrac) / r.height, hFrac));
   }
   function cropPointerUp() {
     const p = panRef.current;
@@ -246,10 +274,16 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
     }
   }
 
-  // Transform CSS de la preview : translate PUIS scale (ordre droite→gauche
-  // en CSS) pour amener le centre (cx, cy) au centre du cadre.
-  const tx = (0.5 - cx) * 100;
-  const ty = (0.5 - cy) * 100;
+  // Géométrie du cadrage : le cadre a le ratio cible R ; la vidéo source
+  // est positionnée en absolu pour que la zone croppée le remplisse
+  // exactement (mêmes maths que la simulation SitePreview).
+  const R = cropAR || vidAR;
+  const { wFrac, hFrac } = fracs(zoom, R, vidAR);
+  const canPan = wFrac < 0.999 || hFrac < 0.999;
+  const cropVwPct = 100 / wFrac;
+  const cropVhPct = 100 / hFrac;
+  const cropLeftPct = 50 - cx * cropVwPct;
+  const cropTopPct = 50 - cy * cropVhPct;
 
   // ── Drag timeline façon Instagram ───────────────────────────────────────
   const timeAtX = (clientX) => {
@@ -336,11 +370,14 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
     setBusy(true); setMsg("");
     // Recadrage → fractions de position du crop (0..1) pour ffmpeg :
     // x = (iw - ow) * px. px = position du bord gauche du crop dans la
-    // marge disponible, dérivée du centre (cx).
-    const crop = zoom > 1.01 ? {
+    // marge disponible, dérivée du centre (cx). `ratio` = format device
+    // choisi (le clip généré aura ce ratio).
+    const fg = fracs(zoom, cropAR || vidAR, vidAR);
+    const crop = (zoom > 1.01 || cropAR) ? {
       zoom,
-      px: (cx - 1 / (2 * zoom)) / (1 - 1 / zoom),
-      py: (cy - 1 / (2 * zoom)) / (1 - 1 / zoom),
+      ratio: cropAR || undefined,
+      px: fg.wFrac < 0.999 ? (cx - fg.wFrac / 2) / (1 - fg.wFrac) : 0.5,
+      py: fg.hFrac < 0.999 ? (cy - fg.hFrac / 2) / (1 - fg.hFrac) : 0.5,
     } : undefined;
     try {
       const r = await fetch("/api/trim", {
@@ -408,16 +445,17 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
         onPointerCancel={cropPointerUp}
         style={{
           position: "relative",
-          width: "100%",
-          maxHeight: 240,
-          aspectRatio: `${vidAR}`,
+          width: "auto",
+          height: 240,
+          maxWidth: "100%",
+          aspectRatio: `${R}`,
           margin: "0 auto",
           background: "#000",
           border: "1px solid var(--rule)",
           overflow: "hidden",
           touchAction: "none",
           userSelect: "none",
-          cursor: zoom > 1.001 ? (panning ? "grabbing" : "grab") : "pointer",
+          cursor: canPan ? (panning ? "grabbing" : "grab") : "pointer",
         }}
       >
         <video
@@ -432,11 +470,13 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
           onPause={() => setPlaying(false)}
           draggable={false}
           style={{
-            display: "block",
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            transform: `scale(${zoom}) translate(${tx}%, ${ty}%)`,
+            position: "absolute",
+            width: `${cropVwPct}%`,
+            height: `${cropVhPct}%`,
+            left: `${cropLeftPct}%`,
+            top: `${cropTopPct}%`,
+            maxWidth: "none",
+            objectFit: "fill",
             pointerEvents: "none",
           }}
         />
@@ -456,6 +496,33 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
         )}
       </div>
 
+      {/* ── Format de cadrage (device) ──────────────────────────────────── */}
+      <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 8, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 10, color: "var(--dim)", textTransform: "uppercase", letterSpacing: "0.1em", flexShrink: 0 }}>Format</span>
+        {[
+          { label: "Original", v: null },
+          { label: "16:9 · PC", v: 16 / 9 },
+          { label: "9:16 · Mobile", v: 9 / 16 },
+          { label: "1:1 · Carré", v: 1 },
+          { label: "4:5 · Feed", v: 4 / 5 },
+        ].map((f) => (
+          <button
+            key={f.label}
+            type="button"
+            data-ratio={f.label}
+            className="btn btn--ghost"
+            onClick={() => applyRatio(f.v)}
+            style={{
+              padding: "2px 8px",
+              fontSize: 11,
+              ...(cropAR === f.v ? { background: "var(--accent)", color: "#000", borderColor: "var(--accent)" } : {}),
+            }}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
       {/* ── Zoom / recadrage ────────────────────────────────────────────── */}
       <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
         <span style={{ fontSize: 10, color: "var(--dim)", textTransform: "uppercase", letterSpacing: "0.1em", flexShrink: 0 }}>Zoom</span>
@@ -470,15 +537,15 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
           aria-label="Zoom du cadrage"
         />
         <span style={{ fontSize: 11, fontVariantNumeric: "tabular-nums", width: 34, textAlign: "right" }}>{zoom.toFixed(1)}×</span>
-        {zoom > 1.001 && (
-          <button type="button" className="btn btn--ghost" style={{ padding: "2px 8px", fontSize: 11 }} onClick={() => { setZoom(1); setCx(0.5); setCy(0.5); }}>
+        {(zoom > 1.001 || cropAR) && (
+          <button type="button" className="btn btn--ghost" style={{ padding: "2px 8px", fontSize: 11 }} onClick={() => { setZoom(1); setCropAR(null); setCx(0.5); setCy(0.5); }}>
             ⟲ Réinitialiser
           </button>
         )}
       </div>
-      {zoom > 1.001 && (
+      {canPan && (
         <p className="note" style={{ margin: "4px 0 0", fontSize: 10, color: "var(--dim)" }}>
-          Glisse l'image dans le cadre pour choisir le cadrage — il sera appliqué à la boucle générée.
+          Glisse l'image dans le cadre pour choisir le cadrage — il sera appliqué à la boucle générée{cropAR ? ` (format ${cropAR > 1 ? "paysage" : cropAR === 1 ? "carré" : "portrait"})` : ""}.
         </p>
       )}
 
@@ -568,9 +635,9 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
               <SitePreview
                 label="Hover PC — cellule grille"
                 width={170}
-                cellAspect={vidAR}
+                cellAspect={R}
                 videoAR={vidAR}
-                zoom={zoom} cx={cx} cy={cy}
+                cropRatio={R} wFrac={wFrac} hFrac={hFrac} cx={cx} cy={cy}
                 previewSrc={previewSrc} start={start} end={end}
                 videoFilter="grayscale(0.4) contrast(1.1)"
                 extraScale={1.04}
@@ -580,7 +647,7 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
                 width={300}
                 cellAspect={16 / 9}
                 videoAR={vidAR}
-                zoom={zoom} cx={cx} cy={cy}
+                cropRatio={R} wFrac={wFrac} hFrac={hFrac} cx={cx} cy={cy}
                 previewSrc={previewSrc} start={start} end={end}
                 containerFilter="grayscale(1) contrast(1.1) brightness(0.6)"
                 veil
@@ -588,9 +655,9 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
               <SitePreview
                 label="Mobile — carte grille"
                 width={110}
-                cellAspect={vidAR}
+                cellAspect={R}
                 videoAR={vidAR}
-                zoom={zoom} cx={cx} cy={cy}
+                cropRatio={R} wFrac={wFrac} hFrac={hFrac} cx={cx} cy={cy}
                 previewSrc={previewSrc} start={start} end={end}
                 videoFilter="grayscale(1) contrast(1.05) brightness(0.95)"
                 note="au tap : grayscale(0.3)"

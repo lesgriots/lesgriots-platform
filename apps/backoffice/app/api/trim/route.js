@@ -52,17 +52,32 @@ export async function POST(req) {
   const outName = `${base}-loop-${stamp}.mp4`;
   const outPath = path.join(IMG_DIR, outName);
 
-  // Recadrage optionnel : { zoom ≥ 1, px, py ∈ [0,1] } envoyé par le
-  // découpeur du BO (zoom + pan de l'image). On croppe iw/zoom × ih/zoom
-  // (même ratio que la source), positionné dans la marge disponible :
-  //   x = (iw - ow) * px. Dimensions forcées paires (requis par yuv420p).
+  // Recadrage optionnel : { zoom ≥ 1, px, py ∈ [0,1], ratio? } envoyé par le
+  // découpeur du BO (format device + zoom + pan de l'image).
+  //   - sans ratio : crop iw/zoom × ih/zoom (même ratio que la source)
+  //   - avec ratio R : crop = plus grand rectangle de ratio R contenu dans
+  //     la source, divisé par zoom → w = min(iw, ih*R)/zoom, h = w/R
+  //   - position : x = (iw - ow) * px. Dimensions paires (requis yuv420p).
+  //   NB : la virgule dans min() est échappée (\,) pour le parseur de
+  //   filtergraph ffmpeg.
   let vf = null;
   const c = body.crop;
-  if (c && Number.isFinite(Number(c.zoom)) && Number(c.zoom) > 1.001) {
-    const z = Math.min(Math.max(Number(c.zoom), 1), 6);
-    const px = Math.min(Math.max(Number(c.px ?? 0.5), 0), 1);
-    const py = Math.min(Math.max(Number(c.py ?? 0.5), 0), 1);
-    vf = `crop=floor(iw/${z.toFixed(4)}/2)*2:floor(ih/${z.toFixed(4)}/2)*2:(iw-ow)*${px.toFixed(4)}:(ih-oh)*${py.toFixed(4)}`;
+  if (c) {
+    const z = Math.min(Math.max(Number(c.zoom) || 1, 1), 6);
+    const ratio = Number(c.ratio);
+    const hasRatio = Number.isFinite(ratio) && ratio >= 0.2 && ratio <= 5;
+    if (z > 1.001 || hasRatio) {
+      const px = Math.min(Math.max(Number(c.px ?? 0.5), 0), 1);
+      const py = Math.min(Math.max(Number(c.py ?? 0.5), 0), 1);
+      const zs = z.toFixed(4);
+      const wExpr = hasRatio
+        ? `floor(min(iw\\,ih*${ratio.toFixed(6)})/${zs}/2)*2`
+        : `floor(iw/${zs}/2)*2`;
+      const hExpr = hasRatio
+        ? `floor(ow/${ratio.toFixed(6)}/2)*2`
+        : `floor(ih/${zs}/2)*2`;
+      vf = `crop=${wExpr}:${hExpr}:(iw-ow)*${px.toFixed(4)}:(ih-oh)*${py.toFixed(4)}`;
+    }
   }
 
   try {
