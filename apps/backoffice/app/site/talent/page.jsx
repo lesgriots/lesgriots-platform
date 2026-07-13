@@ -10,6 +10,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Type from "../../components/Type";
+import VideoTrimmer from "../../components/VideoTrimmer";
 
 export default function TalentEditorPage() {
   const [loading, setLoading] = useState(true);
@@ -23,6 +24,9 @@ export default function TalentEditorPage() {
   const [instagramUrl, setInstagramUrl] = useState("");
   const [upPhoto, setUpPhoto] = useState(false);
   const [upVideo, setUpVideo] = useState(false);
+  // Découpeur / recadrage de la vidéo hover (même outil que les projets
+  // et l'Écosystème). Visible uniquement pour un mp4 self-hosté sous img/.
+  const [showTrim, setShowTrim] = useState(false);
 
   useEffect(() => {
     fetch("/api/site/talent")
@@ -142,6 +146,30 @@ export default function TalentEditorPage() {
           {hoverVideo ? (
             <video src={`/api/preview?p=${encodeURIComponent(hoverVideo)}`} muted loop playsInline controls style={{ marginTop: 10, maxWidth: "100%", maxHeight: 180, border: "1px solid var(--rule)" }} />
           ) : <p className="note">{upVideo ? "Upload en cours…" : "Vide = vidéo par défaut (riles-live-04.mp4)."}</p>}
+          {/* Découpeur + recadrage — même outil que sur les projets. La page
+              Talent utilise les MÊMES rendus que Work (cellule hover +
+              backdrop .ahome__bg), donc les previews « rendu sur le site »
+              sont représentatives. */}
+          {!!hoverVideo && !/^https?:\/\//i.test(hoverVideo) && /\.(mp4|mov|webm|m4v)$/i.test(hoverVideo) && (
+            <div style={{ marginTop: 8 }}>
+              <button
+                type="button"
+                className="btn btn--ghost"
+                style={{ padding: "4px 10px", fontSize: 11 }}
+                onClick={() => setShowTrim((s) => !s)}
+              >
+                {showTrim ? "✕ Fermer le découpage" : "✂ Choisir l'extrait + cadrage"}
+              </button>
+              {showTrim && (
+                <VideoTrimmer
+                  key={hoverVideo}
+                  src={hoverVideo}
+                  previewSrc={`/api/preview?p=${encodeURIComponent(hoverVideo)}`}
+                  onTrimmed={(p) => setHoverVideo(p)}
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
 
