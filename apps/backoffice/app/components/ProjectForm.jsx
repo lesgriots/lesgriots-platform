@@ -3,6 +3,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import VideoTrimmer from "./VideoTrimmer";
 
 // Liste pré-définie de services — un clic pour les ajouter au rôle multi.
 // Tu peux toujours en taper d'autres à la main ; ces chips ne sont qu'un raccourci.
@@ -152,6 +153,11 @@ export default function ProjectForm({ initial, isNew }) {
   // Tant que l'utilisateur n'a pas touché l'ID à la main, on le génère
   // automatiquement depuis le nom (uniquement en création).
   const [idTouched, setIdTouched] = useState(!isNew);
+  // Découpeur d'extrait pour la thumb video (hover grille Work + fond
+  // de l'overlay INFORMATION du viewer). Visible uniquement pour un
+  // .mp4 self-hosté sous img/ (les URL externes / YouTube ne passent
+  // pas par /api/trim).
+  const [showThumbTrim, setShowThumbTrim] = useState(false);
 
   function set(k, v) { setF((p) => ({ ...p, [k]: v })); }
 
@@ -408,6 +414,34 @@ export default function ProjectForm({ initial, isNew }) {
         accept="video/mp4"
         isVideo
       />
+      {/* Découpeur d'extrait — même outil que sur la page Écosystème.
+          Permet de choisir directement le segment qui tournera en boucle
+          au hover (grille Work) et en fond (overlay INFORMATION), au lieu
+          d'uploader un mp4 déjà pré-découpé. Génère un clip court optimisé
+          via /api/trim (ffmpeg) et fait pointer le champ dessus. */}
+      {!!f.thumbVideo && !isExternalUrl(f.thumbVideo) && /\.(mp4|mov|webm|m4v)$/i.test(f.thumbVideo) && (
+        <div style={{ marginTop: 6 }}>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            style={{ padding: "4px 10px", fontSize: 11 }}
+            onClick={() => setShowThumbTrim((s) => !s)}
+          >
+            {showThumbTrim ? "✕ Fermer le découpage" : "✂ Choisir l'extrait (hover + fond)"}
+          </button>
+          {showThumbTrim && (
+            // key = valeur du champ → le découpeur se réinitialise quand la
+            // source change (nouvel upload, ou boucle générée qui devient la
+            // nouvelle source).
+            <VideoTrimmer
+              key={f.thumbVideo}
+              src={f.thumbVideo}
+              previewSrc={`/api/preview?p=${encodeURIComponent(f.thumbVideo)}`}
+              onTrimmed={(p) => set("thumbVideo", p)}
+            />
+          )}
+        </div>
+      )}
       {/* Timecode de départ — utile uniquement quand thumbVideo est une
           URL YouTube. La grille Work joue un extrait [thumbStart → +4s]
           en boucle au hover. Ignoré pour les .mp4 self-hostés (qui sont
