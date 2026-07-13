@@ -100,7 +100,7 @@ export async function POST(req) {
   const targetDir = subdir ? path.join(IMG_DIR, subdir) : IMG_DIR;
   await fs.mkdir(targetDir, { recursive: true });
 
-  const bytes = Buffer.from(await file.arrayBuffer());
+  let bytes = Buffer.from(await file.arrayBuffer());
 
   const needsImgConvert = IMG_CONVERT.test(original);
   const needsVidConvert = VID_CONVERT.test(original);
@@ -108,6 +108,24 @@ export async function POST(req) {
   // ---- Cas simple : déjà web-compatible, on écrit tel quel ----------------
   if (!needsImgConvert && !needsVidConvert) {
     const safeName = `${base}-${stamp}${srcExt}`;
+    // Remux faststart systématique des mp4 directs (> 2 Mo) : si l'index
+    // (moov) est en fin de fichier, le navigateur doit télécharger TOUT le
+    // fichier avant de pouvoir lire → écran noir + durée fallback 01:00
+    // sur les gros films (vu le 14/07/2026 sur indigo-cristal). -c copy =
+    // sans ré-encodage, quelques secondes même sur un film.
+    if (VIDEO_WEB.test(safeName) && bytes.length > 2 * 1024 * 1024 && (await hasBinary("ffmpeg"))) {
+      const t1 = path.join(os.tmpdir(), `fs-src-${stamp}${srcExt}`);
+      const t2 = path.join(os.tmpdir(), `fs-out-${stamp}${srcExt}`);
+      try {
+        await fs.writeFile(t1, bytes);
+        await execFileP("ffmpeg", ["-v", "error", "-i", t1, "-c", "copy", "-movflags", "+faststart", t2, "-y"]);
+        bytes = Buffer.from(await fs.readFile(t2));
+      } catch { /* remux raté → on garde l'original tel quel */ }
+      finally {
+        fs.unlink(t1).catch(() => {});
+        fs.unlink(t2).catch(() => {});
+      }
+    }
     // Vidéo lourde + R2 configuré → offload vers le bucket (multipart),
     // le champ du BO pointera sur https://media.lesgriotsxstudio.com/…
     // En cas d'échec R2, on retombe silencieusement sur le disque local.
