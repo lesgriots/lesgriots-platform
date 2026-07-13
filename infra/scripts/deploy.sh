@@ -72,7 +72,10 @@ case "$APP" in
     BO_PATH="$REPO_PATH/apps/backoffice"
 
     echo "  → git pull (user $DEPLOY_USER)"
-    ssh -t "$VPS_USER@$VPS_HOST" "sudo -u $DEPLOY_USER git -C $REPO_PATH pull --ff-only"
+    # npm modifie package-lock.json sur le serveur à chaque install → on le
+    # checkout avant le pull (le lockfile de référence est celui du repo).
+    # Idem pour les fichiers générés par l'exporteur.
+    ssh -t "$VPS_USER@$VPS_HOST" "sudo -u $DEPLOY_USER git -C $REPO_PATH checkout -- apps/backoffice/package-lock.json apps/lesgriotsxstudio/data.jsx apps/lesgriotsxstudio/index.html 2>/dev/null; sudo -u $DEPLOY_USER git -C $REPO_PATH pull --ff-only"
 
     echo "  → npm install + build"
     ssh -t "$VPS_USER@$VPS_HOST" "sudo -u $DEPLOY_USER bash -c 'cd $BO_PATH && npm install --omit=dev && npm run build'"
@@ -94,7 +97,10 @@ case "$APP" in
     OS_PATH="$REPO_PATH/apps/lesgriots-os"
 
     echo "  → git pull (user $DEPLOY_USER)"
-    ssh -t "$VPS_USER@$VPS_HOST" "sudo -u $DEPLOY_USER git -C $REPO_PATH pull --ff-only"
+    # npm modifie package-lock.json sur le serveur à chaque install → on le
+    # checkout avant le pull (le lockfile de référence est celui du repo).
+    # Idem pour les fichiers générés par l'exporteur.
+    ssh -t "$VPS_USER@$VPS_HOST" "sudo -u $DEPLOY_USER git -C $REPO_PATH checkout -- apps/backoffice/package-lock.json apps/lesgriotsxstudio/data.jsx apps/lesgriotsxstudio/index.html 2>/dev/null; sudo -u $DEPLOY_USER git -C $REPO_PATH pull --ff-only"
 
     echo "  → npm ci + build (npm ci COMPLET : next build a besoin des devDeps,"
     echo "    et better-sqlite3 est un module natif recompilé si l'ABI Node change)"
