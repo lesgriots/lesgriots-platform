@@ -142,21 +142,22 @@ export async function exportToDataJsx() {
   const content = header + projectsBlock + siteBlock + footer;
   await fs.writeFile(DATA_PATH, content, "utf8");
 
-  // Cache-busting : data.jsx change à chaque export, mais son URL dans
-  // index.html porte un ?v=<n> figé → navigateurs et Cloudflare gardent
-  // l'ancienne copie. On bump donc la version de data.jsx dans index.html
-  // à chaque export pour forcer un rechargement frais côté visiteurs.
-  // (index.html n'est pas mis en cache par Cloudflare → vu immédiatement.)
+  // Cache-busting : TOUTES les URLs versionnées de index.html (.jsx ET .css)
+  // sont re-bumpées à chaque export — pas seulement data.jsx.
+  // Leçon du 13/07/2026 : Cloudflare (réglages de zone) sert les fichiers
+  // statiques en cache long ; avec un ?v= figé, les visiteurs gardaient des
+  // .jsx périmés des semaines après les déploiements (bugs fantômes).
+  // Un ?v= frais à chaque export = URL neuve = cache percé partout.
+  // Corollaire : après un déploiement de code du site, déclencher un export
+  // (Sync) pour rendre le nouveau code visible — deploy.sh le fait.
   let cacheBust = null;
   try {
     const INDEX_PATH = path.join(SITE_ROOT, "index.html");
     let html = await fs.readFile(INDEX_PATH, "utf8");
     const version = Date.now();
-    if (/data\.jsx\?v=\d+/.test(html)) {
-      html = html.replace(/data\.jsx\?v=\d+/g, `data.jsx?v=${version}`);
-    } else {
-      html = html.replace(/data\.jsx(?!\?)/g, `data.jsx?v=${version}`);
-    }
+    html = html.replace(/\.(jsx|css)\?v=\d+/g, `.$1?v=${version}`);
+    // data.jsx sans version (état initial) → on lui en pose une.
+    html = html.replace(/data\.jsx(?!\?)/g, `data.jsx?v=${version}`);
     await fs.writeFile(INDEX_PATH, html, "utf8");
     cacheBust = version;
   } catch {

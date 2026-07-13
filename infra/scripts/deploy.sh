@@ -44,10 +44,18 @@ echo "▶ Déploiement de '$APP' sur $VPS_HOST ..."
 
 case "$APP" in
   lesgriots|lagriotheque|lesgriotsxstudio|all)
-    # Sites statiques (HTML + Babel standalone) : git pull et c'est tout.
-    # Pas de build, pas de reload nginx — nginx sert les fichiers tels quels,
-    # la prochaine requête sert la nouvelle version automatiquement.
-    ssh -t "$VPS_USER@$VPS_HOST" "sudo -u $DEPLOY_USER git -C $REPO_PATH pull --ff-only"
+    # Sites statiques (HTML + Babel standalone) : git pull, puis re-export.
+    # data.jsx et index.html sont GÉNÉRÉS sur le serveur par l'exporteur
+    # (Sync du BO) → on les checkout avant le pull pour éviter le conflit,
+    # puis on relance l'export juste après : il régénère data.jsx depuis la
+    # DB (source de vérité) ET re-bump les ?v= de tous les .jsx/.css —
+    # indispensable pour percer le cache Cloudflare après un déploiement
+    # de code (leçon du 13/07/2026 : fullscreen "cassé" = viewer.jsx
+    # périmé servi par le cache).
+    ssh -t "$VPS_USER@$VPS_HOST" "sudo -u $DEPLOY_USER git -C $REPO_PATH checkout -- apps/lesgriotsxstudio/data.jsx apps/lesgriotsxstudio/index.html 2>/dev/null; sudo -u $DEPLOY_USER git -C $REPO_PATH pull --ff-only"
+
+    echo "  → régénération data.jsx + cache-bust des versions (exporteur)"
+    ssh -t "$VPS_USER@$VPS_HOST" "cd $REPO_PATH/apps/backoffice && sudo -u $DEPLOY_USER node --input-type=module -e \"import(process.cwd()+'/lib/exporter.js').then(m=>m.exportToDataJsx()).then(r=>console.log('export ok, v='+r.cacheBust)).catch(e=>{console.error('export KO: '+e.message);process.exit(1)})\""
 
     # Fix permissions au cas où de nouveaux fichiers seraient arrivés avec
     # un mode trop restrictif (rsync préserve les modes source).
