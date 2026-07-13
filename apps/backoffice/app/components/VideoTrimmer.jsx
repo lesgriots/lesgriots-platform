@@ -31,6 +31,79 @@ const MIN_LEN = 0.2;    // durée mini de la sélection (s)
 const HANDLE_W = 14;    // largeur px des poignées
 const MAX_ZOOM = 4;
 
+// ── Simulation du rendu sur le site ──────────────────────────────────────
+// Reproduit fidèlement comment le clip (sélection + cadrage) apparaîtra dans
+// un contexte du site : cellule de la grille Work au hover, fond plein écran
+// au hover, carte de la grille mobile. Le crop est simulé mathématiquement :
+// le clip généré fera iw/zoom × ih/zoom centré sur (cx, cy), affiché en
+// object-fit cover dans le conteneur → on positionne la vidéo SOURCE en
+// absolu à la taille / position équivalentes.
+//   VwPct = zoom × max(1, A/C) × 100   (A = ratio vidéo, C = ratio conteneur)
+//   VhPct = zoom × max(1, C/A) × 100
+//   left  = 50% − cx × VwPct ;  top = 50% − cy × VhPct
+function SitePreview({ label, width, cellAspect, videoAR, zoom, cx, cy, previewSrc, start, end, videoFilter, containerFilter, veil, extraScale = 1, note }) {
+  const vRef = useRef(null);
+  // Boucle la lecture dans [start, end], comme le fera le clip généré.
+  useEffect(() => {
+    const v = vRef.current;
+    if (!v) return;
+    const onTU = () => {
+      if (end > start && (v.currentTime >= end || v.currentTime < start - 0.05)) {
+        v.currentTime = start;
+        if (v.paused) v.play().catch(() => {});
+      }
+    };
+    v.addEventListener("timeupdate", onTU);
+    return () => v.removeEventListener("timeupdate", onTU);
+  }, [start, end]);
+  // Nouvelle sélection → repart du début de l'extrait.
+  useEffect(() => {
+    const v = vRef.current;
+    if (v && v.readyState >= 1) {
+      v.currentTime = start;
+      v.play().catch(() => {});
+    }
+  }, [start, end]);
+
+  const A = videoAR || 16 / 9;
+  const C = cellAspect || A;
+  const z = (zoom || 1) * extraScale;
+  const VwPct = z * Math.max(1, A / C) * 100;
+  const VhPct = z * Math.max(1, C / A) * 100;
+  const leftPct = 50 - (cx ?? 0.5) * VwPct;
+  const topPct = 50 - (cy ?? 0.5) * VhPct;
+
+  return (
+    <div style={{ flexShrink: 0 }}>
+      <div style={{ fontSize: 9, color: "var(--dim)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 3 }}>{label}</div>
+      <div style={{ position: "relative", width, aspectRatio: `${C}`, overflow: "hidden", background: "#000", border: "1px solid var(--rule)", filter: containerFilter || "none" }}>
+        <video
+          ref={vRef}
+          src={previewSrc}
+          muted
+          playsInline
+          autoPlay
+          style={{
+            position: "absolute",
+            width: `${VwPct}%`,
+            height: `${VhPct}%`,
+            left: `${leftPct}%`,
+            top: `${topPct}%`,
+            maxWidth: "none",
+            objectFit: "fill",
+            filter: videoFilter || "none",
+            pointerEvents: "none",
+          }}
+        />
+        {veil && (
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.7) 100%)", pointerEvents: "none" }} />
+        )}
+      </div>
+      {note && <div style={{ fontSize: 9, color: "var(--dim)", marginTop: 2, maxWidth: width }}>{note}</div>}
+    </div>
+  );
+}
+
 export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   const vidRef = useRef(null);
   const stripRef = useRef(null);
@@ -51,6 +124,8 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   const [ok, setOk] = useState(true);
   // État lecture, synchronisé sur l'élément <video> (onPlay/onPause).
   const [playing, setPlaying] = useState(false);
+  // Affichage des previews "rendu sur le site" (hover PC / fond / mobile).
+  const [showRender, setShowRender] = useState(false);
   // ── Recadrage ──
   // zoom ≥ 1 ; (cx, cy) = centre du cadrage en fraction de l'image (0..1).
   // Le ratio de sortie = ratio source (le site affiche la thumb en cover,
@@ -474,6 +549,59 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
         <span>début <strong style={{ color: "var(--ink)" }}>{fmtTC(start)}</strong></span>
         <span>segment <strong style={{ color: "var(--accent)" }}>{selLen.toFixed(1)}s</strong></span>
         <span>fin <strong style={{ color: "var(--ink)" }}>{fmtTC(end)}</strong> / {fmtTC(dur)}</span>
+      </div>
+
+      {/* ── Rendu sur le site : hover PC (cellule + fond) et mobile ────── */}
+      <div style={{ marginTop: 10 }}>
+        <button
+          type="button"
+          className="btn btn--ghost"
+          data-render-toggle
+          style={{ padding: "4px 10px", fontSize: 11 }}
+          onClick={() => setShowRender((s) => !s)}
+        >
+          {showRender ? "✕ Masquer le rendu sur le site" : "👁 Voir le rendu sur le site (hover PC + mobile)"}
+        </button>
+        {showRender && (
+          <>
+            <div data-render-previews style={{ display: "flex", gap: 14, marginTop: 8, flexWrap: "wrap", alignItems: "flex-start" }}>
+              <SitePreview
+                label="Hover PC — cellule grille"
+                width={170}
+                cellAspect={vidAR}
+                videoAR={vidAR}
+                zoom={zoom} cx={cx} cy={cy}
+                previewSrc={previewSrc} start={start} end={end}
+                videoFilter="grayscale(0.4) contrast(1.1)"
+                extraScale={1.04}
+              />
+              <SitePreview
+                label="Hover PC — fond plein écran"
+                width={300}
+                cellAspect={16 / 9}
+                videoAR={vidAR}
+                zoom={zoom} cx={cx} cy={cy}
+                previewSrc={previewSrc} start={start} end={end}
+                containerFilter="grayscale(1) contrast(1.1) brightness(0.6)"
+                veil
+              />
+              <SitePreview
+                label="Mobile — carte grille"
+                width={110}
+                cellAspect={vidAR}
+                videoAR={vidAR}
+                zoom={zoom} cx={cx} cy={cy}
+                previewSrc={previewSrc} start={start} end={end}
+                videoFilter="grayscale(1) contrast(1.05) brightness(0.95)"
+                note="au tap : grayscale(0.3)"
+              />
+            </div>
+            <p className="note" style={{ margin: "6px 0 0", fontSize: 10, color: "var(--dim)" }}>
+              Simulation fidèle des filtres du site (N&B, voile, scale hover) avec ta sélection et ton cadrage.
+              NB : la grille mobile joue la 1ère ressource vidéo du projet, pas la thumb — rendu identique si c'est la même vidéo.
+            </p>
+          </>
+        )}
       </div>
 
       <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 10, flexWrap: "wrap" }}>
