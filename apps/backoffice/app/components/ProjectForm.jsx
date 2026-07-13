@@ -389,9 +389,14 @@ export default function ProjectForm({ initial, isNew }) {
         Cover (image principale visible sur la home)
         <span style={{ color: "var(--accent)", marginLeft: 6 }}>* recommandé</span>
       </label>
-      {!f.cover && (
+      {!f.cover && !f.thumbVideo && (
         <p className="note" style={{ marginTop: 0, marginBottom: 6, color: "var(--dim)" }}>
-          ⚠ Si tu n'ajoutes pas de cover, un placeholder jaune avec le nom du projet sera affiché à la place. Tu peux toujours sauver sans, mais ça aura l'air bien plus pro avec une image.
+          ⚠ Si tu n'ajoutes ni cover ni thumb video, un placeholder jaune avec le nom du projet sera affiché à la place. Tu peux toujours sauver sans, mais ça aura l'air bien plus pro avec un visuel.
+        </p>
+      )}
+      {!f.cover && !!f.thumbVideo && (
+        <p className="note" style={{ marginTop: 0, marginBottom: 6, color: "var(--dim)" }}>
+          Pas de cover : une image sera générée automatiquement depuis la thumb video à la publication (Sync). Tu peux quand même en uploader une pour la contrôler.
         </p>
       )}
       <MediaInput

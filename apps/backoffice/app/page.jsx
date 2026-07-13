@@ -92,8 +92,12 @@ export default function ProjectsListPage() {
   // Alerte qualité sur un projet (affichée comme badge dans la liste).
   function warnings(p) {
     const w = [];
-    if (!p.cover || !p.cover.trim()) w.push("sans cover");
-    else if (NON_WEB.test(p.cover)) w.push("cover non-web");
+    // Une thumb video vaut cover : à l'export, une image est générée
+    // automatiquement depuis une frame de la vidéo (ffmpeg). On n'alerte
+    // "sans cover" que si le projet n'a NI cover NI thumb video.
+    const hasThumbVid = !!(p.thumbVideo && p.thumbVideo.trim());
+    if ((!p.cover || !p.cover.trim()) && !hasThumbVid) w.push("sans cover");
+    else if (p.cover && p.cover.trim() && NON_WEB.test(p.cover)) w.push("cover non-web");
     if ((p.resources || []).some((r) => r.src && NON_WEB.test(r.src) && !isExternal(r.src))) {
       w.push("média .mov/.tif");
     }

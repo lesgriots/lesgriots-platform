@@ -5,10 +5,14 @@
 // Le site continue de fonctionner même si le back office est arrêté.
 import fs from "fs/promises";
 import path from "path";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import { listProjects, listContent } from "./db.js";
 
+const execFileP = promisify(execFile);
 const SITE_ROOT = path.resolve(process.cwd(), "..", "lesgriotsxstudio");
 const DATA_PATH = path.join(SITE_ROOT, "data.jsx");
+const IMG_DIR = path.join(SITE_ROOT, "img");
 
 // Échappe les chaînes pour les sortir en littéraux JS sûrs.
 function s(value) {
@@ -29,6 +33,39 @@ function placeholderCover(name) {
 // Renvoie le cover du projet, ou un placeholder si vide.
 function safeCover(p) {
   return (p.cover && p.cover.trim()) ? p.cover : placeholderCover(p.name);
+}
+
+// Cover automatique depuis la thumb video : si le projet n'a pas de cover
+// mais a une thumb video self-hostée (mp4 sous img/), on extrait une frame
+// (à 1 s, ou 0 s si le clip est plus court) en img/<id>-cover-auto.jpg via
+// ffmpeg. La cover peut donc être « une vidéo » : le visuel statique
+// (poster viewer, grille mobile, fallback YT) est dérivé de la vidéo.
+// Regénérée à chaque export (une frame = quasi gratuit) pour rester en
+// phase si la thumb video change. Fallback silencieux (placeholder) si
+// ffmpeg absent ou vidéo illisible.
+async function autoCoverFromVideo(p) {
+  const tv = (p.thumbVideo || "").trim();
+  if (!tv || /^https?:\/\//i.test(tv) || !/\.(mp4|mov|webm|m4v)$/i.test(tv)) return null;
+  const abs = path.resolve(SITE_ROOT, tv);
+  if (!abs.startsWith(IMG_DIR + path.sep)) return null;
+  try { await fs.access(abs); } catch { return null; }
+  const outName = `${p.id}-cover-auto.jpg`;
+  const outPath = path.join(IMG_DIR, outName);
+  for (const ss of ["1", "0"]) {
+    try {
+      await execFileP("ffmpeg", [
+        "-v", "error",
+        "-ss", ss,
+        "-i", abs,
+        "-frames:v", "1",
+        "-q:v", "3",
+        outPath, "-y",
+      ]);
+      const st = await fs.stat(outPath);
+      if (st.size > 0) return `img/${outName}`;
+    } catch { /* frame à 1s hors durée ou ffmpeg absent → essai suivant */ }
+  }
+  return null;
 }
 
 function formatProject(p, indent = "  ") {
@@ -74,6 +111,15 @@ function formatProject(p, indent = "  ") {
 
 export async function exportToDataJsx() {
   const projects = listProjects({ excludeHidden: true });
+
+  // Covers automatiques : projet sans cover mais avec thumb video locale
+  // → frame extraite de la vidéo (sinon safeCover posera le placeholder).
+  for (const p of projects) {
+    if (!(p.cover && p.cover.trim())) {
+      const auto = await autoCoverFromVideo(p);
+      if (auto) p.cover = auto;
+    }
+  }
 
   const header = `/* global window */
 // LESGRIOTSxSTUDIO — projects data
