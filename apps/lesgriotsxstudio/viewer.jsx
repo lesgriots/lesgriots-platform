@@ -291,6 +291,11 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
     setMediaWidth(null);
   }, [resIdx, projectId]);
 
+  // Thumbs du rail dont la <video> a échoué (codec, réseau, Safari qui
+  // refuse d'extraire une frame…) → on bascule sur une image de secours.
+  const [thumbErr, setThumbErr] = useStateV({});
+  useEffectV(() => { setThumbErr({}); }, [projectId]);
+
   // Legacy simulated progress (only for video resources WITHOUT a real
   // .mp4 src — kept so the existing placeholder demos still animate).
   useEffectV(() => {
@@ -801,17 +806,26 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
               aria-label={r.label}>
               {previewSrc ? (
                 <img src={previewSrc} alt="" loading="lazy" />
-              ) : isRealVideoSrc ? (
+              ) : isRealVideoSrc && !thumbErr[i] ? (
                 <video
                   src={r.src}
                   muted
                   playsInline
                   preload="metadata"
+                  /* Poster de secours = cover du projet : affichée pendant
+                     le chargement des métadonnées ET si le navigateur ne
+                     veut pas extraire de frame (Safari + vidéos
+                     cross-origin notamment). Plus jamais de tuile noire
+                     ou d'icône cassée. */
+                  poster={project.cover || undefined}
                   // Se positionne sur ~1 seconde pour montrer une frame
                   // représentative (la 1ère est souvent un fondu noir ou
                   // une mire — 1s ≈ 25-30e frame, on est dans le contenu).
                   onLoadedMetadata={(e) => { try { e.currentTarget.currentTime = 1; } catch {} }}
+                  onError={() => setThumbErr((m) => ({ ...m, [i]: true }))}
                 />
+              ) : project.cover ? (
+                <img src={project.cover} alt="" loading="lazy" />
               ) : (
                 <span className="viewer__thumb__missing">—</span>
               )}
@@ -1025,6 +1039,8 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
                       muted
                       playsInline
                       preload="metadata"
+                      /* Même poster de secours que le rail (cover projet). */
+                      poster={r.poster || project.cover || undefined}
                       onLoadedMetadata={(e) => { try { e.currentTarget.currentTime = 1; } catch {} }}
                     />
                   ) : (
