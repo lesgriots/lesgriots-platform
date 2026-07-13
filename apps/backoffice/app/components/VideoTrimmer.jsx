@@ -8,6 +8,9 @@
 //   - une fenêtre de sélection avec 2 poignées se drag directement dessus :
 //       · poignée gauche / droite → ajuste début / fin (scrub en direct)
 //       · drag au milieu → déplace toute la fenêtre (durée conservée)
+//   - RECADRAGE : slider de zoom + drag de l'image dans le cadre pour
+//     choisir le cadrage (grille des tiers pendant le drag). Le crop est
+//     appliqué par ffmpeg à la génération.
 //   - la vidéo au-dessus joue la sélection en boucle
 //   - « Générer la boucle » → POST /api/trim (ffmpeg) → le champ pointe
 //     sur le clip découpé.
@@ -26,14 +29,17 @@ function fmtTC(s) {
 const THUMBS = 12;      // nb de vignettes de la filmstrip
 const MIN_LEN = 0.2;    // durée mini de la sélection (s)
 const HANDLE_W = 14;    // largeur px des poignées
+const MAX_ZOOM = 4;
 
 export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   const vidRef = useRef(null);
   const stripRef = useRef(null);
-  // Drag en cours : { mode: "start"|"end"|"move", grabOffset } — dans une ref
-  // pour ne pas re-render à chaque pointermove (on met à jour start/end, qui
-  // eux re-render).
+  const cropRef = useRef(null);
+  // Drag timeline en cours : { mode: "start"|"end"|"move", grabOffset } — dans
+  // une ref pour ne pas re-render à chaque pointermove.
   const dragRef = useRef(null);
+  // Pan du recadrage en cours : { x, y, cx, cy, moved }.
+  const panRef = useRef(null);
   const [dur, setDur] = useState(0);
   const [start, setStart] = useState(0);
   const [end, setEnd] = useState(0);
@@ -43,23 +49,38 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [ok, setOk] = useState(true);
-  // État lecture, synchronisé sur l'élément <video> (onPlay/onPause) pour
-  // que le bouton Prévisualiser reflète toujours la réalité.
+  // État lecture, synchronisé sur l'élément <video> (onPlay/onPause).
   const [playing, setPlaying] = useState(false);
+  // ── Recadrage ──
+  // zoom ≥ 1 ; (cx, cy) = centre du cadrage en fraction de l'image (0..1).
+  // Le ratio de sortie = ratio source (le site affiche la thumb en cover,
+  // n'importe quel ratio marche) ; le crop fait iw/zoom × ih/zoom.
+  const [vidAR, setVidAR] = useState(16 / 9);
+  const [zoom, setZoom] = useState(1);
+  const [cx, setCx] = useState(0.5);
+  const [cy, setCy] = useState(0.5);
+  const [panning, setPanning] = useState(false);
+
+  const clampC = (c, z) => Math.max(1 / (2 * z), Math.min(1 - 1 / (2 * z), c));
+
+  function applyZoom(zRaw) {
+    const z = Math.max(1, Math.min(MAX_ZOOM, zRaw));
+    setZoom(z);
+    setCx((c) => clampC(c, z));
+    setCy((c) => clampC(c, z));
+  }
 
   // Métadonnées chargées → durée connue, sélection = clip entier par défaut.
   function onMeta() {
-    const d = vidRef.current?.duration || 0;
+    const v = vidRef.current;
+    const d = v?.duration || 0;
     setDur(d);
     setStart(0);
     setEnd(d);
+    if (v?.videoWidth && v?.videoHeight) setVidAR(v.videoWidth / v.videoHeight);
   }
 
   // ── Filmstrip : extraction des vignettes ────────────────────────────────
-  // Vidéo cachée dédiée (pour ne pas toucher la lecture de la preview) :
-  // on seek THUMBS positions réparties sur la durée et on dessine chaque
-  // frame dans un canvas → dataURL. Même origine (/api/preview) → pas de
-  // souci de canvas "tainted".
   useEffect(() => {
     let cancelled = false;
     setThumbs([]);
@@ -92,7 +113,6 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
       const out = [];
       for (let i = 0; i < THUMBS; i++) {
         if (cancelled) return;
-        // centre de chaque tranche → vignette représentative de la zone
         const t = ((i + 0.5) / THUMBS) * d;
         try {
           await seekTo(Math.min(t, Math.max(0, d - 0.05)));
@@ -114,14 +134,49 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
     const v = vidRef.current;
     if (!v) return;
     setCur(v.currentTime);
-    // Pas de rebouclage pendant un drag (on laisse le scrub tranquille).
     if (!dragRef.current && end > start && (v.currentTime >= end || v.currentTime < start - 0.05)) {
       v.currentTime = start;
       if (v.paused) v.play().catch(() => {});
     }
   }
 
-  // ── Drag façon Instagram ────────────────────────────────────────────────
+  // ── Recadrage : pan de l'image dans le cadre ───────────────────────────
+  function cropPointerDown(e) {
+    e.preventDefault();
+    panRef.current = { x: e.clientX, y: e.clientY, cx, cy, moved: false };
+    if (zoom > 1.001) setPanning(true);
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  }
+  function cropPointerMove(e) {
+    const p = panRef.current;
+    if (!p) return;
+    const dx = e.clientX - p.x;
+    const dy = e.clientY - p.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) p.moved = true;
+    if (zoom <= 1.001 || !cropRef.current) return;
+    const r = cropRef.current.getBoundingClientRect();
+    // Déplacer le doigt de r.width px = traverser toute la LARGEUR VISIBLE,
+    // soit 1/zoom de l'image → dcx = dx / (width * zoom).
+    setCx(clampC(p.cx - dx / (r.width * zoom), zoom));
+    setCy(clampC(p.cy - dy / (r.height * zoom), zoom));
+  }
+  function cropPointerUp() {
+    const p = panRef.current;
+    panRef.current = null;
+    setPanning(false);
+    // Simple clic (pas un drag) → toggle lecture, comme avant.
+    if (p && !p.moved) {
+      const v = vidRef.current;
+      if (v) { v.paused ? v.play().catch(() => {}) : v.pause(); }
+    }
+  }
+
+  // Transform CSS de la preview : translate PUIS scale (ordre droite→gauche
+  // en CSS) pour amener le centre (cx, cy) au centre du cadre.
+  const tx = (0.5 - cx) * 100;
+  const ty = (0.5 - cy) * 100;
+
+  // ── Drag timeline façon Instagram ───────────────────────────────────────
   const timeAtX = (clientX) => {
     const r = stripRef.current?.getBoundingClientRect();
     if (!r || !dur) return 0;
@@ -157,7 +212,6 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
       setEnd(Math.min(dur, ne));
       scrub(Math.min(dur, ne));
     } else {
-      // move : fenêtre entière, durée conservée
       const len = end - start;
       let ns = t - drag.grabOffset;
       ns = Math.max(0, Math.min(ns, dur - len));
@@ -170,21 +224,19 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   function endDrag() {
     if (!dragRef.current) return;
     dragRef.current = null;
-    // Fin de drag → on relit la sélection depuis le début (feedback immédiat).
     const v = vidRef.current;
     if (v) {
       v.currentTime = startRef.current;
       v.play().catch(() => {});
     }
   }
-  // start dans une ref pour endDrag (qui vit hors du cycle de render).
   const startRef = useRef(start);
   useEffect(() => { startRef.current = start; }, [start]);
 
   // Tap sur la strip hors fenêtre → recale la fenêtre centrée sur le tap.
   function onStripPointerDown(e) {
     const t = timeAtX(e.clientX);
-    if (t >= start && t <= end) return; // dans la fenêtre → géré par la fenêtre
+    if (t >= start && t <= end) return;
     const len = Math.min(end - start, dur);
     let ns = Math.max(0, Math.min(t - len / 2, dur - len));
     setStart(ns);
@@ -194,9 +246,8 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
     e.currentTarget.setPointerCapture?.(e.pointerId);
   }
 
-  // Prévisualise l'extrait : repart du DÉBUT de la sélection et joue en
-  // boucle (le rebouclage est assuré par onTimeUpdate). Si déjà en lecture,
-  // met en pause.
+  // Prévisualise l'extrait : repart du DÉBUT de la sélection, boucle assurée
+  // par onTimeUpdate. Si déjà en lecture, met en pause.
   function previewSelection() {
     const v = vidRef.current;
     if (!v) return;
@@ -208,17 +259,25 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   async function generate() {
     if (!(end > start)) { setMsg("La fin doit être après le début."); setOk(false); return; }
     setBusy(true); setMsg("");
+    // Recadrage → fractions de position du crop (0..1) pour ffmpeg :
+    // x = (iw - ow) * px. px = position du bord gauche du crop dans la
+    // marge disponible, dérivée du centre (cx).
+    const crop = zoom > 1.01 ? {
+      zoom,
+      px: (cx - 1 / (2 * zoom)) / (1 - 1 / zoom),
+      py: (cy - 1 / (2 * zoom)) / (1 - 1 / zoom),
+    } : undefined;
     try {
       const r = await fetch("/api/trim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ src, start, end }),
+        body: JSON.stringify({ src, start, end, crop }),
       });
       const j = await r.json().catch(() => ({}));
       setBusy(false);
       if (r.ok && j.path) {
         const mb = j.bytes ? (j.bytes / 1048576).toFixed(1) : "?";
-        setMsg(`✓ Boucle générée (${(end - start).toFixed(1)}s · ${mb} Mo). Le champ pointe désormais sur le clip découpé.`);
+        setMsg(`✓ Boucle générée (${(end - start).toFixed(1)}s${crop ? ` · zoom ${zoom.toFixed(1)}×` : ""} · ${mb} Mo). Le champ pointe désormais sur le clip découpé.`);
         setOk(true);
         onTrimmed(j.path);
       } else {
@@ -249,30 +308,109 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   const gripStyle = {
     width: 2, height: 16, background: "rgba(0,0,0,0.55)", borderRadius: 1,
   };
+  const thirdLine = (axis, pct) => ({
+    position: "absolute",
+    ...(axis === "v"
+      ? { top: 0, bottom: 0, left: `${pct}%`, width: 1 }
+      : { left: 0, right: 0, top: `${pct}%`, height: 1 }),
+    background: "rgba(232,226,214,0.35)",
+    pointerEvents: "none",
+  });
 
   return (
     <div style={{ marginTop: 10, padding: 12, border: "1px solid var(--rule)", background: "#0b0a09" }}>
       <div style={{ fontSize: 10, color: "var(--dim)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 8 }}>
-        Découpeur — fais glisser la fenêtre sur la timeline, la sélection tourne en boucle
+        Découpeur — fenêtre = extrait · zoom + glisser l'image = cadrage
       </div>
 
-      <video
-        ref={vidRef}
-        src={previewSrc}
-        muted
-        playsInline
-        autoPlay
-        onLoadedMetadata={onMeta}
-        onTimeUpdate={onTimeUpdate}
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        onClick={() => { const v = vidRef.current; if (!v) return; v.paused ? v.play().catch(() => {}) : v.pause(); }}
-        style={{ width: "100%", maxHeight: 220, background: "#000", border: "1px solid var(--rule)", cursor: "pointer" }}
-      />
+      {/* ── Cadre de recadrage : la vidéo bouge dedans (zoom + pan) ────── */}
+      <div
+        ref={cropRef}
+        data-cropbox
+        onPointerDown={cropPointerDown}
+        onPointerMove={cropPointerMove}
+        onPointerUp={cropPointerUp}
+        onPointerCancel={cropPointerUp}
+        style={{
+          position: "relative",
+          width: "100%",
+          maxHeight: 240,
+          aspectRatio: `${vidAR}`,
+          margin: "0 auto",
+          background: "#000",
+          border: "1px solid var(--rule)",
+          overflow: "hidden",
+          touchAction: "none",
+          userSelect: "none",
+          cursor: zoom > 1.001 ? (panning ? "grabbing" : "grab") : "pointer",
+        }}
+      >
+        <video
+          ref={vidRef}
+          src={previewSrc}
+          muted
+          playsInline
+          autoPlay
+          onLoadedMetadata={onMeta}
+          onTimeUpdate={onTimeUpdate}
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          draggable={false}
+          style={{
+            display: "block",
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            transform: `scale(${zoom}) translate(${tx}%, ${ty}%)`,
+            pointerEvents: "none",
+          }}
+        />
+        {/* Grille des tiers pendant le pan (repère de cadrage, façon IG) */}
+        {panning && (
+          <>
+            <div style={thirdLine("v", 33.33)} />
+            <div style={thirdLine("v", 66.66)} />
+            <div style={thirdLine("h", 33.33)} />
+            <div style={thirdLine("h", 66.66)} />
+          </>
+        )}
+        {zoom > 1.001 && (
+          <span style={{ position: "absolute", top: 4, right: 6, fontSize: 10, color: "var(--ink)", background: "rgba(5,5,5,0.6)", padding: "1px 6px", letterSpacing: "0.08em", pointerEvents: "none" }}>
+            {zoom.toFixed(1)}×
+          </span>
+        )}
+      </div>
+
+      {/* ── Zoom / recadrage ────────────────────────────────────────────── */}
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
+        <span style={{ fontSize: 10, color: "var(--dim)", textTransform: "uppercase", letterSpacing: "0.1em", flexShrink: 0 }}>Zoom</span>
+        <input
+          type="range"
+          min={1}
+          max={MAX_ZOOM}
+          step={0.05}
+          value={zoom}
+          onChange={(e) => applyZoom(Number(e.target.value))}
+          style={{ flex: 1 }}
+          aria-label="Zoom du cadrage"
+        />
+        <span style={{ fontSize: 11, fontVariantNumeric: "tabular-nums", width: 34, textAlign: "right" }}>{zoom.toFixed(1)}×</span>
+        {zoom > 1.001 && (
+          <button type="button" className="btn btn--ghost" style={{ padding: "2px 8px", fontSize: 11 }} onClick={() => { setZoom(1); setCx(0.5); setCy(0.5); }}>
+            ⟲ Réinitialiser
+          </button>
+        )}
+      </div>
+      {zoom > 1.001 && (
+        <p className="note" style={{ margin: "4px 0 0", fontSize: 10, color: "var(--dim)" }}>
+          Glisse l'image dans le cadre pour choisir le cadrage — il sera appliqué à la boucle générée.
+        </p>
+      )}
 
       {/* ── Filmstrip + fenêtre de sélection (style Instagram) ─────────── */}
       <div
         ref={stripRef}
+        data-strip
         onPointerDown={onStripPointerDown}
         onPointerMove={onDragMove}
         onPointerUp={endDrag}

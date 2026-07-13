@@ -52,6 +52,19 @@ export async function POST(req) {
   const outName = `${base}-loop-${stamp}.mp4`;
   const outPath = path.join(IMG_DIR, outName);
 
+  // Recadrage optionnel : { zoom ≥ 1, px, py ∈ [0,1] } envoyé par le
+  // découpeur du BO (zoom + pan de l'image). On croppe iw/zoom × ih/zoom
+  // (même ratio que la source), positionné dans la marge disponible :
+  //   x = (iw - ow) * px. Dimensions forcées paires (requis par yuv420p).
+  let vf = null;
+  const c = body.crop;
+  if (c && Number.isFinite(Number(c.zoom)) && Number(c.zoom) > 1.001) {
+    const z = Math.min(Math.max(Number(c.zoom), 1), 6);
+    const px = Math.min(Math.max(Number(c.px ?? 0.5), 0), 1);
+    const py = Math.min(Math.max(Number(c.py ?? 0.5), 0), 1);
+    vf = `crop=floor(iw/${z.toFixed(4)}/2)*2:floor(ih/${z.toFixed(4)}/2)*2:(iw-ow)*${px.toFixed(4)}:(ih-oh)*${py.toFixed(4)}`;
+  }
+
   try {
     // -ss avant -i : seek rapide ; ré-encodage → coupe précise.
     await execFileP("ffmpeg", [
@@ -59,6 +72,7 @@ export async function POST(req) {
       "-ss", String(start),
       "-i", abs,
       "-t", String(duration),
+      ...(vf ? ["-vf", vf] : []),
       "-an",                          // sans audio (boucle muette)
       "-c:v", "libx264",
       "-preset", "veryfast",
