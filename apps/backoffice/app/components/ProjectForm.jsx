@@ -180,11 +180,35 @@ export default function ProjectForm({ initial, isNew }) {
     }));
   }
 
-  // ---- COVER -----------------------------------------------------------
-  // MediaInput gère l'upload + la progression, et nous renvoie le path final.
-  function handleCover(path) { if (path) set("cover", path); }
-  // ---- THUMB VIDEO -----------------------------------------------------
-  function handleThumbVideo(path) { if (path) set("thumbVideo", path); }
+  // ---- VISUEL PRINCIPAL (cover image OU vidéo, champ unifié) -----------
+  // Un seul upload : le type du fichier route automatiquement —
+  // vidéo → thumbVideo (hover grille + fond overlay), image → cover.
+  // Les deux peuvent coexister (l'image sert alors de poster/fallback).
+  const [upVisual, setUpVisual] = useState({ status: "idle", pct: 0, err: "" });
+  const [visUrlMode, setVisUrlMode] = useState(false);
+  const [visUrlDraft, setVisUrlDraft] = useState("");
+  async function visualUpload(file) {
+    if (!file) return;
+    setUpVisual({ status: "up", pct: 0, err: "" });
+    try {
+      const path = await uploadFile(file, (pct) => setUpVisual((s) => ({ ...s, pct })));
+      if (/^video\//.test(file.type) || /\.(mp4|mov|webm|m4v)$/i.test(path)) set("thumbVideo", path);
+      else set("cover", path);
+      setUpVisual({ status: "done", pct: 100, err: "" });
+      setTimeout(() => setUpVisual((s) => (s.status === "done" ? { status: "idle", pct: 0, err: "" } : s)), 2500);
+    } catch (e) {
+      setUpVisual({ status: "error", pct: 0, err: e.message || "échec de l'upload" });
+    }
+  }
+  function visualUrlSubmit() {
+    const u = visUrlDraft.trim();
+    if (!u) { setVisUrlMode(false); return; }
+    if (!/^https?:\/\//i.test(u)) { alert("L'URL doit commencer par http:// ou https://"); return; }
+    const isVid = /youtube\.com|youtu\.be|vimeo\.com/i.test(u) || /\.(mp4|mov|webm|m4v)(\?|$)/i.test(u);
+    set(isVid ? "thumbVideo" : "cover", u);
+    setVisUrlDraft("");
+    setVisUrlMode(false);
+  }
   // ---- RESOURCES (médias détaillés du projet) -------------------------
   function resourceAdd(type) {
     let blank;
@@ -490,42 +514,105 @@ export default function ProjectForm({ initial, isNew }) {
         })}
       </div>
 
-      <h2>Médias</h2>
-
-      <label>
-        Cover (image principale visible sur la home)
-        <span style={{ color: "var(--accent)", marginLeft: 6 }}>* recommandé</span>
-      </label>
+      <h2>Visuel principal</h2>
+      <p className="note" style={{ marginTop: 0, marginBottom: 8 }}>
+        Une seule zone, <strong>photo ou vidéo</strong> — le type est détecté automatiquement.
+        Une vidéo joue au hover (grille Work) et en fond (overlay INFO) ; une image sert de cover statique
+        (poster, mobile, partage). Vidéo seule ? L'image est générée automatiquement au Sync depuis une frame.
+        Les deux ? Tu contrôles tout.
+      </p>
       {!f.cover && !f.thumbVideo && (
         <p className="note" style={{ marginTop: 0, marginBottom: 6, color: "var(--dim)" }}>
-          ⚠ Si tu n'ajoutes ni cover ni thumb video, un placeholder jaune avec le nom du projet sera affiché à la place. Tu peux toujours sauver sans, mais ça aura l'air bien plus pro avec un visuel.
+          ⚠ Sans visuel, un placeholder jaune avec le nom du projet sera affiché sur le site.
         </p>
       )}
-      {!f.cover && !!f.thumbVideo && (
-        <p className="note" style={{ marginTop: 0, marginBottom: 6, color: "var(--dim)" }}>
-          Pas de cover : une image sera générée automatiquement depuis la thumb video à la publication (Sync). Tu peux quand même en uploader une pour la contrôler.
-        </p>
-      )}
-      <MediaInput
-        value={f.cover}
-        onUpload={handleCover}
-        onUrl={(url) => set("cover", url)}
-        onClear={() => set("cover", "")}
-        accept="image/*"
-      />
 
-      <label>Thumb video (mp4 court qui se lance au hover — optionnel)</label>
-      <p className="note" style={{ marginTop: 0, marginBottom: 6, color: "var(--dim)" }}>
-        Tu peux aussi coller une URL YouTube ici : la grille jouera un extrait de 4 s à partir du timecode spécifié ci-dessous.
-      </p>
-      <MediaInput
-        value={f.thumbVideo}
-        onUpload={handleThumbVideo}
-        onUrl={(url) => set("thumbVideo", url)}
-        onClear={() => set("thumbVideo", "")}
-        accept="video/mp4"
-        isVideo
-      />
+      {(() => {
+        // Preview : la vidéo prime (c'est elle qu'on voit au hover), sinon l'image.
+        const tv = (f.thumbVideo || "").trim();
+        const ytId = tv && (tv.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([\w-]{6,})/i) || [])[1];
+        const tvLocal = tv && !isExternalUrl(tv) && /\.(mp4|mov|webm|m4v)$/i.test(tv);
+        const tvSrc = tv && !ytId ? (isExternalUrl(tv) ? tv : `/api/preview?p=${encodeURIComponent(tv)}`) : null;
+        const cv = (f.cover || "").trim();
+        const cvSrc = cv ? (isExternalUrl(cv) ? cv : `/api/preview?p=${encodeURIComponent(cv)}`) : null;
+        return (
+          <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+            <div style={{
+              width: 168, height: 100, flexShrink: 0, position: "relative",
+              border: "1px solid var(--rule)", borderRadius: "var(--r-sm)", overflow: "hidden",
+              background: "#141210", display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              {tvSrc ? (
+                <video key={tvSrc} src={tvSrc} poster={cvSrc || undefined} muted loop playsInline autoPlay style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : ytId ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={`https://i.ytimg.com/vi/${ytId}/mqdefault.jpg`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : cvSrc ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={cvSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <span style={{ fontSize: 10, color: "var(--dim)", letterSpacing: "0.1em" }}>—</span>
+              )}
+              {(upVisual.status === "up" || upVisual.status === "done") && (
+                <div style={{ position: "absolute", inset: 0, background: "rgba(5,5,5,0.72)", display: "flex", alignItems: "center", justifyContent: "center", color: upVisual.status === "done" ? "var(--accent)" : "var(--ink)", fontSize: 15, fontWeight: 700 }}>
+                  {upVisual.status === "done" ? "✓" : `${upVisual.pct}%`}
+                </div>
+              )}
+            </div>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {visUrlMode ? (
+                <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                  <input
+                    autoFocus
+                    value={visUrlDraft}
+                    onChange={(e) => setVisUrlDraft(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); visualUrlSubmit(); } if (e.key === "Escape") setVisUrlMode(false); }}
+                    placeholder="URL image, .mp4, YouTube ou Vimeo — le type est détecté"
+                    style={{ flex: 1 }}
+                  />
+                  <button type="button" className="btn" style={{ padding: "4px 10px", fontSize: 11 }} onClick={visualUrlSubmit}>OK</button>
+                  <button type="button" className="btn btn--ghost" style={{ padding: "4px 10px", fontSize: 11 }} onClick={() => setVisUrlMode(false)}>×</button>
+                </div>
+              ) : (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+                  <label className="btn btn--ghost" style={{ padding: "5px 12px", fontSize: 11, cursor: upVisual.status === "up" ? "wait" : "pointer", opacity: upVisual.status === "up" ? 0.6 : 1 }}>
+                    {upVisual.status === "up" ? `Upload… ${upVisual.pct}%` : "⇪ Upload photo ou vidéo"}
+                    <input
+                      type="file"
+                      accept="image/*,video/mp4,video/webm,video/quicktime"
+                      disabled={upVisual.status === "up"}
+                      onChange={(e) => { const file = e.target.files[0]; e.target.value = ""; visualUpload(file); }}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+                  <button type="button" className="btn btn--ghost" style={{ padding: "5px 12px", fontSize: 11 }} onClick={() => setVisUrlMode(true)}>Coller URL</button>
+                </div>
+              )}
+              {upVisual.err && <p className="note" style={{ color: "var(--danger)", margin: "0 0 6px" }}>✗ {upVisual.err}</p>}
+
+              {/* État des deux assets — chips retirables */}
+              {tv && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, marginBottom: 4, minWidth: 0 }}>
+                  <span className="pill" style={{ flexShrink: 0, borderColor: "var(--accent)", color: "var(--accent)" }}>VIDÉO</span>
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--dim)" }} title={tv}>{tv}</span>
+                  <button type="button" className="btn btn--ghost" style={{ padding: "1px 8px", fontSize: 10, flexShrink: 0 }} onClick={() => { set("thumbVideo", ""); setShowThumbTrim(false); }}>Retirer</button>
+                </div>
+              )}
+              {cv && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, marginBottom: 4, minWidth: 0 }}>
+                  <span className="pill" style={{ flexShrink: 0 }}>IMAGE</span>
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--dim)" }} title={cv}>{cv}</span>
+                  <button type="button" className="btn btn--ghost" style={{ padding: "1px 8px", fontSize: 10, flexShrink: 0 }} onClick={() => set("cover", "")}>Retirer</button>
+                </div>
+              )}
+              {!cv && tvLocal && (
+                <p className="note" style={{ margin: 0 }}>Image auto-générée depuis la vidéo au Sync.</p>
+              )}
+            </div>
+          </div>
+        );
+      })()}
       {/* Découpeur d'extrait — même outil que sur la page Écosystème.
           Permet de choisir directement le segment qui tournera en boucle
           au hover (grille Work) et en fond (overlay INFORMATION), au lieu
