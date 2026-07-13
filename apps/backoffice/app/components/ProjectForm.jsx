@@ -1,7 +1,7 @@
 // Composant partagé entre /projects/new et /projects/[id].
 // Gère tous les champs d'un projet + uploads de médias (cover, thumbVideo, strip, resources).
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import VideoTrimmer from "./VideoTrimmer";
 
@@ -158,6 +158,17 @@ export default function ProjectForm({ initial, isNew }) {
   // .mp4 self-hosté sous img/ (les URL externes / YouTube ne passent
   // pas par /api/trim).
   const [showThumbTrim, setShowThumbTrim] = useState(false);
+  // ── Galerie façon Instagram ──
+  // Tuile sélectionnée (son éditeur s'ouvre sous la grille) + drag & drop.
+  const [selectedRes, setSelectedRes] = useState(null);
+  const resDragIdx = useRef(null);
+  const [resDragging, setResDragging] = useState(null); // index en cours de drag
+  const [resDropIdx, setResDropIdx] = useState(null);
+  // ── Upload façon Vimeo ──
+  // Drop de fichiers n'importe où sur la fiche + file d'attente visible.
+  const dragDepth = useRef(0);
+  const [dropActive, setDropActive] = useState(false);
+  const [upQueue, setUpQueue] = useState([]);
 
   function set(k, v) { setF((p) => ({ ...p, [k]: v })); }
 
@@ -219,6 +230,62 @@ export default function ProjectForm({ initial, isNew }) {
   }
   function resourceSetUrl(i, field, url) {
     resourcePatch(i, { [field]: url });
+  }
+  // Réordonnancement par drag & drop de la grille (façon Instagram).
+  function resourceReorder(from, to) {
+    if (from == null || to == null || from === to) return;
+    const arr = [...f.resources];
+    const [moved] = arr.splice(from, 1);
+    arr.splice(to, 0, moved);
+    set("resources", arr);
+  }
+  // Miniature d'une resource pour la grille : poster > src image > thumb YT.
+  // Les vidéos sans poster sont rendues en <video> directement dans la tuile.
+  function resThumb(r) {
+    if (r.type === "youtube") {
+      const id = parseYouTubeId(r.src);
+      return id ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg` : null;
+    }
+    const src = r.poster || (r.type === "image" ? r.src : null);
+    if (!src) return null;
+    return isExternalUrl(src) ? src : `/api/preview?p=${encodeURIComponent(src)}`;
+  }
+  function resVideoSrc(r) {
+    if (r.type !== "video" || !r.src || r.poster) return null;
+    return isExternalUrl(r.src) ? r.src : `/api/preview?p=${encodeURIComponent(r.src)}`;
+  }
+
+  // ── Upload façon Vimeo : fichiers déposés n'importe où sur la fiche ──
+  // Chaque fichier passe par /api/upload (avec progression) puis devient
+  // une resource de la galerie (type déduit du MIME).
+  function dtHasFiles(e) {
+    return Array.from(e.dataTransfer?.types || []).includes("Files");
+  }
+  async function handleDroppedFiles(fileList) {
+    const files = Array.from(fileList).filter((file) => /^(image|video)\//.test(file.type));
+    for (const file of files) {
+      const qid = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+      setUpQueue((q) => [...q, { id: qid, name: file.name, pct: 0, status: "up" }]);
+      try {
+        const path = await uploadFile(file, (pct) =>
+          setUpQueue((q) => q.map((it) => (it.id === qid ? { ...it, pct } : it))));
+        const isVid = /^video\//.test(file.type);
+        setF((p) => ({
+          ...p,
+          resources: [
+            ...p.resources,
+            isVid
+              ? { type: "video", src: path, poster: "", label: "", aspect: "16/9" }
+              : { type: "image", src: path, label: "", aspect: "16/9" },
+          ],
+        }));
+        setUpQueue((q) => q.map((it) => (it.id === qid ? { ...it, pct: 100, status: "done" } : it)));
+        setTimeout(() => setUpQueue((q) => q.filter((it) => it.id !== qid)), 3500);
+      } catch (e) {
+        setUpQueue((q) => q.map((it) => (it.id === qid ? { ...it, status: "error", name: `${file.name} — ${e.message}` } : it)));
+        setTimeout(() => setUpQueue((q) => q.filter((it) => it.id !== qid)), 8000);
+      }
+    }
   }
   // ---- CREDITS ---------------------------------------------------------
   function creditAdd() {
@@ -292,7 +359,47 @@ export default function ProjectForm({ initial, isNew }) {
 
   // ---- RENDER ----------------------------------------------------------
   return (
-    <form onSubmit={submit}>
+    <form
+      onSubmit={submit}
+      /* Drop global façon Vimeo : dépose une image/vidéo n'importe où sur
+         la fiche → upload + ajout à la galerie. Le compteur dragDepth évite
+         le clignotement du veil quand le curseur traverse les enfants.
+         Les drags INTERNES (réordonnancement des tuiles) n'ont pas le type
+         "Files" → ignorés ici. */
+      onDragEnter={(e) => { if (dtHasFiles(e)) { e.preventDefault(); dragDepth.current += 1; setDropActive(true); } }}
+      onDragOver={(e) => { if (dtHasFiles(e)) e.preventDefault(); }}
+      onDragLeave={(e) => { if (dtHasFiles(e)) { dragDepth.current -= 1; if (dragDepth.current <= 0) { dragDepth.current = 0; setDropActive(false); } } }}
+      onDrop={(e) => {
+        if (!dtHasFiles(e)) return;
+        e.preventDefault();
+        dragDepth.current = 0;
+        setDropActive(false);
+        handleDroppedFiles(e.dataTransfer.files);
+      }}
+    >
+      {/* Veil de drop plein écran */}
+      {dropActive && (
+        <div className="dropveil">
+          <div className="dropveil__box">⇣ Dépose tes images / vidéos ici</div>
+        </div>
+      )}
+      {/* File d'attente d'uploads (bottom-right) */}
+      {upQueue.length > 0 && (
+        <div className="upqueue">
+          {upQueue.map((u) => (
+            <div key={u.id} className={"upqueue__item" + (u.status === "done" ? " upqueue__item--done" : u.status === "error" ? " upqueue__item--error" : "")}>
+              <div className="upqueue__name">
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{u.name}</span>
+                <em>{u.status === "done" ? "✓" : u.status === "error" ? "✗" : `${u.pct}%`}</em>
+              </div>
+              <div className="upqueue__bar">
+                <div className="upqueue__fill" style={{ width: `${u.status === "error" ? 100 : u.pct}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <h2>Identité</h2>
       <div className="row">
         <div>
@@ -473,93 +580,180 @@ export default function ProjectForm({ initial, isNew }) {
           et sont préservées par l'exporter, simplement plus éditables ici. */}
 
       <h2>Galerie (médias du projet)</h2>
-      <p className="note">Un par bloc média sur la page projet. Image ou vidéo, ratio libre. Upload local ou URL externe (Bunny, R2, Cloudflare).</p>
-      {f.resources.map((r, i) => (
-        <div key={i} className="resource">
-          <div className="resource__head">
-            <strong>#{i + 1} — {r.type}</strong>
-            <span>
-              <button type="button" className="btn btn--ghost" style={btnTiny} onClick={() => resourceMove(i, -1)}>↑</button>
-              <button type="button" className="btn btn--ghost" style={btnTiny} onClick={() => resourceMove(i, +1)}>↓</button>
-              <button type="button" className="btn btn--danger" style={btnTiny} onClick={() => resourceRemove(i)}>×</button>
-            </span>
-          </div>
-          <div className="row">
-            {r.type === "youtube" ? (
-              <div style={{ flex: 1 }}>
-                <label>URL YouTube ou Vimeo</label>
-                <input
-                  type="url"
-                  value={r.src || ""}
-                  onChange={(e) => resourcePatch(i, { src: e.target.value.trim() })}
-                  placeholder="https://www.youtube.com/watch?v=… ou https://vimeo.com/…"
-                  style={{ width: "100%" }}
+      <p className="note">
+        Glisse les tuiles pour réordonner (l'ordre de la page projet suit). Clique une tuile pour l'éditer.
+        Tu peux aussi <strong>déposer des fichiers n'importe où sur la page</strong> — ils s'uploadent et rejoignent la galerie.
+      </p>
+
+      {/* Grille façon Instagram */}
+      <div className="medialib">
+        {f.resources.map((r, i) => {
+          const thumb = resThumb(r);
+          const vidSrc = resVideoSrc(r);
+          return (
+            <div
+              key={i}
+              className={
+                "mediatile" +
+                (selectedRes === i ? " mediatile--selected" : "") +
+                (resDragging === i ? " mediatile--dragging" : "") +
+                (resDropIdx === i && resDragging != null && resDragging !== i ? " mediatile--dropover" : "")
+              }
+              draggable
+              onDragStart={(e) => {
+                resDragIdx.current = i;
+                setResDragging(i);
+                setSelectedRes(null);
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData("text/plain", String(i));
+              }}
+              onDragOver={(e) => { if (resDragging != null) { e.preventDefault(); setResDropIdx(i); } }}
+              onDrop={(e) => {
+                if (resDragging == null) return;
+                e.preventDefault();
+                e.stopPropagation();
+                resourceReorder(resDragIdx.current, i);
+                resDragIdx.current = null;
+                setResDragging(null);
+                setResDropIdx(null);
+              }}
+              onDragEnd={() => { resDragIdx.current = null; setResDragging(null); setResDropIdx(null); }}
+              onClick={() => setSelectedRes((s) => (s === i ? null : i))}
+              role="button"
+              aria-label={`Média ${i + 1} (${r.type})`}
+            >
+              {thumb ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={thumb} alt="" loading="lazy" draggable={false} />
+              ) : vidSrc ? (
+                <video
+                  src={vidSrc}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  onLoadedMetadata={(e) => { try { e.currentTarget.currentTime = 1; } catch {} }}
                 />
-                {/* Aperçu de l'ID parsé pour valider que le BO comprend bien l'URL.
-                    Le viewer studio construit l'embed à la volée à partir de l'ID. */}
-                {r.src && !parseYouTubeId(r.src) && !parseVimeoId(r.src) && (
-                  <p className="note" style={{ color: "var(--danger)" }}>
-                    ✗ URL non reconnue (attendu : youtube.com / youtu.be / vimeo.com)
-                  </p>
-                )}
-                {r.src && parseYouTubeId(r.src) && (
-                  <p className="note" style={{ color: "var(--accent)" }}>
-                    ✓ YouTube ID : <code>{parseYouTubeId(r.src)}</code>
-                  </p>
-                )}
-                {r.src && parseVimeoId(r.src) && (
-                  <p className="note" style={{ color: "var(--accent)" }}>
-                    ✓ Vimeo ID : <code>{parseVimeoId(r.src)}</code>
-                  </p>
-                )}
-              </div>
-            ) : (
-              <>
-                <div>
-                  <label>Source ({r.type})</label>
-                  <MediaInput
-                    value={r.src}
-                    onUpload={(file) => resourceUpload(i, "src", file)}
-                    onUrl={(url) => resourceSetUrl(i, "src", url)}
-                    onClear={() => resourcePatch(i, { src: "" })}
-                    accept={r.type === "video" ? "video/*" : "image/*"}
-                    isVideo={r.type === "video"}
-                    // Pour les vidéos lourdes, on recommande de coller un URL Bunny/R2 plutôt qu'uploader
-                    urlHint={r.type === "video" ? "Recommandé : URL .mp4 Bunny/R2/Cloudflare" : null}
+              ) : (
+                <span className="mediatile__missing">VIDE</span>
+              )}
+              <span className="mediatile__type">{r.type === "youtube" ? "YT" : r.type}</span>
+              <span className="mediatile__num">{i + 1}</span>
+              <button
+                type="button"
+                className="mediatile__remove"
+                title="Retirer ce média"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resourceRemove(i);
+                  setSelectedRes((s) => (s === i ? null : s != null && s > i ? s - 1 : s));
+                }}
+              >×</button>
+            </div>
+          );
+        })}
+        {/* Tuiles d'ajout */}
+        <button type="button" className="mediatile mediatile--add" onClick={() => { resourceAdd("image"); setSelectedRes(f.resources.length); }}>
+          <span className="plus">+</span> image
+        </button>
+        <button type="button" className="mediatile mediatile--add" onClick={() => { resourceAdd("video"); setSelectedRes(f.resources.length); }}>
+          <span className="plus">+</span> vidéo
+        </button>
+        <button type="button" className="mediatile mediatile--add" onClick={() => { resourceAdd("youtube"); setSelectedRes(f.resources.length); }}>
+          <span className="plus">+</span> YT / Vimeo
+        </button>
+      </div>
+
+      {/* Éditeur de la tuile sélectionnée */}
+      {selectedRes != null && f.resources[selectedRes] && (() => {
+        const i = selectedRes;
+        const r = f.resources[i];
+        return (
+          <div className="media-editor">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <strong style={{ fontSize: 12, color: "var(--dim)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                Média #{i + 1} — {r.type}
+              </strong>
+              <span>
+                <button type="button" className="btn btn--ghost" style={btnTiny} onClick={() => setSelectedRes(null)}>✕ Fermer</button>
+              </span>
+            </div>
+            <div className="row">
+              {r.type === "youtube" ? (
+                <div style={{ flex: 1 }}>
+                  <label>URL YouTube ou Vimeo</label>
+                  <input
+                    type="url"
+                    value={r.src || ""}
+                    onChange={(e) => resourcePatch(i, { src: e.target.value.trim() })}
+                    placeholder="https://www.youtube.com/watch?v=… ou https://vimeo.com/…"
+                    style={{ width: "100%" }}
                   />
+                  {r.src && !parseYouTubeId(r.src) && !parseVimeoId(r.src) && (
+                    <p className="note" style={{ color: "var(--danger)" }}>
+                      ✗ URL non reconnue (attendu : youtube.com / youtu.be / vimeo.com)
+                    </p>
+                  )}
+                  {r.src && parseYouTubeId(r.src) && (
+                    <p className="note" style={{ color: "var(--accent)" }}>
+                      ✓ YouTube ID : <code>{parseYouTubeId(r.src)}</code>
+                    </p>
+                  )}
+                  {r.src && parseVimeoId(r.src) && (
+                    <p className="note" style={{ color: "var(--accent)" }}>
+                      ✓ Vimeo ID : <code>{parseVimeoId(r.src)}</code>
+                    </p>
+                  )}
                 </div>
-                {r.type === "video" && (
+              ) : (
+                <>
                   <div>
-                    <label>Poster (image de chargement)</label>
+                    <label>Source ({r.type})</label>
                     <MediaInput
-                      value={r.poster || ""}
-                      onUpload={(file) => resourceUpload(i, "poster", file)}
-                      onUrl={(url) => resourceSetUrl(i, "poster", url)}
-                      onClear={() => resourcePatch(i, { poster: "" })}
-                      accept="image/*"
+                      value={r.src}
+                      onUpload={(file) => resourceUpload(i, "src", file)}
+                      onUrl={(url) => resourceSetUrl(i, "src", url)}
+                      onClear={() => resourcePatch(i, { src: "" })}
+                      accept={r.type === "video" ? "video/*" : "image/*"}
+                      isVideo={r.type === "video"}
+                      urlHint={r.type === "video" ? "Recommandé : URL .mp4 Bunny/R2/Cloudflare" : null}
                     />
                   </div>
-                )}
-              </>
-            )}
-          </div>
-          <div className="row">
-            <div>
-              <label>Label (légende)</label>
-              <input value={r.label || ""} onChange={(e) => resourcePatch(i, { label: e.target.value })} />
+                  {r.type === "video" && (
+                    <div>
+                      <label>Poster (image de chargement)</label>
+                      <MediaInput
+                        value={r.poster || ""}
+                        onUpload={(file) => resourceUpload(i, "poster", file)}
+                        onUrl={(url) => resourceSetUrl(i, "poster", url)}
+                        onClear={() => resourcePatch(i, { poster: "" })}
+                        accept="image/*"
+                      />
+                    </div>
+                  )}
+                </>
+              )}
             </div>
-            <div>
-              <label>Aspect (ex 16/9, 4/5, 1/1)</label>
-              <input value={r.aspect || ""} onChange={(e) => resourcePatch(i, { aspect: e.target.value })} placeholder="16/9" />
+            <div className="row">
+              <div>
+                <label>Label (légende)</label>
+                <input value={r.label || ""} onChange={(e) => resourcePatch(i, { label: e.target.value })} />
+              </div>
+              <div>
+                <label>Aspect (ex 16/9, 4/5, 1/1)</label>
+                <input value={r.aspect || ""} onChange={(e) => resourcePatch(i, { aspect: e.target.value })} placeholder="16/9" />
+              </div>
+            </div>
+            <div className="actions" style={{ marginTop: 12 }}>
+              <button
+                type="button"
+                className="btn btn--danger"
+                style={{ padding: "6px 12px", fontSize: 11 }}
+                onClick={() => { resourceRemove(i); setSelectedRes(null); }}
+              >× Retirer ce média</button>
             </div>
           </div>
-        </div>
-      ))}
-      <div className="actions" style={{ marginTop: 12 }}>
-        <button type="button" className="btn btn--ghost" onClick={() => resourceAdd("image")}>+ Image</button>
-        <button type="button" className="btn btn--ghost" onClick={() => resourceAdd("video")}>+ Vidéo (fichier)</button>
-        <button type="button" className="btn btn--ghost" onClick={() => resourceAdd("youtube")}>+ YouTube / Vimeo</button>
-      </div>
+        );
+      })()}
 
       <h2>Crédits</h2>
       <p className="note">Format affiché : RÔLE — Nom 1, Nom 2…</p>

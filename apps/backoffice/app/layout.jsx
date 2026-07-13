@@ -122,6 +122,12 @@ const globalCss = `
     --dim: var(--ink-dim);
     --accent: var(--yellow);
     --fg: var(--ink);
+    /* Modernisation douce : rayons + surfaces + easing partagés */
+    --r-sm: 6px;
+    --r-md: 10px;
+    --surface: #0b0a08;
+    --surface-2: #12100b;
+    --ease: cubic-bezier(0.25, 0.7, 0.3, 1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
@@ -163,7 +169,7 @@ const globalCss = `
       rgba(0,0,0,0)   4px
     );
     mix-blend-mode: multiply;
-    opacity: 0.45;
+    opacity: 0.28; /* adouci — l'identité CRT reste mais moins brutale */
   }
 
   /* ---- Vignette CRT douce sur les bords ----------------------------- */
@@ -342,9 +348,9 @@ const globalCss = `
   button { font: inherit; cursor: pointer; }
   input, textarea, select {
     font: inherit; color: var(--ink); background: #0f0e0a;
-    border: 1px solid var(--rule); padding: 9px 11px; border-radius: 0;
+    border: 1px solid var(--rule); padding: 9px 11px; border-radius: var(--r-sm);
     width: 100%;
-    transition: border-color 0.12s, box-shadow 0.12s, background 0.12s;
+    transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease), background 0.18s var(--ease);
   }
   input::placeholder, textarea::placeholder { color: #4a4418; opacity: 1; }
   input:hover, textarea:hover, select:hover { border-color: var(--ink-dim); }
@@ -404,14 +410,15 @@ const globalCss = `
     background: var(--yellow);
     color: #000;
     border: 0;
+    border-radius: var(--r-sm);
     padding: 10px 18px;
     font-weight: 600;
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    transition: background 0.15s, transform 0.15s;
+    transition: background 0.18s var(--ease), transform 0.18s var(--ease), box-shadow 0.18s var(--ease);
   }
-  .btn:hover { background: #fff; transform: translateY(-1px); }
+  .btn:hover { background: #fff; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(246,226,28,0.12); }
   .btn--ghost {
     background: transparent;
     color: var(--ink);
@@ -442,6 +449,7 @@ const globalCss = `
     display: inline-block;
     padding: 2px 8px;
     border: 1px solid var(--rule);
+    border-radius: 99px;
     font-size: 10px;
     margin-right: 4px;
     color: var(--ink-dim);
@@ -452,7 +460,243 @@ const globalCss = `
     padding: 40px;
     text-align: center;
     border: 1px dashed var(--rule);
+    border-radius: var(--r-md);
   }
+
+  /* ================================================================
+     BIBLIOTHÈQUE PROJETS — façon YouTube Studio
+     ================================================================ */
+  .bo-toolbar {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    margin: 14px 0 20px;
+  }
+  .bo-search {
+    flex: 1; min-width: 220px; max-width: 420px;
+    position: relative;
+  }
+  .bo-search input { padding-left: 34px; border-radius: 99px; }
+  .bo-search::before {
+    content: "⌕";
+    position: absolute; left: 13px; top: 50%; transform: translateY(-50%) scaleX(-1);
+    color: var(--ink-dim); font-size: 15px; pointer-events: none; z-index: 1;
+  }
+  .projlib {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+    margin-top: 8px;
+  }
+  .projcard {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    transition: transform 0.22s var(--ease), border-color 0.22s var(--ease), box-shadow 0.22s var(--ease), opacity 0.22s var(--ease);
+    cursor: grab;
+  }
+  .projcard:hover {
+    transform: translateY(-3px);
+    border-color: var(--ink-dim);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.5);
+  }
+  .projcard--hidden { opacity: 0.45; }
+  .projcard--hidden:hover { opacity: 0.8; }
+  .projcard--dragging { opacity: 0.35; border-style: dashed; }
+  .projcard--dropover { border-color: var(--yellow); box-shadow: 0 0 0 2px rgba(246,226,28,0.25); }
+  .projcard__thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #141210;
+    overflow: hidden;
+  }
+  .projcard__thumb img, .projcard__thumb video {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.4s var(--ease);
+  }
+  .projcard:hover .projcard__thumb img, .projcard:hover .projcard__thumb video {
+    transform: scale(1.04);
+  }
+  .projcard__order {
+    position: absolute; top: 8px; left: 8px;
+    padding: 1px 8px;
+    background: rgba(5,5,5,0.72); color: var(--ink);
+    font-family: var(--font-mono); font-size: 10px;
+    border-radius: 99px;
+    letter-spacing: 0.08em;
+  }
+  .projcard__badges { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; }
+  .projcard__badge {
+    padding: 1px 8px; border-radius: 99px;
+    background: rgba(5,5,5,0.72);
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink);
+  }
+  .projcard__badge--warn { color: var(--danger); border: 1px solid rgba(255,95,86,0.5); }
+  .projcard__actions {
+    position: absolute; inset: auto 0 0 0;
+    display: flex; gap: 6px; justify-content: flex-end;
+    padding: 26px 8px 8px;
+    background: linear-gradient(to top, rgba(5,5,5,0.85), transparent);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+  }
+  .projcard:hover .projcard__actions { opacity: 1; transform: none; }
+  .projcard__act {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 28px; height: 28px; padding: 0 9px;
+    background: rgba(15,14,10,0.9);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
+    color: var(--ink); font-size: 12px;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .projcard__act:hover { color: var(--yellow); border-color: var(--yellow); }
+  .projcard__act--danger:hover { color: var(--danger); border-color: var(--danger); }
+  .projcard__meta { padding: 10px 12px 12px; }
+  .projcard__name { display: block; font-weight: 500; color: var(--ink); font-size: 13px; line-height: 1.3; }
+  .projcard:hover .projcard__name { color: var(--yellow); }
+  .projcard__sub {
+    margin-top: 3px;
+    font-size: 11px; color: var(--ink-dim);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* ================================================================
+     GALERIE MÉDIAS — façon Instagram (fiche projet)
+     ================================================================ */
+  .medialib {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .mediatile {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+    cursor: grab;
+    transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), opacity 0.2s var(--ease);
+  }
+  .mediatile:hover { transform: translateY(-2px); border-color: var(--ink-dim); }
+  .mediatile--selected { border-color: var(--yellow); box-shadow: 0 0 0 2px rgba(246,226,28,0.3); }
+  .mediatile--dragging { opacity: 0.35; border-style: dashed; }
+  .mediatile--dropover { border-color: var(--yellow); box-shadow: 0 0 0 2px rgba(246,226,28,0.25); }
+  .mediatile img, .mediatile video {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .mediatile__type {
+    position: absolute; top: 5px; left: 5px;
+    padding: 1px 7px; border-radius: 99px;
+    background: rgba(5,5,5,0.75);
+    font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink);
+  }
+  .mediatile__num {
+    position: absolute; top: 5px; right: 5px;
+    min-width: 18px; height: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 99px;
+    background: rgba(5,5,5,0.75);
+    font-family: var(--font-mono); font-size: 9px; color: var(--ink);
+  }
+  .mediatile__missing {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%;
+    color: var(--ink-dim); font-size: 11px; letter-spacing: 0.1em;
+  }
+  .mediatile__remove {
+    position: absolute; bottom: 5px; right: 5px;
+    width: 22px; height: 22px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 99px; border: 0;
+    background: rgba(5,5,5,0.8); color: var(--ink);
+    font-size: 12px; opacity: 0;
+    transition: opacity 0.18s var(--ease), color 0.15s;
+  }
+  .mediatile:hover .mediatile__remove { opacity: 1; }
+  .mediatile__remove:hover { color: var(--danger); }
+  .mediatile--add {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px;
+    border-style: dashed;
+    color: var(--ink-dim);
+    background: transparent;
+    cursor: pointer;
+    font-size: 11px; letter-spacing: 0.06em;
+  }
+  .mediatile--add:hover { color: var(--yellow); border-color: var(--yellow); transform: none; }
+  .mediatile--add .plus { font-size: 20px; line-height: 1; }
+  .media-editor {
+    border: 1px solid var(--rule);
+    border-radius: var(--r-md);
+    background: var(--surface);
+    padding: 14px 16px 16px;
+    margin: 4px 0 14px;
+    animation: media-editor-in 0.22s var(--ease);
+  }
+  @keyframes media-editor-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ================================================================
+     UPLOAD — façon Vimeo (drop global + file d'attente)
+     ================================================================ */
+  .dropveil {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(5,5,5,0.82);
+    backdrop-filter: blur(3px);
+    pointer-events: none;
+  }
+  .dropveil__box {
+    padding: 44px 64px;
+    border: 2px dashed var(--yellow);
+    border-radius: var(--r-md);
+    color: var(--yellow);
+    font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase;
+    background: rgba(15,14,10,0.7);
+    animation: dropveil-pulse 1.2s ease infinite;
+  }
+  @keyframes dropveil-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.025); }
+  }
+  .upqueue {
+    position: fixed; right: 18px; bottom: 18px; z-index: 210;
+    width: 300px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .upqueue__item {
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
+    padding: 9px 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+    animation: media-editor-in 0.2s var(--ease);
+  }
+  .upqueue__name {
+    display: flex; justify-content: space-between; gap: 8px;
+    font-size: 11px; color: var(--ink);
+    white-space: nowrap; overflow: hidden;
+  }
+  .upqueue__name em { font-style: normal; color: var(--ink-dim); flex-shrink: 0; }
+  .upqueue__bar {
+    height: 3px; margin-top: 7px; border-radius: 99px;
+    background: var(--rule); overflow: hidden;
+  }
+  .upqueue__fill {
+    height: 100%; border-radius: 99px;
+    background: var(--yellow);
+    transition: width 0.2s var(--ease);
+  }
+  .upqueue__item--done .upqueue__fill { background: #6fd66f; }
+  .upqueue__item--error .upqueue__fill { background: var(--danger); }
   .note { color: var(--ink-dim); font-size: 11px; margin: 4px 0 0; line-height: 1.5; }
 
   /* ---- Code inline ------------------------------------------------- */

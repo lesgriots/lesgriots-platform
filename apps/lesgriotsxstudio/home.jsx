@@ -436,6 +436,15 @@ function HomeMobile({ onOpenProject }) {
           p.resources && p.resources[0]
           && p.resources[0].type === "video"
           && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(p.resources[0].src || "");
+        // Perf mobile : on joue la THUMB video (boucle courte optimisée,
+        // ~1-2 Mo) plutôt que la 1ère resource complète (parfois 30-50 Mo
+        // → réseau saturé sur 4G). Fallback sur la 1ère resource seulement
+        // si le projet n'a pas de thumb self-hostée.
+        const localThumb = p.thumbVideo
+          && !/^https?:\/\//i.test(p.thumbVideo)
+          && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(p.thumbVideo)
+          ? p.thumbVideo : null;
+        const cardVideo = localThumb || (isFirstRealVideo ? p.resources[0].src : null);
         const insertBrand = i > 0 && i % BRAND_EVERY === 0;
         // Détection thumbnail YouTube : si thumbVideo est une URL YouTube,
         // on extrait l'ID et on utilise https://i.ytimg.com/vi/ID/maxresdefault.jpg
@@ -453,9 +462,9 @@ function HomeMobile({ onOpenProject }) {
               className="hm__card"
               onClick={() => onOpenProject(p.id)}
               aria-label={p.name}>
-              {isFirstRealVideo ? (
+              {cardVideo ? (
                 <video
-                  src={p.resources[0].src}
+                  src={cardVideo}
                   poster={imgSrc}
                   autoPlay
                   muted

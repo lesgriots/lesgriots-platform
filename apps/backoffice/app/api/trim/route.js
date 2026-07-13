@@ -80,6 +80,13 @@ export async function POST(req) {
     }
   }
 
+  // Cap de résolution : les boucles servent de thumbs (cellules 130-190px)
+  // et de fonds hover — 1280px de large suffisent largement, même en retina.
+  // Une source 1920/4K ré-encodée telle quelle double/quadruple le poids
+  // pour zéro gain visuel. -2 = hauteur paire auto (requis yuv420p).
+  const SCALE = "scale=min(1280\\,iw):-2";
+  vf = vf ? `${vf},${SCALE}` : SCALE;
+
   try {
     // -ss avant -i : seek rapide ; ré-encodage → coupe précise.
     await execFileP("ffmpeg", [
