@@ -43,6 +43,9 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [ok, setOk] = useState(true);
+  // État lecture, synchronisé sur l'élément <video> (onPlay/onPause) pour
+  // que le bouton Prévisualiser reflète toujours la réalité.
+  const [playing, setPlaying] = useState(false);
 
   // Métadonnées chargées → durée connue, sélection = clip entier par défaut.
   function onMeta() {
@@ -191,6 +194,17 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
     e.currentTarget.setPointerCapture?.(e.pointerId);
   }
 
+  // Prévisualise l'extrait : repart du DÉBUT de la sélection et joue en
+  // boucle (le rebouclage est assuré par onTimeUpdate). Si déjà en lecture,
+  // met en pause.
+  function previewSelection() {
+    const v = vidRef.current;
+    if (!v) return;
+    if (!v.paused) { v.pause(); return; }
+    v.currentTime = start;
+    v.play().catch(() => {});
+  }
+
   async function generate() {
     if (!(end > start)) { setMsg("La fin doit être après le début."); setOk(false); return; }
     setBusy(true); setMsg("");
@@ -250,6 +264,8 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
         autoPlay
         onLoadedMetadata={onMeta}
         onTimeUpdate={onTimeUpdate}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
         onClick={() => { const v = vidRef.current; if (!v) return; v.paused ? v.play().catch(() => {}) : v.pause(); }}
         style={{ width: "100%", maxHeight: 220, background: "#000", border: "1px solid var(--rule)", cursor: "pointer" }}
       />
@@ -322,7 +338,10 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
         <span>fin <strong style={{ color: "var(--ink)" }}>{fmtTC(end)}</strong> / {fmtTC(dur)}</span>
       </div>
 
-      <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 10 }}>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 10, flexWrap: "wrap" }}>
+        <button type="button" className="btn btn--ghost" style={{ padding: "6px 14px", fontSize: 12 }} onClick={previewSelection} disabled={!(end > start)}>
+          {playing ? "⏸ Pause" : "▶ Prévisualiser l'extrait"}
+        </button>
         <button type="button" className="btn" style={{ padding: "6px 14px", fontSize: 12 }} onClick={generate} disabled={busy || !(end > start)}>
           {busy ? "Découpage…" : "✂ Générer la boucle"}
         </button>
