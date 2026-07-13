@@ -5685,6 +5685,41 @@ body.overview-open .utilbar {
      du fullscreen (Esc ou bouton FS dans le player bar). */
   display: none !important;
 }
+/* Le média vit dans .viewer__media-wrap (fit-content, max-width 80vw en
+   mode normal pour coller la barre à la vidéo). En fullscreen ces
+   contraintes doivent SAUTER, sinon la vidéo plafonne à 80vw / 100vh-340px
+   et ne remplit pas l'écran (régression détectée le 13/07/2026). */
+.viewer--fs .viewer__media-wrap {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.viewer--fs .viewer__media-wrap > img,
+.viewer--fs .viewer__media-wrap > video {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: 100vh !important;
+  object-fit: contain;
+  background: #000;
+}
+/* Embeds YouTube/Vimeo : le conteneur a des dimensions inline (80vw…) —
+   on les écrase pour occuper tout l'écran, l'iframe suit en 100 %.
+   :not() pour ne PAS toucher la barre de lecture ni le label, qui sont
+   aussi des div enfants directs du media-wrap. */
+.viewer--fs .viewer__media-wrap > div:not(.viewer__controls):not(.viewer__media-label) {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  aspect-ratio: auto !important;
+}
+/* Label de resource au-dessus du média : hors sujet en plein écran. */
+.viewer--fs .viewer__media-label { display: none !important; }
+
 /* En fullscreen, la barre de lecture passe en position fixed bas écran
    pour rester accessible quel que soit le ratio du média plein écran */
 .viewer--fs .viewer__controls--fixed {
