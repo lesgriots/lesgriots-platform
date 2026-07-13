@@ -58,8 +58,17 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
   // dès que les vraies dimensions du média sont disponibles.
   const [mediaWidth, setMediaWidth] = useStateV(null);
   const remeasureMedia = React.useCallback(() => {
-    const el = videoRef.current || imgRef.current;
-    if (!el) return;
+    // On mesure aussi l'iframe YouTube/Vimeo : sans ça, sur une resource
+    // youtube les deux refs video/img sont null → early return → mediaWidth
+    // garde la largeur du média PRÉCÉDENT, et ce style inline périmé écrase
+    // le align-self:stretch CSS (barre plus étroite/large que l'iframe).
+    const el = videoRef.current || imgRef.current || ytIframeRef.current;
+    if (!el) {
+      // Aucun média mesurable → on retire le fallback inline pour laisser
+      // le CSS (media-wrap fit-content + align-self:stretch) faire foi.
+      setMediaWidth(null);
+      return;
+    }
     const rect = el.getBoundingClientRect();
     let w = rect.width;
     // Pour une vidéo ou image avec object-fit: contain, le BOX peut être
@@ -82,8 +91,8 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
     if (w > 0) setMediaWidth(Math.round(w));
   }, []);
   React.useEffect(() => {
-    const el = videoRef.current || imgRef.current;
-    if (!el) return;
+    const el = videoRef.current || imgRef.current || ytIframeRef.current;
+    if (!el) { setMediaWidth(null); return; }
     remeasureMedia();
     // Re-mesures différées : le navigateur a parfois besoin d'un tick pour
     // que les vraies dimensions soient stables (surtout après transition
@@ -275,6 +284,11 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
     setProgress(0);
     setPlaying(active.type === "video");
     stageKey.current += 1;
+    // Reset du fallback largeur : le nouveau média n'a pas encore été
+    // mesuré, on ne veut pas appliquer la largeur de l'ANCIEN média en
+    // inline sur la barre. null → le CSS fit-content prend le relais
+    // jusqu'à la prochaine mesure (onLoad / onLoadedMetadata).
+    setMediaWidth(null);
   }, [resIdx, projectId]);
 
   // Legacy simulated progress (only for video resources WITHOUT a real
