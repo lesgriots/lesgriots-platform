@@ -2539,6 +2539,19 @@ body:has(.eco3) .idcard { display: none !important; }
   width: auto;
 }
 
+/* Message d'échec de chargement du média principal du viewer */
+.viewer__media-fail {
+  padding: 18px 22px;
+  border: 1px dashed var(--rule);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  background: rgba(15, 14, 10, 0.8);
+}
+
 /* Label optionnel au-dessus du média — mêmes dimensions que la projmeta
    (.viewer__projmeta) en dessous du média : font-size 11px,
    letter-spacing 0.14em, uppercase, opacity 0.55 (= projmeta__client).

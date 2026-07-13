@@ -296,6 +296,11 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
   const [thumbErr, setThumbErr] = useStateV({});
   useEffectV(() => { setThumbErr({}); }, [projectId]);
 
+  // Échec de chargement du média PRINCIPAL → au lieu d'un écran noir muet
+  // avec un compteur mensonger, on affiche un message explicite.
+  const [mediaFail, setMediaFail] = useStateV(false);
+  useEffectV(() => { setMediaFail(false); }, [resIdx, projectId]);
+
   // Legacy simulated progress (only for video resources WITHOUT a real
   // .mp4 src — kept so the existing placeholder demos still animate).
   useEffectV(() => {
@@ -463,12 +468,16 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
   // - YouTube : duration depuis le YT player, progress mis à jour par interval
   // - Vidéo self-hosted : duration depuis l'élément <video>
   // - Vidéo simulée (legacy) : duration depuis active.duration en data
+  // dur = 0 tant que la durée réelle est inconnue → le player affiche
+  // « --:-- » au lieu d'un mensonger « 01:00 » (fallback historique qui
+  // faisait croire à une « vidéo d'une minute » quand le média ne
+  // chargeait pas — bug remonté le 14/07/2026).
   const dur = isYouTube && ytPlayerRef.current && ytPlayerRef.current.getDuration
-    ? (ytPlayerRef.current.getDuration() || active.duration || 60)
+    ? (ytPlayerRef.current.getDuration() || active.duration || 0)
     : (isRealVideo && videoRef.current && videoRef.current.duration)
       ? videoRef.current.duration
-      : (active.duration || 60);
-  const pct = isMediaPlayable ? (progress / dur) * 100 : 0;
+      : (active.duration || 0);
+  const pct = isMediaPlayable && dur ? (progress / dur) * 100 : 0;
   const isVideo = active.type === "video";
 
   // No more auto-exit fullscreen when switching to a non-video resource —
@@ -658,6 +667,7 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
                   remeasureMedia();
                 }}
                 onLoadedData={remeasureMedia}
+                onError={() => setMediaFail(true)}
                 /* Retry play() dès que la vidéo a assez de buffer pour
                    jouer. Sans ça, sur certaines vidéos lourdes ou lentes
                    à charger, le autoPlay HTML + le useEffect play() partent
@@ -679,7 +689,17 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
                 src={active.src}
                 alt={active.label}
                 onLoad={remeasureMedia}
+                onError={() => setMediaFail(true)}
               />
+            )}
+
+            {/* Message d'échec de chargement du média — mieux qu'un écran
+                noir + compteur bloqué. Le plus souvent : cache navigateur
+                périmé → un rechargement suffit. */}
+            {mediaFail && (
+              <div className="viewer__media-fail" role="alert">
+                ⚠ média indisponible — recharge la page (Cmd+Shift+R)
+              </div>
             )}
 
           {/* Barre de lecture — voisin DOM direct du média, donc rendue
@@ -708,7 +728,7 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
                 <div className="bar__fill" style={{ width: pct + "%" }}></div>
               </div>
               <span className="time">
-                {fmtTime(progress)} / <span className="total">{fmtTime(dur)}</span>
+                {fmtTime(progress)} / <span className="total">{dur ? fmtTime(dur) : "--:--"}</span>
               </span>
               <button
                 className="mute-btn"
