@@ -738,15 +738,44 @@ export default function ProjectForm({ initial, isNew }) {
             </div>
           );
         })}
-        {/* Tuiles d'ajout */}
-        <button type="button" className="mediatile mediatile--add" onClick={() => { resourceAdd("image"); setSelectedRes(f.resources.length); }}>
-          <span className="plus">+</span> image
-        </button>
-        <button type="button" className="mediatile mediatile--add" onClick={() => { resourceAdd("video"); setSelectedRes(f.resources.length); }}>
-          <span className="plus">+</span> vidéo
-        </button>
-        <button type="button" className="mediatile mediatile--add" onClick={() => { resourceAdd("youtube"); setSelectedRes(f.resources.length); }}>
-          <span className="plus">+</span> YT / Vimeo
+        {/* Tuiles d'ajout — SANS distinction photo/vidéo : un seul bouton,
+            multi-sélection, le type est détecté automatiquement (MIME),
+            même mécanique que le drop de fichiers. */}
+        <label className="mediatile mediatile--add" title="Ajouter des photos et/ou des vidéos — le type est détecté automatiquement">
+          <span className="plus">+</span> média(s)
+          <input
+            type="file"
+            accept="image/*,video/*"
+            multiple
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const files = Array.from(e.target.files || []);
+              e.target.value = "";
+              if (files.length) handleDroppedFiles(files);
+            }}
+          />
+        </label>
+        <button
+          type="button"
+          className="mediatile mediatile--add"
+          title="Coller une URL : image, .mp4 (Bunny/R2), YouTube ou Vimeo — le type est détecté"
+          onClick={() => {
+            const u = window.prompt("URL du média (image, .mp4, YouTube, Vimeo…) :");
+            if (!u) return;
+            if (!/^https?:\/\//i.test(u.trim())) { alert("L'URL doit commencer par http:// ou https://"); return; }
+            const url = u.trim();
+            const isYT = /youtube\.com|youtu\.be|vimeo\.com/i.test(url);
+            const isVid = /\.(mp4|mov|webm|m4v)(\?|$)/i.test(url);
+            const res = isYT
+              ? { type: "youtube", src: url, label: "", aspect: "16/9" }
+              : isVid
+                ? { type: "video", src: url, poster: "", label: "", aspect: "16/9" }
+                : { type: "image", src: url, label: "", aspect: "16/9" };
+            set("resources", [...f.resources, res]);
+            setSelectedRes(f.resources.length);
+          }}
+        >
+          <span className="plus">+</span> URL / YT
         </button>
       </div>
 
