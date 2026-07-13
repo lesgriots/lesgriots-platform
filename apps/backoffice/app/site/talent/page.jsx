@@ -59,6 +59,8 @@ export default function TalentEditorPage() {
     try {
       const fd = new FormData();
       fd.append("file", file);
+    // Vidéos de cette page = découpables → stockage VPS forcé (pas R2).
+    fd.append("local", "1");
       const r = await fetch("/api/upload", { method: "POST", body: fd });
       const j = await r.json();
       if (r.ok && j.path) {

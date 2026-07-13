@@ -168,6 +168,8 @@ function MediaField({ label, value, onChange, accept, isVideo }) {
     setBusy(true); setErr(""); setDone(false); setPct(0);
     const fd = new FormData();
     fd.append("file", file);
+    // Vidéos de cette page = découpables → stockage VPS forcé (pas R2).
+    fd.append("local", "1");
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/upload");
     xhr.upload.onprogress = (e) => {

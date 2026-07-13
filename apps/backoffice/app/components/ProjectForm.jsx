@@ -112,10 +112,14 @@ function formToProject(f) {
 // Upload helper : POST multipart vers /api/upload, renvoie le path relatif.
 // Utilise XMLHttpRequest (et pas fetch) pour exposer la progression réelle
 // du transfert via xhr.upload.onprogress → onProgress(pourcentage 0..100).
-function uploadFile(file, onProgress) {
+function uploadFile(file, onProgress, opts = {}) {
   return new Promise((resolve, reject) => {
     const fd = new FormData();
     fd.append("file", file);
+    // local: true → force le stockage VPS (nécessaire pour les vidéos qui
+    // passeront par le découpeur ; les gros fichiers de la galerie partent
+    // vers R2 automatiquement côté serveur).
+    if (opts.local) fd.append("local", "1");
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/upload");
     xhr.upload.onprogress = (e) => {
@@ -191,7 +195,8 @@ export default function ProjectForm({ initial, isNew }) {
     if (!file) return;
     setUpVisual({ status: "up", pct: 0, err: "" });
     try {
-      const path = await uploadFile(file, (pct) => setUpVisual((s) => ({ ...s, pct })));
+      // local: true → la thumb video doit rester sur le VPS pour le découpeur.
+      const path = await uploadFile(file, (pct) => setUpVisual((s) => ({ ...s, pct })), { local: true });
       if (/^video\//.test(file.type) || /\.(mp4|mov|webm|m4v)$/i.test(path)) set("thumbVideo", path);
       else set("cover", path);
       setUpVisual({ status: "done", pct: 100, err: "" });

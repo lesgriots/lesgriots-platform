@@ -18,6 +18,10 @@ import path from "path";
 import os from "os";
 import { execFile } from "child_process";
 import { promisify } from "util";
+import { r2Enabled, r2MinBytes, r2UploadBuffer, r2UploadFile, videoContentType } from "../../../lib/r2.js";
+
+// Extensions vidéo web-compatibles (candidates à l'offload R2).
+const VIDEO_WEB = /\.(mp4|webm|m4v)$/i;
 
 const execFileP = promisify(execFile);
 const IMG_DIR = path.resolve(process.cwd(), "..", "lesgriotsxstudio", "img");
@@ -78,6 +82,11 @@ export async function POST(req) {
   const formData = await req.formData();
   const file = formData.get("file");
   const subdir = (formData.get("subdir") || "").toString().replace(/[^a-z0-9_-]/gi, "");
+  // local=1 → forcer le stockage VPS même pour une grosse vidéo.
+  // Utilisé par les champs dont la vidéo doit passer par le découpeur
+  // (/api/trim ne travaille que sur les fichiers locaux sous img/) :
+  // thumb video projet, vidéo de fond écosystème, hover talent.
+  const forceLocal = (formData.get("local") || "").toString() === "1";
 
   if (!file || typeof file === "string") {
     return NextResponse.json({ error: "missing file" }, { status: 400 });
@@ -99,6 +108,17 @@ export async function POST(req) {
   // ---- Cas simple : déjà web-compatible, on écrit tel quel ----------------
   if (!needsImgConvert && !needsVidConvert) {
     const safeName = `${base}-${stamp}${srcExt}`;
+    // Vidéo lourde + R2 configuré → offload vers le bucket (multipart),
+    // le champ du BO pointera sur https://media.lesgriotsxstudio.com/…
+    // En cas d'échec R2, on retombe silencieusement sur le disque local.
+    if (!forceLocal && VIDEO_WEB.test(safeName) && r2Enabled() && bytes.length > r2MinBytes()) {
+      try {
+        const url = await r2UploadBuffer(`videos/${safeName}`, bytes, videoContentType(safeName));
+        return NextResponse.json({ path: url, bytes: bytes.length, storage: "r2" });
+      } catch (e) {
+        console.error("upload R2 échoué, fallback local :", e.message);
+      }
+    }
     const targetPath = path.join(targetDir, safeName);
     await fs.writeFile(targetPath, bytes);
     const rel = subdir ? `img/${subdir}/${safeName}` : `img/${safeName}`;
@@ -139,6 +159,17 @@ export async function POST(req) {
     const outPath = path.join(targetDir, outName);
     await convertVideoToMp4(tmpSrc, outPath);
     const stat = await fs.stat(outPath);
+    // Vidéo convertie lourde + R2 configuré → offload en streaming depuis
+    // le fichier converti, puis suppression du fichier local.
+    if (!forceLocal && r2Enabled() && stat.size > r2MinBytes()) {
+      try {
+        const url = await r2UploadFile(`videos/${outName}`, outPath, "video/mp4");
+        fs.unlink(outPath).catch(() => {});
+        return NextResponse.json({ path: url, bytes: stat.size, converted: `${srcExt} → .mp4`, storage: "r2" });
+      } catch (e) {
+        console.error("upload R2 échoué, fallback local :", e.message);
+      }
+    }
     const rel = subdir ? `img/${subdir}/${outName}` : `img/${outName}`;
     return NextResponse.json({ path: rel, bytes: stat.size, converted: `${srcExt} → .mp4` });
   } catch (e) {
