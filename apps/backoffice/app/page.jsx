@@ -266,7 +266,10 @@ export default function ProjectsListPage() {
                 onMouseLeave={() => setHoverId((h) => (h === p.id ? null : h))}
               >
                 <a href={`/projects/${p.id}`} className="projcard__thumb" style={{ display: "block" }}>
-                  {showVideo ? (
+                  {/* Toujours une couverture visible : l'image si elle
+                      existe, SINON la boucle vidéo qui tourne direct.
+                      Placeholder texte uniquement s'il n'y a vraiment rien. */}
+                  {showVideo || (!cSrc && vSrc) ? (
                     <video src={vSrc} poster={cSrc || undefined} autoPlay muted loop playsInline />
                   ) : cSrc ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -276,7 +279,7 @@ export default function ProjectsListPage() {
                       display: "flex", alignItems: "center", justifyContent: "center",
                       width: "100%", height: "100%", fontSize: 11, color: "var(--dim)",
                       letterSpacing: "0.12em",
-                    }}>{vSrc ? "▶ VIDEO" : "NO COVER"}</span>
+                    }}>NO COVER</span>
                   )}
                   <span className="projcard__order">#{i + 1}</span>
                   <span className="projcard__badges">
