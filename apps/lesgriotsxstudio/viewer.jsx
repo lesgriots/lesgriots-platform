@@ -296,6 +296,19 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
   const [thumbErr, setThumbErr] = useStateV({});
   useEffectV(() => { setThumbErr({}); }, [projectId]);
 
+  // Ratios RÉELS (hauteur/largeur) des miniatures du rail, mesurés au
+  // chargement de chaque média. Les aspects déclarés dans data.jsx sont
+  // souvent faux (16/9 par défaut posé par le BO sur du portrait) → le
+  // calcul de largeur du rail débordait et coupait les extrémités.
+  // Avec les ratios mesurés, TOUS les médias tiennent dans le rail,
+  // la largeur se réduit proportionnellement quand il y en a beaucoup.
+  const [railRatios, setRailRatios] = useStateV({});
+  useEffectV(() => { setRailRatios({}); }, [projectId]);
+  const recordRailRatio = (i, w, h) => {
+    if (!w || !h) return;
+    setRailRatios((m) => (m[i] ? m : { ...m, [i]: h / w }));
+  };
+
   // Échec de chargement du média PRINCIPAL → au lieu d'un écran noir muet
   // avec un compteur mensonger, on affiche un message explicite.
   const [mediaFail, setMediaFail] = useStateV(false);
@@ -784,8 +797,10 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
           "--rail-thumb-w": (() => {
             const N = resources.length;
             if (N <= 1) return "100px";
-            // Somme des height/width ratios. Si aspect manque, on suppose 1:1.
-            const totalRatio = resources.reduce((sum, r) => {
+            // Somme des height/width ratios : priorité au ratio RÉEL mesuré
+            // au chargement (railRatios), sinon l'aspect déclaré, sinon 1:1.
+            const totalRatio = resources.reduce((sum, r, i) => {
+              if (railRatios[i]) return sum + railRatios[i];
               const parts = (typeof r.aspect === "string" && r.aspect.includes("/"))
                 ? r.aspect.split("/").map((p) => parseFloat(p))
                 : [1, 1];
@@ -796,9 +811,9 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
             // 70vh dispo, gap 10px entre chaque thumb.
             // hauteur totale = totalRatio × thumb_w + gaps
             // → thumb_w = (70vh - gaps) / totalRatio
-            // 70vh on doesn't have, on calcule en vh : (70 - gaps_vh) / totalRatio
-            // Plus simple : on calc en CSS avec calc.
-            return `min(100px, calc((70vh - ${(N - 1) * 10}px) / ${totalRatio.toFixed(2)}))`;
+            // La largeur se réduit proportionnellement au nombre/format des
+            // médias pour que TOUT tienne, plancher à 36px pour rester tapable.
+            return `min(100px, max(36px, calc((70vh - ${(N - 1) * 10}px) / ${totalRatio.toFixed(2)})))`;
           })(),
         }}
       >
@@ -825,7 +840,12 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
               onClick={() => pickResource(i)}
               aria-label={r.label}>
               {previewSrc ? (
-                <img src={previewSrc} alt="" loading="lazy" />
+                <img
+                  src={previewSrc}
+                  alt=""
+                  loading="lazy"
+                  onLoad={(e) => recordRailRatio(i, e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)}
+                />
               ) : isRealVideoSrc && !thumbErr[i] ? (
                 <video
                   src={r.src}
@@ -841,11 +861,19 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
                   // Se positionne sur ~1 seconde pour montrer une frame
                   // représentative (la 1ère est souvent un fondu noir ou
                   // une mire — 1s ≈ 25-30e frame, on est dans le contenu).
-                  onLoadedMetadata={(e) => { try { e.currentTarget.currentTime = 1; } catch {} }}
+                  onLoadedMetadata={(e) => {
+                    recordRailRatio(i, e.currentTarget.videoWidth, e.currentTarget.videoHeight);
+                    try { e.currentTarget.currentTime = 1; } catch {}
+                  }}
                   onError={() => setThumbErr((m) => ({ ...m, [i]: true }))}
                 />
               ) : project.cover ? (
-                <img src={project.cover} alt="" loading="lazy" />
+                <img
+                  src={project.cover}
+                  alt=""
+                  loading="lazy"
+                  onLoad={(e) => recordRailRatio(i, e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)}
+                />
               ) : (
                 <span className="viewer__thumb__missing">—</span>
               )}
