@@ -994,7 +994,14 @@ body:has(.eco3) .idcard { display: none !important; }
   opacity: 1;
   transform: translateX(100%);
   pointer-events: none;
-  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* visibility: hidden en état fermé (appliquée APRÈS la transition de
+     sortie) = garantie que le panneau ne peut jamais "dépasser" sur le
+     bord droit, même si le navigateur rate le recalcul du translateX
+     pendant un resize (bug constaté le 14/07/2026 : bordure + items
+     visibles sur le côté après fermeture + réduction de fenêtre). */
+  visibility: hidden;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+              visibility 0s 0.35s;
   display: flex;
   flex-direction: column;
   z-index: 95;
@@ -1002,6 +1009,8 @@ body:has(.eco3) .idcard { display: none !important; }
 .menubar.open .menubar__term {
   transform: translateX(0);
   pointer-events: auto;
+  visibility: visible;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 /* Pas de blur du contenu derrière sur desktop — la page reste nette,
    seule la sidebar slide par-dessus. Le blur reste en mobile (override

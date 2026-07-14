@@ -1053,14 +1053,18 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
                       })()}
                       alt=""
                     />
+                  ) : isVideo && (r.poster || project.cover) ? (
+                    /* Miniature = le POSTER en image directe (celui posé dans
+                       le BO ou généré automatiquement à l'export). Beaucoup
+                       plus fiable et léger sur mobile que d'ouvrir N <video>
+                       dans le drawer pour en extraire une frame. */
+                    <img src={r.poster || project.cover} alt="" loading="lazy" />
                   ) : isVideo ? (
                     <video
                       src={r.src}
                       muted
                       playsInline
                       preload="metadata"
-                      /* Même poster de secours que le rail (cover projet). */
-                      poster={r.poster || project.cover || undefined}
                       onLoadedMetadata={(e) => { try { e.currentTarget.currentTime = 1; } catch {} }}
                     />
                   ) : (
