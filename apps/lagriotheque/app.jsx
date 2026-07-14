@@ -4426,7 +4426,12 @@ function App() {
       const hH = header ? header.offsetHeight : 0;
       // Basé sur le scroll vs hauteur du hero → fonctionne aussi quand le hero
       // est "sticky" (effet de superposition : le contenu monte par-dessus).
-      const past = hero ? window.scrollY > hero.offsetHeight - hH - 8 : false;
+      // Seuil précoce (30 % du hero) : dès que le panneau de contenu commence
+      // à recouvrir sérieusement la vidéo, le menu bascule en barre solide.
+      // Avant : bascule seulement une fois le hero entièrement couvert → le
+      // menu restait en texte blanc transparent au-dessus du contenu clair
+      // (invisible) pendant toute la transition.
+      const past = hero ? window.scrollY > hero.offsetHeight * 0.3 : false;
       document.body.classList.toggle("past-hero", past);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
