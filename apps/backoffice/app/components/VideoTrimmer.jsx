@@ -41,8 +41,29 @@ const MAX_ZOOM = 4;
 //   VwPct = zoom × max(1, A/C) × 100   (A = ratio vidéo, C = ratio conteneur)
 //   VhPct = zoom × max(1, C/A) × 100
 //   left  = 50% − cx × VwPct ;  top = 50% − cy × VhPct
-function SitePreview({ label, width, cellAspect, videoAR, cropRatio, wFrac, hFrac, cx, cy, previewSrc, start, end, videoFilter, containerFilter, veil, extraScale = 1, note }) {
+function SitePreview({ label, width, cellAspect, videoAR, cropRatio, wFrac, hFrac, cx, cy, previewSrc, start, end, videoFilter, containerFilter, veil, extraScale = 1, note, onPan }) {
   const vRef = useRef(null);
+  const boxRef = useRef(null);
+  // Drag DIRECT dans la preview : on convertit le déplacement du pointeur
+  // en fraction de l'image source et on remonte au parent (onPan), qui
+  // met à jour cx/cy — le cadre principal et les autres previews suivent.
+  const dragRef = useRef(null);
+  function panDown(e) {
+    if (!onPan) return;
+    e.preventDefault();
+    dragRef.current = { x: e.clientX, y: e.clientY };
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  }
+  function panMove(e) {
+    const d = dragRef.current;
+    if (!d || !onPan || !boxRef.current) return;
+    const r = boxRef.current.getBoundingClientRect();
+    const dcx = -(e.clientX - d.x) / (r.width * (VwPct / 100));
+    const dcy = -(e.clientY - d.y) / (r.height * (VhPct / 100));
+    dragRef.current = { x: e.clientX, y: e.clientY };
+    onPan(dcx, dcy);
+  }
+  function panUp() { dragRef.current = null; }
   // Boucle la lecture dans [start, end], comme le fera le clip généré.
   useEffect(() => {
     const v = vRef.current;
@@ -82,7 +103,21 @@ function SitePreview({ label, width, cellAspect, videoAR, cropRatio, wFrac, hFra
   return (
     <div style={{ flexShrink: 0 }}>
       <div style={{ fontSize: 9, color: "var(--dim)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 3 }}>{label}</div>
-      <div style={{ position: "relative", width, aspectRatio: `${C}`, overflow: "hidden", background: "#000", border: "1px solid var(--rule)", filter: containerFilter || "none" }}>
+      <div
+        ref={boxRef}
+        onPointerDown={panDown}
+        onPointerMove={panMove}
+        onPointerUp={panUp}
+        onPointerCancel={panUp}
+        style={{
+          position: "relative", width, aspectRatio: `${C}`, overflow: "hidden",
+          background: "#000", border: "1px solid var(--rule)",
+          filter: containerFilter || "none",
+          cursor: onPan ? "grab" : "default",
+          touchAction: onPan ? "none" : "auto",
+          userSelect: "none",
+        }}
+      >
         <video
           ref={vRef}
           src={previewSrc}
@@ -263,6 +298,13 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
     setCx(clampAxis(p.cx - (dx * wFrac) / r.width, wFrac));
     setCy(clampAxis(p.cy - (dy * hFrac) / r.height, hFrac));
   }
+  // Pan piloté depuis les previews « rendu sur le site » : même état
+  // (cx/cy) que le cadre principal, tout reste synchronisé.
+  function panBy(dcx, dcy) {
+    setCx((c) => clampAxis(c + dcx, wFrac));
+    setCy((c) => clampAxis(c + dcy, hFrac));
+  }
+
   function cropPointerUp() {
     const p = panRef.current;
     panRef.current = null;
@@ -638,6 +680,7 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
                 cellAspect={R}
                 videoAR={vidAR}
                 cropRatio={R} wFrac={wFrac} hFrac={hFrac} cx={cx} cy={cy}
+                onPan={canPan ? panBy : null}
                 previewSrc={previewSrc} start={start} end={end}
                 videoFilter="grayscale(0.4) contrast(1.1)"
                 extraScale={1.04}
@@ -648,6 +691,7 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
                 cellAspect={16 / 9}
                 videoAR={vidAR}
                 cropRatio={R} wFrac={wFrac} hFrac={hFrac} cx={cx} cy={cy}
+                onPan={canPan ? panBy : null}
                 previewSrc={previewSrc} start={start} end={end}
                 containerFilter="grayscale(1) contrast(1.1) brightness(0.6)"
                 veil
@@ -658,6 +702,7 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
                 cellAspect={R}
                 videoAR={vidAR}
                 cropRatio={R} wFrac={wFrac} hFrac={hFrac} cx={cx} cy={cy}
+                onPan={canPan ? panBy : null}
                 previewSrc={previewSrc} start={start} end={end}
                 videoFilter="grayscale(1) contrast(1.05) brightness(0.95)"
                 note="au tap : grayscale(0.3)"
