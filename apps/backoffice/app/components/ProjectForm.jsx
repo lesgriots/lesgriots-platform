@@ -168,12 +168,7 @@ export default function ProjectForm({ initial, isNew }) {
   // .mp4 self-hosté sous img/ (les URL externes / YouTube ne passent
   // pas par /api/trim).
   const [showThumbTrim, setShowThumbTrim] = useState(false);
-  // Cible du découpage : la boucle générée va dans quel champ ?
-  //   thumbVideo       → miniature de la grille Work (desktop)
-  //   thumbVideoBg     → fond plein écran au hover
-  //   thumbVideoMobile → carte de la grille mobile
-  // Le site retombe sur thumbVideo quand une variante n'existe pas.
-  const [trimTarget, setTrimTarget] = useState("thumbVideo");
+
   // ── Galerie façon Instagram ──
   // Tuile sélectionnée (son éditeur s'ouvre sous la grille) + drag & drop.
   const [selectedRes, setSelectedRes] = useState(null);
@@ -655,39 +650,19 @@ export default function ProjectForm({ initial, isNew }) {
           </button>
           {showThumbTrim && (
             <>
-              {/* Cible du cadrage : chaque contexte du site peut avoir SA
-                  version recadrée. On découpe toujours depuis la vidéo de
-                  base (thumbVideo), et la boucle générée va dans le champ
-                  de la cible choisie. */}
-              <div style={{ display: "flex", gap: 6, alignItems: "center", margin: "8px 0 0", flexWrap: "wrap" }}>
-                <span style={{ fontSize: 10, color: "var(--dim)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Cible</span>
-                {[
-                  { k: "thumbVideo", label: "Miniature (grille)" },
-                  { k: "thumbVideoBg", label: "Fond hover" },
-                  { k: "thumbVideoMobile", label: "Mobile" },
-                ].map((c) => (
-                  <button
-                    key={c.k}
-                    type="button"
-                    className="btn btn--ghost"
-                    onClick={() => setTrimTarget(c.k)}
-                    style={{
-                      padding: "2px 10px", fontSize: 11,
-                      ...(trimTarget === c.k ? { background: "var(--accent)", color: "#000", borderColor: "var(--accent)" } : {}),
-                    }}
-                  >
-                    {c.label}{f[c.k] ? " ✓" : ""}
-                  </button>
-                ))}
-              </div>
               <p className="note" style={{ margin: "4px 0 0", fontSize: 10, color: "var(--dim)" }}>
                 Sans variante, le site utilise la miniature partout. Astuce : Fond hover en 16:9, Mobile en 4:5 ou 9:16 (chips Format du découpeur).
               </p>
               <VideoTrimmer
-                key={f.thumbVideo + "→" + trimTarget}
+                key={f.thumbVideo}
                 src={f.thumbVideo}
                 previewSrc={`/api/preview?p=${encodeURIComponent(f.thumbVideo)}`}
-                onTrimmed={(p) => set(trimTarget, p)}
+                /* La cible (miniature / fond / mobile) se choisit DANS le
+                   découpeur — chaque vue a son cadrage indépendant. */
+                onTrimmed={(p, kind) => set(
+                  kind === "bg" ? "thumbVideoBg" : kind === "mobile" ? "thumbVideoMobile" : "thumbVideo",
+                  p
+                )}
               />
             </>
           )}

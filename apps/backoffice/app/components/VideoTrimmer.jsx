@@ -176,39 +176,52 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   // Le ratio de sortie = ratio source (le site affiche la thumb en cover,
   // n'importe quel ratio marche) ; le crop fait iw/zoom × ih/zoom.
   const [vidAR, setVidAR] = useState(16 / 9);
-  const [zoom, setZoom] = useState(1);
-  const [cx, setCx] = useState(0.5);
-  const [cy, setCy] = useState(0.5);
+  // CADRAGES INDÉPENDANTS par cible : chaque vue du site (miniature de la
+  // grille, fond plein écran, carte mobile) a son propre zoom/format/centre.
+  // La cible ACTIVE est celle que le cadre principal, le slider de zoom et
+  // les chips Format pilotent — et celle que « Générer » produit.
+  const [activeKind, setActiveKind] = useState("cell");
+  const [crops, setCrops] = useState({
+    cell:   { zoom: 1, ratio: null, cx: 0.5, cy: 0.5 },
+    bg:     { zoom: 1, ratio: null, cx: 0.5, cy: 0.5 },
+    mobile: { zoom: 1, ratio: null, cx: 0.5, cy: 0.5 },
+  });
+  const updateCrop = (kind, patch) =>
+    setCrops((m) => ({ ...m, [kind]: { ...m[kind], ...patch } }));
   const [panning, setPanning] = useState(false);
-
-  // Format de cadrage « device » : null = ratio original de la vidéo,
-  // sinon ratio cible (16/9 PC, 9/16 mobile, 1:1, 4:5). Le clip généré
-  // aura ce ratio — la grille du site (aspect détecté au load) suivra.
-  const [cropAR, setCropAR] = useState(null);
 
   // Fractions VISIBLES de l'image source dans le cadrage (largeur/hauteur).
   // R = ratio cible, A = ratio source :
   //   wFrac = min(1, R/A)/zoom ; hFrac = min(1, A/R)/zoom
-  // (si R plus étroit que A, on ne voit qu'une tranche horizontale, etc.)
   const fracs = (z, Rr, A) => ({
     wFrac: Math.min(1, Rr / A) / z,
     hFrac: Math.min(1, A / Rr) / z,
   });
   const clampAxis = (c, frac) => Math.max(frac / 2, Math.min(1 - frac / 2, c));
+  const fracsFor = (kind) => {
+    const k = crops[kind];
+    return fracs(k.zoom, k.ratio || vidAR, vidAR);
+  };
 
   function applyZoom(zRaw) {
     const z = Math.max(1, Math.min(MAX_ZOOM, zRaw));
-    const f = fracs(z, cropAR || vidAR, vidAR);
-    setZoom(z);
-    setCx((c) => clampAxis(c, f.wFrac));
-    setCy((c) => clampAxis(c, f.hFrac));
+    const k = crops[activeKind];
+    const f = fracs(z, k.ratio || vidAR, vidAR);
+    updateCrop(activeKind, {
+      zoom: z,
+      cx: clampAxis(k.cx, f.wFrac),
+      cy: clampAxis(k.cy, f.hFrac),
+    });
   }
 
   function applyRatio(Rr) {
-    setCropAR(Rr);
-    const f = fracs(zoom, Rr || vidAR, vidAR);
-    setCx((c) => clampAxis(c, f.wFrac));
-    setCy((c) => clampAxis(c, f.hFrac));
+    const k = crops[activeKind];
+    const f = fracs(k.zoom, Rr || vidAR, vidAR);
+    updateCrop(activeKind, {
+      ratio: Rr,
+      cx: clampAxis(k.cx, f.wFrac),
+      cy: clampAxis(k.cy, f.hFrac),
+    });
   }
 
   // Métadonnées chargées → durée connue, sélection = clip entier par défaut.
@@ -299,21 +312,33 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
     // La vidéo affichée fait r.width / wFrac px de large → déplacer le
     // pointeur de dx px = déplacer le centre de dx × wFrac / r.width
     // (en fraction de l'image source).
-    setCx(clampAxis(p.cx - (dx * wFrac) / r.width, wFrac));
-    setCy(clampAxis(p.cy - (dy * hFrac) / r.height, hFrac));
+    updateCrop(activeKind, {
+      cx: clampAxis(p.cx - (dx * wFrac) / r.width, wFrac),
+      cy: clampAxis(p.cy - (dy * hFrac) / r.height, hFrac),
+    });
   }
-  // Pan piloté depuis les previews « rendu sur le site » : même état
-  // (cx/cy) que le cadre principal, tout reste synchronisé.
-  function panBy(dcx, dcy) {
-    setCx((c) => clampAxis(c + dcx, wFrac));
-    setCy((c) => clampAxis(c + dcy, hFrac));
+  // Pan piloté depuis une preview : ne modifie QUE le cadrage de SA cible,
+  // et rend cette cible active (le cadre principal bascule dessus).
+  function panKind(kind, dcx, dcy) {
+    setActiveKind(kind);
+    setCrops((m) => {
+      const k = m[kind];
+      const f = fracs(k.zoom, k.ratio || vidAR, vidAR);
+      return { ...m, [kind]: { ...k, cx: clampAxis(k.cx + dcx, f.wFrac), cy: clampAxis(k.cy + dcy, f.hFrac) } };
+    });
   }
-  // Drag dans une vue qui croppe alors qu'aucun cadrage n'est actif →
-  // on adopte le format du conteneur de cette vue (ex. 16:9 pour le fond
-  // plein écran) et le recadrage démarre dans le même geste.
-  function adoptRatio(C) {
+  // Drag dans une vue qui croppe alors que sa cible n'a aucun cadrage →
+  // on adopte le format du conteneur de cette vue (ex. 16:9 pour le fond)
+  // et le recadrage démarre dans le même geste.
+  function adoptKind(kind, C) {
+    setActiveKind(kind);
     const target = Math.abs(C - vidAR) < 0.01 ? null : C;
-    if ((cropAR || null) !== target) applyRatio(target);
+    setCrops((m) => {
+      const k = m[kind];
+      if ((k.ratio || null) === target) return m;
+      const f = fracs(k.zoom, target || vidAR, vidAR);
+      return { ...m, [kind]: { ...k, ratio: target, cx: clampAxis(k.cx, f.wFrac), cy: clampAxis(k.cy, f.hFrac) } };
+    });
   }
 
   function cropPointerUp() {
@@ -327,9 +352,8 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
     }
   }
 
-  // Géométrie du cadrage : le cadre a le ratio cible R ; la vidéo source
-  // est positionnée en absolu pour que la zone croppée le remplisse
-  // exactement (mêmes maths que la simulation SitePreview).
+  // Géométrie du cadre principal : dérivée du cadrage de la CIBLE ACTIVE.
+  const { zoom, ratio: cropAR, cx, cy } = crops[activeKind];
   const R = cropAR || vidAR;
   const { wFrac, hFrac } = fracs(zoom, R, vidAR);
   const canPan = wFrac < 0.999 || hFrac < 0.999;
@@ -337,6 +361,10 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   const cropVhPct = 100 / hFrac;
   const cropLeftPct = 50 - cx * cropVwPct;
   const cropTopPct = 50 - cy * cropVhPct;
+  const canPanFor = (kind) => {
+    const f = fracsFor(kind);
+    return f.wFrac < 0.999 || f.hFrac < 0.999;
+  };
 
   // ── Drag timeline façon Instagram ───────────────────────────────────────
   const timeAtX = (clientX) => {
@@ -425,12 +453,13 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
     // x = (iw - ow) * px. px = position du bord gauche du crop dans la
     // marge disponible, dérivée du centre (cx). `ratio` = format device
     // choisi (le clip généré aura ce ratio).
-    const fg = fracs(zoom, cropAR || vidAR, vidAR);
-    const crop = (zoom > 1.01 || cropAR) ? {
-      zoom,
-      ratio: cropAR || undefined,
-      px: fg.wFrac < 0.999 ? (cx - fg.wFrac / 2) / (1 - fg.wFrac) : 0.5,
-      py: fg.hFrac < 0.999 ? (cy - fg.hFrac / 2) / (1 - fg.hFrac) : 0.5,
+    const k = crops[activeKind];
+    const fg = fracs(k.zoom, k.ratio || vidAR, vidAR);
+    const crop = (k.zoom > 1.01 || k.ratio) ? {
+      zoom: k.zoom,
+      ratio: k.ratio || undefined,
+      px: fg.wFrac < 0.999 ? (k.cx - fg.wFrac / 2) / (1 - fg.wFrac) : 0.5,
+      py: fg.hFrac < 0.999 ? (k.cy - fg.hFrac / 2) / (1 - fg.hFrac) : 0.5,
     } : undefined;
     try {
       const r = await fetch("/api/trim", {
@@ -444,7 +473,7 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
         const mb = j.bytes ? (j.bytes / 1048576).toFixed(1) : "?";
         setMsg(`✓ Boucle générée (${(end - start).toFixed(1)}s${crop ? ` · zoom ${zoom.toFixed(1)}×` : ""} · ${mb} Mo). Le champ pointe désormais sur le clip découpé.`);
         setOk(true);
-        onTrimmed(j.path);
+        onTrimmed(j.path, activeKind);
       } else {
         setMsg(`✗ ${j.error || `échec (${r.status})`}`);
         setOk(false);
@@ -486,6 +515,25 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
     <div style={{ marginTop: 10, padding: 12, border: "1px solid var(--rule)", background: "#0b0a09" }}>
       <div style={{ fontSize: 10, color: "var(--dim)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 8 }}>
         Découpeur — fenêtre = extrait · zoom + glisser l'image = cadrage
+      </div>
+
+      {/* ── Cible du cadrage : chaque vue du site a SON cadrage propre ── */}
+      <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 10, color: "var(--dim)", textTransform: "uppercase", letterSpacing: "0.1em", flexShrink: 0 }}>Cadrage pour</span>
+        {[["cell", "Miniature"], ["bg", "Fond hover"], ["mobile", "Mobile"]].map(([k, lbl]) => (
+          <button
+            key={k}
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => setActiveKind(k)}
+            style={{
+              padding: "2px 10px", fontSize: 11,
+              ...(activeKind === k ? { background: "var(--accent)", color: "#000", borderColor: "var(--accent)" } : {}),
+            }}
+          >
+            {lbl}{(crops[k].zoom > 1.01 || crops[k].ratio) ? " ✂" : ""}
+          </button>
+        ))}
       </div>
 
       {/* ── Cadre de recadrage : la vidéo bouge dedans (zoom + pan) ────── */}
@@ -591,7 +639,7 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
         />
         <span style={{ fontSize: 11, fontVariantNumeric: "tabular-nums", width: 34, textAlign: "right" }}>{zoom.toFixed(1)}×</span>
         {(zoom > 1.001 || cropAR) && (
-          <button type="button" className="btn btn--ghost" style={{ padding: "2px 8px", fontSize: 11 }} onClick={() => { setZoom(1); setCropAR(null); setCx(0.5); setCy(0.5); }}>
+          <button type="button" className="btn btn--ghost" style={{ padding: "2px 8px", fontSize: 11 }} onClick={() => updateCrop(activeKind, { zoom: 1, ratio: null, cx: 0.5, cy: 0.5 })}>
             ⟲ Réinitialiser
           </button>
         )}
@@ -685,42 +733,54 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
         {showRender && (
           <>
             <div data-render-previews style={{ display: "flex", gap: 14, marginTop: 8, flexWrap: "wrap", alignItems: "flex-start" }}>
-              <SitePreview
-                label="Hover PC — cellule grille"
-                width={170}
-                cellAspect={R}
-                videoAR={vidAR}
-                cropRatio={R} wFrac={wFrac} hFrac={hFrac} cx={cx} cy={cy}
-                onPan={canPan ? panBy : null}
-                onAdopt={adoptRatio}
-                previewSrc={previewSrc} start={start} end={end}
-                videoFilter="grayscale(0.4) contrast(1.1)"
-                extraScale={1.04}
-              />
-              <SitePreview
-                label="Hover PC — fond plein écran"
-                width={300}
-                cellAspect={16 / 9}
-                videoAR={vidAR}
-                cropRatio={R} wFrac={wFrac} hFrac={hFrac} cx={cx} cy={cy}
-                onPan={canPan ? panBy : null}
-                onAdopt={adoptRatio}
-                previewSrc={previewSrc} start={start} end={end}
-                containerFilter="grayscale(1) contrast(1.1) brightness(0.6)"
-                veil
-              />
-              <SitePreview
-                label="Mobile — carte grille"
-                width={110}
-                cellAspect={R}
-                videoAR={vidAR}
-                cropRatio={R} wFrac={wFrac} hFrac={hFrac} cx={cx} cy={cy}
-                onPan={canPan ? panBy : null}
-                onAdopt={adoptRatio}
-                previewSrc={previewSrc} start={start} end={end}
-                videoFilter="grayscale(1) contrast(1.05) brightness(0.95)"
-                note="au tap : grayscale(0.3)"
-              />
+              {(() => {
+                const kindProps = (kind) => {
+                  const k = crops[kind];
+                  const f = fracsFor(kind);
+                  return {
+                    cropRatio: k.ratio || vidAR,
+                    wFrac: f.wFrac, hFrac: f.hFrac,
+                    cx: k.cx, cy: k.cy,
+                    onPan: canPanFor(kind) ? (dx, dy) => panKind(kind, dx, dy) : null,
+                    onAdopt: (C) => adoptKind(kind, C),
+                    active: activeKind === kind,
+                  };
+                };
+                return (
+                  <>
+                    <SitePreview
+                      label={"Hover PC — cellule grille" + (activeKind === "cell" ? " ●" : "")}
+                      width={170}
+                      cellAspect={crops.cell.ratio || vidAR}
+                      videoAR={vidAR}
+                      {...kindProps("cell")}
+                      previewSrc={previewSrc} start={start} end={end}
+                      videoFilter="grayscale(0.4) contrast(1.1)"
+                      extraScale={1.04}
+                    />
+                    <SitePreview
+                      label={"Hover PC — fond plein écran" + (activeKind === "bg" ? " ●" : "")}
+                      width={300}
+                      cellAspect={16 / 9}
+                      videoAR={vidAR}
+                      {...kindProps("bg")}
+                      previewSrc={previewSrc} start={start} end={end}
+                      containerFilter="grayscale(1) contrast(1.1) brightness(0.6)"
+                      veil
+                    />
+                    <SitePreview
+                      label={"Mobile — carte grille" + (activeKind === "mobile" ? " ●" : "")}
+                      width={110}
+                      cellAspect={crops.mobile.ratio || vidAR}
+                      videoAR={vidAR}
+                      {...kindProps("mobile")}
+                      previewSrc={previewSrc} start={start} end={end}
+                      videoFilter="grayscale(1) contrast(1.05) brightness(0.95)"
+                      note="au tap : grayscale(0.3)"
+                    />
+                  </>
+                );
+              })()}
             </div>
             <p className="note" style={{ margin: "6px 0 0", fontSize: 10, color: "var(--dim)" }}>
               Simulation fidèle des filtres du site (N&B, voile, scale hover) avec ta sélection et ton cadrage.
@@ -735,7 +795,7 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
           {playing ? "⏸ Pause" : "▶ Prévisualiser l'extrait"}
         </button>
         <button type="button" className="btn" style={{ padding: "6px 14px", fontSize: 12 }} onClick={generate} disabled={busy || !(end > start)}>
-          {busy ? "Découpage…" : "✂ Générer la boucle"}
+          {busy ? "Découpage…" : `✂ Générer (${activeKind === "bg" ? "fond hover" : activeKind === "mobile" ? "mobile" : "miniature"})`}
         </button>
         {msg && <span className="note" style={{ color: ok ? "var(--accent)" : "var(--danger)" }}>{msg}</span>}
       </div>
