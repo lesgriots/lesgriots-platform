@@ -238,13 +238,12 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
               .catch(() => {});
           }
         } catch (e) {}
-      } else if (videoRef.current && typeof videoRef.current.webkitEnterFullscreen === "function") {
-        // iPhone (Safari iOS) : pas de Fullscreen API sur les éléments —
-        // on ouvre le PLAYER NATIF de la vidéo, qui passe automatiquement
-        // en paysage si la vidéo est horizontale.
-        try { videoRef.current.webkitEnterFullscreen(); } catch (e) { setFullscreen((f) => !f); }
       } else {
-        // Fallback for browsers without API support — toggle the CSS-only mode
+        // iPhone (Safari iOS) : pas de Fullscreen API sur les éléments.
+        // On utilise le plein écran CSS maison (.viewer--fs) qui garde
+        // NOTRE barre de lecture (le player natif webkitEnterFullscreen
+        // impose la sienne). La vidéo occupe tout le viewport et suit la
+        // rotation du téléphone (paysage = plein cadre).
         setFullscreen((f) => !f);
       }
     } else {

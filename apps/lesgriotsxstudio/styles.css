@@ -5698,13 +5698,29 @@ body.overview-open .utilbar {
    already takes us out of the page; black background; full-bleed image. */
 .viewer--fs {
   background: #000;
+  /* position fixed + 100dvh : indispensable pour le mode plein écran CSS
+     sur iPhone (pas de Fullscreen API) — couvre tout le viewport, barres
+     Safari comprises, et suit la rotation du téléphone. */
+  position: fixed;
+  inset: 0;
+  z-index: 200;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   padding: 0 !important;
   display: flex !important;
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
+}
+/* En plein écran mobile, on cache le HUD 4-coins et les triggers
+   GALERIE / INFORMATION — seul le média + notre barre restent. */
+.viewer--fs .viewer__hud,
+.viewer--fs .viewer__overview-trigger,
+.viewer--fs .viewer__info-trigger,
+.viewer--fs .viewer__overview,
+.viewer--fs .viewer__overview-backdrop {
+  display: none !important;
 }
 .viewer--fs .viewer__main {
   width: 100vw !important;
@@ -5743,6 +5759,11 @@ body.overview-open .utilbar {
 .viewer--fs .viewer__media-wrap {
   width: 100vw !important;
   height: 100vh !important;
+  height: 100dvh !important;
+  /* neutralise le cap mobile (max-height calc(100vh - 380px)) et le
+     positionnement centre du mode normal */
+  max-height: none !important;
+  top: 50dvh !important;
   max-width: none !important;
   display: flex;
   flex-direction: column;
@@ -5753,8 +5774,10 @@ body.overview-open .utilbar {
 .viewer--fs .viewer__media-wrap > video {
   width: 100vw !important;
   height: 100vh !important;
+  height: 100dvh !important;
   max-width: none !important;
   max-height: 100vh !important;
+  max-height: 100dvh !important;
   object-fit: contain;
   background: #000;
 }
@@ -5777,7 +5800,7 @@ body.overview-open .utilbar {
   position: fixed !important;
   left: 0;
   right: 0;
-  bottom: 24px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
   width: min(900px, calc(100vw - 48px)) !important;
   margin: 0 auto;
   z-index: 100;
