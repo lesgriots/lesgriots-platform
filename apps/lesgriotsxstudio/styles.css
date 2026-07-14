@@ -4047,8 +4047,8 @@ body.overview-open .utilbar {
   }
   .eco-mobile__row__thumb {
     width: 100%;
-    max-width: 150px;
-    aspect-ratio: 1 / 1;
+    max-width: 170px;
+    aspect-ratio: 16 / 9;
     overflow: hidden;
     background: #0d0c0a;
   }
