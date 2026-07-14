@@ -224,12 +224,36 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
     if (!fsEl) {
       const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
       if (req) {
-        try { req.call(el); } catch (e) {}
+        try {
+          const p = req.call(el);
+          // Vidéo HORIZONTALE sur mobile (Android/Chrome) : on verrouille
+          // l'orientation en paysage pour que le plein écran utilise tout
+          // le téléphone. Silencieux si non supporté (desktop, iOS).
+          const v = videoRef.current;
+          if (v && v.videoWidth > v.videoHeight
+              && window.screen && window.screen.orientation
+              && typeof window.screen.orientation.lock === "function") {
+            Promise.resolve(p)
+              .then(() => window.screen.orientation.lock("landscape"))
+              .catch(() => {});
+          }
+        } catch (e) {}
+      } else if (videoRef.current && typeof videoRef.current.webkitEnterFullscreen === "function") {
+        // iPhone (Safari iOS) : pas de Fullscreen API sur les éléments —
+        // on ouvre le PLAYER NATIF de la vidéo, qui passe automatiquement
+        // en paysage si la vidéo est horizontale.
+        try { videoRef.current.webkitEnterFullscreen(); } catch (e) { setFullscreen((f) => !f); }
       } else {
         // Fallback for browsers without API support — toggle the CSS-only mode
         setFullscreen((f) => !f);
       }
     } else {
+      try {
+        if (window.screen && window.screen.orientation
+            && typeof window.screen.orientation.unlock === "function") {
+          window.screen.orientation.unlock();
+        }
+      } catch (e) {}
       const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
       if (exit) {
         try { exit.call(document); } catch (e) {}
@@ -243,6 +267,16 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
     const onChange = () => {
       const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
       setFullscreen(!!fsEl);
+      // Sortie de plein écran → on libère le verrou d'orientation posé
+      // à l'entrée (vidéos paysage sur mobile).
+      if (!fsEl) {
+        try {
+          if (window.screen && window.screen.orientation
+              && typeof window.screen.orientation.unlock === "function") {
+            window.screen.orientation.unlock();
+          }
+        } catch (e) {}
+      }
     };
     document.addEventListener("fullscreenchange", onChange);
     document.addEventListener("webkitfullscreenchange", onChange);
