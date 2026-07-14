@@ -1030,14 +1030,14 @@ function ViewerView({ projectId, onClose, onSwitchProject }) {
               const isVideo = r.type === "video";
               const isYT = r.type === "youtube" || /(?:youtube\.com|youtu\.be)/i.test(r.src || "");
               const isImg = r.type === "image" || /\.(jpg|jpeg|png|webp|gif|svg)(\?|$)/i.test(r.src || "");
-              const aspectStyle = (typeof r.aspect === "string" && r.aspect.includes("/"))
-                ? { aspectRatio: r.aspect }
-                : null;
+              /* RÈGLE MAISON : on ne croppe JAMAIS — le média dicte son
+                 ratio. Pas d'aspect-ratio forcé sur la cellule (l'aspect
+                 déclaré en BO peut être faux) : l'image/le poster prend
+                 sa hauteur native dans la colonne. */
               return (
                 <button
                   key={"ov-" + i}
                   className={"viewer__overview__cell" + (i === safeResIdx ? " is-active" : "")}
-                  style={aspectStyle || undefined}
                   onClick={() => {
                     setResIdx(i);
                     setShowOverview(false);
