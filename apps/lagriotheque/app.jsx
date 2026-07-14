@@ -4433,10 +4433,26 @@ function App() {
       // (invisible) pendant toute la transition.
       const past = hero ? window.scrollY > hero.offsetHeight * 0.3 : false;
       document.body.classList.toggle("past-hero", past);
+      // Positionne la "plaque" (rideau papier unique qui recouvre la vidéo au
+      // scroll, cf. .lg__catalogue::after) juste sous le hero. Mesuré en JS
+      // car la hauteur du hero varie (44vh desktop, 3/2 mobile, transitions).
+      if (hero && hero.classList.contains("lg__pagehero") && hero.parentElement) {
+        hero.parentElement.style.setProperty(
+          "--plaque-top",
+          (hero.offsetTop + hero.offsetHeight) + "px"
+        );
+      }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
     onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
+    // Re-mesure après le rendu de chaque page (le hero change de page en page)
+    const t = setTimeout(onScroll, 120);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      clearTimeout(t);
+    };
   }, []);
 
   // Toggle classes sur <body> pour pilotage CSS du splash sur la home
@@ -4450,6 +4466,10 @@ function App() {
     document.body.classList.toggle("is-home", isHome);
     document.body.classList.toggle("is-listhero", heroRoutes.includes(route) || isDetailHero);
     document.body.classList.toggle("is-scrolled", scrolled);
+    // Re-mesure la position de la plaque après le rendu de la nouvelle page
+    // (le handler de scroll fait la mesure ; on le déclenche manuellement).
+    const t = setTimeout(() => window.dispatchEvent(new Event("scroll")), 150);
+    return () => clearTimeout(t);
   }, [route, scrolled]);
 
   useEffect(() => {

@@ -4427,10 +4427,25 @@ body.is-listhero:not(.is-home) .lg__catalogue .lg__pagehero {
   z-index: 0;
   margin-bottom: 0;
 }
+/* PLAQUE UNIQUE : un seul rideau papier plein cadre (::after) qui part du bas
+   du hero et couvre toute la section jusqu'en bas. Il monte d'un bloc sur la
+   vidéo au scroll — plus de gaps entre sous-blocs ni sur les côtés.
+   Sa position (--plaque-top) est mesurée en JS (hauteur du hero variable). */
+body.is-listhero:not(.is-home) .lg__catalogue::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--plaque-top, 56vh);
+  bottom: 0;
+  background: var(--paper);
+  z-index: 1;
+}
 body.is-listhero:not(.is-home) .lg__catalogue .lg__pagehero ~ * {
   position: relative;
-  z-index: 1;
-  background: var(--paper);
+  z-index: 2;
+  /* fonds individuels retirés : c'est la plaque ::after qui fait le fond */
+  background: transparent;
 }
 /* Fiche formation/workshop : banner normal (pas de superposition).
    Le contenu de la fiche ne couvre pas toute la largeur (onglets + 2 colonnes),
