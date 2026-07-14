@@ -3952,46 +3952,62 @@ body.overview-open .utilbar {
    ============================================================ */
 .eco-mobile { display: none; }
 @media (max-width: 900px) {
-  /* Container plein viewport — tout tient à l'écran sans scroll */
+  /* ============================================================
+     MOBILE — redesign 14/07/2026 : le texte et les identités des
+     3 univers sont VISIBLES (demande Moos). Liste de cards
+     scrollable : vignette pleine largeur + nom façon wordmark +
+     kicker + description + CTA. (L'ancienne version "purement
+     visuelle" cachait tout le texte.)
+     ============================================================ */
   .eco-mobile {
     display: flex;
     flex-direction: column;
     position: relative;
     z-index: 5;
-    /* 100dvh = dynamic viewport height (gère les barres Safari mobiles) */
-    height: 100dvh;
-    overflow: hidden;
+    min-height: 100dvh;
+    padding-bottom: 48px;
   }
   .eco-solar > .eco-solar__bg,
   .eco-solar > .eco-solar__plane { display: none !important; }
+  /* Le conteneur solaire desktop est overflow:hidden + centré flex —
+     en mobile on le neutralise pour laisser la liste scroller. */
+  .eco-solar {
+    overflow: visible;
+    display: block;
+    min-height: 0;
+    cursor: default;
+    perspective: none;
+  }
+  /* La page scrolle normalement en mobile (cards + textes). */
+  body:has(.eco-mobile) { overflow-y: auto; }
+  /* Le footer fixe (copyright) chevauchait les cards au scroll → on le
+     replace en flux, après la liste. */
+  body:has(.eco-mobile) .page-foot {
+    position: static;
+    margin: 28px 18px 0;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
 
-  /* Hero compact en haut — fixé en hauteur, ne prend pas de flex */
+  /* Hero compact en haut : griot + accroche */
   .eco-mobile__hero {
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 80px 24px 12px;
+    padding: 96px 24px 8px;
     text-align: center;
-    gap: 8px;
+    gap: 10px;
   }
-  /* Texte de la page eco masqué en mobile — l'utilisateur veut une vue
-     purement visuelle (griot + vignettes cliquables). On retire le lead
-     d'intro + tout le bloc texte des items (nom, kicker, "VOUS ÊTES ICI").
-     Les vignettes restent cliquables et conduisent vers les sites. */
-  .eco-mobile__hero__lead,
-  .eco-mobile__row__text {
-    display: none !important;
-  }
-  /* Griot ultra-compact — minuscule décoration, prend très peu de place */
   .eco-mobile__hero__griot {
     width: min(38vw, 160px);
     transform: scale(0.4);
     transform-origin: center;
     color: var(--ink);
     opacity: 0.7;
-    margin: -55px 0;
+    margin: -48px 0 -36px;
   }
   .eco-mobile__hero__griot pre {
     font-family: var(--font-mono);
@@ -4011,37 +4027,27 @@ body.overview-open .utilbar {
     margin: 0;
   }
 
-  /* ---- Liste style YARD/INITIATIVES : thumbnail + texte ------------ */
-  /* Prend toute la place restante du viewport — les 3 rows se distribuent
-     équitablement la hauteur via flex: 1, pas besoin de scroll. */
+  /* ---- Cards empilées : vignette pleine largeur + bloc texte ------- */
   .eco-mobile__list {
     list-style: none;
-    padding: 16px 18px 24px;
+    padding: 18px 18px 0;
     margin: 0;
     display: flex;
     flex-direction: column;
-    flex: 1 1 auto;
-    min-height: 0;
-    gap: 14px;
+    gap: 30px;
   }
   .eco-mobile__row {
-    display: grid;
-    grid-template-columns: 38vw 1fr;
-    gap: 14px;
-    align-items: start;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     cursor: pointer;
-    /* Chaque ligne prend 1/3 de la hauteur dispo */
-    flex: 1 1 0;
-    min-height: 0;
   }
   .eco-mobile__row__thumb {
-    width: 38vw;
-    max-width: 180px;
+    width: 100%;
     aspect-ratio: 16 / 9;
     overflow: hidden;
     background: #0d0c0a;
-    /* Hauteur ne dépasse pas la ligne */
-    max-height: 100%;
+    border: 1px solid var(--rule);
   }
   .eco-mobile__row__thumb video,
   .eco-mobile__row__thumb img {
@@ -4055,41 +4061,55 @@ body.overview-open .utilbar {
     flex-direction: column;
     gap: 4px;
     min-width: 0;
-    /* Compense la hauteur de la première ligne du titre (line-height 1.4
-       sur font 14px ≈ 19.6px) pour que la baseline du H2 colle pile au
-       top du thumbnail au lieu d'être décalée vers le bas. */
-    margin-top: -3px;
+    padding: 0 2px;
   }
-  /* Typo alignée sur la page About : mono, uppercase, letter-spacing
-     généreux (0.08em sur le corps, 0.14em sur les titres courts). */
+  /* Nom = wordmark typographique de l'entité */
   .eco-mobile__row__name {
     font-family: var(--font-mono);
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 500;
     color: var(--ink);
-    letter-spacing: 0.08em;
-    line-height: 1.4;
-    margin: 0 0 4px;
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+    margin: 0;
     text-transform: uppercase;
-    /* Permet le wrap si le nom est long (LESGRIOTSxSTUDIO) */
     word-break: break-word;
   }
   .eco-mobile__row.is-current .eco-mobile__row__name { color: var(--yellow); }
   .eco-mobile__row__kicker {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 10px;
     color: var(--ink-dim);
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     margin: 0;
-    line-height: 1.55;
+    line-height: 1.5;
   }
+  .eco-mobile__row__desc {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.03em;
+    line-height: 1.6;
+    margin: 4px 0 0;
+    max-width: 60ch;
+  }
+  .eco-mobile__row__cta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink);
+    letter-spacing: 0.16em;
+    margin: 8px 0 0;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+  .eco-mobile__row:active .eco-mobile__row__cta { color: var(--yellow); }
   .eco-mobile__row__here {
     font-family: var(--font-mono);
     font-size: 10px;
     color: var(--yellow);
     letter-spacing: 0.16em;
-    margin: 6px 0 0;
+    margin: 8px 0 0;
     text-transform: uppercase;
     line-height: 1.4;
   }

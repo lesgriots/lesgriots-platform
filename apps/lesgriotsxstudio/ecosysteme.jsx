@@ -401,7 +401,12 @@ function EcoView() {
                     key={"em-k-" + s.id + "-" + lang}
                   />
                 </p>
-                {s.current && (
+                {/* Description de l'univers — texte plein (pas de typewriter,
+                    trop long pour la cascade), éditable depuis le BO. */}
+                {s.description && (
+                  <p className="eco-mobile__row__desc">{s.description}</p>
+                )}
+                {s.current ? (
                   <p className="eco-mobile__row__here">
                     <Type
                       text={lang === "fr" ? "VOUS ÊTES ICI" : "YOU ARE HERE"}
@@ -411,6 +416,8 @@ function EcoView() {
                       key={"em-h-" + s.id + "-" + lang}
                     />
                   </p>
+                ) : (
+                  <p className="eco-mobile__row__cta">{lang === "fr" ? "[ ENTRER ↗ ]" : "[ ENTER ↗ ]"}</p>
                 )}
               </div>
             </li>
