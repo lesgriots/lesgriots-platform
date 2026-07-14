@@ -206,8 +206,11 @@ function HomeView({ onOpenProject, onNavigate }) {
                 (hoveredKey === cell.key ? " is-hovered" : "")
               }
               style={{
-                gridColumn: cell.c + 1,
-                gridRow: cell.r + 1,
+                // Placement AUTO-FLOW (plus de gridColumn/gridRow explicites) :
+                // les cells remplissent la grille dans l'ordre, ce qui permet
+                // aux media queries CSS de passer à 4 ou 3 colonnes quand la
+                // fenêtre rétrécit — avant, la 5e colonne se faisait couper
+                // au bord droit (bug du 14/07/2026).
                 // Jitter exposé en CSS vars — le transform final est composé
                 // dans styles.css (translate + rotation par nth-child sur
                 // mobile pour le côté "destructuré" sans casser le drag JS).

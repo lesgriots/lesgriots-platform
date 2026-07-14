@@ -1877,6 +1877,18 @@ body:has(.eco3) .idcard { display: none !important; }
   z-index: 5;
   min-height: calc(100vh - 180px);
 }
+/* Grille fluide : les cells ont des largeurs fixes (130-190px) + gaps
+   généreux → en dessous de ~1280px, 5 colonnes débordent du viewport
+   (cellules coupées au bord droit). On réduit le nombre de colonnes
+   progressivement — le placement des cells est en auto-flow, donc la
+   grille se réorganise toute seule. */
+@media (max-width: 1300px) {
+  .ahome { padding-left: 36px; padding-right: 36px; }
+  .ahome__grid { grid-template-columns: repeat(4, 1fr); gap: 70px 50px; }
+}
+@media (max-width: 1020px) {
+  .ahome__grid { grid-template-columns: repeat(3, 1fr); gap: 60px 40px; }
+}
 
 .ahome__cell {
   position: relative;
