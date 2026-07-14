@@ -4036,18 +4036,21 @@ body.overview-open .utilbar {
     flex-direction: column;
     gap: 30px;
   }
+  /* Ligne façon YARD "Initiatives" : vignette carrée à gauche,
+     titre + sous-titre à droite, beaucoup d'air entre les lignes. */
   .eco-mobile__row {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: minmax(96px, 34vw) 1fr;
+    gap: 20px;
+    align-items: start;
     cursor: pointer;
   }
   .eco-mobile__row__thumb {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    max-width: 150px;
+    aspect-ratio: 1 / 1;
     overflow: hidden;
     background: #0d0c0a;
-    border: 1px solid var(--rule);
   }
   .eco-mobile__row__thumb video,
   .eco-mobile__row__thumb img {
@@ -4059,9 +4062,9 @@ body.overview-open .utilbar {
   .eco-mobile__row__text {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
     min-width: 0;
-    padding: 0 2px;
+    padding-top: 4px;
   }
   /* Nom = wordmark typographique de l'entité */
   .eco-mobile__row__name {
@@ -4085,21 +4088,15 @@ body.overview-open .utilbar {
     margin: 0;
     line-height: 1.5;
   }
-  .eco-mobile__row__desc {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--ink-dim);
-    letter-spacing: 0.03em;
-    line-height: 1.6;
-    margin: 4px 0 0;
-    max-width: 60ch;
-  }
+  /* Façon YARD : titre + sous-titre suffisent, la ligne est tappable.
+     La description reste dispo en desktop (vue solaire) et dans le BO. */
+  .eco-mobile__row__desc { display: none; }
   .eco-mobile__row__cta {
     font-family: var(--font-mono);
     font-size: 10px;
-    color: var(--ink);
+    color: var(--ink-dim);
     letter-spacing: 0.16em;
-    margin: 8px 0 0;
+    margin: 10px 0 0;
     text-transform: uppercase;
     line-height: 1.4;
   }
