@@ -41,7 +41,7 @@ const MAX_ZOOM = 4;
 //   VwPct = zoom × max(1, A/C) × 100   (A = ratio vidéo, C = ratio conteneur)
 //   VhPct = zoom × max(1, C/A) × 100
 //   left  = 50% − cx × VwPct ;  top = 50% − cy × VhPct
-function SitePreview({ label, width, cellAspect, videoAR, cropRatio, wFrac, hFrac, cx, cy, previewSrc, start, end, videoFilter, containerFilter, veil, extraScale = 1, note, onPan }) {
+function SitePreview({ label, width, cellAspect, videoAR, cropRatio, wFrac, hFrac, cx, cy, previewSrc, start, end, videoFilter, containerFilter, veil, extraScale = 1, note, onPan, onAdopt }) {
   const vRef = useRef(null);
   const boxRef = useRef(null);
   // Drag DIRECT dans la preview : on convertit le déplacement du pointeur
@@ -49,10 +49,14 @@ function SitePreview({ label, width, cellAspect, videoAR, cropRatio, wFrac, hFra
   // met à jour cx/cy — le cadre principal et les autres previews suivent.
   const dragRef = useRef(null);
   function panDown(e) {
-    if (!onPan) return;
+    if (!onPan && !onAdopt) return;
     e.preventDefault();
     dragRef.current = { x: e.clientX, y: e.clientY };
     e.currentTarget.setPointerCapture?.(e.pointerId);
+    // Rien à recadrer (format Original, zoom 1) mais cette vue CROPPE la
+    // vidéo (cover) → on adopte son format : le cadrage devient possible
+    // immédiatement, le drag en cours continue.
+    if (!onPan && onAdopt) onAdopt(C);
   }
   function panMove(e) {
     const d = dragRef.current;
@@ -113,8 +117,8 @@ function SitePreview({ label, width, cellAspect, videoAR, cropRatio, wFrac, hFra
           position: "relative", width, aspectRatio: `${C}`, overflow: "hidden",
           background: "#000", border: "1px solid var(--rule)",
           filter: containerFilter || "none",
-          cursor: onPan ? "grab" : "default",
-          touchAction: onPan ? "none" : "auto",
+          cursor: (onPan || onAdopt) ? "grab" : "default",
+          touchAction: (onPan || onAdopt) ? "none" : "auto",
           userSelect: "none",
         }}
       >
@@ -303,6 +307,13 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
   function panBy(dcx, dcy) {
     setCx((c) => clampAxis(c + dcx, wFrac));
     setCy((c) => clampAxis(c + dcy, hFrac));
+  }
+  // Drag dans une vue qui croppe alors qu'aucun cadrage n'est actif →
+  // on adopte le format du conteneur de cette vue (ex. 16:9 pour le fond
+  // plein écran) et le recadrage démarre dans le même geste.
+  function adoptRatio(C) {
+    const target = Math.abs(C - vidAR) < 0.01 ? null : C;
+    if ((cropAR || null) !== target) applyRatio(target);
   }
 
   function cropPointerUp() {
@@ -681,6 +692,7 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
                 videoAR={vidAR}
                 cropRatio={R} wFrac={wFrac} hFrac={hFrac} cx={cx} cy={cy}
                 onPan={canPan ? panBy : null}
+                onAdopt={adoptRatio}
                 previewSrc={previewSrc} start={start} end={end}
                 videoFilter="grayscale(0.4) contrast(1.1)"
                 extraScale={1.04}
@@ -692,6 +704,7 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
                 videoAR={vidAR}
                 cropRatio={R} wFrac={wFrac} hFrac={hFrac} cx={cx} cy={cy}
                 onPan={canPan ? panBy : null}
+                onAdopt={adoptRatio}
                 previewSrc={previewSrc} start={start} end={end}
                 containerFilter="grayscale(1) contrast(1.1) brightness(0.6)"
                 veil
@@ -703,6 +716,7 @@ export default function VideoTrimmer({ src, previewSrc, onTrimmed }) {
                 videoAR={vidAR}
                 cropRatio={R} wFrac={wFrac} hFrac={hFrac} cx={cx} cy={cy}
                 onPan={canPan ? panBy : null}
+                onAdopt={adoptRatio}
                 previewSrc={previewSrc} start={start} end={end}
                 videoFilter="grayscale(1) contrast(1.05) brightness(0.95)"
                 note="au tap : grayscale(0.3)"
