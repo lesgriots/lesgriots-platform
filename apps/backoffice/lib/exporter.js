@@ -109,6 +109,40 @@ function formatProject(p, indent = "  ") {
   return lines.join("\n");
 }
 
+// Poster automatique pour une resource vidéo de galerie sans poster :
+// frame extraite (à 1 s, sinon 0 s) → img/poster-auto-<nom>.jpg.
+// Marche pour les vidéos locales (img/) ET les vidéos R2 (ffmpeg lit les
+// URL https en Range, quelques Mo seulement grâce au faststart).
+// Utilisé par le rail du viewer (miniatures) et l'overview mobile : une
+// image légère au lieu de charger la vidéo pour en tirer une frame.
+// Le poster n'est posé QUE dans l'export (le champ BO reste vide → Moos
+// peut toujours uploader un poster choisi qui prendra le dessus).
+// Idempotent : si le jpg existe déjà, on le réutilise.
+async function autoPosterForResource(r) {
+  const src = (r.src || "").trim();
+  if (!src || (r.poster && r.poster.trim())) return;
+  if (r.type !== "video" || !/\.(mp4|webm|m4v)(\?|$)/i.test(src)) return;
+  const base = path.basename(src.split("?")[0]).replace(/\.(mp4|webm|m4v)$/i, "")
+    .toLowerCase().replace(/[^a-z0-9_-]+/g, "-");
+  const outName = `poster-auto-${base}.jpg`;
+  const outPath = path.join(IMG_DIR, outName);
+  try {
+    const st = await fs.stat(outPath);
+    if (st.size > 0) { r.poster = `img/${outName}`; return; }
+  } catch { /* pas encore généré */ }
+  const input = /^https?:\/\//i.test(src) ? src : path.resolve(SITE_ROOT, src);
+  for (const ss of ["1", "0"]) {
+    try {
+      await execFileP("ffmpeg", [
+        "-v", "error", "-ss", ss, "-i", input,
+        "-frames:v", "1", "-q:v", "3", outPath, "-y",
+      ]);
+      const st = await fs.stat(outPath);
+      if (st.size > 0) { r.poster = `img/${outName}`; return; }
+    } catch { /* frame hors durée ou ffmpeg absent → essai suivant */ }
+  }
+}
+
 export async function exportToDataJsx() {
   const projects = listProjects({ excludeHidden: true });
 
@@ -118,6 +152,10 @@ export async function exportToDataJsx() {
     if (!(p.cover && p.cover.trim())) {
       const auto = await autoCoverFromVideo(p);
       if (auto) p.cover = auto;
+    }
+    // Posters automatiques des vidéos de galerie (miniatures du rail).
+    for (const r of p.resources || []) {
+      await autoPosterForResource(r);
     }
   }
 
