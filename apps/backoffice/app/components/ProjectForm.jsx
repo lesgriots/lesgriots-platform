@@ -43,6 +43,8 @@ const EMPTY = {
   location: "",
   cover: "",
   thumbVideo: "",
+  thumbVideoBg: "",       // variante recadrée pour le FOND plein écran (hover)
+  thumbVideoMobile: "",   // variante recadrée pour la carte MOBILE
   // Timecode de départ du thumb (en secondes). Utile uniquement quand
   // thumbVideo pointe sur une URL YouTube : la grille Work lit une boucle
   // de 4 secondes à partir de cette position. Ignoré pour les .mp4 self-hostés.
@@ -72,6 +74,8 @@ function projectToForm(p) {
     location: p.location || "",
     cover: p.cover || "",
     thumbVideo: p.thumbVideo || "",
+    thumbVideoBg: p.thumbVideoBg || "",
+    thumbVideoMobile: p.thumbVideoMobile || "",
     thumbStart: typeof p.thumbStart === "number" ? p.thumbStart : 0,
     strip: p.strip || [],
     resources: p.resources || [],
@@ -100,6 +104,8 @@ function formToProject(f) {
     location: f.location.trim(),
     cover: f.cover.trim(),
     thumbVideo: f.thumbVideo.trim() || undefined,
+    thumbVideoBg: (f.thumbVideoBg || "").trim() || undefined,
+    thumbVideoMobile: (f.thumbVideoMobile || "").trim() || undefined,
     thumbStart: f.thumbStart ? Number(f.thumbStart) : undefined,
     strip: f.strip.filter(Boolean),
     resources: f.resources.filter((r) => r.src && r.src.trim()),
@@ -162,6 +168,12 @@ export default function ProjectForm({ initial, isNew }) {
   // .mp4 self-hosté sous img/ (les URL externes / YouTube ne passent
   // pas par /api/trim).
   const [showThumbTrim, setShowThumbTrim] = useState(false);
+  // Cible du découpage : la boucle générée va dans quel champ ?
+  //   thumbVideo       → miniature de la grille Work (desktop)
+  //   thumbVideoBg     → fond plein écran au hover
+  //   thumbVideoMobile → carte de la grille mobile
+  // Le site retombe sur thumbVideo quand une variante n'existe pas.
+  const [trimTarget, setTrimTarget] = useState("thumbVideo");
   // ── Galerie façon Instagram ──
   // Tuile sélectionnée (son éditeur s'ouvre sous la grille) + drag & drop.
   const [selectedRes, setSelectedRes] = useState(null);
@@ -611,6 +623,14 @@ export default function ProjectForm({ initial, isNew }) {
                   <button type="button" className="btn btn--ghost" style={{ padding: "1px 8px", fontSize: 10, flexShrink: 0 }} onClick={() => set("cover", "")}>Retirer</button>
                 </div>
               )}
+              {/* Variantes de cadrage par contexte (générées par le découpeur) */}
+              {[["thumbVideoBg", "FOND HOVER"], ["thumbVideoMobile", "MOBILE"]].map(([k, lbl]) => f[k] ? (
+                <div key={k} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, marginBottom: 4, minWidth: 0 }}>
+                  <span className="pill" style={{ flexShrink: 0, borderColor: "var(--ink-dim)" }}>{lbl}</span>
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--dim)" }} title={f[k]}>{f[k]}</span>
+                  <button type="button" className="btn btn--ghost" style={{ padding: "1px 8px", fontSize: 10, flexShrink: 0 }} onClick={() => set(k, "")}>Retirer</button>
+                </div>
+              ) : null)}
               {!cv && tvLocal && (
                 <p className="note" style={{ margin: 0 }}>Image auto-générée depuis la vidéo au Sync.</p>
               )}
@@ -631,18 +651,45 @@ export default function ProjectForm({ initial, isNew }) {
             style={{ padding: "4px 10px", fontSize: 11 }}
             onClick={() => setShowThumbTrim((s) => !s)}
           >
-            {showThumbTrim ? "✕ Fermer le découpage" : "✂ Choisir l'extrait (hover + fond)"}
+            {showThumbTrim ? "✕ Fermer le découpage" : "✂ Choisir l'extrait + cadrage"}
           </button>
           {showThumbTrim && (
-            // key = valeur du champ → le découpeur se réinitialise quand la
-            // source change (nouvel upload, ou boucle générée qui devient la
-            // nouvelle source).
-            <VideoTrimmer
-              key={f.thumbVideo}
-              src={f.thumbVideo}
-              previewSrc={`/api/preview?p=${encodeURIComponent(f.thumbVideo)}`}
-              onTrimmed={(p) => set("thumbVideo", p)}
-            />
+            <>
+              {/* Cible du cadrage : chaque contexte du site peut avoir SA
+                  version recadrée. On découpe toujours depuis la vidéo de
+                  base (thumbVideo), et la boucle générée va dans le champ
+                  de la cible choisie. */}
+              <div style={{ display: "flex", gap: 6, alignItems: "center", margin: "8px 0 0", flexWrap: "wrap" }}>
+                <span style={{ fontSize: 10, color: "var(--dim)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Cible</span>
+                {[
+                  { k: "thumbVideo", label: "Miniature (grille)" },
+                  { k: "thumbVideoBg", label: "Fond hover" },
+                  { k: "thumbVideoMobile", label: "Mobile" },
+                ].map((c) => (
+                  <button
+                    key={c.k}
+                    type="button"
+                    className="btn btn--ghost"
+                    onClick={() => setTrimTarget(c.k)}
+                    style={{
+                      padding: "2px 10px", fontSize: 11,
+                      ...(trimTarget === c.k ? { background: "var(--accent)", color: "#000", borderColor: "var(--accent)" } : {}),
+                    }}
+                  >
+                    {c.label}{f[c.k] ? " ✓" : ""}
+                  </button>
+                ))}
+              </div>
+              <p className="note" style={{ margin: "4px 0 0", fontSize: 10, color: "var(--dim)" }}>
+                Sans variante, le site utilise la miniature partout. Astuce : Fond hover en 16:9, Mobile en 4:5 ou 9:16 (chips Format du découpeur).
+              </p>
+              <VideoTrimmer
+                key={f.thumbVideo + "→" + trimTarget}
+                src={f.thumbVideo}
+                previewSrc={`/api/preview?p=${encodeURIComponent(f.thumbVideo)}`}
+                onTrimmed={(p) => set(trimTarget, p)}
+              />
+            </>
           )}
         </div>
       )}

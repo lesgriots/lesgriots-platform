@@ -378,7 +378,10 @@ function HomeView({ onOpenProject, onNavigate }) {
           );
         }
         const first = bgProj.resources && bgProj.resources[0];
-        const videoSrc = bgProj.thumbVideo
+        // Priorité à la variante recadrée pour le FOND (thumbVideoBg),
+        // sinon la miniature, sinon la 1ère resource vidéo.
+        const videoSrc = bgProj.thumbVideoBg
+          || bgProj.thumbVideo
           || (first && first.type === "video"
               && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(first.src || "")
               ? first.src : null);
@@ -438,12 +441,14 @@ function HomeMobile({ onOpenProject }) {
           && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(p.resources[0].src || "");
         // Perf mobile : on joue la THUMB video (boucle courte optimisée,
         // ~1-2 Mo) plutôt que la 1ère resource complète (parfois 30-50 Mo
-        // → réseau saturé sur 4G). Fallback sur la 1ère resource seulement
-        // si le projet n'a pas de thumb self-hostée.
-        const localThumb = p.thumbVideo
-          && !/^https?:\/\//i.test(p.thumbVideo)
-          && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(p.thumbVideo)
-          ? p.thumbVideo : null;
+        // → réseau saturé sur 4G). Priorité à la variante recadrée MOBILE
+        // (thumbVideoMobile), sinon la miniature standard. Fallback sur la
+        // 1ère resource seulement si le projet n'a pas de thumb.
+        const pickThumb = (v) => v
+          && !/^https?:\/\//i.test(v)
+          && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(v)
+          ? v : null;
+        const localThumb = pickThumb(p.thumbVideoMobile) || pickThumb(p.thumbVideo);
         const cardVideo = localThumb || (isFirstRealVideo ? p.resources[0].src : null);
         const insertBrand = i > 0 && i % BRAND_EVERY === 0;
         // Détection thumbnail YouTube : si thumbVideo est une URL YouTube,

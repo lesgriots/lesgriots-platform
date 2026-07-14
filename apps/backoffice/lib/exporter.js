@@ -85,6 +85,10 @@ function formatProject(p, indent = "  ") {
   // Comme ça le site n'a jamais d'image cassée ni d'écran noir.
   lines.push(`${indent}  cover: ${s(safeCover(p))},`);
   if (p.thumbVideo) lines.push(`${indent}  thumbVideo: ${s(p.thumbVideo)},`);
+  // Variantes de cadrage par contexte (fond hover / carte mobile) —
+  // le site retombe sur thumbVideo quand elles n'existent pas.
+  if (p.thumbVideoBg) lines.push(`${indent}  thumbVideoBg: ${s(p.thumbVideoBg)},`);
+  if (p.thumbVideoMobile) lines.push(`${indent}  thumbVideoMobile: ${s(p.thumbVideoMobile)},`);
   if (typeof p.thumbStart === "number" && p.thumbStart > 0) {
     lines.push(`${indent}  thumbStart: ${p.thumbStart},`);
   }
