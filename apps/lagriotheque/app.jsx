@@ -3032,7 +3032,7 @@ function Agenda() {
     <section className="lg__catalogue" id="agenda">
       <PageHero src={text("agenda.media", "img/hero.mp4")} title={text("agenda.heading", "Agenda")}>
         <PageIntro
-          text={text("agenda.intro", "Les prochaines sessions de formations et de workshops : dates, places disponibles et modalités (présentiel au Havre ou à distance).")}
+          text={text("agenda.intro", "Les prochaines sessions de formations et de workshops : dates, places disponibles et modalités (présentiel ou à distance).")}
         />
       </PageHero>
 
@@ -3399,7 +3399,7 @@ function Ressources() {
         <PageIntro
           text={text(
             "ressources.intro",
-            "Des ressources gratuites à télécharger : worksheets, templates et guides pour structurer ta communication et tes contenus."
+            "Des ressources gratuites à télécharger : worksheets, templates et guides pour structurer ton récit et tes contenus."
           )}
         />
       </PageHero>
