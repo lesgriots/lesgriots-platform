@@ -4427,25 +4427,31 @@ body.is-listhero:not(.is-home) .lg__catalogue .lg__pagehero {
   z-index: 0;
   margin-bottom: 0;
 }
-/* PLAQUE UNIQUE : un seul rideau papier plein cadre (::after) qui part du bas
-   du hero et couvre toute la section jusqu'en bas. Il monte d'un bloc sur la
-   vidéo au scroll — plus de gaps entre sous-blocs ni sur les côtés.
-   Sa position (--plaque-top) est mesurée en JS (hauteur du hero variable). */
-body.is-listhero:not(.is-home) .lg__catalogue::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: var(--plaque-top, 56vh);
-  bottom: 0;
-  background: var(--paper);
-  z-index: 1;
-}
+/* Superposition — MÊME MÉCANIQUE QUE LA HOME : chaque bloc de contenu sous le
+   hero est OPAQUE (fond papier) et remonte par-dessus la vidéo sticky au
+   scroll. On n'utilise plus la plaque ::after mesurée en JS : elle restait
+   ancrée au bas du hero et ne suivait pas le contenu qui monte, si bien que
+   le texte passait en transparent (illisible) sur la vidéo sombre pendant la
+   transition. Des blocs opaques et jointifs = l'effet propre de la home. */
 body.is-listhero:not(.is-home) .lg__catalogue .lg__pagehero ~ * {
   position: relative;
   z-index: 2;
-  /* fonds individuels retirés : c'est la plaque ::after qui fait le fond */
-  background: transparent;
+  background: var(--paper);
+  /* Fond papier PLEINE LARGEUR : le hero sticky est full-bleed (100vw), donc
+     le fond opaque doit couvrir aussi la gouttière latérale de 24px, sinon la
+     vidéo sombre réapparaît sur les bords pendant la superposition. On étend
+     la boîte au bord de l'écran (margin négatif) tout en gardant le texte à sa
+     place (padding compensé). */
+  margin-left: -24px;
+  margin-right: -24px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+/* Pas de gap transparent entre blocs opaques (sinon la vidéo sticky
+   réapparaît dans l'interstice quand le contenu monte au-dessus du hero). */
+body.is-listhero:not(.is-home) .lg__catalogue .lg__ag__list,
+body.is-listhero:not(.is-home) .lg__catalogue .lg__rows {
+  margin-top: 0;
 }
 /* Fiche formation/workshop : banner normal (pas de superposition).
    Le contenu de la fiche ne couvre pas toute la largeur (onglets + 2 colonnes),
