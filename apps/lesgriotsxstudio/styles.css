@@ -6264,33 +6264,30 @@ body.overview-open .utilbar {
   opacity: 0.7;
   margin: 0 0 14px;
 }
-.talent-skills__list {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 0;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-/* Texte simple (sans rectangle) — chaque compétence séparée par un point
-   médian, dans la même grammaire terminale que la bio. */
-.talent-skills__tag {
+/* Ligne de compétences — rendu terminal (typewriter) identique à la bio :
+   texte simple sans rectangle, séparé par des points médians, avec la
+   technique ghost/typed pour réserver la hauteur et éviter tout saut. */
+.talent-skills__line {
+  position: relative;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.08em;
+  line-height: 1.6;
   text-transform: uppercase;
   color: var(--ink);
-  transition: color 0.2s ease;
+  max-width: 62ch;
+  margin: 0;
 }
-.talent-skills__tag:not(:last-child)::after {
-  content: "·";
-  margin: 0 10px;
-  color: var(--ink);
-  opacity: 0.5;
+.talent-skills__ghost {
+  visibility: hidden;
+  display: block;
 }
-.talent-skills__tag:hover {
-  color: var(--yellow);
+.talent-skills__typed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* ─── Mobile ───────────────────────────────────────────────────────────

@@ -86,6 +86,13 @@ function TalentView() {
     return out;
   })();
 
+  // Fin approximative du typing de la bio → point de départ du typing des
+  // compétences (elles s'écrivent APRÈS la bio, comme une sortie terminale
+  // qui continue). Recalculé à chaque changement de langue via la key du Type.
+  const bioEnd = bioLines.length
+    ? delaysBio[bioLines.length - 1] + String(bioLines[bioLines.length - 1]).length * SPEED + GAP
+    : 300;
+
   const NAME = "MOOS COULIBALY";
   const ROLE = tr("talent.role", lang);
 
@@ -226,12 +233,31 @@ function TalentView() {
               Masqué s'il n'y a aucune compétence renseignée dans le BO. */}
           {skills.length > 0 && (
             <div className="talent-skills">
-              <div className="talent-skills__label">{skillsLabel}</div>
-              <ul className="talent-skills__list">
-                {skills.map((s, i) => (
-                  <li className="talent-skills__tag" key={"skill-" + i}>{s}</li>
-                ))}
-              </ul>
+              {/* Label typé en terminal, puis la ligne de compétences qui
+                  s'écrit à la suite (même technique ghost/typed que la bio). */}
+              <div className="talent-skills__label">
+                <Type
+                  text={skillsLabel}
+                  speed={26}
+                  delay={bioEnd}
+                  cursor="while"
+                  key={"sk-label-" + lang}
+                />
+              </div>
+              <p className="talent-skills__line">
+                <span className="talent-skills__ghost" aria-hidden="true">
+                  {skills.join("  ·  ")}
+                </span>
+                <span className="talent-skills__typed">
+                  <Type
+                    text={skills.join("  ·  ")}
+                    speed={SPEED}
+                    delay={bioEnd + skillsLabel.length * 26 + 250}
+                    cursor="always"
+                    key={"sk-line-" + lang}
+                  />
+                </span>
+              </p>
             </div>
           )}
         </aside>
