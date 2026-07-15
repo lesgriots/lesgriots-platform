@@ -119,6 +119,8 @@ a, button, [role="button"], label, summary, select,
 .idcard__img,
 .menubar__items button,
 .menubar__items button *,
+.menubar__items a,
+.menubar__items a *,
 .menubar__toggle,
 .menubar__toggle *,
 .menubar__lang button,
@@ -1062,8 +1064,10 @@ body:has(.eco3) .idcard { display: none !important; }
   padding: 18px 28px 28px;
   flex: 1; /* prend toute la hauteur dispo sous la term bar */
 }
-.menubar__items button {
+.menubar__items button,
+.menubar__items a {
   display: flex;
+  text-decoration: none;
   justify-content: flex-start;
   align-items: baseline;
   gap: 10px;
@@ -1088,13 +1092,15 @@ body:has(.eco3) .idcard { display: none !important; }
 }
 /* Hover UNIQUEMENT : effet identique à .idx-term__row.is-active de
    la vue INDEX — mustard sombre partout (plus de jaune vif). */
-.menubar__items button:hover {
+.menubar__items button:hover,
+.menubar__items a:hover {
   opacity: 1;
   color: var(--ink);
   border-left-color: var(--ink);
   background: rgba(138, 122, 32, 0.06);
 }
-.menubar__items button:hover .prompt {
+.menubar__items button:hover .prompt,
+.menubar__items a:hover .prompt {
   color: var(--ink);
   opacity: 1;
 }

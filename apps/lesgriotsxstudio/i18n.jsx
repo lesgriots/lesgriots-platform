@@ -37,6 +37,7 @@ const DICT = {
   "menu.talent":   { en: "TALENT",    fr: "TALENT" },
   "menu.about":    { en: "ABOUT",     fr: "À PROPOS" },
   "menu.eco":      { en: "ECOSYSTEM", fr: "ÉCOSYSTÈME" },
+  "menu.formation":{ en: "TRAINING",  fr: "FORMATION" },
   "menu.view":     { en: "[VIEW]",    fr: "[VOIR]" },
   "menu.inquiry":  { en: "INQUIRY",   fr: "CONTACT" },
   "menu.strip":    { en: "STRIP",     fr: "BANDE" },

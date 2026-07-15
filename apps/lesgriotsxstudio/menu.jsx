@@ -58,6 +58,9 @@ function MenuBar({ view, onNavigate }) {
     { id: "talent", to: "talent", label: tr("menu.talent", lang), active: isActive("talent") },
     { id: "eco",    to: "eco",    label: tr("menu.eco",    lang), active: isActive("eco") },
     { id: "about",  to: "about",  label: tr("menu.about",  lang), active: isActive("about") },
+    // Lien EXTERNE vers La Griothèque (pilier formation). href → ancre
+    // externe (nouvel onglet), pas de navigation SPA interne.
+    { id: "formation", href: "https://lagriotheque.com", label: tr("menu.formation", lang), active: true },
   ].filter((it) => it.active);
 
   function pick(it) {
@@ -159,22 +162,40 @@ function MenuBar({ view, onNavigate }) {
             const prevDuration = items
               .slice(0, i)
               .reduce((acc, p) => acc + p.label.length * speed + 200, 0);
+            const inner = (
+              <>
+                <span className="prompt" aria-hidden="true">&gt;</span>
+                <Type
+                  text={it.label}
+                  speed={speed}
+                  delay={prevDuration}
+                  cursor={(!it.href && view === it.to) ? "always" : "while"}
+                  key={"m-" + it.id + "-" + lang + "-" + openSeq}
+                />
+              </>
+            );
+            // Item externe (La Griothèque) → ancre nouvel onglet.
+            if (it.href) {
+              return (
+                <a
+                  key={it.id}
+                  href={it.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="menubar__ext"
+                  onClick={() => setOpen(false)}
+                >
+                  {inner}
+                </a>
+              );
+            }
             return (
               <button
                 key={it.id}
                 className={view === it.to ? "active" : ""}
                 onClick={() => pick(it)}
               >
-                <span className="prompt" aria-hidden="true">&gt;</span>
-                <Type
-                  text={it.label}
-                  speed={speed}
-                  delay={prevDuration}
-                  cursor={view === it.to ? "always" : "while"}
-                  key={"m-" + it.id + "-" + lang + "-" + openSeq}
-                />
-                {/* "VOIR" / "VIEW" retiré — le prompt > et le label
-                    suffisent, plus simple visuellement. */}
+                {inner}
               </button>
             );
           })}
