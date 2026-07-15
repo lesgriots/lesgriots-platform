@@ -4449,6 +4449,16 @@ function App() {
       // (invisible) pendant toute la transition.
       const past = hero ? window.scrollY > hero.offsetHeight * 0.3 : false;
       document.body.classList.toggle("past-hero", past);
+      // Menu transparent + texte blanc quand la section vidéo VISION (home) est
+      // derrière le header — même traitement immersif que le hero. Redevient
+      // solide dès qu'un bloc papier repasse derrière le menu.
+      const vision = document.querySelector(".lg__vision");
+      let overVideo = false;
+      if (vision) {
+        const r = vision.getBoundingClientRect();
+        overVideo = r.top < hH && r.bottom > hH;
+      }
+      document.body.classList.toggle("is-over-video", overVideo);
       // Positionne la "plaque" (rideau papier unique qui recouvre la vidéo au
       // scroll, cf. .lg__catalogue::after) juste sous le hero. Mesuré en JS
       // car la hauteur du hero varie (44vh desktop, 3/2 mobile, transitions).

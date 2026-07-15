@@ -2056,6 +2056,20 @@ body.is-listhero:not(.past-hero) .lg__header__menubtn,
 body.is-listhero:not(.past-hero) .lg__header__wordmark {
   color: #fff;
 }
+/* Menu immersif au-dessus de la section vidéo VISION (home) : transparent +
+   texte blanc, comme au-dessus du hero. Classe posée en JS (is-over-video)
+   quand la vidéo passe derrière le header ; retour au solide sinon. */
+body.is-over-video .lg__header {
+  background: transparent;
+  border-bottom-color: transparent;
+}
+body.is-over-video .lg__menu__link,
+body.is-over-video .lg__menu__sep,
+body.is-over-video .lg__header__griot,
+body.is-over-video .lg__header__menubtn,
+body.is-over-video .lg__header__wordmark {
+  color: #fff;
+}
 
 .lg__hero-yard {
   position: relative;
