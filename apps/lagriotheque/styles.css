@@ -4552,17 +4552,17 @@ body.is-scrolled .lg__pagehero__brand {
 }
 @media (max-width: 700px) {
   .lg__pagehero { aspect-ratio: 3 / 2; margin-bottom: 22px; margin-top: -50px; }
-  /* Texte au même niveau que la tagline de la home (≈ 1/3 du bas). */
-  .lg__pagehero__overlay { padding: 18px 18px 33.333vh; }
+  /* Le hero mobile est désormais un bandeau (pas plein écran) : on cale le
+     titre + l'intro en bas du bandeau, sans le décalage 33vh prévu pour le
+     plein écran (qui poussait le texte hors du média). */
+  .lg__pagehero__overlay { padding: 16px 18px; }
 }
 @media (max-width: 600px) {
-  /* Hero pleine page au repos, se réduit au scroll — comme la home. */
+  /* Mobile : le média des pages ne prend PLUS tout l'écran au repos — il garde
+     son ratio 3/2 (bandeau, cf. règle max-width:700) au lieu de 100vh. Le
+     contenu opaque remonte quand même par-dessus au scroll (superposition
+     conservée). La home (.lg__hero-yard) garde son plein écran, elle. */
   .lg__pagehero { transition: height 0.5s ease, max-height 0.5s ease; }
-  body.is-listhero:not(.past-hero) .lg__pagehero {
-    height: 100vh;
-    max-height: 100vh;
-    aspect-ratio: auto;
-  }
 }
 /* Desktop uniquement : média plus court, identique sur les 4 pages-listes
    (Formations, Workshops, Agenda, Ressources).
