@@ -254,6 +254,16 @@ button {
   right: 0;
   background: var(--paper);
   z-index: 50;
+  /* Bascule douce solide <-> transparent (au-dessus du hero / de la vidéo). */
+  transition: background-color 0.4s ease, border-color 0.4s ease;
+}
+/* Fondu de la couleur du texte du menu lors du même basculement. */
+.lg__menu__link,
+.lg__menu__sep,
+.lg__header__wordmark,
+.lg__header__griot,
+.lg__header__menubtn {
+  transition: color 0.4s ease;
 }
 .lg__header__griot {
   /* Mot-marque large — même largeur que le logo d'accueil (320 px). */
