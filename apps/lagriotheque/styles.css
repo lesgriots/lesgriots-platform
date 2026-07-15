@@ -381,7 +381,7 @@ button {
 .lg__menu__link {
   color: inherit;
   text-decoration: none;
-  text-transform: uppercase;
+  text-transform: lowercase;
 }
 .lg__menu__link:hover {
   /* Override la règle globale `a:hover { color: var(--accent); }` qui rendait
