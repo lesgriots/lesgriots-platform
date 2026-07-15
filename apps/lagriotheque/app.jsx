@@ -49,19 +49,29 @@ function text(path, fallback = "") {
 // span .lg-brand (qui applique le style typographique brand : police mono,
 // letter-spacing serré). Sert quand on saisit du texte brut côté BO mais
 // qu'on veut conserver la mise en forme du nom de marque.
-function renderManifestoBrand(str) {
-  if (!str) return null;
-  const idx = str.indexOf("LA GRIOTHÈQUE");
-  if (idx === -1) return str;
-  const before = str.slice(0, idx);
-  const after = str.slice(idx + "LA GRIOTHÈQUE".length);
+// Remplace "LA GRIOTHÈQUE" par le logo dans un fragment de texte.
+function renderBrandInline(part) {
+  const idx = part.indexOf("LA GRIOTHÈQUE");
+  if (idx === -1) return part;
   return (
     <>
-      {before}
+      {part.slice(0, idx)}
       <BrandLogo />
-      {after}
+      {part.slice(idx + "LA GRIOTHÈQUE".length)}
     </>
   );
+}
+
+function renderManifestoBrand(str) {
+  if (!str) return null;
+  // Une phrase par ligne : retour à la ligne au début de chaque phrase.
+  const sentences = str.split(/(?<=[.!?])\s+/).filter(Boolean);
+  return sentences.map((sentence, i) => (
+    <React.Fragment key={i}>
+      {i > 0 && <br />}
+      {renderBrandInline(sentence)}
+    </React.Fragment>
+  ));
 }
 
 // Logo mot-marque « LA GRIOTHÈQUE » en INLINE (réutilise le SVG vectorisé
