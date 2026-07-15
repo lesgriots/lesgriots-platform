@@ -734,8 +734,8 @@ button {
   letter-spacing: -0.02em;
   max-width: none;
   width: 100%;
-  hyphens: auto;
-  -webkit-hyphens: auto;
+  hyphens: none;
+  -webkit-hyphens: none;
 }
 @media (max-width: 600px) {
   .lg__manifeste--hero .lg__manifeste__prose p {
