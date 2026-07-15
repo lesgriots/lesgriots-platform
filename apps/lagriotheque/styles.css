@@ -2126,8 +2126,16 @@ body.is-home .lg__manifesto {
   top: 121px;
   z-index: 1;
 }
+/* La section vidéo se cale (sticky) en haut, DERRIÈRE le header, pour que la
+   vidéo soit continue sous le menu devenu transparent (pas de raccord avec le
+   hero). Les formations (z-index supérieur) remontent ensuite par-dessus. */
 body.is-home .lg__vision {
+  position: sticky;
+  top: 0;
   z-index: 2;
+}
+body.is-home .lg__latest {
+  z-index: 3;
 }
 @media (max-width: 600px) {
   body.is-home .lg__manifesto { top: 85px; }
