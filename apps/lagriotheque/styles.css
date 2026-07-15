@@ -2497,7 +2497,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   width: 100vw;
   margin-left: calc(50% - 50vw);
   aspect-ratio: 16 / 9;
-  max-height: 72vh;
+  max-height: 52vh;
   overflow: hidden;
   background: var(--ink);
   display: flex;
@@ -2541,7 +2541,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   color: #fff;
 }
 @media (max-width: 700px) {
-  .lg__vision { aspect-ratio: 3 / 4; max-height: none; }
+  .lg__vision { aspect-ratio: 4 / 5; max-height: 56vh; }
   .lg__vision__overlay { padding: 0 18px 10vh; }
 }
 
