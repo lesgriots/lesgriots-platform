@@ -4717,7 +4717,7 @@ body.is-scrolled .lg__pagehero__brand {
 }
 .lg__pagehero__title {
   font-family: var(--font-sans);
-  font-weight: 700;
+  font-weight: 500; /* Geist n'a pas de 700 réel → 500 (Medium) évite le faux-gras */
   font-size: clamp(28px, 4vw, 56px);
   line-height: 1;
   letter-spacing: -0.03em;
