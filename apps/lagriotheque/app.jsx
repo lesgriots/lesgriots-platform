@@ -4456,8 +4456,17 @@ function App() {
       // quel que soit l'empilement sticky.
       let overVideo = false;
       const el = document.elementFromPoint(Math.round(window.innerWidth / 2), hH + 6);
-      if (el && el.closest && (el.closest(".lg__vision") || el.closest(".lg__hero-yard"))) {
-        overVideo = true;
+      if (el && el.closest) {
+        if (el.closest(".lg__hero-yard")) {
+          // Le hero couvre toujours toute la bande du header → transparent.
+          overVideo = true;
+        } else {
+          const vis = el.closest(".lg__vision");
+          // La section vidéo : transparent SEULEMENT quand elle couvre toute la
+          // bande du header (top <= 0). Tant qu'elle monte encore, on verrait le
+          // hero derrière le haut du menu → on garde le menu papier.
+          if (vis && vis.getBoundingClientRect().top <= 0) overVideo = true;
+        }
       }
       document.body.classList.toggle("is-over-video", overVideo);
       // Positionne la "plaque" (rideau papier unique qui recouvre la vidéo au
