@@ -2538,7 +2538,7 @@ function Catalogue() {
   return (
     <section className="lg__catalogue" id="catalogue">
       <HoverBg src={bg} />
-      <PageHero src={text("catalogue.media", "img/hero.mp4")} title={text("catalogue.heading", "Formations")}>
+      <PageHero src={text("catalogue.media", "")} title={text("catalogue.heading", "Formations")}>
         <PageIntro
           text={text(
             "catalogue.intro",
@@ -2624,7 +2624,7 @@ function Workshops() {
   return (
     <section className="lg__catalogue" id="workshops">
       <HoverBg src={bg} />
-      <PageHero src={text("workshops_page.media", "img/hero.mp4")} title={text("workshops_page.heading", "Workshops")}>
+      <PageHero src={text("workshops_page.media", "")} title={text("workshops_page.heading", "Workshops")}>
         <PageIntro
           text={text(
             "workshops_page.intro",
@@ -3030,7 +3030,7 @@ function Agenda() {
   // Même structure exacte que Catalogue : section + intro + filtres + rows
   return (
     <section className="lg__catalogue" id="agenda">
-      <PageHero src={text("agenda.media", "img/hero.mp4")} title={text("agenda.heading", "Agenda")}>
+      <PageHero src={text("agenda.media", "")} title={text("agenda.heading", "Agenda")}>
         <PageIntro
           text={text("agenda.intro", "Les prochaines sessions de formations et de workshops : dates, places disponibles et modalités (présentiel ou à distance).")}
         />
@@ -3395,7 +3395,7 @@ function ResourceModal({ resource, onClose }) {
 function Ressources() {
   return (
     <section className="lg__catalogue" id="ressources">
-      <PageHero src={text("ressources.media", "img/hero.mp4")} title={text("ressources.heading", "Ressources")}>
+      <PageHero src={text("ressources.media", "")} title={text("ressources.heading", "Ressources")}>
         <PageIntro
           text={text(
             "ressources.intro",
@@ -4457,11 +4457,16 @@ function App() {
     const isHome = route === "";
     // Pages avec média hero (home incluse) : menu visible en blanc sur le
     // média, puis barre solide une fois le média dépassé.
-    const heroRoutes = ["", "catalogue", "workshops", "agenda", "ressources"];
     // Les fiches (formations/<id>, workshops/<id>) ont aussi un hero banner.
     const isDetailHero = route.startsWith("formations/") || route.startsWith("workshops/");
+    // Les pages liste n'activent le mode "hero" (média plein cadre + menu blanc
+    // transparent + superposition) que si un média est réellement défini côté
+    // BO. Sans média, elles s'affichent comme "Notre approche" (titre + intro,
+    // menu solide). Ajouter une vidéo dans le BO réactive l'effet tout seul.
+    const listMediaKey = { catalogue: "catalogue.media", workshops: "workshops_page.media", agenda: "agenda.media", ressources: "ressources.media" }[route];
+    const hasPageMedia = listMediaKey ? text(listMediaKey, "") !== "" : false;
     document.body.classList.toggle("is-home", isHome);
-    document.body.classList.toggle("is-listhero", heroRoutes.includes(route) || isDetailHero);
+    document.body.classList.toggle("is-listhero", isHome || isDetailHero || hasPageMedia);
     document.body.classList.toggle("is-scrolled", scrolled);
     // Re-mesure la position de la plaque après le rendu de la nouvelle page
     // (le handler de scroll fait la mesure ; on le déclenche manuellement).
