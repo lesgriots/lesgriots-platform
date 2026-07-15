@@ -4349,7 +4349,10 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   margin-left: calc(50% - 50vw);
   /* Contenu bord à bord, sans marge latérale (look éditorial plein cadre). */
   padding: 40px 0 80px;
-  min-height: calc(100vh - 200px);
+  /* Pas de min-height forcée : sur une page à peu de contenu (ex. Workshops
+     avec un seul item), elle créait un grand vide entre le contenu et le
+     footer (« un trou »). Le footer reste collé en bas grâce au flex
+     (#root > .lg > main { flex: 1 }), sans creuser d'espace superflu. */
   position: relative;
 }
 
