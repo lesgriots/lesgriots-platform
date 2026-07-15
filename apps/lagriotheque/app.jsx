@@ -4476,18 +4476,34 @@ function App() {
       //    blanc) : la section VISION (home) une fois qu'elle recouvre le menu →
       //    effet de superposition, le papier reste dessous, jamais de hero visible.
       let menuTransparent = false;
-      let overVideo = false;
       const el = document.elementFromPoint(Math.round(window.innerWidth / 2), hH + 6);
-      if (el && el.closest) {
-        if (el.closest(".lg__hero-yard") || el.closest(".lg__pagehero")) {
-          menuTransparent = true;
-        } else {
-          const vis = el.closest(".lg__vision");
-          if (vis && vis.getBoundingClientRect().top <= 0) overVideo = true;
-        }
+      if (el && el.closest && (el.closest(".lg__hero-yard") || el.closest(".lg__pagehero"))) {
+        // Un média doit transparaître directement derrière → plaque cachée, nav blanc.
+        menuTransparent = true;
       }
       document.body.classList.toggle("menu-transparent", menuTransparent);
-      document.body.classList.toggle("is-over-video", overVideo);
+      // Effet précis : chaque bloc de texte du menu passe en blanc LÀ où la vidéo
+      // VISION est derrière lui — la vidéo "traverse" le texte en montant, bloc
+      // par bloc (au lieu d'un flip global). Sombre au-dessus du bord de la vidéo
+      // (papier), blanc en dessous (vidéo).
+      const vision = document.querySelector(".lg__vision");
+      const latest = document.querySelector(".lg__latest");
+      const navEls = document.querySelectorAll(
+        ".lg__header__griot, .lg__header__wordmark, .lg__menu__row, .lg__header__menubtn"
+      );
+      const vr = vision ? vision.getBoundingClientRect() : null;
+      const lr = latest ? latest.getBoundingClientRect() : null;
+      navEls.forEach((elm) => {
+        const r = elm.getBoundingClientRect();
+        const c = r.top + r.height / 2;
+        // Sur la vidéo si son centre est dans la bande couverte par la vidéo,
+        // et pas recouvert par les formations (papier, z-index supérieur).
+        const onVid =
+          !menuTransparent &&
+          vr && c >= vr.top && c <= vr.bottom &&
+          !(lr && c >= lr.top && c <= lr.bottom);
+        elm.classList.toggle("is-on-video", !!onVid);
+      });
       // Positionne la "plaque" (rideau papier unique qui recouvre la vidéo au
       // scroll, cf. .lg__catalogue::after) juste sous le hero. Mesuré en JS
       // car la hauteur du hero varie (44vh desktop, 3/2 mobile, transitions).
