@@ -19,6 +19,9 @@ export default function TalentEditorPage() {
   const [msgKind, setMsgKind] = useState("ok");
   const [fr, setFr] = useState("");
   const [en, setEn] = useState("");
+  // Savoir-faire / compétences du talent (1 par ligne, bilingue comme la bio).
+  const [skillsFr, setSkillsFr] = useState("");
+  const [skillsEn, setSkillsEn] = useState("");
   const [portrait, setPortrait] = useState("");
   const [hoverVideo, setHoverVideo] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
@@ -36,6 +39,9 @@ export default function TalentEditorPage() {
         const bio = v.bio || { fr: [], en: [] };
         setFr((bio.fr || []).join("\n"));
         setEn((bio.en || []).join("\n"));
+        const skills = v.skills || { fr: [], en: [] };
+        setSkillsFr((skills.fr || []).join("\n"));
+        setSkillsEn((skills.en || []).join("\n"));
         setPortrait(v.portrait || "");
         setHoverVideo(v.hoverVideo || "");
         setInstagramUrl(v.instagramUrl || "");
@@ -80,6 +86,7 @@ export default function TalentEditorPage() {
     flash("", "ok");
     const payload = {
       bio: { fr: splitLines(fr), en: splitLines(en) },
+      skills: { fr: splitLines(skillsFr), en: splitLines(skillsEn) },
       portrait: portrait.trim(),
       hoverVideo: hoverVideo.trim(),
       instagramUrl: instagramUrl.trim(),
@@ -191,7 +198,33 @@ export default function TalentEditorPage() {
         placeholder={"MOOS COULIBALY IS A MULTIDISCIPLINARY ARTIST…\nA DANCER TURNED CHOREOGRAPHER…\n@mooscoulibaly"}
       />
 
-      <label>Lien Instagram (pour la ligne @handle)</label>
+      <h2 style={{ marginTop: 28 }}>Savoir-faire · ce que le talent sait faire</h2>
+      <p className="note" style={{ marginTop: 0, marginBottom: 10 }}>
+        Une compétence par ligne (ex. <code>Chorégraphie</code>, <code>Direction artistique</code>,
+        <code>Réalisation</code>). Affichées en tags sous la bio sur la page Talent. Vide = section masquée.
+      </p>
+      <div className="row">
+        <div>
+          <label>Compétences · Français · {splitLines(skillsFr).length}</label>
+          <textarea
+            value={skillsFr}
+            onChange={(e) => setSkillsFr(e.target.value)}
+            style={{ minHeight: 140, lineHeight: 1.7 }}
+            placeholder={"Chorégraphie\nDirection artistique\nMouvement\nRéalisation\nDirection créative"}
+          />
+        </div>
+        <div>
+          <label>Compétences · English · {splitLines(skillsEn).length}</label>
+          <textarea
+            value={skillsEn}
+            onChange={(e) => setSkillsEn(e.target.value)}
+            style={{ minHeight: 140, lineHeight: 1.7 }}
+            placeholder={"Choreography\nArt direction\nMovement\nDirecting\nCreative direction"}
+          />
+        </div>
+      </div>
+
+      <label style={{ marginTop: 24 }}>Lien Instagram (pour la ligne @handle)</label>
       <input
         value={instagramUrl}
         onChange={(e) => setInstagramUrl(e.target.value)}

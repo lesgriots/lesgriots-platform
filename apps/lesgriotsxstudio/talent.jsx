@@ -58,6 +58,10 @@ function TalentView() {
     : tr("talent.bio", lang);
   const hoverVideo = overrides.hoverVideo || "img/riles-live-04.mp4";
   const portraitImg = overrides.portrait || null;
+  // Savoir-faire du talent — liste de compétences (bilingue). Affichées en
+  // tags sous la bio. Vide → section masquée.
+  const skills = (overrides.skills && overrides.skills[lang]) || [];
+  const skillsLabel = lang === "en" ? "Capabilities" : "Savoir-faire";
   // URL du compte Instagram de Moos — utilisée pour rendre toute ligne
   // qui commence par "@" cliquable. Override possible via SITE_CONTENT.
   const instagramUrl = overrides.instagramUrl || "https://instagram.com/mooscoulibaly";
@@ -217,6 +221,19 @@ function TalentView() {
               );
             })}
           </div>
+
+          {/* Savoir-faire — tags des compétences du talent, sous la bio.
+              Masqué s'il n'y a aucune compétence renseignée dans le BO. */}
+          {skills.length > 0 && (
+            <div className="talent-skills">
+              <div className="talent-skills__label">{skillsLabel}</div>
+              <ul className="talent-skills__list">
+                {skills.map((s, i) => (
+                  <li className="talent-skills__tag" key={"skill-" + i}>{s}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </aside>
       </div>
 

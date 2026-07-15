@@ -6247,6 +6247,46 @@ body.overview-open .utilbar {
   color: var(--yellow);
 }
 
+/* ─── Savoir-faire (compétences du talent) ─────────────────────────────
+   Tags sous la bio. Même grammaire terminale : mono, uppercase, moutarde,
+   filet 1px. Hover jaune comme les liens/handle. */
+.talent-skills {
+  margin-top: 34px;
+  padding-top: 22px;
+  border-top: 1px solid var(--rule);
+}
+.talent-skills__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.7;
+  margin: 0 0 14px;
+}
+.talent-skills__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.talent-skills__tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  padding: 5px 11px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.talent-skills__tag:hover {
+  color: var(--yellow);
+  border-color: var(--yellow);
+}
+
 /* ─── Mobile ───────────────────────────────────────────────────────────
    On force le wrapper à tenir dans 100vh (height + overflow hidden) pour
    qu'il n'y ait PAS DE SCROLL sur la page Talent en mobile, comme la page
