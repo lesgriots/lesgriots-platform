@@ -2087,13 +2087,42 @@ body.is-listhero:not(.past-hero) .lg__header__menubtn,
 body.is-listhero:not(.past-hero) .lg__header__wordmark {
   color: #fff;
 }
-/* Menu immersif au-dessus de la section vidéo VISION (home) : transparent +
-   texte blanc, comme au-dessus du hero. Classe posée en JS (is-over-video)
-   quand la vidéo passe derrière le header ; retour au solide sinon. */
-body.is-over-video .lg__header {
+/* ===== Menu à deux couches : plaque papier (DESSOUS) + nav (DESSUS) =====
+   Le header porte la nav, transparent, au premier plan (z 55). Une plaque
+   papier fixe (z 45) fait le fond du menu ; la section vidéo (home, z 46)
+   remonte PAR-DESSUS la plaque → superposition, le papier reste dessous et le
+   hero n'apparaît jamais. La plaque se cache quand un média doit transparaître
+   directement derrière (hero d'accueil, pagehero des pages liste). */
+.lg__header,
+body.is-home .lg__header,
+body.is-listhero .lg__header {
   background: transparent;
   border-bottom-color: transparent;
+  z-index: 55;
 }
+.lg__header__plate {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 121px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--ink);
+  z-index: 45;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+body.menu-transparent .lg__header__plate { opacity: 0; }
+@media (max-width: 600px) {
+  .lg__header__plate { height: 85px; }
+}
+/* Nav en blanc quand un média est derrière (plaque cachée) OU quand la vidéo
+   passe par-dessus la plaque. */
+body.menu-transparent .lg__menu__link,
+body.menu-transparent .lg__menu__sep,
+body.menu-transparent .lg__header__griot,
+body.menu-transparent .lg__header__menubtn,
+body.menu-transparent .lg__header__wordmark,
 body.is-over-video .lg__menu__link,
 body.is-over-video .lg__menu__sep,
 body.is-over-video .lg__header__griot,
@@ -2153,10 +2182,10 @@ body.is-home .lg__manifesto {
 body.is-home .lg__vision {
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 46; /* AU-DESSUS de la plaque papier du menu (z-index 45) */
 }
 body.is-home .lg__latest {
-  z-index: 3;
+  z-index: 47; /* au-dessus de la vidéo */
 }
 @media (max-width: 600px) {
   body.is-home .lg__manifesto { top: 85px; }

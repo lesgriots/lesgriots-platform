@@ -217,6 +217,10 @@ function Header({ route }) {
 
   return (
     <>
+      {/* Plaque papier du menu — couche DESSOUS. La section vidéo (home) remonte
+          PAR-DESSUS elle (superposition), la nav reste au premier plan. Cachée
+          quand un média doit transparaître (hero d'accueil, pagehero liste). */}
+      <div className="lg__header__plate" aria-hidden="true" />
       <header className="lg__header">
         <a className="lg__header__griot" href="#/" aria-label="Accueil">
           <GriotRing />
@@ -4465,20 +4469,24 @@ function App() {
       // papier (manifeste, formations) le touche. On sonde le point juste sous
       // le header pour savoir quel bloc est réellement au premier plan — robuste
       // quel que soit l'empilement sticky.
+      // Deux modes selon ce qui est derrière le menu :
+      //  - "menu-transparent" (plaque papier CACHÉE, nav blanc) : un média doit
+      //    transparaître directement → hero d'accueil ou pagehero des pages liste.
+      //  - "is-over-video" (plaque VISIBLE mais la vidéo passe PAR-DESSUS, nav
+      //    blanc) : la section VISION (home) une fois qu'elle recouvre le menu →
+      //    effet de superposition, le papier reste dessous, jamais de hero visible.
+      let menuTransparent = false;
       let overVideo = false;
       const el = document.elementFromPoint(Math.round(window.innerWidth / 2), hH + 6);
       if (el && el.closest) {
-        if (el.closest(".lg__hero-yard")) {
-          // Le hero couvre toujours toute la bande du header → transparent.
-          overVideo = true;
+        if (el.closest(".lg__hero-yard") || el.closest(".lg__pagehero")) {
+          menuTransparent = true;
         } else {
           const vis = el.closest(".lg__vision");
-          // La section vidéo : transparent SEULEMENT quand elle couvre toute la
-          // bande du header (top <= 0). Tant qu'elle monte encore, on verrait le
-          // hero derrière le haut du menu → on garde le menu papier.
           if (vis && vis.getBoundingClientRect().top <= 0) overVideo = true;
         }
       }
+      document.body.classList.toggle("menu-transparent", menuTransparent);
       document.body.classList.toggle("is-over-video", overVideo);
       // Positionne la "plaque" (rideau papier unique qui recouvre la vidéo au
       // scroll, cf. .lg__catalogue::after) juste sous le hero. Mesuré en JS
