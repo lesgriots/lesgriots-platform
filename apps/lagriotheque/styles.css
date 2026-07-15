@@ -2118,22 +2118,39 @@ body.menu-transparent .lg__header__plate { opacity: 0; }
 }
 /* Nav en blanc quand un média est derrière (plaque cachée) OU quand la vidéo
    passe par-dessus la plaque. */
-body.menu-transparent .lg__menu__link,
-body.menu-transparent .lg__menu__sep,
-body.menu-transparent .lg__header__griot,
-body.menu-transparent .lg__header__menubtn,
-body.menu-transparent .lg__header__wordmark {
+/* Header en DEUX couches empilées pour une révélation VRAIMENT progressive :
+   - couche de base (sombre) toujours là ;
+   - couche blanche par-dessus, découpée au ras du bord de la vidéo via
+     clip-path (--vid-top / --vid-bottom posés en JS). Le texte devient blanc
+     pixel par pixel là où la vidéo passe derrière lui. */
+.lg__header {
+  display: block;
+  padding: 0;
+  height: 121px;
+  min-height: 121px;
+}
+.lg__header__layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 24px;
+}
+.lg__header__layer--white {
+  color: #fff;
+  pointer-events: none;
+  clip-path: inset(var(--vid-top, 100%) 0 var(--vid-bottom, 0) 0);
+}
+.lg__header__layer--white .lg__menu__link,
+.lg__header__layer--white .lg__menu__sep,
+.lg__header__layer--white .lg__header__griot,
+.lg__header__layer--white .lg__header__menubtn,
+.lg__header__layer--white .lg__header__wordmark {
   color: #fff;
 }
-/* Effet précis : chaque bloc du menu passe en blanc là où la vidéo passe
-   derrière lui (classe .is-on-video posée en JS, bloc par bloc). Transition
-   douce via .lg__menu__link { transition: color }. */
-.lg__header__griot.is-on-video,
-.lg__header__wordmark.is-on-video,
-.lg__header__menubtn.is-on-video,
-.lg__menu__row.is-on-video .lg__menu__link,
-.lg__menu__row.is-on-video .lg__menu__sep {
-  color: #fff;
+@media (max-width: 600px) {
+  .lg__header { height: 85px; min-height: 85px; }
 }
 
 .lg__hero-yard {
