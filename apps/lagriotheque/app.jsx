@@ -58,9 +58,20 @@ function renderManifestoBrand(str) {
   return (
     <>
       {before}
-      <span className="lg-brand">LA GRIOTHÈQUE</span>
+      <BrandLogo />
       {after}
     </>
+  );
+}
+
+// Logo mot-marque « LA GRIOTHÈQUE » en INLINE (réutilise le SVG vectorisé
+// officiel via GriotRing) — sert à remplacer le texte de marque dans les
+// phrases par le logo. Font-indépendant, donc fidèle même sans Geist chargé.
+function BrandLogo() {
+  return (
+    <span className="lg-brand-logo" role="img" aria-label="LA GRIOTHÈQUE">
+      <GriotRing />
+    </span>
   );
 }
 
@@ -1592,7 +1603,7 @@ function ProgramPage({ item, kind }) {
           body: (
             <div className="lg__formation__prose">
               <p className="lg__approche__lede">
-                Trois points qui définissent l'ADN de <span className="lg-brand">LA GRIOTHÈQUE</span>
+                Trois points qui définissent l'ADN de <BrandLogo />
                 {" "}— ce qui nous rend différents d'un centre de formation comme les autres.
               </p>
               <div className="lg__approche-mini">

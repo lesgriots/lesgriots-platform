@@ -224,6 +224,27 @@ button {
   font-weight: 700;
   white-space: nowrap;
 }
+/* Logo mot-marque « LA GRIOTHÈQUE » en inline (remplace le texte de marque dans
+   les phrases). Dimensionné sur la hauteur du texte, calé sur la ligne de base. */
+.lg-brand-logo {
+  display: inline-block;
+  height: 1.05em;
+  vertical-align: baseline;
+  position: relative;
+  top: 0.16em;
+  line-height: 0;
+  white-space: nowrap;
+}
+.lg-brand-logo .lg__hero__griot__wrap {
+  width: auto;
+  height: 1.05em;
+  min-width: 0;
+  display: inline-flex;
+}
+.lg-brand-logo .lg__wordmark-svg {
+  height: 1.05em;
+  width: auto;
+}
 .lg-brand::after {
   content: "™";
   font-size: 0.45em;
@@ -5776,8 +5797,9 @@ a.lg__partners__logo:hover {
 @media (max-width: 600px) {
   .lg { padding: 0 18px; }
   .lg__header { padding: 10px 14px; gap: 12px; align-items: center; }
-  .lg__header__griot { display: none; }
-  .lg__header__wordmark { display: inline-block; font-size: 16px; }
+  /* Mobile aussi : le logo (mot-marque SVG) plutôt que le texte. */
+  .lg__header__griot { display: flex; }
+  .lg__header__wordmark { display: none; }
   .lg__menu { display: none; }
   .lg__header__menubtn { display: inline-block; }
   .lg__manifesto { padding: 60px 0 50px; }
