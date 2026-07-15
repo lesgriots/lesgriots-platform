@@ -2058,10 +2058,23 @@ function HoverBg({ src }) {
   );
 }
 
+// Découpe un texte en phrases, une par ligne (retour à la ligne au début de
+// chaque phrase). Renvoie tel quel si ce n'est pas une chaîne.
+function sentencesToLines(str) {
+  if (!str || typeof str !== "string") return str;
+  const parts = str.split(/(?<=[.!?])\s+/).filter(Boolean);
+  return parts.map((p, i) => (
+    <React.Fragment key={i}>
+      {i > 0 && <br />}
+      {p}
+    </React.Fragment>
+  ));
+}
+
 function PageIntro({ text, sub }) {
   return (
     <div className="lg__intro">
-      <p className="lg__intro__text">{text}</p>
+      <p className="lg__intro__text">{sentencesToLines(text)}</p>
       {sub && <p className="lg__intro__sub">{sub}</p>}
     </div>
   );
