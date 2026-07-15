@@ -4449,14 +4449,19 @@ function App() {
       // (invisible) pendant toute la transition.
       const past = hero ? window.scrollY > hero.offsetHeight * 0.3 : false;
       document.body.classList.toggle("past-hero", past);
-      // Menu transparent + texte blanc quand la section vidéo VISION (home) est
-      // derrière le header — même traitement immersif que le hero. Redevient
-      // solide dès qu'un bloc papier repasse derrière le menu.
+      // Menu transparent + texte blanc tant qu'un MÉDIA (hero ou section vidéo)
+      // est derrière le header sur la home ; solide dès qu'un bloc PAPIER le
+      // touche. « jusqu'à ce que la section touche le menu ».
+      const manifesto = document.querySelector(".lg__manifesto");
       const vision = document.querySelector(".lg__vision");
       let overVideo = false;
+      // Hero vidéo derrière le header : vrai tant que le manifeste (1er bloc
+      // papier) n'a pas atteint le menu.
+      if (manifesto && manifesto.getBoundingClientRect().top > hH) overVideo = true;
+      // Section vidéo VISION derrière le header.
       if (vision) {
         const r = vision.getBoundingClientRect();
-        overVideo = r.top < hH && r.bottom > hH;
+        if (r.top < hH && r.bottom > hH) overVideo = true;
       }
       document.body.classList.toggle("is-over-video", overVideo);
       // Positionne la "plaque" (rideau papier unique qui recouvre la vidéo au
