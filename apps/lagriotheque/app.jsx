@@ -457,6 +457,24 @@ function Manifesto() {
         </div>
       </section>
 
+      {/* VISION — bandeau vidéo entre le manifeste et les formations.
+          Média éditable via BO (home.vision_video), fallback hero.mp4. */}
+      <section className="lg__vision">
+        <div className="lg__vision__media">
+          <video
+            src={text("home.vision_video", "img/hero.mp4")}
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+        </div>
+        <div className="lg__vision__overlay">
+          <h2 className="lg__vision__title">{text("home.vision_title", "New stories need new faces.")}</h2>
+          <p className="lg__vision__text">{text("home.vision_text", "La vision de La Griothèque est de permettre l'émergence de nouveaux récits.")}</p>
+        </div>
+      </section>
+
       {/* LATEST — liste des formations à l'affiche, style YARD. L'onglet
           Workshops n'apparaît que s'il y a au moins un workshop dispo. */}
       <section className="lg__latest">
@@ -1755,10 +1773,11 @@ function ProgramPage({ item, kind }) {
               {f.rs && <span className="lg__cta-mini__cert__code"> · RS {f.rs}</span>}
             </p>
           )}
-          {kind !== "workshop" && (f.cpf || f.opco || f.rs) && (
+          {kind !== "workshop" && (f.cpf || f.opco || f.faf || f.rs) && (
             <div className="lg__cta-mini__badges">
               {f.cpf && <span>CPF</span>}
               {f.opco && <span>OPCO</span>}
+              {f.faf && <span>FAF</span>}
               {f.rs && <span>RS {f.rs}</span>}
             </div>
           )}
@@ -1927,7 +1946,7 @@ function FormationDetail({ id, onClose }) {
           </div>
           <div>
             <h6>FINANCEMENT</h6>
-            <p>{f.cpf ? "CPF" : "—"} {f.cpf && f.opco && "·"} {f.opco ? "OPCO" : ""}</p>
+            <p>{[f.cpf && "CPF", f.opco && "OPCO", f.faf && "FAF"].filter(Boolean).join(" · ") || "—"}</p>
           </div>
         </div>
 
