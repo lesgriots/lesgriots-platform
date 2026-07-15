@@ -5001,10 +5001,10 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
 .lg__approche__title {
   font-family: var(--font-sans);
   font-weight: 500;
-  /* Légèrement réduit (vs 40-96px) pour ne pas écraser la lede en dessous. */
-  font-size: clamp(36px, 5.2vw, 80px);
-  line-height: 0.98;
-  letter-spacing: -0.035em;
+  /* Même taille que le titre des pages liste (Formations/Agenda/Ressources). */
+  font-size: clamp(28px, 4vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.03em;
   margin: 0 0 40px;
   color: var(--ink);
   text-transform: none;
