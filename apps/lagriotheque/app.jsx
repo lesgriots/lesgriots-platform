@@ -2542,9 +2542,8 @@ function Catalogue() {
         <PageIntro
           text={text(
             "catalogue.intro",
-            "Apprends à raconter ton talent et à en vivre. Des formations courtes et pratiques, animées par des professionnels qui transmettent ce qu'ils ont construit."
+            "Des formations courtes et pratiques en communication, image de marque et réseaux sociaux. Animées par des professionnels en activité, en petits groupes. Formats certifiants et finançables selon les cas (CPF, OPCO, FAF)."
           )}
-          sub={text("catalogue.sub", "Certifiantes · finançables CPF, OPCO & perso · présentiel et distanciel")}
         />
       </PageHero>
 
@@ -3033,8 +3032,7 @@ function Agenda() {
     <section className="lg__catalogue" id="agenda">
       <PageHero src={text("agenda.media", "img/hero.mp4")} title={text("agenda.heading", "Agenda")}>
         <PageIntro
-          text={text("agenda.intro", "Les prochaines dates : formations, workshops et événements à venir.")}
-          sub={<a className="lg__intro__sublink" href="mailto:formations@lesgriots.com?subject=Recevoir%20les%20prochaines%20dates">Recevoir les prochaines dates →</a>}
+          text={text("agenda.intro", "Les prochaines sessions de formations et de workshops : dates, places disponibles et modalités (présentiel au Havre ou à distance).")}
         />
       </PageHero>
 
@@ -3401,9 +3399,8 @@ function Ressources() {
         <PageIntro
           text={text(
             "ressources.intro",
-            "Des outils gratuits : worksheets, templates et guides pour structurer ton récit, affûter ta méthode et porter ta marque. À télécharger et utiliser dès aujourd'hui."
+            "Des ressources gratuites à télécharger : worksheets, templates et guides pour structurer ta communication et tes contenus."
           )}
-          sub={text("ressources.sub", "Gratuites · mises à jour régulièrement")}
         />
       </PageHero>
       <div className="lg__rows">
