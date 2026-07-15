@@ -4591,6 +4591,17 @@ body.is-scrolled .lg__pagehero__brand {
 .lg__intro__sub {
   margin-top: 6px;
 }
+/* Pages liste SANS média hero (mode "Notre approche") : l'intro n'est plus dans
+   l'overlay du hero, elle prenait donc la taille de base énorme (jusqu'à 48px)
+   et alourdissait la page (effet "titre en trop gras"). On la ramène à une
+   taille de lede, sous le titre, comme sur Notre approche. */
+body:not(.is-listhero) .lg__catalogue .lg__intro__text {
+  font-size: clamp(17px, 1.8vw, 22px);
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--ink-2);
+  max-width: 68ch;
+}
 /* Lien cliquable dans le sous-titre (ex. Agenda → recevoir les prochaines dates) */
 .lg__intro__sublink {
   color: inherit;

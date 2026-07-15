@@ -718,7 +718,7 @@ function CtaBanner({ item, nextSession, tagline, upcoming, title, kind }) {
   // OPCO / mentions fiscales formelles).
   const isQualiopi = kind !== "workshop";
   const finance = isQualiopi
-    ? [item.cpf && "CPF", item.opco && "OPCO"].filter(Boolean).join(" · ")
+    ? [item.cpf && "CPF", item.opco && "OPCO", item.faf && "FAF"].filter(Boolean).join(" · ")
     : "";
   // 2-3 prochaines dates max dans la colonne sessions
   const sessionDates = (upcoming || []).slice(0, 3);
@@ -1526,8 +1526,8 @@ function ProgramPage({ item, kind }) {
               <strong>{f.price || "—"} HT</strong> — montant net à payer.
               {" "}LES GRIOTS bénéficie de la franchise en base de TVA
               (art. 293 B du CGI), aucune TVA n'est ajoutée.
-              {(f.cpf || f.opco) && (
-                <> Prise en charge possible {f.opco ? "OPCO" : ""}{f.cpf && f.opco ? " · " : ""}{f.cpf ? "CPF" : ""}.</>
+              {(f.cpf || f.opco || f.faf) && (
+                <> Prise en charge possible {[f.opco && "OPCO", f.cpf && "CPF", f.faf && "FAF"].filter(Boolean).join(" · ")}.</>
               )}
             </p>
           ),
