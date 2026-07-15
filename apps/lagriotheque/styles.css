@@ -2093,6 +2093,21 @@ body.is-home .lg__latest {
   z-index: 1;
   background: var(--paper);
 }
+/* Effet de pile au scroll (home) : le manifeste se FIGE sous le menu quand il
+   l'atteint, et la section vidéo « New stories » remonte PAR-DESSUS lui
+   (z-index supérieur + opaque). Le manifeste reste ensuite couvert par la
+   vidéo puis par les formations. */
+body.is-home .lg__manifesto {
+  position: sticky;
+  top: 121px;
+  z-index: 1;
+}
+body.is-home .lg__vision {
+  z-index: 2;
+}
+@media (max-width: 600px) {
+  body.is-home .lg__manifesto { top: 85px; }
+}
 
 /* GRIOT — overlay top-left du hero, même taille que sur la page contact */
 .lg__hero-yard__brand {
