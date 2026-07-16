@@ -1277,13 +1277,23 @@ function TrainersInline({ trainers }) {
   return (
     <div className="lg__trx">
       {cursor && (
-        <img
-          className="lg__trx__cursorimg"
-          src={cursor.src}
-          alt=""
-          aria-hidden="true"
-          style={{ left: cursor.x + "px", top: cursor.y + "px" }}
-        />
+        cursor.src ? (
+          <img
+            className="lg__trx__cursorimg"
+            src={cursor.src}
+            alt=""
+            aria-hidden="true"
+            style={{ left: cursor.x + "px", top: cursor.y + "px" }}
+          />
+        ) : (
+          <div
+            className="lg__trx__cursorimg lg__trx__cursorimg--ph"
+            aria-hidden="true"
+            style={{ left: cursor.x + "px", top: cursor.y + "px" }}
+          >
+            <span>{trainerInitials(cursor.name)}</span>
+          </div>
+        )
       )}
       <ul className="lg__trx__list">
         {list.map((t, i) => {
@@ -1296,7 +1306,7 @@ function TrainersInline({ trainers }) {
                 type="button"
                 className="lg__trx__head"
                 onClick={() => setOpenId(isOpen ? null : key)}
-                onMouseMove={(e) => { if (t.photo) setCursor({ src: t.photo, x: e.clientX, y: e.clientY }); }}
+                onMouseMove={(e) => setCursor({ src: t.photo || "", name: t.name, x: e.clientX, y: e.clientY })}
                 onMouseLeave={() => setCursor(null)}
                 aria-expanded={isOpen}
               >

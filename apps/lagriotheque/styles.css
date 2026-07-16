@@ -4176,6 +4176,20 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   filter: grayscale(1) contrast(1.04);
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.38);
 }
+.lg__trx__cursorimg--ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  color: var(--paper);
+  filter: none;
+}
+.lg__trx__cursorimg--ph span {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(28px, 3vw, 44px);
+  letter-spacing: 0.02em;
+}
 @media (max-width: 700px) {
   .lg__trx__cursorimg { display: none; }
 }
