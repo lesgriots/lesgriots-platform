@@ -2049,7 +2049,9 @@ function ProgramPage({ item, kind }) {
           {f.duration && (
             <div className="lg__cta-mini__sessions">
               <p className="lg__cta-mini__sessions__label">Durée</p>
-              <p className="lg__cta-mini__session__date">{formatDuration(f.duration)}</p>
+              <p className="lg__cta-mini__session__date">
+                {f.duration.toLowerCase().replace(/\s*·\s*/g, " / ").replace(/journée/g, "jour")}
+              </p>
             </div>
           )}
           {kind === "workshop" ? (
