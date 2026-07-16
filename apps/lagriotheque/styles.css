@@ -2219,6 +2219,10 @@ body.is-home .lg__latest {
   --ink-2: rgba(246, 245, 243, 0.72);
   --ink-3: rgba(246, 245, 243, 0.45);
 }
+/* Rows « à la page Formations » dans la section noire de la home : alignées à
+   gauche (la section .lg__latest est centrée pour ses onglets). */
+.lg__latest__rows { text-align: left; margin-top: 8px; }
+.lg__latest__rows .lg__row:first-child { border-top: none; }
 @media (max-width: 600px) {
   body.is-home .lg__manifesto { top: 85px; }
 }

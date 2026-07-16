@@ -531,27 +531,16 @@ function Manifesto() {
             >{text("home.latest_tab_workshops", "Workshops")}</span>
           )}
         </div>
-        <div className="lg__latest__list">
-          {(latestTab === "workshops"
-            ? WORKSHOPS.filter((w) => w.available)
-            : FORMATIONS.filter((f) => f.available)
-          ).map((item) => (
-            <a
-              key={item.id}
-              href={(latestTab === "workshops" ? "#/workshops/" : "#/formations/") + item.id}
-              className="lg__latest__row"
-            >
-              <span className="lg__latest__row__left">
-                {item.discipline
-                  ? item.discipline.split(" · ")[0].toLowerCase()
-                  : (latestTab === "workshops" ? "workshop" : "formation")}
-              </span>
-              <h3 className="lg__latest__row__title">{item.title}</h3>
-              <span className="lg__latest__row__right">
-                {item.duration ? item.duration.split(" · ").pop().toLowerCase() : ""}
-              </span>
-            </a>
-          ))}
+        {/* Présentation identique à la page Formations : label + grand titre
+            (composants FormationRow / WorkshopRow, conteneur .lg__rows). */}
+        <div className="lg__rows lg__latest__rows">
+          {latestTab === "workshops"
+            ? WORKSHOPS.filter((w) => w.available).map((w) => (
+                <WorkshopRow key={w.id} w={w} />
+              ))
+            : FORMATIONS.filter((f) => f.available).map((f) => (
+                <FormationRow key={f.id} f={f} />
+              ))}
         </div>
       </section>
 
