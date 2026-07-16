@@ -2562,6 +2562,19 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 @media (max-width: 700px) {
   .lg__hero-yard__tagline--quote p { font-size: clamp(21px, 6vw, 30px); max-width: none; }
 }
+/* Kicker / label de catégorie au-dessus de la phrase forte (« Storytelling »).
+   Sélecteur renforcé pour battre .lg__hero-yard__tagline--quote p. */
+.lg__hero-yard__tagline .lg__hero-yard__kicker {
+  margin: 0 0 16px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(12px, 1vw, 15px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper);
+  opacity: 0.85;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+}
 /* Sous-titre concret du hero (façon VSCO : bénéfices en une phrase).
    Sélecteur renforcé pour battre .lg__hero-yard__tagline--quote p. */
 .lg__hero-yard__tagline .lg__hero-yard__sub {
