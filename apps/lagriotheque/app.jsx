@@ -1231,9 +1231,10 @@ function DownloadModal({ item, onClose }) {
   );
 }
 
-// Formateurs présentés comme les formations : grandes lignes (label + nom),
-// photo qui apparaît au survol (portrait flottant), et bio + rôle qui se
-// déroulent au clic. Les infos complètes (bio, photo) sont résolues depuis
+// Formateurs façon IDW / home : petit label mono ("FORMATEUR · 2026"),
+// nom en typo géante (marquee au survol si débordement), puis panneau
+// TOUJOURS visible en dessous : photo + rôle + bio. Une ligne fine sépare
+// chaque entrée. Les infos complètes (bio, photo) sont résolues depuis
 // TRAINERS (l'export ne met que name+role sur f.trainer).
 // Repasse un nom TOUT EN MAJUSCULES en casse titre ("MOOS COULIBALY" →
 // "Moos Coulibaly"). Laisse intact un nom déjà correctement casé.
@@ -1266,50 +1267,41 @@ function trainerFull(t) {
   };
 }
 
+function TrainerXLRow({ t }) {
+  const nameRef = useMarqueeOverflow([t.name]);
+  return (
+    <li className="lg__trx__row">
+      <p className="lg__trx__label">FORMATEUR · 2026</p>
+      <h3 className="lg__trx__name" ref={nameRef}>
+        <span className="lg__marquee__inner">{t.name}</span>
+      </h3>
+      {(t.photo || t.role || t.bio) && (
+        <div className="lg__trx__panel">
+          {t.photo ? (
+            <img className="lg__trx__photo" src={t.photo} alt={t.name} loading="lazy" />
+          ) : (
+            <div className="lg__trx__photo lg__trx__photo--ph" aria-hidden="true">
+              <span>{trainerInitials(t.name)}</span>
+            </div>
+          )}
+          <div className="lg__trx__bio">
+            {t.role && <p className="lg__trx__role">{t.role}</p>}
+            {t.bio && <p className="lg__trx__text">{t.bio}</p>}
+          </div>
+        </div>
+      )}
+    </li>
+  );
+}
+
 function TrainersInline({ trainers }) {
   const list = (Array.isArray(trainers) ? trainers : [trainers]).filter(Boolean).map(trainerFull);
-  const [openId, setOpenId] = React.useState(null);
-  const [hover, setHover] = React.useState(null);
   return (
     <div className="lg__trx">
-      {hover && (
-        <img className="lg__trx__hoverimg" src={hover} alt="" aria-hidden="true" />
-      )}
       <ul className="lg__trx__list">
-        {list.map((t, i) => {
-          const isOpen = openId === (t.id || i);
-          const key = t.id || i;
-          return (
-            <li key={key} className={"lg__trx__row" + (isOpen ? " is-open" : "")}>
-              <button
-                type="button"
-                className="lg__trx__head"
-                onClick={() => setOpenId(isOpen ? null : key)}
-                onMouseEnter={() => t.photo && setHover(t.photo)}
-                onMouseLeave={() => setHover(null)}
-                aria-expanded={isOpen}
-              >
-                <span className="lg__trx__name">{t.name}</span>
-                <span className="lg__trx__toggle" aria-hidden="true">{isOpen ? "−" : "+"}</span>
-              </button>
-              {isOpen && (
-                <div className="lg__trx__panel">
-                  {t.photo ? (
-                    <img className="lg__trx__photo" src={t.photo} alt={t.name} loading="lazy" />
-                  ) : (
-                    <div className="lg__trx__photo lg__trx__photo--ph" aria-hidden="true">
-                      <span>{trainerInitials(t.name)}</span>
-                    </div>
-                  )}
-                  <div className="lg__trx__bio">
-                    {t.role && <p className="lg__trx__role">{t.role}</p>}
-                    {t.bio && <p className="lg__trx__text">{t.bio}</p>}
-                  </div>
-                </div>
-              )}
-            </li>
-          );
-        })}
+        {list.map((t, i) => (
+          <TrainerXLRow key={t.id || i} t={t} />
+        ))}
       </ul>
     </div>
   );
