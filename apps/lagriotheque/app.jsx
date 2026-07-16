@@ -509,14 +509,11 @@ function Manifesto() {
           <p>
             {text(
               "home.hero_statement",
-              "Ce n’est pas l’histoire que tu racontes qui compte. C’est le récit que les autres se font de toi. Apprends à l’écrire."
+              "Structure ton récit, trouve à qui le raconter, et comment."
             )}
           </p>
           <p className="lg__hero-yard__sub">
-            {text(
-              "home.hero_sub",
-              "C’est ça, le storytelling : structure ton récit, trouve à qui le raconter, et comment."
-            )}
+            {text("home.hero_sub", "C’est ça, le storytelling.")}
           </p>
           <a className="lg__hero-yard__cta" href="#/formations">
             {text("home.hero_cta", "Voir les formations")}
