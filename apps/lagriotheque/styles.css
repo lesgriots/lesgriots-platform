@@ -3292,8 +3292,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   z-index: 28;
   margin: 0 -16px;
   /* Padding gauche aligné sur le titre (.lg__formation__title : padding-left
-     16 avec la même marge -16 → décalage effectif 0). Vertical resserré. */
-  padding: 11px 24px 11px 16px;
+     16 avec la même marge -16 → décalage effectif 0). Gap vertical identique
+     au-dessus et en dessous (12px, cf. .lg__tabsec:first-child). */
+  padding: 12px 24px 12px 16px;
   background: var(--paper);
   /* Trait de séparation sous la barre d'onglets. */
   border-bottom: 1px solid var(--ink);
@@ -3497,7 +3498,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   padding: 16px 16px;
   animation: lg-section-in 0.2s ease;
 }
-.lg__tabsec:first-child { padding-top: 14px; }
+.lg__tabsec:first-child { padding-top: 12px; }
 .lg__tabsec:last-child { padding-bottom: 40px; }
 .lg__tabsec__title {
   display: flex;
