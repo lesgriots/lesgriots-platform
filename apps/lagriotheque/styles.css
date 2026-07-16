@@ -2575,8 +2575,8 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   font-size: clamp(26px, 3.3vw, 48px);
   line-height: 1.15;
   letter-spacing: -0.02em;
-  color: var(--paper);
-  opacity: 0.9;
+  color: #ffffff;
+  opacity: 1;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
 }
 /* Sous-titre concret du hero (façon VSCO : bénéfices en une phrase).
