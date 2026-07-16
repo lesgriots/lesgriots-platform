@@ -1351,7 +1351,7 @@ function ProgramPage({ item, kind }) {
     ? [
         {
           id: "presentation",
-          label: "Présentation",
+          label: "Description",
           sections: ["description", "public", "prerequis"],
         },
         {
@@ -1369,7 +1369,7 @@ function ProgramPage({ item, kind }) {
     : [
         {
           id: "presentation",
-          label: "Présentation",
+          label: "Description",
           sections: ["description", "public", "prerequis"],
         },
         { id: "objectifs", label: "Objectifs", sections: ["objectifs"] },
