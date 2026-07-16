@@ -2034,6 +2034,9 @@ function ProgramPage({ item, kind }) {
                   return (
                     <li key={s.id} className="lg__cta-mini__session">
                       <span className="lg__cta-mini__session__date">{sessionDateLabel(s)}</span>
+                      {s.location && (
+                        <span className="lg__cta-mini__session__loc">{s.location}</span>
+                      )}
                       <span className="lg__cta-mini__session__meta">
                         <span className={"lg__cta-mini__session__status is-" + st.class}>{st.label}</span>
                         {s.places && st.class === "open" && (
