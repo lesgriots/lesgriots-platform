@@ -1487,9 +1487,6 @@ function ProgramPage({ item, kind }) {
           label: "Programme",
           sections: ["programme", "duree", "moyens"],
         },
-        ...((item.cpf || item.rs)
-          ? [{ id: "certification", label: "Certification", sections: ["certification"] }]
-          : []),
         { id: "formateurs", label: "Formateurs", sections: ["formateur"] },
         {
           id: "financement",
