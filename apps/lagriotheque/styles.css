@@ -4175,14 +4175,13 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   object-fit: cover;
   flex: 0 0 auto;
 }
-.lg__trx__bio { flex: 1 1 auto; max-width: 640px; }
+.lg__trx__bio { flex: 1 1 auto; min-width: 0; }
 .lg__trx__role {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  letter-spacing: 0;
   color: var(--ink-3);
-  margin: 0 0 10px;
+  margin: 0 0 8px;
 }
 .lg__trx__text {
   font-family: var(--font-sans);
