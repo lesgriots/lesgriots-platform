@@ -2497,7 +2497,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   width: 100vw;
   margin-left: calc(50% - 50vw);
   aspect-ratio: 16 / 9;
-  max-height: 52vh;
+  /* Assez haute pour que, quand elle est calée en haut, le footer ne dépasse
+     pas en bas (le bloc "latest" en dessous est court). */
+  max-height: 76vh;
   overflow: hidden;
   background: var(--ink);
   display: flex;
