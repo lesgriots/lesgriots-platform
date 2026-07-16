@@ -2003,8 +2003,6 @@ function ProgramPage({ item, kind }) {
               {f.price || "—"}
             </strong>
             <span className="lg__cta-mini__hint">
-              {f.duration ? formatDuration(f.duration) : ""}
-              {f.duration ? " · " : ""}
               {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
             </span>
           </div>
@@ -2046,6 +2044,12 @@ function ProgramPage({ item, kind }) {
                   );
                 })}
               </ul>
+            </div>
+          )}
+          {f.duration && (
+            <div className="lg__cta-mini__sessions">
+              <p className="lg__cta-mini__sessions__label">Durée</p>
+              <p className="lg__cta-mini__session__date">{formatDuration(f.duration)}</p>
             </div>
           )}
           {kind === "workshop" ? (
