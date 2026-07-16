@@ -4619,7 +4619,7 @@ function App() {
       // devient noire (plaque noire + nav blanc), en continuité avec la section.
       let menuDark = false;
       if (!menuTransparent && document.body.classList.contains("is-home")) {
-        [".lg__manifesto", ".lg__latest", ".lg__vision"].forEach((sel) => {
+        [".lg__latest", ".lg__vision"].forEach((sel) => {
           const dk = document.querySelector(sel);
           if (!dk) return;
           const r = dk.getBoundingClientRect();
