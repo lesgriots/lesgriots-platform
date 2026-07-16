@@ -1427,6 +1427,7 @@ function ProgramPage({ item, kind }) {
         ...((item.cpf || item.rs)
           ? [{ id: "certification", label: "Certification", sections: ["certification"] }]
           : []),
+        { id: "formateurs", label: "Formateurs", sections: ["formateur"] },
         {
           id: "financement",
           label: "Financement",
@@ -1435,7 +1436,7 @@ function ProgramPage({ item, kind }) {
         {
           id: "sessions",
           label: "Sessions / Lieu",
-          sections: ["lieu", "formateur", "accessibilite", "evaluation"],
+          sections: ["lieu", "accessibilite", "evaluation"],
         },
         { id: "faq", label: "FAQ", sections: ["faq"] },
         { id: "contact", label: "Contact", sections: ["contact"] },
