@@ -2237,8 +2237,8 @@ body.is-home .lg__latest {
   font-family: var(--font-sans);
   font-weight: 500;
   text-transform: uppercase;
-  /* Dimensionné pour tenir sur UNE ligne au desktop (voir nowrap ci-dessous). */
-  font-size: clamp(30px, 5.4vw, 104px);
+  /* Sur une seule ligne au desktop (nowrap ci-dessous), taille mesurée. */
+  font-size: clamp(24px, 3.5vw, 56px);
   line-height: 1.02;
   letter-spacing: -0.02em;
   margin: 0 0 18px;
