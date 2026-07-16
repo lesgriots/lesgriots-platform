@@ -4033,6 +4033,35 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 /* Variante ACCORDÉON : liste verticale de jours repliables (pas de grille de
    cartes). Chaque jour = un en-tête cliquable (titre + toggle) qui déroule
    son contenu en dessous. */
+/* Section Avis dédiée (page formation), avant le CTA final. */
+.lg__avis {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding: 64px 24px;
+  border-top: 1px solid var(--ink);
+  background: var(--paper);
+}
+.lg__avis__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(28px, 3.4vw, 48px);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0 0 18px;
+  color: var(--ink);
+}
+.lg__avis__text {
+  font-family: var(--font-sans);
+  font-size: clamp(16px, 1.5vw, 20px);
+  line-height: 1.5;
+  max-width: 720px;
+  color: var(--ink-2);
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .lg__avis { padding: 44px 16px; }
+}
+
 .lg__program--accordion {
   display: block;
 }

@@ -1432,7 +1432,6 @@ function ProgramPage({ item, kind }) {
           label: "Financement",
           sections: ["tarif", "delai"],
         },
-        { id: "avis", label: "Avis", sections: ["avis"] },
         {
           id: "sessions",
           label: "Sessions / Lieu",
@@ -1970,6 +1969,18 @@ function ProgramPage({ item, kind }) {
           onClose={() => setCpfOpen(false)}
         />
       )}
+
+      {/* Avis — section dédiée (sortie de la barre d'onglets), juste avant le
+          CTA final. */}
+      <section className="lg__avis" aria-label="Avis">
+        <h2 className="lg__avis__title">Avis</h2>
+        <p className="lg__avis__text">
+          Les premiers avis seront publiés à l'issue des sessions 2025-2026.
+          La Griothèque démarre sa première promotion en 2025 — les indicateurs
+          de satisfaction et de recommandation seront accessibles ici dès le
+          bilan de la promo.
+        </p>
+      </section>
 
       {/* Bloc CTA final pleine largeur en bas de page — la vidéo de la
           formation tourne en background avec un voile sombre par-dessus. */}
