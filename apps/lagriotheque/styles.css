@@ -3222,7 +3222,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   top: calc(121px + var(--lg-title-h, 80px));
   z-index: 28;
   margin: 0 -16px;
-  padding: 16px 24px;
+  /* Padding gauche aligné sur le titre (.lg__formation__title : padding-left
+     16 avec la même marge -16 → décalage effectif 0). */
+  padding: 16px 24px 16px 16px;
   background: var(--paper);
   /* Trait de séparation sous la barre d'onglets. */
   border-bottom: 1px solid var(--ink);
