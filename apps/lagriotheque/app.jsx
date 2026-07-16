@@ -1945,13 +1945,25 @@ function ProgramPage({ item, kind }) {
               </ul>
             </div>
           )}
-          <a
-            className="lg__cta-mini__btn"
-            href={ctaHref(item, nextSession)}
-            {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          >
-            {ctaLabel(item)}
-          </a>
+          {kind === "workshop" ? (
+            /* Workshop = achat direct (Stripe) → « Réserver / Payer ». */
+            <a
+              className="lg__cta-mini__btn"
+              href={ctaHref(item, nextSession)}
+              {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            >
+              {ctaLabel(item)}
+            </a>
+          ) : (
+            /* Formation = pas d'achat direct → demande d'inscription (modale). */
+            <button
+              type="button"
+              className="lg__cta-mini__btn"
+              onClick={() => setShowInscription(true)}
+            >
+              Demander une inscription →
+            </button>
+          )}
           {kind !== "workshop" && f.cpf && (
             <button
               type="button"
@@ -2048,13 +2060,23 @@ function ProgramPage({ item, kind }) {
               </span>
             </p>
           )}
-          <a
-            className="lg__cta-final__btn"
-            href={ctaHref(item, nextSession)}
-            {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          >
-            {ctaLabel(item)}
-          </a>
+          {kind === "workshop" ? (
+            <a
+              className="lg__cta-final__btn"
+              href={ctaHref(item, nextSession)}
+              {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            >
+              {ctaLabel(item)}
+            </a>
+          ) : (
+            <button
+              type="button"
+              className="lg__cta-final__btn"
+              onClick={() => setShowInscription(true)}
+            >
+              Demander une inscription →
+            </button>
+          )}
         </div>
       </div>
     </section>
