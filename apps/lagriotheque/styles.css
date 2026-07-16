@@ -1587,6 +1587,18 @@ button {
 }
 .lg__cta-mini__sub:hover { color: var(--ink-3, #555); }
 
+/* Carte de réservation : tous les libellés passent en Geist Sans (plus de
+   Geist Mono). Léger ajustement de letter-spacing pour la lisibilité. */
+.lg__cta-mini__hint,
+.lg__cta-mini__cert__code,
+.lg__cta-mini__badges span,
+.lg__cta-mini__sessions__label,
+.lg__cta-mini__session__meta,
+.lg__cta-mini__sub {
+  font-family: var(--font-sans);
+  letter-spacing: 0.02em;
+}
+
 /* Mobile : la sidebar parent passe en fixed bottom (.lg__formation__side).
    La carte se compacte en barre prix + bouton. */
 @media (max-width: 900px) {
