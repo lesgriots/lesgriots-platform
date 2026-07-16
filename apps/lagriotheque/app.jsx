@@ -537,7 +537,7 @@ function Manifesto() {
             Éditable via BO (home.formations_heading / _lede). */}
         <div className="lg__latest__intro">
           <h2 className="lg__latest__heading">
-            {text("home.formations_heading", "Des outils pour bâtir ton récit")}
+            {text("home.formations_heading", "Les outils pour vivre de ton art")}
           </h2>
           <p className="lg__latest__lede">
             {text(
