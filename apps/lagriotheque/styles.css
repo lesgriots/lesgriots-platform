@@ -2201,12 +2201,23 @@ body.is-home .lg__manifesto {
 /* La section vidéo se cale (sticky) en haut, DERRIÈRE le header, pour que la
    vidéo soit continue sous le menu devenu transparent (pas de raccord avec le
    hero). Les formations (z-index supérieur) remontent ensuite par-dessus. */
+body.is-home .lg__latest {
+  z-index: 46; /* AU-DESSUS de la plaque papier du menu (z-index 45) : remonte par-dessus le manifeste */
+}
 body.is-home .lg__vision-track {
   position: relative;
-  z-index: 46; /* AU-DESSUS de la plaque papier du menu (z-index 45) */
+  z-index: 47; /* final : la section récits remonte par-dessus les formations */
 }
+/* Section « Nos formations » sur fond NOIR (home). Le fond est une couleur
+   littérale (pas var(--ink)) car on redéfinit ci-dessous --ink/--ink-2/--ink-3
+   en clair : ainsi tous les textes ET les styles inline (color:var(--ink-3))
+   basculent en clair sur le noir, sans toucher au reste du site. */
 body.is-home .lg__latest {
-  z-index: 47; /* au-dessus de la vidéo */
+  background: #000000;
+  border-top-color: rgba(246, 245, 243, 0.14);
+  --ink: #f6f5f3;
+  --ink-2: rgba(246, 245, 243, 0.72);
+  --ink-3: rgba(246, 245, 243, 0.45);
 }
 @media (max-width: 600px) {
   body.is-home .lg__manifesto { top: 85px; }

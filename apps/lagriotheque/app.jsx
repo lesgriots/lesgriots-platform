@@ -505,41 +505,11 @@ function Manifesto() {
         </div>
       </section>
 
-      {/* VISION — séquence "scroll-telling" : la section se FIGE quand elle
-          atteint le menu, puis au scroll 4 visages (vidéos) s'enchaînent en
-          fondu, puis elle repart vers le haut avec l'effet de menu.
-          Piste de scroll (track) tall → durée de la séquence. Médias éditables
-          via BO (home.vision_video / _video2 / _video3 / _video4). */}
-      <div className="lg__vision-track">
-        <section className="lg__vision">
-          <div className="lg__vision__media">
-            {[
-              text("home.vision_video", "img/hero.mp4"),
-              text("home.vision_video2", "img/hero.mp4"),
-              text("home.vision_video3", "img/hero.mp4"),
-              text("home.vision_video4", "img/hero.mp4"),
-            ].map((src, i) => (
-              <video
-                key={i}
-                className="lg__vision__face"
-                data-face={i}
-                src={src}
-                autoPlay
-                loop
-                muted
-                playsInline
-              />
-            ))}
-          </div>
-          <div className="lg__vision__overlay">
-            <h2 className="lg__vision__title">{text("home.vision_title", "nouveaux récits,\nnouveaux visages")}</h2>
-            <p className="lg__vision__text">{text("home.vision_text", "La vision de La Griothèque est de permettre l'émergence de nouveaux récits.")}</p>
-          </div>
-        </section>
-      </div>
-
       {/* LATEST — liste des formations à l'affiche, style YARD. L'onglet
-          Workshops n'apparaît que s'il y a au moins un workshop dispo. */}
+          Workshops n'apparaît que s'il y a au moins un workshop dispo.
+          Placée AVANT la section récits (fond noir) : elle remonte par-dessus
+          le manifeste, puis la section « nouveaux récits » remonte par-dessus
+          elle (cf. z-index dans styles.css). */}
       <section className="lg__latest">
         <div className="lg__latest__tabs">
           <span
@@ -584,6 +554,39 @@ function Manifesto() {
           ))}
         </div>
       </section>
+
+      {/* VISION — séquence "scroll-telling" : la section se FIGE quand elle
+          atteint le menu, puis au scroll 4 visages (vidéos) s'enchaînent en
+          overlap, puis elle repart vers le haut. Placée APRÈS les formations :
+          c'est le final de la home (z-index supérieur → passe par-dessus).
+          Médias éditables via BO (home.vision_video / _video2 / _video3 / _video4). */}
+      <div className="lg__vision-track">
+        <section className="lg__vision">
+          <div className="lg__vision__media">
+            {[
+              text("home.vision_video", "img/hero.mp4"),
+              text("home.vision_video2", "img/hero.mp4"),
+              text("home.vision_video3", "img/hero.mp4"),
+              text("home.vision_video4", "img/hero.mp4"),
+            ].map((src, i) => (
+              <video
+                key={i}
+                className="lg__vision__face"
+                data-face={i}
+                src={src}
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            ))}
+          </div>
+          <div className="lg__vision__overlay">
+            <h2 className="lg__vision__title">{text("home.vision_title", "nouveaux récits,\nnouveaux visages")}</h2>
+            <p className="lg__vision__text">{text("home.vision_text", "La vision de La Griothèque est de permettre l'émergence de nouveaux récits.")}</p>
+          </div>
+        </section>
+      </div>
     </>
   );
 }
@@ -4554,20 +4557,20 @@ function App() {
         if (menuTransparent) {
           topPx = 0; botPx = 0; // média direct derrière → tout blanc
         } else {
-          const vision = document.querySelector(".lg__vision");
-          const latest = document.querySelector(".lg__latest");
-          if (vision) {
-            const vr = vision.getBoundingClientRect();
-            if (vr.top < hH && vr.bottom > 0) {
-              const top = Math.max(0, Math.min(hH, vr.top));
-              let bot = hH;
-              if (latest) {
-                const lr = latest.getBoundingClientRect();
-                if (lr.top < hH) bot = Math.max(0, Math.min(hH, lr.top));
-              }
-              if (bot > top) { topPx = top; botPx = hH - bot; }
+          // Sections SOMBRES de la home (formations noires + section récits) :
+          // le texte du menu passe en blanc là où l'une d'elles est derrière le
+          // header. On calcule l'union de leurs zones dans la bande du header.
+          let covTop = hH, covBot = 0;
+          [".lg__latest", ".lg__vision"].forEach((sel) => {
+            const el = document.querySelector(sel);
+            if (!el) return;
+            const r = el.getBoundingClientRect();
+            if (r.top < hH && r.bottom > 0) {
+              covTop = Math.min(covTop, Math.max(0, Math.min(hH, r.top)));
+              covBot = Math.max(covBot, Math.max(0, Math.min(hH, r.bottom)));
             }
-          }
+          });
+          if (covBot > covTop) { topPx = covTop; botPx = hH - covBot; }
         }
         headerEl.style.setProperty("--vid-top", topPx + "px");
         headerEl.style.setProperty("--vid-bottom", botPx + "px");
