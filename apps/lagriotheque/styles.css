@@ -2525,6 +2525,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   font-weight: 700;
   font-size: clamp(28px, 4vw, 60px);
   line-height: 0.98;
+  white-space: pre-line; /* respecte le \n → deux lignes */
   letter-spacing: -0.03em;
   margin: 0 0 18px;
   max-width: 20ch;

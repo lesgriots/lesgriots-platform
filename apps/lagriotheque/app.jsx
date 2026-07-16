@@ -518,7 +518,7 @@ function Manifesto() {
           />
         </div>
         <div className="lg__vision__overlay">
-          <h2 className="lg__vision__title">{text("home.vision_title", "Nouveaux récits, nouveaux visages.")}</h2>
+          <h2 className="lg__vision__title">{text("home.vision_title", "nouveaux récits,\nnouveaux visages")}</h2>
           <p className="lg__vision__text">{text("home.vision_text", "La vision de La Griothèque est de permettre l'émergence de nouveaux récits.")}</p>
         </div>
       </section>
