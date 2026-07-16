@@ -2572,9 +2572,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   max-width: 1000px;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(26px, 3.3vw, 48px);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  font-size: clamp(30px, 4.2vw, 62px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
   color: #ffffff;
   opacity: 1;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
