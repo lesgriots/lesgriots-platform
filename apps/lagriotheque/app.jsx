@@ -1305,8 +1305,8 @@ function TrainersInline({ trainers }) {
               <button
                 type="button"
                 className="lg__trx__head"
-                onClick={() => setOpenId(isOpen ? null : key)}
-                onMouseMove={(e) => setCursor({ src: t.photo || "", name: t.name, x: e.clientX, y: e.clientY })}
+                onClick={() => { setCursor(null); setOpenId(isOpen ? null : key); }}
+                onMouseMove={(e) => { if (!isOpen) setCursor({ src: t.photo || "", name: t.name, x: e.clientX, y: e.clientY }); }}
                 onMouseLeave={() => setCursor(null)}
                 aria-expanded={isOpen}
               >
