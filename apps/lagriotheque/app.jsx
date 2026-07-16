@@ -1242,6 +1242,17 @@ function titleCaseName(s) {
   return s.toLowerCase().replace(/(^|[\s'’\-])(\p{L})/gu, (m, sep, ch) => sep + ch.toUpperCase());
 }
 
+// Initiales pour le placeholder photo ("Moos Coulibaly" → "MC").
+function trainerInitials(name) {
+  return (name || "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w.charAt(0))
+    .join("")
+    .toUpperCase();
+}
+
 function trainerFull(t) {
   const src = t || {};
   const full = (typeof TRAINERS !== "undefined" && TRAINERS.find((x) =>
@@ -1283,8 +1294,12 @@ function TrainersInline({ trainers }) {
               </button>
               {isOpen && (
                 <div className="lg__trx__panel">
-                  {t.photo && (
+                  {t.photo ? (
                     <img className="lg__trx__photo" src={t.photo} alt={t.name} loading="lazy" />
+                  ) : (
+                    <div className="lg__trx__photo lg__trx__photo--ph" aria-hidden="true">
+                      <span>{trainerInitials(t.name)}</span>
+                    </div>
                   )}
                   <div className="lg__trx__bio">
                     {t.role && <p className="lg__trx__role">{t.role}</p>}

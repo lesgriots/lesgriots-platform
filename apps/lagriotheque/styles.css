@@ -4175,6 +4175,19 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   object-fit: cover;
   flex: 0 0 auto;
 }
+.lg__trx__photo--ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  color: var(--paper);
+}
+.lg__trx__photo--ph span {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(30px, 4vw, 52px);
+  letter-spacing: 0.02em;
+}
 .lg__trx__bio { flex: 1 1 auto; min-width: 0; }
 .lg__trx__role {
   font-family: var(--font-sans);
