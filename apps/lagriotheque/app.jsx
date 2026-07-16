@@ -505,6 +505,9 @@ function Manifesto() {
             {text("home.hero_tagline_line2", "les outils pour bâtir leur récit")}<br />
             {text("home.hero_tagline_line3", "et vivre de leur passion.")}
           </p>
+          <a className="lg__hero-yard__cta" href="#/formations">
+            {text("home.hero_cta", "Voir les formations")}
+          </a>
         </div>
         <div className="lg__hero-yard__scrollhint" aria-hidden="true">
           ↓ scroll

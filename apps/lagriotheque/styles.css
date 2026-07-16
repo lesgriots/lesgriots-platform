@@ -2551,6 +2551,31 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   color: var(--paper);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
+/* CTA principal du hero (Chris Do : une action claire au-dessus de la ligne
+   de flottaison). Bouton blanc plein, texte sombre, inversion au survol. */
+.lg__hero-yard__cta {
+  pointer-events: auto;
+  display: inline-block;
+  margin-top: 28px;
+  padding: 14px 28px;
+  background: var(--paper);
+  color: #000;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(15px, 1.2vw, 18px);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  border: 1px solid var(--paper);
+  border-radius: 999px;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.lg__hero-yard__cta:hover {
+  background: transparent;
+  color: var(--paper);
+}
+@media (max-width: 700px) {
+  .lg__hero-yard__cta { margin-top: 20px; padding: 12px 22px; }
+}
 @media (max-width: 700px) {
   .lg__hero-yard { aspect-ratio: 4 / 5; max-height: none; }
   .lg__hero-yard__play { top: 16px; left: 16px; font-size: 10px; padding: 6px 10px; }
