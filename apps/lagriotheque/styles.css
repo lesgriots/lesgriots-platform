@@ -4084,7 +4084,12 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   display: flex;
   flex-direction: column;
   gap: 22px;
-  padding: 2px 0 28px;
+  /* Contenu déroulé encadré (le « carré ») au clic. */
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  padding: 22px 24px 26px;
+  margin: 0 0 16px;
+  background: var(--paper);
 }
 .lg__program__module {
   display: block;
