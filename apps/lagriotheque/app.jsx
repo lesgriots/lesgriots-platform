@@ -509,7 +509,7 @@ function Manifesto() {
           <p>
             {text(
               "home.hero_statement",
-              "Structure ton récit, trouve à qui le raconter, comment et avec quels outils."
+              "Structure ton récit, cible la bonne audience, maîtrise les bons outils."
             )}
           </p>
           <a className="lg__hero-yard__cta" href="#/formations">
