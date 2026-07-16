@@ -2083,7 +2083,7 @@ button {
   width: auto;
   position: sticky;
   top: 121px;
-  z-index: 30;
+  z-index: 42;
   background: var(--paper);
   border-bottom: 1px solid var(--ink);
   transition: font-size 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -3291,7 +3291,8 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__tabs {
   position: sticky;
   top: calc(121px + var(--lg-title-h, 80px));
-  z-index: 28;
+  /* Au-dessus de la carte de réservation pour que le trait reste continu. */
+  z-index: 41;
   margin: 0 -16px;
   /* Padding gauche aligné sur le titre (.lg__formation__title : padding-left
      16 avec la même marge -16 → décalage effectif 0). Gap vertical identique
