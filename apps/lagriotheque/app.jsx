@@ -559,8 +559,10 @@ function Manifesto() {
             </a>
           </p>
         </div>
-        {/* Onglets « nos formations / workshops » retirés à la demande de Moos.
-            La section affiche directement les formations + les filtres. */}
+        {/* Onglet workshops retiré ; on garde le libellé « Nos formations ». */}
+        <div className="lg__latest__label">
+          {text("home.latest_tab_formations", "Nos formations")}
+        </div>
         {/* Filtres par catégorie — mêmes tabs que la page Formations. */}
         {latestTab === "formations" && (
           <nav className="lg__cat-filters lg__latest__filters" aria-label="Filtrer par catégorie">
