@@ -2568,12 +2568,12 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 /* Eyebrow descriptif au-dessus de la phrase forte (situe l'école).
    Sélecteur renforcé pour battre .lg__hero-yard__tagline--quote p. */
 .lg__hero-yard__tagline .lg__hero-yard__eyebrow {
-  margin: 0 0 18px;
-  max-width: 560px;
+  margin: 0 0 20px;
+  max-width: 680px;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(14px, 1.25vw, 18px);
-  line-height: 1.35;
+  font-size: clamp(18px, 1.9vw, 27px);
+  line-height: 1.3;
   letter-spacing: -0.005em;
   color: var(--paper);
   opacity: 0.78;
