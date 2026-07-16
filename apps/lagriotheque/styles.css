@@ -1323,6 +1323,51 @@ button {
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 .lg__cta-mini__meta li:last-child { border-bottom: 0; }
+/* Bloc « Prochaine(s) session(s) » — plus lisible : label + date en évidence
+   + statut/places. */
+.lg__cta-mini__sessions {
+  margin: 0 0 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+.lg__cta-mini__sessions__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 10px;
+}
+.lg__cta-mini__sessions__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.lg__cta-mini__session {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.lg__cta-mini__session__date {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.lg__cta-mini__session__meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.lg__cta-mini__session__status.is-open { color: #1a7a3c; }
+.lg__cta-mini__session__places { color: var(--ink-3); }
 .lg__cta-mini__btn {
   display: block;
   background: var(--ink);

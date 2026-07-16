@@ -1921,8 +1921,30 @@ function ProgramPage({ item, kind }) {
           )}
           <ul className="lg__cta-mini__meta">
             {f.format && <li>{f.format}</li>}
-            {nextSession && <li>{sessionDateLabel(nextSession)}</li>}
           </ul>
+          {upcoming.length > 0 && (
+            <div className="lg__cta-mini__sessions">
+              <p className="lg__cta-mini__sessions__label">
+                {upcoming.length > 1 ? "Prochaines sessions" : "Prochaine session"}
+              </p>
+              <ul className="lg__cta-mini__sessions__list">
+                {upcoming.slice(0, 3).map((s) => {
+                  const st = normalizeStatus(s.status);
+                  return (
+                    <li key={s.id} className="lg__cta-mini__session">
+                      <span className="lg__cta-mini__session__date">{sessionDateLabel(s)}</span>
+                      <span className="lg__cta-mini__session__meta">
+                        <span className={"lg__cta-mini__session__status is-" + st.class}>{st.label}</span>
+                        {s.places && st.class === "open" && (
+                          <span className="lg__cta-mini__session__places">· {s.places} place{Number(s.places) > 1 ? "s" : ""}</span>
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
           <a
             className="lg__cta-mini__btn"
             href={ctaHref(item, nextSession)}
