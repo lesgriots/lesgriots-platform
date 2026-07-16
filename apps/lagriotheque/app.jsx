@@ -1261,7 +1261,7 @@ function trainerFull(t) {
   return {
     id: src.id || full.id || src.name || "",
     name: titleCaseName(src.name || full.name || ""),
-    role: src.role || full.role || "",
+    role: titleCaseName(src.role || full.role || ""),
     bio: full.bio || src.bio || "",
     photo: full.photo || src.photo || "",
   };

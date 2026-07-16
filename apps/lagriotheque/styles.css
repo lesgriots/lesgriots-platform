@@ -4214,9 +4214,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 .lg__trx__bio { flex: 1 1 auto; min-width: 0; max-width: 68ch; }
 .lg__trx__role {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.02em;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  letter-spacing: -0.005em;
   color: var(--ink-3);
   margin: 0 0 8px;
 }
