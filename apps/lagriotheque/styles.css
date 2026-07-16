@@ -934,8 +934,10 @@ button {
 /* ----- PAGE FORMATION (détail) -------------------------------- */
 
 .lg__formation {
-  width: 100vw;
+  /* Full-bleed robuste : marges négatives symétriques (au lieu de width:100vw)
+     → pas de décalage/gap à droite causé par la barre de défilement. */
   margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
   padding: 30px 16px 60px;
 }
 
