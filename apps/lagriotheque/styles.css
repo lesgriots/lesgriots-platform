@@ -2518,11 +2518,13 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   height: 100%;
   object-fit: cover;
   display: block;
-  opacity: 0;
-  transition: opacity 0.25s linear;
-  will-change: opacity;
+  will-change: transform;
 }
-.lg__vision__face[data-face="0"] { opacity: 1; }
+/* Chaque visage suivant passe PAR-DESSUS le précédent (overlap) : z-index
+   croissant, et il glisse depuis le bas (translateY piloté en JS). */
+.lg__vision__face[data-face="1"] { z-index: 1; }
+.lg__vision__face[data-face="2"] { z-index: 2; }
+.lg__vision__face[data-face="3"] { z-index: 3; }
 /* PLACEHOLDER : les 4 visages pointent sur hero.mp4 → on les différencie par un
    filtre pour DÉMONTRER la séquence. À RETIRER dès que tu fournis 4 vraies
    vidéos distinctes (home.vision_video / _video2 / _video3 / _video4). */
@@ -2537,7 +2539,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 .lg__vision__overlay {
   position: relative;
-  z-index: 2;
+  z-index: 10; /* au-dessus des visages (z 1→3) qui glissent par-dessus */
   width: 100%;
   /* Collé à la gouttière gauche (plus à gauche) au lieu d'être centré dans
      un conteneur de 1400px. */

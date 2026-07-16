@@ -4580,9 +4580,14 @@ function App() {
         const tr = visionTrack.getBoundingClientRect();
         const scrollable = visionTrack.offsetHeight - window.innerHeight;
         const prog = scrollable > 0 ? Math.max(0, Math.min(1, (-tr.top) / scrollable)) : 0;
-        const f = prog * (faces.length - 1);
+        const n = faces.length;
+        const seg = 1 / (n - 1);
+        // Chaque visage (sauf le 1er) glisse depuis le bas (translateY 100%→0)
+        // pendant son segment de scroll → il recouvre le précédent (overlap).
         faces.forEach((face, i) => {
-          face.style.opacity = String(Math.max(0, Math.min(1, 1 - Math.abs(f - i))));
+          if (i === 0) { face.style.transform = "translateY(0)"; return; }
+          const local = Math.max(0, Math.min(1, (prog - (i - 1) * seg) / seg));
+          face.style.transform = "translateY(" + ((1 - local) * 100).toFixed(2) + "%)";
         });
       }
       // Positionne la "plaque" (rideau papier unique qui recouvre la vidéo au
