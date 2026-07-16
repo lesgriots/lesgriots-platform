@@ -1231,6 +1231,51 @@ function DownloadModal({ item, onClose }) {
   );
 }
 
+// Programme en accordéon : chaque jour est replié par défaut (le 1er ouvert),
+// se déroule au clic. Évite un mur de contenu quand tout est affiché d'un coup.
+function ProgramAccordion({ program }) {
+  const [openDay, setOpenDay] = React.useState(0);
+  return (
+    <div className="lg__program lg__program--accordion">
+      {program.map((d, i) => {
+        const isOpen = openDay === i;
+        return (
+          <div key={i} className={"lg__program__day" + (isOpen ? " is-open" : "")}>
+            <button
+              type="button"
+              className="lg__program__day__head"
+              onClick={() => setOpenDay(isOpen ? null : i)}
+              aria-expanded={isOpen}
+            >
+              <span className="lg__program__day__tag">{d.day}</span>
+              <span className="lg__program__day__toggle" aria-hidden="true">{isOpen ? "−" : "+"}</span>
+            </button>
+            {isOpen && (
+              <div className="lg__program__day__body">
+                {d.modules && d.modules.map((m, j) => (
+                  <div key={j} className="lg__program__module">
+                    <h4 className="lg__program__module__title">{m.title}</h4>
+                    <ul className="lg__program__items">
+                      {m.items.map((it, k) => <li key={k}>{it}</li>)}
+                    </ul>
+                  </div>
+                ))}
+                {d.exercises && d.exercises.length > 0 && (
+                  <ul className="lg__program__exercises">
+                    {d.exercises.map((ex, k) => (
+                      <li key={k}><span className="lg__program__plus">+ </span>Exercice : {ex}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function ProgramPage({ item, kind }) {
   const titleRef = useFitOne(160);
   const titleSentinelRef = useRef(null);
@@ -1380,7 +1425,6 @@ function ProgramPage({ item, kind }) {
         ...((item.cpf || item.rs)
           ? [{ id: "certification", label: "Certification", sections: ["certification"] }]
           : []),
-        { id: "griotheque", label: "La Griothèque", sections: ["griotheque", "indicateurs"] },
         {
           id: "financement",
           label: "Financement",
@@ -1540,28 +1584,7 @@ function ProgramPage({ item, kind }) {
           title: "Programme",
           body:
             f.program && f.program.length > 0 ? (
-              <div className="lg__program">
-                {f.program.map((d, i) => (
-                  <div key={i} className="lg__program__day">
-                    <span className="lg__program__day__tag">{d.day}</span>
-                    {d.modules && d.modules.map((m, j) => (
-                      <div key={j} className="lg__program__module">
-                        <h4 className="lg__program__module__title">{m.title}</h4>
-                        <ul className="lg__program__items">
-                          {m.items.map((it, k) => <li key={k}>{it}</li>)}
-                        </ul>
-                      </div>
-                    ))}
-                    {d.exercises && d.exercises.length > 0 && (
-                      <ul className="lg__program__exercises">
-                        {d.exercises.map((ex, k) => (
-                          <li key={k}><span className="lg__program__plus">+ </span>Exercice : {ex}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <ProgramAccordion program={f.program} />
             ) : f.chapters && f.chapters.length > 0 ? (
               <ol>
                 {f.chapters.map((c, i) => (

@@ -4029,6 +4029,63 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 @media (max-width: 900px) {
   .lg__program { grid-template-columns: 1fr; }
 }
+
+/* Variante ACCORDÉON : liste verticale de jours repliables (pas de grille de
+   cartes). Chaque jour = un en-tête cliquable (titre + toggle) qui déroule
+   son contenu en dessous. */
+.lg__program--accordion {
+  display: block;
+}
+.lg__program--accordion .lg__program__day {
+  position: static;
+  border: 0;
+  border-top: 1px solid var(--ink);
+  border-radius: 0;
+  padding: 0;
+  gap: 0;
+  display: block;
+  background: transparent;
+}
+.lg__program--accordion .lg__program__day:last-child {
+  border-bottom: 1px solid var(--ink);
+}
+.lg__program__day__head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  color: var(--ink);
+}
+.lg__program--accordion .lg__program__day__tag {
+  position: static;
+  top: auto;
+  right: auto;
+  border-bottom: 0;
+  padding-bottom: 0;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(19px, 2.1vw, 27px);
+  letter-spacing: -0.01em;
+}
+.lg__program__day__toggle {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+.lg__program__day__body {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 2px 0 28px;
+}
 .lg__program__module {
   display: block;
 }
