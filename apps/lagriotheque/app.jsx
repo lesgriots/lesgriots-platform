@@ -1271,7 +1271,6 @@ function TrainerXLRow({ t }) {
   const nameRef = useMarqueeOverflow([t.name]);
   return (
     <li className="lg__trx__row">
-      <p className="lg__trx__label">FORMATEUR · 2026</p>
       <h3 className="lg__trx__name" ref={nameRef}>
         <span className="lg__marquee__inner">{t.name}</span>
       </h3>
