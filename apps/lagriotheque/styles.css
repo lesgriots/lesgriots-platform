@@ -2570,21 +2570,20 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   position: relative;
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  height: 400vh;
 }
+/* Bannière vidéo compacte et cinématique (façon VSCO « PURE PHOTOGRAPHY ») :
+   une seule vidéo, ratio large, texte en bas à gauche. Elle remonte par-dessus
+   les formations (overlap) grâce au z-index de .lg__vision-track. */
 .lg__vision {
-  position: sticky;
-  top: 0;
+  position: relative;
   width: 100%;
-  height: 100vh;
+  aspect-ratio: 12 / 5; /* ~2,4:1, banner cinématique */
   overflow: hidden;
   background: var(--ink);
   display: flex;
   align-items: flex-end;
 }
 .lg__vision__media { position: absolute; inset: 0; }
-/* Chaque visage : vidéo plein cadre superposée, révélée en fondu au scroll
-   (opacité pilotée en JS). La première est visible par défaut. */
 .lg__vision__face {
   position: absolute;
   inset: 0;
@@ -2592,19 +2591,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   height: 100%;
   object-fit: cover;
   display: block;
-  will-change: transform;
 }
-/* Chaque visage suivant passe PAR-DESSUS le précédent (overlap) : z-index
-   croissant, et il glisse depuis le bas (translateY piloté en JS). */
-.lg__vision__face[data-face="1"] { z-index: 1; }
-.lg__vision__face[data-face="2"] { z-index: 2; }
-.lg__vision__face[data-face="3"] { z-index: 3; }
-/* PLACEHOLDER : les 4 visages pointent sur hero.mp4 → on les différencie par un
-   filtre pour DÉMONTRER la séquence. À RETIRER dès que tu fournis 4 vraies
-   vidéos distinctes (home.vision_video / _video2 / _video3 / _video4). */
-.lg__vision__face[data-face="1"] { filter: grayscale(1) contrast(1.05); }
-.lg__vision__face[data-face="2"] { filter: sepia(0.7) saturate(1.4) hue-rotate(160deg); }
-.lg__vision__face[data-face="3"] { filter: grayscale(1) brightness(1.3) contrast(1.2); }
 .lg__vision__media::after {
   content: "";
   position: absolute;
@@ -2642,8 +2629,8 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   color: #fff;
 }
 @media (max-width: 700px) {
-  .lg__vision { height: 100svh; }
-  .lg__vision__overlay { padding: 0 18px 10vh; }
+  .lg__vision { aspect-ratio: 4 / 5; } /* plus haut en mobile */
+  .lg__vision__overlay { padding: 0 18px 8vh; }
 }
 
 .lg__latest {

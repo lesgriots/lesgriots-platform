@@ -623,31 +623,22 @@ function Manifesto() {
         </div>
       </section>
 
-      {/* VISION — séquence "scroll-telling" : la section se FIGE quand elle
-          atteint le menu, puis au scroll 4 visages (vidéos) s'enchaînent en
-          overlap, puis elle repart vers le haut. Placée APRÈS les formations :
-          c'est le final de la home (z-index supérieur → passe par-dessus).
-          Médias éditables via BO (home.vision_video / _video2 / _video3 / _video4). */}
+      {/* VISION — bannière vidéo compacte et cinématique (façon VSCO « PURE
+          PHOTOGRAPHY. SERIOUS BUSINESS »). Une seule vidéo, texte en bas à
+          gauche. Placée APRÈS les formations : elle remonte par-dessus (overlap,
+          z-index supérieur). Vidéo éditable via BO (home.vision_video). */}
       <div className="lg__vision-track">
         <section className="lg__vision">
           <div className="lg__vision__media">
-            {[
-              text("home.vision_video", "img/hero.mp4"),
-              text("home.vision_video2", "img/hero.mp4"),
-              text("home.vision_video3", "img/hero.mp4"),
-              text("home.vision_video4", "img/hero.mp4"),
-            ].map((src, i) => (
-              <video
-                key={i}
-                className="lg__vision__face"
-                data-face={i}
-                src={src}
-                autoPlay
-                loop
-                muted
-                playsInline
-              />
-            ))}
+            <video
+              className="lg__vision__face"
+              data-face={0}
+              src={text("home.vision_video", "img/hero.mp4")}
+              autoPlay
+              loop
+              muted
+              playsInline
+            />
           </div>
           <div className="lg__vision__overlay">
             <h2 className="lg__vision__title">{text("home.vision_title", "nouveaux récits,\nnouveaux visages")}</h2>
@@ -4655,24 +4646,6 @@ function App() {
         }
         headerEl.style.setProperty("--vid-top", topPx + "px");
         headerEl.style.setProperty("--vid-bottom", botPx + "px");
-      }
-      // Séquence de visages : fondu enchaîné entre les vidéos selon la
-      // progression du scroll dans la piste (pendant que la section est figée).
-      const visionTrack = document.querySelector(".lg__vision-track");
-      const faces = document.querySelectorAll(".lg__vision__face");
-      if (visionTrack && faces.length > 1) {
-        const tr = visionTrack.getBoundingClientRect();
-        const scrollable = visionTrack.offsetHeight - window.innerHeight;
-        const prog = scrollable > 0 ? Math.max(0, Math.min(1, (-tr.top) / scrollable)) : 0;
-        const n = faces.length;
-        const seg = 1 / (n - 1);
-        // Chaque visage (sauf le 1er) glisse depuis le bas (translateY 100%→0)
-        // pendant son segment de scroll → il recouvre le précédent (overlap).
-        faces.forEach((face, i) => {
-          if (i === 0) { face.style.transform = "translateY(0)"; return; }
-          const local = Math.max(0, Math.min(1, (prog - (i - 1) * seg) / seg));
-          face.style.transform = "translateY(" + ((1 - local) * 100).toFixed(2) + "%)";
-        });
       }
       // Positionne la "plaque" (rideau papier unique qui recouvre la vidéo au
       // scroll, cf. .lg__catalogue::after) juste sous le hero. Mesuré en JS
