@@ -2496,10 +2496,11 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   z-index: 1;
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  aspect-ratio: 16 / 9;
-  /* Assez haute pour que, quand elle est calée en haut, le footer ne dépasse
-     pas en bas (le bloc "latest" en dessous est court). */
-  max-height: 76vh;
+  /* Hauteur = viewport moins le bloc "latest" (~436px) + marge : garantit que,
+     quand la section se cale en haut, le footer ne dépasse pas en bas — sur
+     TOUTES les tailles d'écran (l'aspect-ratio plafonnait trop sur écran haut). */
+  height: calc(100vh - 360px);
+  min-height: 440px;
   overflow: hidden;
   background: var(--ink);
   display: flex;
@@ -2544,7 +2545,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   color: #fff;
 }
 @media (max-width: 700px) {
-  .lg__vision { aspect-ratio: 4 / 5; max-height: 56vh; }
+  .lg__vision { height: auto; aspect-ratio: 4 / 5; max-height: 56vh; min-height: 0; }
   .lg__vision__overlay { padding: 0 18px 10vh; }
 }
 
