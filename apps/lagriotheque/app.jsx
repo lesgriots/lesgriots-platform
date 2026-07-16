@@ -1272,8 +1272,19 @@ function trainerFull(t) {
 function TrainersInline({ trainers }) {
   const list = (Array.isArray(trainers) ? trainers : [trainers]).filter(Boolean).map(trainerFull);
   const [openId, setOpenId] = React.useState(null);
+  // Photo qui suit le curseur au survol (noir & blanc). { src, x, y } | null.
+  const [cursor, setCursor] = React.useState(null);
   return (
     <div className="lg__trx">
+      {cursor && (
+        <img
+          className="lg__trx__cursorimg"
+          src={cursor.src}
+          alt=""
+          aria-hidden="true"
+          style={{ left: cursor.x + "px", top: cursor.y + "px" }}
+        />
+      )}
       <ul className="lg__trx__list">
         {list.map((t, i) => {
           const key = t.id || i;
@@ -1285,6 +1296,8 @@ function TrainersInline({ trainers }) {
                 type="button"
                 className="lg__trx__head"
                 onClick={() => setOpenId(isOpen ? null : key)}
+                onMouseMove={(e) => { if (t.photo) setCursor({ src: t.photo, x: e.clientX, y: e.clientY }); }}
+                onMouseLeave={() => setCursor(null)}
                 aria-expanded={isOpen}
               >
                 <span className="lg__trx__name">{t.name}</span>

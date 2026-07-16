@@ -4163,6 +4163,22 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   align-items: flex-start;
   padding: 4px 0 32px;
 }
+/* Photo qui suit le curseur au survol du nom : noir & blanc, centrée sur la
+   souris. Au clic (panneau ouvert), la photo .lg__trx__photo reste en couleur. */
+.lg__trx__cursorimg {
+  position: fixed;
+  width: clamp(150px, 15vw, 200px);
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 60;
+  filter: grayscale(1) contrast(1.04);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.38);
+}
+@media (max-width: 700px) {
+  .lg__trx__cursorimg { display: none; }
+}
 .lg__trx__photo {
   width: clamp(140px, 17vw, 200px);
   aspect-ratio: 3 / 4;
