@@ -547,7 +547,7 @@ function Manifesto() {
             Éditable via BO (home.formations_heading / _lede). */}
         <div className="lg__latest__intro">
           <h2 className="lg__latest__heading">
-            {text("home.formations_heading", "Les outils pour bâtir ton récit")}
+            {text("home.formations_heading", "Nos formations")}
           </h2>
           <p className="lg__latest__lede">
             {text(
@@ -558,10 +558,6 @@ function Manifesto() {
               {text("home.formations_lede_link", "Trouve la formation faite pour toi.")}
             </a>
           </p>
-        </div>
-        {/* Onglet workshops retiré ; on garde le libellé « Nos formations ». */}
-        <div className="lg__latest__label">
-          {text("home.latest_tab_formations", "Nos formations")}
         </div>
         {/* Filtres par catégorie — mêmes tabs que la page Formations. */}
         {latestTab === "formations" && (

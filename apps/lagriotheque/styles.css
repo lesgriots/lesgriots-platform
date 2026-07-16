@@ -2234,21 +2234,6 @@ body.is-home .lg__latest {
 }
 /* Rows « à la page Formations » dans la section noire de la home : alignées à
    gauche (la section .lg__latest est centrée pour ses onglets). */
-/* Libellé « Nos formations » au-dessus des filtres (section noire home). */
-.lg__latest__label {
-  text-align: left;
-  padding-left: 24px;
-  margin-bottom: 18px;
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 17px;
-  letter-spacing: -0.01em;
-  text-transform: lowercase;
-  color: var(--ink);
-}
-@media (max-width: 700px) {
-  .lg__latest__label { padding-left: 14px; font-size: 14px; }
-}
 .lg__latest__rows { text-align: left; margin-top: 8px; }
 .lg__latest__rows .lg__row:first-child { border-top: none; }
 /* Pas de bordure basse sur la dernière formation : la section récits (vidéo)
