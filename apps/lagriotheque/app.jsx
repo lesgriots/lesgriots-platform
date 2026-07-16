@@ -565,29 +565,9 @@ function Manifesto() {
             </a>
           </p>
         </div>
-        <div className="lg__latest__tabs">
-          <span
-            className={latestTab === "formations" ? "is-active" : ""}
-            role="button"
-            tabIndex={0}
-            style={{ cursor: "pointer", color: latestTab === "formations" ? undefined : "var(--ink-3)" }}
-            onClick={() => setLatestTab("formations")}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLatestTab("formations"); } }}
-          >{text("home.latest_tab_formations", "Nos formations")}</span>
-          {typeof WORKSHOPS !== "undefined" && WORKSHOPS.some((w) => w.available) && (
-            <span
-              className={latestTab === "workshops" ? "is-active" : ""}
-              role="button"
-              tabIndex={0}
-              style={{ cursor: "pointer", color: latestTab === "workshops" ? undefined : "var(--ink-3)" }}
-              onClick={() => setLatestTab("workshops")}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLatestTab("workshops"); } }}
-            >{text("home.latest_tab_workshops", "Workshops")}</span>
-          )}
-        </div>
-        {/* Filtres par catégorie — mêmes tabs que la page Formations. Affichés
-            uniquement sur l'onglet formations (les workshops n'ont pas de
-            catégories). */}
+        {/* Onglets « nos formations / workshops » retirés à la demande de Moos.
+            La section affiche directement les formations + les filtres. */}
+        {/* Filtres par catégorie — mêmes tabs que la page Formations. */}
         {latestTab === "formations" && (
           <nav className="lg__cat-filters lg__latest__filters" aria-label="Filtrer par catégorie">
             <button
