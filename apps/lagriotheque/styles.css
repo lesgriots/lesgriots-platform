@@ -4135,9 +4135,8 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__trx__label {
   display: block;
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.02em;
   color: var(--ink-3);
   margin-bottom: 8px;
 }
