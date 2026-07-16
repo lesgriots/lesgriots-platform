@@ -391,6 +391,28 @@ function Manifesto() {
   // Onglet actif de la section "LATEST" : formations (défaut) ou workshops.
   // Cliquer "Workshops" affiche la liste juste en dessous, sans changer de page.
   const [latestTab, setLatestTab] = useState("formations");
+  // Filtre catégorie de la section formations (home) — même logique que la
+  // page Formations (Catalogue) : "all" / catégorie / "archives".
+  const [homeCat, setHomeCat] = useState("all");
+  const homeCategories = React.useMemo(() => {
+    const set = new Set();
+    FORMATIONS.forEach((f) => {
+      const cat = (f.discipline || "").split(" · ")[0].trim();
+      if (cat) set.add(cat);
+    });
+    return Array.from(set);
+  }, []);
+  const homeArchivedCount = FORMATIONS.filter((f) => f.available === false).length;
+  const homeVisibleFormations =
+    homeCat === "archives"
+      ? FORMATIONS.filter((f) => f.available === false)
+      : homeCat === "all"
+        ? FORMATIONS.filter((f) => f.available !== false)
+        : FORMATIONS.filter(
+            (f) =>
+              f.available !== false &&
+              (f.discipline || "").split(" · ")[0].trim() === homeCat
+          );
   const heroVideoRef = useRef(null);
 
   // Bouton "plein écran" : passe la vidéo en fullscreen avec controls + son
@@ -531,6 +553,44 @@ function Manifesto() {
             >{text("home.latest_tab_workshops", "Workshops")}</span>
           )}
         </div>
+        {/* Filtres par catégorie — mêmes tabs que la page Formations. Affichés
+            uniquement sur l'onglet formations (les workshops n'ont pas de
+            catégories). */}
+        {latestTab === "formations" && (
+          <nav className="lg__cat-filters lg__latest__filters" aria-label="Filtrer par catégorie">
+            <button
+              type="button"
+              className={"lg__cat-filters__btn" + (homeCat === "all" ? " is-active" : "")}
+              onClick={() => setHomeCat("all")}
+            >
+              Tous <span className="lg__cat-filters__count">({FORMATIONS.filter((f) => f.available !== false).length})</span>
+            </button>
+            {homeCategories.map((cat) => {
+              const count = FORMATIONS.filter(
+                (f) => f.available !== false && (f.discipline || "").split(" · ")[0].trim() === cat
+              ).length;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  className={"lg__cat-filters__btn" + (homeCat === cat ? " is-active" : "")}
+                  onClick={() => setHomeCat(cat)}
+                >
+                  {cat.toLowerCase()} <span className="lg__cat-filters__count">({count})</span>
+                </button>
+              );
+            })}
+            {homeArchivedCount > 0 && (
+              <button
+                type="button"
+                className={"lg__cat-filters__btn lg__cat-filters__btn--archives" + (homeCat === "archives" ? " is-active" : "")}
+                onClick={() => setHomeCat("archives")}
+              >
+                archives <span className="lg__cat-filters__count">({homeArchivedCount})</span>
+              </button>
+            )}
+          </nav>
+        )}
         {/* Présentation identique à la page Formations : label + grand titre
             (composants FormationRow / WorkshopRow, conteneur .lg__rows). */}
         <div className="lg__rows lg__latest__rows">
@@ -538,9 +598,12 @@ function Manifesto() {
             ? WORKSHOPS.filter((w) => w.available).map((w) => (
                 <WorkshopRow key={w.id} w={w} />
               ))
-            : FORMATIONS.filter((f) => f.available).map((f) => (
+            : homeVisibleFormations.map((f) => (
                 <FormationRow key={f.id} f={f} />
               ))}
+          {latestTab === "formations" && homeVisibleFormations.length === 0 && (
+            <p className="lg__cat-empty">Aucune formation dans cette catégorie pour le moment.</p>
+          )}
         </div>
       </section>
 
