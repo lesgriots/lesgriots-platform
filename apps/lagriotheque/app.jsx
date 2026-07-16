@@ -1955,9 +1955,10 @@ function ProgramPage({ item, kind }) {
           {kind !== "workshop" && f.cpf && (
             <button
               type="button"
-              className="lg__cta-mini__btn"
+              className="lg__cta-mini__btn lg__cta-mini__btn--cpf"
               onClick={() => setCpfOpen(true)}
             >
+              <img className="lg__cpflogo" src="img/moncompteformation.webp" alt="" aria-hidden="true" />
               S'inscrire via Mon Compte Formation
             </button>
           )}
@@ -2158,6 +2159,7 @@ function FormationDetail({ id, onClose }) {
               href={f.cpfUrl}
               target="_blank"
               rel="noopener noreferrer">
+              <img className="lg__cpflogo" src="img/moncompteformation.webp" alt="" aria-hidden="true" />
               S'INSCRIRE VIA MON COMPTE FORMATION →
             </a>
           )}

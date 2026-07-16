@@ -1387,6 +1387,27 @@ button {
   color: var(--ink);
   outline: 1px solid var(--ink);
 }
+/* Bouton Mon Compte Formation : logo + texte alignés. */
+.lg__cta-mini__btn--cpf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.lg__btn--cpf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.lg__cpflogo {
+  height: 22px;
+  width: auto;
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
 /* Variante "ghost" du bouton CTA dans la carte : fond clair, contour. */
 .lg__cta-mini__btn--ghost {
   background: var(--paper);
