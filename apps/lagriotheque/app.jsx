@@ -1370,9 +1370,8 @@ function ProgramPage({ item, kind }) {
         {
           id: "presentation",
           label: "Description",
-          sections: ["description", "public", "prerequis"],
+          sections: ["description", "objectifs", "public", "prerequis"],
         },
-        { id: "objectifs", label: "Objectifs", sections: ["objectifs"] },
         {
           id: "programme",
           label: "Programme",
