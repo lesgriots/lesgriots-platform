@@ -2562,12 +2562,27 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 @media (max-width: 700px) {
   .lg__hero-yard__tagline--quote p { font-size: clamp(21px, 6vw, 30px); max-width: none; }
 }
+/* Sous-titre concret du hero (façon VSCO : bénéfices en une phrase).
+   Sélecteur renforcé pour battre .lg__hero-yard__tagline--quote p. */
+.lg__hero-yard__tagline .lg__hero-yard__sub {
+  pointer-events: auto;
+  margin: 20px 0 0;
+  max-width: 560px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(16px, 1.5vw, 21px);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--paper);
+  opacity: 0.9;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+}
 /* CTA principal du hero (Chris Do : une action claire au-dessus de la ligne
    de flottaison). Bouton blanc plein, texte sombre, inversion au survol. */
 .lg__hero-yard__cta {
   pointer-events: auto;
   display: inline-block;
-  margin-top: 28px;
+  margin-top: 24px;
   padding: 14px 28px;
   background: var(--paper);
   color: #000;
