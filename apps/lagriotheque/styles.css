@@ -1387,26 +1387,29 @@ button {
   color: var(--ink);
   outline: 1px solid var(--ink);
 }
-/* Bouton Mon Compte Formation : logo + texte alignés. */
-.lg__cta-mini__btn--cpf {
+/* Encart « Mon Compte Formation » en bas de la carte : logo + mention. */
+.lg__cta-mini__cpfbox {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  background: var(--paper);
 }
-.lg__btn--cpf {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-.lg__cpflogo {
-  height: 22px;
-  width: auto;
-  display: inline-block;
-  vertical-align: middle;
-  border-radius: 3px;
+.lg__cta-mini__cpfbox__logo {
+  height: 42px;
+  width: 42px;
+  object-fit: contain;
   flex: 0 0 auto;
+  border-radius: 4px;
+}
+.lg__cta-mini__cpfbox__text {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink-2);
 }
 /* Variante "ghost" du bouton CTA dans la carte : fond clair, contour. */
 .lg__cta-mini__btn--ghost {

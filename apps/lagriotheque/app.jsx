@@ -1955,10 +1955,9 @@ function ProgramPage({ item, kind }) {
           {kind !== "workshop" && f.cpf && (
             <button
               type="button"
-              className="lg__cta-mini__btn lg__cta-mini__btn--cpf"
+              className="lg__cta-mini__btn"
               onClick={() => setCpfOpen(true)}
             >
-              <img className="lg__cpflogo" src="img/moncompteformation.webp" alt="" aria-hidden="true" />
               S'inscrire via Mon Compte Formation
             </button>
           )}
@@ -1975,6 +1974,16 @@ function ProgramPage({ item, kind }) {
           >
             Étudier un financement
           </a>
+          {kind !== "workshop" && f.cpf && (
+            <div className="lg__cta-mini__cpfbox">
+              <img
+                className="lg__cta-mini__cpfbox__logo"
+                src="img/moncompteformation.webp"
+                alt="Mon Compte Formation"
+              />
+              <span className="lg__cta-mini__cpfbox__text">Finançable avec ton Compte Personnel de Formation</span>
+            </div>
+          )}
         </div>
       </aside>
       </div>{/* /.lg__formation__layout */}
@@ -2159,7 +2168,6 @@ function FormationDetail({ id, onClose }) {
               href={f.cpfUrl}
               target="_blank"
               rel="noopener noreferrer">
-              <img className="lg__cpflogo" src="img/moncompteformation.webp" alt="" aria-hidden="true" />
               S'INSCRIRE VIA MON COMPTE FORMATION →
             </a>
           )}
