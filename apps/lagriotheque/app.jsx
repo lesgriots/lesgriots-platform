@@ -1235,13 +1235,20 @@ function DownloadModal({ item, onClose }) {
 // photo qui apparaît au survol (portrait flottant), et bio + rôle qui se
 // déroulent au clic. Les infos complètes (bio, photo) sont résolues depuis
 // TRAINERS (l'export ne met que name+role sur f.trainer).
+// Repasse un nom TOUT EN MAJUSCULES en casse titre ("MOOS COULIBALY" →
+// "Moos Coulibaly"). Laisse intact un nom déjà correctement casé.
+function titleCaseName(s) {
+  if (!s || s !== s.toUpperCase()) return s;
+  return s.toLowerCase().replace(/(^|[\s'’\-])(\p{L})/gu, (m, sep, ch) => sep + ch.toUpperCase());
+}
+
 function trainerFull(t) {
   const src = t || {};
   const full = (typeof TRAINERS !== "undefined" && TRAINERS.find((x) =>
     x.id === src.id || (x.name || "").toUpperCase() === (src.name || "").toUpperCase())) || {};
   return {
     id: src.id || full.id || src.name || "",
-    name: src.name || full.name || "",
+    name: titleCaseName(src.name || full.name || ""),
     role: src.role || full.role || "",
     bio: full.bio || src.bio || "",
     photo: full.photo || src.photo || "",
