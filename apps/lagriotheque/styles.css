@@ -2208,7 +2208,14 @@ body.is-home .lg__manifesto {
    vidéo soit continue sous le menu devenu transparent (pas de raccord avec le
    hero). Les formations (z-index supérieur) remontent ensuite par-dessus. */
 body.is-home .lg__latest {
+  /* Se FIGE sous le menu quand elle l'atteint → la section récits (z-index
+     supérieur) remonte ensuite PAR-DESSUS (overlap). */
+  position: sticky;
+  top: 121px;
   z-index: 46; /* AU-DESSUS de la plaque papier du menu (z-index 45) : remonte par-dessus le manifeste */
+}
+@media (max-width: 600px) {
+  body.is-home .lg__latest { top: 85px; }
 }
 body.is-home .lg__vision-track {
   position: relative;
