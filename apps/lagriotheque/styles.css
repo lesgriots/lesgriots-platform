@@ -2706,7 +2706,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   position: relative;
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  padding: 80px 16px 80px;
+  padding: 40px 16px 80px;
   text-align: center;
   background: var(--paper);
   border-top: 1px solid var(--ink);
