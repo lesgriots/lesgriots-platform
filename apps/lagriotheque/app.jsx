@@ -1242,6 +1242,8 @@ function ProgramPage({ item, kind }) {
   const [pastVideo, setPastVideo] = useState(false);
   const [activeTab, setActiveTab] = useState("presentation");
   const [titleStuck, setTitleStuck] = useState(false);
+  // Ouvre la modale d'inscription (capture lead → /api/leads → email/Qualiopi).
+  const [showInscription, setShowInscription] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [cpfOpen, setCpfOpen] = useState(false);
   const tabContentRef = useRef(null);
@@ -2104,13 +2106,24 @@ function FormationDetail({ id, onClose }) {
               S'INSCRIRE VIA MON COMPTE FORMATION →
             </a>
           )}
-          <a className={"lg__btn" + (f.cpf && f.cpfUrl ? "" : " lg__btn--primary")} href="mailto:formations@lesgriots.com?subject=Inscription%20%E2%80%94%20{title}">
+          <button
+            type="button"
+            className={"lg__btn" + (f.cpf && f.cpfUrl ? "" : " lg__btn--primary")}
+            onClick={() => setShowInscription(true)}
+          >
             DEMANDER UNE INSCRIPTION
-          </a>
+          </button>
           <a className="lg__btn" href="mailto:formations@lesgriots.com?subject=Devis%20CPF%2FOPCO">
             ÉTUDIER UN FINANCEMENT
           </a>
         </div>
+        {showInscription && (
+          <InscriptionModal
+            target={{ id: f.id, title: f.title }}
+            kind={kind}
+            onClose={() => setShowInscription(false)}
+          />
+        )}
       </div>
     </div>
   );
@@ -2964,6 +2977,7 @@ function AgendaRow({ s, item, isOpen, onToggle }) {
   const detailHref = isWorkshop
     ? (targetId ? `#/workshops/${targetId}` : "#/workshops")
     : (targetId ? `#/formations/${targetId}` : "#/catalogue");
+  const [showInscription, setShowInscription] = React.useState(false);
 
   return (
     <div className={"lg__ag" + (isOpen ? " is-open" : "") + " is-" + status.class}>
@@ -3015,15 +3029,26 @@ function AgendaRow({ s, item, isOpen, onToggle }) {
           )}
           <div className="lg__ag__actions">
             {status.class === "open" && (
-              <a href={mailto} className="lg__ag__btn lg__ag__btn--primary">
+              <button
+                type="button"
+                className="lg__ag__btn lg__ag__btn--primary"
+                onClick={() => setShowInscription(true)}
+              >
                 ↓ Réserver
-              </a>
+              </button>
             )}
             <a href={detailHref} className="lg__ag__btn">
               → Voir la page complète
             </a>
           </div>
         </div>
+      )}
+      {showInscription && (
+        <InscriptionModal
+          target={{ id: targetId, title: title }}
+          kind={isWorkshop ? "workshop" : "formation"}
+          onClose={() => setShowInscription(false)}
+        />
       )}
     </div>
   );
@@ -3696,6 +3721,135 @@ function ResourceModal({ resource, onClose }) {
           </div>
         </form>
         </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Modale d'inscription — capture nom/email/téléphone pour une formation, un
+// workshop ou un événement, et POST vers le endpoint leads (window.SITE_CONFIG
+// .leadsEndpoint), avec le contexte dans `source` (inscription:<kind>:<titre>)
+// et l'id de la cible dans `resource_id`. Ce lead alimente ensuite les emails
+// (systeme.io) et le process Qualiopi (génération des documents via l'OS).
+function InscriptionModal({ target, kind, onClose }) {
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState("");
+  const [step, setStep] = useState("form");
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  const kindLabel = kind === "workshop" ? "workshop" : kind === "event" ? "événement" : "formation";
+
+  async function submit(e) {
+    e.preventDefault();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr("Email invalide"); return; }
+    if (!consent) { setErr("Merci d'accepter pour envoyer ta demande."); return; }
+    setSubmitting(true);
+    setErr("");
+    // Endpoint prod du back-office (les autres formulaires du site postent
+    // aussi en dur ici ; SITE_CONFIG.leadsEndpoint reste sur localhost).
+    const endpoint = "https://admin.lagriotheque.com/api/leads";
+    try {
+      await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          name,
+          phone,
+          resource_id: target.id,
+          consent,
+          source: `inscription:${kind}:${target.title || target.id}`,
+        }),
+      });
+    } catch (e) {
+      console.warn("Lead capture failed:", e);
+    }
+    setSubmitting(false);
+    setStep("done");
+  }
+
+  const inputStyle = {
+    width: "100%", padding: "10px 12px", marginBottom: 14,
+    border: "1px solid var(--ink)", background: "transparent",
+    fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--ink)",
+  };
+  const labelStyle = { display: "block", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 6, opacity: 0.6 };
+
+  return (
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+    >
+      <div style={{ position: "relative", background: "var(--paper)", color: "var(--ink)", maxWidth: 480, width: "100%", padding: "32px 28px", border: "1px solid var(--ink)", fontFamily: "var(--font-mono)" }}>
+        <button onClick={onClose} aria-label="Fermer" style={{ position: "absolute", top: 0, right: 0, background: "var(--ink)", border: 0, color: "var(--paper)", padding: "10px 16px", cursor: "pointer", fontSize: 18 }}>×</button>
+
+        <p style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", opacity: 0.6, marginBottom: 10 }}>
+          Inscription · {kindLabel}
+        </p>
+        <h3 style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 24, lineHeight: 1.15, marginBottom: 18, letterSpacing: "-0.01em" }}>
+          {target.title}
+        </h3>
+
+        {step === "done" ? (
+          <div style={{ padding: "8px 0 12px" }}>
+            <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>
+              ✓ Merci{name ? `, ${name}` : ""} — ta demande d'inscription est enregistrée.
+            </p>
+            <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 18, opacity: 0.75 }}>
+              On te recontacte sous 48h ouvrées avec les modalités et le devis. Tu recevras un email de confirmation.
+            </p>
+            <button onClick={onClose} style={{ padding: "10px 18px", border: "1px solid var(--ink)", background: "var(--ink)", color: "var(--paper)", fontFamily: "var(--font-mono)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em", cursor: "pointer" }}>
+              Fermer
+            </button>
+          </div>
+        ) : (
+          <>
+            <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 24, opacity: 0.75 }}>
+              Laisse-nous tes coordonnées : on revient vers toi sous 48h ouvrées avec les modalités et le financement possible (CPF, OPCO, FAF).
+            </p>
+            <form onSubmit={submit}>
+              <label style={labelStyle}>Nom et prénom</label>
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
+
+              <label style={labelStyle}>Email *</label>
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ton@email.com" style={inputStyle} />
+
+              <label style={labelStyle}>Téléphone (optionnel)</label>
+              <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="06 00 00 00 00" style={{ ...inputStyle, marginBottom: 18 }} />
+
+              <label style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12, lineHeight: 1.5, cursor: "pointer", marginBottom: 22 }}>
+                <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ marginTop: 3 }} />
+                <span>
+                  J'accepte d'être recontacté(e) par LA GRIOTHÈQUE au sujet de cette inscription et de recevoir occasionnellement ses actualités. Désinscription en 1 clic.
+                </span>
+              </label>
+
+              {err && <p style={{ color: "#d72d2d", fontSize: 12, marginBottom: 14 }}>✗ {err}</p>}
+
+              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                <button type="button" onClick={onClose} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: "transparent", color: "var(--ink)", fontFamily: "var(--font-mono)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em", cursor: "pointer" }}>
+                  Annuler
+                </button>
+                <button type="submit" disabled={submitting} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: submitting ? "var(--ink-dim)" : "var(--accent, #ffca00)", color: "var(--ink)", fontFamily: "var(--font-mono)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, cursor: submitting ? "wait" : "pointer" }}>
+                  {submitting ? "..." : "Envoyer ma demande"}
+                </button>
+              </div>
+            </form>
+          </>
         )}
       </div>
     </div>
