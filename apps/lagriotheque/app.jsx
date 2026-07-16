@@ -1231,6 +1231,69 @@ function DownloadModal({ item, onClose }) {
   );
 }
 
+// Formateurs présentés comme les formations : grandes lignes (label + nom),
+// photo qui apparaît au survol (portrait flottant), et bio + rôle qui se
+// déroulent au clic. Les infos complètes (bio, photo) sont résolues depuis
+// TRAINERS (l'export ne met que name+role sur f.trainer).
+function trainerFull(t) {
+  const src = t || {};
+  const full = (typeof TRAINERS !== "undefined" && TRAINERS.find((x) =>
+    x.id === src.id || (x.name || "").toUpperCase() === (src.name || "").toUpperCase())) || {};
+  return {
+    id: src.id || full.id || src.name || "",
+    name: src.name || full.name || "",
+    role: src.role || full.role || "",
+    bio: full.bio || src.bio || "",
+    photo: full.photo || src.photo || "",
+  };
+}
+
+function TrainersInline({ trainers }) {
+  const list = (Array.isArray(trainers) ? trainers : [trainers]).filter(Boolean).map(trainerFull);
+  const [openId, setOpenId] = React.useState(null);
+  const [hover, setHover] = React.useState(null);
+  return (
+    <div className="lg__trx">
+      {hover && (
+        <img className="lg__trx__hoverimg" src={hover} alt="" aria-hidden="true" />
+      )}
+      <ul className="lg__trx__list">
+        {list.map((t, i) => {
+          const isOpen = openId === (t.id || i);
+          const key = t.id || i;
+          return (
+            <li key={key} className={"lg__trx__row" + (isOpen ? " is-open" : "")}>
+              <button
+                type="button"
+                className="lg__trx__head"
+                onClick={() => setOpenId(isOpen ? null : key)}
+                onMouseEnter={() => t.photo && setHover(t.photo)}
+                onMouseLeave={() => setHover(null)}
+                aria-expanded={isOpen}
+              >
+                <span className="lg__trx__label">Formateur{t.role ? " · " + t.role : ""}</span>
+                <span className="lg__trx__name">{t.name}</span>
+                <span className="lg__trx__toggle" aria-hidden="true">{isOpen ? "−" : "+"}</span>
+              </button>
+              {isOpen && (
+                <div className="lg__trx__panel">
+                  {t.photo && (
+                    <img className="lg__trx__photo" src={t.photo} alt={t.name} loading="lazy" />
+                  )}
+                  <div className="lg__trx__bio">
+                    {t.role && <p className="lg__trx__role">{t.role}</p>}
+                    {t.bio && <p className="lg__trx__text">{t.bio}</p>}
+                  </div>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 // Programme en accordéon : chaque jour est replié par défaut (le 1er ouvert),
 // se déroule au clic. Évite un mur de contenu quand tout est affiché d'un coup.
 function ProgramAccordion({ program }) {
@@ -1635,8 +1698,8 @@ function ProgramPage({ item, kind }) {
         },
         {
           id: "formateur",
-          title: "Formateur",
-          body: f.trainer ? <TrainerCard trainer={f.trainer} /> : null,
+          title: Array.isArray(f.trainer) && f.trainer.length > 1 ? "Formateurs" : "Formateur",
+          body: f.trainer ? <TrainersInline trainers={f.trainer} /> : null,
         },
         {
           id: "moyens",
