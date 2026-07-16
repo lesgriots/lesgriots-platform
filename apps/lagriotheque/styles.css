@@ -934,8 +934,11 @@ button {
 /* ----- PAGE FORMATION (détail) -------------------------------- */
 
 .lg__formation {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
+  /* Full-bleed compensé de la barre de défilement (--sbw posée en JR) : la
+     page occupe exactement la largeur visible (clientWidth), donc les traits
+     touchent les deux bords sans gap ni débord sous la scrollbar. */
+  width: calc(100vw - var(--sbw, 0px));
+  margin-left: calc(50% - 50vw + var(--sbw, 0px) / 2);
   padding: 30px 16px 60px;
 }
 

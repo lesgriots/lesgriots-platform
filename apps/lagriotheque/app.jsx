@@ -5027,6 +5027,11 @@ function App() {
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 30);
+      // Largeur de la barre de défilement → variable CSS --sbw. Sert au
+      // full-bleed de la page formation pour que les traits touchent exactement
+      // les bords sans gap ni débord sous la scrollbar.
+      const sbw = window.innerWidth - document.documentElement.clientWidth;
+      document.documentElement.style.setProperty("--sbw", (sbw > 0 ? sbw : 0) + "px");
       // "past-hero" : vrai quand on a dépassé le média hero (son bas passe
       // sous le header). Tant qu'on est sur le média → menu blanc transparent ;
       // une fois dépassé → barre solide.
