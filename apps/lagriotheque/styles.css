@@ -3223,6 +3223,8 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   margin: 0 -16px;
   padding: 16px 24px;
   background: var(--paper);
+  /* Trait de séparation sous la barre d'onglets. */
+  border-bottom: 1px solid var(--ink);
   display: flex;
   flex-wrap: nowrap;
   align-items: baseline;
