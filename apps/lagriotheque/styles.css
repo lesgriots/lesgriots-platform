@@ -2568,15 +2568,15 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 /* Eyebrow descriptif au-dessus de la phrase forte (situe l'école).
    Sélecteur renforcé pour battre .lg__hero-yard__tagline--quote p. */
 .lg__hero-yard__tagline .lg__hero-yard__eyebrow {
-  margin: 0 0 22px;
-  max-width: 860px;
+  margin: 0 0 24px;
+  max-width: 1000px;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(22px, 2.5vw, 36px);
-  line-height: 1.22;
-  letter-spacing: -0.005em;
+  font-size: clamp(26px, 3.3vw, 48px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   color: var(--paper);
-  opacity: 0.78;
+  opacity: 0.9;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
 }
 /* Sous-titre concret du hero (façon VSCO : bénéfices en une phrase).
