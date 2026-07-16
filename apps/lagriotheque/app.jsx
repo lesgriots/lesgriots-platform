@@ -505,23 +505,38 @@ function Manifesto() {
         </div>
       </section>
 
-      {/* VISION — bandeau vidéo entre le manifeste et les formations.
-          Média éditable via BO (home.vision_video), fallback hero.mp4. */}
-      <section className="lg__vision">
-        <div className="lg__vision__media">
-          <video
-            src={text("home.vision_video", "img/hero.mp4")}
-            autoPlay
-            loop
-            muted
-            playsInline
-          />
-        </div>
-        <div className="lg__vision__overlay">
-          <h2 className="lg__vision__title">{text("home.vision_title", "nouveaux récits,\nnouveaux visages")}</h2>
-          <p className="lg__vision__text">{text("home.vision_text", "La vision de La Griothèque est de permettre l'émergence de nouveaux récits.")}</p>
-        </div>
-      </section>
+      {/* VISION — séquence "scroll-telling" : la section se FIGE quand elle
+          atteint le menu, puis au scroll 4 visages (vidéos) s'enchaînent en
+          fondu, puis elle repart vers le haut avec l'effet de menu.
+          Piste de scroll (track) tall → durée de la séquence. Médias éditables
+          via BO (home.vision_video / _video2 / _video3 / _video4). */}
+      <div className="lg__vision-track">
+        <section className="lg__vision">
+          <div className="lg__vision__media">
+            {[
+              text("home.vision_video", "img/hero.mp4"),
+              text("home.vision_video2", "img/hero.mp4"),
+              text("home.vision_video3", "img/hero.mp4"),
+              text("home.vision_video4", "img/hero.mp4"),
+            ].map((src, i) => (
+              <video
+                key={i}
+                className="lg__vision__face"
+                data-face={i}
+                src={src}
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            ))}
+          </div>
+          <div className="lg__vision__overlay">
+            <h2 className="lg__vision__title">{text("home.vision_title", "nouveaux récits,\nnouveaux visages")}</h2>
+            <p className="lg__vision__text">{text("home.vision_text", "La vision de La Griothèque est de permettre l'émergence de nouveaux récits.")}</p>
+          </div>
+        </section>
+      </div>
 
       {/* LATEST — liste des formations à l'affiche, style YARD. L'onglet
           Workshops n'apparaît que s'il y a au moins un workshop dispo. */}
@@ -4556,6 +4571,19 @@ function App() {
         }
         headerEl.style.setProperty("--vid-top", topPx + "px");
         headerEl.style.setProperty("--vid-bottom", botPx + "px");
+      }
+      // Séquence de visages : fondu enchaîné entre les vidéos selon la
+      // progression du scroll dans la piste (pendant que la section est figée).
+      const visionTrack = document.querySelector(".lg__vision-track");
+      const faces = document.querySelectorAll(".lg__vision__face");
+      if (visionTrack && faces.length > 1) {
+        const tr = visionTrack.getBoundingClientRect();
+        const scrollable = visionTrack.offsetHeight - window.innerHeight;
+        const prog = scrollable > 0 ? Math.max(0, Math.min(1, (-tr.top) / scrollable)) : 0;
+        const f = prog * (faces.length - 1);
+        faces.forEach((face, i) => {
+          face.style.opacity = String(Math.max(0, Math.min(1, 1 - Math.abs(f - i))));
+        });
       }
       // Positionne la "plaque" (rideau papier unique qui recouvre la vidéo au
       // scroll, cf. .lg__catalogue::after) juste sous le hero. Mesuré en JS
