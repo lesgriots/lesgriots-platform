@@ -4111,15 +4111,18 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
    au survol, bio qui se déroule au clic. */
 .lg__trx { position: relative; }
 .lg__trx__hoverimg {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: clamp(150px, 19vw, 230px);
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  width: clamp(150px, 16vw, 220px);
   aspect-ratio: 3 / 4;
   object-fit: cover;
-  z-index: 3;
+  z-index: 50;
   pointer-events: none;
-  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+@media (max-width: 700px) {
+  .lg__trx__hoverimg { display: none; }
 }
 .lg__trx__list { list-style: none; margin: 0; padding: 0; }
 .lg__trx__row { border-top: 1px solid var(--ink); }
