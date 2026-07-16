@@ -2113,6 +2113,12 @@ body.is-listhero .lg__header {
   transition: opacity 0.35s ease;
 }
 body.menu-transparent .lg__header__plate { opacity: 0; }
+/* Barre de menu NOIRE quand une section noire de la home est calée sous le
+   header (continuité visuelle : plaque noire + nav blanc). */
+body.menu-dark .lg__header__plate {
+  background: #000000;
+  border-bottom-color: rgba(246, 245, 243, 0.14);
+}
 @media (max-width: 600px) {
   .lg__header__plate { height: 85px; }
 }

@@ -4614,6 +4614,19 @@ function App() {
         menuTransparent = true;
       }
       document.body.classList.toggle("menu-transparent", menuTransparent);
+      // "menu-dark" (home) : quand une section NOIRE (manifeste, formations,
+      // récits) se cale sous le header ou passe derrière lui, la barre de menu
+      // devient noire (plaque noire + nav blanc), en continuité avec la section.
+      let menuDark = false;
+      if (!menuTransparent && document.body.classList.contains("is-home")) {
+        [".lg__manifesto", ".lg__latest", ".lg__vision"].forEach((sel) => {
+          const dk = document.querySelector(sel);
+          if (!dk) return;
+          const r = dk.getBoundingClientRect();
+          if (r.top <= hH + 4 && r.bottom > hH) menuDark = true;
+        });
+      }
+      document.body.classList.toggle("menu-dark", menuDark);
       // Couche BLANCHE du menu : révélée pixel par pixel dans la zone où la vidéo
       // VISION est visible derrière le header (de son bord haut jusqu'au bas =
       // là où les formations la recouvrent). Pilote le clip-path de la couche
@@ -4622,8 +4635,8 @@ function App() {
       if (headerEl) {
         let topPx = hH; // inset haut : zone blanche vide par défaut (tout sombre)
         let botPx = 0;  // inset bas
-        if (menuTransparent) {
-          topPx = 0; botPx = 0; // média direct derrière → tout blanc
+        if (menuTransparent || menuDark) {
+          topPx = 0; botPx = 0; // média direct OU section noire derrière → tout blanc
         } else {
           // Sections SOMBRES de la home (formations noires + section récits) :
           // le texte du menu passe en blanc là où l'une d'elles est derrière le
