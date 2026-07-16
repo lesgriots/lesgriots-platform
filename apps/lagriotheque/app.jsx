@@ -1239,6 +1239,8 @@ function ProgramAccordion({ program }) {
     <div className="lg__program lg__program--accordion">
       {program.map((d, i) => {
         const isOpen = openDay === i;
+        // Force la majuscule initiale du libellé jour ("jour 1" → "Jour 1").
+        const dayLabel = d.day ? d.day.charAt(0).toUpperCase() + d.day.slice(1) : `Jour ${i + 1}`;
         return (
           <div key={i} className={"lg__program__day" + (isOpen ? " is-open" : "")}>
             <button
@@ -1247,7 +1249,7 @@ function ProgramAccordion({ program }) {
               onClick={() => setOpenDay(isOpen ? null : i)}
               aria-expanded={isOpen}
             >
-              <span className="lg__program__day__tag">{d.day}</span>
+              <span className="lg__program__day__tag">{dayLabel}</span>
               <span className="lg__program__day__toggle" aria-hidden="true">{isOpen ? "−" : "+"}</span>
             </button>
             {isOpen && (
