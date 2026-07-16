@@ -500,7 +500,6 @@ function Manifesto() {
         {/* Lien "Prochaines sessions" désactivé sur le hero d'arrivée —
             redondant avec la nav et l'agenda accessible depuis le menu. */}
         <div className="lg__hero-yard__tagline lg__hero-yard__tagline--quote">
-          <p className="lg__hero-yard__kicker">{text("home.hero_kicker", "Storytelling")}</p>
           <p>
             {text(
               "home.hero_statement",
@@ -510,7 +509,7 @@ function Manifesto() {
           <p className="lg__hero-yard__sub">
             {text(
               "home.hero_sub",
-              "Structure ton récit, trouve à qui le raconter, et comment."
+              "C’est ça, le storytelling : structure ton récit, trouve à qui le raconter, et comment."
             )}
           </p>
           <a className="lg__hero-yard__cta" href="#/formations">
