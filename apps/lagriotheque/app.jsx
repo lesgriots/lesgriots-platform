@@ -533,6 +533,22 @@ function Manifesto() {
           le manifeste, puis la section « nouveaux récits » remonte par-dessus
           elle (cf. z-index dans styles.css). */}
       <section className="lg__latest">
+        {/* En-tête éditorial de la section (style VSCO) : grand titre + lede.
+            Éditable via BO (home.formations_heading / _lede). */}
+        <div className="lg__latest__intro">
+          <h2 className="lg__latest__heading">
+            {text("home.formations_heading", "Des outils pour bâtir ton récit")}
+          </h2>
+          <p className="lg__latest__lede">
+            {text(
+              "home.formations_lede",
+              "Des formations courtes et pratiques, pour tous les niveaux et toutes les disciplines. "
+            )}
+            <a className="lg__latest__lede__link" href="#/formations">
+              {text("home.formations_lede_link", "Trouve la formation faite pour toi.")}
+            </a>
+          </p>
+        </div>
         <div className="lg__latest__tabs">
           <span
             className={latestTab === "formations" ? "is-active" : ""}

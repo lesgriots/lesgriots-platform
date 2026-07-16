@@ -2223,6 +2223,50 @@ body.is-home .lg__latest {
    gauche (la section .lg__latest est centrée pour ses onglets). */
 .lg__latest__rows { text-align: left; margin-top: 8px; }
 .lg__latest__rows .lg__row:first-child { border-top: none; }
+
+/* En-tête éditorial de la section formations (style VSCO) : grand titre
+   capitales + lede, alignés à gauche. Onglets réalignés à gauche pour la
+   cohérence. */
+.lg__latest__intro {
+  text-align: left;
+  padding-left: 24px;
+  padding-right: 24px;
+  margin-bottom: 44px;
+  max-width: 1000px;
+}
+.lg__latest__heading {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: clamp(30px, 4.6vw, 62px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0 0 18px;
+  color: var(--ink);
+}
+.lg__latest__lede {
+  font-family: var(--font-sans);
+  font-size: clamp(16px, 1.5vw, 21px);
+  line-height: 1.38;
+  letter-spacing: -0.01em;
+  color: var(--ink-2);
+  margin: 0;
+  max-width: 640px;
+}
+.lg__latest__lede__link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+body.is-home .lg__latest__tabs {
+  justify-content: flex-start;
+  padding-left: 24px;
+}
+@media (max-width: 700px) {
+  .lg__latest__intro { padding-left: 14px; padding-right: 14px; margin-bottom: 32px; }
+  body.is-home .lg__latest__tabs { padding-left: 14px; }
+}
 @media (max-width: 600px) {
   body.is-home .lg__manifesto { top: 85px; }
 }
