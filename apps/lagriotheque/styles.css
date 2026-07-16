@@ -2197,6 +2197,12 @@ body.is-home .lg__manifesto {
   position: sticky;
   top: 121px;
   z-index: 1;
+  /* Manifeste sur fond NOIR (même traitement que la section formations) :
+     couleur littérale + redéfinition des variables d'encre en clair. */
+  background: #000000;
+  --ink: #f6f5f3;
+  --ink-2: rgba(246, 245, 243, 0.72);
+  --ink-3: rgba(246, 245, 243, 0.45);
 }
 /* La section vidéo se cale (sticky) en haut, DERRIÈRE le header, pour que la
    vidéo soit continue sous le menu devenu transparent (pas de raccord avec le
