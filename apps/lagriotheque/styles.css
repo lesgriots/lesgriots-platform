@@ -4107,31 +4107,27 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 /* Variante ACCORDÉON : liste verticale de jours repliables (pas de grille de
    cartes). Chaque jour = un en-tête cliquable (titre + toggle) qui déroule
    son contenu en dessous. */
-/* Formateurs « façon formations » : lignes label + grand nom, photo flottante
-   au survol, bio qui se déroule au clic. */
+/* Formateurs « façon IDW » (réf. idw.li) : petit label mono + nom en typo
+   géante, puis panneau photo + rôle + bio TOUJOURS visible. Une ligne fine
+   sépare chaque entrée — même vocabulaire que les listes formations (lg__row)
+   et intervenants du home (lg__trainer). */
 .lg__trx { position: relative; }
-.lg__trx__hoverimg {
-  position: fixed;
-  bottom: 24px;
-  left: 24px;
-  width: clamp(150px, 16vw, 220px);
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
-  z-index: 50;
-  pointer-events: none;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-}
-@media (max-width: 700px) {
-  .lg__trx__hoverimg { display: none; }
-}
 .lg__trx__list { list-style: none; margin: 0; padding: 0; }
-.lg__trx__row { border-top: 1px solid var(--ink); }
+/* display:block avec la spécificité nécessaire pour battre le générique
+   `.lg__tabsec__body li { display:flex }` (listes numérotées des onglets). */
+.lg__trx__row,
+.lg__tabsec__body .lg__trx__row {
+  display: block;
+  border-top: 1px solid var(--ink);
+  padding: 0;
+}
 .lg__trx__row:last-child { border-bottom: 1px solid var(--ink); }
+/* En-tête cliquable (nom + toggle) — reset bouton, pleine largeur. */
 .lg__trx__head {
   position: relative;
   display: block;
   width: 100%;
-  padding: 14px 42px 18px 0;
+  padding: 16px 46px 18px 0;
   background: none;
   border: 0;
   cursor: pointer;
@@ -4140,37 +4136,32 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   transition: opacity 0.18s ease;
 }
 .lg__trx__head:hover { opacity: 0.6; }
-.lg__trx__label {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  color: var(--ink-3);
-  margin-bottom: 8px;
-}
 .lg__trx__name {
   display: block;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(28px, 4vw, 64px);
-  line-height: 1.03;
-  letter-spacing: -0.025em;
+  font-size: clamp(40px, 6.5vw, 110px);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
   color: var(--ink);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .lg__trx__toggle {
   position: absolute;
   right: 4px;
-  top: 14px;
+  top: 20px;
   font-family: var(--font-sans);
   font-weight: 400;
-  font-size: 26px;
+  font-size: 30px;
   line-height: 1;
 }
 .lg__trx__panel {
   display: flex;
   gap: 26px;
   align-items: flex-start;
-  padding: 2px 0 30px;
+  padding: 4px 0 32px;
 }
 .lg__trx__photo {
   width: clamp(140px, 17vw, 200px);
@@ -4191,11 +4182,11 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   font-size: clamp(30px, 4vw, 52px);
   letter-spacing: 0.02em;
 }
-.lg__trx__bio { flex: 1 1 auto; min-width: 0; }
+.lg__trx__bio { flex: 1 1 auto; min-width: 0; max-width: 68ch; }
 .lg__trx__role {
-  font-family: var(--font-sans);
-  font-size: 13px;
-  letter-spacing: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
   color: var(--ink-3);
   margin: 0 0 8px;
 }
@@ -4207,9 +4198,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   margin: 0;
 }
 @media (max-width: 700px) {
-  .lg__trx__hoverimg { display: none; }
   .lg__trx__panel { flex-direction: column; gap: 16px; }
-  .lg__trx__name { font-size: clamp(26px, 8vw, 42px); }
+  .lg__trx__name { font-size: clamp(34px, 11vw, 56px); margin-bottom: 16px; }
+  .lg__trx__row { padding-bottom: 26px; }
 }
 
 /* Section Avis dédiée (page formation), avant le CTA final. */
@@ -5757,7 +5748,8 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   transition: transform var(--marquee-duration, 6s) linear;
 }
 .lg__row:hover .lg__row__title.is-overflowing .lg__marquee__inner,
-.lg__trainer:hover .lg__trainer__name.is-overflowing .lg__marquee__inner {
+.lg__trainer:hover .lg__trainer__name.is-overflowing .lg__marquee__inner,
+.lg__trx__row:hover .lg__trx__name.is-overflowing .lg__marquee__inner {
   transform: translateX(var(--overflow, 0));
   transition: transform var(--marquee-duration, 6s) linear;
 }

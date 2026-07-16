@@ -1267,40 +1267,47 @@ function trainerFull(t) {
   };
 }
 
-function TrainerXLRow({ t }) {
-  const nameRef = useMarqueeOverflow([t.name]);
-  return (
-    <li className="lg__trx__row">
-      <h3 className="lg__trx__name" ref={nameRef}>
-        <span className="lg__marquee__inner">{t.name}</span>
-      </h3>
-      {(t.photo || t.role || t.bio) && (
-        <div className="lg__trx__panel">
-          {t.photo ? (
-            <img className="lg__trx__photo" src={t.photo} alt={t.name} loading="lazy" />
-          ) : (
-            <div className="lg__trx__photo lg__trx__photo--ph" aria-hidden="true">
-              <span>{trainerInitials(t.name)}</span>
-            </div>
-          )}
-          <div className="lg__trx__bio">
-            {t.role && <p className="lg__trx__role">{t.role}</p>}
-            {t.bio && <p className="lg__trx__text">{t.bio}</p>}
-          </div>
-        </div>
-      )}
-    </li>
-  );
-}
-
+// Accordéon : nom seul par défaut, clic → la fiche s'agrandit (photo + rôle +
+// bio en dessous). Une seule fiche ouverte à la fois.
 function TrainersInline({ trainers }) {
   const list = (Array.isArray(trainers) ? trainers : [trainers]).filter(Boolean).map(trainerFull);
+  const [openId, setOpenId] = React.useState(null);
   return (
     <div className="lg__trx">
       <ul className="lg__trx__list">
-        {list.map((t, i) => (
-          <TrainerXLRow key={t.id || i} t={t} />
-        ))}
+        {list.map((t, i) => {
+          const key = t.id || i;
+          const isOpen = openId === key;
+          const hasPanel = t.photo || t.role || t.bio;
+          return (
+            <li key={key} className={"lg__trx__row" + (isOpen ? " is-open" : "")}>
+              <button
+                type="button"
+                className="lg__trx__head"
+                onClick={() => setOpenId(isOpen ? null : key)}
+                aria-expanded={isOpen}
+              >
+                <span className="lg__trx__name">{t.name}</span>
+                <span className="lg__trx__toggle" aria-hidden="true">{isOpen ? "−" : "+"}</span>
+              </button>
+              {isOpen && hasPanel && (
+                <div className="lg__trx__panel">
+                  {t.photo ? (
+                    <img className="lg__trx__photo" src={t.photo} alt={t.name} loading="lazy" />
+                  ) : (
+                    <div className="lg__trx__photo lg__trx__photo--ph" aria-hidden="true">
+                      <span>{trainerInitials(t.name)}</span>
+                    </div>
+                  )}
+                  <div className="lg__trx__bio">
+                    {t.role && <p className="lg__trx__role">{t.role}</p>}
+                    {t.bio && <p className="lg__trx__text">{t.bio}</p>}
+                  </div>
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
