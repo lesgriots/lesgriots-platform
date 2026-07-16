@@ -28,6 +28,7 @@ const DEFAULT_ACTIVE_PAGES = {
   formations: true,
   workshops: true,
   agenda: true,
+  events: true,
   financement: true,
   ressources: true,
   cgv: true,
@@ -40,6 +41,7 @@ const EMPTY = {
   trainers: [],
   sessions: [],
   resources: [],
+  events: [],         // événements IRL (masterclasses, talks, soirées, projections)
   leads: [],          // emails capturés via le lead-gate des ressources
   active_pages: { ...DEFAULT_ACTIVE_PAGES },
   defaults: {
@@ -207,6 +209,12 @@ export const listResources = (opts) => listCollection("resources", opts);
 export const getResource = (id) => getInCollection("resources", id);
 export const upsertResource = (r) => upsertInCollection("resources", r);
 export const deleteResource = (id) => deleteFromCollection("resources", id);
+
+// EVENTS (événements IRL : masterclasses, talks, soirées, projections)
+export const listEvents = (opts) => listCollection("events", opts);
+export const getEvent = (id) => getInCollection("events", id);
+export const upsertEvent = (e) => upsertInCollection("events", e);
+export const deleteEvent = (id) => deleteFromCollection("events", id);
 
 // LEADS (emails capturés via lead-gate des ressources)
 // Spécifique : append-only en pratique, id auto-généré, tri par date desc

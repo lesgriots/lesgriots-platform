@@ -69,6 +69,14 @@ export const SITE_CONTENT_DEFAULTS = {
     media: "",
   },
 
+  events_page: {
+    heading: "Événements",
+    intro:
+      "La scène de La Griothèque, en vrai. Masterclasses, talks, soirées et projections pour se rencontrer, apprendre et bâtir ensemble.",
+    sub: "Masterclasses · talks · soirées · projections",
+    media: "",
+  },
+
   contact: {
     title: "Contact",
     line1: "LA GRIOTHÈQUE",
@@ -270,6 +278,17 @@ export const SITE_CONTENT_SECTIONS = [
       { key: "intro", label: "Texte d'intro", type: "textarea", rows: 4 },
       { key: "sub", label: "Sous-titre court", type: "text" },
       { key: "media", label: "Vidéo/image du hero de page (vide = défaut)", type: "upload" },
+    ],
+  },
+  {
+    key: "events_page",
+    title: "Page Événements",
+    desc: "Titre + intro affichés en tête de la page Événements.",
+    fields: [
+      { key: "heading", label: "Titre de la page", type: "text" },
+      { key: "intro", label: "Texte d'intro", type: "textarea", rows: 4 },
+      { key: "sub", label: "Sous-titre court", type: "text" },
+      { key: "media", label: "Vidéo/image du hero de page (vide = pas de bandeau)", type: "upload" },
     ],
   },
   {

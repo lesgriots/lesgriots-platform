@@ -17,6 +17,7 @@ const REQUIRED = {
   trainers: ["name"],
   sessions: [],
   resources: ["title"],
+  events: ["title"],
 };
 
 // Champs qui, s'ils sont présents, doivent être des strings (pas objets/arrays).
@@ -28,6 +29,7 @@ const STRING_FIELDS = {
   trainers: ["name", "role", "bio", "photo"],
   sessions: ["date", "formation_id", "workshop_id", "status"],
   resources: ["title", "type", "format", "href"],
+  events: ["title", "date", "time", "location", "city", "link", "link_label", "status"],
 };
 
 /**

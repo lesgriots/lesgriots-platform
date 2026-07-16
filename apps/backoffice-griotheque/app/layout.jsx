@@ -53,6 +53,8 @@ export default function RootLayout({ children }) {
             <span className="bo-nav__sep">·</span>
             <a href="/sessions">sessions</a>
             <span className="bo-nav__sep">·</span>
+            <a href="/events">événements</a>
+            <span className="bo-nav__sep">·</span>
             <a href="/resources">ressources</a>
             <span className="bo-nav__sep">·</span>
             <a href="/leads">leads</a>

@@ -1,4 +1,4 @@
-/* global React, ReactDOM, FORMATIONS, WORKSHOPS, TRAINERS, SESSIONS, RESOURCES, MatrixGriot */
+/* global React, ReactDOM, FORMATIONS, WORKSHOPS, TRAINERS, SESSIONS, RESOURCES, EVENTS, MatrixGriot */
 // LA GRIOTHÈQUE — vitrine + catalogue des formations
 
 const { useState, useEffect, useRef, useLayoutEffect } = React;
@@ -2818,6 +2818,83 @@ function Workshops() {
   );
 }
 
+// ===== ÉVÉNEMENTS — page des événements IRL (masterclasses, talks, soirées) =
+// Données depuis EVENTS (data.jsx, généré par le back office). Chaque événement
+// = média optionnel + label type + titre + méta (date · heure · lieu · ville) +
+// description + lien d'inscription. Page gérée depuis le BO, hors menu (route
+// directe #/events).
+function formatEventDate(iso) {
+  if (!iso) return "";
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!m) return iso;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const day = DAYS_FR[d.getDay()];
+  const month = MONTHS_FR_LOWER[Number(m[2]) - 1];
+  const full = `${day} ${Number(m[3])} ${month} ${m[1]}`;
+  return full.charAt(0).toUpperCase() + full.slice(1);
+}
+
+function EventCard({ e }) {
+  const media = e.media || {};
+  const isVideo = media.type === "video" || /\.(mp4|webm|mov|m4v)(\?|$)/i.test(media.src || "");
+  const meta = [formatEventDate(e.date), e.time, e.location, e.city].filter(Boolean).join(" · ");
+  const isPast = (e.status || "").toUpperCase() === "PASSÉ";
+  return (
+    <article className={"lg__event" + (isPast ? " is-past" : "")}>
+      {media.src && (
+        <div className="lg__event__media">
+          {isVideo
+            ? <video src={media.src} autoPlay loop muted playsInline />
+            // eslint-disable-next-line @next/next/no-img-element
+            : <img src={media.src} alt={e.title || ""} loading="lazy" />}
+        </div>
+      )}
+      <div className="lg__event__body">
+        {(e.kind || e.status) && (
+          <p className="lg__event__eyebrow">
+            {e.kind || "Événement"}
+            {e.status ? <span className="lg__event__status"> · {e.status}</span> : null}
+          </p>
+        )}
+        <h3 className="lg__event__title">{e.title}</h3>
+        {meta && <p className="lg__event__meta">{meta}</p>}
+        {e.description && <p className="lg__event__desc">{e.description}</p>}
+        {e.link && !isPast && (
+          <a className="lg__event__cta" href={e.link} target="_blank" rel="noopener">
+            {e.link_label || "En savoir plus"}
+          </a>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function Events() {
+  const list = typeof EVENTS !== "undefined" ? EVENTS : [];
+  return (
+    <section className="lg__catalogue" id="events">
+      <PageHero src={text("events_page.media", "")} title={text("events_page.heading", "Événements")}>
+        <PageIntro
+          text={text(
+            "events_page.intro",
+            "La scène de La Griothèque, en vrai. Masterclasses, talks, soirées et projections pour se rencontrer, apprendre et bâtir ensemble."
+          )}
+          sub={text("events_page.sub", "Masterclasses · talks · soirées · projections")}
+        />
+      </PageHero>
+      {list.length === 0 ? (
+        <p className="lg__cat-empty" style={{ padding: "40px 24px" }}>
+          Aucun événement pour le moment. Reviens bientôt.
+        </p>
+      ) : (
+        <div className="lg__events">
+          {list.map((e) => <EventCard key={e.id} e={e} />)}
+        </div>
+      )}
+    </section>
+  );
+}
+
 // ===== Agenda helpers — gère les deux formats de date possibles ============
 // 1. ISO "2026-09-24" (depuis backoffice idéalement)
 // 2. Texte "MARS 2026" (legacy)
@@ -4755,6 +4832,7 @@ function App() {
     "contact": "contact",
     "cgv": "cgv",
     "financement": "financement",
+    "events": "events",
   };
   // Pour les routes formations/[id] et workshops/[id], on remonte au parent
   const routeBase = route.startsWith("formations/") ? "catalogue"
@@ -4813,6 +4891,7 @@ function App() {
       case "catalogue":   page = <Catalogue />; break;
       case "workshops":   page = <Workshops />; break;
       case "agenda":      page = <Agenda />; break;
+      case "events":      page = <Events />; break;
       case "ressources":  page = <Ressources />; break;
       case "approche":    page = <Approche />; break;
       case "contact":     page = <Contact />; break;

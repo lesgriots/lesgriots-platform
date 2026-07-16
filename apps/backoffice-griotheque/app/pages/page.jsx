@@ -11,6 +11,7 @@ const PAGE_LABELS = {
   formations: { label: "Formations", desc: "Catalogue des formations longues" },
   workshops: { label: "Workshops", desc: "Catalogue des formats courts" },
   agenda: { label: "Agenda", desc: "Sessions à venir (formations + workshops)" },
+  events: { label: "Événements", desc: "Événements IRL : masterclasses, talks, soirées, projections" },
   financement: { label: "Financement", desc: "OPCO, FAF, CPF, financement personnel" },
   ressources: { label: "Ressources", desc: "Guides, articles, outils téléchargeables" },
   cgv: { label: "CGV", desc: "Conditions générales de vente (Qualiopi)" },

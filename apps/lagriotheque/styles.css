@@ -4972,6 +4972,82 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   color: var(--ink);
 }
 
+/* ===== ÉVÉNEMENTS — grille de cartes (masterclasses, talks, soirées) ===== */
+.lg__events {
+  padding: 12px 24px 90px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 60px 44px;
+}
+@media (max-width: 800px) {
+  .lg__events { grid-template-columns: 1fr; gap: 48px; padding: 12px 16px 70px; }
+}
+.lg__event { display: flex; flex-direction: column; }
+.lg__event.is-past { opacity: 0.5; }
+.lg__event__media {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: var(--ink);
+  margin-bottom: 20px;
+}
+.lg__event__media img,
+.lg__event__media video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.lg__event__eyebrow {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 10px;
+}
+.lg__event__status { color: var(--accent); }
+.lg__event__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(24px, 2.6vw, 38px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+.lg__event__meta {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ink-2);
+  margin: 0 0 14px;
+}
+.lg__event__desc {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  margin: 0 0 22px;
+  max-width: 52ch;
+}
+.lg__event__cta {
+  align-self: flex-start;
+  display: inline-block;
+  padding: 12px 24px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.lg__event__cta:hover { background: transparent; color: var(--ink); }
+
 .lg__rows {
   display: flex;
   flex-direction: column;

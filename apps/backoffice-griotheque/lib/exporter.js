@@ -15,6 +15,7 @@ import {
   listTrainers,
   listSessions,
   listResources,
+  listEvents,
   getDefaults,
   getActivePages,
   getSiteContent,
@@ -68,7 +69,8 @@ function formatEntity(obj, indent = "  ") {
     "objectives", "chapters", "program",
     "methods", "evaluation", "accessibility",
     "formation_id", "workshop_id",
-    "date", "places", "status",
+    "kind", "date", "time", "city", "places", "status",
+    "link", "link_label",
     "role", "bio", "photo",
     "type", "href", "available",
   ];
@@ -101,6 +103,7 @@ export async function exportToDataJsx() {
   const trainers = listTrainers();
   const sessions = listSessions();
   const resources = listResources();
+  const events = listEvents();
   const defaults = getDefaults();
 
   // Index des intervenants par id pour résoudre trainer_id → { name, role }
@@ -144,6 +147,7 @@ export async function exportToDataJsx() {
     formatArray("TRAINERS", trainers),
     formatArray("SESSIONS", sessions),
     formatArray("RESOURCES", resources),
+    formatArray("EVENTS", events),
   ].join("\n");
 
   // Configuration du site : pages actives + endpoint API pour les leads
@@ -165,6 +169,7 @@ if (typeof window !== "undefined") {
   window.TRAINERS = TRAINERS;
   window.SESSIONS = SESSIONS;
   window.RESOURCES = RESOURCES;
+  window.EVENTS = EVENTS;
   window.SITE_CONFIG = SITE_CONFIG;
   window.SITE_CONTENT = SITE_CONTENT;
 }
@@ -193,6 +198,7 @@ if (typeof window !== "undefined") {
       trainers: trainers.length,
       sessions: sessions.length,
       resources: resources.length,
+      events: events.length,
     },
     seo,
     bytes: content.length,
