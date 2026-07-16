@@ -2967,6 +2967,7 @@ function normalizeStatus(raw) {
   if (s === "open" || s.startsWith("ouverte") || s.startsWith("ouvert")) return { class: "open", label: "ouverte" };
   if (s === "full" || s.startsWith("complet")) return { class: "full", label: "complet" };
   if (s.startsWith("annul")) return { class: "cancel", label: "annulée" };
+  if (s.startsWith("pass")) return { class: "past", label: "passé" };
   return { class: "soon", label: "à venir" };
 }
 
@@ -3046,6 +3047,59 @@ function AgendaRow({ s, item, isOpen, onToggle }) {
             )}
             <a href={detailHref} className="lg__ag__btn">
               → Voir la page complète
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Ligne agenda pour un ÉVÉNEMENT (masterclass, talk, soirée). Réutilise les
+// mêmes classes .lg__ag* que les sessions pour un rendu identique, mais avec
+// les champs propres à l'événement (heure, lieu, ville, lien d'inscription).
+function AgendaEventRow({ e, isOpen, onToggle }) {
+  const dateInfo = parseSessionDate(e.date);
+  const status = normalizeStatus(e.status);
+  const dateLong = fullDateLabel(dateInfo);
+  return (
+    <div className={"lg__ag" + (isOpen ? " is-open" : "") + " is-" + status.class}>
+      <button
+        type="button"
+        className="lg__ag__head"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+      >
+        <div className="lg__ag__date">
+          <div className="lg__ag__date__full">{dateLong}</div>
+        </div>
+        <div className="lg__ag__main">
+          <div className="lg__ag__kind">{(e.kind || "événement").toLowerCase()}</div>
+          <h3 className="lg__ag__title">{e.title}</h3>
+        </div>
+        <div className="lg__ag__side">
+          <span className={"lg__ag__pill is-" + status.class}>{status.label}</span>
+          <span className="lg__ag__caret">{isOpen ? "−" : "+"}</span>
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="lg__ag__panel">
+          <div className="lg__ag__grid">
+            {e.time && <Pair label="Heure" value={e.time} />}
+            {(e.location || e.city) && (
+              <Pair label="Lieu" value={[e.location, e.city].filter(Boolean).join(" — ")} />
+            )}
+          </div>
+          {e.description && <p className="lg__ag__desc">{e.description}</p>}
+          <div className="lg__ag__actions">
+            {e.link && status.class !== "past" && (
+              <a href={e.link} target="_blank" rel="noopener" className="lg__ag__btn lg__ag__btn--primary">
+                ↗ {e.link_label || "En savoir plus"}
+              </a>
+            )}
+            <a href="#/events" className="lg__ag__btn">
+              → Tous les événements
             </a>
           </div>
         </div>
@@ -3247,28 +3301,37 @@ function Agenda() {
   const cfgActivePages = (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.activePages) || {};
   const formationsOn = cfgActivePages.formations !== false;
   const workshopsOn = cfgActivePages.workshops !== false;
+  const eventsOn = cfgActivePages.events !== false;
 
-  // Tri par date croissante puis filtre par pages actives
-  const sorted = [...SESSIONS]
+  // Liste unifiée : sessions (formations + workshops) + événements. Chaque
+  // entrée est taguée { kind, date, node } pour un tri et un filtre communs.
+  // Les événements PASSÉS ne remontent pas dans l'agenda (à venir) — ils
+  // restent visibles sur la page /events.
+  const eventsAll = typeof EVENTS !== "undefined" ? EVENTS : [];
+  const sessionItems = [...SESSIONS]
     .filter((s) => {
       const k = sessionKind(s);
       if (k === "workshop") return workshopsOn;
       return formationsOn;
     })
-    .sort((a, b) => {
-      const da = parseSessionDate(a.date).sortKey;
-      const db = parseSessionDate(b.date).sortKey;
-      return da.localeCompare(db);
-    });
-  const visible = filter === "all"
-    ? sorted
-    : sorted.filter((s) => sessionKind(s) === filter);
+    .map((s) => ({ kind: sessionKind(s), date: s.date, s }));
+  const eventItems = (eventsOn ? eventsAll : [])
+    .filter((e) => (e.status || "").toUpperCase() !== "PASSÉ")
+    .map((e) => ({ kind: "event", date: e.date, e }));
+
+  const sorted = [...sessionItems, ...eventItems].sort((a, b) => {
+    const da = parseSessionDate(a.date).sortKey;
+    const db = parseSessionDate(b.date).sortKey;
+    return da.localeCompare(db);
+  });
+  const visible = filter === "all" ? sorted : sorted.filter((it) => it.kind === filter);
 
   // Compteurs pour les tabs (sur la base déjà filtrée par activePages)
   const counts = {
     all: sorted.length,
-    formation: sorted.filter((s) => sessionKind(s) === "formation").length,
-    workshop: sorted.filter((s) => sessionKind(s) === "workshop").length,
+    formation: sorted.filter((it) => it.kind === "formation").length,
+    workshop: sorted.filter((it) => it.kind === "workshop").length,
+    event: sorted.filter((it) => it.kind === "event").length,
   };
 
   // Si le filtre actif pointe vers un type masqué (ex: workshops désactivés
@@ -3276,13 +3339,14 @@ function Agenda() {
   // vide trompeuse.
   if (filter === "workshop" && !workshopsOn) setFilter("all");
   if (filter === "formation" && !formationsOn) setFilter("all");
+  if (filter === "event" && !eventsOn) setFilter("all");
 
   // Même structure exacte que Catalogue : section + intro + filtres + rows
   return (
     <section className="lg__catalogue" id="agenda">
       <PageHero src={text("agenda.media", "")} title={text("agenda.heading", "Agenda")}>
         <PageIntro
-          text={text("agenda.intro", "Les prochaines sessions de formations et de workshops : dates, places disponibles et modalités (présentiel ou à distance).")}
+          text={text("agenda.intro", "Les prochaines dates : formations, workshops et événements. Places disponibles et modalités (présentiel ou à distance).")}
         />
       </PageHero>
 
@@ -3313,11 +3377,33 @@ function Agenda() {
             workshops <span className="lg__cat-filters__count">({counts.workshop})</span>
           </button>
         )}
+        {eventsOn && (
+          <button
+            type="button"
+            className={"lg__cat-filters__btn" + (filter === "event" ? " is-active" : "")}
+            onClick={() => setFilter("event")}
+          >
+            événements <span className="lg__cat-filters__count">({counts.event})</span>
+          </button>
+        )}
       </nav>
 
       <div className="lg__ag__list">
-        {visible.map((s) => {
-          const isWorkshop = sessionKind(s) === "workshop";
+        {visible.map((it) => {
+          if (it.kind === "event") {
+            const e = it.e;
+            const key = "evt-" + e.id;
+            return (
+              <AgendaEventRow
+                key={key}
+                e={e}
+                isOpen={openId === key}
+                onToggle={() => setOpenId(openId === key ? null : key)}
+              />
+            );
+          }
+          const s = it.s;
+          const isWorkshop = it.kind === "workshop";
           const targetId = s.formation_id || s.workshop_id || s.targetId || "";
           const pool = isWorkshop ? WORKSHOPS : FORMATIONS;
           const item = pool.find((x) => x.id === targetId);
@@ -3333,7 +3419,7 @@ function Agenda() {
         })}
         {visible.length === 0 && (
           <p className="lg__cat-empty">
-            Aucune session {filter !== "all" ? `de type ${filter}` : ""} pour l'instant.
+            Aucun élément {filter !== "all" ? `de type ${filter}` : ""} pour l'instant.
           </p>
         )}
       </div>
