@@ -1271,7 +1271,7 @@ function TrainersInline({ trainers }) {
                 onMouseLeave={() => setHover(null)}
                 aria-expanded={isOpen}
               >
-                <span className="lg__trx__label">Formateur{t.role ? " · " + t.role : ""}</span>
+                <span className="lg__trx__label">Formateur</span>
                 <span className="lg__trx__name">{t.name}</span>
                 <span className="lg__trx__toggle" aria-hidden="true">{isOpen ? "−" : "+"}</span>
               </button>
