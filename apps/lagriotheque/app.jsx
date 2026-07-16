@@ -499,11 +499,12 @@ function Manifesto() {
         <p className="lg__hero-yard__wordmark" aria-hidden="true">LA&nbsp;GRIOTHÈQUE</p>
         {/* Lien "Prochaines sessions" désactivé sur le hero d'arrivée —
             redondant avec la nav et l'agenda accessible depuis le menu. */}
-        <div className="lg__hero-yard__tagline">
+        <div className="lg__hero-yard__tagline lg__hero-yard__tagline--quote">
           <p>
-            {text("home.hero_tagline_line1", "Transmettre à une nouvelle génération de créatifs")}<br />
-            {text("home.hero_tagline_line2", "les outils pour bâtir leur récit")}<br />
-            {text("home.hero_tagline_line3", "et vivre de leur passion.")}
+            {text(
+              "home.hero_statement",
+              "Ce n’est pas tant l’histoire que vous tentez de raconter qui importe, mais plutôt le récit que s’imaginent les autres lorsqu’ils portent leurs regards sur votre âme."
+            )}
           </p>
           <a className="lg__hero-yard__cta" href="#/formations">
             {text("home.hero_cta", "Voir les formations")}

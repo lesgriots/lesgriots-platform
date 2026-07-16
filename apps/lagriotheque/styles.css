@@ -2551,6 +2551,17 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   color: var(--paper);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
+/* Variante "phrase forte / citation" : texte plus long → taille réduite,
+   interligne respirant, largeur limitée pour un rendu éditorial. */
+.lg__hero-yard__tagline--quote p {
+  font-size: clamp(22px, 2.9vw, 42px);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  max-width: 900px;
+}
+@media (max-width: 700px) {
+  .lg__hero-yard__tagline--quote p { font-size: clamp(21px, 6vw, 30px); max-width: none; }
+}
 /* CTA principal du hero (Chris Do : une action claire au-dessus de la ligne
    de flottaison). Bouton blanc plein, texte sombre, inversion au survol. */
 .lg__hero-yard__cta {
