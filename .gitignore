@@ -97,3 +97,10 @@ ziRjUTlQ
 /skills/
 /bio-*.md
 .tmp_sync*.sh
+
+# LES GRIOTS (site ombrelle) — résidus de travail, non versionnés
+apps/lesgriots/_OLD-*
+apps/lesgriots/.wtest
+apps/lesgriots/Les*Griots.html
+apps/lesgriots/apercu-*.html
+apps/lesgriots/*.placeholder.html

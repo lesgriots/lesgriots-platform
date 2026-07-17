@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Les Griots — Boutique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{--serif:"Times Now","Times New Roman",serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;color:#fff}
+body{font-family:var(--serif);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.shop-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:32px;padding:22px clamp(20px,2vw,36px);font-size:13px;letter-spacing:.16em;text-transform:uppercase}
+.shop-head .h-c{justify-self:center}
+.shop-head .h-r{justify-self:end}
+.shop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(48px,7vh,120px) clamp(32px,4vw,80px);padding:clamp(48px,8vh,110px) clamp(36px,5vw,96px) 140px}
+.product{display:flex;flex-direction:column;align-items:center;text-align:center}
+.product .ph{height:clamp(220px,34vh,330px);display:flex;align-items:flex-end;justify-content:center}
+.product img{max-height:100%;width:auto;max-width:100%;display:block;box-shadow:0 18px 50px rgba(0,0,0,.55)}
+.product .dots{display:flex;gap:7px;margin:26px 0 18px;align-items:center}
+.product .dots i{width:3px;height:3px;border-radius:999px;background:rgba(255,255,255,.45)}
+.product .dots i.on{background:#fff}
+.product h3{font-weight:400;font-size:clamp(17px,1.4vw,21px);letter-spacing:.01em;margin-bottom:12px}
+.product .cta{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.92)}
+.product .cta:hover{color:#F1B81F}
+.shop-foot{position:relative;overflow:hidden;height:clamp(120px,18vw,260px)}
+.shop-foot span{position:absolute;left:50%;bottom:-0.28em;transform:translateX(-50%);font-size:clamp(120px,17vw,320px);line-height:1;white-space:nowrap;color:#fff}
+@media(max-width:980px){.shop-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.shop-grid{grid-template-columns:1fr}}
+.shop-logo{display:block;padding:0;position:sticky;top:0;z-index:50;background:#000}
+.shop-logo img{width:100%;height:auto;display:block}
+</style>
+</head>
+<body>
+<a class="shop-logo" href="index.html" aria-label="Accueil Les Griots">
+  <img src="assets/les-griots-logo.png" alt="Les Griots" />
+</a>
+<header class="shop-head">
+  <span>Shop</span>
+  <span class="h-c">Encyclopædia Griotica · Vol XIV</span>
+  <a class="h-r" href="index.html#journal">Index</a>
+</header>
+
+<main class="shop-grid" data-screen-label="01 Boutique">
+  <article class="product">
+    <div class="ph"><img src="https://picsum.photos/seed/shop-1/440/620" alt="" /></div>
+    <div class="dots"><i class="on"></i><i></i><i></i><i></i></div>
+    <h3>Encyclopædia Griotica</h3>
+    <a class="cta" href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a>
+  </article>
+  <article class="product">
+    <div class="ph"><img src="https://picsum.photos/seed/shop-2/440/620" alt="" /></div>
+    <div class="dots"><i class="on"></i><i></i><i></i><i></i></div>
+    <h3>Florale — Affiche du film</h3>
+    <a class="cta" href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a>
+  </article>
+  <article class="product">
+    <div class="ph"><img src="https://picsum.photos/seed/shop-3/440/620" alt="" /></div>
+    <div class="dots"><i class="on"></i><i></i><i></i><i></i></div>
+    <h3>Indigo Cristal — Édition limitée</h3>
+    <a class="cta" href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a>
+  </article>
+  <article class="product">
+    <div class="ph"><img src="https://picsum.photos/seed/shop-4/440/620" alt="" /></div>
+    <div class="dots"><i class="on"></i><i></i><i></i><i></i></div>
+    <h3>Monument</h3>
+    <a class="cta" href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a>
+  </article>
+  <article class="product">
+    <div class="ph"><img src="https://picsum.photos/seed/shop-5/460/620" alt="" /></div>
+    <div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+    <h3>Tour Book — La Griothèque</h3>
+    <a class="cta" href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a>
+  </article>
+  <article class="product">
+    <div class="ph"><img src="https://picsum.photos/seed/shop-6/440/620" alt="" /></div>
+    <div class="dots"><i class="on"></i><i></i><i></i><i></i></div>
+    <h3>Bleu Azurest</h3>
+    <a class="cta" href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a>
+  </article>
+  <article class="product">
+    <div class="ph"><img src="https://picsum.photos/seed/shop-7/440/620" alt="" /></div>
+    <div class="dots"><i class="on"></i><i></i><i></i><i></i></div>
+    <h3>Carnets du fleuve</h3>
+    <a class="cta" href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a>
+  </article>
+  <article class="product">
+    <div class="ph"><img src="https://picsum.photos/seed/shop-8/440/620" alt="" /></div>
+    <div class="dots"><i class="on"></i><i></i><i></i><i></i></div>
+    <h3>Une place à la table</h3>
+    <a class="cta" href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a>
+  </article>
+</main>
+
+<footer class="shop-foot" aria-hidden="true">
+  <span>LES GRIOTS</span>
+</footer>
+
+<style id="__om-edit-overrides"></style>
+</body>
+</html>

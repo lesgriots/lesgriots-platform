@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Les Griots — Specimens typographiques</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,800;0,900;1,400;1,800&family=Inter+Tight:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,700;1,9..144,400&family=Archivo:wght@300;400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,700;0,6..96,900;1,6..96,400&family=DM+Sans:wght@300;400;500;700&family=Italiana&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --paper: #f4efe3;
+    --accent: #F1B81F;
+    --ink-paper: #1a1814;
+    --muted: rgba(244,239,227,.55);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--paper); }
+  body { font-family: Inter, system-ui, sans-serif; line-height: 1.5; padding: 64px clamp(28px, 4vw, 80px) 120px; }
+  a { color: inherit; text-decoration: none; }
+  img, video { max-width: 100%; display: block; }
+
+  /* === HEADER === */
+  .head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid rgba(244,239,227,.15);
+    margin-bottom: 64px;
+  }
+  .head h1 {
+    font-family: "Playfair Display", "Bodoni Moda", serif;
+    font-weight: 800;
+    font-size: clamp(40px, 4.6vw, 76px);
+    line-height: 1;
+    letter-spacing: -.02em;
+  }
+  .head h1 em { color: var(--accent); font-style: italic; }
+  .head .meta {
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: right;
+  }
+  .head .meta strong { color: var(--paper); display: block; font-size: 13px; }
+
+  /* === LOGO REFERENCE === */
+  .logo-ref {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    background: #18130a;
+    padding: 32px 36px;
+    margin-bottom: 80px;
+    border: 1px solid rgba(241,184,31,.18);
+  }
+  .logo-ref img {
+    width: 280px;
+    height: auto;
+  }
+  .logo-ref .desc {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(244,239,227,.78);
+    max-width: 56ch;
+  }
+  .logo-ref .desc b { color: var(--accent); font-weight: 600; letter-spacing: .02em; }
+  .logo-ref ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-top: 14px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .logo-ref ul li::before { content: "·"; margin-right: 6px; color: var(--accent); }
+
+  /* === SPECIMEN CARDS === */
+  .specimens {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .spec {
+    background: var(--paper);
+    color: var(--ink-paper);
+    padding: 48px clamp(28px, 4vw, 64px);
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  .spec-side {
+    border-right: 1px solid rgba(26,24,20,.18);
+    padding-right: 32px;
+  }
+  .spec-num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: .18em;
+    color: rgba(26,24,20,.45);
+    margin-bottom: 12px;
+  }
+  .spec-name {
+    font-family: "Playfair Display", serif;
+    font-size: 32px;
+    line-height: 1;
+    letter-spacing: -.01em;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .spec-pair {
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(26,24,20,.55);
+    margin-bottom: 24px;
+  }
+  .spec-desc {
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(26,24,20,.7);
+    max-width: 30ch;
+  }
+  .spec-tags {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .spec-tags span {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    background: var(--ink-paper);
+    color: var(--paper);
+    padding: 4px 8px;
+  }
+
+  /* Sample content */
+  .sample {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+  .sample .display {
+    line-height: .95;
+    letter-spacing: -.025em;
+    font-size: clamp(60px, 7vw, 116px);
+  }
+  .sample .heading {
+    font-size: clamp(28px, 2.6vw, 40px);
+    line-height: 1.05;
+    letter-spacing: -.01em;
+  }
+  .sample .body {
+    font-size: 17px;
+    line-height: 1.55;
+    color: rgba(26,24,20,.82);
+    max-width: 64ch;
+  }
+  .sample .micro {
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: rgba(26,24,20,.55);
+    border-top: 1px solid rgba(26,24,20,.2);
+    padding-top: 14px;
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .sample em { font-style: italic; color: #b08911; }
+
+  /* === Type families per specimen === */
+  .s1 .display, .s1 .heading { font-family: "Playfair Display", serif; font-weight: 800; }
+  .s1 .body, .s1 .micro      { font-family: Inter, sans-serif; }
+
+  .s2 .display { font-family: "Bodoni Moda", serif; font-weight: 900; }
+  .s2 .heading { font-family: "Bodoni Moda", serif; font-weight: 700; }
+  .s2 .body, .s2 .micro { font-family: "Inter Tight", sans-serif; }
+
+  .s3 .display { font-family: "Fraunces", serif; font-weight: 700; font-variation-settings: "opsz" 144, "SOFT" 100; }
+  .s3 .heading { font-family: "Fraunces", serif; font-weight: 500; font-variation-settings: "opsz" 36; }
+  .s3 .body, .s3 .micro { font-family: "DM Sans", sans-serif; }
+
+  .s4 .display, .s4 .heading { font-family: "Cormorant Garamond", serif; font-weight: 500; }
+  .s4 .display { font-weight: 600; letter-spacing: 0; }
+  .s4 .body, .s4 .micro { font-family: "Manrope", sans-serif; }
+
+  .s5 .display, .s5 .heading { font-family: "Instrument Serif", serif; font-weight: 400; }
+  .s5 .body, .s5 .micro      { font-family: "Space Grotesk", sans-serif; }
+
+  .s6 .display { font-family: "Italiana", serif; font-weight: 400; letter-spacing: .01em; }
+  .s6 .heading { font-family: "Italiana", serif; font-weight: 400; }
+  .s6 .body, .s6 .micro { font-family: "Archivo", sans-serif; }
+
+  /* Italic accents */
+  .s1 .display .it,
+  .s2 .display .it,
+  .s3 .display .it,
+  .s4 .display .it,
+  .s5 .display .it,
+  .s6 .display .it { font-style: italic; }
+
+  /* === FOOTER === */
+  .foot {
+    margin-top: 96px;
+    border-top: 1px solid rgba(244,239,227,.15);
+    padding-top: 32px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  @media (max-width: 880px) {
+    body { padding: 32px 22px 80px; }
+    .head { grid-template-columns: 1fr; align-items: start; }
+    .head .meta { text-align: left; }
+    .logo-ref { flex-direction: column; align-items: flex-start; padding: 24px; }
+    .logo-ref img { width: 100%; max-width: 240px; }
+    .spec { grid-template-columns: 1fr; gap: 24px; }
+    .spec-side { border-right: 0; border-bottom: 1px solid rgba(26,24,20,.18); padding-right: 0; padding-bottom: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="head">
+  <h1>Six couples <em>typographiques</em><br/>pour Les Griots</h1>
+  <div class="meta">
+    <strong>Spécimens · v1</strong>
+    Mai 2026 · 23.05
+  </div>
+</header>
+
+<!-- LOGO REFERENCE -->
+<section class="logo-ref">
+  <img src="assets/les-griots-logo.png" alt="Les Griots" />
+  <div class="desc">
+    <b>Lecture du logo :</b> didone gras à fort contraste — fûts épais, déliés très fins, terminaisons en boule sur le <em>g</em> et le <em>s</em>. Italiques courbées, jambage du <em>g</em> double-étage. Trois points carrés en sceau. ADN : éditorial chic, presse africaine moderne, fashion classique.
+    <ul>
+      <li>Didone</li><li>High-contrast</li><li>Ball terminals</li><li>Editorial</li><li>Double-storey g</li>
+    </ul>
+  </div>
+</section>
+
+<div class="specimens">
+
+  <!-- 01 -->
+  <article class="spec s1">
+    <div class="spec-side">
+      <div class="spec-num">01 / 06 · Direct match</div>
+      <div class="spec-name">Playfair Display</div>
+      <div class="spec-pair">+ Inter</div>
+      <p class="spec-desc">Le cousin gratuit le plus proche du logo. Hauts contrastes, terminaisons en boule. Inter en compagnon neutre pour le corps de texte.</p>
+      <div class="spec-tags"><span>Google</span><span>Hi-contrast</span><span>Familier</span></div>
+    </div>
+    <div class="sample">
+      <div class="display">les griots <span class="it">racontent</span></div>
+      <div class="heading">L'appétit radical de la réalisatrice <span class="it">Aïssata Diallo</span></div>
+      <div class="body">Plateforme éditoriale dédiée aux conteuses et conteurs d'Afrique et de ses diasporas. Récits longs, portfolios, entretiens — une institution éphémère et entêtée. Nous croyons au temps long, au geste répété, au cinéma de l'attention.</div>
+      <div class="micro"><span>Récit · 14 min</span><span>Mariama Bâ</span><span>Mai 2026</span></div>
+    </div>
+  </article>
+
+  <!-- 02 -->
+  <article class="spec s2">
+    <div class="spec-side">
+      <div class="spec-num">02 / 06 · Editorial pur</div>
+      <div class="spec-name">Bodoni Moda</div>
+      <div class="spec-pair">+ Inter Tight</div>
+      <p class="spec-desc">Le Bodoni canonique : presse mode et beaux livres. Plus sec et formel que Playfair. Plus distant aussi. Excellent pour un côté manifeste / luxe sobre.</p>
+      <div class="spec-tags"><span>Premium</span><span>Mode</span><span>Sec</span></div>
+    </div>
+    <div class="sample">
+      <div class="display">les griots <span class="it">racontent</span></div>
+      <div class="heading">L'appétit radical de la réalisatrice <span class="it">Aïssata Diallo</span></div>
+      <div class="body">Plateforme éditoriale dédiée aux conteuses et conteurs d'Afrique et de ses diasporas. Récits longs, portfolios, entretiens — une institution éphémère et entêtée. Nous croyons au temps long, au geste répété, au cinéma de l'attention.</div>
+      <div class="micro"><span>Récit · 14 min</span><span>Mariama Bâ</span><span>Mai 2026</span></div>
+    </div>
+  </article>
+
+  <!-- 03 -->
+  <article class="spec s3">
+    <div class="spec-side">
+      <div class="spec-num">03 / 06 · Contemporain</div>
+      <div class="spec-name">Fraunces</div>
+      <div class="spec-pair">+ DM Sans</div>
+      <p class="spec-desc">Plus chaleureux, plus rond, plus organique. Sert dans le luxe contemporain (Aesop, Apple). Axes variables — peut s'adoucir ou se durcir selon le contexte.</p>
+      <div class="spec-tags"><span>Variable</span><span>Chaleureux</span><span>Contemporain</span></div>
+    </div>
+    <div class="sample">
+      <div class="display">les griots <span class="it">racontent</span></div>
+      <div class="heading">L'appétit radical de la réalisatrice <span class="it">Aïssata Diallo</span></div>
+      <div class="body">Plateforme éditoriale dédiée aux conteuses et conteurs d'Afrique et de ses diasporas. Récits longs, portfolios, entretiens — une institution éphémère et entêtée. Nous croyons au temps long, au geste répété, au cinéma de l'attention.</div>
+      <div class="micro"><span>Récit · 14 min</span><span>Mariama Bâ</span><span>Mai 2026</span></div>
+    </div>
+  </article>
+
+  <!-- 04 -->
+  <article class="spec s4">
+    <div class="spec-side">
+      <div class="spec-num">04 / 06 · Élégant et fin</div>
+      <div class="spec-name">Cormorant Garamond</div>
+      <div class="spec-pair">+ Manrope</div>
+      <p class="spec-desc">Plus fin, plus aérien que le logo. Crée un contraste joli : le logo dense fait l'ancre, le texte respire. Recommandé si tu veux atténuer le côté « presse » du logo.</p>
+      <div class="spec-tags"><span>Garalde</span><span>Aérien</span><span>Contraste</span></div>
+    </div>
+    <div class="sample">
+      <div class="display">les griots <span class="it">racontent</span></div>
+      <div class="heading">L'appétit radical de la réalisatrice <span class="it">Aïssata Diallo</span></div>
+      <div class="body">Plateforme éditoriale dédiée aux conteuses et conteurs d'Afrique et de ses diasporas. Récits longs, portfolios, entretiens — une institution éphémère et entêtée. Nous croyons au temps long, au geste répété, au cinéma de l'attention.</div>
+      <div class="micro"><span>Récit · 14 min</span><span>Mariama Bâ</span><span>Mai 2026</span></div>
+    </div>
+  </article>
+
+  <!-- 05 -->
+  <article class="spec s5">
+    <div class="spec-side">
+      <div class="spec-num">05 / 06 · Actuel</div>
+      <div class="spec-name">Instrument Serif</div>
+      <div class="spec-pair">+ Space Grotesk</div>
+      <p class="spec-desc">L'option « 2024-2026 » — utilisée partout dans les studios créatifs cool. Plus chic et plus contemporain que Playfair. Italique magnifique. La sans-serif géométrique apporte un côté tech / studio.</p>
+      <div class="spec-tags"><span>Studio</span><span>Tendance</span><span>Italique</span></div>
+    </div>
+    <div class="sample">
+      <div class="display">les griots <span class="it">racontent</span></div>
+      <div class="heading">L'appétit radical de la réalisatrice <span class="it">Aïssata Diallo</span></div>
+      <div class="body">Plateforme éditoriale dédiée aux conteuses et conteurs d'Afrique et de ses diasporas. Récits longs, portfolios, entretiens — une institution éphémère et entêtée. Nous croyons au temps long, au geste répété, au cinéma de l'attention.</div>
+      <div class="micro"><span>Récit · 14 min</span><span>Mariama Bâ</span><span>Mai 2026</span></div>
+    </div>
+  </article>
+
+  <!-- 06 -->
+  <article class="spec s6">
+    <div class="spec-side">
+      <div class="spec-num">06 / 06 · Architectural</div>
+      <div class="spec-name">Italiana</div>
+      <div class="spec-pair">+ Archivo</div>
+      <p class="spec-desc">Très fin, lettres hautes et étroites. Donne au site un caractère couture / haute couture / architecture. À utiliser uniquement en grand. Surprenant à côté du logo épais — joue le contraste fort/fin.</p>
+      <div class="spec-tags"><span>Couture</span><span>Display only</span><span>Étroit</span></div>
+    </div>
+    <div class="sample">
+      <div class="display">les griots <span class="it">racontent</span></div>
+      <div class="heading">L'appétit radical de la réalisatrice <span class="it">Aïssata Diallo</span></div>
+      <div class="body">Plateforme éditoriale dédiée aux conteuses et conteurs d'Afrique et de ses diasporas. Récits longs, portfolios, entretiens — une institution éphémère et entêtée. Nous croyons au temps long, au geste répété, au cinéma de l'attention.</div>
+      <div class="micro"><span>Récit · 14 min</span><span>Mariama Bâ</span><span>Mai 2026</span></div>
+    </div>
+  </article>
+
+</div>
+
+<footer class="foot">
+  <span>Les Griots · Specimens v1</span>
+  <span>Tous les couples sont 100% Google Fonts (gratuits)</span>
+</footer>
+
+</body>
+</html>

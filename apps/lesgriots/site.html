@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Les Griots — Récits inattendus du continent et de ses diasporas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Permanent+Marker&family=Playfair+Display:ital,wght@0,400;0,600;0,800;0,900;1,400;1,800&family=Inter:wght@300;400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,700;0,6..96,900;1,6..96,400&family=Inter+Tight:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Italiana&family=Archivo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<template id="__bundler_thumbnail" data-bg-color="#0a0a0a">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0a0a0a"/>
+    <text x="600" y="440" font-family="Georgia, serif" font-size="150" font-style="italic" font-weight="700" fill="#F1B81F" text-anchor="middle">les griots</text>
+  </svg>
+</template>
+
+<body class="page-archive">
+
+<!-- BRAND : lives outside all sections so its z-index escapes stacking contexts -->
+<a class="brand-mark" id="brand" href="#stage" aria-label="Retour à l'accueil">
+  <img class="brand-img brand-yellow" src="assets/les-griots-logo.png" alt="Les Griots" />
+  <img class="brand-img brand-white"  src="assets/les-griots-logo.png" alt="" aria-hidden="true" />
+</a>
+
+<!-- =========================================================
+     STAGE — single page : Florale home video → click reveals menu
+     ========================================================= -->
+<main class="stage" id="stage" data-screen-label="00 Accueil">
+
+  <!-- Image stack — projets -->
+  <div class="stage-images">
+    <img class="stage-img is-active is-visible" data-key="florale"  src="assets/florale.jpg" alt="" />
+    <img class="stage-img" data-key="indigo"     src="assets/indigo-cristal.jpg" alt="" />
+    <img class="stage-img" data-key="monument"   src="assets/monument.jpg" alt="" />
+    <img class="stage-img" data-key="aissata"    src="https://picsum.photos/seed/lg-aissata/2000/1300" alt="" />
+  </div>
+
+  <!-- Home video — couche dédiée, indépendante des projets -->
+  <video class="stage-home" id="stage-home" src="assets/florale.mp4" poster="assets/florale.jpg" autoplay muted loop playsinline preload="auto"></video>
+
+  <!-- Vignettes — top + bottom for legibility -->
+  <div class="stage-veil" aria-hidden="true"></div>
+
+
+
+  <!-- BOTTOM RIGHT — mail icon -->
+  <a class="stage-mail" href="#" aria-label="Nous contacter">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+      <rect x="3" y="6" width="18" height="13" rx="1"/>
+      <path d="M3 7l9 7 9-7"/>
+    </svg>
+  </a>
+
+</main>
+
+<!-- Scroll runway — drives the progressive logo rise -->
+<div class="scroll-runway" aria-hidden="true"></div>
+
+<!-- =========================================================
+     JOURNAL — index of projects (arrives directly after the video)
+     ========================================================= -->
+<section class="journal" id="journal" data-screen-label="02 Index" data-lenis-prevent>
+  <dl class="jr-list">
+    <div class="jr-bg" aria-hidden="true">
+      <img data-bg="trale" src="assets/florale.jpg" alt="" />
+      <img data-bg="wanderkid" src="https://picsum.photos/seed/lg-wanderkid/1600/900" alt="" />
+      <img data-bg="outside" src="https://picsum.photos/seed/lg-outside/1600/900" alt="" />
+      <img data-bg="tempete" src="assets/indigo-cristal.jpg" alt="" />
+      <img data-bg="samir" src="https://picsum.photos/seed/lg-samir/1600/900" alt="" />
+      <img data-bg="utopia" src="https://picsum.photos/seed/lg-utopia/1600/900" alt="" />
+      <img data-bg="mirage" src="https://picsum.photos/seed/lg-mirage/1600/900" alt="" />
+      <img data-bg="kwesi" src="https://picsum.photos/seed/lg-kwesi/1600/900" alt="" />
+      <img data-bg="bafana" src="https://picsum.photos/seed/lg-bafana/1600/900" alt="" />
+      <img data-bg="nuitdebout" src="https://picsum.photos/seed/lg-nuitdebout/1600/900" alt="" />
+      <img data-bg="sahel" src="https://picsum.photos/seed/lg-sahel/1600/900" alt="" />
+      <img data-bg="odyssee" src="https://picsum.photos/seed/lg-odyssee/1600/900" alt="" />
+      <img data-bg="yiri" src="https://picsum.photos/seed/lg-yiri/1600/900" alt="" />
+      <img data-bg="palabres" src="https://picsum.photos/seed/lg-palabres/1600/900" alt="" />
+      <img data-bg="kora" src="https://picsum.photos/seed/lg-kora/1600/900" alt="" />
+      <img data-bg="diasporafm" src="https://picsum.photos/seed/lg-diasporafm/1600/900" alt="" />
+      <img data-bg="zephyr" src="https://picsum.photos/seed/lg-zephyr/1600/900" alt="" />
+      <img data-bg="nike" src="https://picsum.photos/seed/lg-nike/1600/900" alt="" />
+    </div>
+    <div class="jr-row" data-key="trale"><dt>26-05-12</dt><dd>Tralé</dd></div>
+    <div class="jr-row" data-key="wanderkid"><dt>26-04-02</dt><dd>Wanderkid</dd></div>
+    <div class="jr-row" data-key="outside"><dt>26-03-18</dt><dd>Outside</dd></div>
+    <div class="jr-row" data-key="tempete"><dt>26-02-07</dt><dd>Tempête</dd></div>
+    <div class="jr-row" data-key="samir"><dt>x</dt><dd>Samir</dd></div>
+    <div class="jr-row" data-key="utopia"><dt>x</dt><dd>Utopia</dd></div>
+    <div class="jr-row" data-key="mirage"><dt>x</dt><dd>Mirage</dd></div>
+    <div class="jr-row" data-key="kwesi"><dt>x</dt><dd>Kwesi</dd></div>
+    <div class="jr-row" data-key="bafana"><dt>x</dt><dd>Bafana</dd></div>
+    <div class="jr-row" data-key="nuitdebout"><dt>x</dt><dd>Nuit Debout</dd></div>
+    <div class="jr-row" data-key="sahel"><dt>x</dt><dd>Sahel</dd></div>
+    <div class="jr-row" data-key="odyssee"><dt>x</dt><dd>Odyssée</dd></div>
+    <div class="jr-row" data-key="yiri"><dt>x</dt><dd>Yiri</dd></div>
+    <div class="jr-row" data-key="palabres"><dt>x</dt><dd>Palabres</dd></div>
+    <div class="jr-row" data-key="kora"><dt>x</dt><dd>Kora</dd></div>
+    <div class="jr-row" data-key="diasporafm"><dt>x</dt><dd>Diaspora FM</dd></div>
+    <div class="jr-row" data-key="zephyr"><dt>x</dt><dd>Zéphyr</dd></div>
+    <div class="jr-row" data-key="nike"><dt>x</dt><dd>Les Griots × Nike — Air Teranga</dd></div>
+  </dl>
+  <footer class="jr-foot"><span>© LES GRIOTS</span><a href="https://instagram.com/lesgriots" target="_blank" rel="noopener">INSTAGRAM</a></footer>
+</section>
+
+<!-- =========================================================
+     PLAYER — Colors-style full-bleed video, opens on tile click
+     ========================================================= -->
+<div class="player" id="player" aria-hidden="true">
+  <button class="player-close" aria-label="Fermer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M6 6l12 12M18 6L6 18"/>
+    </svg>
+  </button>
+  <div class="player-stage">
+    <img class="player-image" id="player-image" alt="" />
+  </div>
+  <div class="player-badge">
+    Les<br/>Griots<br/><span>*studios</span>
+  </div>
+  <div class="player-meta">
+    <span class="player-title" id="player-title">—</span>
+    <span class="player-sub">Un épisode Les Griots · 2026</span>
+  </div>
+</div>
+
+<!-- MENU — fixe sous le logo, au-dessus des panneaux -->
+<header class="jr-head">
+  <span>Index</span>
+  <a href="#" id="archive-btn">Archive</a>
+  <a href="#" id="shop-btn">Shop</a>
+  <a href="#" id="about-btn">About</a>
+</header>
+
+<!-- PROJET — page type (Florale) : monte comme les autres panneaux -->
+<aside class="about-panel project-panel" id="project-florale" aria-hidden="true" data-lenis-prevent>
+  <div class="pj-hero">
+    <img src="uploads/florale-01.jpg" alt="Tralé" />
+    <h2>Tralé</h2>
+  </div>
+  <div class="pj-body">
+    <p class="pj-intro">Un film Les Griots. Réalisé par Moos Coulibaly.</p>
+    <figure class="pj-img pj-wide"><img src="https://picsum.photos/seed/flo-2/1600/900" alt="" /></figure>
+    <div class="pj-pair">
+      <figure class="pj-img"><img src="https://picsum.photos/seed/flo-3/700/900" alt="" /></figure>
+      <figure class="pj-img"><img src="https://picsum.photos/seed/flo-4/700/900" alt="" /></figure>
+    </div>
+    <p class="pj-note">Tourné entre Dakar et Paris. Direction artistique, production et post-production Les Griots.</p>
+    <figure class="pj-img pj-wide"><img src="https://picsum.photos/seed/flo-5/1600/900" alt="" /></figure>
+    <a class="pj-next" href="#" id="pj-next">Projet suivant — Wanderkid</a>
+  </div>
+</aside>
+
+<!-- PRODUIT — détail qui overlap le shop -->
+<aside class="about-panel product-panel" id="product-panel" aria-hidden="true" data-lenis-prevent>
+  <div class="pd-wrap">
+    <img id="pd-img" alt="" />
+    <div class="pd-info">
+      <h3 id="pd-title"></h3>
+      <p class="pd-desc">Édition Les Griots. Impression et façonnage soignés, tirage limité.</p>
+      <a href="#" class="pd-buy">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a>
+    </div>
+  </div>
+</aside>
+
+<!-- PANIER — apparaît en haut à droite quand le shop est ouvert -->
+<div class="shop-cart" id="shop-cart">Panier&nbsp;(&nbsp;<span id="cart-count">0</span>&nbsp;)</div>
+
+<style id="__om-edit-overrides"></style>
+
+<!-- ARCHIVE — panneau mosaïque -->
+<aside class="about-panel archive-panel" id="archive-panel" aria-hidden="true" data-lenis-prevent>
+  <div class="ar-grid">
+    <a href="#" title="Les Griots × COLORS — Session Bamako"><img src="https://picsum.photos/seed/lg-colors/800/450" alt="Les Griots × COLORS — Session Bamako" /></a>
+    <a href="#" title="Les Griots × ARTE — Mémoires du Fleuve"><img src="https://picsum.photos/seed/lg-arte/800/450" alt="Les Griots × ARTE — Mémoires du Fleuve" /></a>
+    <a href="#" title="Les Griots × Jacquemus — Le Boubou"><img src="https://picsum.photos/seed/lg-jacquemus/800/450" alt="Les Griots × Jacquemus — Le Boubou" /></a>
+    <a href="#" title="Les Griots × Spotify — Griot Radio Live"><img src="https://picsum.photos/seed/lg-spotify/800/450" alt="Les Griots × Spotify — Griot Radio Live" /></a>
+    <a href="#" title="Fleuve Noir"><img src="https://picsum.photos/seed/lg-fleuvenoir/800/450" alt="Fleuve Noir" /></a>
+    <a href="#" class="ar-gap"></a>
+    <a href="#" title="Cauris"><img src="https://picsum.photos/seed/lg-cauris/800/450" alt="Cauris" /></a>
+    <a href="#" title="Harmattan"><img src="https://picsum.photos/seed/lg-harmattan/800/450" alt="Harmattan" /></a>
+    <a href="#" title="Gorée"><img src="https://picsum.photos/seed/lg-goree/800/450" alt="Gorée" /></a>
+    <a href="#" title="Wax"><img src="https://picsum.photos/seed/lg-wax/800/450" alt="Wax" /></a>
+    <a href="#" title="Téranga"><img src="https://picsum.photos/seed/lg-teranga/800/450" alt="Téranga" /></a>
+    <a href="#" class="ar-gap"></a>
+    <a href="#" title="Baobab"><img src="https://picsum.photos/seed/lg-baobab/800/450" alt="Baobab" /></a>
+    <a href="#" title="Griot Radio"><img src="https://picsum.photos/seed/lg-griotradio/800/450" alt="Griot Radio" /></a>
+    <a href="#" title="Mansa"><img src="https://picsum.photos/seed/lg-mansa/800/450" alt="Mansa" /></a>
+    <a href="#" title="Sankofa"><img src="https://picsum.photos/seed/lg-sankofa/800/450" alt="Sankofa" /></a>
+    <a href="#" title="Bamako Nights"><img src="https://picsum.photos/seed/lg-bamakonights/800/450" alt="Bamako Nights" /></a>
+    <a href="#" class="ar-gap"></a>
+    <a href="#" title="Ancestra"><img src="https://picsum.photos/seed/lg-ancestra/800/450" alt="Ancestra" /></a>
+    <a href="#" title="Kilimandjaro"><img src="https://picsum.photos/seed/lg-kilimandjaro/800/450" alt="Kilimandjaro" /></a>
+  </div>
+</aside>
+
+<!-- ABOUT — panneau qui monte par le bas -->
+<aside class="about-panel" id="about-panel" aria-hidden="true" data-lenis-prevent>
+  <div class="about-scroll">
+    <div class="about-slide"><p>Multidisciplinary platform and institution that seeks to amplify vital voices and works in art, design, music and literature. With an urgent mission to preserve, collect and uplift the stories, works and archives of Black creators, Saint Heron remains dedicated to empowering future practitioners of art by reverencing the spiritual act of creating and spotlighting artists' unwavering devotion to the intergenerational language of expression.</p></div>
+        <div class="about-slide about-white">
+      <div class="aw-sites">
+        <a class="aw-site" href="https://lesgriotsxstudio.com" target="_blank" rel="noopener"><img src="uploads/florale-01.jpg" alt="" /><span>lesgriotsxstudio.com</span></a>
+        <a class="aw-site" href="https://lesgriots.com" target="_blank" rel="noopener"><img src="uploads/p-monument.jpg" alt="" /><span>lesgriots.com</span></a>
+        <a class="aw-site" href="https://lagriotheque.com" target="_blank" rel="noopener"><img src="uploads/indigo-cristal-cover.jpg" alt="" /><span>lagriotheque.com</span></a>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- SHOP — panneau qui monte par le bas -->
+<aside class="about-panel shop-panel" id="shop-panel" aria-hidden="true" data-lenis-prevent>
+  <div class="shop-panel-grid">
+    <article class="sp-product"><img src="https://picsum.photos/seed/shop-1/440/620" alt="" /><h3>Encyclopædia Griotica</h3><a href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a></article>
+    <article class="sp-product"><img src="https://picsum.photos/seed/shop-2/440/620" alt="" /><h3>Florale — Affiche du film</h3><a href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a></article>
+    <article class="sp-product"><img src="https://picsum.photos/seed/shop-3/440/620" alt="" /><h3>Indigo Cristal — Édition limitée</h3><a href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a></article>
+    <article class="sp-product"><img src="https://picsum.photos/seed/shop-4/440/620" alt="" /><h3>Monument</h3><a href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a></article>
+    <article class="sp-product"><img src="https://picsum.photos/seed/shop-5/460/620" alt="" /><h3>Tour Book — La Griothèque</h3><a href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a></article>
+    <article class="sp-product"><img src="https://picsum.photos/seed/shop-6/440/620" alt="" /><h3>Bleu Azurest</h3><a href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a></article>
+    <article class="sp-product"><img src="https://picsum.photos/seed/shop-7/440/620" alt="" /><h3>Carnets du fleuve</h3><a href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a></article>
+    <article class="sp-product"><img src="https://picsum.photos/seed/shop-8/440/620" alt="" /><h3>Une place à la table</h3><a href="#">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a></article>
+  </div>
+</aside>
+
+<script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
+<script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script>
+  (function() {
+    const body = document.body;
+    const stage = document.getElementById('stage');
+    const stack = document.querySelector('.stage-images');
+    const rows = document.querySelectorAll('.stage-list .row');
+
+    // Build the rotation order from the DOM
+    const slides = Array.from(stack.querySelectorAll('.stage-img'));
+    const keys = slides.map((el) => el.dataset.key);
+    let currentIdx = 0;
+    let rotateTimer = null;
+    let zCounter = 1;
+    const ROTATE_MS = 2200; // each project shown ~2.2s before reveal
+
+    // Initial : indigo is visible in the stage section (florale lives in landing)
+    const initial = stack.querySelector('.stage-img.is-active');
+    if (initial) {
+      initial.classList.add('is-visible');
+      initial.style.zIndex = String(zCounter);
+    }
+
+    function showByIdx(i) {
+      currentIdx = (i + keys.length) % keys.length;
+      const key = keys[currentIdx];
+      slideUp(key);
+      rows.forEach((r) => r.classList.toggle('is-active', r.dataset.key === key));
+    }
+
+    // Slide the target image up from below, on top of whatever was there.
+    // Previous images stay visible underneath.
+    function slideUp(key) {
+      const el = stack.querySelector(`.stage-img[data-key="${key}"]`);
+      if (!el) return;
+      // If it's already the top one, nothing to do
+      if (el.classList.contains('is-visible') && parseInt(el.style.zIndex, 10) === zCounter) return;
+      zCounter++;
+      el.style.zIndex = String(zCounter);
+      // Simple cross-fade: just make this one visible
+      el.classList.add('is-visible');
+    }
+
+    function startRotation() { /* disabled — only one video shows on arrival */ }
+    function stopRotation() {
+      if (rotateTimer) { clearInterval(rotateTimer); rotateTimer = null; }
+    }
+
+    function enter() {
+      if (body.classList.contains('entered')) return;
+      body.classList.add('entered');
+      stopRotation();
+    }
+
+    // Begin auto-rotation on load
+    startRotation();
+
+    // 1. Click on the stage → smooth-scroll down, which drives the logo rise
+    if (stage) {
+      stage.addEventListener('click', function(e) {
+        if (e.target.closest('.stage-list, .stage-mail')) return;
+        startArrival();
+      });
+    }
+
+    // 2. Progressive scroll → logo position follows scroll exactly
+    const brandEl = document.getElementById('brand');
+    // Eased scroll-follow : the logo lerps toward its target each frame
+    let currentY = 0;
+    let targetY = 0;
+    let menuReturnY = null; // pilotage du menu pendant le retour à l'Index
+    const jrHeadEl = document.querySelector('.jr-head');
+    let brandLoop = 0; // décalage boucle : le logo sort par le haut et réapparaît par le bas
+    // === Arrivée en DEUX TEMPS ===
+    // Phase 1 : au premier geste de scroll, le logo file directement en haut
+    //           (le scroll de page est verrouillé pendant ce temps).
+    // Phase 2 : une fois le logo docké en haut, la section Index monte.
+    let seq = 0;            // 0 = accueil, 1 = logo monte, 2 = entré
+    let travelFixed = 0;
+    function journalTop() {
+      const jEl = document.getElementById('journal');
+      return jEl ? jEl.offsetTop : window.innerHeight;
+    }
+    // Déclenche la phase 1 (logo → haut). Idempotent.
+    function startArrival() {
+      if (seq !== 0 || !brandEl) return;
+      seq = 1;
+      const rect = brandEl.getBoundingClientRect();
+      travelFixed = Math.max(0, rect.top - currentY);
+      targetY = -travelFixed;                 // le logo monte en haut
+      // La phase 2 (montée de la section) se déclenche DÈS QUE le logo touche
+      // le haut — détecté dans tick() (onLogoDocked). Pas de délai fixe.
+    }
+    // Fin de phase 1 (logo en haut) → phase 2 : on relâche le scroll et la section monte.
+    function onLogoDocked() {
+      if (seq !== 1) return;
+      seq = 2;
+      enter();
+      // Phase 2 : l'Index monte EN OVERLAY par-dessus le hero (qui reste derrière),
+      // le logo reste pinné en haut. Pas de scroll de page.
+      raiseIndex();
+    }
+    // Index en overlay : slide up par-dessus le hero, puis reste en place.
+    function raiseIndex() {
+      const j = document.getElementById('journal');
+      if (!j) return;
+      j.classList.add('as-overlay');
+      j.style.transform = 'translateY(100%)';
+      j.setAttribute('aria-hidden', 'false');
+      const t0 = performance.now();
+      (function tw(now) {
+        const t = Math.min(1, (now - t0) / 300);
+        const e = 1 - Math.pow(1 - t, 3);
+        j.style.transform = 'translateY(' + ((1 - e) * 100) + '%)';
+        if (t < 1) requestAnimationFrame(tw);
+        else j.style.transform = 'translateY(0)';
+      })(performance.now());
+    }
+    // NB : le vrai onScroll (recalage du logo + toggle "settled") est défini
+    // plus bas — une seule déclaration pour éviter les conflits de hoisting.
+    function tick() {
+      const k = (seq === 1) ? 0.2 : 0.08; // phase 1 : montée directe et vive du logo
+      currentY += (targetY - currentY) * k;
+      if (Math.abs(targetY - currentY) < 0.1) currentY = targetY;
+      if (seq === 1 && currentY <= targetY + 0.6) onLogoDocked(); // logo docké → phase 2
+      const pj = document.getElementById('project-florale');
+      if (pj && !pj.classList.contains('open')) brandLoop = 0;
+      if (brandEl) brandEl.style.transform = 'translateY(' + (currentY + brandLoop) + 'px)';
+      if (jrHeadEl && brandEl) {
+        // le menu monte avec le logo, s'arrête en haut (22px) et y reste ensuite
+        const maxUp = (brandEl.offsetHeight || 0) + 14 - 22;
+        const menuY = menuReturnY !== null ? menuReturnY
+          : (brandLoop <= 0 ? Math.max(brandLoop, -maxUp) : -maxUp);
+        jrHeadEl.style.transform = 'translateY(' + menuY + 'px)';
+      }
+      requestAnimationFrame(tick);
+    }
+    // --- Menu INDEX (section noire)
+    const menuBtn = document.getElementById('ency-menu-btn');
+    if (menuBtn) {
+      menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const wrap = menuBtn.parentElement;
+        const open = wrap.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', String(open));
+      });
+      document.addEventListener('click', () => menuBtn.parentElement.classList.remove('open'));
+    }
+
+    // --- Index : plein écran, texte centré (hauteur fixe en CSS)
+    const journalEl = document.getElementById('journal');
+
+    // --- Hover d'un projet → miniature à une position aléatoire de l'écran
+    if (journalEl) {
+      const bgs = journalEl.querySelectorAll('.jr-bg img');
+      const srcByKey = {};
+      bgs.forEach((im) => { srcByKey[im.dataset.bg] = im.getAttribute('src'); });
+      const thumb = document.createElement('div');
+      thumb.className = 'jr-thumb';
+      thumb.innerHTML = '<img alt="" />';
+      document.body.appendChild(thumb);
+      const thumbImg = thumb.querySelector('img');
+      journalEl.querySelectorAll('.jr-row[data-key]').forEach((row) => {
+        const dd = row.querySelector('dd') || row;
+        dd.addEventListener('mouseenter', () => {
+          const src = srcByKey[row.dataset.key];
+          if (!src) return;
+          thumbImg.src = src;
+          const w = 280, h = w * 9 / 16;
+          // jamais dans la zone du logo : uniquement en dessous
+          const brandRect = document.getElementById('brand')?.getBoundingClientRect();
+          const minY = Math.max(40, (brandRect ? brandRect.bottom : 0) + 60); /* sous logo + menu */
+          const x = 40 + Math.random() * Math.max(0, window.innerWidth - w - 80);
+          const y = minY + Math.random() * Math.max(0, window.innerHeight - h - minY - 40);
+          thumb.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+          thumb.classList.add('on');
+        });
+        dd.addEventListener('mouseleave', () => thumb.classList.remove('on'));
+      });
+    }
+
+    // --- About / Shop : panneaux qui montent par le bas
+    // Remontée logo+menu depuis le bas (même chorégraphie qu'à l'arrivée), puis callback
+    function riseLogoMenu(cb) {
+      const Hlogo = brandEl ? brandEl.offsetHeight : 0;
+      const fromLoop = Hlogo - currentY;
+      const t0 = performance.now();
+      window.__returning = true;
+      (function riseBack(now) {
+        const t = Math.min(1, (now - t0) / 300);
+        const e = 1 - Math.pow(1 - t, 3);
+        brandLoop = fromLoop * (1 - e);
+        const menuFrom = window.innerHeight - (Hlogo + 14);
+        menuReturnY = Math.max(0, menuFrom) * (1 - e);
+        if (t < 1) requestAnimationFrame(riseBack);
+        else {
+          window.__returning = false; menuReturnY = null;
+          brandLoop = 0; window.__logoPhase = false;
+          if (cb) cb();
+        }
+      })(t0);
+    }
+    // Montée/descente de panneau animée en JS (les transitions CSS démarrent trop tard ici)
+    function slidePanelUp(panel) {
+      panel.style.transition = 'none';
+      panel.classList.add('open');
+      panel.setAttribute('aria-hidden', 'false');
+      const t0 = performance.now();
+      (function tw(now) {
+        const t = Math.min(1, (now - t0) / 300);
+        const e = 1 - Math.pow(1 - t, 3);
+        panel.style.transform = 'translateY(' + ((1 - e) * 100) + '%)';
+        if (t < 1) requestAnimationFrame(tw);
+        else { panel.style.transition = ''; panel.style.transform = ''; }
+      })(t0);
+    }
+    function slidePanelDown(panel) {
+      panel.style.transition = 'none';
+      const t0 = performance.now();
+      (function tw(now) {
+        const t = Math.min(1, (now - t0) / 300);
+        const e = 1 - Math.pow(1 - t, 3);
+        panel.style.transform = 'translateY(' + (e * 100) + '%)';
+        if (t < 1) requestAnimationFrame(tw);
+        else {
+          panel.classList.remove('open');
+          panel.setAttribute('aria-hidden', 'true');
+          panel.style.transition = ''; panel.style.transform = '';
+        }
+      })(t0);
+    }
+    let panelZ = 200;
+    function wirePanel(btnId, panelId) {
+      const btn = document.getElementById(btnId);
+      const panel = document.getElementById(panelId);
+      if (!btn || !panel) return;
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const doOpen = () => {
+          panelZ = panelZ >= 230 ? 201 : panelZ + 1;
+          panel.style.zIndex = String(panelZ); // monte par-dessus le panneau déjà présenté
+          slidePanelUp(panel);
+        };
+        // Depuis un projet (logo déplacé) : d'abord logo+menu remontent, puis la section
+        if (brandLoop !== 0) riseLogoMenu(doOpen); else doOpen();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') panel.classList.remove('open');
+      });
+    }
+    wirePanel('about-btn', 'about-panel');
+    // Scroll inverse en haut d'un panneau → il redescend, la section précédente réapparaît
+    let upAccum = 0, closeCooldown = 0;
+    document.addEventListener('wheel', (e) => {
+      const openPanel = [...document.querySelectorAll('.about-panel.open')]
+        .sort((a, b) => (parseInt(b.style.zIndex, 10) || 0) - (parseInt(a.style.zIndex, 10) || 0))[0];
+      if (!openPanel) { upAccum = 0; return; }
+      if (window.__logoPhase) { upAccum = 0; return; } // le logo revient d'abord, pas de fermeture
+      if (Date.now() < closeCooldown) return; // absorbe l'inertie du trackpad après une fermeture
+      if (e.deltaY < 0 && openPanel.scrollTop <= 0) {
+        upAccum += -e.deltaY;
+        if (upAccum > 220) {
+          upAccum = 0;
+          closeCooldown = Date.now() + 1200;
+          slidePanelDown(openPanel);
+        }
+      } else { upAccum = 0; }
+    }, { passive: true });
+    // Les 3 sites montent avec ease quand la section blanche arrive
+    const awSlide = document.querySelector('.about-white');
+    if (awSlide) {
+      new IntersectionObserver((entries) => {
+        entries.forEach((en) => awSlide.classList.toggle('in-view', en.isIntersecting));
+      }, { threshold: 0.35 }).observe(awSlide);
+    }
+    // Panier : visible quand le shop (ou une fiche) est ouvert, compteur sur "Acheter"
+    const cartEl = document.getElementById('shop-cart');
+    const cartCount = document.getElementById('cart-count');
+    if (cartEl) {
+      let n = 0;
+      const shopP = document.getElementById('shop-panel');
+      const prodP = document.getElementById('product-panel');
+      const sync = () => cartEl.classList.toggle('on',
+        (shopP && shopP.classList.contains('open')) || (prodP && prodP.classList.contains('open')));
+      new MutationObserver(sync).observe(shopP, { attributes: true, attributeFilter: ['class'] });
+      if (prodP) new MutationObserver(sync).observe(prodP, { attributes: true, attributeFilter: ['class'] });
+      document.querySelectorAll('.sp-product a, .pd-buy').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          cartCount.textContent = String(++n);
+          cartEl.classList.add('bump');
+          setTimeout(() => cartEl.classList.remove('bump'), 350);
+        });
+      });
+    }
+    wirePanel('shop-btn', 'shop-panel');
+    // Clic sur un article du shop → sa fiche overlap
+    const pdPanel = document.getElementById('product-panel');
+    if (pdPanel) {
+      document.querySelectorAll('.sp-product').forEach((card) => {
+        card.addEventListener('click', (e) => {
+          e.preventDefault();
+          document.getElementById('pd-img').src = card.querySelector('img').src;
+          document.getElementById('pd-title').textContent = card.querySelector('h3').textContent;
+          panelZ = panelZ >= 230 ? 201 : panelZ + 1;
+          pdPanel.style.zIndex = String(panelZ);
+          slidePanelUp(pdPanel);
+        });
+      });
+    }
+    wirePanel('archive-btn', 'archive-panel');
+    // Archive : les cases montent avec ease au scroll
+    const arPanel = document.getElementById('archive-panel');
+    if (arPanel) {
+      const tiles = arPanel.querySelectorAll('.ar-grid a');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((en) => en.target.classList.toggle('in-view', en.isIntersecting));
+      }, { root: arPanel, threshold: 0.2 });
+      tiles.forEach((t, i) => { t.style.transitionDelay = (i % 4) * 0.08 + 's'; io.observe(t); });
+    }
+    // Clic sur n'importe quel projet de l'index → la page projet monte (contenu adapté)
+    const floralePanel = document.getElementById('project-florale');
+    if (journalEl && floralePanel) {
+      let logoOff = 0;
+      const rows = [...journalEl.querySelectorAll('.jr-row[data-key]')];
+      const bgSrc = {};
+      journalEl.querySelectorAll('.jr-bg img').forEach((im) => { bgSrc[im.dataset.bg] = im.getAttribute('src'); });
+      const heroImg = floralePanel.querySelector('.pj-hero img');
+      const heroTitle = floralePanel.querySelector('.pj-hero h2');
+      const nextLink = document.getElementById('pj-next');
+      function openProject(idx) {
+        const row = rows[idx];
+        const name = row.querySelector('dd').textContent;
+        heroTitle.textContent = name;
+        if (bgSrc[row.dataset.key]) heroImg.src = bgSrc[row.dataset.key];
+        const next = rows[(idx + 1) % rows.length];
+        if (nextLink) {
+          nextLink.textContent = 'Projet suivant — ' + next.querySelector('dd').textContent;
+          nextLink.dataset.idx = String((idx + 1) % rows.length);
+        }
+        panelZ = panelZ >= 230 ? 201 : panelZ + 1;
+        floralePanel.style.zIndex = String(panelZ);
+        slidePanelUp(floralePanel);
+        floralePanel.scrollTop = 0;
+        logoOff = 0; brandLoop = 0; window.__logoPhase = false;
+      }
+      rows.forEach((row, i) => {
+        (row.querySelector('dd') || row).addEventListener('click', () => openProject(i));
+      });
+      if (nextLink) nextLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        openProject(parseInt(nextLink.dataset.idx || '0', 10));
+      });
+      // Premier scroll : seul le logo sort par le haut, le contenu ne bouge pas
+      floralePanel.addEventListener('wheel', (e) => {
+        if (!floralePanel.classList.contains('open') || !brandEl) return;
+        const H = (brandEl.offsetHeight || 0) + 20;
+        if (e.deltaY > 0 && logoOff < H) {
+          e.preventDefault();
+          logoOff = Math.min(H, logoOff + e.deltaY);
+          brandLoop = -logoOff;
+        } else if (e.deltaY < 0 && floralePanel.scrollTop <= 0 && logoOff > 0) {
+          e.preventDefault();
+          logoOff = Math.max(0, logoOff + e.deltaY);
+          brandLoop = -logoOff;
+        }
+        window.__logoPhase = logoOff > 0 && logoOff < H;
+      }, { passive: false });
+      // Puis, plus on scrolle, plus le logo réapparaît par le bas et retrouve sa place d'arrivée
+      floralePanel.addEventListener('scroll', () => {
+        if (!brandEl || !floralePanel.classList.contains('open')) return;
+        const Hmax = (brandEl.offsetHeight || 0) + 20;
+        if (logoOff < Hmax) return; // le logo n'est pas encore sorti par le haut
+        // dès le début du scroll, le logo émerge petit à petit du bord bas
+        const start = 0;
+        const total = Math.max(1, floralePanel.scrollHeight - floralePanel.clientHeight - start);
+        const raw = Math.min(1, Math.max(0, (floralePanel.scrollTop - start) / total));
+        const p = raw * raw * (3 - 2 * raw); /* smoothstep : arrivée douce */
+        const Hlogo = brandEl.offsetHeight || 0;
+        const fromBelow = -currentY + Hlogo; /* haut du logo au ras du bord bas */
+        const target = -currentY;
+        brandLoop = p === 0 ? -Hmax : fromBelow + (target - fromBelow) * p;
+      }, { passive: true });
+    }
+    // Retour à l'Index (stylé) : une copie de la section Index remonte par-dessus
+    function returnToIndex() {
+      const openPanels = document.querySelectorAll('.about-panel.open');
+      if (!openPanels.length || !journalEl) return;
+      const ghost = journalEl.cloneNode(true);
+      ghost.removeAttribute('id');
+      ghost.querySelector('.jr-bg')?.remove(); // allège la copie : fonds invisibles inutiles
+      ghost.classList.add('covering');
+      document.body.appendChild(ghost);
+      ghost.getBoundingClientRect(); // flush : l'état translateY(100%) est peint avant la transition
+      // Deux temps : 1) logo et menu remontent ensemble… 2) la section Index monte
+      {
+        const Hlogo = brandEl ? brandEl.offsetHeight : 0;
+        const fromLoop = Hlogo - currentY; /* départ : logo entièrement sous le bord bas */
+        const t0 = performance.now();
+        window.__returning = true;
+        (function riseBack(now) {
+          const t = Math.min(1, (now - t0) / 300);
+          const e = 1 - Math.pow(1 - t, 3); /* même ease que la montée des sections */
+          brandLoop = fromLoop * (1 - e);
+          const menuFrom = window.innerHeight - (Hlogo + 14);
+          menuReturnY = Math.max(0, menuFrom) * (1 - e);
+          if (t < 1) requestAnimationFrame(riseBack);
+          else { window.__returning = false; menuReturnY = null; }
+        })(t0);
+      }
+      setTimeout(() => { /* temps 2 : montée animée en JS (fiable même si le main thread est chargé) */
+        const t3 = performance.now();
+        ghost.style.transition = 'none';
+        (function coverTween(now) {
+          const t = Math.min(1, (now - t3) / 300);
+          const e = 1 - Math.pow(1 - t, 3);
+          ghost.style.transform = 'translateY(' + ((1 - e) * 100) + '%)';
+          if (t < 1) requestAnimationFrame(coverTween);
+          else finishReturn();
+        })(t3);
+      }, 1050);
+      function finishReturn() {
+        openPanels.forEach((p) => {
+          p.style.transition = 'none'; // se referme d'un coup, caché derrière la copie
+          p.classList.remove('open');
+          p.getBoundingClientRect();
+          p.style.transition = '';
+        });
+        brandLoop = 0; window.__logoPhase = false; window.__returning = false; // le logo reprend sa place pinnée
+        setTimeout(() => ghost.remove(), 80);
+      }
+    }
+    document.querySelector('.jr-head span')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      returnToIndex();
+    });
+    // Clic sur le logo : même retour élégant vers l'Index
+    if (brandEl) {
+      brandEl.addEventListener('click', (e) => {
+        if (!body.classList.contains('entered')) return;
+        e.preventDefault();
+        returnToIndex();
+      });
+    }
+
+    function onScroll() {
+      // Recalage du logo selon la phase (ne pilote plus la montée elle-même).
+      if (seq === 2) targetY = -travelFixed;
+      else targetY = 0;
+      // Index : le texte n'apparaît qu'une fois la section installée
+      if (journalEl) {
+        const jr = journalEl.getBoundingClientRect();
+        journalEl.classList.toggle('settled', jr.top < window.innerHeight * 0.25);
+      }
+    }
+
+    // --- Encyclopédie : tiles randomly light up / fade out like screens waking
+    const encyTiles = Array.from(document.querySelectorAll('.ency-index a'));
+    if (encyTiles.length) {
+      setInterval(() => {
+        // Turn a random tile on for a few seconds
+        const tile = encyTiles[Math.floor(Math.random() * encyTiles.length)];
+        tile.classList.add('lit');
+        setTimeout(() => tile.classList.remove('lit'), 2200 + Math.random() * 2400);
+      }, 700);
+    }
+
+    // --- Lenis : inertie douce premium + GSAP ScrollTrigger
+    let lenis = null;
+    if (window.Lenis) {
+      lenis = new Lenis({ duration: 1.15, smoothWheel: true });
+      window.__lenis = lenis;
+      (function rafLenis(t) { lenis.raf(t); requestAnimationFrame(rafLenis); })(0);
+      lenis.on('scroll', onScroll);
+      // Accueil verrouillé : aucun scroll de page tant que le logo n'est pas monté (phase 1).
+      if (seq === 0) lenis.stop();
+      if (window.gsap && window.ScrollTrigger) {
+        gsap.registerPlugin(ScrollTrigger);
+        lenis.on('scroll', ScrollTrigger.update);
+      }
+    }
+    function smoothTo(top) {
+      if (lenis) lenis.scrollTo(top, { duration: 0.3, easing: (t) => 1 - Math.pow(1 - t, 3) });
+      else window.scrollTo({ top, behavior: 'smooth' });
+    }
+
+    requestAnimationFrame(tick);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    onScroll();
+
+    // Déclencheurs de l'arrivée (phase 1) : le premier geste de scroll vers le bas.
+    window.addEventListener('wheel', (e) => { if (seq === 0 && e.deltaY > 0) startArrival(); }, { passive: true });
+    let __touchY0 = null;
+    window.addEventListener('touchstart', (e) => { __touchY0 = e.touches[0].clientY; }, { passive: true });
+    window.addEventListener('touchmove', (e) => {
+      if (seq === 0 && __touchY0 !== null && (__touchY0 - e.touches[0].clientY) > 6) startArrival();
+    }, { passive: true });
+    window.addEventListener('keydown', (e) => {
+      if (seq === 0 && (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ')) startArrival();
+    });
+
+    // 3. After entering, the side menu becomes interactive
+    let lockedKey = keys[0];
+    function activate(key) {
+      const idx = keys.indexOf(key);
+      if (idx < 0) return;
+      currentIdx = idx;
+      showByIdx(idx);
+    }
+    rows.forEach((row) => {
+      row.addEventListener('mouseenter', () => { if (body.classList.contains('entered')) activate(row.dataset.key); });
+      row.addEventListener('focus',      () => { if (body.classList.contains('entered')) activate(row.dataset.key); });
+      row.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!body.classList.contains('entered')) {
+          enter();
+          lockedKey = row.dataset.key;
+          activate(lockedKey);
+        } else {
+          // Already in archive mode → open the player
+          openPlayer(row.dataset.key, row.querySelector('.name').textContent);
+        }
+      });
+    });
+
+    // Archive tiles → open the player
+    document.querySelectorAll('.archive .tile').forEach((tile) => {
+      tile.addEventListener('click', (e) => {
+        e.preventDefault();
+        const img = tile.querySelector('img');
+        const title = tile.querySelector('.ttl')?.textContent || '';
+        openPlayer(null, title, img?.src);
+      });
+    });
+
+    // --- Player open/close ---
+    const player = document.getElementById('player');
+    const playerImg = document.getElementById('player-image');
+    const playerTitle = document.getElementById('player-title');
+    function openPlayer(key, title, src) {
+      let url = src;
+      if (!url && key) {
+        const el = stack.querySelector(`.stage-img[data-key="${key}"]`);
+        url = el?.getAttribute('src');
+      }
+      if (url) playerImg.src = url;
+      playerTitle.textContent = title || '';
+      player.classList.add('is-open');
+      player.setAttribute('aria-hidden', 'false');
+      stopRotation();
+    }
+    function closePlayer() {
+      player.classList.remove('is-open');
+      player.setAttribute('aria-hidden', 'true');
+    }
+    player.querySelector('.player-close').addEventListener('click', closePlayer);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePlayer();
+    });
+    document.querySelector('.stage-list')?.addEventListener('mouseleave', () => {
+      if (body.classList.contains('entered')) activate(lockedKey);
+    });
+
+    // On entering, sync lockedKey to whatever was on screen
+    const observer = new MutationObserver(() => {
+      if (body.classList.contains('entered')) {
+        lockedKey = keys[currentIdx];
+        observer.disconnect();
+      }
+    });
+    observer.observe(body, { attributes: true, attributeFilter: ['class'] });
+    // --- Logo : le journal beige traverse le logo jaune qui devient noir
+    //     sous la ligne de coupe (le bord haut de la section).
+    const brand = document.getElementById('brand');
+    const def   = document.getElementById('journal');
+    if (brand && def) {
+      function onCross() {
+        const b = brand.getBoundingClientRect();
+        const r = def.getBoundingClientRect();
+        // Position of the def's top edge inside the brand box, as a percentage
+        let cut = ((r.top - b.top) / b.height) * 100;
+        cut = Math.max(0, Math.min(100, cut));
+        brand.style.setProperty('--cut', cut + '%');
+      }
+      window.addEventListener('scroll', onCross, { passive: true });
+      window.addEventListener('resize', onCross);
+      onCross();
+    }
+  })();
+</script>
+
+<!-- =========================================================
+     FONT TESTER — live pairing switcher (temporary)
+     ========================================================= -->
+<div class="fonttest" id="fonttest">
+  <div class="ft-head">
+    <span>Test typo</span>
+    <button class="ft-hide" id="ft-hide" aria-label="Masquer">×</button>
+  </div>
+  <div class="ft-list" id="ft-list"></div>
+</div>
+<style>
+  .fonttest {
+    position: fixed; left: 16px; bottom: 88px; z-index: 500;
+    width: 220px;
+    background: rgba(14,13,11,.92);
+    backdrop-filter: blur(16px);
+    color: #f4efe3;
+    border: 1px solid rgba(244,239,227,.16);
+    border-radius: 12px;
+    padding: 12px;
+    font-family: "JetBrains Mono", monospace;
+    box-shadow: 0 16px 40px rgba(0,0,0,.4);
+  }
+  .fonttest.is-hidden .ft-list { display: none; }
+  .ft-head { display: flex; justify-content: space-between; align-items: center; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: rgba(244,239,227,.6); margin-bottom: 10px; }
+  .ft-hide { color: #f4efe3; font-size: 16px; line-height: 1; padding: 0 4px; }
+  .ft-list { display: flex; flex-direction: column; gap: 4px; }
+  .ft-list button {
+    text-align: left; color: #f4efe3;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; letter-spacing: .04em;
+    padding: 8px 10px; border-radius: 7px;
+    border: 1px solid transparent;
+    transition: background .15s, border-color .15s;
+  }
+  .ft-list button:hover { background: rgba(244,239,227,.08); }
+  .ft-list button.active { background: rgba(241,184,31,.16); border-color: rgba(241,184,31,.4); color: #F1B81F; }
+  .ft-list button small { display: block; color: rgba(244,239,227,.45); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; margin-top: 3px; }
+</style>
+<script>
+  (function() {
+    const PAIRS = [
+      { id: 'timesnow',   label: 'Times Now',         sub: '+ Archivo (Saint Heron)', serif: '"Times Now", "Times New Roman", serif', sans: '"Archivo", sans-serif' },
+      { id: 'instrument', label: 'Instrument Serif', sub: '+ Space Grotesk', serif: '"Instrument Serif", serif', sans: '"Space Grotesk", sans-serif' },
+      { id: 'playfair',   label: 'Playfair Display',  sub: '+ Inter',         serif: '"Playfair Display", serif', sans: '"Inter", sans-serif' },
+      { id: 'bodoni',     label: 'Bodoni Moda',       sub: '+ Inter Tight',   serif: '"Bodoni Moda", serif', sans: '"Inter Tight", sans-serif' },
+      { id: 'fraunces',   label: 'Fraunces',          sub: '+ DM Sans',       serif: '"Fraunces", serif', sans: '"DM Sans", sans-serif' },
+      { id: 'cormorant',  label: 'Cormorant Garamond',sub: '+ Manrope',       serif: '"Cormorant Garamond", serif', sans: '"Manrope", sans-serif' },
+      { id: 'italiana',   label: 'Italiana',          sub: '+ Archivo',       serif: '"Italiana", serif', sans: '"Archivo", sans-serif' },
+    ];
+    const root = document.documentElement;
+    const list = document.getElementById('ft-list');
+    const KEY = 'lesgriots-fonttest';
+    function apply(p) {
+      root.style.setProperty('--serif', p.serif);
+      root.style.setProperty('--sans', p.sans);
+      [...list.children].forEach((b) => b.classList.toggle('active', b.dataset.id === p.id));
+      try { localStorage.setItem(KEY, p.id); } catch(e) {}
+    }
+    PAIRS.forEach((p) => {
+      const b = document.createElement('button');
+      b.dataset.id = p.id;
+      b.innerHTML = p.label + '<small>' + p.sub + '</small>';
+      b.addEventListener('click', () => apply(p));
+      list.appendChild(b);
+    });
+    let saved = null;
+    try { saved = localStorage.getItem(KEY); } catch(e) {}
+    apply(PAIRS.find((p) => p.id === saved) || PAIRS.find((p) => p.id === 'timesnow'));
+
+    document.getElementById('ft-hide').addEventListener('click', () => {
+      document.getElementById('fonttest').classList.toggle('is-hidden');
+    });
+  })();
+</script>
+</body>
+</html>
