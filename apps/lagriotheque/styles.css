@@ -1209,15 +1209,14 @@ button {
   /* 1 colonne pleine largeur : on annule le padding-right desktop (180px)
      qui poussait le contenu à gauche avec du vide à droite sur mobile. */
   .lg__formation__layout { display: block; padding-right: 0; }
+  /* Carte de réservation NON figée sur mobile : elle s'affiche en bas du
+     contenu, complète, avec tous les boutons empilés et bien visibles. */
   .lg__formation__side {
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 30;
+    position: static;
+    width: 100%;
+    margin-top: 32px;
   }
-  .lg__formation { padding-bottom: 96px; }
+  .lg__formation { padding-bottom: 60px; }
 }
 
 /* ===================================================================
@@ -1606,38 +1605,17 @@ button {
   letter-spacing: 0.02em;
 }
 
-/* Mobile : la sidebar parent passe en fixed bottom (.lg__formation__side).
-   La carte se compacte en barre prix + bouton. */
+/* Mobile : la carte reste une carte complète (boutons empilés, tout visible),
+   affichée en bas du contenu de la formation. */
 @media (max-width: 900px) {
   .lg__cta-mini {
-    border: 0;
-    border-top: 1px solid var(--ink);
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+    padding: 22px 18px 20px;
   }
-  .lg__cta-mini__head {
-    padding-bottom: 0;
-    border-bottom: 0;
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
-  .lg__cta-mini__price { font-size: 18px; }
-  .lg__cta-mini__title,
-  .lg__cta-mini__hint,
-  .lg__cta-mini__badges,
-  .lg__cta-mini__meta,
-  .lg__cta-mini__btn--ghost,
-  .lg__cta-mini__sub { display: none; }
   .lg__cta-mini__btn {
-    margin-bottom: 0;
-    padding: 12px 18px;
-    flex: 1;
-    max-width: none;
-    white-space: nowrap;
+    display: block;
+    width: 100%;
+    padding: 15px 18px;
+    font-size: 14px;
   }
 }
 
