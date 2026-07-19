@@ -89,7 +89,7 @@ export async function POST() {
     html = fill(html, "ABOUT_TEXT",
       `    <div class="about-slide"><p>${esc(about.text)}</p></div>`);
     html = fill(html, "ABOUT_SITES", (about.links || []).map((l) =>
-      `        <a class="aw-site" href="${esc(l.url)}" target="_blank" rel="noopener"><img src="${esc(l.img)}" alt="" /><span>${esc(l.label)}</span></a>`).join("\n"));
+      `        <a class="aw-site" href="${esc(l.url)}" target="_blank" rel="noopener"><img src="${esc(l.img)}" alt="" onerror="this.style.display=\'none\'" /><span>${esc(l.label)}</span></a>`).join("\n"));
 
     // ---- Shop ------------------------------------------------------------
     html = fill(html, "SHOP_PRODUCTS", shop.map((p) =>
@@ -121,7 +121,7 @@ export async function POST() {
     attFill("ATT_ABOUT_SITES",
       `    <div class="about-sites">\n` +
       (about.links || []).map((l) =>
-        `      <a${l.img ? "" : ' class="no-img"'} href="${esc(l.url)}" target="_blank" rel="noopener"><img src="${esc(l.img)}" alt="" /><span>${esc(l.label)}</span></a>`).join("\n") +
+        `      <a${l.img ? "" : ' class="no-img"'} href="${esc(l.url)}" target="_blank" rel="noopener"><img src="${esc(l.img)}" alt="" onerror="this.closest(\'a\').classList.add(\'no-img\')" /><span>${esc(l.label)}</span></a>`).join("\n") +
       `\n    </div>`);
 
     // ---- Écriture atomique -----------------------------------------------
