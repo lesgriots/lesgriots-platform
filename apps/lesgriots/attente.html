@@ -47,32 +47,6 @@
     background: linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0) 30%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55));
   }
 
-  /* ---- Film grain animé — au-dessus de TOUT (vidéo + panneau) --------- */
-  .grain {
-    position: fixed;
-    inset: -50%;
-    z-index: 10;
-    pointer-events: none;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch' seed='7'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/><feComponentTransfer><feFuncA type='linear' slope='1.4' intercept='-0.1'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23g)'/></svg>");
-    background-size: 300px 300px;
-    mix-blend-mode: screen;
-    opacity: 0.16;
-    animation: grain 0.5s steps(1) infinite;
-    will-change: transform;
-  }
-  @keyframes grain {
-    0%   { transform: translate(0, 0); }
-    10%  { transform: translate(-4%, 2%); }
-    20%  { transform: translate(3%, -4%); }
-    30%  { transform: translate(-2%, 5%); }
-    40%  { transform: translate(4%, 1%); }
-    50%  { transform: translate(-5%, -2%); }
-    60%  { transform: translate(3%, 4%); }
-    70%  { transform: translate(-3%, -4%); }
-    80%  { transform: translate(5%, 2%); }
-    90%  { transform: translate(-2%, -3%); }
-    100% { transform: translate(0, 0); }
-  }
 
   /* ---- Logo pleine largeur en bas ------------------------------------- */
   .logo {
@@ -162,7 +136,6 @@
 
   @media (prefers-reduced-motion: reduce) {
     .logo, .home-video, .hint { animation: none; opacity: 1; }
-    .grain { animation: none; }
   }
 </style>
 </head>
@@ -173,7 +146,6 @@
   <!-- /BO:ATT_VIDEO -->
 
   <div class="veil" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
   <span class="hint" aria-hidden="true">( scroll )</span>
 
   <aside class="about" id="about" aria-hidden="true">
