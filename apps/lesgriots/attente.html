@@ -187,8 +187,8 @@
     function slidePanel(open, done) {
       var t0 = performance.now();
       (function tw(now) {
-        var t = Math.min(1, (now - t0) / 300);
-        var e = 1 - Math.pow(1 - t, 3);
+        var t = Math.min(1, (now - t0) / 700);
+        var e = 1 - Math.pow(1 - t, 4);
         var y = open ? (1 - e) * 100 : e * 100;
         about.style.transform = 'translateY(' + y + '%)';
         if (t < 1) requestAnimationFrame(tw);
@@ -243,7 +243,7 @@
     window.addEventListener('click', function () { if (seq === 0) openArrival(); });
 
     (function tick() {
-      var k = (seq === 1) ? 0.2 : 0.08;   // phase 1 : montée directe et vive
+      var k = (seq === 1) ? 0.14 : 0.08;   // phase 1 : montée directe et vive
       cur += (tgt - cur) * k;
       if (Math.abs(tgt - cur) < 0.6) {
         cur = tgt;
