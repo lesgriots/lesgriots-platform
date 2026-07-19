@@ -3,6 +3,7 @@
 // Présent sur TOUTES les pages du BO (placé dans le menu).
 "use client";
 import { useState } from "react";
+import { BP } from "../../lib/bp.js";
 
 export default function SyncButton() {
   const [state, setState] = useState("idle"); // idle | loading | ok | error
@@ -13,7 +14,7 @@ export default function SyncButton() {
     setState("loading");
     setMsg("");
     try {
-      const r = await fetch("/api/export", { method: "POST" });
+      const r = await fetch(`${BP}/api/export`, { method: "POST" });
       const j = await r.json();
       if (j.error) throw new Error(j.error);
       setState("ok");

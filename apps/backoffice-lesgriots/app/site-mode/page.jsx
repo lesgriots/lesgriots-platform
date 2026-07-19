@@ -2,6 +2,7 @@
 // POST /api/site-mode → échange index.html (attente.html ↔ site.html) côté site.
 "use client";
 import { useEffect, useState } from "react";
+import { BP } from "../../lib/bp.js";
 
 export default function SiteModePage() {
   const [mode, setMode] = useState(null);   // "coming-soon" | "live" | null (chargement)
@@ -10,7 +11,7 @@ export default function SiteModePage() {
   const [kind, setKind] = useState("ok");
 
   useEffect(() => {
-    fetch("/api/site-mode")
+    fetch(`${BP}/api/site-mode`)
       .then((r) => r.json())
       .then((j) => setMode(j.mode || "coming-soon"))
       .catch(() => setMode("coming-soon"));
@@ -20,7 +21,7 @@ export default function SiteModePage() {
     if (busy || next === mode) return;
     setBusy(true); setMsg("");
     try {
-      const r = await fetch("/api/site-mode", {
+      const r = await fetch(`${BP}/api/site-mode`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode: next }),

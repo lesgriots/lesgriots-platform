@@ -1,13 +1,14 @@
 // Tableau de bord du BO LES GRIOTS (site ombrelle).
 // Server component : lit directement le store lesgriots.json et affiche
 // un résumé des 4 sections éditables + accès rapide. Le Sync est dans la nav.
+import Link from "next/link";
 import { getHomeVideo, listProjects, getAbout, listShop, getMode } from "../lib/db.js";
 
 export const dynamic = "force-dynamic"; // toujours relire le store à chaud
 
 function Card({ href, title, value, note }) {
   return (
-    <a
+    <Link
       href={href}
       className="projcard"
       style={{ display: "block", padding: "18px 20px", cursor: "pointer" }}
@@ -19,7 +20,7 @@ function Card({ href, title, value, note }) {
         {value}
       </div>
       <div className="note" style={{ marginTop: 6 }}>{note}</div>
-    </a>
+    </Link>
   );
 }
 
