@@ -62,7 +62,7 @@ export default function SiteModePage() {
               style={{
                 textAlign: "left", padding: "18px 20px", cursor: "pointer",
                 borderColor: !isLive ? "var(--yellow)" : "var(--rule)",
-                boxShadow: !isLive ? "0 0 0 2px rgba(246,226,28,0.25)" : "none",
+                boxShadow: !isLive ? "0 0 0 2px rgba(241,184,31,0.25)" : "none",
               }}
             >
               <div className="bo-navgroup__title" style={{ border: "none", padding: 0, marginBottom: 8 }}>
@@ -79,7 +79,7 @@ export default function SiteModePage() {
               style={{
                 textAlign: "left", padding: "18px 20px", cursor: "pointer",
                 borderColor: isLive ? "var(--yellow)" : "var(--rule)",
-                boxShadow: isLive ? "0 0 0 2px rgba(246,226,28,0.25)" : "none",
+                boxShadow: isLive ? "0 0 0 2px rgba(241,184,31,0.25)" : "none",
               }}
             >
               <div className="bo-navgroup__title" style={{ border: "none", padding: 0, marginBottom: 8 }}>

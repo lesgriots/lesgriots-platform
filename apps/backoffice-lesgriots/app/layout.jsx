@@ -1,53 +1,14 @@
 // Layout racine du back office.
-// Aligné sur le style du site studio : Geist Mono, palette ink/yellow,
-// sticker top-left, griot ASCII bottom-right.
+// DA alignée sur le SITE OMBRELLE (apps/lesgriots/styles.css) :
+//   fond noir profond, encre ivoire #f4efe3, accent or #F1B81F, hot #C4321F,
+//   titres Instrument Serif (em italique = or), labels JetBrains Mono
+//   uppercase très espacés, grain photographique (feTurbulence) en overlay.
+// Les noms de classes sont inchangés — seules les valeurs bougent.
 import NavShell from "./components/NavShell";
 
 export const metadata = {
   title: "LES GRIOTS — Back Office",
 };
-
-// ASCII griot version condensée (silhouette principale) — affichée en
-// bas à droite, faded, en décoration. Pas d'animation côté back office.
-const ASCII_GRIOT = `              000000
-          0111111111110
-        0111111111111111
-       0111111110111111111
-      01111111101001000111
-      011111111110001   111
-      01001111111001     01
-      00011 111000000 0 011
-      00 010111 0  01   11
-     1111111111   11011111
-    1110111111010 101 111
-010000111010111100001010 00
-1001010100  11010111111010001111
-010    11011111111110011
-01011110 11111111111110
-011 110  00  1  0010
-01    0010 110  00 0010
-0101 0101  0 10101 01
-0  011110101 0 10110101
-010  1010011101 110010
-00 010     1 00 0100 1
-11      10110 01  1 11001
-1 111     1 10  011 11
-1101    100111010100  10
-1010    0111 00111100001
-011     010010 011010000
-001    0011001 11000010
-01    011010   1 0 1011
-101    0001101101001100
-0011101   01 101111 001000
-0101000010110101  1011101
-0            100110  1 100001
-01           11 010010000
-11    011111111111101
-01111111111111   011111111111
-011111111111111
-0111111111111
-01111111110
-0111`;
 
 export default function RootLayout({ children }) {
   return (
@@ -55,11 +16,12 @@ export default function RootLayout({ children }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        {/* Mêmes polices que le site les griots : Instrument Serif (titres) + Geist (texte) */}
+        {/* Mêmes polices que le site les griots : Instrument Serif (titres),
+            Geist (texte), JetBrains Mono (labels) */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
         <style>{globalCss}</style>
@@ -70,41 +32,33 @@ export default function RootLayout({ children }) {
         <div className="shell">
           <main>{children}</main>
         </div>
-
-        {/* Griot ASCII bottom-right — décoration, en arrière-plan */}
-        <pre className="bo-griot" aria-hidden="true">{ASCII_GRIOT}</pre>
       </body>
     </html>
   );
 }
 
 const globalCss = `
-  /* ---- Polices : mêmes que le site les griots (chargées via Google Fonts
-     dans le <head>) — Instrument Serif pour les titres, Geist pour le texte,
-     Geist Mono pour le code / l'ASCII. ------------------------------------ */
-
-  /* ---- Palette du site studio --------------------------------------- */
+  /* ---- Palette du SITE OMBRELLE (styles.css du site) ----------------- */
   :root {
-    --bg: #050505;
-    --ink: #8a7a20;          /* mustard gold — texte principal */
-    --ink-dim: #5a5018;
-    --rule: #1a1814;
-    --yellow: #f6e21c;
-    --yellow-deep: #d9c510;
-    --danger: #ff5f56;
-    --font-mono: "Geist Mono", "JetBrains Mono", "Courier New", monospace;
+    --bg: #0a0a0a;
+    --ink: #f4efe3;                          /* ivoire — texte principal */
+    --ink-dim: rgba(244, 239, 227, 0.55);    /* ivoire éteint — labels */
+    --rule: rgba(244, 239, 227, 0.14);       /* filets */
+    --yellow: #F1B81F;                       /* or du site (accent) */
+    --yellow-deep: #d9a41b;
+    --danger: #C4321F;                       /* rouge chaud du site (--hot) */
+    --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
     --font-sans: "Geist", "Söhne", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
     --font-serif: "Instrument Serif", "Newsreader", "Times New Roman", Georgia, serif;
-    /* Aliases — utilisés par les pages/composants. Avant ils n'étaient pas
-       définis → les couleurs tombaient en fallback navigateur (bug). */
+    /* Aliases utilisés par les pages/composants */
     --dim: var(--ink-dim);
     --accent: var(--yellow);
     --fg: var(--ink);
-    /* Modernisation douce : rayons + surfaces + easing partagés */
-    --r-sm: 6px;
-    --r-md: 10px;
-    --surface: #0b0a08;
-    --surface-2: #12100b;
+    /* Éditorial = angles nets, rayons discrets */
+    --r-sm: 3px;
+    --r-md: 6px;
+    --surface: #111111;
+    --surface-2: #161616;
     --ease: cubic-bezier(0.25, 0.7, 0.3, 1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -113,12 +67,13 @@ const globalCss = `
     color: var(--ink);
     font-family: var(--font-sans);
     font-size: 14px;
-    line-height: 1.45;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
     min-height: 100vh;
   }
 
-  /* ---- Caret terminal clignotant ------------------------------------ */
+  /* ---- Caret clignotant (conservé, en or) ---------------------------- */
   .bo-caret {
     display: inline-block;
     width: 0.55em;
@@ -132,37 +87,20 @@ const globalCss = `
     50%, 100% { opacity: 0; }
   }
 
-  /* ---- Scanlines CRT — overlay très subtil, plein viewport ---------- */
+  /* ---- Grain photographique — même recette feTurbulence que le site -- */
   body::after {
     content: "";
     position: fixed;
     inset: 0;
     z-index: 999;
     pointer-events: none;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      rgba(0,0,0,0)   0px,
-      rgba(0,0,0,0)   2px,
-      rgba(0,0,0,0.18) 3px,
-      rgba(0,0,0,0)   4px
-    );
-    mix-blend-mode: multiply;
-    opacity: 0.28; /* adouci — l'identité CRT reste mais moins brutale */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .9 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/></svg>");
+    background-size: 260px 260px;
+    opacity: 0.16;
+    mix-blend-mode: overlay;
   }
 
-  /* ---- Vignette CRT douce sur les bords ----------------------------- */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 998;
-    pointer-events: none;
-    background: radial-gradient(ellipse at center,
-      rgba(0,0,0,0) 60%,
-      rgba(0,0,0,0.4) 100%);
-  }
-
-  /* ---- Sidebar (desktop) / drawer (mobile) -------------------------- */
+  /* ---- Sidebar (desktop) / drawer (mobile) --------------------------- */
   .bo-sidebar {
     position: fixed;
     top: 0; left: 0; bottom: 0;
@@ -170,105 +108,77 @@ const globalCss = `
     z-index: 95;
     display: flex;
     flex-direction: column;
-    padding: 18px 16px 24px;
-    background: #070604;
+    padding: 22px 18px 24px;
+    background: #000;
     border-right: 1px solid var(--rule);
     overflow-y: auto;
     overscroll-behavior: contain;
   }
   .bo-sidebar__brand {
     display: block;
-    margin: 4px 6px 22px;
-    filter: drop-shadow(2px 4px 0 rgba(0,0,0,0.35));
-    transition: transform 0.35s cubic-bezier(0.2,0.7,0.2,1);
+    margin: 4px 6px 26px;
+    transition: opacity 0.25s var(--ease);
   }
-  .bo-sidebar__brand:hover { transform: translate(-2px,-2px); }
+  .bo-sidebar__brand:hover { opacity: 0.85; }
   .bo-sidebar__brand img { display: block; width: 150px; max-width: 78%; height: auto; }
   .bo-sidebar__tag {
     display: block;
-    margin-top: 10px;
-    font-size: 10px;
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 9px;
     color: var(--ink-dim);
     text-transform: uppercase;
     letter-spacing: 0.22em;
   }
 
-  /* Groupes + liens de nav */
-  .bo-navgroup { margin-bottom: 18px; }
+  /* Groupes + liens de nav — labels mono espacés comme le site */
+  .bo-navgroup { margin-bottom: 20px; }
   .bo-navgroup__title {
+    font-family: var(--font-mono);
     font-size: 9px;
     color: var(--ink-dim);
     text-transform: uppercase;
-    letter-spacing: 0.2em;
-    padding: 0 8px 6px;
-    margin-bottom: 2px;
+    letter-spacing: 0.22em;
+    padding: 0 8px 7px;
+    margin-bottom: 3px;
     border-bottom: 1px solid var(--rule);
   }
   .bo-navlink {
     display: block;
-    padding: 7px 8px;
+    padding: 8px 8px;
     color: var(--ink);
-    font-size: 12px;
-    letter-spacing: 0.04em;
+    font-size: 12.5px;
+    letter-spacing: 0.03em;
     border-left: 2px solid transparent;
-    transition: color 0.12s, background 0.12s, border-color 0.12s;
-  }
-  .bo-navlink::before {
-    content: "> ";
-    color: var(--ink-dim);
-    opacity: 0.5;
-    margin-right: 2px;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
   }
   .bo-navlink:hover {
     color: var(--yellow);
-    background: #100e09;
+    background: rgba(244, 239, 227, 0.04);
   }
-  .bo-navlink:hover::before { color: var(--yellow); opacity: 1; }
   .bo-navlink--active {
     color: var(--yellow);
-    background: #14110a;
+    background: rgba(241, 184, 31, 0.07);
     border-left-color: var(--yellow);
     font-weight: 500;
   }
-  .bo-navlink--active::before { content: "$ "; color: var(--yellow); opacity: 1; }
   .bo-sidenav__actions { display: flex; flex-direction: column; gap: 8px; padding: 4px 8px 0; }
   .bo-navlink--ext { padding-left: 0; }
-  .bo-navlink--ext::before { content: ""; margin: 0; }
 
   /* Barre mobile (cachée en desktop) */
   .bo-mobilebar { display: none; }
   .bo-scrim {
     position: fixed; inset: 0; z-index: 94;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(1px);
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(2px);
   }
 
-  /* ---- Griot ASCII bottom-right ------------------------------------- */
-  .bo-griot {
-    position: fixed;
-    right: -10px;
-    bottom: -20px;
-    z-index: 0;
-    color: var(--ink-dim);
-    opacity: 0.45;
-    font-family: var(--font-mono);
-    font-size: 8px;
-    line-height: 1;
-    letter-spacing: 0;
-    white-space: pre;
-    pointer-events: none;
-    transform: scale(1);
-    transform-origin: bottom right;
-  }
-
-  /* ---- Layout principal --------------------------------------------- */
-  /* Pleine largeur du viewport, comme le site studio. Padding gauche
-     généreux pour laisser respirer le sticker. Pas de max-width. */
+  /* ---- Layout principal ---------------------------------------------- */
   .shell {
     position: relative;
     z-index: 1;
     margin-left: 232px;
-    padding: 32px 60px 200px 48px;
+    padding: 40px 60px 160px 52px;
     max-width: 1180px;
   }
 
@@ -282,7 +192,7 @@ const globalCss = `
       top: 0;
       z-index: 93;
       padding: 10px 14px;
-      background: rgba(7,6,4,0.92);
+      background: rgba(10,10,10,0.92);
       backdrop-filter: blur(6px);
       border-bottom: 1px solid var(--rule);
     }
@@ -295,105 +205,99 @@ const globalCss = `
       color: var(--ink);
       border: 1px solid var(--rule);
       padding: 7px 12px;
-      font-size: 13px;
+      font-family: var(--font-mono);
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.16em;
+      cursor: pointer;
     }
-    .bo-burger span { font-size: 11px; }
+    .bo-burger span { font-size: 10px; }
     .bo-burger:hover { color: var(--yellow); border-color: var(--yellow); }
 
     .bo-sidebar {
       transform: translateX(-100%);
       transition: transform 0.28s cubic-bezier(0.3,0.7,0.2,1);
       width: 264px;
-      box-shadow: 8px 0 40px rgba(0,0,0,0.6);
+      box-shadow: 8px 0 40px rgba(0,0,0,0.7);
     }
     .bo-sidebar--open { transform: translateX(0); }
 
     .shell { margin-left: 0; padding: 22px 18px 120px; }
-    .bo-griot { display: none; }
   }
   @media (max-width: 600px) {
     .shell { padding: 18px 14px 100px; }
     .bo-sidebar { width: 84vw; }
   }
-  /* En desktop, le voile mobile ne doit jamais s'afficher. */
   @media (min-width: 901px) { .bo-scrim { display: none; } }
 
-  /* ---- Liens, boutons, formulaires ---------------------------------- */
+  /* ---- Liens, boutons, formulaires ------------------------------------ */
   a { color: var(--ink); text-decoration: none; }
   a:hover { color: var(--yellow); }
   button { font: inherit; cursor: pointer; }
   input, textarea, select {
-    font: inherit; color: var(--ink); background: #0f0e0a;
+    font: inherit; color: var(--ink); background: #141414;
     border: 1px solid var(--rule); padding: 9px 11px; border-radius: var(--r-sm);
     width: 100%;
     transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease), background 0.18s var(--ease);
   }
-  input::placeholder, textarea::placeholder { color: #4a4418; opacity: 1; }
-  input:hover, textarea:hover, select:hover { border-color: var(--ink-dim); }
+  input::placeholder, textarea::placeholder { color: rgba(244,239,227,0.3); opacity: 1; }
+  input:hover, textarea:hover, select:hover { border-color: rgba(244,239,227,0.35); }
   input:focus, textarea:focus, select:focus {
     outline: none;
     border-color: var(--yellow);
-    background: #12100a;
-    box-shadow: 0 0 0 2px rgba(246,226,28,0.18);
+    background: #171717;
+    box-shadow: 0 0 0 2px rgba(241, 184, 31, 0.18);
   }
   textarea { font-family: var(--font-sans); resize: vertical; min-height: 80px; }
   label {
     display: block; margin: 14px 0 6px;
-    font-size: 11px; color: var(--ink-dim);
-    text-transform: uppercase; letter-spacing: 0.14em;
+    font-family: var(--font-mono);
+    font-size: 10px; color: var(--ink-dim);
+    text-transform: uppercase; letter-spacing: 0.18em;
   }
 
-  /* ---- Typo titres — Instrument Serif, comme le site les griots ----- */
+  /* ---- Typo titres — Instrument Serif, em italique = or (comme le site) */
   h1 {
     font-family: var(--font-serif);
-    font-size: 42px;
+    font-size: 46px;
     font-weight: 400;
-    color: var(--yellow);
+    color: var(--ink);
     margin: 0 0 18px;
-    letter-spacing: 0;
+    letter-spacing: -0.015em;
     line-height: 1.05;
   }
-  /* Prompt terminal retiré — on garde l'éditorial du site */
-  h1::before {
-    content: "";
-    margin-right: 0;
-  }
+  h1 em, h2 em { font-style: italic; color: var(--yellow); }
   h2 {
     font-family: var(--font-serif);
-    font-size: 24px;
+    font-size: 25px;
     font-weight: 400;
-    margin: 28px 0 12px;
+    margin: 30px 0 12px;
     color: var(--ink);
-    text-transform: none;
-    letter-spacing: 0;
-    padding-bottom: 6px;
+    letter-spacing: -0.01em;
+    padding-bottom: 7px;
     border-bottom: 1px solid var(--rule);
   }
-  h2::before {
-    content: "";
-    margin-right: 0;
-  }
 
-  /* ---- Grille de formulaires --------------------------------------- */
+  /* ---- Grille de formulaires ----------------------------------------- */
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 640px) { .row { grid-template-columns: 1fr; gap: 4px; } }
 
-  /* ---- Boutons ----------------------------------------------------- */
+  /* ---- Boutons — or du site, labels mono espacés ---------------------- */
   .btn {
     background: var(--yellow);
     color: #000;
     border: 0;
     border-radius: var(--r-sm);
-    padding: 10px 18px;
-    font-weight: 600;
-    font-size: 11px;
-    letter-spacing: 0.12em;
+    padding: 11px 20px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    transition: background 0.18s var(--ease), transform 0.18s var(--ease), box-shadow 0.18s var(--ease);
+    transition: background 0.18s var(--ease), color 0.18s var(--ease), transform 0.18s var(--ease);
   }
-  .btn:hover { background: #fff; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(246,226,28,0.12); }
+  .btn:hover { background: var(--ink); color: #000; transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.45; cursor: default; transform: none; }
   .btn--ghost {
     background: transparent;
     color: var(--ink);
@@ -406,29 +310,32 @@ const globalCss = `
     transform: none;
   }
   .btn--danger { background: var(--danger); color: #fff; }
-  .btn--danger:hover { background: #ff8079; color: #fff; transform: none; }
+  .btn--danger:hover { background: #a52a1a; color: #fff; transform: none; }
   .actions { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
 
-  /* ---- Tableau ----------------------------------------------------- */
+  /* ---- Tableau -------------------------------------------------------- */
   table { width: 100%; border-collapse: collapse; }
   th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
   th {
-    font-size: 10px; color: var(--ink-dim);
-    text-transform: uppercase; letter-spacing: 0.14em;
+    font-family: var(--font-mono);
+    font-size: 9px; color: var(--ink-dim);
+    text-transform: uppercase; letter-spacing: 0.18em;
     font-weight: 500;
   }
-  tr:hover td { background: #0f0e0a; }
+  tr:hover td { background: rgba(244,239,227,0.03); }
 
-  /* ---- Pill / note / empty ----------------------------------------- */
+  /* ---- Pill / note / empty -------------------------------------------- */
   .pill {
     display: inline-block;
-    padding: 2px 8px;
+    padding: 2px 9px;
     border: 1px solid var(--rule);
     border-radius: 99px;
-    font-size: 10px;
+    font-family: var(--font-mono);
+    font-size: 9px;
     margin-right: 4px;
     color: var(--ink-dim);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
   .empty {
     color: var(--ink-dim);
@@ -436,10 +343,12 @@ const globalCss = `
     text-align: center;
     border: 1px dashed var(--rule);
     border-radius: var(--r-md);
+    font-family: var(--font-serif);
+    font-size: 16px;
   }
 
   /* ================================================================
-     BIBLIOTHÈQUE PROJETS — façon YouTube Studio
+     BIBLIOTHÈQUE PROJETS
      ================================================================ */
   .bo-toolbar {
     display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
@@ -468,21 +377,20 @@ const globalCss = `
     border-radius: var(--r-md);
     overflow: hidden;
     transition: transform 0.22s var(--ease), border-color 0.22s var(--ease), box-shadow 0.22s var(--ease), opacity 0.22s var(--ease);
-    cursor: grab;
   }
   .projcard:hover {
     transform: translateY(-3px);
-    border-color: var(--ink-dim);
-    box-shadow: 0 14px 34px rgba(0,0,0,0.5);
+    border-color: rgba(244,239,227,0.35);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.55);
   }
   .projcard--hidden { opacity: 0.45; }
   .projcard--hidden:hover { opacity: 0.8; }
   .projcard--dragging { opacity: 0.35; border-style: dashed; }
-  .projcard--dropover { border-color: var(--yellow); box-shadow: 0 0 0 2px rgba(246,226,28,0.25); }
+  .projcard--dropover { border-color: var(--yellow); box-shadow: 0 0 0 2px rgba(241,184,31,0.3); }
   .projcard__thumb {
     position: relative;
     aspect-ratio: 16 / 9;
-    background: #141210;
+    background: #000;
     overflow: hidden;
   }
   .projcard__thumb img, .projcard__thumb video {
@@ -495,7 +403,7 @@ const globalCss = `
   .projcard__order {
     position: absolute; top: 8px; left: 8px;
     padding: 1px 8px;
-    background: rgba(5,5,5,0.72); color: var(--ink);
+    background: rgba(0,0,0,0.72); color: var(--ink);
     font-family: var(--font-mono); font-size: 10px;
     border-radius: 99px;
     letter-spacing: 0.08em;
@@ -503,16 +411,17 @@ const globalCss = `
   .projcard__badges { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; }
   .projcard__badge {
     padding: 1px 8px; border-radius: 99px;
-    background: rgba(5,5,5,0.72);
-    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    background: rgba(0,0,0,0.72);
+    font-family: var(--font-mono);
+    font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--ink);
   }
-  .projcard__badge--warn { color: var(--danger); border: 1px solid rgba(255,95,86,0.5); }
+  .projcard__badge--warn { color: #ff8071; border: 1px solid rgba(196,50,31,0.6); }
   .projcard__actions {
     position: absolute; inset: auto 0 0 0;
     display: flex; gap: 6px; justify-content: flex-end;
     padding: 26px 8px 8px;
-    background: linear-gradient(to top, rgba(5,5,5,0.85), transparent);
+    background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
     opacity: 0;
     transform: translateY(4px);
     transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
@@ -521,14 +430,14 @@ const globalCss = `
   .projcard__act {
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 28px; height: 28px; padding: 0 9px;
-    background: rgba(15,14,10,0.9);
+    background: rgba(10,10,10,0.9);
     border: 1px solid var(--rule);
     border-radius: var(--r-sm);
     color: var(--ink); font-size: 12px;
     transition: color 0.15s, border-color 0.15s, background 0.15s;
   }
   .projcard__act:hover { color: var(--yellow); border-color: var(--yellow); }
-  .projcard__act--danger:hover { color: var(--danger); border-color: var(--danger); }
+  .projcard__act--danger:hover { color: #ff8071; border-color: var(--danger); }
   .projcard__meta { padding: 10px 12px 12px; }
   .projcard__name { display: block; font-weight: 500; color: var(--ink); font-size: 13px; line-height: 1.3; }
   .projcard:hover .projcard__name { color: var(--yellow); }
@@ -539,7 +448,7 @@ const globalCss = `
   }
 
   /* ================================================================
-     GALERIE MÉDIAS — façon Instagram (fiche projet)
+     GALERIE MÉDIAS
      ================================================================ */
   .medialib {
     display: grid;
@@ -554,21 +463,21 @@ const globalCss = `
     border: 1px solid var(--rule);
     border-radius: var(--r-sm);
     overflow: hidden;
-    cursor: grab;
     transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), opacity 0.2s var(--ease);
   }
-  .mediatile:hover { transform: translateY(-2px); border-color: var(--ink-dim); }
-  .mediatile--selected { border-color: var(--yellow); box-shadow: 0 0 0 2px rgba(246,226,28,0.3); }
+  .mediatile:hover { transform: translateY(-2px); border-color: rgba(244,239,227,0.35); }
+  .mediatile--selected { border-color: var(--yellow); box-shadow: 0 0 0 2px rgba(241,184,31,0.35); }
   .mediatile--dragging { opacity: 0.35; border-style: dashed; }
-  .mediatile--dropover { border-color: var(--yellow); box-shadow: 0 0 0 2px rgba(246,226,28,0.25); }
+  .mediatile--dropover { border-color: var(--yellow); box-shadow: 0 0 0 2px rgba(241,184,31,0.3); }
   .mediatile img, .mediatile video {
     width: 100%; height: 100%; object-fit: cover; display: block;
   }
   .mediatile__type {
     position: absolute; top: 5px; left: 5px;
     padding: 1px 7px; border-radius: 99px;
-    background: rgba(5,5,5,0.75);
-    font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+    background: rgba(0,0,0,0.75);
+    font-family: var(--font-mono);
+    font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--ink);
   }
   .mediatile__num {
@@ -576,25 +485,27 @@ const globalCss = `
     min-width: 18px; height: 18px;
     display: inline-flex; align-items: center; justify-content: center;
     border-radius: 99px;
-    background: rgba(5,5,5,0.75);
+    background: rgba(0,0,0,0.75);
     font-family: var(--font-mono); font-size: 9px; color: var(--ink);
   }
   .mediatile__missing {
     display: flex; align-items: center; justify-content: center;
     width: 100%; height: 100%;
-    color: var(--ink-dim); font-size: 11px; letter-spacing: 0.1em;
+    color: var(--ink-dim);
+    font-family: var(--font-serif); font-style: italic;
+    font-size: 13px; letter-spacing: 0.02em;
   }
   .mediatile__remove {
     position: absolute; bottom: 5px; right: 5px;
     width: 22px; height: 22px;
     display: inline-flex; align-items: center; justify-content: center;
     border-radius: 99px; border: 0;
-    background: rgba(5,5,5,0.8); color: var(--ink);
+    background: rgba(0,0,0,0.8); color: var(--ink);
     font-size: 12px; opacity: 0;
     transition: opacity 0.18s var(--ease), color 0.15s;
   }
   .mediatile:hover .mediatile__remove { opacity: 1; }
-  .mediatile__remove:hover { color: var(--danger); }
+  .mediatile__remove:hover { color: #ff8071; }
   .mediatile--add {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 2px;
@@ -610,7 +521,7 @@ const globalCss = `
     border: 1px solid var(--rule);
     border-radius: var(--r-md);
     background: var(--surface);
-    padding: 14px 16px 16px;
+    padding: 16px 18px 18px;
     margin: 4px 0 14px;
     animation: media-editor-in 0.22s var(--ease);
   }
@@ -620,12 +531,12 @@ const globalCss = `
   }
 
   /* ================================================================
-     UPLOAD — façon Vimeo (drop global + file d'attente)
+     UPLOAD — drop global + file d'attente
      ================================================================ */
   .dropveil {
     position: fixed; inset: 0; z-index: 200;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(5,5,5,0.82);
+    background: rgba(0,0,0,0.84);
     backdrop-filter: blur(3px);
     pointer-events: none;
   }
@@ -634,8 +545,9 @@ const globalCss = `
     border: 2px dashed var(--yellow);
     border-radius: var(--r-md);
     color: var(--yellow);
-    font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase;
-    background: rgba(15,14,10,0.7);
+    font-family: var(--font-mono);
+    font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase;
+    background: rgba(17,17,17,0.7);
     animation: dropveil-pulse 1.2s ease infinite;
   }
   @keyframes dropveil-pulse {
@@ -652,7 +564,7 @@ const globalCss = `
     border: 1px solid var(--rule);
     border-radius: var(--r-sm);
     padding: 9px 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     animation: media-editor-in 0.2s var(--ease);
   }
   .upqueue__name {
@@ -672,14 +584,16 @@ const globalCss = `
   }
   .upqueue__item--done .upqueue__fill { background: #6fd66f; }
   .upqueue__item--error .upqueue__fill { background: var(--danger); }
-  .note { color: var(--ink-dim); font-size: 11px; margin: 4px 0 0; line-height: 1.5; }
+  .note { color: var(--ink-dim); font-size: 11.5px; margin: 4px 0 0; line-height: 1.55; }
 
-  /* ---- Code inline ------------------------------------------------- */
+  /* ---- Code inline ---------------------------------------------------- */
   code {
-    background: #0f0e0a;
+    background: #141414;
     border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
     padding: 1px 6px;
+    font-family: var(--font-mono);
     font-size: 11px;
-    color: var(--yellow-deep);
+    color: var(--yellow);
   }
 `;
