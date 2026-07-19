@@ -1477,3 +1477,12 @@ body.panel-open .stage-home { filter: brightness(.45); }
   transition: color .25s ease;
 }
 .ah-txt a:hover { color: #F1B81F; }
+
+
+/* ---- About mobile : le texte respire (marges latérales + corps adapté) ---- */
+@media (max-width: 720px) {
+  .about-slide { padding-left: 8vw; padding-right: 8vw; }
+  .about-slide p, .ah-txt p { font-size: 17px; line-height: 1.62; }
+  .ah-txt h3 { font-size: 19px; margin-bottom: 14px; }
+  .ah-txt a { margin-top: 28px; }
+}

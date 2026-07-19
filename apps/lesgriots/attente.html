@@ -182,6 +182,14 @@
   }
   .ah-txt a:hover { color: #F1B81F; }
 
+  /* ---- About mobile : le texte respire ---- */
+  @media (max-width: 720px) {
+    .about-slide { padding-left: 8vw; padding-right: 8vw; }
+    .about-slide p, .ah-txt p { font-size: 17px; line-height: 1.62; }
+    .ah-txt h3 { font-size: 19px; margin-bottom: 14px; }
+    .ah-txt a { margin-top: 28px; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .logo, .home-video, .hint { animation: none; opacity: 1; }
   }
