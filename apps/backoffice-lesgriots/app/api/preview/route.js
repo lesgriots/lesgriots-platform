@@ -24,7 +24,9 @@ const MIME = {
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
-  const p = searchParams.get("p");
+  // Le store peut versionner les médias (uploads/x.mp4?v=2 pour casser le
+  // cache navigateur) : on retire le suffixe de version pour lire le fichier.
+  const p = (searchParams.get("p") || "").replace(/\?.*$/, "");
   if (!p) return new Response("missing p", { status: 400 });
 
   // Sécurité : empêche les traversées (../) — on résout puis on vérifie que ça reste sous SITE_ROOT.
