@@ -426,7 +426,7 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   padding: calc(100vw / 3.89 + 88px) clamp(24px, 5vw, 96px) 48px; /* le texte reste sous le menu */
 }
 /* About — trois sites, façon PIN-UP */
-.about-white { z-index: 2; margin-top: -38vh; }
+.about-white { z-index: 2; margin-top: -58vh; } /* raccord resserré : la grille arrive plus tôt sous la phrase */
 .aw-sites {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
