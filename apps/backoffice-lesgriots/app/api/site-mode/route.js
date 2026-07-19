@@ -14,6 +14,7 @@ const INDEX = path.join(SITE_ROOT, "index.html");
 // /api/export) si elle existe, sinon le template brut site.html.
 const FULL_TEMPLATE = path.join(SITE_ROOT, "site.html");
 const FULL_EXPORT = path.join(SITE_ROOT, "site.live.html");
+const SOON_EXPORT = path.join(SITE_ROOT, "attente.live.html");
 const SOON = path.join(SITE_ROOT, "attente.html");
 
 export async function GET() {
@@ -24,7 +25,9 @@ export async function POST(req) {
   try {
     const { mode } = await req.json();
     const target = mode === "live" ? "live" : "coming-soon";
-    const src = target === "live" ? (fs.existsSync(FULL_EXPORT) ? FULL_EXPORT : FULL_TEMPLATE) : SOON;
+    const src = target === "live"
+      ? (fs.existsSync(FULL_EXPORT) ? FULL_EXPORT : FULL_TEMPLATE)
+      : (fs.existsSync(SOON_EXPORT) ? SOON_EXPORT : SOON);
     if (!fs.existsSync(src)) {
       return NextResponse.json(
         { error: `Fichier source manquant : ${path.basename(src)}` },

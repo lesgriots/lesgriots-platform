@@ -107,4 +107,5 @@ apps/lesgriots/*.placeholder.html
 
 # Sorties générées par le BO les griots (source de vérité : VPS)
 apps/lesgriots/site.live.html
+apps/lesgriots/attente.live.html
 apps/lesgriots/index.html

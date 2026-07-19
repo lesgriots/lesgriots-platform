@@ -10,8 +10,8 @@ const PAGES = [
   {
     mode: "coming-soon",
     name: "Page d'attente",
-    tag: "attente.html",
-    desc: "Grain animé + logo. Rien d'autre n'est visible : les URLs internes du site complet répondent 404.",
+    tag: "attente.live.html (export du BO)",
+    desc: "Vidéo d'accueil + grain + logo, et l'About qui monte au scroll. Rien d'autre n'est visible : les URLs internes répondent 404.",
   },
   {
     mode: "live",

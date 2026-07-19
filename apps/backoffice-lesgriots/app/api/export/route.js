@@ -16,6 +16,8 @@ import {
 const SITE_ROOT = path.resolve(process.cwd(), "..", "lesgriots");
 const TEMPLATE = path.join(SITE_ROOT, "site.html");
 const OUTPUT = path.join(SITE_ROOT, "site.live.html");
+const ATT_TEMPLATE = path.join(SITE_ROOT, "attente.html");
+const ATT_OUTPUT = path.join(SITE_ROOT, "attente.live.html");
 const INDEX = path.join(SITE_ROOT, "index.html");
 
 const esc = (s) => String(s ?? "")
@@ -105,19 +107,38 @@ export async function POST() {
     const v = Date.now().toString(36);
     html = html.replace(/href="styles\.css[^"]*"/, `href="styles.css?v=${v}"`);
 
+    // ---- Page d'attente : hydratée elle aussi (vidéo + About) ------------
+    let att = fs.readFileSync(ATT_TEMPLATE, "utf8");
+    const attFill = (name, inner) => {
+      const re = new RegExp(`(<!-- BO:${name} -->)[\\s\\S]*?(<!-- /BO:${name} -->)`);
+      if (!re.test(att)) throw new Error(`marqueur BO:${name} introuvable dans attente.html`);
+      att = att.replace(re, `$1\n${inner}\n$2`);
+    };
+    attFill("ATT_VIDEO",
+      `  <video class="home-video" src="${esc(home.src)}" poster="${esc(home.poster)}" autoplay muted loop playsinline preload="auto"></video>`);
+    attFill("ATT_ABOUT_TEXT",
+      `    <p class="about-text">${esc(about.text)}</p>`);
+    attFill("ATT_ABOUT_SITES",
+      `    <div class="about-sites">\n` +
+      (about.links || []).map((l) =>
+        `      <a${l.img ? "" : ' class="no-img"'} href="${esc(l.url)}" target="_blank" rel="noopener"><img src="${esc(l.img)}" alt="" /><span>${esc(l.label)}</span></a>`).join("\n") +
+      `\n    </div>`);
+
     // ---- Écriture atomique -----------------------------------------------
     const tmp = OUTPUT + ".tmp";
     fs.writeFileSync(tmp, html, "utf8");
     fs.renameSync(tmp, OUTPUT);
+    const tmpA = ATT_OUTPUT + ".tmp";
+    fs.writeFileSync(tmpA, att, "utf8");
+    fs.renameSync(tmpA, ATT_OUTPUT);
 
-    // Mode live → l'index public est mis à jour dans la foulée.
-    let published = false;
-    if (getMode() === "live") {
-      const t2 = INDEX + ".tmp";
-      fs.copyFileSync(OUTPUT, t2);
-      fs.renameSync(t2, INDEX);
-      published = true;
-    }
+    // La page ACTIVE est republiée dans la foulée (index.html), quel que soit le mode.
+    const mode = getMode();
+    const src = mode === "live" ? OUTPUT : ATT_OUTPUT;
+    const t2 = INDEX + ".tmp";
+    fs.copyFileSync(src, t2);
+    fs.renameSync(t2, INDEX);
+    const published = true;
 
     return NextResponse.json({
       ok: true,
@@ -128,9 +149,9 @@ export async function POST() {
       home: !!home.src,
       links: (about.links || []).length,
       published,
-      note: published
-        ? "site.live.html régénéré et publié (index.html mis à jour)."
-        : "site.live.html régénéré — publie en basculant le Mode du site sur « live ».",
+      note: mode === "live"
+        ? "Site complet régénéré et publié (page d'attente aussi mise à jour)."
+        : "Pages régénérées — la page d'attente (active) est publiée, le site complet est prêt derrière.",
     });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
