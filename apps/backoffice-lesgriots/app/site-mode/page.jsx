@@ -1,11 +1,28 @@
-// Mode du site : bascule entre la page d'attente (coming-soon) et le site complet.
-// POST /api/site-mode → échange index.html (attente.html ↔ site.html) côté site.
+// Pages du site : gère QUELLE page est servie aux visiteurs sur lesgriots.com.
+// Une seule page active à la fois. Quand la page d'attente est active, le
+// site complet est totalement invisible (les fichiers internes sont bloqués
+// par nginx — snippet lesgriots-pages.conf).
 "use client";
 import { useEffect, useState } from "react";
 import { BP } from "../../lib/bp.js";
 
+const PAGES = [
+  {
+    mode: "coming-soon",
+    name: "Page d'attente",
+    tag: "attente.html",
+    desc: "Grain animé + logo. Rien d'autre n'est visible : les URLs internes du site complet répondent 404.",
+  },
+  {
+    mode: "live",
+    name: "Site complet",
+    tag: "site.live.html (export du BO)",
+    desc: "Hero vidéo, Index, pages projets, About, Shop, Archive — la dernière version exportée via Sync.",
+  },
+];
+
 export default function SiteModePage() {
-  const [mode, setMode] = useState(null);   // "coming-soon" | "live" | null (chargement)
+  const [mode, setMode] = useState(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [kind, setKind] = useState("ok");
@@ -29,7 +46,7 @@ export default function SiteModePage() {
       const j = await r.json();
       if (j.error) throw new Error(j.error);
       setMode(j.mode);
-      setMsg(`✓ ${j.note} — pense à redéployer le site.`);
+      setMsg(`✓ ${j.note} En ligne immédiatement.`);
       setKind("ok");
     } catch (e) {
       setMsg(`✗ ${e.message}`);
@@ -38,67 +55,65 @@ export default function SiteModePage() {
     setBusy(false);
   }
 
-  const isLive = mode === "live";
-
   return (
     <>
-      <h1>mode du site</h1>
+      <h1>pages du <em>site</em></h1>
       <p className="note" style={{ marginTop: -8, marginBottom: 20 }}>
-        Bascule ce que voient les visiteurs à la racine. Le site complet est
-        toujours préservé dans <code>site.html</code>, la page d'attente dans
-        <code> attente.html</code>. Après bascule, <strong>redéploie</strong> le
-        dossier <code>apps/lesgriots</code> sur le VPS.
+        Une seule page est servie aux visiteurs de lesgriots.com. La page
+        inactive est <strong>totalement invisible</strong> — même en tapant son
+        URL directe. La bascule est instantanée.
       </p>
 
       {mode === null ? (
         <p className="note">Chargement…</p>
       ) : (
-        <>
-          <div className="projlib" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))" }}>
-            <button
-              type="button"
-              onClick={() => apply("coming-soon")}
-              className="projcard"
-              style={{
-                textAlign: "left", padding: "18px 20px", cursor: "pointer",
-                borderColor: !isLive ? "var(--yellow)" : "var(--rule)",
-                boxShadow: !isLive ? "0 0 0 2px rgba(241,184,31,0.25)" : "none",
-              }}
-            >
-              <div className="bo-navgroup__title" style={{ border: "none", padding: 0, marginBottom: 8 }}>
-                Page d'attente {!isLive && "· actif"}
+        <div className="projlib" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
+          {PAGES.map((p) => {
+            const active = mode === p.mode;
+            return (
+              <div
+                key={p.mode}
+                className="projcard"
+                style={{
+                  padding: "20px 22px",
+                  borderColor: active ? "var(--yellow)" : "var(--rule)",
+                  boxShadow: active ? "0 0 0 2px rgba(241,184,31,0.25)" : "none",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <div className="bo-navgroup__title" style={{ border: "none", padding: 0 }}>
+                    {p.tag}
+                  </div>
+                  {active && <span className="pill" style={{ color: "var(--yellow)", borderColor: "var(--yellow)" }}>active</span>}
+                </div>
+                <div style={{ fontFamily: "var(--font-serif)", fontSize: 26, margin: "8px 0 6px", color: active ? "var(--yellow)" : "var(--ink)" }}>
+                  {p.name}
+                </div>
+                <p className="note" style={{ marginBottom: 16 }}>{p.desc}</p>
+                {active ? (
+                  <a className="btn btn--ghost" href="https://lesgriots.com" target="_blank" rel="noopener noreferrer"
+                    style={{ display: "inline-block", textDecoration: "none" }}>
+                    Voir en ligne ↗
+                  </a>
+                ) : (
+                  <button className="btn" disabled={busy} onClick={() => apply(p.mode)}>
+                    {busy ? "…" : "Activer cette page"}
+                  </button>
+                )}
               </div>
-              <div style={{ fontSize: 22, color: !isLive ? "var(--yellow)" : "var(--ink)" }}>Coming soon</div>
-              <div className="note" style={{ marginTop: 6 }}>Juste le logo, plein largeur en bas.</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => apply("live")}
-              className="projcard"
-              style={{
-                textAlign: "left", padding: "18px 20px", cursor: "pointer",
-                borderColor: isLive ? "var(--yellow)" : "var(--rule)",
-                boxShadow: isLive ? "0 0 0 2px rgba(241,184,31,0.25)" : "none",
-              }}
-            >
-              <div className="bo-navgroup__title" style={{ border: "none", padding: 0, marginBottom: 8 }}>
-                Site complet {isLive && "· actif"}
-              </div>
-              <div style={{ fontSize: 22, color: isLive ? "var(--yellow)" : "var(--ink)" }}>En ligne</div>
-              <div className="note" style={{ marginTop: 6 }}>Hero vidéo, anim, Index, panneaux.</div>
-            </button>
-          </div>
-
-          <p className="note" style={{ marginTop: 18 }}>
-            État actuel : <strong style={{ color: "var(--yellow)" }}>{isLive ? "Site complet en ligne" : "Page d'attente"}</strong>
-            {busy && " · bascule en cours…"}
-          </p>
-        </>
+            );
+          })}
+        </div>
       )}
 
+      <p className="note" style={{ marginTop: 18 }}>
+        Le site complet publié est la dernière version <strong>exportée</strong> :
+        après des modifs de contenu, clique « ↑ Sync vers le site » pour
+        régénérer (publication immédiate si le site complet est actif).
+      </p>
+
       {msg && (
-        <p className="note" style={{ color: kind === "err" ? "var(--danger)" : "var(--accent)" }}>{msg}</p>
+        <p className="note" style={{ marginTop: 10, color: kind === "err" ? "var(--danger)" : "var(--accent)" }}>{msg}</p>
       )}
     </>
   );

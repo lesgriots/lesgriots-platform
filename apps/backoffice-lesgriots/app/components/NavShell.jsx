@@ -17,7 +17,7 @@ const GROUPS = [
     title: "Site ombrelle",
     links: [
       { href: "/", label: "Tableau de bord" },
-      { href: "/site-mode", label: "Mode du site" },
+      { href: "/site-mode", label: "Pages du site" },
       { href: "/home-video", label: "Vidéo d'accueil" },
       { href: "/projects", label: "Projets (stage)" },
       { href: "/index-journal", label: "Index (journal)" },
