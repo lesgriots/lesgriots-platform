@@ -1521,7 +1521,16 @@ body.panel-open .stage-home { filter: brightness(.45); }
    fond clair, visuels en rectangles nets, nom en serif centré
    dessous, cascade à l'arrivée.
    ========================================================= */
-.aw2-slide { background: #0a0a0a; /* fond noir — la version que Moos aime */ align-items: center; justify-content: center; }
+.aw2-slide {
+  background: #0a0a0a; /* fond noir — la version que Moos aime */
+  align-items: center;
+  justify-content: center;
+  /* Raccord resserré : l'écran des sites recouvre le vide sous la
+     phrase (comme l'ancien écran blanc) — il arrive 58vh plus tôt. */
+  position: relative;
+  z-index: 2;
+  margin-top: -58vh;
+}
 .aw2-row {
   display: flex;
   gap: clamp(36px, 6vw, 110px);
@@ -1566,4 +1575,5 @@ body.panel-open .stage-home { filter: brightness(.45); }
 @media (max-width: 720px) {
   .aw2-row { flex-direction: column; gap: 34px; }
   .aw2-frame { width: min(84vw, 420px); }
+.aw2-slide { margin-top: 0; } /* mobile : snap net, pas de chevauchement */
 }
