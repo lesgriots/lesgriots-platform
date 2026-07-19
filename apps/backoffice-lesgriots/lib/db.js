@@ -159,6 +159,8 @@ export function setAbout(about) {
       label: (l && l.label) || "",
       url: (l && l.url) || "",
       img: (l && l.img) || "",
+      title: (l && l.title) || "",
+      desc: (l && l.desc) || "",
     })),
   };
   save(store);

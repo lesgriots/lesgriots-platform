@@ -89,11 +89,17 @@ export async function POST() {
     // la page d'attente : phrase sur écran noir, puis les 3 sites en
     // grande grille « pin-up » (aw-sites) qui montent en cascade.
     const aboutTextHtml = `    <div class="about-slide"><p>${esc(about.text)}</p></div>`;
-    const aboutSitesHtml =
-      `    <div class="about-slide about-white"><div class="aw-sites">\n` +
-      (about.links || []).map((l) =>
-        `      <a class="aw-site" href="${esc(l.url)}" target="_blank" rel="noopener"><img src="${esc(l.img)}" alt="" onerror="this.style.display='none'" /><span>${esc(l.label)}</span></a>`).join("\n") +
-      `\n    </div></div>`;
+    // Sections « à la Saint Heron » : un écran par pilier, visuel de fond
+    // assombri + bloc éditorial (titre, paragraphe, lien vers le site).
+    const aboutSitesHtml = (about.links || []).map((l) =>
+      `    <div class="about-slide ah-section">\n` +
+      (l.img ? `      <img class="ah-bg" src="${esc(l.img)}" alt="" onerror="this.remove()" />\n` : ``) +
+      `      <div class="ah-txt">\n` +
+      `        <h3>${esc(l.title || l.label)}</h3>\n` +
+      `        <p>${esc(l.desc || "")}</p>\n` +
+      `        <a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}&nbsp;↗</a>\n` +
+      `      </div>\n    </div>`
+    ).join("\n");
     html = fill(html, "ABOUT_TEXT", aboutTextHtml);
     html = fill(html, "ABOUT_SITES", aboutSitesHtml);
 

@@ -1427,3 +1427,53 @@ body.entered .stage-mail {
 }
 body.panel-open .journal { filter: brightness(.45) saturate(.9); }
 body.panel-open .stage-home { filter: brightness(.45); }
+
+
+/* =========================================================
+   ABOUT — sections « à la Saint Heron » : un écran par pilier,
+   visuel de fond assombri + bloc éditorial aligné à gauche qui
+   se révèle à l'arrivée dans le viewport.
+   ========================================================= */
+.ah-section { position: relative; overflow: hidden; align-items: center; }
+.ah-bg {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: brightness(.35) saturate(.9);
+}
+.ah-txt {
+  position: relative; z-index: 1;
+  max-width: 860px;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity .9s cubic-bezier(.16, 1, .3, 1), transform .9s cubic-bezier(.16, 1, .3, 1);
+}
+.ah-section.in-view .ah-txt { opacity: 1; transform: none; }
+.ah-txt h3 {
+  font-family: var(--serif);
+  font-size: clamp(17px, 1.5vw, 24px);
+  font-weight: 400;
+  letter-spacing: .02em;
+  color: #f4efe3;
+  margin-bottom: 18px;
+}
+.ah-txt p {
+  font-family: var(--serif);
+  font-size: clamp(16px, 1.4vw, 24px);
+  line-height: 1.55;
+  text-align: left;
+  color: rgba(244, 239, 227, .92);
+}
+.ah-txt a {
+  display: inline-block;
+  margin-top: 22px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(244, 239, 227, .75);
+  text-decoration: none;
+  transition: color .25s ease;
+}
+.ah-txt a:hover { color: #F1B81F; }

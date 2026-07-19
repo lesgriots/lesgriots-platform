@@ -137,6 +137,51 @@
   .aw-site:hover span { color: #F1B81F; }
   @media (max-width: 720px) { .aw-sites { grid-template-columns: 1fr; } }
 
+  /* ---- Sections « Saint Heron » — copie conforme du site ---- */
+  .ah-section { position: relative; overflow: hidden; align-items: center; }
+  .ah-bg {
+    position: absolute; inset: 0; z-index: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: brightness(.35) saturate(.9);
+  }
+  .ah-txt {
+    position: relative; z-index: 1;
+    max-width: 860px;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity .9s cubic-bezier(.16, 1, .3, 1), transform .9s cubic-bezier(.16, 1, .3, 1);
+  }
+  .ah-section.in-view .ah-txt { opacity: 1; transform: none; }
+  .ah-txt h3 {
+    font-family: "Instrument Serif", "Times New Roman", Georgia, serif;
+    font-size: clamp(17px, 1.5vw, 24px);
+    font-weight: 400;
+    letter-spacing: .02em;
+    color: #f4efe3;
+    margin-bottom: 18px;
+  }
+  .ah-txt p {
+    font-family: "Instrument Serif", "Times New Roman", Georgia, serif;
+    font-size: clamp(16px, 1.4vw, 24px);
+    line-height: 1.55;
+    text-align: left;
+    color: rgba(244, 239, 227, .92);
+  }
+  .ah-txt a {
+    display: inline-block;
+    margin-top: 22px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: rgba(244, 239, 227, .75);
+    text-decoration: none;
+    transition: color .25s ease;
+  }
+  .ah-txt a:hover { color: #F1B81F; }
+
   @media (prefers-reduced-motion: reduce) {
     .logo, .home-video, .hint { animation: none; opacity: 1; }
   }
@@ -251,6 +296,11 @@
         entries.forEach(function (en) { awSlide.classList.toggle('in-view', en.isIntersecting); });
       }, { root: about, threshold: 0.35 }).observe(awSlide);
     }
+    document.querySelectorAll('.ah-section').forEach(function (sec) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { sec.classList.toggle('in-view', en.isIntersecting); });
+      }, { root: about, threshold: 0.3 }).observe(sec);
+    });
 
     // Clic sur la vidéo = même déclencheur que le site
     window.addEventListener('click', function () { if (seq === 0) openArrival(); });

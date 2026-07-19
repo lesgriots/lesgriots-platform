@@ -115,6 +115,16 @@ export default function AboutPage() {
                   <input type="text" value={l.url} onChange={(e) => patchLink(i, "url", e.target.value)}
                     style={{ width: "100%", display: "block", marginTop: 2 }} />
                 </label>
+                <label className="note" style={{ display: "block", marginBottom: 6 }}>
+                  titre de section (sinon le label)
+                  <input type="text" value={l.title || ""} onChange={(e) => patchLink(i, "title", e.target.value)}
+                    placeholder="LESGRIOTSxSTUDIO" style={{ width: "100%", display: "block", marginTop: 2 }} />
+                </label>
+                <label className="note" style={{ display: "block", marginBottom: 6 }}>
+                  texte éditorial (écran Saint Heron)
+                  <textarea rows={5} value={l.desc || ""} onChange={(e) => patchLink(i, "desc", e.target.value)}
+                    style={{ width: "100%", display: "block", marginTop: 2 }} />
+                </label>
                 <button className="projcard__act projcard__act--danger" disabled={busy}
                   onClick={() => patch({ ...about, links: about.links.filter((_, idx) => idx !== i) })}>
                   retirer ce lien

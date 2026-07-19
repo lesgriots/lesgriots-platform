@@ -522,6 +522,13 @@
         entries.forEach((en) => awSlide.classList.toggle('in-view', en.isIntersecting));
       }, { threshold: 0.35 }).observe(awSlide);
     }
+    // Sections About « Saint Heron » : révélation du bloc texte à l'arrivée
+    const ahRoot = document.getElementById('about-panel');
+    document.querySelectorAll('.ah-section').forEach((sec) => {
+      new IntersectionObserver((entries) => {
+        entries.forEach((en) => sec.classList.toggle('in-view', en.isIntersecting));
+      }, { root: ahRoot, threshold: 0.3 }).observe(sec);
+    });
     // Panier : visible quand le shop (ou une fiche) est ouvert, compteur sur "Acheter"
     const cartEl = document.getElementById('shop-cart');
     const cartCount = document.getElementById('cart-count');
