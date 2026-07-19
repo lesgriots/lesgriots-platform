@@ -85,13 +85,15 @@ export async function POST() {
     html = fill(html, "DATA",
       `<script id="lg-data">window.LG_PROJECTS = ${JSON.stringify(lgData)};</script>`);
 
-    // ---- About — même markup que la page d'attente (présentation unifiée)
-    const aboutTextHtml = `    <p class="about-text">${esc(about.text)}</p>`;
+    // ---- About — structure EXACTE du panneau du site, partagée avec
+    // la page d'attente : phrase sur écran noir, puis les 3 sites en
+    // grande grille « pin-up » (aw-sites) qui montent en cascade.
+    const aboutTextHtml = `    <div class="about-slide"><p>${esc(about.text)}</p></div>`;
     const aboutSitesHtml =
-      `    <div class="about-sites">\n` +
+      `    <div class="about-slide about-white"><div class="aw-sites">\n` +
       (about.links || []).map((l) =>
-        `      <a${l.img ? "" : ' class="no-img"'} href="${esc(l.url)}" target="_blank" rel="noopener"><img src="${esc(l.img)}" alt="" onerror="this.closest('a').classList.add('no-img')" /><span>${esc(l.label)}</span></a>`).join("\n") +
-      `\n    </div>`;
+        `      <a class="aw-site" href="${esc(l.url)}" target="_blank" rel="noopener"><img src="${esc(l.img)}" alt="" onerror="this.style.display='none'" /><span>${esc(l.label)}</span></a>`).join("\n") +
+      `\n    </div></div>`;
     html = fill(html, "ABOUT_TEXT", aboutTextHtml);
     html = fill(html, "ABOUT_SITES", aboutSitesHtml);
 

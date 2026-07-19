@@ -416,57 +416,7 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
 }
 .about-panel.open { transform: translateY(0); }
 /* About — deux écrans : phrase noire, puis section blanche qui monte au scroll */
-/* About — présentation unifiée avec la page d'attente : un seul écran,
-   texte centré + 3 sites dessous, sous le logo docké. */
-#about-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(28px, 5vh, 56px);
-  padding: calc(100vw / 3.89 + 64px) 24px 6vh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  text-align: center;
-}
-#about-panel .about-text {
-  max-width: 720px;
-  font-family: var(--serif);
-  font-size: clamp(19px, 2.6vw, 28px);
-  line-height: 1.45;
-  letter-spacing: -0.01em;
-  color: rgba(244, 239, 227, 0.92);
-}
-#about-panel .about-text em { font-style: italic; color: #F1B81F; }
-#about-panel .about-sites {
-  display: flex;
-  gap: clamp(16px, 3vw, 36px);
-  flex-wrap: wrap;
-  justify-content: center;
-}
-#about-panel .about-sites a {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  text-decoration: none;
-  color: rgba(244, 239, 227, 0.75);
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  transition: color 0.25s ease, transform 0.25s ease;
-}
-#about-panel .about-sites a:hover { color: #F1B81F; transform: translateY(-3px); }
-#about-panel .about-sites img {
-  width: clamp(110px, 16vw, 170px);
-  aspect-ratio: 1;
-  object-fit: cover;
-  display: block;
-  filter: grayscale(0.15);
-  transition: filter 0.25s ease;
-}
-#about-panel .about-sites a:hover img { filter: none; }
-#about-panel .about-sites a.no-img img { display: none; }
+#about-panel { display: block; padding: 0; overflow-y: auto; overscroll-behavior: contain; }
 .about-slide {
   height: 100vh;
   display: flex;
