@@ -355,7 +355,7 @@
       j.setAttribute('aria-hidden', 'false');
       const t0 = performance.now();
       (function tw(now) {
-        const t = Math.min(1, (now - t0) / 700);
+        const t = Math.min(1, (now - t0) / 300);
         const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
         j.style.transform = 'translate3d(0,' + ((1 - e) * 100) + '%,0)';
         if (t < 1) requestAnimationFrame(tw);
@@ -433,7 +433,7 @@
       const t0 = performance.now();
       window.__returning = true;
       (function riseBack(now) {
-        const t = Math.min(1, (now - t0) / 700);
+        const t = Math.min(1, (now - t0) / 300);
         const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
         brandLoop = fromLoop * (1 - e);
         const menuFrom = window.innerHeight - (Hlogo + 14);
@@ -454,7 +454,7 @@
       panel.setAttribute('aria-hidden', 'false');
       const t0 = performance.now();
       (function tw(now) {
-        const t = Math.min(1, (now - t0) / 700);
+        const t = Math.min(1, (now - t0) / 300);
         const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
         panel.style.transform = 'translate3d(0,' + ((1 - e) * 100) + '%,0)';
         if (t < 1) requestAnimationFrame(tw);
@@ -465,7 +465,7 @@
       panel.style.transition = 'none';
       const t0 = performance.now();
       (function tw(now) {
-        const t = Math.min(1, (now - t0) / 700);
+        const t = Math.min(1, (now - t0) / 300);
         const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
         panel.style.transform = 'translate3d(0,' + (e * 100) + '%,0)';
         if (t < 1) requestAnimationFrame(tw);
@@ -681,7 +681,7 @@
         const t0 = performance.now();
         window.__returning = true;
         (function riseBack(now) {
-          const t = Math.min(1, (now - t0) / 700);
+          const t = Math.min(1, (now - t0) / 300);
           const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)); /* même ease que la montée des sections */
           brandLoop = fromLoop * (1 - e);
           const menuFrom = window.innerHeight - (Hlogo + 14);
@@ -694,7 +694,7 @@
         const t3 = performance.now();
         ghost.style.transition = 'none';
         (function coverTween(now) {
-          const t = Math.min(1, (now - t3) / 700);
+          const t = Math.min(1, (now - t3) / 300);
           const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
           ghost.style.transform = 'translate3d(0,' + ((1 - e) * 100) + '%,0)';
           if (t < 1) requestAnimationFrame(coverTween);
@@ -763,7 +763,7 @@
       }
     }
     function smoothTo(top) {
-      if (lenis) lenis.scrollTo(top, { duration: 0.7, easing: (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)) });
+      if (lenis) lenis.scrollTo(top, { duration: 0.3, easing: (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)) });
       else window.scrollTo({ top, behavior: 'smooth' });
     }
 
