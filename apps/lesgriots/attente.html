@@ -80,10 +80,11 @@
     left: 0; bottom: 0;
     width: 100vw; height: auto;
     display: block;
-    z-index: 2;
+    z-index: 6;                 /* au-dessus du panneau About, comme sur le site */
     opacity: 0; animation: fade 1.4s ease forwards;
     -webkit-user-select: none; user-select: none; -webkit-user-drag: none;
     pointer-events: none;
+    will-change: transform;
   }
   @keyframes fade { to { opacity: 1; } }
 
@@ -107,7 +108,7 @@
   .about {
     position: fixed;
     inset: 0;
-    z-index: 5;
+    z-index: 5;                 /* sous le logo docké en haut */
     background: #0a0a0a;
     transform: translateY(100%);
     will-change: transform;
@@ -116,8 +117,10 @@
     align-items: center;
     justify-content: center;
     gap: clamp(28px, 5vh, 56px);
-    padding: 8vh 24px;
+    /* le logo pleine largeur est docké en haut pendant que l'About est ouvert */
+    padding: calc(100vw / 3.89 + 4vh) 24px 6vh;
     text-align: center;
+    overflow-y: auto;
   }
   .about-text {
     max-width: 720px;
@@ -186,47 +189,96 @@
 
 <script>
   (function () {
-    // Scroll piloté : molette / doigt → le panneau About monte par le bas,
-    // avec inertie (lerp) et snap ouvert/fermé au relâchement.
+    // === Même mécanique d'arrivée que le site, adaptée à l'attente ===
+    // Phase 1 : premier scroll → le logo (pleine largeur, en bas) monte se
+    //           docker en haut de l'écran (lerp vif).
+    // Phase 2 : une fois le logo docké, le panneau About monte par le bas
+    //           (tween 300ms) et reste sous le logo.
+    // Retour  : scroll vers le haut (About en haut de son scroll) → l'About
+    //           redescend, puis le logo revient en bas.
+    var logo = document.querySelector('.logo');
     var about = document.getElementById('about');
     var body = document.body;
-    var target = 0;      // 0 = fermé, 1 = ouvert
-    var progress = 0;
-    var idleTimer = null;
+    var seq = 0;              // 0 accueil · 1 logo monte · 2 ouvert · 3 fermeture
+    var cur = 0, tgt = 0;     // translateY du logo (px)
 
-    function clamp(v) { return Math.max(0, Math.min(1, v)); }
-    function nudge(delta) {
-      target = clamp(target + delta);
-      if (idleTimer) clearTimeout(idleTimer);
-      // Au repos : snap vers l'état le plus proche
-      idleTimer = setTimeout(function () { target = target > 0.5 ? 1 : 0; }, 160);
+    function logoTravel() {
+      return -Math.max(0, window.innerHeight - (logo.offsetHeight || 0));
+    }
+
+    function openArrival() {
+      if (seq !== 0) return;
+      seq = 1;
+      tgt = logoTravel();
+    }
+
+    function slidePanel(open, done) {
+      var t0 = performance.now();
+      (function tw(now) {
+        var t = Math.min(1, (now - t0) / 300);
+        var e = 1 - Math.pow(1 - t, 3);
+        var y = open ? (1 - e) * 100 : e * 100;
+        about.style.transform = 'translateY(' + y + '%)';
+        if (t < 1) requestAnimationFrame(tw);
+        else if (done) done();
+      })(t0);
+    }
+
+    function onDocked() {
+      if (seq !== 1) return;
+      seq = 2;
+      body.classList.add('open');
+      about.setAttribute('aria-hidden', 'false');
+      slidePanel(true);
+    }
+
+    function closeArrival() {
+      if (seq !== 2) return;
+      seq = 3;
+      slidePanel(false, function () {
+        body.classList.remove('open');
+        about.setAttribute('aria-hidden', 'true');
+        tgt = 0;              // le logo redescend
+      });
     }
 
     window.addEventListener('wheel', function (e) {
       e.preventDefault();
-      nudge(e.deltaY / (window.innerHeight * 0.9));
+      if (seq === 0 && e.deltaY > 0) openArrival();
+      else if (seq === 2) {
+        if (e.deltaY < 0 && about.scrollTop <= 0) closeArrival();
+        else about.scrollTop += e.deltaY;   // contenu plus haut que l'écran
+      }
     }, { passive: false });
 
-    var lastY = null;
+    var touchY = null;
     window.addEventListener('touchstart', function (e) {
-      lastY = e.touches[0].clientY;
+      touchY = e.touches[0].clientY;
     }, { passive: true });
     window.addEventListener('touchmove', function (e) {
       e.preventDefault();
-      if (lastY === null) return;
-      var y = e.touches[0].clientY;
-      nudge((lastY - y) / (window.innerHeight * 0.7));
-      lastY = y;
+      if (touchY === null) return;
+      var dy = touchY - e.touches[0].clientY;   // >0 = swipe vers le haut
+      if (seq === 0 && dy > 24) { openArrival(); touchY = null; }
+      else if (seq === 2) {
+        if (dy < -24 && about.scrollTop <= 0) { closeArrival(); touchY = null; }
+        else { about.scrollTop += dy; touchY = e.touches[0].clientY; }
+      }
     }, { passive: false });
-    window.addEventListener('touchend', function () { lastY = null; });
+    window.addEventListener('touchend', function () { touchY = null; });
+
+    // Clic sur la vidéo = même déclencheur que le site
+    window.addEventListener('click', function () { if (seq === 0) openArrival(); });
 
     (function tick() {
-      progress += (target - progress) * 0.12;
-      if (Math.abs(target - progress) < 0.001) progress = target;
-      about.style.transform = 'translateY(' + ((1 - progress) * 100) + '%)';
-      var opened = progress > 0.02;
-      about.setAttribute('aria-hidden', String(!opened));
-      body.classList.toggle('open', progress > 0.5);
+      var k = (seq === 1) ? 0.2 : 0.08;   // phase 1 : montée directe et vive
+      cur += (tgt - cur) * k;
+      if (Math.abs(tgt - cur) < 0.6) {
+        cur = tgt;
+        if (seq === 1) onDocked();
+        if (seq === 3 && tgt === 0) seq = 0;
+      }
+      logo.style.transform = 'translateY(' + cur + 'px)';
       requestAnimationFrame(tick);
     })();
   })();
