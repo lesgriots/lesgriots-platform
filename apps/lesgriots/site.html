@@ -335,16 +335,15 @@
       const rect = brandEl.getBoundingClientRect();
       travelFixed = Math.max(0, rect.top - currentY);
       targetY = -travelFixed;                 // le logo monte en haut
-      // SYNCHRONISÉ : la section part EN MÊME TEMPS que le logo et met le
-      // même temps à monter (500ms ≈ temps de pose du lerp k=.16). Une seule
-      // chorégraphie, aucun temps mort, aucun décrochage.
-      enter();
-      raiseIndex();
+      // La section part dans tick() À L'INSTANT où le logo touche le haut
+      // (92% du trajet = contact visuel, pas d'attente du pixel final).
     }
     // Fin de phase 1 (logo en haut) → phase 2 : on relâche le scroll et la section monte.
     function onLogoDocked() {
       if (seq !== 1) return;
-      seq = 2; // la section est déjà partie avec le logo (startArrival)
+      seq = 2;
+      enter();
+      raiseIndex(); // la section monte juste après le contact du logo en haut
     }
     // Index en overlay : slide up par-dessus le hero, puis reste en place.
     function raiseIndex() {
@@ -370,7 +369,7 @@
       if (Math.abs(targetY - currentY) < 0.1) currentY = targetY;
       // Chevauchement : la section part quand le logo a fait ~78% du trajet
       // (il finit de se poser pendant qu'elle monte) → zéro temps mort.
-      if (seq === 1 && targetY < 0 && currentY <= targetY * 0.82) onLogoDocked();
+      if (seq === 1 && targetY < 0 && currentY <= targetY * 0.92) onLogoDocked();
       if (seq === 1 && currentY <= targetY + 0.6) onLogoDocked(); // filet de sécurité
       const pj = document.getElementById('project-florale');
       if (pj && !pj.classList.contains('open')) brandLoop = 0;

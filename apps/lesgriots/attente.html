@@ -255,10 +255,7 @@
       if (seq !== 0) return;
       seq = 1;
       tgt = logoTravel();
-      // SYNCHRONISÉ : l'About part en même temps que le logo, même durée.
-      body.classList.add('open');
-      about.setAttribute('aria-hidden', 'false');
-      slidePanel(true);
+      // L'About part dans tick() à l'instant où le logo touche le haut.
     }
 
     function slidePanel(open, done) {
@@ -277,7 +274,10 @@
 
     function onDocked() {
       if (seq !== 1) return;
-      seq = 2; // le panneau est déjà parti avec le logo (openArrival)
+      seq = 2;
+      body.classList.add('open');
+      about.setAttribute('aria-hidden', 'false');
+      slidePanel(true); // l'About monte juste après le contact du logo en haut
     }
 
     function closeArrival() {
@@ -358,7 +358,7 @@
       cur += (tgt - cur) * k;
       // Chevauchement : l'About part quand le logo a fait ~75% du trajet,
       // pendant qu'il finit de se poser → zéro temps mort entre les phases.
-      if (seq === 1 && tgt !== 0 && Math.abs(cur) >= Math.abs(tgt) * 0.8) onDocked();
+      if (seq === 1 && tgt !== 0 && Math.abs(cur) >= Math.abs(tgt) * 0.92) onDocked();
       if (Math.abs(tgt - cur) < 0.6) {
         cur = tgt;
         if (seq === 1) onDocked();
