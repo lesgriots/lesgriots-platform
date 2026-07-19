@@ -91,18 +91,14 @@ export async function POST() {
     const aboutTextHtml = `    <div class="about-slide"><p>${esc(about.text)}</p></div>`;
     // Sections « à la Saint Heron » : un écran par pilier, visuel de fond
     // assombri + bloc éditorial (titre, paragraphe, lien vers le site).
-    // Layout Saint Heron : texte éditorial à gauche, visuel du site en
-    // RECTANGLE plein bord à droite (pas de fond plein écran).
-    const aboutSitesHtml = (about.links || []).map((l) =>
-      `    <div class="about-slide ah-section">\n` +
-      `      <div class="ah-txt">\n` +
-      `        <h3>${esc(l.title || l.label)}</h3>\n` +
-      `        <p>${esc(l.desc || "")}</p>\n` +
-      `        <a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}&nbsp;↗</a>\n` +
-      `      </div>\n` +
-      (l.img ? `      <img class="ah-visual" src="${esc(l.img)}" alt="" onerror="this.remove()" />\n` : ``) +
-      `    </div>`
-    ).join("\n");
+    // Présentation des sites « comme ça » (réf. envoyée par Moos) : écran
+    // CLAIR, rangée horizontale de rectangles (visuel du site) avec le nom
+    // en serif centré dessous. Révélation en cascade à l'arrivée.
+    const aboutSitesHtml =
+      `    <div class="about-slide ah-section aw2-slide"><div class="aw2-row">\n` +
+      (about.links || []).map((l) =>
+        `      <a class="aw2-item" href="${esc(l.url)}" target="_blank" rel="noopener"><span class="aw2-frame"><img src="${esc(l.img)}" alt="${esc(l.label)}" onerror="this.parentNode.style.display='none'" /></span><span class="aw2-label">${esc(l.label)}</span></a>`).join("\n") +
+      `\n    </div></div>`;
     html = fill(html, "ABOUT_TEXT", aboutTextHtml);
     html = fill(html, "ABOUT_SITES", aboutSitesHtml);
 
