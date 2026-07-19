@@ -120,6 +120,9 @@ export default function ShopPage() {
                   onBlur={(e) => { if (e.target.value !== s.url) saveItem({ ...s, url: e.target.value }); }}
                   style={{ flex: 1 }} />
               </div>
+              <textarea rows={2} defaultValue={s.desc} key={`${s.id}-desc`} placeholder="Description (fiche produit)"
+                onBlur={(e) => { if (e.target.value !== (s.desc || "")) saveItem({ ...s, desc: e.target.value }); }}
+                style={{ width: "100%", marginTop: 6, fontSize: 12, minHeight: 48 }} />
               <div className="projcard__actions" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
                 <button className="projcard__act" disabled={!!busy}
                   onClick={() => { uploadTarget.current = s.id; fileInput.current?.click(); }}>

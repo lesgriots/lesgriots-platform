@@ -9,6 +9,7 @@
 //   shop      : les articles de la boutique (shop-panel).
 import fs from "fs";
 import path from "path";
+import DEFAULTS from "./defaults.json";
 
 const STORE_PATH = path.join(process.cwd(), "lesgriots.json");
 
@@ -18,6 +19,12 @@ const EMPTY = {
   projects: [],                         // slides stage-img — cf. seed.mjs
   about: { text: "", links: [] },       // texte + liens écosystème
   shop: [],                             // articles boutique
+  // Contenus du site complet — seeds extraits de site.html (lib/defaults.json)
+  journal: DEFAULTS.journal,            // entrées de l'Index (date, titre, img, intro, note, galerie)
+  archive: DEFAULTS.archive,            // tuiles du panneau Archive
+  meta: DEFAULTS.meta,                  // <title> + meta description
+  texts: DEFAULTS.texts,                // textes épars (sous-titre player, footer)
+  social: DEFAULTS.social,              // liens réseaux (instagram)
 };
 
 // Lit le store. Le crée vide s'il n'existe pas encore.
@@ -26,7 +33,14 @@ function load() {
   try {
     const raw = fs.readFileSync(STORE_PATH, "utf8");
     const parsed = JSON.parse(raw);
-    return { ...structuredCloneSafe(EMPTY), ...parsed };
+    const merged = { ...structuredCloneSafe(EMPTY), ...parsed };
+    // Migration v2 (site complet) : au premier chargement d'un store d'avant
+    // les seeds, on remplit shop/about.text s'ils sont vides.
+    if (!("journal" in parsed)) {
+      if (!parsed.shop || !parsed.shop.length) merged.shop = structuredCloneSafe(DEFAULTS.shop);
+      if (parsed.about && !parsed.about.text) merged.about = { ...parsed.about, text: DEFAULTS.aboutText };
+    }
+    return merged;
   } catch (e) {
     console.error("lesgriots.json corrompu :", e.message);
     return structuredCloneSafe(EMPTY);
@@ -184,6 +198,7 @@ export function upsertShopItem(item) {
     price: item.price || "",
     img: item.img || "",
     url: item.url || "",
+    desc: item.desc || "",
     position: Number(item.position) || 0,
     hidden: !!item.hidden,
   };
@@ -200,4 +215,87 @@ export function deleteShopItem(id) {
   store.shop = (store.shop || []).filter((s) => s.id !== id);
   save(store);
   return before - store.shop.length;
+}
+
+
+// ---- Générique : collections triées (journal, archive) -----------------
+function listCollection(key, { excludeHidden = false } = {}) {
+  const store = load();
+  let arr = store[key] || [];
+  if (excludeHidden) arr = arr.filter((x) => !x.hidden);
+  return [...arr].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+}
+
+function upsertIn(key, shape, item) {
+  if (!item || !item.id) throw new Error(`upsert ${key}: id required`);
+  const store = load();
+  const arr = store[key] || [];
+  const i = arr.findIndex((x) => x.id === item.id);
+  const next = shape(item, i >= 0 ? arr[i] : null);
+  if (i >= 0) arr[i] = next;
+  else arr.push(next);
+  store[key] = arr;
+  save(store);
+  return next;
+}
+
+function deleteIn(key, id) {
+  const store = load();
+  const before = (store[key] || []).length;
+  store[key] = (store[key] || []).filter((x) => x.id !== id);
+  save(store);
+  return before - store[key].length;
+}
+
+// ---- Journal (entrées de l'Index) ---------------------------------------
+export function listJournal(opts) { return listCollection("journal", opts); }
+export function getJournalItem(id) { return (load().journal || []).find((x) => x.id === id) || null; }
+export function upsertJournalItem(item) {
+  return upsertIn("journal", (p) => ({
+    id: p.id,
+    date: p.date || "x",
+    title: p.title || "",
+    img: p.img || "",
+    hero: p.hero || "",
+    intro: p.intro || "",
+    note: p.note || "",
+    gallery: Array.isArray(p.gallery) ? p.gallery.filter(Boolean) : [],
+    position: Number(p.position) || 0,
+    hidden: !!p.hidden,
+  }), item);
+}
+export function deleteJournalItem(id) { return deleteIn("journal", id); }
+
+// ---- Archive (tuiles) ----------------------------------------------------
+export function listArchive(opts) { return listCollection("archive", opts); }
+export function getArchiveItem(id) { return (load().archive || []).find((x) => x.id === id) || null; }
+export function upsertArchiveItem(item) {
+  return upsertIn("archive", (p) => ({
+    id: p.id,
+    title: p.title || "",
+    img: p.img || "",
+    url: p.url || "",
+    position: Number(p.position) || 0,
+    hidden: !!p.hidden,
+  }), item);
+}
+export function deleteArchiveItem(id) { return deleteIn("archive", id); }
+
+// ---- Méta + textes + réseaux --------------------------------------------
+export function getSiteTexts() {
+  const store = load();
+  return {
+    meta: { ...EMPTY.meta, ...(store.meta || {}) },
+    texts: { ...EMPTY.texts, ...(store.texts || {}) },
+    social: { ...EMPTY.social, ...(store.social || {}) },
+  };
+}
+
+export function setSiteTexts({ meta, texts, social }) {
+  const store = load();
+  if (meta) store.meta = { title: meta.title || "", description: meta.description || "" };
+  if (texts) store.texts = { playerSub: texts.playerSub || "", footer: texts.footer || "" };
+  if (social) store.social = { instagram: social.instagram || "" };
+  save(store);
+  return getSiteTexts();
 }

@@ -104,3 +104,7 @@ apps/lesgriots/.wtest
 apps/lesgriots/Les*Griots.html
 apps/lesgriots/apercu-*.html
 apps/lesgriots/*.placeholder.html
+
+# Sorties générées par le BO les griots (source de vérité : VPS)
+apps/lesgriots/site.live.html
+apps/lesgriots/index.html

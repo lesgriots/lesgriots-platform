@@ -20,8 +20,11 @@ const GROUPS = [
       { href: "/site-mode", label: "Mode du site" },
       { href: "/home-video", label: "Vidéo d'accueil" },
       { href: "/projects", label: "Projets (stage)" },
+      { href: "/index-journal", label: "Index (journal)" },
+      { href: "/archive", label: "Archive" },
       { href: "/about", label: "About + liens" },
       { href: "/shop", label: "Boutique" },
+      { href: "/site-texts", label: "Textes & méta" },
     ],
   },
 ];

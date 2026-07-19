@@ -2,7 +2,7 @@
 // Server component : lit directement le store lesgriots.json et affiche
 // un résumé des 4 sections éditables + accès rapide. Le Sync est dans la nav.
 import Link from "next/link";
-import { getHomeVideo, listProjects, getAbout, listShop, getMode } from "../lib/db.js";
+import { getHomeVideo, listProjects, getAbout, listShop, getMode, listJournal, listArchive } from "../lib/db.js";
 
 export const dynamic = "force-dynamic"; // toujours relire le store à chaud
 
@@ -75,6 +75,18 @@ export default function Dashboard() {
           title="Boutique"
           value={shop.length}
           note={shop.length ? `${shop.length} article(s)` : "Aucun article"}
+        />
+        <Card
+          href="/index-journal"
+          title="Index (journal)"
+          value={listJournal({ excludeHidden: true }).length}
+          note="Entrées visibles de l'Index"
+        />
+        <Card
+          href="/archive"
+          title="Archive"
+          value={listArchive({ excludeHidden: true }).length}
+          note="Tuiles visibles de la mosaïque"
         />
       </div>
 

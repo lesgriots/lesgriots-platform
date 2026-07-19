@@ -1,0 +1,434 @@
+{
+  "meta": {
+    "title": "Les Griots — Récits inattendus du continent et de ses diasporas",
+    "description": "Les Griots — Récits inattendus du continent et de ses diasporas."
+  },
+  "journal": [
+    {
+      "id": "trale",
+      "date": "26-05-12",
+      "title": "Tralé",
+      "img": "assets/florale.jpg",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 1,
+      "hidden": false
+    },
+    {
+      "id": "wanderkid",
+      "date": "26-04-02",
+      "title": "Wanderkid",
+      "img": "https://picsum.photos/seed/lg-wanderkid/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 2,
+      "hidden": false
+    },
+    {
+      "id": "outside",
+      "date": "26-03-18",
+      "title": "Outside",
+      "img": "https://picsum.photos/seed/lg-outside/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 3,
+      "hidden": false
+    },
+    {
+      "id": "tempete",
+      "date": "26-02-07",
+      "title": "Tempête",
+      "img": "assets/indigo-cristal.jpg",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 4,
+      "hidden": false
+    },
+    {
+      "id": "samir",
+      "date": "x",
+      "title": "Samir",
+      "img": "https://picsum.photos/seed/lg-samir/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 5,
+      "hidden": false
+    },
+    {
+      "id": "utopia",
+      "date": "x",
+      "title": "Utopia",
+      "img": "https://picsum.photos/seed/lg-utopia/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 6,
+      "hidden": false
+    },
+    {
+      "id": "mirage",
+      "date": "x",
+      "title": "Mirage",
+      "img": "https://picsum.photos/seed/lg-mirage/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 7,
+      "hidden": false
+    },
+    {
+      "id": "kwesi",
+      "date": "x",
+      "title": "Kwesi",
+      "img": "https://picsum.photos/seed/lg-kwesi/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 8,
+      "hidden": false
+    },
+    {
+      "id": "bafana",
+      "date": "x",
+      "title": "Bafana",
+      "img": "https://picsum.photos/seed/lg-bafana/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 9,
+      "hidden": false
+    },
+    {
+      "id": "nuitdebout",
+      "date": "x",
+      "title": "Nuit Debout",
+      "img": "https://picsum.photos/seed/lg-nuitdebout/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 10,
+      "hidden": false
+    },
+    {
+      "id": "sahel",
+      "date": "x",
+      "title": "Sahel",
+      "img": "https://picsum.photos/seed/lg-sahel/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 11,
+      "hidden": false
+    },
+    {
+      "id": "odyssee",
+      "date": "x",
+      "title": "Odyssée",
+      "img": "https://picsum.photos/seed/lg-odyssee/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 12,
+      "hidden": false
+    },
+    {
+      "id": "yiri",
+      "date": "x",
+      "title": "Yiri",
+      "img": "https://picsum.photos/seed/lg-yiri/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 13,
+      "hidden": false
+    },
+    {
+      "id": "palabres",
+      "date": "x",
+      "title": "Palabres",
+      "img": "https://picsum.photos/seed/lg-palabres/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 14,
+      "hidden": false
+    },
+    {
+      "id": "kora",
+      "date": "x",
+      "title": "Kora",
+      "img": "https://picsum.photos/seed/lg-kora/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 15,
+      "hidden": false
+    },
+    {
+      "id": "diasporafm",
+      "date": "x",
+      "title": "Diaspora FM",
+      "img": "https://picsum.photos/seed/lg-diasporafm/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 16,
+      "hidden": false
+    },
+    {
+      "id": "zephyr",
+      "date": "x",
+      "title": "Zéphyr",
+      "img": "https://picsum.photos/seed/lg-zephyr/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 17,
+      "hidden": false
+    },
+    {
+      "id": "nike",
+      "date": "x",
+      "title": "Les Griots × Nike — Air Teranga",
+      "img": "https://picsum.photos/seed/lg-nike/1600/900",
+      "intro": "",
+      "note": "",
+      "gallery": [],
+      "position": 18,
+      "hidden": false
+    }
+  ],
+  "archive": [
+    {
+      "id": "ar-1",
+      "title": "Les Griots × COLORS — Session Bamako",
+      "img": "https://picsum.photos/seed/lg-colors/800/450",
+      "url": "",
+      "position": 1,
+      "hidden": false
+    },
+    {
+      "id": "ar-2",
+      "title": "Les Griots × ARTE — Mémoires du Fleuve",
+      "img": "https://picsum.photos/seed/lg-arte/800/450",
+      "url": "",
+      "position": 2,
+      "hidden": false
+    },
+    {
+      "id": "ar-3",
+      "title": "Les Griots × Jacquemus — Le Boubou",
+      "img": "https://picsum.photos/seed/lg-jacquemus/800/450",
+      "url": "",
+      "position": 3,
+      "hidden": false
+    },
+    {
+      "id": "ar-4",
+      "title": "Les Griots × Spotify — Griot Radio Live",
+      "img": "https://picsum.photos/seed/lg-spotify/800/450",
+      "url": "",
+      "position": 4,
+      "hidden": false
+    },
+    {
+      "id": "ar-5",
+      "title": "Fleuve Noir",
+      "img": "https://picsum.photos/seed/lg-fleuvenoir/800/450",
+      "url": "",
+      "position": 5,
+      "hidden": false
+    },
+    {
+      "id": "ar-6",
+      "title": "Cauris",
+      "img": "https://picsum.photos/seed/lg-cauris/800/450",
+      "url": "",
+      "position": 6,
+      "hidden": false
+    },
+    {
+      "id": "ar-7",
+      "title": "Harmattan",
+      "img": "https://picsum.photos/seed/lg-harmattan/800/450",
+      "url": "",
+      "position": 7,
+      "hidden": false
+    },
+    {
+      "id": "ar-8",
+      "title": "Gorée",
+      "img": "https://picsum.photos/seed/lg-goree/800/450",
+      "url": "",
+      "position": 8,
+      "hidden": false
+    },
+    {
+      "id": "ar-9",
+      "title": "Wax",
+      "img": "https://picsum.photos/seed/lg-wax/800/450",
+      "url": "",
+      "position": 9,
+      "hidden": false
+    },
+    {
+      "id": "ar-10",
+      "title": "Téranga",
+      "img": "https://picsum.photos/seed/lg-teranga/800/450",
+      "url": "",
+      "position": 10,
+      "hidden": false
+    },
+    {
+      "id": "ar-11",
+      "title": "Baobab",
+      "img": "https://picsum.photos/seed/lg-baobab/800/450",
+      "url": "",
+      "position": 11,
+      "hidden": false
+    },
+    {
+      "id": "ar-12",
+      "title": "Griot Radio",
+      "img": "https://picsum.photos/seed/lg-griotradio/800/450",
+      "url": "",
+      "position": 12,
+      "hidden": false
+    },
+    {
+      "id": "ar-13",
+      "title": "Mansa",
+      "img": "https://picsum.photos/seed/lg-mansa/800/450",
+      "url": "",
+      "position": 13,
+      "hidden": false
+    },
+    {
+      "id": "ar-14",
+      "title": "Sankofa",
+      "img": "https://picsum.photos/seed/lg-sankofa/800/450",
+      "url": "",
+      "position": 14,
+      "hidden": false
+    },
+    {
+      "id": "ar-15",
+      "title": "Bamako Nights",
+      "img": "https://picsum.photos/seed/lg-bamakonights/800/450",
+      "url": "",
+      "position": 15,
+      "hidden": false
+    },
+    {
+      "id": "ar-16",
+      "title": "Ancestra",
+      "img": "https://picsum.photos/seed/lg-ancestra/800/450",
+      "url": "",
+      "position": 16,
+      "hidden": false
+    },
+    {
+      "id": "ar-17",
+      "title": "Kilimandjaro",
+      "img": "https://picsum.photos/seed/lg-kilimandjaro/800/450",
+      "url": "",
+      "position": 17,
+      "hidden": false
+    }
+  ],
+  "shop": [
+    {
+      "id": "sp-1",
+      "name": "Encyclopædia Griotica",
+      "price": "",
+      "img": "https://picsum.photos/seed/shop-1/440/620",
+      "url": "",
+      "desc": "",
+      "position": 1,
+      "hidden": false
+    },
+    {
+      "id": "sp-2",
+      "name": "Florale — Affiche du film",
+      "price": "",
+      "img": "https://picsum.photos/seed/shop-2/440/620",
+      "url": "",
+      "desc": "",
+      "position": 2,
+      "hidden": false
+    },
+    {
+      "id": "sp-3",
+      "name": "Indigo Cristal — Édition limitée",
+      "price": "",
+      "img": "https://picsum.photos/seed/shop-3/440/620",
+      "url": "",
+      "desc": "",
+      "position": 3,
+      "hidden": false
+    },
+    {
+      "id": "sp-4",
+      "name": "Monument",
+      "price": "",
+      "img": "https://picsum.photos/seed/shop-4/440/620",
+      "url": "",
+      "desc": "",
+      "position": 4,
+      "hidden": false
+    },
+    {
+      "id": "sp-5",
+      "name": "Tour Book — La Griothèque",
+      "price": "",
+      "img": "https://picsum.photos/seed/shop-5/460/620",
+      "url": "",
+      "desc": "",
+      "position": 5,
+      "hidden": false
+    },
+    {
+      "id": "sp-6",
+      "name": "Bleu Azurest",
+      "price": "",
+      "img": "https://picsum.photos/seed/shop-6/440/620",
+      "url": "",
+      "desc": "",
+      "position": 6,
+      "hidden": false
+    },
+    {
+      "id": "sp-7",
+      "name": "Carnets du fleuve",
+      "price": "",
+      "img": "https://picsum.photos/seed/shop-7/440/620",
+      "url": "",
+      "desc": "",
+      "position": 7,
+      "hidden": false
+    },
+    {
+      "id": "sp-8",
+      "name": "Une place à la table",
+      "price": "",
+      "img": "https://picsum.photos/seed/shop-8/440/620",
+      "url": "",
+      "desc": "",
+      "position": 8,
+      "hidden": false
+    }
+  ],
+  "texts": {
+    "playerSub": "Un épisode Les Griots · 2026",
+    "footer": "© LES GRIOTS"
+  },
+  "social": {
+    "instagram": "https://instagram.com/lesgriots"
+  },
+  "aboutText": "Multidisciplinary platform and institution that seeks to amplify vital voices and works in art, design, music and literature. With an urgent mission to preserve, collect and uplift the stories, works and archives of Black creators, Saint Heron remains dedicated to empowering future practitioners of art by reverencing the spiritual act of creating and spotlighting artists' unwavering devotion to the intergenerational language of expression."
+}
