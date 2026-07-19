@@ -335,17 +335,16 @@
       const rect = brandEl.getBoundingClientRect();
       travelFixed = Math.max(0, rect.top - currentY);
       targetY = -travelFixed;                 // le logo monte en haut
-      // La phase 2 (montée de la section) se déclenche DÈS QUE le logo touche
-      // le haut — détecté dans tick() (onLogoDocked). Pas de délai fixe.
+      // SYNCHRONISÉ : la section part EN MÊME TEMPS que le logo et met le
+      // même temps à monter (500ms ≈ temps de pose du lerp k=.16). Une seule
+      // chorégraphie, aucun temps mort, aucun décrochage.
+      enter();
+      raiseIndex();
     }
     // Fin de phase 1 (logo en haut) → phase 2 : on relâche le scroll et la section monte.
     function onLogoDocked() {
       if (seq !== 1) return;
-      seq = 2;
-      enter();
-      // Phase 2 : l'Index monte EN OVERLAY par-dessus le hero (qui reste derrière),
-      // le logo reste pinné en haut. Pas de scroll de page.
-      raiseIndex();
+      seq = 2; // la section est déjà partie avec le logo (startArrival)
     }
     // Index en overlay : slide up par-dessus le hero, puis reste en place.
     function raiseIndex() {
@@ -356,7 +355,7 @@
       j.setAttribute('aria-hidden', 'false');
       const t0 = performance.now();
       (function tw(now) {
-        const t = Math.min(1, (now - t0) / 300);
+        const t = Math.min(1, (now - t0) / 500); /* même temps que le logo */
         const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
         j.style.transform = 'translate3d(0,' + ((1 - e) * 100) + '%,0)';
         if (t < 1) requestAnimationFrame(tw);
@@ -366,12 +365,12 @@
     // NB : le vrai onScroll (recalage du logo + toggle "settled") est défini
     // plus bas — une seule déclaration pour éviter les conflits de hoisting.
     function tick() {
-      const k = (seq === 1) ? 0.2 : 0.08; // phase 1 : montée directe et vive du logo
+      const k = (seq === 1) ? 0.16 : 0.08; // phase 1 : montée décidée mais posée
       currentY += (targetY - currentY) * k;
       if (Math.abs(targetY - currentY) < 0.1) currentY = targetY;
       // Chevauchement : la section part quand le logo a fait ~78% du trajet
       // (il finit de se poser pendant qu'elle monte) → zéro temps mort.
-      if (seq === 1 && targetY < 0 && currentY <= targetY * 0.78) onLogoDocked();
+      if (seq === 1 && targetY < 0 && currentY <= targetY * 0.82) onLogoDocked();
       if (seq === 1 && currentY <= targetY + 0.6) onLogoDocked(); // filet de sécurité
       const pj = document.getElementById('project-florale');
       if (pj && !pj.classList.contains('open')) brandLoop = 0;

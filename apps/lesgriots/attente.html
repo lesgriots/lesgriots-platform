@@ -255,12 +255,18 @@
       if (seq !== 0) return;
       seq = 1;
       tgt = logoTravel();
+      // SYNCHRONISÉ : l'About part en même temps que le logo, même durée.
+      body.classList.add('open');
+      about.setAttribute('aria-hidden', 'false');
+      slidePanel(true);
     }
 
     function slidePanel(open, done) {
+      // Ouverture ample (650ms), fermeture plus vive (400ms)
+      var dur = open ? 500 : 400; // même temps que la montée du logo
       var t0 = performance.now();
       (function tw(now) {
-        var t = Math.min(1, (now - t0) / 300);
+        var t = Math.min(1, (now - t0) / dur);
         var e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
         var y = open ? (1 - e) * 100 : e * 100;
         about.style.transform = 'translate3d(0,' + y + '%,0)';
@@ -271,10 +277,7 @@
 
     function onDocked() {
       if (seq !== 1) return;
-      seq = 2;
-      body.classList.add('open');
-      about.setAttribute('aria-hidden', 'false');
-      slidePanel(true);
+      seq = 2; // le panneau est déjà parti avec le logo (openArrival)
     }
 
     function closeArrival() {
@@ -351,11 +354,11 @@
     window.addEventListener('click', function () { if (seq === 0) openArrival(); });
 
     (function tick() {
-      var k = (seq === 1) ? 0.22 : 0.1;    // phase 1 : montée directe et vive
+      var k = (seq === 1) ? 0.16 : 0.1;    // phase 1 : montée décidée mais posée
       cur += (tgt - cur) * k;
       // Chevauchement : l'About part quand le logo a fait ~75% du trajet,
       // pendant qu'il finit de se poser → zéro temps mort entre les phases.
-      if (seq === 1 && tgt !== 0 && Math.abs(cur) >= Math.abs(tgt) * 0.75) onDocked();
+      if (seq === 1 && tgt !== 0 && Math.abs(cur) >= Math.abs(tgt) * 0.8) onDocked();
       if (Math.abs(tgt - cur) < 0.6) {
         cur = tgt;
         if (seq === 1) onDocked();
