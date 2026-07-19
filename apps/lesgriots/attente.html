@@ -358,7 +358,7 @@
         if (sTarget === null) { sRaf = null; return; }
         var d = sTarget - about.scrollTop;
         if (Math.abs(d) < 0.5) { about.scrollTop = sTarget; sTarget = null; sRaf = null; return; }
-        about.scrollTop += d * 0.09;
+        about.scrollTop += d * 0.075;
         sTick();
       });
     }
@@ -368,7 +368,8 @@
       else if (seq === 2) {
         if (e.deltaY < 0 && about.scrollTop <= 0 && (sTarget === null || sTarget <= 0)) { sTarget = null; closeArrival(); return; }
         if (sTarget === null) sTarget = about.scrollTop;
-        sTarget = Math.max(0, Math.min(about.scrollHeight - about.clientHeight, sTarget + e.deltaY));
+        // Gain réduit : un cran de molette déplace moins (défilement posé)
+        sTarget = Math.max(0, Math.min(about.scrollHeight - about.clientHeight, sTarget + e.deltaY * 0.55));
         if (sIdle) clearTimeout(sIdle);
         sIdle = setTimeout(function () {
           if (sTarget !== null) sTarget = Math.round(sTarget / about.clientHeight) * about.clientHeight;
