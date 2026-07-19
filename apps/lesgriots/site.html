@@ -366,10 +366,13 @@
     // NB : le vrai onScroll (recalage du logo + toggle "settled") est défini
     // plus bas — une seule déclaration pour éviter les conflits de hoisting.
     function tick() {
-      const k = (seq === 1) ? 0.14 : 0.08; // phase 1 : montée directe et vive du logo
+      const k = (seq === 1) ? 0.2 : 0.08; // phase 1 : montée directe et vive du logo
       currentY += (targetY - currentY) * k;
       if (Math.abs(targetY - currentY) < 0.1) currentY = targetY;
-      if (seq === 1 && currentY <= targetY + 0.6) onLogoDocked(); // logo docké → phase 2
+      // Chevauchement : la section part quand le logo a fait ~78% du trajet
+      // (il finit de se poser pendant qu'elle monte) → zéro temps mort.
+      if (seq === 1 && targetY < 0 && currentY <= targetY * 0.78) onLogoDocked();
+      if (seq === 1 && currentY <= targetY + 0.6) onLogoDocked(); // filet de sécurité
       const pj = document.getElementById('project-florale');
       if (pj && !pj.classList.contains('open')) brandLoop = 0;
       if (brandEl) brandEl.style.transform = 'translate3d(0,' + (currentY + brandLoop) + 'px,0)';
