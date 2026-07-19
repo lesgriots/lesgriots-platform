@@ -7,8 +7,10 @@
   --ink: #ffffff;
   --accent: #F1B81F;
   --hot: #C4321F;
-  --serif: "Instrument Serif", "Newsreader", "Times New Roman", Georgia, serif;
-  --sans: "Geist", "Söhne", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  /* Paire « Saint Heron » (cf. testeur de polices) gravée par défaut :
+     serif classique façon Times + Archivo en sans. */
+  --serif: "Times Now", "Times New Roman", Georgia, serif;
+  --sans: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif;
   --mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
 }
 
