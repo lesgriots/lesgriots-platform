@@ -1,5 +1,55 @@
 # Déploiement en production
 
+## Première mise en ligne — lesgriots.com (page coming-soon)
+
+> Site ombrelle `apps/lesgriots`. Servi en statique par nginx depuis le monorepo
+> (root = `.../apps/lesgriots`). L'`index.html` public est la page d'attente ;
+> le site complet est dans `site.html` (bascule via le BO → « Mode du site »).
+
+**0. Nettoyer un éventuel verrou git (si édité via sandbox)**
+```bash
+cd ~/Downloads/lesgriots-platform && rm -f .git/index.lock
+```
+
+**1. Commit + push (sur le Mac)**
+```bash
+git add apps/lesgriots apps/backoffice-lesgriots infra/nginx/lesgriots.conf .gitignore
+git commit -m "feat(lesgriots): page coming-soon + BO les griots + vhost lesgriots.com"
+git push
+```
+
+**2. DNS chez OVH (une fois)** — faire pointer le domaine sur le VPS :
+- `lesgriots.com`      → A `51.210.4.77` + AAAA `2001:41d0:404:200::4537`
+- `www.lesgriots.com`  → A `51.210.4.77` + AAAA idem
+
+Actuellement `lesgriots.com` pointe sur `213.186.33.5` (parking OVH). TTL ~1h.
+
+**3. Sur le VPS — activer le site (une fois)**
+```bash
+ssh debian@51.210.4.77
+sudo -u deployment git -C /var/www/ecosystem/production/lesgriots-platform pull --ff-only
+sudo cp /var/www/ecosystem/production/lesgriots-platform/infra/nginx/lesgriots.conf \
+  /etc/nginx/sites-available/lesgriots.com.conf
+sudo ln -s /etc/nginx/sites-available/lesgriots.com.conf /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+**4. HTTPS (une fois le DNS propagé)**
+```bash
+sudo certbot --nginx -d lesgriots.com -d www.lesgriots.com
+```
+
+**5. Vérifier**
+```bash
+curl -I https://lesgriots.com    # → 200, page coming-soon (logo)
+```
+
+**Déploiements suivants** : `git push` puis `./scripts/deploy.sh lesgriots`
+(git pull côté VPS). Pour publier le site complet : dans le BO → « Mode du
+site » → *En ligne* (copie `site.html` → `index.html`), commit + push + deploy.
+
+---
+
 ## Cible
 
 VPS OVH (Strasbourg) — Ubuntu 24.04 LTS — `51.210.4.77` — 6 vCores, 12 Go RAM, 100 Go SSD.
