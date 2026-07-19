@@ -1437,15 +1437,20 @@ body.panel-open .stage-home { filter: brightness(.45); }
    se révèle à l'arrivée dans le viewport.
    ========================================================= */
 .ah-section { position: relative; overflow: hidden; align-items: center; }
-.ah-bg {
-  position: absolute; inset: 0; z-index: 0;
-  width: 100%; height: 100%;
+/* Visuel du site : rectangle plein bord droit, pleine hauteur (Saint Heron) */
+.ah-visual {
+  position: absolute; right: 0; top: 0; bottom: 0; z-index: 0;
+  width: 38%; height: 100%;
   object-fit: cover;
-  filter: brightness(.35) saturate(.9);
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .9s cubic-bezier(.16, 1, .3, 1) .3s, transform 1.2s cubic-bezier(.16, 1, .3, 1) .3s;
 }
+.ah-section.in-view .ah-visual { opacity: 1; transform: none; }
 .ah-txt {
   position: relative; z-index: 1;
-  max-width: 860px;
+  max-width: min(52%, 720px);
+  margin-right: auto;
   text-align: left;
   opacity: 0;
   transform: translateY(40px);
@@ -1500,10 +1505,12 @@ body.panel-open .stage-home { filter: brightness(.45); }
 @media (max-width: 720px) {
   #about-panel { scroll-snap-type: y mandatory; }
   #about-panel .about-slide { scroll-snap-align: start; scroll-snap-stop: always; }
-  .ah-bg {
-    opacity: 0;
-    transform: scale(1.05);
-    transition: opacity .9s cubic-bezier(.16, 1, .3, 1) .45s, transform 1.4s cubic-bezier(.16, 1, .3, 1) .45s;
+  /* Mobile : texte d'abord, puis le RECTANGLE apparaît dessous */
+  .ah-section { flex-direction: column; align-items: flex-start; justify-content: center; gap: 26px; }
+  .ah-txt { max-width: 100%; margin-right: 0; }
+  .ah-visual {
+    position: static; width: 100%; height: auto; aspect-ratio: 16 / 10;
+    transform: translateY(24px) scale(1.02);
+    transition-delay: .45s, .45s;
   }
-  .ah-section.in-view .ah-bg { opacity: 1; transform: none; }
 }
