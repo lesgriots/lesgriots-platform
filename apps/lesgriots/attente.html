@@ -276,6 +276,11 @@
     .ah-txt a { margin-top: 28px; }
   }
 
+  /* La phrase part de plus bas : incite à descendre, puis à scroller */
+  .about .about-scroll > .about-slide:first-child {
+    padding-top: max(calc(100vw / 3.89 + 88px), 55vh);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .logo, .home-video, .hint { animation: none; opacity: 1; }
   }

@@ -1577,3 +1577,10 @@ body.panel-open .stage-home { filter: brightness(.45); }
   .aw2-frame { width: min(84vw, 420px); }
 .aw2-slide { margin-top: 0; } /* mobile : snap net, pas de chevauchement */
 }
+
+
+/* La phrase du manifeste part de plus bas : l'œil doit descendre la chercher,
+   ce qui incite à scroller vers la suite. */
+#about-panel .about-scroll > .about-slide:first-child {
+  padding-top: max(calc(100vw / 3.89 + 88px), 55vh);
+}
