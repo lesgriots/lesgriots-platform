@@ -94,6 +94,8 @@
     padding: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
+    touch-action: pan-y;               /* scroll natif au doigt dans le panneau */
+    -webkit-overflow-scrolling: touch;
   }
   /* Écran 1 : la phrase — mêmes règles que .about-panel p / .about-slide du site */
   .about-slide {
@@ -181,6 +183,19 @@
     transition: color .25s ease;
   }
   .ah-txt a:hover { color: #F1B81F; }
+
+  /* ---- Pacing « award » mobile : snap écran par écran + le texte monte
+     d'abord, l'image arrive ensuite en superposition (fondu + micro-zoom) --- */
+  @media (max-width: 720px) {
+    .about { scroll-snap-type: y mandatory; }
+    .about .about-slide { scroll-snap-align: start; scroll-snap-stop: always; }
+    .ah-bg {
+      opacity: 0;
+      transform: scale(1.05);
+      transition: opacity .9s cubic-bezier(.16, 1, .3, 1) .45s, transform 1.4s cubic-bezier(.16, 1, .3, 1) .45s;
+    }
+    .ah-section.in-view .ah-bg { opacity: 1; transform: none; }
+  }
 
   /* ---- About mobile : le texte respire ---- */
   @media (max-width: 720px) {
@@ -272,12 +287,29 @@
       });
     }
 
+    // Molette : défilement AMORTI du panneau (cible + lerp + snap au repos)
+    var sTarget = null, sRaf = null, sIdle = null;
+    function sTick() {
+      sRaf = requestAnimationFrame(function () {
+        if (sTarget === null) { sRaf = null; return; }
+        var d = sTarget - about.scrollTop;
+        if (Math.abs(d) < 0.5) { about.scrollTop = sTarget; sTarget = null; sRaf = null; return; }
+        about.scrollTop += d * 0.09;
+        sTick();
+      });
+    }
     window.addEventListener('wheel', function (e) {
       e.preventDefault();
       if (seq === 0 && e.deltaY > 0) openArrival();
       else if (seq === 2) {
-        if (e.deltaY < 0 && about.scrollTop <= 0) closeArrival();
-        else about.scrollTop += e.deltaY;   // contenu plus haut que l'écran
+        if (e.deltaY < 0 && about.scrollTop <= 0 && (sTarget === null || sTarget <= 0)) { sTarget = null; closeArrival(); return; }
+        if (sTarget === null) sTarget = about.scrollTop;
+        sTarget = Math.max(0, Math.min(about.scrollHeight - about.clientHeight, sTarget + e.deltaY));
+        if (sIdle) clearTimeout(sIdle);
+        sIdle = setTimeout(function () {
+          if (sTarget !== null) sTarget = Math.round(sTarget / about.clientHeight) * about.clientHeight;
+        }, 180);
+        if (!sRaf) sTick();
       }
     }, { passive: false });
 
@@ -286,13 +318,18 @@
       touchY = e.touches[0].clientY;
     }, { passive: true });
     window.addEventListener('touchmove', function (e) {
-      e.preventDefault();
-      if (touchY === null) return;
+      if (touchY === null) { if (seq !== 2) e.preventDefault(); return; }
       var dy = touchY - e.touches[0].clientY;   // >0 = swipe vers le haut
-      if (seq === 0 && dy > 24) { openArrival(); touchY = null; }
-      else if (seq === 2) {
-        if (dy < -24 && about.scrollTop <= 0) { closeArrival(); touchY = null; }
-        else { about.scrollTop += dy; touchY = e.touches[0].clientY; }
+      if (seq === 0) {
+        e.preventDefault();
+        if (dy > 24) { openArrival(); touchY = null; }
+      } else if (seq === 2) {
+        // Panneau ouvert : scroll NATIF (avec snap CSS écran par écran).
+        // Seul le geste de fermeture est intercepté : tirer vers le bas
+        // quand le panneau est déjà tout en haut.
+        if (dy < -24 && about.scrollTop <= 0) { e.preventDefault(); closeArrival(); touchY = null; }
+      } else {
+        e.preventDefault();
       }
     }, { passive: false });
     window.addEventListener('touchend', function () { touchY = null; });

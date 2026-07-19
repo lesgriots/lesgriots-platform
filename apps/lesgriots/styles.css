@@ -1486,3 +1486,22 @@ body.panel-open .stage-home { filter: brightness(.45); }
   .ah-txt h3 { font-size: 19px; margin-bottom: 14px; }
   .ah-txt a { margin-top: 28px; }
 }
+
+
+/* =========================================================
+   ABOUT — pacing « award » :
+   · mobile : snap écran par écran (un flick = une section, jamais plus),
+     et chorégraphie en deux temps — le TEXTE monte d'abord, l'IMAGE
+     arrive ensuite en superposition (fondu + micro-zoom).
+   · le défilement molette est amorti en JS (voir script).
+   ========================================================= */
+@media (max-width: 720px) {
+  #about-panel { scroll-snap-type: y mandatory; }
+  #about-panel .about-slide { scroll-snap-align: start; scroll-snap-stop: always; }
+  .ah-bg {
+    opacity: 0;
+    transform: scale(1.05);
+    transition: opacity .9s cubic-bezier(.16, 1, .3, 1) .45s, transform 1.4s cubic-bezier(.16, 1, .3, 1) .45s;
+  }
+  .ah-section.in-view .ah-bg { opacity: 1; transform: none; }
+}

@@ -522,6 +522,36 @@
         entries.forEach((en) => awSlide.classList.toggle('in-view', en.isIntersecting));
       }, { threshold: 0.35 }).observe(awSlide);
     }
+    // Défilement AMORTI du panneau About (molette) : la roue alimente une
+    // cible, le scroll la rejoint en lerp (k=.09), et au repos on snappe
+    // sur la section la plus proche. Un rythme, pas une chute libre.
+    (function dampAboutScroll() {
+      var pnl = document.getElementById('about-panel');
+      if (!pnl) return;
+      var target = null, rafId = null, idle = null;
+      pnl.addEventListener('wheel', function (e) {
+        if (!pnl.classList.contains('open')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (target === null) target = pnl.scrollTop;
+        target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY));
+        if (idle) clearTimeout(idle);
+        idle = setTimeout(function () {
+          if (target !== null) target = Math.round(target / pnl.clientHeight) * pnl.clientHeight;
+        }, 180);
+        if (!rafId) tickScroll();
+      }, { passive: false });
+      function tickScroll() {
+        rafId = requestAnimationFrame(function () {
+          if (target === null) { rafId = null; return; }
+          var d = target - pnl.scrollTop;
+          if (Math.abs(d) < 0.5) { pnl.scrollTop = target; target = null; rafId = null; return; }
+          pnl.scrollTop += d * 0.09;
+          tickScroll();
+        });
+      }
+    })();
+
     // Sections About « Saint Heron » : révélation du bloc texte à l'arrivée
     const ahRoot = document.getElementById('about-panel');
     document.querySelectorAll('.ah-section').forEach((sec) => {
