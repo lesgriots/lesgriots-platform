@@ -351,15 +351,15 @@
       const j = document.getElementById('journal');
       if (!j) return;
       j.classList.add('as-overlay');
-      j.style.transform = 'translateY(100%)';
+      j.style.transform = 'translate3d(0,100%,0)';
       j.setAttribute('aria-hidden', 'false');
       const t0 = performance.now();
       (function tw(now) {
         const t = Math.min(1, (now - t0) / 700);
-        const e = 1 - Math.pow(1 - t, 4);
-        j.style.transform = 'translateY(' + ((1 - e) * 100) + '%)';
+        const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+        j.style.transform = 'translate3d(0,' + ((1 - e) * 100) + '%,0)';
         if (t < 1) requestAnimationFrame(tw);
-        else j.style.transform = 'translateY(0)';
+        else j.style.transform = 'translate3d(0,0,0)';
       })(performance.now());
     }
     // NB : le vrai onScroll (recalage du logo + toggle "settled") est défini
@@ -371,13 +371,13 @@
       if (seq === 1 && currentY <= targetY + 0.6) onLogoDocked(); // logo docké → phase 2
       const pj = document.getElementById('project-florale');
       if (pj && !pj.classList.contains('open')) brandLoop = 0;
-      if (brandEl) brandEl.style.transform = 'translateY(' + (currentY + brandLoop) + 'px)';
+      if (brandEl) brandEl.style.transform = 'translate3d(0,' + (currentY + brandLoop) + 'px,0)';
       if (jrHeadEl && brandEl) {
         // le menu monte avec le logo, s'arrête en haut (22px) et y reste ensuite
         const maxUp = (brandEl.offsetHeight || 0) + 14 - 22;
         const menuY = menuReturnY !== null ? menuReturnY
           : (brandLoop <= 0 ? Math.max(brandLoop, -maxUp) : -maxUp);
-        jrHeadEl.style.transform = 'translateY(' + menuY + 'px)';
+        jrHeadEl.style.transform = 'translate3d(0,' + menuY + 'px,0)';
       }
       requestAnimationFrame(tick);
     }
@@ -434,7 +434,7 @@
       window.__returning = true;
       (function riseBack(now) {
         const t = Math.min(1, (now - t0) / 700);
-        const e = 1 - Math.pow(1 - t, 4);
+        const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
         brandLoop = fromLoop * (1 - e);
         const menuFrom = window.innerHeight - (Hlogo + 14);
         menuReturnY = Math.max(0, menuFrom) * (1 - e);
@@ -450,12 +450,13 @@
     function slidePanelUp(panel) {
       panel.style.transition = 'none';
       panel.classList.add('open');
+      document.body.classList.add('panel-open');
       panel.setAttribute('aria-hidden', 'false');
       const t0 = performance.now();
       (function tw(now) {
         const t = Math.min(1, (now - t0) / 700);
-        const e = 1 - Math.pow(1 - t, 4);
-        panel.style.transform = 'translateY(' + ((1 - e) * 100) + '%)';
+        const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+        panel.style.transform = 'translate3d(0,' + ((1 - e) * 100) + '%,0)';
         if (t < 1) requestAnimationFrame(tw);
         else { panel.style.transition = ''; panel.style.transform = ''; }
       })(t0);
@@ -465,13 +466,14 @@
       const t0 = performance.now();
       (function tw(now) {
         const t = Math.min(1, (now - t0) / 700);
-        const e = 1 - Math.pow(1 - t, 4);
-        panel.style.transform = 'translateY(' + (e * 100) + '%)';
+        const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+        panel.style.transform = 'translate3d(0,' + (e * 100) + '%,0)';
         if (t < 1) requestAnimationFrame(tw);
         else {
           panel.classList.remove('open');
           panel.setAttribute('aria-hidden', 'true');
           panel.style.transition = ''; panel.style.transform = '';
+          if (!document.querySelector('.about-panel.open')) document.body.classList.remove('panel-open');
         }
       })(t0);
     }
@@ -680,7 +682,7 @@
         window.__returning = true;
         (function riseBack(now) {
           const t = Math.min(1, (now - t0) / 700);
-          const e = 1 - Math.pow(1 - t, 4); /* même ease que la montée des sections */
+          const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)); /* même ease que la montée des sections */
           brandLoop = fromLoop * (1 - e);
           const menuFrom = window.innerHeight - (Hlogo + 14);
           menuReturnY = Math.max(0, menuFrom) * (1 - e);
@@ -693,12 +695,13 @@
         ghost.style.transition = 'none';
         (function coverTween(now) {
           const t = Math.min(1, (now - t3) / 700);
-          const e = 1 - Math.pow(1 - t, 4);
-          ghost.style.transform = 'translateY(' + ((1 - e) * 100) + '%)';
+          const e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+          ghost.style.transform = 'translate3d(0,' + ((1 - e) * 100) + '%,0)';
           if (t < 1) requestAnimationFrame(coverTween);
           else finishReturn();
         })(t3);
       }, 1050);
+      document.body.classList.remove('panel-open');
       function finishReturn() {
         openPanels.forEach((p) => {
           p.style.transition = 'none'; // se referme d'un coup, caché derrière la copie
@@ -748,7 +751,7 @@
     // --- Lenis : inertie douce premium + GSAP ScrollTrigger
     let lenis = null;
     if (window.Lenis) {
-      lenis = new Lenis({ duration: 1.15, smoothWheel: true });
+      lenis = new Lenis({ duration: 1.15, smoothWheel: true, easing: (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)) });
       window.__lenis = lenis;
       (function rafLenis(t) { lenis.raf(t); requestAnimationFrame(rafLenis); })(0);
       lenis.on('scroll', onScroll);
@@ -760,7 +763,7 @@
       }
     }
     function smoothTo(top) {
-      if (lenis) lenis.scrollTo(top, { duration: 0.7, easing: (t) => 1 - Math.pow(1 - t, 4) });
+      if (lenis) lenis.scrollTo(top, { duration: 0.7, easing: (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)) });
       else window.scrollTo({ top, behavior: 'smooth' });
     }
 

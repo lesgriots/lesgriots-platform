@@ -410,8 +410,9 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   justify-content: center;
   text-align: center;
   padding: calc(100vw / 3.89 + 24px) clamp(24px, 5vw, 96px) 48px;
-  transform: translateY(100%);
-  transition: transform 1s cubic-bezier(.22,1,.36,1);
+  transform: translate3d(0, 100%, 0);
+  transition: transform .7s cubic-bezier(.16, 1, .3, 1);
+  will-change: transform;
 }
 .about-panel.open { transform: translateY(0); }
 /* About — deux écrans : phrase noire, puis section blanche qui monte au scroll */
@@ -1464,3 +1465,15 @@ body.entered .stage-mail {
   .stage-list { left: 18px; }
   .stage-list .row { font-size: 11px; }
 }
+
+
+/* =========================================================
+   PROFONDEUR — quand un panneau est ouvert, la couche du
+   dessous recule doucement (dim + micro-scale). Même courbe
+   expo que les panneaux : le mouvement respire d'un bloc.
+   ========================================================= */
+.journal, .stage-home {
+  transition: filter .7s cubic-bezier(.16, 1, .3, 1);
+}
+body.panel-open .journal { filter: brightness(.45) saturate(.9); }
+body.panel-open .stage-home { filter: brightness(.45); }
