@@ -1521,7 +1521,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
    fond clair, visuels en rectangles nets, nom en serif centré
    dessous, cascade à l'arrivée.
    ========================================================= */
-.aw2-slide { background: #f6f4ef; align-items: center; justify-content: center; }
+.aw2-slide { background: #0a0a0a; /* fond noir — la version que Moos aime */ align-items: center; justify-content: center; }
 .aw2-row {
   display: flex;
   gap: clamp(36px, 6vw, 110px);
@@ -1547,7 +1547,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
   width: clamp(200px, 24vw, 420px);
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: #e4e0d6;
+  background: #111;
 }
 .aw2-frame img {
   width: 100%; height: 100%;
@@ -1559,10 +1559,10 @@ body.panel-open .stage-home { filter: brightness(.45); }
   font-family: var(--serif);
   font-size: clamp(15px, 1.3vw, 19px);
   letter-spacing: .01em;
-  color: #141210;
+  color: #f4efe3;
   text-align: center;
 }
-.aw2-item:hover .aw2-label { color: #C4321F; }
+.aw2-item:hover .aw2-label { color: #F1B81F; }
 @media (max-width: 720px) {
   .aw2-row { flex-direction: column; gap: 34px; }
   .aw2-frame { width: min(84vw, 420px); }
