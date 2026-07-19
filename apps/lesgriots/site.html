@@ -750,6 +750,73 @@
     }
 
     // --- Lenis : inertie douce premium + GSAP ScrollTrigger
+    // === GESTES MOBILE — revenir en arrière au doigt =====================
+    // Tout panneau ouvert (About, Shop, fiche produit, page projet, Archive)
+    // se ferme d'un swipe vers le bas : le panneau suit le doigt (quand son
+    // contenu est déjà en haut), puis se referme au relâchement si le geste
+    // dépasse ~18% de l'écran, sinon il revient en place. Même logique que
+    // les bottom-sheets iOS/Android : intuitif, aucune cible à viser.
+    (function wireSwipeToClose() {
+      function closeFrom(panel, fromPx) {
+        // Tween de fermeture depuis la position actuelle du doigt
+        var H = window.innerHeight;
+        var from = Math.max(0, Math.min(100, (fromPx / H) * 100));
+        panel.style.transition = 'none';
+        var t0 = performance.now();
+        (function tw(now) {
+          var t = Math.min(1, (now - t0) / 300);
+          var e = (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+          var y = from + (100 - from) * e;
+          panel.style.transform = 'translate3d(0,' + y + '%,0)';
+          if (t < 1) requestAnimationFrame(tw);
+          else {
+            panel.classList.remove('open');
+            panel.setAttribute('aria-hidden', 'true');
+            panel.style.transition = ''; panel.style.transform = '';
+            if (!document.querySelector('.about-panel.open')) document.body.classList.remove('panel-open');
+          }
+        })(t0);
+      }
+      document.querySelectorAll('.about-panel').forEach(function (panel) {
+        var startY = null, dragging = false, delta = 0;
+        panel.addEventListener('touchstart', function (e) {
+          if (!panel.classList.contains('open')) return;
+          startY = e.touches[0].clientY; delta = 0; dragging = false;
+        }, { passive: true });
+        panel.addEventListener('touchmove', function (e) {
+          if (startY === null || !panel.classList.contains('open')) return;
+          var dy = e.touches[0].clientY - startY;
+          // On ne « tire » le panneau que si son contenu est déjà tout en haut
+          if (panel.scrollTop <= 0 && dy > 6) {
+            dragging = true; delta = dy;
+            panel.style.transition = 'none';
+            panel.style.transform = 'translate3d(0,' + dy + 'px,0)';
+            e.preventDefault();
+          }
+        }, { passive: false });
+        panel.addEventListener('touchend', function () {
+          if (dragging) {
+            if (delta > window.innerHeight * 0.18) closeFrom(panel, delta);
+            else { panel.style.transition = ''; panel.style.transform = ''; }
+          }
+          startY = null; dragging = false; delta = 0;
+        });
+      });
+      // Player plein écran : swipe vers le bas = fermer (équivaut au bouton ✕)
+      var player = document.getElementById('player');
+      var playerClose = document.querySelector('.player-close');
+      if (player && playerClose) {
+        var pStartY = null;
+        player.addEventListener('touchstart', function (e) { pStartY = e.touches[0].clientY; }, { passive: true });
+        player.addEventListener('touchend', function (e) {
+          if (pStartY === null) return;
+          var dy = e.changedTouches[0].clientY - pStartY;
+          if (dy > window.innerHeight * 0.15) playerClose.click();
+          pStartY = null;
+        });
+      }
+    })();
+
     let lenis = null;
     if (window.Lenis) {
       lenis = new Lenis({ duration: 1.15, smoothWheel: true, easing: (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)) });
