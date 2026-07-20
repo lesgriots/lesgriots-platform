@@ -88,7 +88,10 @@ export async function POST() {
     // ---- About — structure EXACTE du panneau du site, partagée avec
     // la page d'attente : phrase sur écran noir, puis les 3 sites en
     // grande grille « pin-up » (aw-sites) qui montent en cascade.
-    const aboutTextHtml = `    <div class="about-slide"><p>${esc(about.text)}</p></div>`;
+    // Les doubles retours à la ligne du texte About deviennent des respirations
+    // de paragraphes (le template ne rend qu'un seul <p>).
+    const aboutTextBody = esc(about.text).replace(/\n{2,}/g, "<br /><br />").replace(/\n/g, "<br />");
+    const aboutTextHtml = `    <div class="about-slide"><p>${aboutTextBody}</p></div>`;
     // Sections « à la Saint Heron » : un écran par pilier, visuel de fond
     // assombri + bloc éditorial (titre, paragraphe, lien vers le site).
     // Présentation des sites « comme ça » (réf. envoyée par Moos) : écran
