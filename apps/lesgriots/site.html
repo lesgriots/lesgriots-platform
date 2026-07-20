@@ -173,11 +173,12 @@ html[lang="en"] [data-lang="fr"] { display: none; }
      (Index au départ). Clic -> le menu se déploie ; on choisit une section,
      le panneau monte et le label prend son nom. -->
 <header class="jr-head">
+  <span class="section-name" id="menu-current">Archive</span>
   <button type="button" class="menu-label" id="menu-label">
-    <span id="menu-current">Index</span><i class="menu-caret" aria-hidden="true">&#9662;</i>
+    Menu<i class="menu-caret" aria-hidden="true">&#9662;</i>
   </button>
   <nav class="menu-drop" id="menu-drop">
-    <a href="#" id="menu-index">Index</a>
+    <a href="#" id="menu-index">Archive</a>
     <a href="#" id="shop-btn">Shop</a>
     <a href="#" id="about-btn">About</a>
   </nav>
@@ -535,7 +536,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       document.addEventListener('click', closeMenu);
     }
     window.__setSection = setSection;
-    setSection('Index');
+    setSection('Archive');
 
     function wirePanel(btnId, panelId) {
       const btn = document.getElementById(btnId);
@@ -802,7 +803,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         })(t3);
       }, 1050);
       document.body.classList.remove('panel-open');
-      setSection('Index');
+      setSection('Archive');
       function finishReturn() {
         openPanels.forEach((p) => {
           p.style.transition = 'none'; // se referme d'un coup, caché derrière la copie
@@ -818,7 +819,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       e.preventDefault();
       closeMenu();
       returnToIndex();
-      setSection('Index');
+      setSection('Archive');
     });
     // Clic sur le logo : même retour élégant vers l'Index
     if (brandEl) {
@@ -877,7 +878,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
             panel.style.transition = ''; panel.style.transform = '';
             if (!document.querySelector('.about-panel.open')) {
               document.body.classList.remove('panel-open');
-              if (window.__setSection) window.__setSection('Index');
+              if (window.__setSection) window.__setSection('Archive');
             }
           }
         })(t0);
