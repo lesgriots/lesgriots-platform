@@ -616,6 +616,33 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       }
     })();
 
+    // Même défilement AMORTI sur les pages projet (section Archive) : la
+    // molette alimente une cible, le contenu la rejoint en lerp. Pas de snap
+    // (contenu éditorial continu). La mécanique existante du logo qui sort
+    // par le haut garde la priorité (on laisse passer ses preventDefault).
+    (function dampProjectScroll() {
+      var pnl = document.getElementById('project-florale');
+      if (!pnl) return;
+      var target = null, rafId = null;
+      pnl.addEventListener('wheel', function (e) {
+        if (!pnl.classList.contains('open')) return;
+        if (e.defaultPrevented) { target = null; return; } // phase logo : autre listener
+        e.preventDefault();
+        if (target === null) target = pnl.scrollTop;
+        target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY * 0.35));
+        if (!rafId) tickP();
+      }, { passive: false });
+      function tickP() {
+        rafId = requestAnimationFrame(function () {
+          if (target === null) { rafId = null; return; }
+          var d = target - pnl.scrollTop;
+          if (Math.abs(d) < 0.5) { pnl.scrollTop = target; target = null; rafId = null; return; }
+          pnl.scrollTop += d * 0.06;
+          tickP();
+        });
+      }
+    })();
+
     // Sections About « Saint Heron » : révélation du bloc texte à l'arrivée
     const ahRoot = document.getElementById('about-panel');
     document.querySelectorAll('.ah-section').forEach((sec) => {
