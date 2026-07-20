@@ -1613,12 +1613,20 @@ body.panel-open .stage-home { filter: brightness(.45); }
 .menu-drop {
   position: absolute;
   top: calc(100% + 16px);
-  left: 0;
+  left: -20px;
   display: flex;
   flex-direction: column;
   gap: 13px;
   pointer-events: none;
+  /* fond : le menu doit rester lisible par-dessus l'Index */
+  background: rgba(10, 10, 10, 0.88);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  padding: 16px 20px;
+  opacity: 0;
+  transition: opacity .25s cubic-bezier(.16, 1, .3, 1);
 }
+.jr-head.menu-open .menu-drop { opacity: 1; }
 .menu-drop a {
   opacity: 0;
   transform: translate3d(0, -8px, 0);

@@ -519,7 +519,13 @@ html[lang="en"] [data-lang="fr"] { display: none; }
     const menuHead = document.querySelector('.jr-head');
     const menuLabel = document.getElementById('menu-label');
     const menuCurrent = document.getElementById('menu-current');
-    function setSection(name) { if (menuCurrent) menuCurrent.textContent = name; }
+    function setSection(name) {
+      if (menuCurrent) menuCurrent.textContent = name;
+      // La section où l'on se trouve n'apparaît pas dans le menu
+      document.querySelectorAll('.menu-drop a').forEach((a) => {
+        a.style.display = a.textContent.trim().toLowerCase() === String(name).trim().toLowerCase() ? 'none' : '';
+      });
+    }
     function closeMenu() { if (menuHead) menuHead.classList.remove('menu-open'); }
     if (menuLabel) {
       menuLabel.addEventListener('click', (e) => {
@@ -529,6 +535,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       document.addEventListener('click', closeMenu);
     }
     window.__setSection = setSection;
+    setSection('Index');
 
     function wirePanel(btnId, panelId) {
       const btn = document.getElementById(btnId);
