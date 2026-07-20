@@ -356,8 +356,8 @@
     align-items: flex-end;
     justify-content: flex-start;
     text-align: right;
-    padding: calc(100vw / 3.89 + 84px) clamp(20px, 2vw, 40px) 48px;
-    gap: clamp(12px, 2.2vh, 18px);
+    padding: calc(100vw / 3.89 + 66px) clamp(20px, 2vw, 40px) 48px;
+    gap: clamp(10px, 1.8vh, 15px);
     transform: translateY(100%);   /* caché en bas — monte comme shop/archive */
     pointer-events: none;
     z-index: 1;
@@ -367,17 +367,12 @@
     -webkit-overflow-scrolling: touch;
   }
   .att-head.menu-open .menu-drop { transform: translateY(0); pointer-events: auto; }
-  .att-head.menu-open .menu-label {
-    font-size: 20px;
-    line-height: 1.02;
-    letter-spacing: .02em;
-  }
+  /* INDEX ne grossit PAS au clic — les items ont la MÊME taille qu'INDEX (13px / .16em) */
   .att-head .menu-drop a {
     color: #f4efe3;
     text-decoration: none;
-    font-size: 20px;
-    line-height: 1.02;
-    letter-spacing: .02em;
+    font-size: 13px;
+    letter-spacing: .16em;
   }
   .att-head .menu-drop a:hover { color: #F1B81F; }
   /* FR/EN détaché en bas (surcharge le chip fixe top-left) */
@@ -389,9 +384,8 @@
     background: none; border: 0; border-radius: 0; padding: 0;
     -webkit-backdrop-filter: none; backdrop-filter: none;
     font-family: "Times Now", "Times New Roman", Georgia, serif;
-    font-size: 20px;
-    line-height: 1.02;
-    letter-spacing: .02em;
+    font-size: 13px;
+    letter-spacing: .16em;
     text-transform: uppercase;
     color: #f4efe3;
   }
