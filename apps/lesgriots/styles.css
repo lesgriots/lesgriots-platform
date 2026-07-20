@@ -1722,8 +1722,19 @@ html.locked, html.locked body {
   /* On ne garde que « INDEX » en tête (comme la réf.) : la section
      courante à gauche s'efface pendant que le menu est ouvert. */
   .jr-head.menu-open .section-name { opacity: 0; pointer-events: none; }
-  /* Le bouton INDEX reste cliquable au-dessus de l'overlay (referme) */
-  .jr-head.menu-open .menu-label { position: relative; z-index: 10; }
+  /* INDEX : même taille que les entrées, reste cliquable au-dessus de l'overlay */
+  .jr-head.menu-open .menu-label {
+    position: relative;
+    z-index: 10;
+    font-family: var(--serif);
+    font-size: clamp(30px, 8.5vw, 44px);
+    line-height: 1.02;
+    letter-spacing: .02em;
+  }
+  .jr-head.menu-open .menu-caret { display: none; }
+  /* Toutes les sections visibles, y compris ARCHIVE (retour à l'index) */
+  .jr-head.menu-open .menu-drop a { display: block !important; }
+  .jr-head.menu-open .menu-drop #menu-index { order: 1; } /* ARCHIVE en dernier */
 
   .jr-head.menu-open .menu-drop {
     position: fixed;
@@ -1735,7 +1746,7 @@ html.locked, html.locked body {
     background: #0a0a0a;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-    padding: calc(100vw / 3.89 + 116px) clamp(24px, 7vw, 44px) 48px;
+    padding: calc(100vw / 3.89 + 130px) clamp(20px, 2vw, 40px) 48px;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -1757,7 +1768,8 @@ html.locked, html.locked body {
   }
   .jr-head.menu-open .menu-drop .lang-toggle {
     align-self: flex-end;
-    margin-top: auto; /* détaché : poussé en bas, séparé des entrées */
+    order: 2;               /* toujours en dernier, après ARCHIVE */
+    margin-top: auto;       /* détaché : poussé en bas, séparé des entrées */
     font-family: var(--serif);
     font-size: clamp(30px, 8.5vw, 44px);
     line-height: 1.02;
