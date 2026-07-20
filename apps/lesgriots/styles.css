@@ -1684,3 +1684,8 @@ html.locked, html.locked body {
   height: 100%;
   overscroll-behavior: none;
 }
+
+
+/* Page projet : le gros titre du hero est redondant — le nom du projet
+   s'affiche déjà dans l'emplacement de section, à gauche du bandeau. */
+.project-panel .pj-hero h2 { display: none; }
