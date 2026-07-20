@@ -90,8 +90,16 @@ export async function POST() {
     // grande grille « pin-up » (aw-sites) qui montent en cascade.
     // Les doubles retours à la ligne du texte About deviennent des respirations
     // de paragraphes (le template ne rend qu'un seul <p>).
-    const aboutTextBody = esc(about.text).replace(/\n{2,}/g, "<br /><br />").replace(/\n/g, "<br />");
-    const aboutTextHtml = `    <div class="about-slide"><p>${aboutTextBody}</p></div>`;
+    const para = (t) => esc(t).replace(/\n{2,}/g, "<br /><br />").replace(/\n/g, "<br />");
+    const hasEn = !!(about.text_en && about.text_en.trim());
+    const aboutTextHtml =
+      `    <div class="about-slide"><p data-lang="fr">${para(about.text)}</p>` +
+      (hasEn ? `<p data-lang="en">${para(about.text_en)}</p>` : ``) +
+      `</div>`;
+    // Toggle FR/EN : présent seulement si une version anglaise existe.
+    const langToggleHtml = hasEn
+      ? `<button type="button" class="lang-toggle" aria-label="Français / English"><span data-l="fr">FR</span><i>/</i><span data-l="en">EN</span></button>`
+      : ``;
     // Sections « à la Saint Heron » : un écran par pilier, visuel de fond
     // assombri + bloc éditorial (titre, paragraphe, lien vers le site).
     // Présentation des sites « comme ça » (réf. envoyée par Moos) : écran
@@ -103,6 +111,7 @@ export async function POST() {
         `      <a class="aw2-item" href="${esc(l.url)}" target="_blank" rel="noopener"><span class="aw2-frame"><img src="${esc(l.img)}" alt="${esc(l.label)}" onerror="this.parentNode.style.display='none'" /></span><span class="aw2-label">${esc(l.label)}</span></a>`).join("\n") +
       `\n    </div></div>`;
     html = fill(html, "ABOUT_TEXT", aboutTextHtml);
+    html = fill(html, "LANG_TOGGLE", langToggleHtml);
     html = fill(html, "ABOUT_SITES", aboutSitesHtml);
 
     // ---- Shop ------------------------------------------------------------
@@ -131,6 +140,7 @@ export async function POST() {
     attFill("ATT_VIDEO",
       `  <video class="home-video" src="${esc(home.src)}" poster="${esc(home.poster)}" autoplay muted loop playsinline preload="auto"></video>`);
     attFill("ATT_ABOUT_TEXT", aboutTextHtml);
+    attFill("ATT_LANG_TOGGLE", langToggleHtml);
     attFill("ATT_ABOUT_SITES", aboutSitesHtml);
 
     // ---- Écriture atomique -----------------------------------------------

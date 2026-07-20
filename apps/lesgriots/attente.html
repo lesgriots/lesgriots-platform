@@ -284,6 +284,29 @@
   @media (prefers-reduced-motion: reduce) {
     .logo, .home-video, .hint { animation: none; opacity: 1; }
   }
+
+  /* ---- Toggle FR / EN — chip discret, lisible sur vidéo comme sur le logo ---- */
+  .lang-toggle {
+    position: fixed;
+    top: 20px; left: 20px;
+    z-index: 300;
+    display: flex; gap: 7px; align-items: center;
+    background: rgba(0, 0, 0, 0.55);
+    border: 0; border-radius: 99px;
+    padding: 7px 13px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .18em;
+    color: rgba(244, 239, 227, 0.5);
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  }
+  .lang-toggle span.on { color: #F1B81F; }
+  .lang-toggle i { font-style: normal; opacity: .4; }
+  /* Contenus par langue : le FR est la langue par défaut */
+  [data-lang="en"] { display: none; }
+  html[lang="en"] [data-lang="en"] { display: block; }
+  html[lang="en"] [data-lang="fr"] { display: none; }
 </style>
 </head>
 <body>
@@ -294,6 +317,9 @@
 
   <div class="veil" aria-hidden="true"></div>
   <span class="hint" aria-hidden="true">( scroll )</span>
+
+  <!-- BO:ATT_LANG_TOGGLE -->
+  <!-- /BO:ATT_LANG_TOGGLE -->
 
   <aside class="about" id="about" aria-hidden="true">
     <div class="about-scroll">
@@ -444,6 +470,23 @@
       logo.style.transform = 'translate3d(0,' + cur + 'px,0)';
       requestAnimationFrame(tick);
     })();
+  })();
+</script>
+<script>
+  // Bascule FR / EN — mémorisée, appliquée avant le rendu des panneaux.
+  (function () {
+    var t = document.querySelector('.lang-toggle');
+    var lang = 'fr';
+    try { lang = localStorage.getItem('lg-lang') || 'fr'; } catch (e) {}
+    function apply(l) {
+      document.documentElement.setAttribute('lang', l);
+      if (t) t.querySelectorAll('[data-l]').forEach(function (s) { s.classList.toggle('on', s.getAttribute('data-l') === l); });
+      try { localStorage.setItem('lg-lang', l); } catch (e) {}
+    }
+    apply(lang);
+    if (t) t.addEventListener('click', function () {
+      apply(document.documentElement.getAttribute('lang') === 'fr' ? 'en' : 'fr');
+    });
   })();
 </script>
 </body>

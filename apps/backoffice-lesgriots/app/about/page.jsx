@@ -84,6 +84,14 @@ export default function AboutPage() {
           style={{ width: "100%", display: "block" }}
         />
 
+        <div className="bo-navgroup__title" style={{ border: "none", padding: 0, margin: "14px 0 6px" }}>Texte — English</div>
+        <textarea
+          rows={7} value={about.text_en || ""}
+          onChange={(e) => patch({ ...about, text_en: e.target.value })}
+          placeholder="English version (enables the FR / EN toggle on the site)…"
+          style={{ width: "100%", display: "block" }}
+        />
+
         <div className="bo-navgroup__title" style={{ border: "none", padding: 0, margin: "18px 0 6px" }}>
           Liens écosystème
         </div>

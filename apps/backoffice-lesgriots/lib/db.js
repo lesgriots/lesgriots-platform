@@ -147,7 +147,7 @@ export function deleteProject(id) {
 export function getAbout() {
   const store = load();
   const a = store.about || {};
-  return { text: a.text || "", links: Array.isArray(a.links) ? a.links : [] };
+  return { text: a.text || "", text_en: a.text_en || "", links: Array.isArray(a.links) ? a.links : [] };
 }
 
 export function setAbout(about) {
@@ -155,6 +155,7 @@ export function setAbout(about) {
   const links = Array.isArray(about && about.links) ? about.links : [];
   store.about = {
     text: (about && about.text) || "",
+    text_en: (about && about.text_en) || "",
     links: links.map((l) => ({
       label: (l && l.label) || "",
       url: (l && l.url) || "",
