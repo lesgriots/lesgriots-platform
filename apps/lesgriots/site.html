@@ -43,9 +43,6 @@ html[lang="en"] [data-lang="fr"] { display: none; }
 <body class="page-archive">
 
 <!-- BRAND : lives outside all sections so its z-index escapes stacking contexts -->
-<!-- BO:LANG_TOGGLE -->
-<!-- /BO:LANG_TOGGLE -->
-
 <a class="brand-mark" id="brand" href="#stage" aria-label="Retour à l'accueil">
   <img class="brand-img brand-yellow" src="assets/les-griots-logo.png" alt="Les Griots" />
   <img class="brand-img brand-white"  src="assets/les-griots-logo.png" alt="" aria-hidden="true" />
@@ -174,13 +171,13 @@ html[lang="en"] [data-lang="fr"] { display: none; }
      le panneau monte et le label prend son nom. -->
 <header class="jr-head">
   <span class="section-name" id="menu-current">Archive</span>
-  <button type="button" class="menu-label" id="menu-label">
-    Menu<i class="menu-caret" aria-hidden="true">&#9662;</i>
-  </button>
+  <button type="button" class="menu-label" id="menu-label">Index</button>
   <nav class="menu-drop" id="menu-drop">
     <a href="#" id="menu-index">Archive</a>
     <a href="#" id="shop-btn">Shop</a>
     <a href="#" id="about-btn">About</a>
+    <!-- BO:LANG_TOGGLE -->
+    <!-- /BO:LANG_TOGGLE -->
   </nav>
 </header>
 
@@ -1063,7 +1060,8 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       try { localStorage.setItem('lg-lang', l); } catch (e) {}
     }
     apply(lang);
-    if (t) t.addEventListener('click', function () {
+    if (t) t.addEventListener('click', function (e) {
+      e.stopPropagation(); // dans le menu : basculer la langue ne le referme pas
       apply(document.documentElement.getAttribute('lang') === 'fr' ? 'en' : 'fr');
     });
   })();

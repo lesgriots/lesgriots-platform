@@ -1640,3 +1640,20 @@ body.panel-open .stage-home { filter: brightness(.45); }
 .menu-drop a:nth-child(3) { transition-delay: .1s; }
 .jr-head.menu-open .menu-drop { pointer-events: auto; }
 .jr-head.menu-open .menu-drop a { opacity: 1; transform: none; }
+
+
+/* FR/EN dans le menu déroulant : plus un chip flottant, une ligne du menu */
+.menu-drop .lang-toggle {
+  position: static;
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  padding: 0;
+  border-radius: 0;
+  justify-content: flex-end;
+  margin-top: 6px;
+  opacity: 0;
+  transform: translate3d(0, -8px, 0);
+  transition: opacity .3s cubic-bezier(.16, 1, .3, 1) .15s, transform .3s cubic-bezier(.16, 1, .3, 1) .15s;
+}
+.jr-head.menu-open .menu-drop .lang-toggle { opacity: 1; transform: none; }
