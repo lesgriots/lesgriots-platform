@@ -115,7 +115,7 @@
     color: #f4efe3;
   }
   /* Écran 2 : les trois sites, façon PIN-UP — copie conforme du site */
-  .about-white { z-index: 2; margin-top: -58vh; background: transparent; } /* raccord resserré, aligné sur le site */
+  .about-white { z-index: 2; margin-top: 0; /* les sections attendent la fin du texte */ background: transparent; } /* raccord resserré, aligné sur le site */
   .aw-sites {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -204,7 +204,7 @@
        phrase (comme l'ancien écran blanc) — il arrive 58vh plus tôt. */
     position: relative;
     z-index: 2;
-    margin-top: -58vh;
+    margin-top: 0; /* les sections attendent la fin du texte */
   }
   .aw2-row {
   display: flex;
@@ -258,6 +258,7 @@
   @media (max-width: 720px) {
     .about { scroll-snap-type: y mandatory; }
     .about .about-slide { scroll-snap-align: start; scroll-snap-stop: always; }
+    .about .about-scroll > .about-slide:first-child { scroll-snap-align: none; }
     /* Mobile : texte d'abord, puis le RECTANGLE apparaît dessous */
     .ah-section { flex-direction: column; align-items: flex-start; justify-content: center; gap: 26px; }
     .ah-txt { max-width: 100%; margin-right: 0; }
@@ -278,7 +279,10 @@
 
   /* La phrase part de plus bas : incite à descendre, puis à scroller */
   .about .about-scroll > .about-slide:first-child {
-    padding-top: max(calc(100vw / 3.89 + 88px), 55vh);
+    padding-top: max(calc(100vw / 3.89 + 88px), 62vh);
+    height: auto;
+    min-height: 100vh;
+    padding-bottom: 16vh;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -413,7 +417,12 @@
         sTarget = Math.max(0, Math.min(about.scrollHeight - about.clientHeight, sTarget + e.deltaY * 0.35));
         if (sIdle) clearTimeout(sIdle);
         sIdle = setTimeout(function () {
-          if (sTarget !== null) sTarget = Math.round(sTarget / about.clientHeight) * about.clientHeight;
+          if (sTarget === null) return;
+          var vh = about.clientHeight;
+          var best = Math.round(sTarget / vh) * vh;
+          var s2 = about.querySelector('.aw2-slide');
+          if (s2 && Math.abs(s2.offsetTop - sTarget) < Math.abs(best - sTarget)) best = s2.offsetTop;
+          sTarget = Math.max(0, Math.min(about.scrollHeight - vh, best));
         }, 180);
         if (!sRaf) sTick();
       }

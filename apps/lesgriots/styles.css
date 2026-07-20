@@ -1505,6 +1505,8 @@ body.panel-open .stage-home { filter: brightness(.45); }
 @media (max-width: 720px) {
   #about-panel { scroll-snap-type: y mandatory; }
   #about-panel .about-slide { scroll-snap-align: start; scroll-snap-stop: always; }
+  /* l'écran du texte est plus long que le viewport : il se défile librement */
+  #about-panel .about-scroll > .about-slide:first-child { scroll-snap-align: none; }
   /* Mobile : texte d'abord, puis le RECTANGLE apparaît dessous */
   .ah-section { flex-direction: column; align-items: flex-start; justify-content: center; gap: 26px; }
   .ah-txt { max-width: 100%; margin-right: 0; }
@@ -1529,7 +1531,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
      phrase (comme l'ancien écran blanc) — il arrive 58vh plus tôt. */
   position: relative;
   z-index: 2;
-  margin-top: -58vh;
+  margin-top: 0; /* plus de chevauchement : les sections attendent la fin du texte */
 }
 .aw2-row {
   display: flex;
@@ -1582,7 +1584,12 @@ body.panel-open .stage-home { filter: brightness(.45); }
 /* La phrase du manifeste part de plus bas : l'œil doit descendre la chercher,
    ce qui incite à scroller vers la suite. */
 #about-panel .about-scroll > .about-slide:first-child {
-  padding-top: max(calc(100vw / 3.89 + 88px), 55vh);
+  /* Le texte part de plus bas ET son écran s'étire à sa longueur : on le
+     défile en entier avant que les sections n'arrivent. */
+  padding-top: max(calc(100vw / 3.89 + 88px), 62vh);
+  height: auto;
+  min-height: 100vh;
+  padding-bottom: 16vh;
 }
 
 

@@ -596,7 +596,12 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY * 0.35));
         if (idle) clearTimeout(idle);
         idle = setTimeout(function () {
-          if (target !== null) target = Math.round(target / pnl.clientHeight) * pnl.clientHeight;
+          if (target === null) return;
+          var vh = pnl.clientHeight;
+          var best = Math.round(target / vh) * vh;
+          var s2 = pnl.querySelector('.aw2-slide');
+          if (s2 && Math.abs(s2.offsetTop - target) < Math.abs(best - target)) best = s2.offsetTop;
+          target = Math.max(0, Math.min(pnl.scrollHeight - vh, best));
         }, 180);
         if (!rafId) tickScroll();
       }, { passive: false });
