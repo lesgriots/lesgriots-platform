@@ -649,6 +649,31 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       }
     })();
 
+    // Défilement amorti aussi sur le Shop (grille des produits) — même
+    // matière que l'About et les pages projet, sans snap.
+    (function dampShopScroll() {
+      var pnl = document.getElementById('shop-panel');
+      if (!pnl) return;
+      var target = null, rafId = null;
+      pnl.addEventListener('wheel', function (e) {
+        if (!pnl.classList.contains('open')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (target === null) target = pnl.scrollTop;
+        target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY * 0.35));
+        if (!rafId) tickS();
+      }, { passive: false });
+      function tickS() {
+        rafId = requestAnimationFrame(function () {
+          if (target === null) { rafId = null; return; }
+          var d = target - pnl.scrollTop;
+          if (Math.abs(d) < 0.5) { pnl.scrollTop = target; target = null; rafId = null; return; }
+          pnl.scrollTop += d * 0.06;
+          tickS();
+        });
+      }
+    })();
+
     // Sections About « Saint Heron » : révélation du bloc texte à l'arrivée
     const ahRoot = document.getElementById('about-panel');
     document.querySelectorAll('.ah-section').forEach((sec) => {
