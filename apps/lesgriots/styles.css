@@ -354,22 +354,42 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
 .shop-cart:hover { color: #F1B81F; }
 
 /* Fiche produit — overlap au-dessus du shop */
+/* Fiche produit — réf. Saint Heron : colonne centrée, l'objet d'abord */
 .pd-wrap {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(40px, 6vw, 110px);
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: clamp(22px, 3.5vh, 40px);
   max-width: 1100px;
   width: 100%;
   padding-top: calc(100vw / 3.89 * .4);
 }
-.pd-wrap img { width: 100%; max-height: 60vh; object-fit: contain; }
-.pd-info { display: flex; flex-direction: column; gap: 22px; align-items: flex-start; text-align: left; }
-.pd-info h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 3vw, 48px); line-height: 1.1; }
-.pd-desc { font-family: var(--serif); font-size: clamp(15px, 1.3vw, 19px); line-height: 1.5; color: rgba(244,239,227,.75); max-width: 34ch; }
+.pd-carousel { position: relative; width: 100%; cursor: pointer; }
+.pd-track { position: relative; width: 100%; height: 56vh; }
+.pd-track img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain; /* le média dicte son ratio — jamais de crop */
+  opacity: 0;
+  transition: opacity .3s cubic-bezier(.16, 1, .3, 1);
+}
+.pd-track img.is-on { opacity: 1; }
+.pd-dots { display: flex; justify-content: center; gap: 10px; margin-top: 26px; }
+.pd-dots button {
+  width: 5px; height: 5px; padding: 0;
+  border: 0; border-radius: 99px;
+  background: rgba(244, 239, 227, 0.32);
+  cursor: pointer;
+  transition: background .25s ease, transform .25s ease;
+}
+.pd-dots button.is-on { background: #f4efe3; transform: scale(1.25); }
+.pd-info { display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; }
+.pd-info h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(20px, 1.9vw, 30px); line-height: 1.15; }
+.pd-desc { font-family: var(--serif); font-size: clamp(13px, 1vw, 15px); line-height: 1.6; color: rgba(244,239,227,.65); max-width: 52ch; }
+.pd-desc:empty { display: none; }
 .pd-buy { font-family: var(--serif); font-size: clamp(15px, 1.3vw, 19px); letter-spacing: .08em; }
 .pd-buy:hover { color: #F1B81F; }
-@media (max-width: 720px) { .pd-wrap { grid-template-columns: 1fr; } }
+@media (max-width: 720px) { .pd-track { height: 46vh; } }
 
 /* Archive — mosaïque avec creux */
 .about-panel.archive-panel { display: block; padding: calc(100vw / 3.89 + 64px) 0 0; overflow-y: auto; }

@@ -201,12 +201,17 @@ html[lang="en"] [data-lang="fr"] { display: none; }
 </aside>
 
 <!-- PRODUIT — détail qui overlap le shop -->
+<!-- FICHE PRODUIT — réf. Saint Heron : le produit en grand, carrousel à
+     points pour feuilleter ses images, titre serif centré, ( Acheter ). -->
 <aside class="about-panel product-panel" id="product-panel" aria-hidden="true" data-lenis-prevent>
   <div class="pd-wrap">
-    <img id="pd-img" alt="" />
+    <div class="pd-carousel" id="pd-carousel">
+      <div class="pd-track" id="pd-track"></div>
+      <div class="pd-dots" id="pd-dots"></div>
+    </div>
     <div class="pd-info">
       <h3 id="pd-title"></h3>
-      <p class="pd-desc">Édition Les Griots. Impression et façonnage soignés, tirage limité.</p>
+      <p class="pd-desc"></p>
       <a href="#" class="pd-buy">(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a>
     </div>
   </div>
@@ -711,11 +716,52 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       document.querySelectorAll('.sp-product').forEach((card) => {
         card.addEventListener('click', (e) => {
           e.preventDefault();
-          document.getElementById('pd-img').src = card.querySelector('img').src;
+          // Carrousel de la fiche : toutes les images du produit (data-gallery)
+          var slides = [];
+          try { slides = JSON.parse(card.dataset.gallery || '[]'); } catch (err) { slides = []; }
+          if (!slides.length) slides = [card.querySelector('img').getAttribute('src')];
+          var track = document.getElementById('pd-track');
+          var dots = document.getElementById('pd-dots');
+          track.innerHTML = ''; dots.innerHTML = '';
+          var current = 0;
+          slides.forEach(function (src, i) {
+            var im = document.createElement('img');
+            im.src = src; im.alt = '';
+            if (i === 0) im.className = 'is-on';
+            track.appendChild(im);
+            var dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = i === 0 ? 'is-on' : '';
+            dot.addEventListener('click', function (ev) { ev.stopPropagation(); goTo(i); });
+            dots.appendChild(dot);
+          });
+          dots.style.display = slides.length > 1 ? '' : 'none';
+          function goTo(i) {
+            current = (i + slides.length) % slides.length;
+            [].forEach.call(track.children, function (el, k) { el.classList.toggle('is-on', k === current); });
+            [].forEach.call(dots.children, function (el, k) { el.classList.toggle('is-on', k === current); });
+          }
+          // Clic sur le visuel : moitié droite = suivant, gauche = précédent
+          var carousel = document.getElementById('pd-carousel');
+          carousel.onclick = function (ev) {
+            if (slides.length < 2) return;
+            var r = carousel.getBoundingClientRect();
+            goTo(current + (ev.clientX - r.left > r.width / 2 ? 1 : -1));
+          };
+          // Swipe horizontal (mobile) — le swipe vertical garde la fermeture
+          var sx = null, sy = null;
+          carousel.ontouchstart = function (ev) { sx = ev.touches[0].clientX; sy = ev.touches[0].clientY; };
+          carousel.ontouchend = function (ev) {
+            if (sx === null) return;
+            var dx = ev.changedTouches[0].clientX - sx;
+            var dy = ev.changedTouches[0].clientY - sy;
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) goTo(current + (dx < 0 ? 1 : -1));
+            sx = sy = null;
+          };
           document.getElementById('pd-title').textContent = card.querySelector('h3').textContent;
           // Fiche enrichie par le BO (data-desc / data-url / data-price)
           const pdDesc = document.querySelector('.pd-desc');
-          if (pdDesc) pdDesc.textContent = card.dataset.desc || 'Édition Les Griots. Impression et façonnage soignés, tirage limité.';
+          if (pdDesc) pdDesc.textContent = card.dataset.desc || '';
           const pdBuy = document.querySelector('.pd-buy');
           if (pdBuy) {
             const u = card.dataset.url || '';

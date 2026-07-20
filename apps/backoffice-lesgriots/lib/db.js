@@ -200,6 +200,7 @@ export function upsertShopItem(item) {
     name: item.name || "",
     price: item.price || "",
     img: item.img || "",
+    gallery: Array.isArray(item.gallery) ? item.gallery.filter(Boolean) : [],
     url: item.url || "",
     desc: item.desc || "",
     position: Number(item.position) || 0,

@@ -15,7 +15,7 @@ export default function ShopPage() {
   const [kind, setKind] = useState("ok");
   const [confirmId, setConfirmId] = useState(null);
   const [draft, setDraft] = useState({ name: "", price: "", url: "" });
-  const uploadTarget = useRef(null);
+  const uploadTarget = useRef(null); // { id, field: 'img' | 'gallery' }
   const fileInput = useRef(null);
 
   useEffect(() => { reload(); }, []);
@@ -67,20 +67,26 @@ export default function ShopPage() {
   }
 
   async function onFile(e) {
-    const file = e.target.files?.[0];
+    const files = [...(e.target.files || [])];
     e.target.value = "";
-    const id = uploadTarget.current;
-    if (!file || !id) return;
+    const target = uploadTarget.current;
+    if (!files.length || !target) return;
+    const { id, field } = typeof target === "string" ? { id: target, field: "img" } : target;
     setBusy(id);
-    flash("… upload de l'image");
+    flash(`… upload (${files.length} image${files.length > 1 ? "s" : ""})`);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const r = await fetch(`${BP}/api/upload`, { method: "POST", body: fd });
-      const j = await r.json();
-      if (j.error) throw new Error(j.error);
       const item = items.find((x) => x.id === id);
-      await saveItem({ ...item, img: j.path });
+      let next = { ...item };
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append("file", file);
+        const r = await fetch(`${BP}/api/upload`, { method: "POST", body: fd });
+        const j = await r.json();
+        if (j.error) throw new Error(j.error);
+        if (field === "gallery") next = { ...next, gallery: [...(next.gallery || []), j.path] };
+        else next = { ...next, img: j.path };
+      }
+      await saveItem(next);
     } catch (err) { flash(`✗ ${err.message}`, "err"); }
     setBusy("");
   }
@@ -95,7 +101,7 @@ export default function ShopPage() {
         lien d'achat, visuel.
       </p>
 
-      <input ref={fileInput} type="file" accept="image/*" hidden onChange={onFile} />
+      <input ref={fileInput} type="file" accept="image/*" hidden multiple onChange={onFile} />
 
       <div className="projlib" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>
         {items.map((s) => (
@@ -123,9 +129,25 @@ export default function ShopPage() {
               <textarea rows={2} defaultValue={s.desc} key={`${s.id}-desc`} placeholder="Description (fiche produit)"
                 onBlur={(e) => { if (e.target.value !== (s.desc || "")) saveItem({ ...s, desc: e.target.value }); }}
                 style={{ width: "100%", marginTop: 6, fontSize: 12, minHeight: 48 }} />
+              {/* Galerie de la fiche produit (carrousel à points sur le site) */}
+              <div className="medialib" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(52px, 1fr))", margin: "8px 0 0" }}>
+                {(s.gallery || []).map((g, gi) => (
+                  <div key={gi} className="mediatile">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={mediaUrl(g)} alt="" />
+                    <button className="mediatile__remove" title="Retirer"
+                      onClick={() => saveItem({ ...s, gallery: s.gallery.filter((_, x) => x !== gi) })}>✕</button>
+                  </div>
+                ))}
+                <button type="button" className="mediatile mediatile--add" disabled={!!busy}
+                  onClick={() => { uploadTarget.current = { id: s.id, field: "gallery" }; fileInput.current?.click(); }}
+                  title="Ajouter des images à la fiche (carrousel)">
+                  <span className="plus">+</span>
+                </button>
+              </div>
               <div className="projcard__actions" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
                 <button className="projcard__act" disabled={!!busy}
-                  onClick={() => { uploadTarget.current = s.id; fileInput.current?.click(); }}>
+                  onClick={() => { uploadTarget.current = { id: s.id, field: "img" }; fileInput.current?.click(); }}>
                   image
                 </button>
                 <button className="projcard__act" disabled={!!busy}

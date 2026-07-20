@@ -117,8 +117,13 @@ export async function POST() {
     html = fill(html, "ABOUT_SITES", aboutSitesHtml);
 
     // ---- Shop ------------------------------------------------------------
-    html = fill(html, "SHOP_PRODUCTS", shop.map((p) =>
-      `    <article class="sp-product" data-desc="${esc(p.desc)}" data-url="${esc(p.url)}" data-price="${esc(p.price)}"><img src="${esc(p.img)}" alt="" /><h3>${esc(p.name)}</h3><a href="${p.url ? esc(p.url) : "#"}"${p.url ? ' target="_blank" rel="noopener"' : ""}>(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a></article>`).join("\n"));
+    html = fill(html, "SHOP_PRODUCTS", shop.map((p) => {
+      // Galerie de la fiche produit (carrousel à points, réf. Saint Heron) :
+      // toutes les images du produit, l'image de grille en tête si absente.
+      const gal = Array.isArray(p.gallery) && p.gallery.length ? p.gallery : [];
+      const slides = (gal.length ? gal : [p.img]).filter(Boolean);
+      return `    <article class="sp-product" data-desc="${esc(p.desc)}" data-url="${esc(p.url)}" data-price="${esc(p.price)}" data-gallery="${esc(JSON.stringify(slides))}"><img src="${esc(p.img)}" alt="" /><h3>${esc(p.name)}</h3><a href="${p.url ? esc(p.url) : "#"}"${p.url ? ' target="_blank" rel="noopener"' : ""}>(&nbsp;&nbsp;Acheter&nbsp;&nbsp;)</a></article>`;
+    }).join("\n"));
 
     // ---- Archive ---------------------------------------------------------
     const tiles = [];
