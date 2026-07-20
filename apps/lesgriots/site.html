@@ -1042,78 +1042,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
 <!-- =========================================================
      FONT TESTER — live pairing switcher (temporary)
      ========================================================= -->
-<div class="fonttest" id="fonttest">
-  <div class="ft-head">
-    <span>Test typo</span>
-    <button class="ft-hide" id="ft-hide" aria-label="Masquer">×</button>
-  </div>
-  <div class="ft-list" id="ft-list"></div>
-</div>
-<style>
-  .fonttest {
-    position: fixed; left: 16px; bottom: 88px; z-index: 500;
-    width: 220px;
-    background: rgba(14,13,11,.92);
-    backdrop-filter: blur(16px);
-    color: #f4efe3;
-    border: 1px solid rgba(244,239,227,.16);
-    border-radius: 12px;
-    padding: 12px;
-    font-family: "JetBrains Mono", monospace;
-    box-shadow: 0 16px 40px rgba(0,0,0,.4);
-  }
-  .fonttest.is-hidden .ft-list { display: none; }
-  .ft-head { display: flex; justify-content: space-between; align-items: center; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: rgba(244,239,227,.6); margin-bottom: 10px; }
-  .ft-hide { color: #f4efe3; font-size: 16px; line-height: 1; padding: 0 4px; }
-  .ft-list { display: flex; flex-direction: column; gap: 4px; }
-  .ft-list button {
-    text-align: left; color: #f4efe3;
-    font-family: "JetBrains Mono", monospace;
-    font-size: 11px; letter-spacing: .04em;
-    padding: 8px 10px; border-radius: 7px;
-    border: 1px solid transparent;
-    transition: background .15s, border-color .15s;
-  }
-  .ft-list button:hover { background: rgba(244,239,227,.08); }
-  .ft-list button.active { background: rgba(241,184,31,.16); border-color: rgba(241,184,31,.4); color: #F1B81F; }
-  .ft-list button small { display: block; color: rgba(244,239,227,.45); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; margin-top: 3px; }
-</style>
-<script>
-  (function() {
-    const PAIRS = [
-      { id: 'timesnow',   label: 'Times Now',         sub: '+ Archivo (Saint Heron)', serif: '"Times Now", "Times New Roman", serif', sans: '"Archivo", sans-serif' },
-      { id: 'instrument', label: 'Instrument Serif', sub: '+ Space Grotesk', serif: '"Instrument Serif", serif', sans: '"Space Grotesk", sans-serif' },
-      { id: 'playfair',   label: 'Playfair Display',  sub: '+ Inter',         serif: '"Playfair Display", serif', sans: '"Inter", sans-serif' },
-      { id: 'bodoni',     label: 'Bodoni Moda',       sub: '+ Inter Tight',   serif: '"Bodoni Moda", serif', sans: '"Inter Tight", sans-serif' },
-      { id: 'fraunces',   label: 'Fraunces',          sub: '+ DM Sans',       serif: '"Fraunces", serif', sans: '"DM Sans", sans-serif' },
-      { id: 'cormorant',  label: 'Cormorant Garamond',sub: '+ Manrope',       serif: '"Cormorant Garamond", serif', sans: '"Manrope", sans-serif' },
-      { id: 'italiana',   label: 'Italiana',          sub: '+ Archivo',       serif: '"Italiana", serif', sans: '"Archivo", sans-serif' },
-    ];
-    const root = document.documentElement;
-    const list = document.getElementById('ft-list');
-    const KEY = 'lesgriots-fonttest';
-    function apply(p) {
-      root.style.setProperty('--serif', p.serif);
-      root.style.setProperty('--sans', p.sans);
-      [...list.children].forEach((b) => b.classList.toggle('active', b.dataset.id === p.id));
-      try { localStorage.setItem(KEY, p.id); } catch(e) {}
-    }
-    PAIRS.forEach((p) => {
-      const b = document.createElement('button');
-      b.dataset.id = p.id;
-      b.innerHTML = p.label + '<small>' + p.sub + '</small>';
-      b.addEventListener('click', () => apply(p));
-      list.appendChild(b);
-    });
-    let saved = null;
-    try { saved = localStorage.getItem(KEY); } catch(e) {}
-    apply(PAIRS.find((p) => p.id === saved) || PAIRS.find((p) => p.id === 'timesnow'));
-
-    document.getElementById('ft-hide').addEventListener('click', () => {
-      document.getElementById('fonttest').classList.toggle('is-hidden');
-    });
-  })();
-</script>
+<!-- Testeur de polices retiré : la paire Times Now + Archivo (Saint Heron) est gravée dans styles.css -->
 <script>
   // Bascule FR / EN — mémorisée, appliquée avant le rendu des panneaux.
   (function () {
