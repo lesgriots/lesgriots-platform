@@ -325,7 +325,8 @@
     right: clamp(20px, 2vw, 40px);
     z-index: 28;                /* sous le logo (30) mais AU-DESSUS du reste — INDEX toujours accessible */
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;   /* titre de section à gauche · INDEX à droite */
+    align-items: baseline;
     font-family: "Times Now", "Times New Roman", Georgia, serif;
     font-size: 13px;
     letter-spacing: .16em;
@@ -335,6 +336,16 @@
   }
   /* Le menu n'apparaît qu'une fois la section montée — jamais sur la vidéo héros */
   body.open .att-head { pointer-events: auto; }
+  /* Titre de la section (à gauche), comme les pages du site — monte comme INDEX */
+  .att-section {
+    color: #f4efe3;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity .45s ease, transform .45s cubic-bezier(.16, 1, .3, 1);
+  }
+  body.open .att-section { opacity: 1; transform: translateY(0); }
+  /* Caché quand le menu est ouvert (seul INDEX reste, comme le site) */
+  body.menu-open .att-section { opacity: 0; }
   .att-head .menu-label {
     position: relative;
     background: none; border: 0; padding: 0;
@@ -403,6 +414,7 @@
   <div class="veil" aria-hidden="true"></div>
 
   <header class="att-head" id="att-head">
+    <span class="att-section" id="att-section">About</span>
     <button type="button" class="menu-label" id="att-index">Index</button>
   </header>
   <nav class="menu-drop" id="att-menu-drop">
@@ -577,14 +589,15 @@
     var attIndex = document.getElementById('att-index');
     var aboutLink = document.querySelector('.att-about-link');
     var attDrop = document.getElementById('att-menu-drop');
-    function closeMenu() { if (attDrop) attDrop.classList.remove('open'); }
+    function closeMenu() { if (attDrop) attDrop.classList.remove('open'); document.body.classList.remove('menu-open'); }
     // Les clics dans le menu ne doivent pas déclencher l'arrivée (window click)
     if (attHead) attHead.addEventListener('click', function (e) { e.stopPropagation(); });
     if (attIndex) attIndex.addEventListener('click', function (e) {
       e.preventDefault(); e.stopPropagation();
       // À l'ouverture du menu : About repasse SOUS le menu (le menu le recouvre)
       if (!attDrop.classList.contains('open') && about) about.classList.remove('over-menu');
-      attDrop.classList.toggle('open');
+      var open = attDrop.classList.toggle('open');
+      document.body.classList.toggle('menu-open', open);   // cache le titre de section quand le menu est ouvert
     });
     if (aboutLink) aboutLink.addEventListener('click', function (e) {
       e.preventDefault(); e.stopPropagation();
