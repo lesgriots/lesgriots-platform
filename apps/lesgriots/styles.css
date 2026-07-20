@@ -1509,7 +1509,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
 /* ---- About mobile : le texte respire (marges latérales + corps adapté) ---- */
 @media (max-width: 720px) {
   .about-slide { padding-left: 8vw; padding-right: 8vw; }
-  .about-slide p, .ah-txt p { font-size: 17px; line-height: 1.62; }
+  .about-slide p, .ah-txt p { font-size: 18px; line-height: 1.62; }
   .ah-txt h3 { font-size: 19px; margin-bottom: 14px; }
   .ah-txt a { margin-top: 28px; }
 }
@@ -1527,7 +1527,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
   #about-panel .about-slide { scroll-snap-align: start; scroll-snap-stop: always; }
   /* l'écran du texte est plus long que le viewport : il se défile librement */
   #about-panel .about-slide p {
-  font-size: clamp(14px, 1.1vw, 18px);
+  font-size: clamp(15px, 1.3vw, 21px);
   line-height: 1.7;
   max-width: 780px;
 }
@@ -1609,7 +1609,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
 /* La phrase du manifeste part de plus bas : l'œil doit descendre la chercher,
    ce qui incite à scroller vers la suite. */
 #about-panel .about-slide p {
-  font-size: clamp(14px, 1.1vw, 18px);
+  font-size: clamp(15px, 1.3vw, 21px);
   line-height: 1.7;
   max-width: 780px;
 }
