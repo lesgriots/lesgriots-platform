@@ -106,8 +106,8 @@
     height: 100vh;
     display: flex;
     align-items: flex-start;
-    justify-content: flex-start;   /* texte About à GAUCHE */
-    text-align: left;
+    justify-content: center;   /* texte About centré */
+    text-align: center;
     padding: calc(100vw / 3.89 + 88px) clamp(24px, 5vw, 96px) 48px;
   }
   .about-slide p {
@@ -129,7 +129,7 @@
     max-width: 1400px;
     align-items: end;
   }
-  .about-white.about-slide { align-items: center; justify-content: center; text-align: center; }
+  .about-white.about-slide { align-items: center; }
   .aw-site { display: flex; flex-direction: column; gap: 28px; color: #f4efe3; text-decoration: none; opacity: 0; transform: translateY(80px); transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
   .aw-site:nth-child(2) { transition-delay: .12s; }
   .aw-site:nth-child(3) { transition-delay: .24s; }
