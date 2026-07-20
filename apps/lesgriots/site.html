@@ -914,6 +914,10 @@ html[lang="en"] [data-lang="fr"] { display: none; }
             if (!document.querySelector('.about-panel.open')) {
               document.body.classList.remove('panel-open');
               if (window.__setSection) window.__setSection('Archive');
+              // Depuis une page projet, le logo était sorti (brandLoop) :
+              // il remonte par le bas avec le menu — même chorégraphie
+              // fluide que les trajets au clic (riseLogoMenu).
+              if (typeof riseLogoMenu === 'function' && brandLoop !== 0) riseLogoMenu();
             }
           }
         })(t0);
