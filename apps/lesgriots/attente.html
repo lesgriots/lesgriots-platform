@@ -62,7 +62,7 @@
     left: 0; bottom: 0;
     width: 100vw; height: auto;
     display: block;
-    z-index: 6;                 /* au-dessus du panneau About, comme sur le site */
+    z-index: 30;                /* au-dessus du panneau About ET du menu (le menu passe dessous) */
     opacity: 0; animation: fade 1.4s ease forwards;
     -webkit-user-select: none; user-select: none; -webkit-user-drag: none;
     pointer-events: none;
@@ -323,7 +323,7 @@
     top: clamp(120px, 18vh, 180px);
     left: clamp(20px, 2vw, 40px);
     right: clamp(20px, 2vw, 40px);
-    z-index: 320;
+    z-index: 20;                /* sous le logo (30) — le menu monte derrière le logo */
     display: flex;
     justify-content: flex-end;
     font-family: "Times Now", "Times New Roman", Georgia, serif;
