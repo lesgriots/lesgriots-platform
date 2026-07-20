@@ -608,11 +608,16 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         if (idle) clearTimeout(idle);
         idle = setTimeout(function () {
           if (target === null) return;
+          // Aimant DOUX : on ne se cale que près des vraies frontières
+          // (haut du texte, écran des sites) — jamais en pleine lecture,
+          // sinon ça « bascule » au milieu du texte.
           var vh = pnl.clientHeight;
-          var best = Math.round(target / vh) * vh;
           var s2 = pnl.querySelector('.aw2-slide');
-          if (s2 && Math.abs(s2.offsetTop - target) < Math.abs(best - target)) best = s2.offsetTop;
-          target = Math.max(0, Math.min(pnl.scrollHeight - vh, best));
+          var cands = [0];
+          if (s2) cands.push(s2.offsetTop);
+          var best = cands[0];
+          cands.forEach(function (c) { if (Math.abs(c - target) < Math.abs(best - target)) best = c; });
+          if (Math.abs(best - target) < vh * 0.22) target = Math.max(0, Math.min(pnl.scrollHeight - vh, best));
         }, 180);
         if (!rafId) tickScroll();
       }, { passive: false });

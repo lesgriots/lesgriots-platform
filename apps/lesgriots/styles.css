@@ -1523,7 +1523,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
    · le défilement molette est amorti en JS (voir script).
    ========================================================= */
 @media (max-width: 720px) {
-  #about-panel { scroll-snap-type: y mandatory; }
+  #about-panel { scroll-snap-type: y proximity; }
   #about-panel .about-slide { scroll-snap-align: start; scroll-snap-stop: always; }
   /* l'écran du texte est plus long que le viewport : il se défile librement */
   #about-panel .about-slide p {

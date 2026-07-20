@@ -257,7 +257,7 @@
   /* ---- Pacing « award » mobile : snap écran par écran + le texte monte
      d'abord, l'image arrive ensuite en superposition (fondu + micro-zoom) --- */
   @media (max-width: 720px) {
-    .about { scroll-snap-type: y mandatory; }
+    .about { scroll-snap-type: y proximity; }
     .about .about-slide { scroll-snap-align: start; scroll-snap-stop: always; }
     .about .about-scroll > .about-slide:first-child { scroll-snap-align: start; scroll-snap-stop: normal; }
     /* Mobile : texte d'abord, puis le RECTANGLE apparaît dessous */
@@ -420,10 +420,12 @@
         sIdle = setTimeout(function () {
           if (sTarget === null) return;
           var vh = about.clientHeight;
-          var best = Math.round(sTarget / vh) * vh;
           var s2 = about.querySelector('.aw2-slide');
-          if (s2 && Math.abs(s2.offsetTop - sTarget) < Math.abs(best - sTarget)) best = s2.offsetTop;
-          sTarget = Math.max(0, Math.min(about.scrollHeight - vh, best));
+          var cands = [0];
+          if (s2) cands.push(s2.offsetTop);
+          var best = cands[0];
+          cands.forEach(function (c) { if (Math.abs(c - sTarget) < Math.abs(best - sTarget)) best = c; });
+          if (Math.abs(best - sTarget) < vh * 0.22) sTarget = Math.max(0, Math.min(about.scrollHeight - vh, best));
         }, 180);
         if (!sRaf) sTick();
       }
