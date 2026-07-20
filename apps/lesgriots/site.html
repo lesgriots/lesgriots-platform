@@ -776,6 +776,26 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         });
       });
     }
+    // Grille du Shop : au survol, les images de la galerie du produit
+    // défilent dans la vignette (retour à l'image principale en sortant).
+    document.querySelectorAll('.sp-product').forEach(function (card) {
+      var slides = [];
+      try { slides = JSON.parse(card.dataset.gallery || '[]'); } catch (err) { slides = []; }
+      if (slides.length < 2) return;
+      var im = card.querySelector('img');
+      if (!im) return;
+      var base = im.getAttribute('src');
+      var k = 0, tm = null;
+      card.addEventListener('mouseenter', function () {
+        if (tm) return;
+        tm = setInterval(function () { k = (k + 1) % slides.length; im.src = slides[k]; }, 650);
+      });
+      card.addEventListener('mouseleave', function () {
+        if (tm) { clearInterval(tm); tm = null; }
+        k = 0; im.src = base;
+      });
+    });
+
     wirePanel('archive-btn', 'archive-panel');
     // Archive : les cases montent avec ease au scroll
     const arPanel = document.getElementById('archive-panel');
