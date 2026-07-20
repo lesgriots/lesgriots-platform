@@ -1709,3 +1709,56 @@ html.locked, html.locked body {
 /* Page projet : le gros titre du hero est redondant — le nom du projet
    s'affiche déjà dans l'emplacement de section, à gauche du bandeau. */
 .project-panel .pj-hero h2 { display: none; }
+
+/* =========================================================
+   MENU « INDEX » PLEIN ÉCRAN EN MOBILE — réf. Saint Heron.
+   Au clic sur INDEX, la liste des sections s'ouvre en plein
+   écran, alignée à droite, en gros serif. Le petit menu-boîte
+   du desktop est remplacé par cette vue immersive.
+   ========================================================= */
+@media (max-width: 720px) {
+  /* Tout le menu passe au-dessus du logo (z 250) et des couches */
+  .jr-head.menu-open { z-index: 300; transform: none !important; }
+  /* On ne garde que « INDEX » en tête (comme la réf.) : la section
+     courante à gauche s'efface pendant que le menu est ouvert. */
+  .jr-head.menu-open .section-name { opacity: 0; pointer-events: none; }
+  /* Le bouton INDEX reste cliquable au-dessus de l'overlay (referme) */
+  .jr-head.menu-open .menu-label { position: relative; z-index: 10; }
+
+  .jr-head.menu-open .menu-drop {
+    position: fixed;
+    inset: 0;
+    left: 0; right: 0; top: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    background: #0a0a0a;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    padding: calc(100vw / 3.89 + 116px) clamp(24px, 7vw, 44px) 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    text-align: right;
+    gap: clamp(16px, 3.4vh, 30px);
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .jr-head.menu-open .menu-drop a {
+    font-size: clamp(30px, 8.5vw, 44px);
+    line-height: 1.02;
+    letter-spacing: .02em;
+    opacity: 1;
+    transform: none;
+  }
+  .jr-head.menu-open .menu-drop .lang-toggle {
+    align-self: flex-end;
+    margin-top: clamp(18px, 4vh, 34px);
+    font-size: 13px;
+    letter-spacing: .16em;
+  }
+}
