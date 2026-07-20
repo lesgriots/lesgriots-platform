@@ -276,7 +276,9 @@
 
   /* ---- About mobile : le texte respire ---- */
   @media (max-width: 720px) {
-    .about-slide { padding-left: 8vw; padding-right: 8vw; }
+    /* Largeur du texte alignée sur le menu : du bord d'ABOUT (gauche) au bord d'INDEX (droite) */
+    .about-slide:not(.about-white) { padding-left: clamp(20px, 2vw, 40px); padding-right: clamp(20px, 2vw, 40px); }
+    .about-white.about-slide { padding-left: 8vw; padding-right: 8vw; }
     .about-slide p, .ah-txt p { font-size: 16px; line-height: 1.55; }
     .ah-txt h3 { font-size: 19px; margin-bottom: 14px; }
     .ah-txt a { margin-top: 28px; }
