@@ -320,7 +320,7 @@
   /* ---- Menu INDEX (page d'attente) — même esprit que le site ---- */
   .att-head {
     position: fixed;
-    top: clamp(120px, 18vh, 180px);
+    top: calc(100vw / 3.89 + 40px);   /* juste SOUS le logo (hauteur = 100vw/3.89), mobile ET desktop */
     left: clamp(20px, 2vw, 40px);
     right: clamp(20px, 2vw, 40px);
     z-index: 20;                /* sous le logo (30) — le menu monte derrière le logo */
@@ -356,7 +356,7 @@
     align-items: flex-end;
     justify-content: flex-start;
     text-align: right;
-    padding: calc(clamp(120px, 18vh, 180px) + 44px) clamp(20px, 2vw, 40px) 48px;
+    padding: calc(100vw / 3.89 + 84px) clamp(20px, 2vw, 40px) 48px;
     gap: clamp(12px, 2.2vh, 18px);
     transform: translateY(100%);   /* caché en bas — monte comme shop/archive */
     pointer-events: none;
