@@ -679,6 +679,30 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       }
     })();
 
+    // Défilement amorti aussi sur l'Index (journal) — même matière que
+    // l'About : gain réduit + inertie. Actif seulement une fois entré.
+    (function dampJournalScroll() {
+      var pnl = document.getElementById('journal');
+      if (!pnl) return;
+      var target = null, rafId = null;
+      pnl.addEventListener('wheel', function (e) {
+        if (!document.body.classList.contains('entered')) return;
+        e.preventDefault();
+        if (target === null) target = pnl.scrollTop;
+        target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY * 0.35));
+        if (!rafId) tickJ();
+      }, { passive: false });
+      function tickJ() {
+        rafId = requestAnimationFrame(function () {
+          if (target === null) { rafId = null; return; }
+          var d = target - pnl.scrollTop;
+          if (Math.abs(d) < 0.5) { pnl.scrollTop = target; target = null; rafId = null; return; }
+          pnl.scrollTop += d * 0.06;
+          tickJ();
+        });
+      }
+    })();
+
     // Sections About « Saint Heron » : révélation du bloc texte à l'arrivée
     const ahRoot = document.getElementById('about-panel');
     document.querySelectorAll('.ah-section').forEach((sec) => {
