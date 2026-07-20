@@ -116,7 +116,7 @@
     color: #f4efe3;
   }
   /* Écran 2 : les trois sites, façon PIN-UP — copie conforme du site */
-  .about-white { z-index: 2; margin-top: 0; /* les sections attendent la fin du texte */ background: transparent; } /* raccord resserré, aligné sur le site */
+  .about-white { z-index: 2; margin-top: -42vh; /* l'écran des sites passe par-dessus */ background: transparent; } /* raccord resserré, aligné sur le site */
   .aw-sites {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -198,14 +198,14 @@
    dessous, cascade à l'arrivée.
    ========================================================= */
   .aw2-slide {
-    background: transparent; /* le panneau est déjà noir — un fond opaque recouvrirait la phrase (chevauchement -58vh) */
+    background: #0a0a0a; /* opaque : le passage par-dessus se voit */
     align-items: center;
     justify-content: center;
     /* Raccord resserré : l'écran des sites recouvre le vide sous la
        phrase (comme l'ancien écran blanc) — il arrive 58vh plus tôt. */
     position: relative;
     z-index: 2;
-    margin-top: 0; /* les sections attendent la fin du texte */
+    margin-top: -42vh; /* l'écran des sites passe par-dessus */
   }
   .aw2-row {
   display: flex;
@@ -280,10 +280,10 @@
 
   /* La phrase part de plus bas : incite à descendre, puis à scroller */
   .about .about-scroll > .about-slide:first-child {
-    padding-top: calc(100vh - 180px); /* le texte part à la limite basse de l'écran */
+    padding-top: max(calc(100vw / 3.89 + 88px), 72vh);
     height: auto;
     min-height: 100vh;
-    padding-bottom: 16vh;
+    padding-bottom: 50vh; /* = chevauchement : la zone recouverte est vide */
   }
 
   @media (prefers-reduced-motion: reduce) {

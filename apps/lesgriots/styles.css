@@ -1529,14 +1529,14 @@ body.panel-open .stage-home { filter: brightness(.45); }
    dessous, cascade à l'arrivée.
    ========================================================= */
 .aw2-slide {
-  background: transparent; /* le panneau est déjà noir — un fond opaque recouvrirait la phrase (chevauchement -58vh) */
+  background: #0a0a0a; /* opaque : on VOIT l'écran passer par-dessus (la zone chevauchée est du vide, jamais du texte) */
   align-items: center;
   justify-content: center;
   /* Raccord resserré : l'écran des sites recouvre le vide sous la
      phrase (comme l'ancien écran blanc) — il arrive 58vh plus tôt. */
   position: relative;
   z-index: 2;
-  margin-top: 0; /* plus de chevauchement : les sections attendent la fin du texte */
+  margin-top: -42vh; /* l'écran des sites PASSE PAR-DESSUS la fin de l'écran du texte */
 }
 .aw2-row {
   display: flex;
@@ -1596,10 +1596,14 @@ body.panel-open .stage-home { filter: brightness(.45); }
 #about-panel .about-scroll > .about-slide:first-child {
   /* Le texte part de plus bas ET son écran s'étire à sa longueur : on le
      défile en entier avant que les sections n'arrivent. */
-  padding-top: calc(100vh - 180px); /* le texte part à la limite basse de l'écran */
+  /* Entre-deux : le texte part bas (~72vh) sans coller au bord.
+     Le padding-bas ÉGALE le chevauchement de l'écran des sites : la zone
+     recouverte ne contient jamais de texte — l'écran du dessous reste
+     lisible jusqu'à être recouvert par celui du dessus. */
+  padding-top: max(calc(100vw / 3.89 + 88px), 72vh);
   height: auto;
   min-height: 100vh;
-  padding-bottom: 16vh;
+  padding-bottom: 50vh;
 }
 
 
