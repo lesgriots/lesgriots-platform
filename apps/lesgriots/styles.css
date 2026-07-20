@@ -1590,7 +1590,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
    MENU-MÉCANIQUE — le label affiche la section courante ;
    clic -> le menu se déploie dessous, en cascade.
    ========================================================= */
-.jr-head { justify-content: flex-start; }
+.jr-head { justify-content: flex-end; } /* le label de section vit à droite */
 .menu-label {
   display: inline-flex;
   align-items: baseline;
@@ -1613,7 +1613,10 @@ body.panel-open .stage-home { filter: brightness(.45); }
 .menu-drop {
   position: absolute;
   top: calc(100% + 16px);
-  left: -20px;
+  right: -20px;
+  left: auto;
+  text-align: right;
+  align-items: flex-end;
   display: flex;
   flex-direction: column;
   gap: 13px;
