@@ -97,8 +97,10 @@ export async function POST() {
       (hasEn ? `<p data-lang="en">${para(about.text_en)}</p>` : ``) +
       `</div>`;
     // Toggle FR/EN : présent seulement si une version anglaise existe.
+    // Le carré de langue affiche la langue OPPOSÉE : « English » quand le
+    // site est en français, « Français » quand il est en anglais.
     const langToggleHtml = hasEn
-      ? `<button type="button" class="lang-toggle" aria-label="Français / English"><span data-l="fr">FR</span><i>/</i><span data-l="en">EN</span></button>`
+      ? `<button type="button" class="lang-toggle" aria-label="Français / English"><span>English</span></button>`
       : ``;
     // Sections « à la Saint Heron » : un écran par pilier, visuel de fond
     // assombri + bloc éditorial (titre, paragraphe, lien vers le site).

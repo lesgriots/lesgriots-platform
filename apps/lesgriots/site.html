@@ -16,7 +16,7 @@
   z-index: 300;
   display: flex; gap: 7px; align-items: center;
   background: rgba(0, 0, 0, 0.55);
-  border: 0; border-radius: 99px;
+  border: 0; border-radius: 4px; /* carré */
   padding: 7px 13px;
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
@@ -1061,7 +1061,10 @@ html[lang="en"] [data-lang="fr"] { display: none; }
     try { lang = localStorage.getItem('lg-lang') || 'fr'; } catch (e) {}
     function apply(l) {
       document.documentElement.setAttribute('lang', l);
-      if (t) t.querySelectorAll('[data-l]').forEach(function (s) { s.classList.toggle('on', s.getAttribute('data-l') === l); });
+      if (t) {
+        var w = t.querySelector('span');
+        if (w) w.textContent = (l === 'fr') ? 'English' : 'Français';
+      }
       try { localStorage.setItem('lg-lang', l); } catch (e) {}
     }
     apply(lang);
