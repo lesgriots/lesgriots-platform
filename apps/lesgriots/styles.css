@@ -1531,7 +1531,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
   line-height: 1.7;
   max-width: 780px;
 }
-#about-panel .about-scroll > .about-slide:first-child { scroll-snap-align: none; }
+#about-panel .about-scroll > .about-slide:first-child { scroll-snap-align: start; scroll-snap-stop: normal; }
   /* Mobile : texte d'abord, puis le RECTANGLE apparaît dessous */
   .ah-section { flex-direction: column; align-items: flex-start; justify-content: center; gap: 26px; }
   .ah-txt { max-width: 100%; margin-right: 0; }

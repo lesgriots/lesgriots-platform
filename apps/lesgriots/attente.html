@@ -259,7 +259,7 @@
   @media (max-width: 720px) {
     .about { scroll-snap-type: y mandatory; }
     .about .about-slide { scroll-snap-align: start; scroll-snap-stop: always; }
-    .about .about-scroll > .about-slide:first-child { scroll-snap-align: none; }
+    .about .about-scroll > .about-slide:first-child { scroll-snap-align: start; scroll-snap-stop: normal; }
     /* Mobile : texte d'abord, puis le RECTANGLE apparaît dessous */
     .ah-section { flex-direction: column; align-items: flex-start; justify-content: center; gap: 26px; }
     .ah-txt { max-width: 100%; margin-right: 0; }
