@@ -1674,3 +1674,13 @@ body.panel-open .stage-home { filter: brightness(.45); }
   transition: opacity .3s cubic-bezier(.16, 1, .3, 1) .15s, transform .3s cubic-bezier(.16, 1, .3, 1) .15s;
 }
 .jr-head.menu-open .menu-drop .lang-toggle { opacity: 1; transform: none; }
+
+
+/* Verrou post-entrée : plus aucun scroll de page (la vidéo d'accueil est
+   derrière nous). Les couches fixes (Index, panneaux) gardent leur propre
+   défilement interne. */
+html.locked, html.locked body {
+  overflow: hidden;
+  height: 100%;
+  overscroll-behavior: none;
+}

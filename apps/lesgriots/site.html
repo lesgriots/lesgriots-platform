@@ -329,6 +329,12 @@ html[lang="en"] [data-lang="fr"] { display: none; }
     function enter() {
       if (body.classList.contains('entered')) return;
       body.classList.add('entered');
+      // Point de non-retour : une fois entré, on ne remonte JAMAIS vers la
+      // vidéo d'accueil — le scroll de page est verrouillé (desktop ET mobile,
+      // où le scroll natif pouvait encore tirer vers le haut). Tout vit
+      // ensuite dans les couches fixes (Index, panneaux).
+      document.documentElement.classList.add('locked');
+      window.scrollTo(0, 0);
       stopRotation();
     }
 
