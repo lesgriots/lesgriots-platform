@@ -1757,8 +1757,16 @@ html.locked, html.locked body {
   }
   .jr-head.menu-open .menu-drop .lang-toggle {
     align-self: flex-end;
-    margin-top: clamp(18px, 4vh, 34px);
-    font-size: 13px;
-    letter-spacing: .16em;
+    margin-top: 0;
+    font-family: var(--serif);
+    font-size: clamp(30px, 8.5vw, 44px);
+    line-height: 1.02;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    color: #f4efe3;
   }
 }
