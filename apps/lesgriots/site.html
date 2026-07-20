@@ -169,10 +169,18 @@ html[lang="en"] [data-lang="fr"] { display: none; }
 <!-- Menu : Archive (= retour à l'index) · Shop au centre · About à droite.
      3 éléments + space-between → Shop est pile au milieu horizontalement.
      L'ancienne mosaïque #archive-panel n'a plus de bouton (wirePanel ignore). -->
+<!-- Menu-mécanique : le label affiche le NOM DE LA SECTION courante
+     (Index au départ). Clic -> le menu se déploie ; on choisit une section,
+     le panneau monte et le label prend son nom. -->
 <header class="jr-head">
-  <span>Archive</span>
-  <a href="#" id="shop-btn">Shop</a>
-  <a href="#" id="about-btn">About</a>
+  <button type="button" class="menu-label" id="menu-label">
+    <span id="menu-current">Index</span><i class="menu-caret" aria-hidden="true">&#9662;</i>
+  </button>
+  <nav class="menu-drop" id="menu-drop">
+    <a href="#" id="menu-index">Index</a>
+    <a href="#" id="shop-btn">Shop</a>
+    <a href="#" id="about-btn">About</a>
+  </nav>
 </header>
 
 <!-- PROJET — page type (Florale) : monte comme les autres panneaux -->
@@ -507,16 +515,33 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       })(t0);
     }
     let panelZ = 200;
+    // --- Label de section + menu déroulant -----------------------------
+    const menuHead = document.querySelector('.jr-head');
+    const menuLabel = document.getElementById('menu-label');
+    const menuCurrent = document.getElementById('menu-current');
+    function setSection(name) { if (menuCurrent) menuCurrent.textContent = name; }
+    function closeMenu() { if (menuHead) menuHead.classList.remove('menu-open'); }
+    if (menuLabel) {
+      menuLabel.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        menuHead.classList.toggle('menu-open');
+      });
+      document.addEventListener('click', closeMenu);
+    }
+    window.__setSection = setSection;
+
     function wirePanel(btnId, panelId) {
       const btn = document.getElementById(btnId);
       const panel = document.getElementById(panelId);
       if (!btn || !panel) return;
       btn.addEventListener('click', (e) => {
         e.preventDefault();
+        closeMenu();
         const doOpen = () => {
           panelZ = panelZ >= 230 ? 201 : panelZ + 1;
           panel.style.zIndex = String(panelZ); // monte par-dessus le panneau déjà présenté
           slidePanelUp(panel);
+          setSection(btn.textContent.trim()); // le label prend le nom de la section
         };
         // Depuis un projet (logo déplacé) : d'abord logo+menu remontent, puis la section
         if (brandLoop !== 0) riseLogoMenu(doOpen); else doOpen();
@@ -690,6 +715,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         panelZ = panelZ >= 230 ? 201 : panelZ + 1;
         floralePanel.style.zIndex = String(panelZ);
         slidePanelUp(floralePanel);
+        setSection(name); // le label prend le nom du projet
         floralePanel.scrollTop = 0;
         logoOff = 0; brandLoop = 0; window.__logoPhase = false;
       }
@@ -769,6 +795,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         })(t3);
       }, 1050);
       document.body.classList.remove('panel-open');
+      setSection('Index');
       function finishReturn() {
         openPanels.forEach((p) => {
           p.style.transition = 'none'; // se referme d'un coup, caché derrière la copie
@@ -780,9 +807,11 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         setTimeout(() => ghost.remove(), 80);
       }
     }
-    document.querySelector('.jr-head span')?.addEventListener('click', (e) => {
+    document.getElementById('menu-index')?.addEventListener('click', (e) => {
       e.preventDefault();
+      closeMenu();
       returnToIndex();
+      setSection('Index');
     });
     // Clic sur le logo : même retour élégant vers l'Index
     if (brandEl) {
@@ -839,7 +868,10 @@ html[lang="en"] [data-lang="fr"] { display: none; }
             panel.classList.remove('open');
             panel.setAttribute('aria-hidden', 'true');
             panel.style.transition = ''; panel.style.transform = '';
-            if (!document.querySelector('.about-panel.open')) document.body.classList.remove('panel-open');
+            if (!document.querySelector('.about-panel.open')) {
+              document.body.classList.remove('panel-open');
+              if (window.__setSection) window.__setSection('Index');
+            }
           }
         })(t0);
       }
