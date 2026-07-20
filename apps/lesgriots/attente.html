@@ -629,6 +629,10 @@
         var w = t.querySelector('span');
         if (w) w.textContent = (l === 'fr') ? 'English' : 'Français';
       }
+      // Libellés « À propos » (FR) / « About » (EN) : titre de section + lien du menu
+      var aboutLabel = (l === 'fr') ? 'À propos' : 'About';
+      var sec = document.getElementById('att-section'); if (sec) sec.textContent = aboutLabel;
+      var alink = document.querySelector('.att-about-link'); if (alink) alink.textContent = aboutLabel;
       try { localStorage.setItem('lg-lang', l); } catch (e) {}
     }
     apply(lang);
