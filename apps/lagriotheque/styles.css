@@ -7000,7 +7000,7 @@ a.lg__partners__logo:hover {
 .lg__launch__social a { color: var(--paper); text-decoration: none; }
 .lg__launch__social a:hover { color: var(--paper); text-decoration: underline; text-underline-offset: 3px; }
 .lg__launch__social span { opacity: 0.55; }
-.lg__launch__inner { position: relative; z-index: 2; max-width: 860px; width: 100%; text-align: center; transform: translateY(10vh); }
+.lg__launch__inner { position: relative; z-index: 2; max-width: 860px; width: 100%; text-align: center; transform: translateY(20vh); }
 .lg__launch__title {
   font-family: var(--font-sans);
   font-weight: 500;
@@ -7050,6 +7050,12 @@ a.lg__partners__logo:hover {
   .lg__launch__form { flex-direction: column; }
   .lg__launch__top { flex-direction: column; gap: 10px; padding: 18px 18px; }
   .lg__launch__social { justify-content: flex-start; font-size: 12px; }
+  /* Décalage réduit sur mobile pour ne pas pousser le formulaire hors écran */
+  .lg__launch__inner { transform: translateY(9vh); }
+}
+/* Écrans peu hauts (mobile paysage, petits laptops) : on limite la descente */
+@media (max-height: 720px) {
+  .lg__launch__inner { transform: translateY(9vh); }
 }
 
 /* iOS (mode économie d'énergie) : masque le gros bouton play superposé sur la
