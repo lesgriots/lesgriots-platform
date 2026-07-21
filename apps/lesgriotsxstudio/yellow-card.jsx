@@ -27,7 +27,7 @@ function YellowCard({ onClick }) {
       aria-label="lesgriotsxstudio — home"
       {...hoverProps}
     >
-      <img src="img/sticker.png" alt="lesgriotsxstudio" className="idcard__img" />
+      <img src="img/sticker-signature.png" alt="les griots" className="idcard__img" />
       <span className="idcard__label" aria-hidden="true">
         {hovered && (
           <Type key={"home-" + lang + "-" + seq} text={tr("sticker.home", lang)} speed={32} cursor="always" />
