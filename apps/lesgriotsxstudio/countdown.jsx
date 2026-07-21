@@ -122,7 +122,7 @@
     const heading = lang === "en" ? "countdown" : "compte à rebours";
     return (
       <div className="about-min lx-cd" role="dialog" aria-label="Bientôt en ligne">
-        <img src="img/sticker-signature.png" alt="lesgriotsxstudio" className="lx-cd__sticker" aria-hidden="true" />
+        <img src="img/sticker.png" alt="lesgriotsxstudio" className="lx-cd__sticker" aria-hidden="true" />
         <LangSwitch />
 
         <IntroBlock />
