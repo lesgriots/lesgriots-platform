@@ -1,0 +1,37 @@
+<!-- ── VERROU PAYSAGE (smartphone) — LG_ROTATE_GATE ──────────────────────
+     En paysage sur un écran court (téléphone), la mise en page casse
+     (logo plein écran, hero illisible). On masque tout le contenu et on
+     invite à revenir en portrait. Tablettes et desktop non concernés
+     (max-height 520px + pointer:coarse). Bloc auto-suffisant : il est
+     injecté tel quel dans site.html, attente.html et index.html. -->
+<div class="lg-rotate" role="alertdialog" aria-live="polite">
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <rect x="7.5" y="2.5" width="9" height="19" rx="2.2" />
+    <path d="M10.8 5.4h2.4" />
+    <path d="M3.4 13.6a8.8 8.8 0 0 0 2.4 4.6" />
+    <path d="M2.1 10.7l1.3 3 3-1.3" />
+    <path d="M20.6 13.6a8.8 8.8 0 0 1-2.4 4.6" />
+    <path d="M21.9 10.7l-1.3 3-3-1.3" />
+  </svg>
+  <p class="lg-rotate__fr">Tourne ton téléphone.<br /><span>Le site se lit en mode portrait.</span></p>
+  <p class="lg-rotate__en">Rotate your phone.<br /><span>This site is made for portrait mode.</span></p>
+</div>
+<style>
+.lg-rotate { display: none; }
+html[lang="fr"] .lg-rotate__en, html[lang="en"] .lg-rotate__fr { display: none; }
+@media (orientation: landscape) and (max-height: 520px) and (pointer: coarse) {
+  html, body { overflow: hidden !important; height: 100% !important; }
+  body > *:not(.lg-rotate) { display: none !important; }
+  .lg-rotate {
+    display: flex; position: fixed; inset: 0; z-index: 2147483647;
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 18px; padding: 24px; margin: 0;
+    background: #000; color: #fff; text-align: center;
+    font-family: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  .lg-rotate svg { width: 42px; height: 42px; fill: none; stroke: #F1B81F; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .lg-rotate p { margin: 0; font-size: 15px; line-height: 1.5; letter-spacing: 0.01em; }
+  .lg-rotate p span { display: inline-block; margin-top: 6px; font-size: 13px; opacity: 0.55; }
+}
+</style>
+<!-- ── /LG_ROTATE_GATE ─────────────────────────────────────────────── -->
