@@ -8,12 +8,41 @@ export const metadata = {
   title: "LA GRIOTHÈQUE — Back Office",
 };
 
+// En prod le BO est servi sous le basePath /griotheque (cf. next.config.js et
+// le hub admin.lesgriots.com). Or tout le code client utilise des URLs
+// absolues depuis la racine (fetch("/api/…"), <a href="/formations">) qui
+// ignorent ce préfixe : les requêtes partaient sur /api/… (→ BO Studio) et les
+// liens sur /formations (→ 404). Ce shim préfixe automatiquement ces URLs.
+const BASE_PATH = process.env.NODE_ENV === "production" ? "/griotheque" : "";
+
+const basePathShim = `(function(){
+  var BP = ${JSON.stringify(BASE_PATH)};
+  window.__BP = BP;
+  if (!BP) return;
+  var of = window.fetch;
+  window.fetch = function (input, init) {
+    if (typeof input === "string" && input.charAt(0) === "/" && input.indexOf(BP + "/") !== 0) {
+      input = BP + input;
+    }
+    return of.call(this, input, init);
+  };
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href^='/']") : null;
+    if (!a) return;
+    var h = a.getAttribute("href");
+    if (!h || h.indexOf("//") === 0 || h === BP || h.indexOf(BP + "/") === 0) return;
+    e.preventDefault();
+    window.location.href = BP + h;
+  }, true);
+})();`;
+
 export default function RootLayout({ children }) {
   return (
     <html lang="fr">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <script dangerouslySetInnerHTML={{ __html: basePathShim }} />
         <style>{globalCss}</style>
       </head>
       <body>

@@ -82,7 +82,7 @@ export default function SessionForm({ initial = null }) {
       const j = await r.json();
       if (j.error) throw new Error(j.error);
       setMsg(`✓ Sauvegardé. ${isEdit ? "" : "Redirection..."}`);
-      if (!isEdit) setTimeout(() => window.location.href = `/sessions/${j.id}`, 800);
+      if (!isEdit) setTimeout(() => window.location.href = (window.__BP || "") + `/sessions/${j.id}`, 800);
     } catch (e) { setMsg(`✗ ${e.message}`); }
     finally { setSaving(false); }
   }
@@ -91,7 +91,7 @@ export default function SessionForm({ initial = null }) {
     if (!isEdit) return;
     if (!confirm(`Supprimer la session "${data.id}" ?`)) return;
     await fetch(`/api/sessions/${data.id}`, { method: "DELETE" });
-    window.location.href = "/sessions";
+    window.location.href = (window.__BP || "") + "/sessions";
   }
 
   return (

@@ -60,7 +60,7 @@ export default function EventForm({ initial = null }) {
       const j = await r.json();
       if (j.error) throw new Error(j.error);
       setMsg(`✓ Sauvegardé. ${isEdit ? "" : "Redirection..."}`);
-      if (!isEdit) setTimeout(() => window.location.href = `/events/${j.id}`, 800);
+      if (!isEdit) setTimeout(() => window.location.href = (window.__BP || "") + `/events/${j.id}`, 800);
     } catch (e) { setMsg(`✗ ${e.message}`); }
     finally { setSaving(false); }
   }
@@ -69,7 +69,7 @@ export default function EventForm({ initial = null }) {
     if (!isEdit) return;
     if (!confirm(`Supprimer l'événement "${data.id}" ?`)) return;
     await fetch(`/api/events/${data.id}`, { method: "DELETE" });
-    window.location.href = "/events";
+    window.location.href = (window.__BP || "") + "/events";
   }
 
   return (

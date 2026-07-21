@@ -66,7 +66,7 @@ export default function SimpleForm({
       if (j.error) throw new Error(j.error);
       setMsg(`✓ Sauvegardé. ${isEdit ? "" : `Redirection...`}`);
       if (!isEdit) {
-        setTimeout(() => window.location.href = `/${entity}/${j.id}`, 800);
+        setTimeout(() => window.location.href = (window.__BP || "") + `/${entity}/${j.id}`, 800);
       }
     } catch (e) {
       setMsg(`✗ ${e.message}`);
@@ -79,7 +79,7 @@ export default function SimpleForm({
     if (!isEdit) return;
     if (!confirm(`Supprimer "${data.id}" ?`)) return;
     await fetch(`/api/${entity}/${data.id}`, { method: "DELETE" });
-    window.location.href = `/${entity}`;
+    window.location.href = (window.__BP || "") + `/${entity}`;
   }
 
   return (
