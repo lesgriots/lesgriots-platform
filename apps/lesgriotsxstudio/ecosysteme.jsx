@@ -132,7 +132,7 @@ function EcoView() {
       size: 14,
       tiltX: 0, tiltZ: 0,     // planètes coplanaires (même plan d'orbite)
       poster: "img/p-monument.jpg",
-      preview: "img/preview-lesgriots.png",  // screenshot homepage
+      preview: "img/preview-lesgriots.jpg",  // screenshot homepage
       videoSrc: "img/indigo-cristal-thumb.mp4",
       description: lang === "fr"
         ? "Plateforme éditoriale dédiée aux récits inattendus de l'Afrique et de ses diasporas. Une parole ancienne, une voix nouvelle."
@@ -150,7 +150,7 @@ function EcoView() {
       size: 18,
       tiltX: 0, tiltZ: 0,
       poster: "img/atavisme-01.jpg",
-      preview: "img/atavisme-01.jpg",
+      preview: "img/preview-lesgriotsxstudio.jpg",  // screenshot homepage
       videoSrc: "img/nike-thumb.mp4",
       description: lang === "fr"
         ? "Studio créatif : stratégie narrative, direction artistique et production audiovisuelle pour artistes, marques et institutions."
@@ -167,7 +167,7 @@ function EcoView() {
       size: 12,
       tiltX: 0, tiltZ: 0,
       poster: "img/florale-01.jpg",
-      preview: "img/florale-01.jpg",
+      preview: "img/preview-lagriotheque.jpg",  // screenshot homepage
       videoSrc: "img/indigo-cristal-thumb.mp4",
       description: lang === "fr"
         ? "École de transmission pour la nouvelle génération créative. Formations courtes, méthodes éprouvées sur le terrain, certifiée Qualiopi."
