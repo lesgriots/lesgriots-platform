@@ -1724,6 +1724,7 @@ html.locked, html.locked body {
 /* Toutes les sections visibles, ARCHIVE en dernier */
 .jr-head .menu-drop a { display: block !important; }
 .jr-head .menu-drop #menu-index { order: 1; }
+.jr-head .menu-drop #menu-ig { order: 1; }  /* Instagram après Archive */
 /* Panneau plein écran qui MONTE (translateY 100%->0, 300ms ease-out expo) */
 .jr-head .menu-drop {
   position: fixed;
