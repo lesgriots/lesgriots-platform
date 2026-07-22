@@ -14,7 +14,8 @@ import DEFAULTS from "./defaults.json";
 const STORE_PATH = path.join(process.cwd(), "lesgriots.json");
 
 const EMPTY = {
-  mode: "coming-soon",                  // "coming-soon" (page d'attente) | "live" (site complet)
+  mode: "attente",                      // "attente" (home verrouillée) | "live" (site navigable)
+  pages: { about: true, boutique: true }, // interrupteurs par page (menu). false = masquée du menu
   homeVideo: { src: "", poster: "" },   // vidéo d'accueil (stage-home)
   projects: [],                         // slides stage-img — cf. seed.mjs
   about: { text: "", links: [] },       // texte + liens écosystème
@@ -59,17 +60,43 @@ function save(store) {
   fs.renameSync(tmp, STORE_PATH);
 }
 
-// ---- Mode du site (coming-soon / live) ---------------------------------
+// ---- Mode du site (attente / live) -------------------------------------
+// "live"  = site navigable (menu + pages actives)
+// autre   = "attente" : home verrouillée (ancien "coming-soon" est traité ainsi)
 export function getMode() {
   const store = load();
-  return store.mode === "live" ? "live" : "coming-soon";
+  return store.mode === "live" ? "live" : "attente";
 }
 
 export function setMode(mode) {
   const store = load();
-  store.mode = mode === "live" ? "live" : "coming-soon";
+  store.mode = mode === "live" ? "live" : "attente";
   save(store);
   return store.mode;
+}
+
+// ---- Interrupteurs de pages (about, boutique, …) -----------------------
+const PAGE_KEYS = ["about", "boutique"];
+
+export function getPages() {
+  const store = load();
+  const p = store.pages || {};
+  const out = {};
+  for (const k of PAGE_KEYS) out[k] = p[k] !== false; // défaut : activée
+  return out;
+}
+
+export function setPages(pages) {
+  const store = load();
+  const cur = store.pages || {};
+  const next = { ...cur };
+  for (const k of PAGE_KEYS) {
+    if (pages && k in pages) next[k] = !!pages[k];
+    else if (!(k in next)) next[k] = true;
+  }
+  store.pages = next;
+  save(store);
+  return getPages();
 }
 
 // ---- Home video --------------------------------------------------------

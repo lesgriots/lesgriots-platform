@@ -50,7 +50,7 @@ export default function Dashboard() {
           href="/site-mode"
           title="Mode du site"
           value={mode === "live" ? "En ligne" : "Attente"}
-          note={mode === "live" ? "Site complet publié" : "Page coming-soon publiée"}
+          note={mode === "live" ? "Site navigable publié" : "Home en attente publiée"}
         />
         <Card
           href="/home-video"

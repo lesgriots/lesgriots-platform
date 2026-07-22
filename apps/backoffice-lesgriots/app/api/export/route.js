@@ -10,14 +10,12 @@ import fs from "fs";
 import path from "path";
 import {
   listProjects, getHomeVideo, getAbout, listShop,
-  listJournal, listArchive, getSiteTexts, getMode,
+  listJournal, listArchive, getSiteTexts, getMode, getPages,
 } from "../../../lib/db.js";
 
 const SITE_ROOT = path.resolve(process.cwd(), "..", "lesgriots");
 const TEMPLATE = path.join(SITE_ROOT, "site.html");
 const OUTPUT = path.join(SITE_ROOT, "site.live.html");
-const ATT_TEMPLATE = path.join(SITE_ROOT, "attente.html");
-const ATT_OUTPUT = path.join(SITE_ROOT, "attente.live.html");
 const INDEX = path.join(SITE_ROOT, "index.html");
 
 const esc = (s) => String(s ?? "")
@@ -116,6 +114,14 @@ export async function POST() {
     html = fill(html, "LANG_TOGGLE", langToggleHtml);
     html = fill(html, "ABOUT_SITES", aboutSitesHtml);
 
+    // ---- Pilotage : mode (attente/live) + interrupteurs de pages ---------
+    // Un seul fichier porte son état. Le script du site lit ces flags pour
+    // masquer les pages OFF du menu et, en "attente", verrouiller la home.
+    const mode = getMode();
+    const pages = getPages();
+    html = fill(html, "PAGES",
+      `<script id="lg-pages">window.LG_MODE=${JSON.stringify(mode)};window.LG_PAGES=${JSON.stringify(pages)};</script>`);
+
     // ---- Shop ------------------------------------------------------------
     html = fill(html, "SHOP_PRODUCTS", shop.map((p) => {
       // Galerie de la fiche produit (carrousel à points, réf. Saint Heron) :
@@ -137,34 +143,16 @@ export async function POST() {
     const v = Date.now().toString(36);
     html = html.replace(/href="styles\.css[^"]*"/, `href="styles.css?v=${v}"`);
 
-    // ---- Page d'attente : hydratée elle aussi (vidéo + About) ------------
-    let att = fs.readFileSync(ATT_TEMPLATE, "utf8");
-    const attFill = (name, inner) => {
-      const re = new RegExp(`(<!-- BO:${name} -->)[\\s\\S]*?(<!-- /BO:${name} -->)`);
-      if (!re.test(att)) throw new Error(`marqueur BO:${name} introuvable dans attente.html`);
-      att = att.replace(re, `$1\n${inner}\n$2`);
-    };
-    attFill("ATT_VIDEO",
-      `  <video class="home-video" src="${esc(home.src)}" poster="${esc(home.poster)}" autoplay muted loop playsinline preload="auto"></video>`);
-    attFill("ATT_ABOUT_TEXT", aboutTextHtml);
-    attFill("ATT_LANG_TOGGLE", langToggleHtml);
-    attFill("ATT_ABOUT_SITES", aboutSitesHtml);
-
     // ---- Écriture atomique -----------------------------------------------
     const tmp = OUTPUT + ".tmp";
     fs.writeFileSync(tmp, html, "utf8");
     fs.renameSync(tmp, OUTPUT);
-    const tmpA = ATT_OUTPUT + ".tmp";
-    fs.writeFileSync(tmpA, att, "utf8");
-    fs.renameSync(tmpA, ATT_OUTPUT);
 
-    // La page ACTIVE est republiée dans la foulée (index.html), quel que soit le mode.
-    const mode = getMode();
-    const src = mode === "live" ? OUTPUT : ATT_OUTPUT;
+    // Un seul fichier fait foi : site.live.html EST publié en index.html.
+    // Le mode (attente/live) et les pages actives sont dans le fichier lui-même.
     const t2 = INDEX + ".tmp";
-    fs.copyFileSync(src, t2);
+    fs.copyFileSync(OUTPUT, t2);
     fs.renameSync(t2, INDEX);
-    const published = true;
 
     return NextResponse.json({
       ok: true,
@@ -174,10 +162,13 @@ export async function POST() {
       shop: shop.length,
       home: !!home.src,
       links: (about.links || []).length,
-      published,
+      published: true,
+      mode,
+      pages,
       note: mode === "live"
-        ? "Site complet régénéré et publié (page d'attente aussi mise à jour)."
-        : "Pages régénérées — la page d'attente (active) est publiée, le site complet est prêt derrière.",
+        ? "Site publié (navigable). Pages actives : " +
+          Object.entries(pages).filter(([, v]) => v).map(([k]) => k).join(", ")
+        : "Site publié en mode attente : seule la home (vidéo + logo) est visible.",
     });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

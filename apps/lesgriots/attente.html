@@ -425,7 +425,7 @@
 <body>
 
   <!-- BO:ATT_VIDEO -->
-  <video class="home-video" src="assets/florale.mp4" poster="assets/florale.jpg" autoplay muted loop playsinline preload="auto"></video>
+  <video class="home-video" id="home-video" src="assets/florale.mp4" poster="assets/florale.jpg" autoplay muted loop playsinline webkit-playsinline preload="auto"></video>
   <!-- /BO:ATT_VIDEO -->
 
   <div class="veil" aria-hidden="true"></div>
@@ -706,5 +706,24 @@
 })();
 </script>
 <!-- ── /LG_ROTATE_GATE ─────────────────────────────────────────────── -->
+<!-- ── AUTOPLAY KICKER (Safari) — LG_AUTOPLAY ──────────────────────── -->
+<script>
+(function () {
+  var v = document.getElementById("home-video") || document.querySelector(".home-video");
+  if (!v) return;
+  v.muted = true;
+  v.setAttribute("muted", "");
+  v.playsInline = true;
+  function kick() { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+  if (v.readyState >= 2) kick();
+  v.addEventListener("canplay", kick);
+  v.addEventListener("loadeddata", kick);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) kick(); });
+  ["touchstart", "pointerdown", "scroll", "keydown"].forEach(function (ev) {
+    window.addEventListener(ev, function once() { kick(); window.removeEventListener(ev, once); }, { passive: true });
+  });
+})();
+</script>
+<!-- ── /LG_AUTOPLAY ────────────────────────────────────────────────── -->
 </body>
 </html>

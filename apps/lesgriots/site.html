@@ -87,11 +87,14 @@ html[lang="en"] [data-lang="fr"] { display: none; }
 
   <!-- Home video — couche dédiée, indépendante des projets -->
   <!-- BO:HOME_VIDEO -->
-<video class="stage-home" id="stage-home" src="assets/florale.mp4" poster="assets/florale.jpg" autoplay muted loop playsinline preload="auto"></video>
+<video class="stage-home" id="stage-home" src="assets/florale.mp4" poster="assets/florale.jpg" autoplay muted loop playsinline webkit-playsinline preload="auto"></video>
 <!-- /BO:HOME_VIDEO -->
 
   <!-- Vignettes — top + bottom for legibility -->
   <div class="stage-veil" aria-hidden="true"></div>
+
+  <!-- Mention affichée uniquement en mode attente (LG_MODE = "attente") -->
+  <div class="stage-soon" aria-hidden="true">Bientôt</div>
 
 
 
@@ -196,8 +199,8 @@ html[lang="en"] [data-lang="fr"] { display: none; }
   <button type="button" class="menu-label" id="menu-label">Index</button>
   <nav class="menu-drop" id="menu-drop">
     <a href="#" id="menu-index">Archive</a>
-    <a href="#" id="shop-btn">Shop</a>
-    <a href="#" id="about-btn">About</a>
+    <a href="#" id="shop-btn" data-page="boutique">Shop</a>
+    <a href="#" id="about-btn" data-page="about">About</a>
     <a href="https://instagram.com/lesgriots" target="_blank" rel="noopener" id="menu-ig">Instagram</a>
     <!-- BO:LANG_TOGGLE -->
     <!-- /BO:LANG_TOGGLE -->
@@ -279,6 +282,11 @@ html[lang="en"] [data-lang="fr"] { display: none; }
     <!-- BO:ABOUT_TEXT -->
     <div class="about-slide"><p></p></div>
     <!-- /BO:ABOUT_TEXT -->
+    <!-- STATEMENT — phrase seule, façon Saint Heron (statique, hors BO) -->
+    <div class="about-slide aw-line-slide">
+      <h2 class="aw-line-title">We&nbsp;tell&nbsp;stories<br />in&nbsp;any&nbsp;medium</h2>
+    </div>
+    <!-- /STATEMENT -->
     <!-- BO:ABOUT_SITES -->
     <div class="about-slide about-white"><div class="aw-sites"></div></div>
     <!-- /BO:ABOUT_SITES -->
@@ -300,6 +308,21 @@ html[lang="en"] [data-lang="fr"] { display: none; }
 <!-- /BO:SHOP_PRODUCTS -->
   </div>
 </aside>
+
+<!-- BO:PAGES -->
+<script id="lg-pages">window.LG_MODE="live";window.LG_PAGES={"about":true,"boutique":true};</script>
+<!-- /BO:PAGES -->
+<!-- Pages OFF : on masque leur entrée de menu. Mode "attente" : classe globale
+     qui verrouille sur la home (le script d'entrée se neutralise plus bas). -->
+<script>
+(function () {
+  var P = window.LG_PAGES || {}, M = window.LG_MODE || "live";
+  if (M === "attente") document.documentElement.classList.add("lg-attente");
+  document.querySelectorAll("[data-page]").forEach(function (el) {
+    if (P[el.getAttribute("data-page")] === false) el.setAttribute("data-off", "");
+  });
+})();
+</script>
 
 <!-- BO:DATA -->
 <script id="lg-data">window.LG_PROJECTS = {};</script>
@@ -397,6 +420,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
     }
     // Déclenche la phase 1 (logo → haut). Idempotent.
     function startArrival() {
+      if (document.documentElement.classList.contains('lg-attente')) return; // mode attente : on ne rentre pas
       if (seq !== 0 || !brandEl) return;
       seq = 1;
       const rect = brandEl.getBoundingClientRect();
@@ -573,6 +597,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       const btn = document.getElementById(btnId);
       const panel = document.getElementById(panelId);
       if (!btn || !panel) return;
+      if (btn.hasAttribute('data-off')) { btn.style.display = 'none'; return; } // page désactivée : entrée retirée du menu, panneau non câblé
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         closeMenu();
@@ -627,7 +652,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         e.stopPropagation();
         if (target === null) target = pnl.scrollTop;
         // Gain réduit : un cran de molette déplace moins (défilement posé)
-        target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY * 0.35));
+        target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY * 0.6));
         if (idle) clearTimeout(idle);
         idle = setTimeout(function () {
           if (target === null) return;
@@ -649,7 +674,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
           if (target === null) { rafId = null; return; }
           var d = target - pnl.scrollTop;
           if (Math.abs(d) < 0.5) { pnl.scrollTop = target; target = null; rafId = null; return; }
-          pnl.scrollTop += d * 0.06;
+          pnl.scrollTop += d * 0.11;
           tickScroll();
         });
       }
@@ -668,7 +693,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         if (e.defaultPrevented) { target = null; return; } // phase logo : autre listener
         e.preventDefault();
         if (target === null) target = pnl.scrollTop;
-        target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY * 0.35));
+        target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY * 0.6));
         if (!rafId) tickP();
       }, { passive: false });
       function tickP() {
@@ -676,7 +701,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
           if (target === null) { rafId = null; return; }
           var d = target - pnl.scrollTop;
           if (Math.abs(d) < 0.5) { pnl.scrollTop = target; target = null; rafId = null; return; }
-          pnl.scrollTop += d * 0.06;
+          pnl.scrollTop += d * 0.11;
           tickP();
         });
       }
@@ -693,7 +718,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         e.preventDefault();
         e.stopPropagation();
         if (target === null) target = pnl.scrollTop;
-        target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY * 0.35));
+        target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY * 0.6));
         if (!rafId) tickS();
       }, { passive: false });
       function tickS() {
@@ -701,7 +726,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
           if (target === null) { rafId = null; return; }
           var d = target - pnl.scrollTop;
           if (Math.abs(d) < 0.5) { pnl.scrollTop = target; target = null; rafId = null; return; }
-          pnl.scrollTop += d * 0.06;
+          pnl.scrollTop += d * 0.11;
           tickS();
         });
       }
@@ -717,7 +742,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         if (!document.body.classList.contains('entered')) return;
         e.preventDefault();
         if (target === null) target = pnl.scrollTop;
-        target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY * 0.35));
+        target = Math.max(0, Math.min(pnl.scrollHeight - pnl.clientHeight, target + e.deltaY * 0.6));
         if (!rafId) tickJ();
       }, { passive: false });
       function tickJ() {
@@ -725,7 +750,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
           if (target === null) { rafId = null; return; }
           var d = target - pnl.scrollTop;
           if (Math.abs(d) < 0.5) { pnl.scrollTop = target; target = null; rafId = null; return; }
-          pnl.scrollTop += d * 0.06;
+          pnl.scrollTop += d * 0.11;
           tickJ();
         });
       }
@@ -1303,5 +1328,35 @@ html[lang="en"] [data-lang="fr"] { display: none; }
 })();
 </script>
 <!-- ── /LG_ROTATE_GATE ─────────────────────────────────────────────── -->
+<!-- ── AUTOPLAY KICKER (Safari) — LG_AUTOPLAY ──────────────────────── -->
+<script>
+(function () {
+  var v = document.getElementById("stage-home");
+  if (!v) return;
+  v.muted = true;               // Safari fait plus confiance au muted posé en JS
+  v.setAttribute("muted", "");
+  v.playsInline = true;
+  function kick() {
+    var p = v.play();
+    if (p && p.catch) p.catch(function () {});
+  }
+  // 1) dès que la vidéo est prête
+  if (v.readyState >= 2) kick();
+  v.addEventListener("canplay", kick, { once: false });
+  v.addEventListener("loadeddata", kick, { once: false });
+  // 2) au retour de l'onglet
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) kick();
+  });
+  // 3) filet de sécurité : premier geste utilisateur
+  ["touchstart", "pointerdown", "scroll", "keydown"].forEach(function (ev) {
+    window.addEventListener(ev, function once() {
+      kick();
+      window.removeEventListener(ev, once);
+    }, { passive: true });
+  });
+})();
+</script>
+<!-- ── /LG_AUTOPLAY ────────────────────────────────────────────────── -->
 </body>
 </html>
