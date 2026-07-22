@@ -923,7 +923,7 @@ body.entered .stage-home { pointer-events: none; }
   border-bottom: 1px solid rgba(255,255,255,.1);
   position: sticky;
   top: 0;
-  background: rgba(0,0,0,.86);
+  background: rgba(10, 10, 10, 0.86); /* même teinte que --bg (#0a0a0a), pas de noir pur */
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   z-index: 2;
