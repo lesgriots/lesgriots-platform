@@ -15,7 +15,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { background: #000; color: #fff; }
+html, body { background: var(--bg); color: #fff; }
 /* (scroll-snap natif retiré — Lenis gère l'inertie, le snap est piloté en JS) */
 body {
   font-family: var(--sans);
@@ -40,7 +40,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   min-height: 640px;
   overflow: hidden;
   isolation: isolate;
-  background: #0a0a0a;
+  background: var(--bg);
   cursor: pointer;
   z-index: 1;
   scroll-snap-align: start;
@@ -133,7 +133,7 @@ body.entered .landing-tag {
   inset: 0;
   width: 100%;
   height: 100%;
-  background: #111;
+  background: var(--bg);
   overflow: hidden;
 }
 .une-video img, .une-video video {
@@ -164,7 +164,7 @@ body.entered .landing-tag {
 .next-section {
   position: relative;
   z-index: 50;
-  background: #0a0a0a;
+  background: var(--bg);
   color: #f4efe3;
   min-height: 100vh;
   padding: calc(100vw / 3.89 + 48px) clamp(28px, 4vw, 64px) 96px;
@@ -201,7 +201,7 @@ body.entered .landing-tag {
 .intro {
   position: relative;
   z-index: 40;
-  background: #000;
+  background: var(--bg);
   color: #f4efe3;
   min-height: 100vh;
   display: flex;
@@ -228,7 +228,7 @@ body.entered .landing-tag {
   position: sticky;
   top: 0;
   z-index: 51;
-  background: #000;
+  background: var(--bg);
   color: #fff;
   height: 100vh;
   overflow: hidden;
@@ -278,7 +278,7 @@ body.entered .landing-tag {
   display: none;
   flex-direction: column;
   gap: 10px;
-  background: #000;
+  background: var(--bg);
   border: 1px solid rgba(255,255,255,.18);
   padding: 16px 20px;
   min-width: 160px;
@@ -301,7 +301,7 @@ body.entered .landing-tag {
 .journal {
   position: relative;
   z-index: 60;
-  background: #000;
+  background: var(--bg);
   color: #f4efe3;
   height: 100vh;
   overflow-y: auto;
@@ -414,7 +414,7 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   position: fixed;
   inset: 0;
   z-index: 210;
-  background: #000;
+  background: var(--bg);
   transform: translateY(100%);
   transition: transform 1s cubic-bezier(.22,1,.36,1);
 }
@@ -425,7 +425,7 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   position: fixed;
   inset: 0;
   z-index: 90; /* passe sous le logo (z 100) */
-  background: #000;
+  background: var(--bg);
   color: #f4efe3;
   display: flex;
   align-items: center;
@@ -835,7 +835,7 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   min-height: 640px;
   overflow: hidden;
   isolation: isolate;
-  background: #0a0a0a;
+  background: var(--bg);
   cursor: pointer;
   z-index: 2;
   scroll-snap-align: start;
@@ -844,7 +844,7 @@ body.entered .stage { cursor: default; }
 
 /* Video element uses object-fit too */
 .stage-video {
-  background: #1c1c1c;
+  background: var(--bg);
 }
 
 /* Home video — couche d'accueil dédiée, au-dessus des projets, sous le vignettage */
@@ -853,7 +853,7 @@ body.entered .stage { cursor: default; }
   width: 100%; height: 100%;
   object-fit: cover;
   z-index: 1;                 /* au-dessus des projets (.stage-images z0), sous le vignettage */
-  background: #0a0a0a;
+  background: var(--bg);
 }
 /* Index en overlay : monte par-dessus le hero (qui reste derrière), sous le
    logo (z 250) et le menu. Piloté en JS (translateY). */
@@ -875,7 +875,7 @@ body.entered .stage-home { pointer-events: none; }
 .archive {
   position: relative;
   z-index: 4;
-  background: #000;
+  background: var(--bg);
   color: #fff;
   min-height: 100vh;
   display: flex;
@@ -895,7 +895,7 @@ body.entered .stage-home { pointer-events: none; }
 .archive .tile {
   position: relative;
   overflow: hidden;
-  background: #111;
+  background: var(--bg);
   display: block;
 }
 .archive .tile .yr {
@@ -939,7 +939,7 @@ body.entered .stage-home { pointer-events: none; }
 .archive .tile {
   position: relative;
   overflow: hidden;
-  background: #111;
+  background: var(--bg);
   display: block;
   grid-column: span 1;
   grid-row: span 1;
@@ -992,7 +992,7 @@ body.entered .stage-home { pointer-events: none; }
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: #0a0a0a;
+  background: var(--bg);
   opacity: 0;
   pointer-events: none;
   transition: opacity .6s ease;
@@ -1100,7 +1100,7 @@ body.entered .stage-home { pointer-events: none; }
   position: sticky;
   top: 0;
   z-index: 3;
-  background: #0a0a0a;
+  background: var(--bg);
   color: #f4efe3;
   min-height: 100vh;
   padding: 24px clamp(28px, 4vw, 64px) 110px;
@@ -1600,7 +1600,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
    dessous, cascade à l'arrivée.
    ========================================================= */
 .aw2-slide {
-  background: #0a0a0a; /* opaque : on VOIT l'écran passer par-dessus (la zone chevauchée est du vide, jamais du texte) */
+  background: var(--bg); /* opaque : on VOIT l'écran passer par-dessus (la zone chevauchée est du vide, jamais du texte) */
   align-items: center;
   justify-content: center;
   /* Raccord resserré : l'écran des sites recouvre le vide sous la
@@ -1634,7 +1634,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
   width: clamp(200px, 24vw, 420px);
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: #111;
+  background: var(--bg);
 }
 .aw2-frame img {
   width: 100%; height: 100%;
@@ -1784,7 +1784,7 @@ html.locked, html.locked body {
   width: 100%;
   height: 100vh;
   height: 100dvh;
-  background: #0a0a0a;
+  background: var(--bg);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   padding: calc(100vw / 3.89 + 96px) clamp(20px, 2vw, 40px) 48px;
