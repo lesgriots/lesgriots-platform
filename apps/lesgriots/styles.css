@@ -472,7 +472,10 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
 @media (max-width: 720px) { .aw-sites { grid-template-columns: 1fr; } }
 
 /* --- Pilotage des pages (BO) -------------------------------------------- */
-/* Une entrée de menu marquée data-off (page désactivée) disparaît. */
+/* Une entrée de menu marquée data-off (page désactivée) disparaît.
+   Sélecteur volontairement plus spécifique que « .jr-head .menu-drop a
+   { display: block !important } » (plus bas) pour gagner malgré son !important. */
+.jr-head .menu-drop a[data-off],
 .menu-drop a[data-off] { display: none !important; }
 /* Mention « Bientôt » : cachée par défaut, visible seulement en mode attente. */
 .stage-soon {
@@ -503,7 +506,7 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   justify-content: center;
   height: 100vh;
   margin-top: 0;
-  padding: clamp(24px, 5vw, 96px);
+  padding: clamp(24px, 6vw, 120px) clamp(24px, 9vw, 190px); /* marges latérales généreuses : la phrase ne touche jamais les bords */
   background: transparent;
 }
 .aw-line-slide + .about-white { margin-top: 0; } /* les sites arrivent proprement APRÈS la phrase */
@@ -513,9 +516,9 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   font-family: var(--serif);
   font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: .04em;
-  line-height: .98;
-  font-size: clamp(34px, 6.2vw, 118px);
+  letter-spacing: .025em;
+  line-height: 1.02;
+  font-size: clamp(28px, 4.6vw, 88px);
   color: #f7f2e7;
 }
 @media (max-width: 720px) {
