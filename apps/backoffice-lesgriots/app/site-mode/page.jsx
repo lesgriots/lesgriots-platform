@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { BP } from "../../lib/bp.js";
 
 const PAGE_META = [
+  { key: "archive", name: "Archive", desc: "L'entrée « Archive » du menu (l'index des projets). Le retour à l'index par le logo reste possible." },
   { key: "about", name: "About", desc: "Le texte de présentation, la phrase « We tell stories in any medium » et l'écran des trois sites." },
   { key: "boutique", name: "Boutique", desc: "La boutique (Shop) et ses fiches produits." },
 ];

@@ -15,7 +15,7 @@ const STORE_PATH = path.join(process.cwd(), "lesgriots.json");
 
 const EMPTY = {
   mode: "attente",                      // "attente" (home verrouillée) | "live" (site navigable)
-  pages: { about: true, boutique: true }, // interrupteurs par page (menu). false = masquée du menu
+  pages: { archive: true, about: true, boutique: true }, // interrupteurs par page (menu). false = masquée du menu
   homeVideo: { src: "", poster: "" },   // vidéo d'accueil (stage-home)
   projects: [],                         // slides stage-img — cf. seed.mjs
   about: { text: "", links: [] },       // texte + liens écosystème
@@ -76,7 +76,7 @@ export function setMode(mode) {
 }
 
 // ---- Interrupteurs de pages (about, boutique, …) -----------------------
-const PAGE_KEYS = ["about", "boutique"];
+const PAGE_KEYS = ["archive", "about", "boutique"];
 
 export function getPages() {
   const store = load();
