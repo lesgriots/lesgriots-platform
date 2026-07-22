@@ -434,7 +434,9 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       if (seq !== 1) return;
       seq = 2;
       enter();
-      raiseIndex(); // la section monte juste après le contact du logo en haut
+      // Archive off : l'index des projets n'est plus l'accueil → on ouvre la 1re page active.
+      if ((window.LG_PAGES || {}).archive === false) openFirstEnabledPanel();
+      else raiseIndex(); // la section monte juste après le contact du logo en haut
     }
     // Index en overlay : slide up par-dessus le hero, puis reste en place.
     function raiseIndex() {
@@ -969,6 +971,26 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       }, { passive: true });
     }
     // Retour à l'Index (stylé) : une copie de la section Index remonte par-dessus
+    // Quand l'Archive (index des projets) est désactivée, l'index n'est plus
+    // l'accueil : on atterrit / on revient sur la première page active.
+    function firstEnabledPageBtn() {
+      const P = window.LG_PAGES || {};
+      const order = [['about', 'about-btn'], ['boutique', 'shop-btn']];
+      for (const [k, id] of order) { if (P[k] !== false) return document.getElementById(id); }
+      return null;
+    }
+    function openFirstEnabledPanel() {
+      const b = firstEnabledPageBtn();
+      if (!b) return;
+      const panelId = b.id === 'about-btn' ? 'about-panel' : b.id === 'shop-btn' ? 'shop-panel' : null;
+      if (panelId) { const p = document.getElementById(panelId); if (p && p.classList.contains('open')) return; }
+      b.click();
+    }
+    // « Rentrer à la maison » : l'index si l'Archive est active, sinon la 1re page active.
+    function goHome() {
+      if ((window.LG_PAGES || {}).archive !== false) { returnToIndex(); return; }
+      openFirstEnabledPanel();
+    }
     function returnToIndex() {
       const openPanels = document.querySelectorAll('.about-panel.open');
       if (!openPanels.length || !journalEl) return;
@@ -1021,15 +1043,15 @@ html[lang="en"] [data-lang="fr"] { display: none; }
     document.getElementById('menu-index')?.addEventListener('click', (e) => {
       e.preventDefault();
       closeMenu();
-      returnToIndex();
-      setSection('Archive');
+      goHome();
+      if ((window.LG_PAGES || {}).archive !== false) setSection('Archive');
     });
-    // Clic sur le logo : même retour élégant vers l'Index
+    // Clic sur le logo : retour élégant vers l'accueil (index, ou 1re page active si Archive off)
     if (brandEl) {
       brandEl.addEventListener('click', (e) => {
         if (!body.classList.contains('entered')) return;
         e.preventDefault();
-        returnToIndex();
+        goHome();
       });
     }
 
