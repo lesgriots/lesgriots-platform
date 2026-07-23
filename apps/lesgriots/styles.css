@@ -626,10 +626,31 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   color: #f4efe3;
   text-shadow: 0 2px 40px rgba(0, 0, 0, .5);
 }
-/* La vidéo, opaque, recouvre l'image + le nom en glissant au scroll. */
-.pj-video {
+/* Section 2 : texte descriptif — OPAQUE, il recouvre l'image en montant
+   (la section image « disparaît »). */
+.pj-desc {
   position: relative;
   z-index: 3;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(48px, 10vh, 140px) clamp(24px, 8vw, 160px);
+  background: var(--bg);
+}
+.pj-desc .pj-intro {
+  margin: 0;
+  max-width: 24ch;
+  color: #f4efe3;
+  font-size: clamp(24px, 3vw, 46px);
+  line-height: 1.28;
+  text-wrap: balance;
+}
+/* Section 3 : la vidéo pleine largeur, opaque, arrive au scroll suivant. */
+.pj-video {
+  position: relative;
+  z-index: 4;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -640,7 +661,7 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
 .pj-video[hidden] { display: none; }
 .pj-video-el { width: 100%; height: 100%; object-fit: cover; display: block; }
 /* Corps (galerie, note) — opaque, arrive après la vidéo. */
-.pj-body { position: relative; z-index: 4; background: var(--bg); }
+.pj-body { position: relative; z-index: 5; background: var(--bg); }
 .pj-body {
   max-width: 1100px;
   margin: 0 auto;
