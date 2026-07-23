@@ -988,10 +988,14 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         if (!brandEl || !floralePanel.classList.contains('open')) return;
         const Hmax = (brandEl.offsetHeight || 0) + 20;
         if (logoOff < Hmax) return; // le logo n'est pas encore sorti par le haut
-        // dès le début du scroll, le logo émerge petit à petit du bord bas
-        const start = 0;
-        const total = Math.max(1, floralePanel.scrollHeight - floralePanel.clientHeight - start);
-        const raw = Math.min(1, Math.max(0, (floralePanel.scrollTop - start) / total));
+        // dès le début du scroll, le logo émerge petit à petit du bord bas.
+        // Progression bornée à ~1,5 écran (et non toute la page, qui est très
+        // haute avec les sections reveal) → le logo remonte progressivement dès le début.
+        const total = Math.max(1, Math.min(
+          floralePanel.scrollHeight - floralePanel.clientHeight,
+          floralePanel.clientHeight * 1.5
+        ));
+        const raw = Math.min(1, Math.max(0, floralePanel.scrollTop / total));
         const p = raw * raw * (3 - 2 * raw); /* smoothstep : arrivée douce */
         const Hlogo = brandEl.offsetHeight || 0;
         const fromBelow = -currentY + Hlogo; /* haut du logo au ras du bord bas */
