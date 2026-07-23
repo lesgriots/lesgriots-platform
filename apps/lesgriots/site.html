@@ -213,12 +213,11 @@ html[lang="en"] [data-lang="fr"] { display: none; }
   <div class="pj-hero">
     <img src="uploads/florale-01.jpg" alt="Tralé" />
   </div>
-  <!-- Section 2 : le texte monte en overlap par-dessus la photo -->
-  <div class="pj-text">
-    <h2>Tralé</h2>
-    <p class="pj-intro">Un film Les Griots. Réalisé par Moos Coulibaly.</p>
-  </div>
-  <!-- Section 3 : section noire avec la vidéo -->
+  <!-- Section 2 : le TITRE monte en overlap par-dessus la photo (transparent) -->
+  <div class="pj-name"><h2>Tralé</h2></div>
+  <!-- Section 3 : section NOIRE avec la description (overlap le tout) -->
+  <div class="pj-desc"><p class="pj-intro">Un film Les Griots. Réalisé par Moos Coulibaly.</p></div>
+  <!-- Section 4 : la vidéo overlap le texte -->
   <div class="pj-video" hidden>
     <video class="pj-video-el" muted loop playsinline webkit-playsinline preload="metadata"></video>
   </div>
@@ -901,7 +900,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       const bgSrc = {};
       journalEl.querySelectorAll('.jr-bg img').forEach((im) => { bgSrc[im.dataset.bg] = im.getAttribute('src'); });
       const heroImg = floralePanel.querySelector('.pj-hero img');
-      const heroTitle = floralePanel.querySelector('.pj-text h2');
+      const heroTitle = floralePanel.querySelector('.pj-name h2');
       const videoWrap = floralePanel.querySelector('.pj-video');
       const videoEl = floralePanel.querySelector('.pj-video-el');
       const nextLink = document.getElementById('pj-next');

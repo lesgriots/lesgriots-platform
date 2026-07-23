@@ -607,22 +607,20 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
    Le logo reste fixe en bas (inchangé). */
 .pj-hero { position: sticky; top: 0; height: 100vh; z-index: 1; }
 .pj-hero img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(.15) brightness(.62); }
-/* Section 2 : le texte passe PAR-DESSUS la photo figée (transparent). */
-.pj-text {
+/* Section 2 : le TITRE passe par-dessus la photo figée (transparent). */
+.pj-name {
   position: relative;
   z-index: 2;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: clamp(18px, 3vh, 40px);
   padding: 0 clamp(24px, 6vw, 120px);
   background: transparent;
   pointer-events: none;
 }
-.pj-text h2 {
+.pj-name h2 {
   margin: 0;
   font-family: var(--serif);
   font-weight: 400;
@@ -631,19 +629,30 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   color: #f4efe3;
   text-shadow: 0 2px 40px rgba(0, 0, 0, .5);
 }
-.pj-text .pj-intro {
-  margin: 0;
-  max-width: 30ch;
-  color: #f4efe3;
-  font-size: clamp(18px, 1.9vw, 28px);
-  line-height: 1.35;
-  text-wrap: balance;
-  text-shadow: 0 1px 22px rgba(0, 0, 0, .5);
-}
-/* Section 3 : section NOIRE avec la vidéo (la vidéo remplit la section). */
-.pj-video {
+/* Section 3 : section NOIRE avec la description (opaque, recouvre l'image). */
+.pj-desc {
   position: relative;
   z-index: 3;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(48px, 10vh, 140px) clamp(24px, 8vw, 160px);
+  background: var(--bg);
+}
+.pj-desc .pj-intro {
+  margin: 0;
+  max-width: 26ch;
+  color: #f4efe3;
+  font-size: clamp(22px, 2.6vw, 40px);
+  line-height: 1.3;
+  text-wrap: balance;
+}
+/* Section 4 : la vidéo (opaque) overlap le texte au scroll suivant. */
+.pj-video {
+  position: relative;
+  z-index: 4;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -654,7 +663,7 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
 .pj-video[hidden] { display: none; }
 .pj-video-el { width: 100%; height: 100vh; object-fit: cover; display: block; }
 /* Corps (galerie, note) — opaque, arrive après la vidéo. */
-.pj-body { position: relative; z-index: 4; background: var(--bg); }
+.pj-body { position: relative; z-index: 5; background: var(--bg); }
 .pj-body {
   max-width: 1100px;
   margin: 0 auto;
