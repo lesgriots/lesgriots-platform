@@ -956,6 +956,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         slidePanelUp(floralePanel);
         setSection(name); // le label prend le nom du projet
         floralePanel.scrollTop = 0;
+        if (floralePanel.__pjResetScroll) floralePanel.__pjResetScroll();
         logoOff = 0; brandLoop = 0; window.__logoPhase = false;
       }
       rows.forEach((row, i) => {
@@ -965,20 +966,44 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         e.preventDefault();
         openProject(parseInt(nextLink.dataset.idx || '0', 10));
       });
-      // Premier scroll : seul le logo sort par le haut, le contenu ne bouge pas
+      // SCROLL FLUIDE amorti du panneau projet (façon Lenis) : la molette
+      // alimente une cible, le contenu la rejoint en lerp chaque frame.
+      // Phase 1 : le logo sort par le haut (contenu figé). Phase 2 : glisse veloutée.
+      let pjTarget = null, pjRaf = null;
+      function pjTick() {
+        pjRaf = requestAnimationFrame(() => {
+          if (pjTarget === null) { pjRaf = null; return; }
+          const d = pjTarget - floralePanel.scrollTop;
+          if (Math.abs(d) < 0.4) { floralePanel.scrollTop = pjTarget; pjTarget = null; pjRaf = null; return; }
+          floralePanel.scrollTop += d * 0.1; // inertie : plus bas = plus glissant
+          pjTick();
+        });
+      }
+      floralePanel.__pjResetScroll = () => { pjTarget = null; if (pjRaf) { cancelAnimationFrame(pjRaf); pjRaf = null; } };
       floralePanel.addEventListener('wheel', (e) => {
         if (!floralePanel.classList.contains('open') || !brandEl) return;
         const H = (brandEl.offsetHeight || 0) + 20;
+        // Phase 1 : le logo monte/sort, le contenu ne bouge pas
         if (e.deltaY > 0 && logoOff < H) {
           e.preventDefault();
           logoOff = Math.min(H, logoOff + e.deltaY);
           brandLoop = -logoOff;
-        } else if (e.deltaY < 0 && floralePanel.scrollTop <= 0 && logoOff > 0) {
+          window.__logoPhase = logoOff > 0 && logoOff < H;
+          return;
+        }
+        if (e.deltaY < 0 && floralePanel.scrollTop <= 0 && logoOff > 0) {
           e.preventDefault();
           logoOff = Math.max(0, logoOff + e.deltaY);
           brandLoop = -logoOff;
+          window.__logoPhase = logoOff > 0 && logoOff < H;
+          return;
         }
-        window.__logoPhase = logoOff > 0 && logoOff < H;
+        // Phase 2 : glisse amortie
+        e.preventDefault();
+        if (pjTarget === null) pjTarget = floralePanel.scrollTop;
+        const max = Math.max(0, floralePanel.scrollHeight - floralePanel.clientHeight);
+        pjTarget = Math.max(0, Math.min(max, pjTarget + e.deltaY));
+        if (!pjRaf) pjTick();
       }, { passive: false });
       // Puis, plus on scrolle, plus le logo réapparaît par le bas et retrouve sa place d'arrivée
       floralePanel.addEventListener('scroll', () => {
