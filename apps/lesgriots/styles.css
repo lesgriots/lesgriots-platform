@@ -600,24 +600,29 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
 
 /* Page projet — hero plein écran + déroulé éditorial */
 .project-panel { display: block; padding: 0; overflow-y: auto; }
-/* Page projet — enchaînement : image (se fige) → nom qui vient par-dessus au
-   scroll → vidéo → corps. Le logo reste fixe en bas (inchangé). */
+/* Page projet — 3 sections au scroll :
+   1) photo pleine largeur (se fige)
+   2) le texte (nom + descriptif) MONTE EN OVERLAP par-dessus la photo (transparent)
+   3) une section NOIRE avec la vidéo.
+   Le logo reste fixe en bas (inchangé). */
 .pj-hero { position: sticky; top: 0; height: 100vh; z-index: 1; }
 .pj-hero img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(.15) brightness(.62); }
-/* Le nom passe PAR-DESSUS l'image figée (transparent : on voit l'image derrière). */
-.pj-name {
+/* Section 2 : le texte passe PAR-DESSUS la photo figée (transparent). */
+.pj-text {
   position: relative;
   z-index: 2;
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
+  gap: clamp(18px, 3vh, 40px);
   padding: 0 clamp(24px, 6vw, 120px);
   background: transparent;
   pointer-events: none;
 }
-.pj-name h2 {
+.pj-text h2 {
   margin: 0;
   font-family: var(--serif);
   font-weight: 400;
@@ -626,31 +631,19 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   color: #f4efe3;
   text-shadow: 0 2px 40px rgba(0, 0, 0, .5);
 }
-/* Section 2 : texte descriptif — OPAQUE, il recouvre l'image en montant
-   (la section image « disparaît »). */
-.pj-desc {
-  position: relative;
-  z-index: 3;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: clamp(48px, 10vh, 140px) clamp(24px, 8vw, 160px);
-  background: var(--bg);
-}
-.pj-desc .pj-intro {
+.pj-text .pj-intro {
   margin: 0;
-  max-width: 24ch;
+  max-width: 30ch;
   color: #f4efe3;
-  font-size: clamp(24px, 3vw, 46px);
-  line-height: 1.28;
+  font-size: clamp(18px, 1.9vw, 28px);
+  line-height: 1.35;
   text-wrap: balance;
+  text-shadow: 0 1px 22px rgba(0, 0, 0, .5);
 }
-/* Section 3 : la vidéo pleine largeur, opaque, arrive au scroll suivant. */
+/* Section 3 : section NOIRE avec la vidéo (la vidéo remplit la section). */
 .pj-video {
   position: relative;
-  z-index: 4;
+  z-index: 3;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -659,9 +652,9 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   background: var(--bg);
 }
 .pj-video[hidden] { display: none; }
-.pj-video-el { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pj-video-el { width: 100%; height: 100vh; object-fit: cover; display: block; }
 /* Corps (galerie, note) — opaque, arrive après la vidéo. */
-.pj-body { position: relative; z-index: 5; background: var(--bg); }
+.pj-body { position: relative; z-index: 4; background: var(--bg); }
 .pj-body {
   max-width: 1100px;
   margin: 0 auto;
