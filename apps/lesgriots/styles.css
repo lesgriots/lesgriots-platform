@@ -607,11 +607,13 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
    Le logo reste fixe en bas (inchangé). */
 .pj-hero { position: sticky; top: 0; height: 100vh; z-index: 1; }
 .pj-hero img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(.15) brightness(.62); }
-/* Section 2 : le TITRE passe par-dessus la photo figée (transparent). */
+/* Section 2 : le TITRE passe par-dessus la photo figée (transparent).
+   Chaque section se FIGE (sticky) et la suivante glisse par-dessus au scroll. */
 .pj-name {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 2;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -629,11 +631,12 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   color: #f4efe3;
   text-shadow: 0 2px 40px rgba(0, 0, 0, .5);
 }
-/* Section 3 : section NOIRE avec la description (opaque, recouvre l'image). */
+/* Section 3 : section NOIRE avec la description (opaque, recouvre tout). */
 .pj-desc {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 3;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -651,9 +654,10 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
 }
 /* Section 4 : la vidéo (opaque) overlap le texte au scroll suivant. */
 .pj-video {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 4;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
