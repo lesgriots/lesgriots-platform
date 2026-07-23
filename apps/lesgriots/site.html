@@ -209,23 +209,20 @@ html[lang="en"] [data-lang="fr"] { display: none; }
 
 <!-- PROJET — page type (Florale) : monte comme les autres panneaux -->
 <aside class="about-panel project-panel" id="project-florale" aria-hidden="true" data-lenis-prevent>
-  <!-- Bloc image+titre : il GLISSE vers le haut au scroll 3 et révèle la description dessous -->
-  <div class="pj-hold">
-    <!-- Section 1 : photo pleine largeur (se fige pendant que le titre passe) -->
+  <!-- Bloc A : image + titre. Se fige, puis glisse vers le haut pour révéler la description. -->
+  <div class="pj-hold pj-hold--a">
     <div class="pj-hero">
       <img src="uploads/florale-01.jpg" alt="Tralé" />
     </div>
-    <!-- Section 2 : le TITRE monte en overlap par-dessus la photo (transparent) -->
     <div class="pj-name"><h2>Tralé</h2></div>
   </div>
-  <!-- Section 3 : la description (bloc noir) est révélée quand l'image glisse,
-       puis elle glisse à son tour vers le haut pour révéler la vidéo. -->
-  <div class="pj-desc-hold">
+  <!-- Bloc B : description (noir). Révélée, marque une pause, puis glisse pour révéler la vidéo. -->
+  <div class="pj-hold pj-hold--b">
     <div class="pj-desc"><p class="pj-intro">Un film Les Griots. Réalisé par Moos Coulibaly.</p></div>
   </div>
-  <!-- Section 4 : la vidéo, figée dessous, révélée quand la description glisse -->
-  <div class="pj-video" hidden>
-    <video class="pj-video-el" muted loop playsinline webkit-playsinline preload="metadata"></video>
+  <!-- Bloc C : la vidéo. Révélée et maintenue avant le corps. -->
+  <div class="pj-hold pj-hold--c" hidden>
+    <div class="pj-video"><video class="pj-video-el" muted loop playsinline webkit-playsinline preload="metadata"></video></div>
   </div>
   <div class="pj-body">
     <figure class="pj-img pj-wide"><img src="https://picsum.photos/seed/flo-2/1600/900" alt="" /></figure>
@@ -907,7 +904,7 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       journalEl.querySelectorAll('.jr-bg img').forEach((im) => { bgSrc[im.dataset.bg] = im.getAttribute('src'); });
       const heroImg = floralePanel.querySelector('.pj-hero img');
       const heroTitle = floralePanel.querySelector('.pj-name h2');
-      const videoWrap = floralePanel.querySelector('.pj-video');
+      const videoWrap = floralePanel.querySelector('.pj-hold--c');
       const videoEl = floralePanel.querySelector('.pj-video-el');
       const nextLink = document.getElementById('pj-next');
       function openProject(idx) {

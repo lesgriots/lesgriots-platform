@@ -600,16 +600,20 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
 
 /* Page projet — hero plein écran + déroulé éditorial */
 .project-panel { display: block; padding: 0; overflow-y: auto; }
-/* Page projet — choré scroll (REVEAL) :
-   1) photo pleine largeur (se fige)  2) le titre passe par-dessus
-   3) le bloc image+titre GLISSE vers le haut et révèle la section noire (description)
-   4) la vidéo recouvre la description. Logo fixe en bas (inchangé). */
+/* Page projet — choré scroll REVEAL en 3 blocs empilés.
+   Chaque bloc se fige (pause), puis glisse vers le haut pour révéler le bloc
+   DESSOUS (z-index décroissant). Chaque bloc fait 200vh = 100vh de pause + 100vh
+   de glisse, et remonte de -100vh pour se placer derrière le précédent.
+   A) image + titre   B) description (noir)   C) vidéo.  Logo fixe en bas. */
+.pj-hold { position: relative; }
+.pj-hold--a { z-index: 3; }                          /* image+titre : 200vh (hero + nom) */
+.pj-hold--b { z-index: 2; height: 200vh; margin-top: -100vh; }
+.pj-hold--c { z-index: 1; height: 200vh; margin-top: -100vh; }
+.pj-hold--c[hidden] { display: none; }
 
-/* Bloc image+titre : couche du DESSUS (z3), opaque, qui glisse vers le haut. */
-.pj-hold { position: relative; z-index: 3; }
+/* A — la photo se fige pendant que le titre passe par-dessus (transparent). */
 .pj-hero { position: sticky; top: 0; height: 100vh; }
 .pj-hero img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(.15) brightness(.62); }
-/* Le TITRE passe par-dessus la photo figée (transparent). */
 .pj-name {
   position: relative;
   height: 100vh;
@@ -630,15 +634,7 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   color: #f4efe3;
   text-shadow: 0 2px 40px rgba(0, 0, 0, .5);
 }
-/* Section noire (description) : FIGÉE dessous (z1), révélée quand le bloc glisse. */
-/* Bloc description (z2) : révélé quand l'image glisse, puis glisse à son tour
-   vers le haut pour révéler la vidéo. Hauteur 200vh = 100vh figée + 100vh de glisse. */
-.pj-desc-hold {
-  position: relative;
-  z-index: 2;
-  height: 200vh;
-  margin-top: -100vh; /* placé derrière le bas du bloc image+titre */
-}
+/* B — description (section noire), figée pendant la pause puis glisse. */
 .pj-desc {
   position: sticky;
   top: 0;
@@ -658,22 +654,19 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   line-height: 1.3;
   text-wrap: balance;
 }
-/* Vidéo : figée dessous (z1), révélée quand la description glisse. */
+/* C — la vidéo, figée pendant la pause. */
 .pj-video {
   position: sticky;
   top: 0;
-  z-index: 1;
   height: 100vh;
-  margin-top: -100vh; /* derrière le bas du bloc description */
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   background: var(--bg);
 }
-.pj-video[hidden] { display: none; }
 .pj-video-el { width: 100%; height: 100vh; object-fit: cover; display: block; }
-/* Corps (galerie, note) — opaque, arrive après la vidéo. */
+/* Corps (galerie, note) — opaque (z4), arrive après la vidéo. */
 .pj-body { position: relative; z-index: 4; background: var(--bg); }
 .pj-body {
   max-width: 1100px;
