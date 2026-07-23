@@ -78,6 +78,7 @@ export async function POST() {
         intro: j.intro || "",
         note: j.note || "",
         gallery: j.gallery || [],
+        video: j.video_src ? { src: j.video_src, poster: j.video_poster || "" } : null,
       };
     }
     html = fill(html, "DATA",

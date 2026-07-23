@@ -600,38 +600,47 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
 
 /* Page projet — hero plein écran + déroulé éditorial */
 .project-panel { display: block; padding: 0; overflow-y: auto; }
-.pj-hero { position: relative; height: 100vh; }
-.pj-hero img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(.15) brightness(.6); }
-/* Texte superposé, centré au MILIEU de l'image ; le corps descend au scroll. */
-.pj-hero-txt {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
+/* Page projet — enchaînement : image (se fige) → nom qui vient par-dessus au
+   scroll → vidéo → corps. Le logo reste fixe en bas (inchangé). */
+.pj-hero { position: sticky; top: 0; height: 100vh; z-index: 1; }
+.pj-hero img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(.15) brightness(.62); }
+/* Le nom passe PAR-DESSUS l'image figée (transparent : on voit l'image derrière). */
+.pj-name {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: clamp(16px, 2.4vh, 30px);
   padding: 0 clamp(24px, 6vw, 120px);
-  color: #f4efe3;
+  background: transparent;
+  pointer-events: none;
 }
-.pj-hero-txt h2 {
-  display: block;
-  position: static;
+.pj-name h2 {
+  margin: 0;
   font-family: var(--serif);
   font-weight: 400;
   font-size: clamp(48px, 8vw, 140px);
   line-height: .95;
   color: #f4efe3;
-  text-shadow: 0 2px 40px rgba(0, 0, 0, .45);
+  text-shadow: 0 2px 40px rgba(0, 0, 0, .5);
 }
-.pj-hero-txt .pj-intro {
-  margin: 0;
-  max-width: 42ch;
-  color: #f4efe3;
-  text-shadow: 0 1px 20px rgba(0, 0, 0, .4);
+/* La vidéo, opaque, recouvre l'image + le nom en glissant au scroll. */
+.pj-video {
+  position: relative;
+  z-index: 3;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg);
 }
+.pj-video[hidden] { display: none; }
+.pj-video-el { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Corps (galerie, note) — opaque, arrive après la vidéo. */
+.pj-body { position: relative; z-index: 4; background: var(--bg); }
 .pj-body {
   max-width: 1100px;
   margin: 0 auto;

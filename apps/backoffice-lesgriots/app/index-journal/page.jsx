@@ -87,7 +87,11 @@ export default function JournalPage() {
     setNewTitle(""); setOpenId(id);
   }
 
-  function pickFile(target) { uploadTarget.current = target; fileInput.current?.click(); }
+  function pickFile(target) {
+    uploadTarget.current = target;
+    if (fileInput.current) fileInput.current.accept = target.field === "video_src" ? "video/*" : "image/*";
+    fileInput.current?.click();
+  }
 
   async function onFile(e) {
     const files = [...(e.target.files || [])];
@@ -203,6 +207,24 @@ export default function JournalPage() {
                   onClick={() => pickFile({ id: it.id, field: "gallery" })}>
                   <span className="plus">+</span> ajouter
                 </button>
+              </div>
+
+              <label>Vidéo de la page projet (mp4, après le nom)</label>
+              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                {it.video_src ? (
+                  <video src={mediaUrl(it.video_src)} muted playsInline
+                    style={{ width: 160, aspectRatio: "16/9", objectFit: "cover", background: "#000" }} />
+                ) : <span className="note">— aucune vidéo —</span>}
+                <button className="btn btn--ghost" disabled={!!busy} onClick={() => pickFile({ id: it.id, field: "video_src" })}>
+                  {it.video_src ? "Remplacer la vidéo" : "Uploader une vidéo"}
+                </button>
+                <button className="btn btn--ghost" disabled={!!busy || !it.video_src} onClick={() => pickFile({ id: it.id, field: "video_poster" })}>
+                  {it.video_poster ? "Changer le poster" : "Poster"}
+                </button>
+                {it.video_src && (
+                  <button className="projcard__act projcard__act--danger" disabled={!!busy}
+                    onClick={() => saveItem({ ...it, video_src: "", video_poster: "" })}>retirer</button>
+                )}
               </div>
             </div>
           )}

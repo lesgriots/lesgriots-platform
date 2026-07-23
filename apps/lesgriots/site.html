@@ -211,12 +211,13 @@ html[lang="en"] [data-lang="fr"] { display: none; }
 <aside class="about-panel project-panel" id="project-florale" aria-hidden="true" data-lenis-prevent>
   <div class="pj-hero">
     <img src="uploads/florale-01.jpg" alt="Tralé" />
-    <div class="pj-hero-txt">
-      <h2>Tralé</h2>
-      <p class="pj-intro">Un film Les Griots. Réalisé par Moos Coulibaly.</p>
-    </div>
+  </div>
+  <div class="pj-name"><h2>Tralé</h2></div>
+  <div class="pj-video" hidden>
+    <video class="pj-video-el" muted loop playsinline webkit-playsinline preload="metadata"></video>
   </div>
   <div class="pj-body">
+    <p class="pj-intro">Un film Les Griots. Réalisé par Moos Coulibaly.</p>
     <figure class="pj-img pj-wide"><img src="https://picsum.photos/seed/flo-2/1600/900" alt="" /></figure>
     <div class="pj-pair">
       <figure class="pj-img"><img src="https://picsum.photos/seed/flo-3/700/900" alt="" /></figure>
@@ -895,7 +896,9 @@ html[lang="en"] [data-lang="fr"] { display: none; }
       const bgSrc = {};
       journalEl.querySelectorAll('.jr-bg img').forEach((im) => { bgSrc[im.dataset.bg] = im.getAttribute('src'); });
       const heroImg = floralePanel.querySelector('.pj-hero img');
-      const heroTitle = floralePanel.querySelector('.pj-hero h2');
+      const heroTitle = floralePanel.querySelector('.pj-name h2');
+      const videoWrap = floralePanel.querySelector('.pj-video');
+      const videoEl = floralePanel.querySelector('.pj-video-el');
       const nextLink = document.getElementById('pj-next');
       function openProject(idx) {
         const row = rows[idx];
@@ -909,6 +912,20 @@ html[lang="en"] [data-lang="fr"] { display: none; }
         if (introEl) introEl.textContent = lg.intro || 'Un film Les Griots.';
         if (noteEl) { noteEl.textContent = lg.note || ''; noteEl.style.display = lg.note ? '' : 'none'; }
         if (lg.hero) heroImg.src = lg.hero;
+        // Vidéo de la page projet (nouveau champ BO) : affichée seulement si présente
+        if (videoWrap && videoEl) {
+          const vid = lg.video && lg.video.src ? lg.video : null;
+          if (vid) {
+            videoEl.src = vid.src;
+            videoEl.poster = vid.poster || '';
+            videoEl.muted = true;
+            videoWrap.hidden = false;
+            const p = videoEl.play(); if (p && p.catch) p.catch(function () {});
+          } else {
+            videoEl.removeAttribute('src'); videoEl.load();
+            videoWrap.hidden = true;
+          }
+        }
         const bodyEl = floralePanel.querySelector('.pj-body');
         if (bodyEl && Array.isArray(lg.gallery)) {
           bodyEl.querySelectorAll('.pj-img, .pj-pair').forEach((f) => f.remove());

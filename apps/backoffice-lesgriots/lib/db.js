@@ -291,6 +291,8 @@ export function upsertJournalItem(item) {
     intro: p.intro || "",
     note: p.note || "",
     gallery: Array.isArray(p.gallery) ? p.gallery.filter(Boolean) : [],
+    video_src: p.video_src || "",       // vidéo de la page projet (mp4)
+    video_poster: p.video_poster || "", // poster de la vidéo
     position: Number(p.position) || 0,
     hidden: !!p.hidden,
   }), item);
