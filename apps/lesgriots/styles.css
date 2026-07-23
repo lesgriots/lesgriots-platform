@@ -512,9 +512,7 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   padding: clamp(24px, 6vw, 120px) clamp(24px, 9vw, 190px); /* marges latérales généreuses : la phrase ne touche jamais les bords */
   background: transparent;
 }
-/* les sites (aw2-slide à l'export, about-white en template) arrivent APRÈS la phrase, sans la chevaucher */
-.aw-line-slide + .aw2-slide,
-.aw-line-slide + .about-white { margin-top: 0; }
+/* la section des sites chevauche la phrase (raccord -42vh natif de .aw2-slide, conservé) */
 .aw-line-title {
   margin: 0;
   text-align: center;
