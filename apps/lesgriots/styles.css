@@ -505,16 +505,18 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   align-items: center;
   justify-content: center;
   height: 100vh;
-  /* la phrase remonte juste sous le texte About (même raccord que faisaient les sites) */
-  margin-top: -42vh;
-  position: relative;
-  z-index: 2;
+  /* La phrase se FIGE : au scroll, la section des sites (opaque, au-dessus)
+     remonte glisser PAR-DESSUS elle — même principe que la home avec l'Index. */
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin-top: 0;
   padding: clamp(24px, 6vw, 120px) clamp(24px, 9vw, 190px); /* marges latérales généreuses : la phrase ne touche jamais les bords */
-  background: transparent;
+  background: var(--bg);
 }
-/* la section des sites remonte couvrir la MOITIÉ INFÉRIEURE de l'écran de la phrase */
+/* la section des sites glisse par-dessus la phrase figée (au-dessus, opaque, sans marge négative) */
 .aw-line-slide + .aw2-slide,
-.aw-line-slide + .about-white { margin-top: -50vh; }
+.aw-line-slide + .about-white { margin-top: 0; position: relative; z-index: 2; }
 .aw-line-title {
   margin: 0;
   text-align: center;
