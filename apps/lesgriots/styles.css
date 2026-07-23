@@ -445,7 +445,7 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   align-items: flex-start;
   justify-content: center;
   text-align: center;
-  padding: calc(100vw / 3.89 + 88px) clamp(24px, 5vw, 96px) 48px; /* le texte reste sous le menu */
+  padding: calc(100vw / 3.89 + 48px) clamp(24px, 5vw, 96px) 48px; /* le texte reste sous le menu */
 }
 /* About — trois sites, façon PIN-UP */
 .about-white { z-index: 2; margin-top: -58vh; } /* raccord resserré : la grille arrive plus tôt sous la phrase */
@@ -506,11 +506,11 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   justify-content: center;
   /* Hauteur = l'espace SOUS le logo, pour que la phrase tienne toujours à l'écran
      et reste sous le logo (les sites arrivent vite au scroll). */
-  height: calc(100vh - (100vw / 3.89 + 88px));
+  height: calc(100vh - (100vw / 3.89 + 48px));
   /* La phrase se FIGE : au scroll, la section des sites (opaque, au-dessus)
      remonte glisser PAR-DESSUS elle — même principe que la home avec l'Index. */
   position: sticky;
-  top: calc(100vw / 3.89 + 88px); /* se fige SOUS le logo (même offset que le contenu About) */
+  top: calc(100vw / 3.89 + 48px); /* se fige SOUS le logo (même offset que le contenu About) */
   z-index: 1;
   margin-top: 0;
   padding: 0 clamp(24px, 9vw, 190px); /* marges latérales seulement : l'offset top place déjà la phrase sous le logo */
@@ -1692,7 +1692,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
      Le padding-bas ÉGALE le chevauchement de l'écran des sites : la zone
      recouverte ne contient jamais de texte — l'écran du dessous reste
      lisible jusqu'à être recouvert par celui du dessus. */
-  padding-top: max(calc(100vw / 3.89 + 88px), 72vh);
+  padding-top: max(calc(100vw / 3.89 + 48px), 72vh);
   height: auto;
   min-height: 100vh;
   padding-bottom: 50vh;
