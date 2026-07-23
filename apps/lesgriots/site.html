@@ -218,9 +218,12 @@ html[lang="en"] [data-lang="fr"] { display: none; }
     <!-- Section 2 : le TITRE monte en overlap par-dessus la photo (transparent) -->
     <div class="pj-name"><h2>Tralé</h2></div>
   </div>
-  <!-- Section 3 : section NOIRE avec la description — révélée quand le bloc image glisse -->
-  <div class="pj-desc"><p class="pj-intro">Un film Les Griots. Réalisé par Moos Coulibaly.</p></div>
-  <!-- Section 4 : la vidéo recouvre la description au scroll suivant -->
+  <!-- Section 3 : la description (bloc noir) est révélée quand l'image glisse,
+       puis elle glisse à son tour vers le haut pour révéler la vidéo. -->
+  <div class="pj-desc-hold">
+    <div class="pj-desc"><p class="pj-intro">Un film Les Griots. Réalisé par Moos Coulibaly.</p></div>
+  </div>
+  <!-- Section 4 : la vidéo, figée dessous, révélée quand la description glisse -->
   <div class="pj-video" hidden>
     <video class="pj-video-el" muted loop playsinline webkit-playsinline preload="metadata"></video>
   </div>
