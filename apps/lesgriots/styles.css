@@ -504,15 +504,16 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Écran plus court : les sites arrivent plus vite au scroll. */
-  height: 64vh;
+  /* Hauteur = l'espace SOUS le logo, pour que la phrase tienne toujours à l'écran
+     et reste sous le logo (les sites arrivent vite au scroll). */
+  height: calc(100vh - (100vw / 3.89 + 88px));
   /* La phrase se FIGE : au scroll, la section des sites (opaque, au-dessus)
      remonte glisser PAR-DESSUS elle — même principe que la home avec l'Index. */
   position: sticky;
-  top: 0;
+  top: calc(100vw / 3.89 + 88px); /* se fige SOUS le logo (même offset que le contenu About) */
   z-index: 1;
   margin-top: 0;
-  padding: clamp(24px, 6vw, 120px) clamp(24px, 9vw, 190px); /* marges latérales généreuses : la phrase ne touche jamais les bords */
+  padding: 0 clamp(24px, 9vw, 190px); /* marges latérales seulement : l'offset top place déjà la phrase sous le logo */
   background: var(--bg);
 }
 /* la section des sites glisse par-dessus la phrase figée (au-dessus, opaque),
