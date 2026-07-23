@@ -600,19 +600,18 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
 
 /* Page projet — hero plein écran + déroulé éditorial */
 .project-panel { display: block; padding: 0; overflow-y: auto; }
-/* Page projet — 3 sections au scroll :
-   1) photo pleine largeur (se fige)
-   2) le texte (nom + descriptif) MONTE EN OVERLAP par-dessus la photo (transparent)
-   3) une section NOIRE avec la vidéo.
-   Le logo reste fixe en bas (inchangé). */
-.pj-hero { position: sticky; top: 0; height: 100vh; z-index: 1; }
+/* Page projet — choré scroll (REVEAL) :
+   1) photo pleine largeur (se fige)  2) le titre passe par-dessus
+   3) le bloc image+titre GLISSE vers le haut et révèle la section noire (description)
+   4) la vidéo recouvre la description. Logo fixe en bas (inchangé). */
+
+/* Bloc image+titre : couche du DESSUS (z3), opaque, qui glisse vers le haut. */
+.pj-hold { position: relative; z-index: 3; }
+.pj-hero { position: sticky; top: 0; height: 100vh; }
 .pj-hero img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(.15) brightness(.62); }
-/* Section 2 : le TITRE passe par-dessus la photo figée (transparent).
-   Chaque section se FIGE (sticky) et la suivante glisse par-dessus au scroll. */
+/* Le TITRE passe par-dessus la photo figée (transparent). */
 .pj-name {
-  position: sticky;
-  top: 0;
-  z-index: 2;
+  position: relative;
   height: 100vh;
   display: flex;
   align-items: center;
@@ -631,12 +630,13 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   color: #f4efe3;
   text-shadow: 0 2px 40px rgba(0, 0, 0, .5);
 }
-/* Section 3 : section NOIRE avec la description (opaque, recouvre tout). */
+/* Section noire (description) : FIGÉE dessous (z1), révélée quand le bloc glisse. */
 .pj-desc {
   position: sticky;
   top: 0;
-  z-index: 3;
+  z-index: 1;
   height: 100vh;
+  margin-top: -100vh; /* placée derrière le bas du bloc image+titre */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -652,11 +652,10 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   line-height: 1.3;
   text-wrap: balance;
 }
-/* Section 4 : la vidéo (opaque) overlap le texte au scroll suivant. */
+/* Vidéo : opaque (z2), recouvre la description au scroll suivant. */
 .pj-video {
-  position: sticky;
-  top: 0;
-  z-index: 4;
+  position: relative;
+  z-index: 2;
   height: 100vh;
   display: flex;
   align-items: center;
@@ -667,7 +666,7 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
 .pj-video[hidden] { display: none; }
 .pj-video-el { width: 100%; height: 100vh; object-fit: cover; display: block; }
 /* Corps (galerie, note) — opaque, arrive après la vidéo. */
-.pj-body { position: relative; z-index: 5; background: var(--bg); }
+.pj-body { position: relative; z-index: 4; background: var(--bg); }
 .pj-body {
   max-width: 1100px;
   margin: 0 auto;
