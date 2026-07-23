@@ -504,7 +504,8 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  /* Écran plus court : les sites arrivent plus vite au scroll. */
+  height: 64vh;
   /* La phrase se FIGE : au scroll, la section des sites (opaque, au-dessus)
      remonte glisser PAR-DESSUS elle — même principe que la home avec l'Index. */
   position: sticky;
@@ -514,9 +515,18 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   padding: clamp(24px, 6vw, 120px) clamp(24px, 9vw, 190px); /* marges latérales généreuses : la phrase ne touche jamais les bords */
   background: var(--bg);
 }
-/* la section des sites glisse par-dessus la phrase figée (au-dessus, opaque, sans marge négative) */
+/* la section des sites glisse par-dessus la phrase figée (au-dessus, opaque),
+   et plus courte pour que le passage arrive plus vite. */
 .aw-line-slide + .aw2-slide,
-.aw-line-slide + .about-white { margin-top: 0; position: relative; z-index: 2; }
+.aw-line-slide + .about-white {
+  margin-top: 0;
+  position: relative;
+  z-index: 2;
+  height: auto;
+  min-height: 66vh;
+  padding-top: clamp(48px, 9vh, 120px);
+  padding-bottom: clamp(48px, 9vh, 120px);
+}
 .aw-line-title {
   margin: 0;
   text-align: center;
