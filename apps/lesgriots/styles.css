@@ -505,11 +505,16 @@ body.entered .jr-head { opacity: 1; pointer-events: auto; }
   align-items: center;
   justify-content: center;
   height: 100vh;
-  margin-top: 0;
+  /* la phrase remonte juste sous le texte About (même raccord que faisaient les sites) */
+  margin-top: -42vh;
+  position: relative;
+  z-index: 2;
   padding: clamp(24px, 6vw, 120px) clamp(24px, 9vw, 190px); /* marges latérales généreuses : la phrase ne touche jamais les bords */
   background: transparent;
 }
-.aw-line-slide + .about-white { margin-top: 0; } /* les sites arrivent proprement APRÈS la phrase */
+/* les sites (aw2-slide à l'export, about-white en template) arrivent APRÈS la phrase, sans la chevaucher */
+.aw-line-slide + .aw2-slide,
+.aw-line-slide + .about-white { margin-top: 0; }
 .aw-line-title {
   margin: 0;
   text-align: center;
