@@ -4436,12 +4436,12 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__formation__tagline {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(24px, 3.2vw, 40px);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  font-size: clamp(30px, 4.4vw, 58px);
+  line-height: 1.08;
+  letter-spacing: -0.028em;
   margin: 0;
   color: var(--ink-2);
-  max-width: 46ch;
+  max-width: 36ch;
 }
 .lg__formation__meta {
   display: grid;
