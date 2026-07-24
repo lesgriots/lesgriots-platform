@@ -1655,7 +1655,26 @@ function ProgramPage({ item, kind }) {
         {
           id: "description",
           title: "Description",
-          body: f.description ? <p className="lg__formation__prose">{f.description}</p> : null,
+          // Blocs éditoriaux (overview) : chaque bloc = [accroche, texte].
+          // Rendus en premier, puis le paragraphe factuel (description).
+          body: ((Array.isArray(f.overview) && f.overview.length) || f.description) ? (
+            <div className="lg__ovw">
+              {(Array.isArray(f.overview) ? f.overview : []).map((b, i) => {
+                const head = Array.isArray(b) ? b[0] : b?.title;
+                const text = Array.isArray(b) ? b[1] : b?.text;
+                if (!head && !text) return null;
+                return (
+                  <div className="lg__ovw__block" key={i}>
+                    {head && <h3 className="lg__ovw__head">{head}</h3>}
+                    {text && String(text).split("\n\n").map((para, j) => (
+                      <p className="lg__ovw__text" key={j}>{para}</p>
+                    ))}
+                  </div>
+                );
+              })}
+              {f.description && <p className="lg__formation__prose lg__ovw__meta">{f.description}</p>}
+            </div>
+          ) : null,
         },
         {
           id: "objectifs",

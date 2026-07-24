@@ -3602,6 +3602,38 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   line-height: 1.55;
   margin: 0;
 }
+/* Blocs éditoriaux de la description : accroche + paragraphes (façon page produit). */
+.lg__ovw { display: flex; flex-direction: column; gap: clamp(28px, 3.4vw, 48px); }
+.lg__ovw__block { max-width: 64ch; }
+.lg__ovw__head {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: clamp(20px, 2.1vw, 30px);
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+  color: var(--ink);
+}
+.lg__ovw__text {
+  font-family: var(--font-sans);
+  font-size: clamp(16px, 1.25vw, 18px);
+  line-height: 1.6;
+  margin: 0 0 12px;
+  color: var(--ink-2, var(--ink));
+}
+.lg__ovw__text:last-child { margin-bottom: 0; }
+/* Le paragraphe factuel (description) arrive après, en plus discret. */
+.lg__ovw__meta {
+  padding-top: 22px;
+  border-top: 1px solid var(--rule, rgba(0,0,0,.12));
+  opacity: .78;
+  font-size: 16px !important;
+}
+@media (max-width: 700px) {
+  .lg__ovw { gap: 26px; }
+  .lg__ovw__head { font-size: 19px; }
+  .lg__ovw__text { font-size: 15px; line-height: 1.55; }
+}
 .lg__tabsec__body ol {
   list-style: none;
   padding: 0;
