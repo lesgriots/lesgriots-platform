@@ -5236,13 +5236,15 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
 }
 /* Petit texte sous le titre dans le hero banner d'une fiche formation. */
 .lg__formation__herosub {
-  margin: 14px 0 0;
+  margin: 18px 0 0;
   font-family: var(--font-sans);
-  font-size: clamp(14px, 1.4vw, 19px);
-  line-height: 1.4;
+  font-weight: 500;
+  font-size: clamp(22px, 2.6vw, 36px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   color: #fff;
-  opacity: 0.92;
-  max-width: 48ch;
+  opacity: 0.96;
+  max-width: 38ch;
 }
 .lg__intro__sublink:hover { color: inherit; opacity: 0.75; }
 .lg__catalogue__head {
