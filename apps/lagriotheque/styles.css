@@ -3602,6 +3602,14 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   line-height: 1.55;
   margin: 0;
 }
+/* Public visé dans la carte latérale : texte court, lisible, discret. */
+.lg__cta-mini__audience__text {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 4px 0 0;
+  opacity: .85;
+}
 /* Blocs éditoriaux de la description : accroche + paragraphes (façon page produit). */
 .lg__ovw { display: flex; flex-direction: column; gap: clamp(28px, 3.4vw, 48px); }
 .lg__ovw__block { max-width: 64ch; }

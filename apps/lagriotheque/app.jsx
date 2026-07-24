@@ -2076,6 +2076,13 @@ function ProgramPage({ item, kind }) {
               </p>
             </div>
           )}
+          {/* Public visé : remonté dans la carte (repère immédiat « c'est pour moi »). */}
+          {f.audience && (
+            <div className="lg__cta-mini__sessions lg__cta-mini__audience">
+              <p className="lg__cta-mini__sessions__label">Pour qui</p>
+              <p className="lg__cta-mini__audience__text">{f.audience}</p>
+            </div>
+          )}
           {kind === "workshop" ? (
             /* Workshop = achat direct (Stripe) → « Réserver / Payer ». */
             <a
