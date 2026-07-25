@@ -1423,12 +1423,12 @@ function ProgramPage({ item, kind }) {
   };
 
   // Quand on change d'onglet, on scrolle horizontalement la barre d'onglets
-  // pour amener le bouton actif au centre (utile sur mobile où les onglets
+  // pour amener le bouton actif au cran de gauche (utile sur mobile où les onglets
   // sont en scroll horizontal).
   useEffect(() => {
     const btn = document.querySelector(".lg__tabs .lg__tabs__btn.is-active");
     if (btn && typeof btn.scrollIntoView === "function") {
-      btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
     }
   }, [activeTab]);
 
