@@ -7319,8 +7319,10 @@ a.lg__partners__logo:hover {
   .lg__sheet__body .lg__cta-mini { box-shadow: none; }
   /* Version ULTRA-DENSE de la carte dans le panneau : tout visible d'un
      bloc, hauteur minimale. */
-  .lg__sheet__body { padding: 6px 10px calc(8px + env(safe-area-inset-bottom, 0px)); }
-  .lg__sheet__body .lg__cta-mini { padding: 10px 12px 8px; }
+  .lg__sheet__body { padding: 0 0 env(safe-area-inset-bottom, 0px); }
+  /* Pas de rectangle interne : la carte se fond dans le panneau (le trait
+     supérieur du panneau suffit). */
+  .lg__sheet__body .lg__cta-mini { padding: 10px 14px 8px; border: 0; }
   .lg__sheet__body .lg__cta-mini__title { font-size: 11px; margin: 0 0 6px; padding-bottom: 5px; }
   .lg__sheet__body .lg__cta-mini__head { gap: 1px; padding-bottom: 5px; margin-bottom: 5px; }
   .lg__sheet__body .lg__cta-mini__price { font-size: 16px; }
