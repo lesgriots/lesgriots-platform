@@ -7391,9 +7391,24 @@ a.lg__partners__logo:hover {
     background: var(--accent);
     color: var(--ink);
   }
+  /* Escamotage quand la carte complète (bas de page) est visible. */
+  .lg__formation__bar {
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .lg__formation__bar.is-hidden {
+    transform: translateY(110%);
+  }
   /* La fiche réserve la hauteur de la carte pour que la fin de page
      (avis, CTA final) ne soit jamais masquée. */
   .lg__formation { padding-bottom: 170px; }
   /* Idem pour le footer global quand on est sur une fiche. */
   body.is-fiche .lg__footer { padding-bottom: 180px; }
+}
+
+/* Carte de réservation complète : colonne droite sur desktop, répétée en BAS
+   de page (après les Avis) sur mobile — une seule version visible à la fois. */
+.lg__formation__side--mobile { display: none; }
+@media (max-width: 900px) {
+  .lg__formation__side--desktop { display: none; }
+  .lg__formation__side--mobile { display: block; }
 }

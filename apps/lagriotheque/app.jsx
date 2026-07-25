@@ -1405,6 +1405,10 @@ function ProgramPage({ item, kind }) {
   // Ouvre la modale d'inscription (capture lead → /api/leads → email/Qualiopi).
   const [showInscription, setShowInscription] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
+  // Escamote la carte condensée fixe quand la carte COMPLÈTE (bas de page
+  // mobile) est visible à l'écran — évite le doublon de CTA.
+  const bottomCardRef = useRef(null);
+  const [barHidden, setBarHidden] = useState(false);
   const [cpfOpen, setCpfOpen] = useState(false);
   const tabContentRef = useRef(null);
 
@@ -1431,6 +1435,17 @@ function ProgramPage({ item, kind }) {
       btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    const el = bottomCardRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setBarHidden(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [item && item.id]);
 
   useEffect(() => {
     const el = headerRef.current;
@@ -1580,6 +1595,143 @@ function ProgramPage({ item, kind }) {
       window.scrollTo({ top: y, behavior: "smooth" });
     }
   };
+
+  // Carte de réservation COMPLÈTE — rendue deux fois : colonne de droite
+  // (desktop) et bas de page après les Avis (mobile). Le CSS n'affiche
+  // que la bonne version selon le breakpoint.
+  const reservationCard = (
+    <React.Fragment>
+        <div className="lg__cta-mini">
+          {/* Nom de la formation tout en haut de la carte — repère pour le
+              lecteur qui scrolle dans le contenu. */}
+          <p className="lg__cta-mini__title">{f.title}</p>
+          <div className="lg__cta-mini__head">
+            <strong className="lg__cta-mini__price">
+              {f.price || "—"}
+            </strong>
+            <span className="lg__cta-mini__hint">
+              {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
+            </span>
+          </div>
+          {kind !== "workshop" && (f.cpf || f.rs) && (
+            <p className="lg__cta-mini__cert">
+              <span aria-hidden="true">✓</span> Formation certifiante
+              {f.rs && <span className="lg__cta-mini__cert__code"> · RS {f.rs}</span>}
+            </p>
+          )}
+          {kind !== "workshop" && (f.cpf || f.opco || f.faf || f.rs) && (
+            <div className="lg__cta-mini__badges">
+              {f.cpf && <span>CPF</span>}
+              {f.opco && <span>OPCO</span>}
+              {f.faf && <span>FAF</span>}
+              {f.rs && <span>RS {f.rs}</span>}
+            </div>
+          )}
+          <ul className="lg__cta-mini__meta">
+            {f.format && <li>{f.format}</li>}
+          </ul>
+          {upcoming.length > 0 && (
+            <div className="lg__cta-mini__sessions">
+              <p className="lg__cta-mini__sessions__label">
+                {upcoming.length > 1 ? "Prochaines sessions" : "Prochaine session"}
+              </p>
+              <ul className="lg__cta-mini__sessions__list">
+                {upcoming.slice(0, 3).map((s) => {
+                  const st = normalizeStatus(s.status);
+                  return (
+                    <li key={s.id} className="lg__cta-mini__session">
+                      <span className="lg__cta-mini__session__date">{sessionDateLabel(s)}</span>
+                      {s.location && (
+                        <span className="lg__cta-mini__session__loc">{s.location}</span>
+                      )}
+                      <span className="lg__cta-mini__session__meta">
+                        <span className={"lg__cta-mini__session__status is-" + st.class}>{st.label}</span>
+                        {s.places && st.class === "open" && (
+                          <span className="lg__cta-mini__session__places">· {s.places} place{Number(s.places) > 1 ? "s" : ""}</span>
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+          {f.duration && (
+            <div className="lg__cta-mini__sessions">
+              <p className="lg__cta-mini__sessions__label">Durée</p>
+              <p className="lg__cta-mini__session__date">
+                {f.duration.toLowerCase().replace(/\s*·\s*/g, " / ").replace(/journée/g, "jour")}
+              </p>
+            </div>
+          )}
+          {/* Public visé : remonté dans la carte (repère immédiat « c'est pour moi »). */}
+          {(Array.isArray(f.audience_points) && f.audience_points.length) ? (
+            <div className="lg__cta-mini__sessions lg__cta-mini__audience">
+              <p className="lg__cta-mini__sessions__label">Pour qui</p>
+              <ul className="lg__cta-mini__audience__list">
+                {f.audience_points.map((pt, i) => <li key={i}>{pt}</li>)}
+              </ul>
+            </div>
+          ) : f.audience ? (
+            <div className="lg__cta-mini__sessions lg__cta-mini__audience">
+              <p className="lg__cta-mini__sessions__label">Pour qui</p>
+              <p className="lg__cta-mini__audience__text">{f.audience}</p>
+            </div>
+          ) : null}
+          {kind === "workshop" ? (
+            /* Workshop = achat direct (Stripe) → « Réserver / Payer ». */
+            <a
+              className="lg__cta-mini__btn"
+              href={ctaHref(item, nextSession)}
+              {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            >
+              {ctaLabel(item)}
+            </a>
+          ) : (
+            /* Formation = pas d'achat direct → demande d'inscription (modale). */
+            <button
+              type="button"
+              className="lg__cta-mini__btn"
+              onClick={() => setShowInscription(true)}
+            >
+              Demander une inscription →
+            </button>
+          )}
+          {kind !== "workshop" && f.cpf && (
+            <button
+              type="button"
+              className="lg__cta-mini__btn"
+              onClick={() => setCpfOpen(true)}
+            >
+              S'inscrire via Mon Compte Formation
+            </button>
+          )}
+          <button
+            type="button"
+            className="lg__cta-mini__btn lg__cta-mini__btn--ghost"
+            onClick={() => setDownloadOpen(true)}
+          >
+            ↓ Télécharger le programme
+          </button>
+          <a
+            className="lg__cta-mini__sub"
+            href="mailto:formations@lesgriots.com?subject=Devis%20OPCO%20%2F%20FAF"
+          >
+            Étudier un financement
+          </a>
+          {kind !== "workshop" && f.cpf && (
+            <div className="lg__cta-mini__cpfbox">
+              <img
+                className="lg__cta-mini__cpfbox__logo"
+                src="img/moncompteformation.webp"
+                alt="Mon Compte Formation"
+              />
+              <span className="lg__cta-mini__cpfbox__text">Finançable avec ton Compte Personnel de Formation</span>
+            </div>
+          )}
+        </div>
+    </React.Fragment>
+  );
 
   return (
     <section className="lg__formation">
@@ -2055,143 +2207,15 @@ function ProgramPage({ item, kind }) {
 
       </div>{/* /.lg__formation__main */}
 
-      <aside className="lg__formation__side" aria-label="Réservation">
-        <div className="lg__cta-mini">
-          {/* Nom de la formation tout en haut de la carte — repère pour le
-              lecteur qui scrolle dans le contenu. */}
-          <p className="lg__cta-mini__title">{f.title}</p>
-          <div className="lg__cta-mini__head">
-            <strong className="lg__cta-mini__price">
-              {f.price || "—"}
-            </strong>
-            <span className="lg__cta-mini__hint">
-              {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
-            </span>
-          </div>
-          {kind !== "workshop" && (f.cpf || f.rs) && (
-            <p className="lg__cta-mini__cert">
-              <span aria-hidden="true">✓</span> Formation certifiante
-              {f.rs && <span className="lg__cta-mini__cert__code"> · RS {f.rs}</span>}
-            </p>
-          )}
-          {kind !== "workshop" && (f.cpf || f.opco || f.faf || f.rs) && (
-            <div className="lg__cta-mini__badges">
-              {f.cpf && <span>CPF</span>}
-              {f.opco && <span>OPCO</span>}
-              {f.faf && <span>FAF</span>}
-              {f.rs && <span>RS {f.rs}</span>}
-            </div>
-          )}
-          <ul className="lg__cta-mini__meta">
-            {f.format && <li>{f.format}</li>}
-          </ul>
-          {upcoming.length > 0 && (
-            <div className="lg__cta-mini__sessions">
-              <p className="lg__cta-mini__sessions__label">
-                {upcoming.length > 1 ? "Prochaines sessions" : "Prochaine session"}
-              </p>
-              <ul className="lg__cta-mini__sessions__list">
-                {upcoming.slice(0, 3).map((s) => {
-                  const st = normalizeStatus(s.status);
-                  return (
-                    <li key={s.id} className="lg__cta-mini__session">
-                      <span className="lg__cta-mini__session__date">{sessionDateLabel(s)}</span>
-                      {s.location && (
-                        <span className="lg__cta-mini__session__loc">{s.location}</span>
-                      )}
-                      <span className="lg__cta-mini__session__meta">
-                        <span className={"lg__cta-mini__session__status is-" + st.class}>{st.label}</span>
-                        {s.places && st.class === "open" && (
-                          <span className="lg__cta-mini__session__places">· {s.places} place{Number(s.places) > 1 ? "s" : ""}</span>
-                        )}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-          {f.duration && (
-            <div className="lg__cta-mini__sessions">
-              <p className="lg__cta-mini__sessions__label">Durée</p>
-              <p className="lg__cta-mini__session__date">
-                {f.duration.toLowerCase().replace(/\s*·\s*/g, " / ").replace(/journée/g, "jour")}
-              </p>
-            </div>
-          )}
-          {/* Public visé : remonté dans la carte (repère immédiat « c'est pour moi »). */}
-          {(Array.isArray(f.audience_points) && f.audience_points.length) ? (
-            <div className="lg__cta-mini__sessions lg__cta-mini__audience">
-              <p className="lg__cta-mini__sessions__label">Pour qui</p>
-              <ul className="lg__cta-mini__audience__list">
-                {f.audience_points.map((pt, i) => <li key={i}>{pt}</li>)}
-              </ul>
-            </div>
-          ) : f.audience ? (
-            <div className="lg__cta-mini__sessions lg__cta-mini__audience">
-              <p className="lg__cta-mini__sessions__label">Pour qui</p>
-              <p className="lg__cta-mini__audience__text">{f.audience}</p>
-            </div>
-          ) : null}
-          {kind === "workshop" ? (
-            /* Workshop = achat direct (Stripe) → « Réserver / Payer ». */
-            <a
-              className="lg__cta-mini__btn"
-              href={ctaHref(item, nextSession)}
-              {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            >
-              {ctaLabel(item)}
-            </a>
-          ) : (
-            /* Formation = pas d'achat direct → demande d'inscription (modale). */
-            <button
-              type="button"
-              className="lg__cta-mini__btn"
-              onClick={() => setShowInscription(true)}
-            >
-              Demander une inscription →
-            </button>
-          )}
-          {kind !== "workshop" && f.cpf && (
-            <button
-              type="button"
-              className="lg__cta-mini__btn"
-              onClick={() => setCpfOpen(true)}
-            >
-              S'inscrire via Mon Compte Formation
-            </button>
-          )}
-          <button
-            type="button"
-            className="lg__cta-mini__btn lg__cta-mini__btn--ghost"
-            onClick={() => setDownloadOpen(true)}
-          >
-            ↓ Télécharger le programme
-          </button>
-          <a
-            className="lg__cta-mini__sub"
-            href="mailto:formations@lesgriots.com?subject=Devis%20OPCO%20%2F%20FAF"
-          >
-            Étudier un financement
-          </a>
-          {kind !== "workshop" && f.cpf && (
-            <div className="lg__cta-mini__cpfbox">
-              <img
-                className="lg__cta-mini__cpfbox__logo"
-                src="img/moncompteformation.webp"
-                alt="Mon Compte Formation"
-              />
-              <span className="lg__cta-mini__cpfbox__text">Finançable avec ton Compte Personnel de Formation</span>
-            </div>
-          )}
-        </div>
+      <aside className="lg__formation__side lg__formation__side--desktop" aria-label="Réservation">
+        {reservationCard}
       </aside>
       </div>{/* /.lg__formation__layout */}
 
       {/* Barre de réservation PERMANENTE en bas de l'écran (mobile) : prix +
           CTA toujours visibles pendant la lecture de la fiche. La carte
           complète reste dans la page ; la barre n'apparaît qu'en <=900px. */}
-      <div className="lg__formation__bar" role="complementary" aria-label="Réservation">
+      <div className={"lg__formation__bar" + (barHidden ? " is-hidden" : "")} role="complementary" aria-label="Réservation">
         <p className="lg__formation__bar__title">{f.title}</p>
         <div className="lg__formation__bar__row">
           <div className="lg__formation__bar__head">
@@ -2253,6 +2277,11 @@ function ProgramPage({ item, kind }) {
           bilan de la promo.
         </p>
       </section>
+
+      {/* Carte complète en bas de page (mobile uniquement). */}
+      <aside className="lg__formation__side lg__formation__side--mobile" aria-label="Réservation" ref={bottomCardRef}>
+        {reservationCard}
+      </aside>
 
       {/* Bloc CTA final pleine largeur en bas de page — la vidéo de la
           formation tourne en background avec un voile sombre par-dessus. */}
