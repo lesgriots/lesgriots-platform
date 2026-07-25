@@ -1608,7 +1608,7 @@ function ProgramPage({ item, kind }) {
         <div className="lg__cta-mini">
           {/* Nom de la formation tout en haut de la carte — repère pour le
               lecteur qui scrolle dans le contenu. */}
-          {!compact && <p className="lg__cta-mini__title">{f.title}</p>}
+          <p className="lg__cta-mini__title">{f.title}</p>
           <div className="lg__cta-mini__head">
             <strong className="lg__cta-mini__price">
               {f.price || "—"}
