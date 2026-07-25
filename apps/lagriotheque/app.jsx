@@ -2191,12 +2191,23 @@ function ProgramPage({ item, kind }) {
       {/* Barre de réservation PERMANENTE en bas de l'écran (mobile) : prix +
           CTA toujours visibles pendant la lecture de la fiche. La carte
           complète reste dans la page ; la barre n'apparaît qu'en <=900px. */}
-      <div className="lg__formation__bar" role="complementary" aria-label="Réservation rapide">
-        <div className="lg__formation__bar__head">
-          <strong className="lg__formation__bar__price">{f.price || "—"}</strong>
-          <span className="lg__formation__bar__hint">
-            {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
-          </span>
+      <div className="lg__formation__bar" role="complementary" aria-label="Réservation">
+        <p className="lg__formation__bar__title">{f.title}</p>
+        <div className="lg__formation__bar__row">
+          <div className="lg__formation__bar__head">
+            <strong className="lg__formation__bar__price">{f.price || "—"}</strong>
+            <span className="lg__formation__bar__hint">
+              {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
+            </span>
+          </div>
+          {kind !== "workshop" && (f.cpf || f.opco || f.faf || f.rs) && (
+            <div className="lg__formation__bar__badges">
+              {f.cpf && <span>CPF</span>}
+              {f.opco && <span>OPCO</span>}
+              {f.faf && <span>FAF</span>}
+              {f.rs && <span>RS {f.rs}</span>}
+            </div>
+          )}
         </div>
         {kind === "workshop" ? (
           <a
@@ -2212,7 +2223,7 @@ function ProgramPage({ item, kind }) {
             className="lg__formation__bar__btn"
             onClick={() => setShowInscription(true)}
           >
-            S'inscrire →
+            Demander une inscription →
           </button>
         )}
       </div>
