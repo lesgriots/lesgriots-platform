@@ -5616,6 +5616,20 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   line-height: 1.1;
   letter-spacing: -0.01em;
 }
+/* Mobile : les filtres (tous · formations · événements) restent ALIGNÉS sur
+   une seule ligne — typo réduite, pas de retour à la ligne (défilement
+   horizontal discret en secours si un libellé s'ajoute). */
+@media (max-width: 700px) {
+  .lg__cat-filters {
+    font-size: 15px;
+    gap: 16px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .lg__cat-filters::-webkit-scrollbar { display: none; }
+}
 .lg__cat-filters__btn {
   background: none;
   border: 0;
