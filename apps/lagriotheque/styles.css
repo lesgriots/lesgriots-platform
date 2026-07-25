@@ -3666,7 +3666,17 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__ovw__block--media .lg__ovw__media { margin-top: 0; }
 @media (max-width: 900px) {
   .lg__ovw__block--media { display: block; }
-  .lg__ovw__block--media .lg__ovw__media { margin-top: 20px; }
+  .lg__ovw__block--media .lg__ovw__media {
+    margin-top: 20px;
+    /* Mobile aussi : jamais de vertical, on garde le 16/9. */
+    aspect-ratio: 16 / 9;
+  }
+  .lg__ovw__block--media .lg__ovw__media img,
+  .lg__ovw__block--media .lg__ovw__media video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 .lg__ovw__head {
   font-family: var(--font-sans);
@@ -3695,12 +3705,17 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   margin: 22px 0 0;
   background: var(--ink);
   overflow: hidden;
+  /* Toujours en paysage, sur tous les écrans. */
+  aspect-ratio: 16 / 9;
 }
+.lg__ovw__media img,
+.lg__ovw__media video { object-fit: cover; }
 .lg__ovw__media img,
 .lg__ovw__media video {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
 }
 /* En deux colonnes : le média reste TOUJOURS en paysage (jamais vertical).
    Il se recadre pour remplir ce cadre, sans jamais se déformer. */
