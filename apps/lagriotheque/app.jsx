@@ -1405,10 +1405,6 @@ function ProgramPage({ item, kind }) {
   // Ouvre la modale d'inscription (capture lead → /api/leads → email/Qualiopi).
   const [showInscription, setShowInscription] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
-  // Escamote la carte condensée fixe quand la carte COMPLÈTE (bas de page
-  // mobile) est visible à l'écran — évite le doublon de CTA.
-  const bottomCardRef = useRef(null);
-  const [barHidden, setBarHidden] = useState(false);
   const [cpfOpen, setCpfOpen] = useState(false);
   const tabContentRef = useRef(null);
 
@@ -1435,17 +1431,6 @@ function ProgramPage({ item, kind }) {
       btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
     }
   }, [activeTab]);
-
-  useEffect(() => {
-    const el = bottomCardRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const obs = new IntersectionObserver(
-      ([entry]) => setBarHidden(entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [item && item.id]);
 
   useEffect(() => {
     const el = headerRef.current;
@@ -1799,8 +1784,6 @@ function ProgramPage({ item, kind }) {
           →
         </button>
       </div>
-
-
 
       {/* Layout 2 colonnes style SENZA / Clearance Kit : contenu de l'onglet
           à gauche, sidebar CTA sticky à droite. Sur mobile : 1 col + sidebar
@@ -2212,45 +2195,6 @@ function ProgramPage({ item, kind }) {
       </aside>
       </div>{/* /.lg__formation__layout */}
 
-      {/* Barre de réservation PERMANENTE en bas de l'écran (mobile) : prix +
-          CTA toujours visibles pendant la lecture de la fiche. La carte
-          complète reste dans la page ; la barre n'apparaît qu'en <=900px. */}
-      <div className={"lg__formation__bar" + (barHidden ? " is-hidden" : "")} role="complementary" aria-label="Réservation">
-        <p className="lg__formation__bar__title">{f.title}</p>
-        <div className="lg__formation__bar__row">
-          <div className="lg__formation__bar__head">
-            <strong className="lg__formation__bar__price">{f.price || "—"}</strong>
-            <span className="lg__formation__bar__hint">
-              {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
-            </span>
-          </div>
-          {kind !== "workshop" && (f.cpf || f.opco || f.faf || f.rs) && (
-            <div className="lg__formation__bar__badges">
-              {f.cpf && <span>CPF</span>}
-              {f.opco && <span>OPCO</span>}
-              {f.faf && <span>FAF</span>}
-              {f.rs && <span>RS {f.rs}</span>}
-            </div>
-          )}
-        </div>
-        {kind === "workshop" ? (
-          <a
-            className="lg__formation__bar__btn"
-            href={ctaHref(item, nextSession)}
-            {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          >
-            {ctaLabel(item)}
-          </a>
-        ) : (
-          <button
-            type="button"
-            className="lg__formation__bar__btn"
-            onClick={() => setShowInscription(true)}
-          >
-            Demander une inscription →
-          </button>
-        )}
-      </div>
 
       {downloadOpen && (
         <DownloadModal
@@ -2279,7 +2223,7 @@ function ProgramPage({ item, kind }) {
       </section>
 
       {/* Carte complète en bas de page (mobile uniquement). */}
-      <aside className="lg__formation__side lg__formation__side--mobile" aria-label="Réservation" ref={bottomCardRef}>
+      <aside className="lg__formation__side lg__formation__side--mobile" aria-label="Réservation">
         {reservationCard}
       </aside>
 
