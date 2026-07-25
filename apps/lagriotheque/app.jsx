@@ -1601,12 +1601,14 @@ function ProgramPage({ item, kind }) {
   // Carte de réservation COMPLÈTE — rendue deux fois : colonne de droite
   // (desktop) et bas de page après les Avis (mobile). Le CSS n'affiche
   // que la bonne version selon le breakpoint.
-  const reservationCard = (
+  // compact=true (panneau mobile) : informations NÉCESSAIRES seulement —
+  // prix, badges, prochaine session, boutons d'inscription.
+  const renderReservationCard = (compact) => (
     <React.Fragment>
         <div className="lg__cta-mini">
           {/* Nom de la formation tout en haut de la carte — repère pour le
               lecteur qui scrolle dans le contenu. */}
-          <p className="lg__cta-mini__title">{f.title}</p>
+          {!compact && <p className="lg__cta-mini__title">{f.title}</p>}
           <div className="lg__cta-mini__head">
             <strong className="lg__cta-mini__price">
               {f.price || "—"}
@@ -1615,7 +1617,7 @@ function ProgramPage({ item, kind }) {
               {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
             </span>
           </div>
-          {kind !== "workshop" && (f.cpf || f.rs) && (
+          {!compact && kind !== "workshop" && (f.cpf || f.rs) && (
             <p className="lg__cta-mini__cert">
               <span aria-hidden="true">✓</span> Formation certifiante
               {f.rs && <span className="lg__cta-mini__cert__code"> · RS {f.rs}</span>}
@@ -1629,9 +1631,11 @@ function ProgramPage({ item, kind }) {
               {f.rs && <span>RS {f.rs}</span>}
             </div>
           )}
-          <ul className="lg__cta-mini__meta">
-            {f.format && <li>{f.format}</li>}
-          </ul>
+          {!compact && (
+            <ul className="lg__cta-mini__meta">
+              {f.format && <li>{f.format}</li>}
+            </ul>
+          )}
           {upcoming.length > 0 && (
             <div className="lg__cta-mini__sessions">
               <p className="lg__cta-mini__sessions__label">
@@ -1658,7 +1662,7 @@ function ProgramPage({ item, kind }) {
               </ul>
             </div>
           )}
-          {f.duration && (
+          {!compact && f.duration && (
             <div className="lg__cta-mini__sessions">
               <p className="lg__cta-mini__sessions__label">Durée</p>
               <p className="lg__cta-mini__session__date">
@@ -1667,14 +1671,14 @@ function ProgramPage({ item, kind }) {
             </div>
           )}
           {/* Public visé : remonté dans la carte (repère immédiat « c'est pour moi »). */}
-          {(Array.isArray(f.audience_points) && f.audience_points.length) ? (
+          {!compact && (Array.isArray(f.audience_points) && f.audience_points.length) ? (
             <div className="lg__cta-mini__sessions lg__cta-mini__audience">
               <p className="lg__cta-mini__sessions__label">Pour qui</p>
               <ul className="lg__cta-mini__audience__list">
                 {f.audience_points.map((pt, i) => <li key={i}>{pt}</li>)}
               </ul>
             </div>
-          ) : f.audience ? (
+          ) : (!compact && f.audience) ? (
             <div className="lg__cta-mini__sessions lg__cta-mini__audience">
               <p className="lg__cta-mini__sessions__label">Pour qui</p>
               <p className="lg__cta-mini__audience__text">{f.audience}</p>
@@ -1708,20 +1712,24 @@ function ProgramPage({ item, kind }) {
               S'inscrire via Mon Compte Formation
             </button>
           )}
-          <button
-            type="button"
-            className="lg__cta-mini__btn lg__cta-mini__btn--ghost"
-            onClick={() => setDownloadOpen(true)}
-          >
-            ↓ Télécharger le programme
-          </button>
-          <a
-            className="lg__cta-mini__sub"
-            href="mailto:formations@lesgriots.com?subject=Devis%20OPCO%20%2F%20FAF"
-          >
-            Étudier un financement
-          </a>
-          {kind !== "workshop" && f.cpf && (
+          {!compact && (
+            <button
+              type="button"
+              className="lg__cta-mini__btn lg__cta-mini__btn--ghost"
+              onClick={() => setDownloadOpen(true)}
+            >
+              ↓ Télécharger le programme
+            </button>
+          )}
+          {!compact && (
+            <a
+              className="lg__cta-mini__sub"
+              href="mailto:formations@lesgriots.com?subject=Devis%20OPCO%20%2F%20FAF"
+            >
+              Étudier un financement
+            </a>
+          )}
+          {!compact && kind !== "workshop" && f.cpf && (
             <div className="lg__cta-mini__cpfbox">
               <img
                 className="lg__cta-mini__cpfbox__logo"
@@ -2208,7 +2216,7 @@ function ProgramPage({ item, kind }) {
       </div>{/* /.lg__formation__main */}
 
       <aside className="lg__formation__side lg__formation__side--desktop" aria-label="Réservation">
-        {reservationCard}
+        {renderReservationCard(false)}
       </aside>
       </div>{/* /.lg__formation__layout */}
 
@@ -2244,7 +2252,7 @@ function ProgramPage({ item, kind }) {
           dans la moitié haute. */}
       <aside className="lg__formation__side lg__formation__side--mobile" aria-label="Réservation">
         <div className="lg__sheet__body">
-          {reservationCard}
+          {renderReservationCard(true)}
         </div>
       </aside>
 
