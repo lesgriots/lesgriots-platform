@@ -3661,8 +3661,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: clamp(24px, 3.4vw, 60px);
-  /* stretch : le média peut ainsi épouser la hauteur du texte. */
-  align-items: stretch;
+  align-items: start;
 }
 .lg__ovw__block--media .lg__ovw__media { margin-top: 0; }
 @media (max-width: 900px) {
@@ -3703,20 +3702,17 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   width: 100%;
   height: auto;
 }
-/* En deux colonnes : le média épouse la hauteur du bloc (recadré, jamais déformé). */
+/* En deux colonnes : le média reste TOUJOURS en paysage (jamais vertical).
+   Il se recadre pour remplir ce cadre, sans jamais se déformer. */
 @media (min-width: 901px) {
-  .lg__ovw__block--media { position: relative; }
   .lg__ovw__block--media .lg__ovw__media {
-    height: 100%;
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
+    align-self: start;
+    aspect-ratio: 4 / 3;
   }
   .lg__ovw__block--media .lg__ovw__media img,
   .lg__ovw__block--media .lg__ovw__media video {
-    flex: 1 1 auto;
+    width: 100%;
     height: 100%;
-    min-height: 0;
     object-fit: cover;
   }
 }
