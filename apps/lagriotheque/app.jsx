@@ -4726,6 +4726,22 @@ function Approche() {
         ))}
       </p>
 
+      {/* À propos : deux textes longs éditables en BO (Griothèque + la maison). */}
+      {(text("approche.about_griotheque", "") || text("approche.about_lesgriots", "")) && (
+        <div className="lg__approche__about">
+          {text("approche.about_griotheque", "") && (
+            <p className="lg__formation__prose lg__approche__about__text">
+              {renderManifestoBrand(text("approche.about_griotheque", ""))}
+            </p>
+          )}
+          {text("approche.about_lesgriots", "") && (
+            <p className="lg__formation__prose lg__approche__about__text">
+              {renderManifestoBrand(text("approche.about_lesgriots", ""))}
+            </p>
+          )}
+        </div>
+      )}
+
       <ApprocheAccordion />
 
       <Partners />

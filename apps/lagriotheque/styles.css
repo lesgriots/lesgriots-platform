@@ -4647,6 +4647,18 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 .lg__ovw__text,
 .lg__trainercard__bio { white-space: pre-line; }
+/* À propos (page Approche) : deux textes longs, plus grands que la prose. */
+.lg__approche__about {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 3vh, 36px);
+  margin: clamp(28px, 5vh, 56px) 0;
+}
+.lg__approche__about__text {
+  font-size: clamp(17px, 1.4vw, 21px) !important;
+  line-height: 1.55 !important;
+  max-width: 72ch;
+}
 .lg__formation__sessions {
   list-style: none;
   display: flex;

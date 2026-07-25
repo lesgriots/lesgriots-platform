@@ -43,6 +43,10 @@ export const SITE_CONTENT_DEFAULTS = {
     pilier3_title: "Formations pratiques",
     pilier3_body:
       "Pédagogie par le faire — tes propres récits comme matière. Tu repars avec un livrable concret, pas un certificat. Plateforme de marque, plan éditorial, vidéo finie, calendrier — utilisable dès le lundi matin.",
+    about_griotheque:
+      "LA GRIOTHÈQUE est l'école de LES GRIOTS : un lieu de transmission dédié aux créatifs et aux entrepreneurs de la nouvelle génération. On y apprend à bâtir son récit, à construire sa marque et à en vivre — avec des méthodes éprouvées sur le terrain, jamais avec de la théorie hors-sol.",
+    about_lesgriots:
+      "LES GRIOTS est une plateforme d'ingénierie narrative et une infrastructure culturelle afro-diasporique. La maison raconte ses propres histoires, structure et amplifie celles des artistes et des marques, et transmet à une nouvelle génération de créatifs de quoi bâtir de nouveaux imaginaires.",
   },
 
   catalogue: {
@@ -245,6 +249,8 @@ export const SITE_CONTENT_SECTIONS = [
       { key: "pilier2_body", label: "Pilier 2 — texte", type: "textarea", rows: 4 },
       { key: "pilier3_title", label: "Pilier 3 — titre", type: "text" },
       { key: "pilier3_body", label: "Pilier 3 — texte", type: "textarea", rows: 4 },
+      { key: "about_griotheque", label: "À propos — LA GRIOTHÈQUE (texte long)", type: "textarea", rows: 8 },
+      { key: "about_lesgriots", label: "À propos — LES GRIOTS, la maison (texte long)", type: "textarea", rows: 8 },
     ],
   },
   {
