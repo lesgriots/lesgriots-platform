@@ -3707,7 +3707,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 @media (min-width: 901px) {
   .lg__ovw__block--media .lg__ovw__media {
     align-self: start;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 9;
   }
   .lg__ovw__block--media .lg__ovw__media img,
   .lg__ovw__block--media .lg__ovw__media video {
