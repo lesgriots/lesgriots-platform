@@ -1405,9 +1405,6 @@ function ProgramPage({ item, kind }) {
   // Ouvre la modale d'inscription (capture lead → /api/leads → email/Qualiopi).
   const [showInscription, setShowInscription] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
-  // Bottom sheet mobile : la carte complète reste ancrée en bas de l'écran,
-  // repliée sur sa poignée (prix + Réserver) ; un tap la déplie.
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [cpfOpen, setCpfOpen] = useState(false);
   const tabContentRef = useRef(null);
 
@@ -1434,8 +1431,6 @@ function ProgramPage({ item, kind }) {
       btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
     }
   }, [activeTab]);
-
-  useEffect(() => { setSheetOpen(false); }, [item && item.id]);
 
   useEffect(() => {
     const el = headerRef.current;
@@ -2227,25 +2222,10 @@ function ProgramPage({ item, kind }) {
         </p>
       </section>
 
-      {/* Carte complète ANCRÉE en bas de l'écran (mobile uniquement) :
-          repliée = poignée prix + Réserver ; dépliée = toute la carte,
-          scrollable, par-dessus la page. */}
-      {sheetOpen && (
-        <div className="lg__sheet__backdrop" onClick={() => setSheetOpen(false)} aria-hidden="true" />
-      )}
-      <aside
-        className={"lg__formation__side lg__formation__side--mobile" + (sheetOpen ? " is-open" : "")}
-        aria-label="Réservation"
-      >
-        <button
-          type="button"
-          className="lg__sheet__bar"
-          onClick={() => setSheetOpen((o) => !o)}
-          aria-expanded={sheetOpen}
-        >
-          <span className="lg__sheet__bar__price">{f.price || "Réservation"}</span>
-          <span className="lg__sheet__bar__action">{sheetOpen ? "Fermer ↓" : "Réserver ↑"}</span>
-        </button>
+      {/* ÉCRAN SCINDÉ (mobile) : la carte complète occupe en permanence la
+          moitié basse de l'écran, scrollable à l'intérieur ; la fiche se lit
+          dans la moitié haute. */}
+      <aside className="lg__formation__side lg__formation__side--mobile" aria-label="Réservation">
         <div className="lg__sheet__body">
           {reservationCard}
         </div>
