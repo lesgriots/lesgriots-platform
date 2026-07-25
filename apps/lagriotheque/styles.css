@@ -3400,6 +3400,10 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   }
   /* Flèches visibles, à gauche et à droite */
   .lg__tabs__nav { display: inline-flex; align-items: center; }
+  /* Flèches calées sur la gouttière du site : on retire leur padding externe
+     pour que les glyphes ← → s'alignent sur la marge du contenu. */
+  .lg__tabs__nav--prev { padding-left: 0; }
+  .lg__tabs__nav--next { padding-right: 0; }
   /* Scroll interne centré sur le bouton actif (scrollIntoView au changement) */
   .lg__tabs__scroll {
     justify-content: flex-start;
