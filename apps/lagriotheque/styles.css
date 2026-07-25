@@ -3407,7 +3407,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   /* Scroll interne centré sur le bouton actif (scrollIntoView au changement) */
   .lg__tabs__scroll {
     justify-content: flex-start;
-    gap: 10px;
+    gap: 26px;
     /* Fondu sur les bords pour indiquer qu'on peut scroller les onglets. */
     -webkit-mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 calc(100% - 26px), transparent 100%);
     mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 calc(100% - 26px), transparent 100%);
@@ -3420,7 +3420,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   }
   .lg__tabs__scroll .lg__tabs__btn { scroll-snap-align: start; }
   .lg__tabs__btn { font-size: 15px; }
-  .lg__tabs__sep { font-size: 15px; }
+  /* Pas de point entre les onglets sur mobile (réf. UAL) : la respiration
+     vient de l'espacement seul. */
+  .lg__tabs__sep { display: none; }
   /* CTA masqué sur mobile : on garde la barre d'onglets seule (le bouton
      Réserver/Payer reste accessible dans la page et la sidebar). */
   .lg__tabs__cta { display: none; }
