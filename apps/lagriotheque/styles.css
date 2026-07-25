@@ -3628,6 +3628,19 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 /* Blocs éditoriaux de la description : accroche + paragraphes (façon page produit). */
 .lg__ovw { display: flex; flex-direction: column; gap: clamp(28px, 3.4vw, 48px); }
 .lg__ovw__block { max-width: 82ch; }
+/* Bloc AVEC média : deux colonnes, le média occupe l'espace à droite du texte. */
+.lg__ovw__block--media {
+  max-width: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(24px, 3.4vw, 60px);
+  align-items: start;
+}
+.lg__ovw__block--media .lg__ovw__media { margin-top: 0; }
+@media (max-width: 900px) {
+  .lg__ovw__block--media { display: block; }
+  .lg__ovw__block--media .lg__ovw__media { margin-top: 20px; }
+}
 .lg__ovw__head {
   font-family: var(--font-sans);
   font-weight: 600;
@@ -3645,6 +3658,26 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   color: var(--ink-2, var(--ink));
 }
 .lg__ovw__text:last-child { margin-bottom: 0; }
+/* Média du bloc : image ou vidéo, pleine largeur du bloc. */
+.lg__ovw__media {
+  margin: 22px 0 0;
+  background: var(--ink);
+  overflow: hidden;
+}
+.lg__ovw__media img,
+.lg__ovw__media video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.lg__ovw__cap {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 8px 0 0;
+  opacity: .7;
+  background: none;
+}
 /* Le paragraphe factuel (description) arrive après, en plus discret. */
 .lg__ovw__meta {
   padding-top: 22px;

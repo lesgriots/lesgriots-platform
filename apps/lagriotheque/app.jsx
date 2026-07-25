@@ -1660,15 +1660,39 @@ function ProgramPage({ item, kind }) {
           body: ((Array.isArray(f.overview) && f.overview.length) || f.description) ? (
             <div className="lg__ovw">
               {(Array.isArray(f.overview) ? f.overview : []).map((b, i) => {
+                // Un bloc = titre + texte + média (image ou vidéo), tous optionnels.
+                // Formats acceptés : ["titre", "texte", "media.jpg"]
+                //                 ou { title, text, media: "…" | { src, poster, caption } }
                 const head = Array.isArray(b) ? b[0] : b?.title;
                 const text = Array.isArray(b) ? b[1] : b?.text;
-                if (!head && !text) return null;
+                const rawMedia = Array.isArray(b) ? b[2] : b?.media;
+                const mSrc = typeof rawMedia === "string" ? rawMedia : (rawMedia?.src || "");
+                const mPoster = typeof rawMedia === "object" ? (rawMedia?.poster || "") : "";
+                const mCaption = typeof rawMedia === "object" ? (rawMedia?.caption || "") : "";
+                const isVideo = /\.(mp4|webm|mov|m4v)$/i.test(mSrc);
+                if (!head && !text && !mSrc) return null;
                 return (
-                  <div className="lg__ovw__block" key={i}>
-                    {head && <h3 className="lg__ovw__head">{head}</h3>}
-                    {text && String(text).split("\n\n").map((para, j) => (
-                      <p className="lg__ovw__text" key={j}>{para}</p>
-                    ))}
+                  <div className={"lg__ovw__block" + (mSrc ? " lg__ovw__block--media" : "")} key={i}>
+                    <div className="lg__ovw__txt">
+                      {head && <h3 className="lg__ovw__head">{head}</h3>}
+                      {text && String(text).split("\n\n").map((para, j) => (
+                        <p className="lg__ovw__text" key={j}>{para}</p>
+                      ))}
+                    </div>
+                    {mSrc && (
+                      <figure className="lg__ovw__media">
+                        {isVideo ? (
+                          <video
+                            src={mSrc}
+                            poster={mPoster || undefined}
+                            muted loop playsInline autoPlay preload="metadata"
+                          />
+                        ) : (
+                          <img src={mSrc} alt={mCaption || head || ""} loading="lazy" />
+                        )}
+                        {mCaption && <figcaption className="lg__ovw__cap">{mCaption}</figcaption>}
+                      </figure>
+                    )}
                   </div>
                 );
               })}

@@ -328,7 +328,7 @@ export default function FormationForm({
 
       {/* ========== OVERVIEW (formations uniquement) ========== */}
       {!isWorkshop && (
-        <Section title="Overview (intro narrative — 3 blocs titre + paragraphe)">
+        <Section title="Description (blocs : titre + texte + média)">
           {(data.overview || []).map((block, i) => (
             <div key={i} style={{ marginBottom: 20, borderLeft: "2px solid var(--rule)", paddingLeft: 14 }}>
               <Field label={`Bloc ${i + 1} — titre`}>
@@ -336,7 +336,7 @@ export default function FormationForm({
                   value={block[0] || ""}
                   onChange={(e) => {
                     const next = [...data.overview];
-                    next[i] = [e.target.value, next[i][1] || ""];
+                    next[i] = [e.target.value, next[i][1] || "", next[i][2] || ""];
                     set("overview", next);
                   }}
                 />
@@ -347,13 +347,43 @@ export default function FormationForm({
                   rows={4}
                   onChange={(e) => {
                     const next = [...data.overview];
-                    next[i] = [next[i][0] || "", e.target.value];
+                    next[i] = [next[i][0] || "", e.target.value, next[i][2] || ""];
                     set("overview", next);
                   }}
                 />
               </Field>
+              <Field label={`Bloc ${i + 1} — média (image ou vidéo, optionnel)`}>
+                <input
+                  value={block[2] || ""}
+                  placeholder="ex. img/f-rs7200.jpg ou uploads/session.mp4"
+                  onChange={(e) => {
+                    const next = [...data.overview];
+                    next[i] = [next[i][0] || "", next[i][1] || "", e.target.value];
+                    set("overview", next);
+                  }}
+                />
+              </Field>
+              {block[2] && (
+                <div style={{ marginTop: 8 }}>
+                  {/\.(mp4|webm|mov|m4v)$/i.test(block[2]) ? (
+                    <video src={block[2]} muted playsInline
+                      style={{ width: 200, aspectRatio: "16/9", objectFit: "cover", background: "#000" }} />
+                  ) : (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={block[2]} alt=""
+                      style={{ width: 200, aspectRatio: "16/9", objectFit: "cover", background: "#000" }} />
+                  )}
+                </div>
+              )}
             </div>
           ))}
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => set("overview", [...(data.overview || []), ["", "", ""]])}
+          >
+            + ajouter un bloc
+          </button>
         </Section>
       )}
 
