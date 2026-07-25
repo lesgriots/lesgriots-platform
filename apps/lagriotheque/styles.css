@@ -5364,6 +5364,19 @@ body.is-scrolled .lg__pagehero__brand {
      titre + l'intro en bas du bandeau, sans le décalage 33vh prévu pour le
      plein écran (qui poussait le texte hors du média). */
   .lg__pagehero__overlay { padding: 16px 18px; }
+  /* Fiche formation/workshop : le bandeau 3/2 était trop court — le bloc
+     titre + accroche débordait vers le haut et percutait le menu. On rend au
+     hero une vraie hauteur (~3/4 d'écran) et on réserve la zone du header
+     transparent (85px) en haut de l'overlay pour interdire la collision. */
+  .lg__formation .lg__pagehero {
+    aspect-ratio: auto;
+    height: 76vh;
+    height: 76svh;
+    max-height: none;
+  }
+  .lg__formation .lg__pagehero__overlay {
+    padding-top: 105px;
+  }
 }
 @media (max-width: 600px) {
   /* Mobile : le média des pages ne prend PLUS tout l'écran au repos — il garde
