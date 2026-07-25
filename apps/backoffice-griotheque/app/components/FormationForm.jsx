@@ -320,6 +320,14 @@ export default function FormationForm({
         <Field label="Prérequis">
           <textarea value={data.prerequisites || ""} onChange={(e) => set("prerequisites", e.target.value)} rows={3} />
         </Field>
+        <Field label="Ce qui est fourni (une ligne par élément)">
+          <textarea
+            value={(data.included || []).join("\n")}
+            rows={4}
+            placeholder={"Le workbook de la formation\nLes templates de plateforme de marque"}
+            onChange={(e) => set("included", e.target.value.split("\n").map((x) => x.trim()).filter(Boolean))}
+          />
+        </Field>
         <ListEditor
           label="Objectifs pédagogiques"
           items={data.objectives || []}

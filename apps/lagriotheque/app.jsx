@@ -696,7 +696,7 @@ function FormationRow({ f, onHover }) {
       onMouseLeave={handleLeave}
     >
       <p className="lg__row__label">
-        FORMATION · 2026
+        FORMATION
         {!f.available && <span className="lg__row__soon"> · PROCHAINEMENT</span>}
       </p>
       <h3 className="lg__row__title" ref={titleRef}>
@@ -1747,6 +1747,15 @@ function ProgramPage({ item, kind }) {
           id: "public",
           title: "Public",
           body: f.audience ? <p className="lg__formation__prose">{f.audience}</p> : null,
+        },
+        {
+          id: "fourni",
+          title: "Ce qui est fourni",
+          body: (Array.isArray(f.included) && f.included.length) ? (
+            <ul className="lg__formation__bullets">
+              {f.included.map((s, i) => <li key={i}>{s}</li>)}
+            </ul>
+          ) : null,
         },
         {
           id: "prerequis",
@@ -4743,14 +4752,6 @@ function ApprocheAccordion() {
           onToggle={() => setOpen((cur) => (cur === p.id ? null : p.id))}
         >
           <p className="lg__formation__prose">{p.intro}</p>
-          <p className="lg__formation__prose lg__approche__lorem">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-            do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco
-            laboris nisi ut aliquip ex ea commodo consequat. Duis aute
-            irure dolor in reprehenderit in voluptate velit esse cillum
-            dolore eu fugiat nulla pariatur.
-          </p>
         </SectionRow>
       ))}
     </div>
@@ -4761,7 +4762,7 @@ function TrainerRow({ t }) {
   const nameRef = useMarqueeOverflow([t.name]);
   return (
     <li className="lg__trainer">
-      <p className="lg__trainer__label">FORMATEUR · 2026</p>
+      <p className="lg__trainer__label">FORMATEUR</p>
       <h3 className="lg__trainer__name" ref={nameRef}>
         <span className="lg__marquee__inner">{t.name}</span>
       </h3>
@@ -4773,7 +4774,7 @@ function Trainers() {
   return (
     <section className="lg__trainers" id="intervenants">
       <header className="lg__trainers__head">
-        <p className="lg__trainers__kicker">INTERVENANTS · 2026 SNEAK PREVIEW</p>
+        <p className="lg__trainers__kicker">INTERVENANTS</p>
         <p className="lg__trainers__intro">
           Tous nos formateurs exercent activement leur pratique. Pas de théorie
           hors-sol — vous apprenez avec des fondateurs, dirigeants, créatifs en poste.

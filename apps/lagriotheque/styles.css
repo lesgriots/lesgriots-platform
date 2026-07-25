@@ -1174,8 +1174,8 @@ button {
   gap: 32px;
   align-items: start;
   margin-top: 8px;
-  /* Pousse tout le layout (et donc la sidebar) vers la gauche. */
-  padding-right: 180px;
+  /* Gouttière symétrique : le layout s'aligne sur les 24px de la section
+     (l'ancien padding-right: 180px désaxait la marge droite). */
 }
 .lg__formation__main { min-width: 0; }
 /* Cible de scroll des onglets : on s'arrête pile sous la pile sticky
@@ -4642,7 +4642,11 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   color: var(--ink);
   margin: 0;
   max-width: 80ch;
+  /* Les sauts de ligne saisis dans le back-office sont respectés. */
+  white-space: pre-line;
 }
+.lg__ovw__text,
+.lg__trainercard__bio { white-space: pre-line; }
 .lg__formation__sessions {
   list-style: none;
   display: flex;

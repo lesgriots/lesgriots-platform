@@ -24,6 +24,10 @@ export const SITE_CONTENT_DEFAULTS = {
     latest_tab_workshops: "Workshops",
     // Vidéo (ou image) de fond du hero. Vide = img/hero.mp4 hardcodé du site.
     hero_video: "",
+    // Section « nouveaux imaginaires » (bas de la page d'accueil).
+    vision_title: "nouveaux récits,\nnouveaux visages",
+    vision_text: "La vision de La Griothèque est de permettre l'émergence de nouveaux récits.",
+    vision_video: "",
   },
 
   approche: {
@@ -223,6 +227,9 @@ export const SITE_CONTENT_SECTIONS = [
       { key: "latest_tab_formations", label: "Onglet « Nos formations »", type: "text" },
       { key: "latest_tab_workshops", label: "Onglet « Workshops »", type: "text" },
       { key: "hero_video", label: "Vidéo hero (fond plein écran — vide = hero.mp4 par défaut)", type: "upload" },
+      { key: "vision_title", label: "Section « nouveaux imaginaires » — titre", type: "textarea", rows: 2 },
+      { key: "vision_text", label: "Section « nouveaux imaginaires » — texte", type: "textarea", rows: 5 },
+      { key: "vision_video", label: "Section « nouveaux imaginaires » — vidéo/image de fond", type: "upload" },
     ],
   },
   {
