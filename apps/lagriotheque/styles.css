@@ -7291,10 +7291,84 @@ a.lg__partners__logo:hover {
   text-align: center;
 }
 
-/* Carte de réservation complète : colonne droite sur desktop, répétée en BAS
-   de page (après les Avis) sur mobile — une seule version visible à la fois. */
+/* Carte de réservation complète : colonne droite sur desktop ; sur mobile,
+   BOTTOM SHEET ancré en bas de l'écran en permanence — replié sur une
+   poignée (prix + Réserver), déplié = toute la carte scrollable. */
 .lg__formation__side--mobile { display: none; }
+.lg__sheet__backdrop { display: none; }
 @media (max-width: 900px) {
   .lg__formation__side--desktop { display: none; }
-  .lg__formation__side--mobile { display: block; }
+  .lg__formation__side--mobile {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 48; /* au-dessus des onglets sticky (41), sous le header (55) */
+    margin: 0;
+    background: var(--paper);
+    border-top: 1px solid var(--ink);
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.12);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    transform: translateY(calc(100% - 56px - env(safe-area-inset-bottom, 0px)));
+    transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .lg__formation__side--mobile.is-open { transform: translateY(0); }
+  .lg__sheet__bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    height: 56px;
+    padding: 6px 24px 0;
+    font-family: var(--font-sans);
+    text-align: left;
+  }
+  /* Poignée visuelle centrée. */
+  .lg__sheet__bar::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 3px;
+    background: var(--ink);
+    opacity: 0.35;
+  }
+  .lg__sheet__bar__price {
+    font-weight: 600;
+    font-size: 19px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .lg__sheet__bar__action {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    white-space: nowrap;
+  }
+  /* Corps du sheet : la carte complète, scrollable, plafonnée. */
+  .lg__sheet__body {
+    max-height: calc(82svh - 56px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  .lg__sheet__body .lg__cta-mini { box-shadow: none; }
+  .lg__sheet__backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 47;
+    background: rgba(0, 0, 0, 0.35);
+  }
+  /* La page réserve la hauteur de la poignée. */
+  .lg__formation { padding-bottom: 92px; }
+  body.is-fiche .lg__footer { padding-bottom: 100px; }
 }
