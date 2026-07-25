@@ -7304,7 +7304,8 @@ a.lg__partners__logo:hover {
     left: 0;
     right: 0;
     bottom: 0;
-    height: 38svh;
+    /* SANS défilement : le panneau prend la hauteur de la carte entière. */
+    height: auto;
     z-index: 48; /* au-dessus des onglets sticky (41), sous le header (55) */
     margin: 0;
     background: var(--paper);
@@ -7312,9 +7313,7 @@ a.lg__partners__logo:hover {
     box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.12);
   }
   .lg__sheet__body {
-    height: 100%;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
     padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
   }
   .lg__sheet__body .lg__cta-mini { box-shadow: none; }
@@ -7345,6 +7344,6 @@ a.lg__partners__logo:hover {
   .lg__sheet__body .lg__cta-mini__cpfbox__text { font-size: 10px; }
   /* La page réserve la hauteur du panneau pour que tout le contenu (avis,
      CTA final, footer) reste lisible au-dessus. */
-  .lg__formation { padding-bottom: calc(38svh + 24px); }
-  body.is-fiche .lg__footer { padding-bottom: calc(38svh + 24px); }
+  .lg__formation { padding-bottom: calc(var(--lg-panel-h, 60svh) + 24px); }
+  body.is-fiche .lg__footer { padding-bottom: calc(var(--lg-panel-h, 60svh) + 24px); }
 }

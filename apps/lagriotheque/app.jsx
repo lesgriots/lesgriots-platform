@@ -1432,6 +1432,23 @@ function ProgramPage({ item, kind }) {
     }
   }, [activeTab]);
 
+  // Panneau mobile SANS défilement : on mesure sa hauteur réelle et on
+  // l'expose en variable CSS pour que la page réserve exactement la place.
+  useEffect(() => {
+    const el = document.querySelector(".lg__formation__side--mobile");
+    if (!el) return;
+    const set = () => document.documentElement.style.setProperty("--lg-panel-h", el.offsetHeight + "px");
+    set();
+    window.addEventListener("resize", set);
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(set) : null;
+    if (ro) ro.observe(el);
+    return () => {
+      window.removeEventListener("resize", set);
+      if (ro) ro.disconnect();
+      document.documentElement.style.removeProperty("--lg-panel-h");
+    };
+  }, [item && item.id]);
+
   useEffect(() => {
     const el = headerRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
