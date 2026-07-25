@@ -3792,6 +3792,12 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   .lg__tabsec__body .lg__formation__prose { font-size: 15px; line-height: 1.5; }
   .lg__tabsec__body ol { grid-template-columns: 1fr; gap: 8px; }
   .lg__tabsec__body li { font-size: 14px; }
+  /* Accordéons (Objectifs pédagogiques, Public, Pré-requis…) resserrés :
+     le padding générique des sections (24/20) ne s'applique pas aux
+     déroulants — seul le header garde un padding vertical compact. */
+  .lg__tabsec--sub { padding: 0; }
+  .lg__tabsec__head { padding: 12px 0; }
+  .lg__tabsec--coll .lg__tabsec__body { padding: 0 0 16px; }
 }
 
 /* Accordéon : titre cliquable + corps déplié au clic */
