@@ -3643,7 +3643,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 .lg__ovw__head {
   font-family: var(--font-sans);
-  font-weight: 600;
+  /* Jamais plus gras que le titre de section (.lg__tabsec__title, 500),
+     sinon la hiérarchie s'inverse. Geist n'a que 400 et 500. */
+  font-weight: 500;
   font-size: clamp(20px, 2.1vw, 30px);
   line-height: 1.18;
   letter-spacing: -0.02em;
