@@ -3602,13 +3602,28 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   line-height: 1.55;
   margin: 0;
 }
-/* Public visé dans la carte latérale : texte court, lisible, discret. */
+/* Public visé dans la carte latérale : texte court, lisible, discret.
+   Limité à 3 lignes : la carte doit rester plus petite que l'écran, sinon
+   le comportement collant (sticky) casse et elle défile avec la page. */
 .lg__cta-mini__audience__text {
   font-family: var(--font-sans);
   font-size: 13px;
   line-height: 1.45;
   margin: 4px 0 0;
   opacity: .85;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* Filet de sécurité : la carte ne dépasse jamais la hauteur disponible. */
+.lg__formation__side {
+  max-height: calc(100vh - (121px + var(--lg-title-h, 80px) + 88px));
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+@media (max-width: 900px) {
+  .lg__formation__side { max-height: none; overflow-y: visible; }
 }
 /* Blocs éditoriaux de la description : accroche + paragraphes (façon page produit). */
 .lg__ovw { display: flex; flex-direction: column; gap: clamp(28px, 3.4vw, 48px); }
