@@ -3652,6 +3652,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 .lg__ovw__text {
   font-family: var(--font-sans);
+  /* Le parent .lg__tabsec impose 500 (Medium) : on revient au Regular.
+     Geist n'a que 400 et 500, un 300 n'aurait aucun effet. */
+  font-weight: 400;
   font-size: clamp(18px, 1.5vw, 22px);
   line-height: 1.55;
   margin: 0 0 16px;
