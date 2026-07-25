@@ -309,6 +309,14 @@ export default function FormationForm({
         <Field label="Public visé">
           <textarea value={data.audience || ""} onChange={(e) => set("audience", e.target.value)} rows={3} />
         </Field>
+        <Field label="Pour qui — puces affichées dans la carte (une par ligne)">
+          <textarea
+            value={(data.audience_points || []).join("\n")}
+            rows={4}
+            placeholder={"Tu diriges une TPE ou tu es indépendant\nTu publies déjà, sans résultat"}
+            onChange={(e) => set("audience_points", e.target.value.split("\n").map((x) => x.trim()).filter(Boolean))}
+          />
+        </Field>
         <Field label="Prérequis">
           <textarea value={data.prerequisites || ""} onChange={(e) => set("prerequisites", e.target.value)} rows={3} />
         </Field>

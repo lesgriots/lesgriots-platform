@@ -2101,12 +2101,19 @@ function ProgramPage({ item, kind }) {
             </div>
           )}
           {/* Public visé : remonté dans la carte (repère immédiat « c'est pour moi »). */}
-          {f.audience && (
+          {(Array.isArray(f.audience_points) && f.audience_points.length) ? (
+            <div className="lg__cta-mini__sessions lg__cta-mini__audience">
+              <p className="lg__cta-mini__sessions__label">Pour qui</p>
+              <ul className="lg__cta-mini__audience__list">
+                {f.audience_points.map((pt, i) => <li key={i}>{pt}</li>)}
+              </ul>
+            </div>
+          ) : f.audience ? (
             <div className="lg__cta-mini__sessions lg__cta-mini__audience">
               <p className="lg__cta-mini__sessions__label">Pour qui</p>
               <p className="lg__cta-mini__audience__text">{f.audience}</p>
             </div>
-          )}
+          ) : null}
           {kind === "workshop" ? (
             /* Workshop = achat direct (Stripe) → « Réserver / Payer ». */
             <a

@@ -3605,6 +3605,33 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 /* Public visé dans la carte latérale : texte court, lisible, discret.
    Limité à 3 lignes : la carte doit rester plus petite que l'écran, sinon
    le comportement collant (sticky) casse et elle défile avec la page. */
+/* « Pour qui » en puces : repère rapide « c'est pour moi ». */
+.lg__cta-mini__audience__list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.lg__cta-mini__audience__list li {
+  position: relative;
+  padding-left: 14px;
+  margin-bottom: 6px;
+  opacity: .9;
+}
+.lg__cta-mini__audience__list li:last-child { margin-bottom: 0; }
+.lg__cta-mini__audience__list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .55em;
+  width: 5px;
+  height: 5px;
+  background: currentColor;
+  opacity: .55;
+}
 .lg__cta-mini__audience__text {
   font-family: var(--font-sans);
   font-size: 13px;
