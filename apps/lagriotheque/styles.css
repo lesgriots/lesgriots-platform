@@ -3612,7 +3612,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 /* Blocs éditoriaux de la description : accroche + paragraphes (façon page produit). */
 .lg__ovw { display: flex; flex-direction: column; gap: clamp(28px, 3.4vw, 48px); }
-.lg__ovw__block { max-width: 64ch; }
+.lg__ovw__block { max-width: 82ch; }
 .lg__ovw__head {
   font-family: var(--font-sans);
   font-weight: 600;
