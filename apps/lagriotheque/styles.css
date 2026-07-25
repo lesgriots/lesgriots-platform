@@ -7290,3 +7290,71 @@ a.lg__partners__logo:hover {
   color: rgba(246, 245, 243, 0.55);
   text-align: center;
 }
+
+/* ===================================================================
+   BARRE DE RÉSERVATION FIXE EN BAS — fiche formation/workshop (mobile)
+   Prix + CTA permanents pendant la lecture. Cachée sur desktop (la
+   sidebar sticky joue ce rôle). La page réserve 96px en bas (le
+   .lg__cta-final compense déjà avec margin-bottom:-96px).
+   =================================================================== */
+.lg__formation__bar { display: none; }
+@media (max-width: 900px) {
+  .lg__formation__bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 42; /* au-dessus de la barre d'onglets sticky (41) */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 24px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: var(--paper);
+    border-top: 1px solid var(--ink);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+    font-family: var(--font-sans);
+  }
+  .lg__formation__bar__head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .lg__formation__bar__price {
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .lg__formation__bar__hint {
+    font-size: 11px;
+    color: var(--ink-3, #555);
+  }
+  .lg__formation__bar__btn {
+    background: var(--ink);
+    color: var(--paper);
+    border: 1px solid var(--ink);
+    padding: 12px 18px;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 1.1;
+    white-space: nowrap;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .lg__formation__bar__btn:hover {
+    background: var(--accent);
+    color: var(--ink);
+  }
+  /* La fiche réserve la hauteur de la barre pour que la fin de page
+     (avis, CTA final) ne soit jamais masquée. */
+  .lg__formation { padding-bottom: 96px; }
+  /* Idem pour le footer global quand on est sur une fiche. */
+  body.is-fiche .lg__footer { padding-bottom: 110px; }
+}

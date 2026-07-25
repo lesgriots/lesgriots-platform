@@ -2188,6 +2188,35 @@ function ProgramPage({ item, kind }) {
       </aside>
       </div>{/* /.lg__formation__layout */}
 
+      {/* Barre de réservation PERMANENTE en bas de l'écran (mobile) : prix +
+          CTA toujours visibles pendant la lecture de la fiche. La carte
+          complète reste dans la page ; la barre n'apparaît qu'en <=900px. */}
+      <div className="lg__formation__bar" role="complementary" aria-label="Réservation rapide">
+        <div className="lg__formation__bar__head">
+          <strong className="lg__formation__bar__price">{f.price || "—"}</strong>
+          <span className="lg__formation__bar__hint">
+            {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
+          </span>
+        </div>
+        {kind === "workshop" ? (
+          <a
+            className="lg__formation__bar__btn"
+            href={ctaHref(item, nextSession)}
+            {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
+            {ctaLabel(item)}
+          </a>
+        ) : (
+          <button
+            type="button"
+            className="lg__formation__bar__btn"
+            onClick={() => setShowInscription(true)}
+          >
+            S'inscrire →
+          </button>
+        )}
+      </div>
+
       {downloadOpen && (
         <DownloadModal
           item={item}
@@ -5309,6 +5338,9 @@ function App() {
     const hasPageMedia = listMediaKey ? text(listMediaKey, "") !== "" : false;
     document.body.classList.toggle("is-home", isHome);
     document.body.classList.toggle("is-listhero", isHome || isDetailHero || hasPageMedia);
+    // Fiche formation/workshop : la barre de réservation fixe (mobile) masque
+    // le bas du footer → le footer se rehausse via body.is-fiche.
+    document.body.classList.toggle("is-fiche", isDetailHero);
     document.body.classList.toggle("is-scrolled", scrolled);
     // Re-mesure la position de la plaque après le rendu de la nouvelle page
     // (le handler de scroll fait la mesure ; on le déclenche manuellement).
