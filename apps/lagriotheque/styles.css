@@ -7323,7 +7323,13 @@ a.lg__partners__logo:hover {
   /* Pas de rectangle interne : la carte se fond dans le panneau (le trait
      supérieur du panneau suffit). */
   .lg__sheet__body .lg__cta-mini { padding: 10px 14px 8px; border: 0; }
-  .lg__sheet__body .lg__cta-mini__title { font-size: 11px; margin: 0 0 6px; padding-bottom: 5px; }
+  .lg__sheet__body .lg__cta-mini__title {
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    margin: 0 0 7px;
+    padding-bottom: 7px;
+  }
   .lg__sheet__body .lg__cta-mini__head { gap: 1px; padding-bottom: 5px; margin-bottom: 5px; }
   .lg__sheet__body .lg__cta-mini__price { font-size: 16px; }
   .lg__sheet__body .lg__cta-mini__hint { font-size: 8px; }
