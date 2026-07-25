@@ -684,19 +684,19 @@ function TrainerCard({ trainer }) {
   );
 }
 
-// Visuel du curseur pour une ligne de catalogue : l'image de la fiche
-// (ou le poster si le média est une vidéo). Vide = placeholder initiales.
-function rowCursorSrc(item) {
-  const m = item && item.media;
-  if (!m) return "";
-  if (m.type === "image" && m.src) return m.src;
-  return m.poster || "";
+// Média du curseur pour une ligne de catalogue : la VIDÉO de la fiche en
+// priorité (16/9), sinon l'image, sinon un placeholder initiales.
+function rowCursorMedia(item) {
+  const m = (item && item.media) || {};
+  const video = item.video || (m.type === "video" ? m.src : "") || text("home.hero_video", "img/hero.mp4");
+  const img = (m.type === "image" && m.src) ? m.src : (m.poster || "");
+  return { video, img };
 }
 
 function FormationRow({ f, onHover }) {
   const titleRef = useMarqueeOverflow([f.title]);
-  // Photo qui suit le curseur (même effet que le survol des formateurs).
-  const handleMove = onHover ? (e) => onHover({ src: rowCursorSrc(f), name: f.title, x: e.clientX, y: e.clientY }) : undefined;
+  // Vidéo qui suit le curseur (même mécanique que le survol des formateurs).
+  const handleMove = onHover ? (e) => onHover({ ...rowCursorMedia(f), name: f.title, x: e.clientX, y: e.clientY }) : undefined;
   const handleLeave = onHover ? () => onHover(null) : undefined;
   return (
     <a
@@ -2404,15 +2404,30 @@ function FormationDetail({ id, onClose }) {
   );
 }
 
-// Photo qui suit le curseur au survol d'une ligne de catalogue — même effet
-// que le survol des formateurs (remplace l'ancienne vidéo plein fond).
+// Média qui suit le curseur au survol d'une ligne de catalogue — même
+// mécanique que le survol des formateurs, mais en VIDÉO 16/9 (remplace
+// l'ancienne vidéo plein fond).
 function HoverBg({ src }) {
   if (!src) return null;
-  const cur = typeof src === "object" ? src : { src, name: "", x: 0, y: 0 };
-  return cur.src ? (
+  const cur = typeof src === "object" ? src : { video: "", img: src, name: "", x: 0, y: 0 };
+  if (cur.video) {
+    return (
+      <video
+        className="lg__row__cursorvid"
+        src={cur.video}
+        autoPlay
+        loop
+        muted
+        playsInline
+        aria-hidden="true"
+        style={{ left: cur.x + "px", top: cur.y + "px" }}
+      />
+    );
+  }
+  return cur.img ? (
     <img
-      className="lg__trx__cursorimg"
-      src={cur.src}
+      className="lg__row__cursorvid"
+      src={cur.img}
       alt=""
       aria-hidden="true"
       style={{ left: cur.x + "px", top: cur.y + "px" }}
@@ -3048,7 +3063,7 @@ function Catalogue() {
 
 function WorkshopRow({ w, onHover }) {
   const titleRef = useMarqueeOverflow([w.title]);
-  const handleMove = onHover ? (e) => onHover({ src: rowCursorSrc(w), name: w.title, x: e.clientX, y: e.clientY }) : undefined;
+  const handleMove = onHover ? (e) => onHover({ ...rowCursorMedia(w), name: w.title, x: e.clientX, y: e.clientY }) : undefined;
   const handleLeave = onHover ? () => onHover(null) : undefined;
   return (
     <a

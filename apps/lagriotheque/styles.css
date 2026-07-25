@@ -4647,6 +4647,20 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 .lg__ovw__text,
 .lg__trainercard__bio { white-space: pre-line; }
+/* Vidéo 16/9 qui suit le curseur au survol des lignes de catalogue. */
+.lg__row__cursorvid {
+  position: fixed;
+  width: clamp(240px, 26vw, 380px);
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 60;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.38);
+}
+@media (hover: none), (max-width: 900px) {
+  .lg__row__cursorvid { display: none; }
+}
 /* À propos (page Approche) : deux textes longs, plus grands que la prose. */
 .lg__approche__about {
   display: flex;
