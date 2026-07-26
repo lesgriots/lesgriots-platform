@@ -4960,9 +4960,6 @@ function Contact() {
         <p className="lg__contact__coords__mail">
           <a href={"mailto:" + email}>{email}</a>
         </p>
-        <p className="lg__contact__coords__line">
-          {text("contact.location_main", "Présentiel à Paris")} · {text("contact.location_hq", "Siège social · Le Havre")}
-        </p>
         <p className="lg__contact__coords__line lg__contact__coords__line--muted">
           {text("contact.line2", "Organisme de formation")} {text("contact.line3", "de la SASU LES GRIOTS")} · {text("contact.line4", "Certifié Qualiopi")}
         </p>
