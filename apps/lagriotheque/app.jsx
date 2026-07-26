@@ -5694,6 +5694,7 @@ function App() {
   const cfgActivePages = (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.activePages) || {};
   const ROUTE_TO_PAGE_KEY = {
     "catalogue": "formations",
+    "formations": "formations",
     "workshops": "workshops",
     "agenda": "agenda",
     "ressources": "ressources",
@@ -5758,6 +5759,7 @@ function App() {
   } else {
     switch (route) {
       case "catalogue":   page = <Catalogue />; break;
+      case "formations":  page = <Catalogue />; break; /* alias — liens #/formations */
       case "workshops":   page = <Workshops />; break;
       case "agenda":      page = <Agenda />; break;
       case "events":      page = <Events />; break;
