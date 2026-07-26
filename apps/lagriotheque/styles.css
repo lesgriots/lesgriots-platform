@@ -2357,6 +2357,7 @@ body.is-home .lg__latest__tabs {
   .lg__latest__intro { padding-left: 0; padding-right: 0; margin-bottom: 32px; }
   body.is-home .lg__latest__tabs { padding-left: 0; }
   .lg__latest .lg__row { padding-left: 0; }
+  .lg__latest .lg__cat-filters { padding-left: 0; padding-right: 0; }
 }
 @media (max-width: 600px) {
   body.is-home .lg__manifesto { top: 85px; }
@@ -3910,7 +3911,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   }
 }
 /* Numéro 01/02/03 à gauche du titre fermé */
-.lg__section-head__num {
+.lg__section-head__num { display: none !important; }
+.lg__section-big__num { display: none !important; }
+.lg__section-head__num--legacy {
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 500;
@@ -4435,7 +4438,10 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   margin: 0;
 }
 @media (max-width: 900px) {
-  .lg__avis { padding: 44px 28px; } /* alignée sur la gouttière effective du contenu de la fiche (mobile + tablette) */
+  .lg__avis { padding: 44px 28px; } /* alignée sur la gouttière effective du contenu de la fiche (tablette) */
+}
+@media (max-width: 600px) {
+  .lg__avis { padding: 44px 24px; } /* gouttière unifiée 24px en mobile */
 }
 
 .lg__program--accordion {
@@ -5160,8 +5166,12 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
     padding-right: 16px;
   }
   .lg__ag__head {
-    /* En mobile, padding horizontal réduit (16px au lieu de 24px) */
-    padding: 16px;
+    /* La section porte déjà la gouttière : pas de retrait interne. */
+    padding: 16px 0;
+  }
+  .lg__ag__panel {
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 .lg__agenda__head,
@@ -5500,6 +5510,8 @@ body.is-scrolled .lg__pagehero__brand {
   }
   .lg__formation .lg__pagehero__overlay {
     padding-top: 105px;
+    padding-left: 24px;
+    padding-right: 24px;
   }
 }
 @media (max-width: 600px) {
@@ -6819,6 +6831,12 @@ a.lg__partners__logo:hover {
   .lg__catalogue .lg__row,
   .lg__catalogue .lg__cat-filters {
     padding-left: 0;
+  }
+  /* Fiche : full-bleed déterministe — le contenu se cale sur la gouttière 24. */
+  .lg__formation {
+    width: auto;
+    margin-left: -24px;
+    margin-right: -24px;
   }
   /* Fiche formation : annule les breakouts edge-to-edge internes pour rester
      dans la même gouttière 24px (mêmes sélecteurs que la règle desktop). */
