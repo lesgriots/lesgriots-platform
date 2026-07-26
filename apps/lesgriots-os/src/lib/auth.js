@@ -63,6 +63,14 @@ const PERMISSIONS = {
   'phases:update':       ['admin', 'manager'],
   'phases:delete':       ['admin'],
 
+  // Commercial (devis, factures) et coffre-fort documentaire
+  'devis:read':          ['admin', 'manager'],
+  'devis:write':         ['admin', 'manager'],
+  'factures:read':       ['admin'],
+  'factures:write':      ['admin'],
+  'documents:read':      ['admin', 'manager'],
+  'documents:write':     ['admin', 'manager'],
+
   // Emails (journal des envois + envoi manuel)
   'emails:read':         ['admin', 'manager'],
   'emails:send':         ['admin', 'manager'],

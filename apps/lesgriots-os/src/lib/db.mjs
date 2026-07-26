@@ -1233,6 +1233,96 @@ function initSchema(db) {
     CREATE INDEX IF NOT EXISTS idx_emails_created ON emails(created_at);
     CREATE INDEX IF NOT EXISTS idx_emails_contexte ON emails(contexte_type, contexte_id);
 
+    -- ── CYCLE DE VIE COMMERCIAL (cahier des charges § 12 et 13) ──────────
+    -- L'OS savait déjà GÉNÉRER un devis ou une facture en PDF ; il ne savait
+    -- pas ce qu'ils devenaient. Ces deux tables suivent la vie du document :
+    -- envoyé, accepté, payé, en retard. C'est ce qui alimente le tableau de
+    -- bord financier et les relances.
+    CREATE TABLE IF NOT EXISTS devis (
+      id TEXT PRIMARY KEY,
+      numero TEXT NOT NULL DEFAULT '',
+      client_id TEXT REFERENCES clients(id) ON DELETE SET NULL,
+      session_id TEXT REFERENCES sessions(id) ON DELETE SET NULL,
+      formation_id TEXT REFERENCES formations(id) ON DELETE SET NULL,
+      apprenant_id TEXT REFERENCES apprenants(id) ON DELETE SET NULL,
+      objet TEXT NOT NULL DEFAULT '',
+      montant_ht REAL NOT NULL DEFAULT 0,
+      tva_rate REAL NOT NULL DEFAULT 0,
+      montant_ttc REAL NOT NULL DEFAULT 0,
+      statut TEXT NOT NULL DEFAULT 'brouillon'
+        CHECK(statut IN ('brouillon','envoye','consulte','accepte','refuse','expire')),
+      date_emission TEXT NOT NULL DEFAULT (date('now')),
+      date_envoi TEXT DEFAULT '',
+      date_reponse TEXT DEFAULT '',
+      valide_jusqu_au TEXT DEFAULT '',
+      fichier TEXT DEFAULT '',
+      notes TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_devis_statut ON devis(statut);
+
+    -- Le payeur n'est pas toujours l'apprenant : entreprise, OPCO, CPF, FAF.
+    -- La subrogation (l'OF encaisse directement le financeur) change le
+    -- circuit de relance, d'où le drapeau dédié.
+    CREATE TABLE IF NOT EXISTS factures (
+      id TEXT PRIMARY KEY,
+      numero TEXT NOT NULL DEFAULT '',
+      devis_id TEXT REFERENCES devis(id) ON DELETE SET NULL,
+      client_id TEXT REFERENCES clients(id) ON DELETE SET NULL,
+      session_id TEXT REFERENCES sessions(id) ON DELETE SET NULL,
+      apprenant_id TEXT REFERENCES apprenants(id) ON DELETE SET NULL,
+      objet TEXT NOT NULL DEFAULT '',
+      montant_ht REAL NOT NULL DEFAULT 0,
+      tva_rate REAL NOT NULL DEFAULT 0,
+      montant_ttc REAL NOT NULL DEFAULT 0,
+      montant_paye REAL NOT NULL DEFAULT 0,
+      statut TEXT NOT NULL DEFAULT 'brouillon'
+        CHECK(statut IN ('brouillon','envoyee','payee','partiellement_payee','retard','annulee')),
+      payeur_type TEXT NOT NULL DEFAULT 'apprenant'
+        CHECK(payeur_type IN ('apprenant','entreprise','opco','cpf','faf','autre')),
+      subrogation INTEGER NOT NULL DEFAULT 0,
+      date_emission TEXT NOT NULL DEFAULT (date('now')),
+      date_echeance TEXT DEFAULT '',
+      date_paiement TEXT DEFAULT '',
+      fichier TEXT DEFAULT '',
+      notes TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_factures_statut ON factures(statut);
+    CREATE INDEX IF NOT EXISTS idx_factures_echeance ON factures(date_echeance);
+
+    -- ── COFFRE-FORT DOCUMENTAIRE (§ 15) ─────────────────────────────────
+    -- Indexe les documents rattachés à une entité (apprenant, session,
+    -- formateur, client…). Le fichier lui-même n'est pas stocké en base : on
+    -- garde son emplacement. Deux apports par rapport à un simple dossier :
+    -- la VERSION (on retrouve la convention v1 signée après une v2) et la
+    -- date d'expiration (CV, habilitations).
+    -- NB : les pièces réglementaires de l'OF vivent dans organisme_documents,
+    -- qui a ses champs propres (émetteur, indicateur RNQ).
+    CREATE TABLE IF NOT EXISTS documents (
+      id TEXT PRIMARY KEY,
+      categorie TEXT NOT NULL DEFAULT 'autre'
+        CHECK(categorie IN ('convention','contrat','cv','attestation','certificat',
+                            'emargement','facture','devis','programme','support','autre')),
+      libelle TEXT NOT NULL DEFAULT '',
+      fichier TEXT DEFAULT '',
+      contexte_type TEXT NOT NULL DEFAULT 'autre'
+        CHECK(contexte_type IN ('apprenant','session','formation','formateur',
+                                'client','projet','organisme','autre')),
+      contexte_id TEXT DEFAULT '',
+      version INTEGER NOT NULL DEFAULT 1,
+      expire_le TEXT DEFAULT '',
+      signe INTEGER NOT NULL DEFAULT 0,
+      notes TEXT DEFAULT '',
+      archived INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_documents_contexte ON documents(contexte_type, contexte_id);
+    CREATE INDEX IF NOT EXISTS idx_documents_categorie ON documents(categorie);
+
     CREATE TABLE IF NOT EXISTS public_links (
       id TEXT PRIMARY KEY,
       kind TEXT NOT NULL CHECK(kind IN ('emargement','questionnaire')),
