@@ -50,14 +50,18 @@ function text(path, fallback = "") {
 // letter-spacing serré). Sert quand on saisit du texte brut côté BO mais
 // qu'on veut conserver la mise en forme du nom de marque.
 // Remplace "LA GRIOTHÈQUE" par le logo dans un fragment de texte.
-function renderBrandInline(part) {
-  const idx = part.indexOf("LA GRIOTHÈQUE");
+function renderBrandInline(part, ci) {
+  // ci = true : matche aussi « La Griothèque » en casse mixte (texte BO).
+  if (typeof part !== "string") return part;
+  const m = ci ? /la\s+griothèque/i.exec(part) : null;
+  const idx = m ? m.index : part.indexOf("LA GRIOTHÈQUE");
+  const len = m ? m[0].length : "LA GRIOTHÈQUE".length;
   if (idx === -1) return part;
   return (
     <>
       {part.slice(0, idx)}
       <BrandLogo />
-      {part.slice(idx + "LA GRIOTHÈQUE".length)}
+      {part.slice(idx + len)}
     </>
   );
 }
@@ -631,7 +635,7 @@ function Manifesto() {
           </div>
           <div className="lg__vision__overlay">
             <h2 className="lg__vision__title">{text("home.vision_title", "nouveaux récits,\nnouveaux visages")}</h2>
-            <p className="lg__vision__text">{text("home.vision_text", "La vision de La Griothèque est de permettre l'émergence de nouveaux récits.")}</p>
+            <p className="lg__vision__text">{renderBrandInline(text("home.vision_text", "La vision de La Griothèque est de permettre l'émergence de nouveaux récits."), true)}</p>
           </div>
         </section>
       </div>
