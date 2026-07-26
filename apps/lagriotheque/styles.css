@@ -3926,6 +3926,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 /* Numéro 01/02/03 à gauche du titre fermé */
 .lg__section-head__num { display: none !important; }
 .lg__section-big__num { display: none !important; }
+/* Sans le numéro, la grille passe à 2 colonnes : titre extensible + toggle
+   calé à droite (sinon le + flotte juste après le texte). */
+.lg__section-head { grid-template-columns: 1fr auto !important; }
 .lg__section-head__num--legacy {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -4610,16 +4613,14 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
-/* NOTRE APPROCHE mobile : chaque pilier tient sur UNE ligne entière —
-   la taille vient du hook de fit (--fit-size), qui réduit la font pour
-   que le titre remplisse exactement la largeur sans être tronqué. */
+/* NOTRE APPROCHE mobile : chaque pilier tient sur UNE ligne entière.
+   Taille FIXE calibrée sur le titre le plus long (pas de JS : le hook de
+   fit refittait au scroll/toggle et faisait « respirer » le texte). */
 @media (max-width: 700px) {
   .lg__approche__accordion .lg__section-head__title {
-    font-size: var(--fit-size, 22px);
-    line-height: 1.15;
-  }
-  .lg__approche__accordion .lg__section-big__title {
-    font-size: var(--fit-size, clamp(40px, 7vw, 140px));
+    font-size: clamp(9px, 3vw, 22px);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
   }
 }
 /* (anciennement masqué — le contenu vit maintenant dans .lg__section__body) */
@@ -5600,66 +5601,69 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   color: var(--ink);
 }
 
-/* ===== ÉVÉNEMENTS — liste en lignes (titre + méta à gauche, lien à droite) ===== */
+/* ===== ÉVÉNEMENTS — cartes façon écosystème (image, titre souligné ↗) ===== */
 .lg__events {
   padding: 12px 0 90px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 40px 24px;
+  max-width: 980px;
+}
+@media (max-width: 640px) {
+  .lg__events { grid-template-columns: 1fr; gap: 32px; }
 }
 .lg__event {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 22px 0;
-  border-top: 1px solid var(--ink-4, rgba(0, 0, 0, 0.14));
+  display: block;
+  text-decoration: none;
+  color: var(--ink);
 }
-.lg__event:last-child { border-bottom: 1px solid var(--ink-4, rgba(0, 0, 0, 0.14)); }
-/* La ligne entière est un lien vers la fiche : on neutralise le hover jaune
-   global des <a> et on anime seulement le lien de droite. */
 a.lg__event, a.lg__event:hover { color: var(--ink); }
-.lg__event:hover .lg__event__cta { color: var(--ink-2); }
 .lg__event.is-past { opacity: 0.5; }
-.lg__event__main { min-width: 0; }
+.lg__event__media {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--ink);
+  background: #0b0b0c;
+}
+.lg__event__media img,
+.lg__event__media video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.2s ease;
+}
+.lg__event:hover .lg__event__media img,
+.lg__event:hover .lg__event__media video { opacity: 0.85; }
 .lg__event__title {
-  /* Proportions de la réf. : titre modéré au-dessus de la ligne méta. */
+  display: inline-block;
+  margin-top: 10px;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(18px, 1.8vw, 24px);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  margin: 0 0 6px;
+  font-size: clamp(17px, 1.7vw, 22px);
+  letter-spacing: -0.015em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
   color: var(--ink);
 }
 .lg__event__meta {
+  display: block;
+  margin-top: 6px;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--ink-3);
-  margin: 0;
 }
-.lg__event__meta__dot { color: var(--ink-3); padding: 0 6px; }
-.lg__event__kind { color: var(--ink); font-weight: 500; }
-.lg__event__cta {
-  flex: none;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 7px;
+.lg__event__desc {
+  display: block;
+  margin-top: 4px;
   font-family: var(--font-sans);
   font-weight: 500;
   font-size: 14px;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-  transition: color 0.18s ease;
-}
-.lg__event__cta__arrow { font-size: 13px; transform: translateY(1px); }
-@media (max-width: 640px) {
-  /* Même disposition qu'en desktop : titre+méta à gauche, lien à droite. */
-  .lg__event { gap: 14px; padding: 18px 0; }
-  .lg__event__title { font-size: 17px; }
-  .lg__event__meta { font-size: 12px; }
-  .lg__event__meta__dot { padding: 0 4px; }
-  .lg__event__cta { font-size: 13px; }
+  line-height: 1.45;
+  color: var(--ink-2, rgba(0, 0, 0, 0.65));
+  white-space: pre-line;
 }
 
 .lg__rows {
