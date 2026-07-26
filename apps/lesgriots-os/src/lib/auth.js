@@ -63,6 +63,16 @@ const PERMISSIONS = {
   'phases:update':       ['admin', 'manager'],
   'phases:delete':       ['admin'],
 
+  // Organisme & qualité (pilotage de l'OF : pièces officielles, réclamations)
+  'organisme:read':      ['admin', 'manager'],
+  'organisme:create':    ['admin'],
+  'organisme:update':    ['admin'],
+  'organisme:delete':    ['admin'],
+  'qualite:read':        ['admin', 'manager'],
+  'qualite:create':      ['admin', 'manager'],
+  'qualite:update':      ['admin', 'manager'],
+  'qualite:delete':      ['admin'],
+
   // Griothèque
   'formations:read':     ['admin', 'manager'],
   'formations:create':   ['admin', 'manager'],

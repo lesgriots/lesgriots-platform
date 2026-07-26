@@ -1137,6 +1137,66 @@ function initSchema(db) {
       UNIQUE(session_id, step_key)
     );
 
+    -- ── GESTION DE L'ORGANISME (pilotage de l'OF lui-même) ──────────────
+    -- Pièces officielles de l'organisme de formation, avec dates de validité.
+    -- Sert deux usages : l'alerte avant péremption (Kbis, Qualiopi, assurance
+    -- RC pro, attestation URSSAF…) et le volet « Organisme » du dossier
+    -- d'audit Qualiopi. Le fichier n'est pas stocké en base : on garde une
+    -- référence (chemin, URL de coffre-fort ou simple numéro de pièce).
+    CREATE TABLE IF NOT EXISTS organisme_documents (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL DEFAULT 'autre'
+        CHECK(type IN ('kbis','nda','qualiopi','assurance_rc','urssaf',
+                       'certification','reglement_interieur','cgv','autre')),
+      libelle TEXT NOT NULL DEFAULT '',
+      reference TEXT DEFAULT '',
+      emis_le TEXT DEFAULT '',
+      expire_le TEXT DEFAULT '',
+      emetteur TEXT DEFAULT '',
+      fichier TEXT DEFAULT '',
+      notes TEXT DEFAULT '',
+      indicator INTEGER,
+      archived INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_organisme_documents_type ON organisme_documents(type);
+    CREATE INDEX IF NOT EXISTS idx_organisme_documents_expire ON organisme_documents(expire_le);
+
+    -- Registre des réclamations, incidents et suggestions.
+    -- Indicateur 31 du RNQ (traitement des aléas et réclamations) : l'auditeur
+    -- attend un registre daté ET la trace du traitement (analyse, action
+    -- corrective, responsable, clôture). Un registre vide mais tenu est
+    -- recevable ; un registre inexistant ne l'est pas.
+    CREATE TABLE IF NOT EXISTS reclamations (
+      id TEXT PRIMARY KEY,
+      reference TEXT NOT NULL DEFAULT '',
+      nature TEXT NOT NULL DEFAULT 'reclamation'
+        CHECK(nature IN ('reclamation','incident','suggestion')),
+      origine TEXT NOT NULL DEFAULT 'apprenant'
+        CHECK(origine IN ('apprenant','client','formateur','financeur','partenaire','interne','autre')),
+      canal TEXT DEFAULT '',
+      auteur_nom TEXT DEFAULT '',
+      auteur_email TEXT DEFAULT '',
+      objet TEXT NOT NULL DEFAULT '',
+      description TEXT DEFAULT '',
+      gravite TEXT NOT NULL DEFAULT 'mineure'
+        CHECK(gravite IN ('mineure','majeure','critique')),
+      statut TEXT NOT NULL DEFAULT 'ouverte'
+        CHECK(statut IN ('ouverte','en_cours','resolue','classee')),
+      analyse TEXT DEFAULT '',
+      action_corrective TEXT DEFAULT '',
+      responsable TEXT DEFAULT '',
+      session_id TEXT REFERENCES sessions(id) ON DELETE SET NULL,
+      apprenant_id TEXT REFERENCES apprenants(id) ON DELETE SET NULL,
+      recue_le TEXT NOT NULL DEFAULT (date('now')),
+      resolue_le TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_reclamations_statut ON reclamations(statut);
+    CREATE INDEX IF NOT EXISTS idx_reclamations_recue_le ON reclamations(recue_le);
+
     CREATE TABLE IF NOT EXISTS public_links (
       id TEXT PRIMARY KEY,
       kind TEXT NOT NULL CHECK(kind IN ('emargement','questionnaire')),

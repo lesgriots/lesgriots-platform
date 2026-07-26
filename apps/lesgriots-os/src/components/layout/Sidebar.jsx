@@ -48,6 +48,7 @@ const NAV = [
   { href: '/formations', icon: 'formations', label: 'Formations' },
   { href: '/sessions-list', icon: 'sessions', label: 'Sessions' },
   { href: '/apprenants', icon: 'apprenants', label: 'Apprenants' },
+  { href: '/organisme', icon: 'settings', label: 'Organisme' },
   { type: 'divider', label: 'STUDIO' },
   { href: '/projects', icon: 'projects', label: 'Projets' },
   { href: '/pipeline', icon: 'pipeline', label: 'Pipeline' },
