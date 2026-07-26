@@ -4743,6 +4743,15 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   font-weight: 500;
   max-width: 60ch;
 }
+/* Titre « Notre écosystème » : même police que le texte (sans, pas mono). */
+.lg__contact .lg__approche__about__kicker {
+  font-family: var(--font-sans);
+  font-size: clamp(18px, 2vw, 26px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--ink);
+}
 .lg__formation__sessions {
   list-style: none;
   display: flex;
