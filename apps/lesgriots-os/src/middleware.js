@@ -9,6 +9,8 @@ import { NextResponse } from 'next/server';
 const PUBLIC_PATHS = [
   '/login',
   '/api/auth/google',
+  // Lien de connexion à usage unique — le token EST l'authentification.
+  '/api/auth/lien',
   '/api/auth/logout',
   '/_next',
   '/favicon.ico',
