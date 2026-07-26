@@ -4466,8 +4466,8 @@ function ResourceModal({ resource, onClose }) {
               style={{
                 padding: "12px 18px", border: "1px solid var(--ink)",
                 background: "transparent", color: "var(--ink)",
-                fontFamily: "var(--font-mono)", fontSize: 12,
-                textTransform: "uppercase", letterSpacing: "0.08em",
+                fontFamily: "var(--font-sans)", fontSize: 14,
+                letterSpacing: "-0.01em",
                 cursor: "pointer",
               }}
             >
@@ -4480,8 +4480,8 @@ function ResourceModal({ resource, onClose }) {
                 padding: "12px 18px", border: "1px solid var(--ink)",
                 background: submitting ? "var(--ink-dim)" : "var(--accent, #ffca00)",
                 color: "var(--ink)",
-                fontFamily: "var(--font-mono)", fontSize: 12,
-                textTransform: "uppercase", letterSpacing: "0.08em",
+                fontFamily: "var(--font-sans)", fontSize: 14,
+                letterSpacing: "-0.01em",
                 fontWeight: 600,
                 cursor: submitting ? "wait" : "pointer",
               }}
@@ -4584,7 +4584,7 @@ function InscriptionModal({ target, kind, onClose }) {
                 ? "On te recontacte sous 48h ouvrées avec les modalités et le devis. Tu recevras un email de confirmation."
                 : "Ta place est demandée — on te confirme par email avec les infos pratiques."}
             </p>
-            <button onClick={onClose} style={{ padding: "10px 18px", border: "1px solid var(--ink)", background: "var(--ink)", color: "var(--paper)", fontFamily: "var(--font-mono)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em", cursor: "pointer" }}>
+            <button onClick={onClose} style={{ padding: "10px 18px", border: "1px solid var(--ink)", background: "var(--ink)", color: "var(--paper)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", cursor: "pointer" }}>
               Fermer
             </button>
           </div>
@@ -4613,10 +4613,10 @@ function InscriptionModal({ target, kind, onClose }) {
               {err && <p style={{ color: "#d72d2d", fontSize: 12, marginBottom: 14 }}>✗ {err}</p>}
 
               <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-                <button type="button" onClick={onClose} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: "transparent", color: "var(--ink)", fontFamily: "var(--font-mono)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em", cursor: "pointer" }}>
+                <button type="button" onClick={onClose} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: "transparent", color: "var(--ink)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", cursor: "pointer" }}>
                   Annuler
                 </button>
-                <button type="submit" disabled={submitting} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: submitting ? "var(--ink-dim)" : "var(--accent, #ffca00)", color: "var(--ink)", fontFamily: "var(--font-mono)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, cursor: submitting ? "wait" : "pointer" }}>
+                <button type="submit" disabled={submitting} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: submitting ? "var(--ink-dim)" : "var(--accent, #ffca00)", color: "var(--ink)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", fontWeight: 600, cursor: submitting ? "wait" : "pointer" }}>
                   {submitting ? "..." : "Envoyer ma demande"}
                 </button>
               </div>

@@ -2960,11 +2960,11 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__needs__cta {
   display: inline-block;
   margin-top: 36px;
-  font-family: var(--font-mono);
-  font-size: 12px;
+  font-family: var(--font-sans);
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  text-transform: none;
   color: var(--accent);
   text-decoration: none;
   border-bottom: 1px solid var(--accent);
@@ -4921,11 +4921,11 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__btn {
   display: inline-block;
   padding: 14px 22px;
-  font-family: var(--font-mono);
-  font-size: 12px;
+  font-family: var(--font-sans);
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  text-transform: none;
   text-decoration: none;
   color: var(--ink);
   border: 1px solid var(--ink);
@@ -5132,10 +5132,11 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   flex-wrap: wrap;
 }
 .lg__ag__btn {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  /* Une seule police pour tous les boutons du site : la sans maison. */
+  font-family: var(--font-sans);
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  text-transform: none;
   text-decoration: none;
   padding: 10px 18px;
   border: 1px solid var(--ink);
