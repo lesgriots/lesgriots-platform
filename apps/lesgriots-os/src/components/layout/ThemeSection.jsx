@@ -33,6 +33,8 @@ const ROUTES_GRIOTHEQUE = [
   '/sessions-list',
   '/apprenants',
   '/organisme',
+  '/apercu',
+  '/catalogue',
 ];
 
 export function estHoteGriotheque(hostname) {

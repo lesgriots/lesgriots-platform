@@ -48,9 +48,9 @@ const icons = {
 const NAV = [
   { type: 'item', href: '/', icon: 'home', label: 'Accueil', monde: 'studio' },
   // Sur le domaine Griothèque, l'accueil est la vue d'ensemble de l'OF.
-  { type: 'item', href: '/formations', icon: 'home', label: 'Vue d ensemble', monde: 'griotheque' },
+  { type: 'item', href: '/apercu', icon: 'home', label: 'Vue d ensemble', monde: 'griotheque' },
   { type: 'divider', label: 'GRIOTHÈQUE' },
-  { href: '/formations', icon: 'formations', label: 'Formations' },
+  { href: '/catalogue', icon: 'formations', label: 'Formations' },
   { href: '/sessions-list', icon: 'sessions', label: 'Sessions' },
   { href: '/apprenants', icon: 'apprenants', label: 'Apprenants' },
   { href: '/organisme', icon: 'organisme', label: 'Organisme' },
