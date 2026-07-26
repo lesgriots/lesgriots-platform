@@ -5616,15 +5616,18 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
 .lg__events {
   padding: 12px 24px 90px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px 16px;
 }
-@media (max-width: 1000px) {
+@media (max-width: 1200px) {
+  .lg__events { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
   .lg__events { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 640px) {
-  .lg__events { grid-template-columns: 1fr; gap: 20px; padding: 12px 24px 70px; }
-  .lg__event { max-width: 340px; }
+@media (max-width: 560px) {
+  .lg__events { grid-template-columns: 1fr; gap: 18px; padding: 12px 24px 70px; }
+  .lg__event { max-width: 300px; }
 }
 .lg__event {
   display: flex;
@@ -5651,31 +5654,31 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding: 14px 16px 16px;
+  padding: 12px 14px 14px;
 }
 .lg__event__meta {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 0.02em;
   color: var(--ink-3);
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 .lg__event__title {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(18px, 1.7vw, 22px);
-  line-height: 1.12;
+  font-size: clamp(16px, 1.4vw, 19px);
+  line-height: 1.15;
   letter-spacing: -0.02em;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   color: var(--ink);
 }
 .lg__event__desc {
   font-family: var(--font-sans);
-  font-size: 13.5px;
+  font-size: 12.5px;
   line-height: 1.45;
   color: var(--ink-2);
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   max-width: 52ch;
   white-space: pre-line; /* retours à la ligne du back-office respectés */
 }
@@ -5687,16 +5690,16 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   gap: 7px;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 11.5px;
+  font-size: 10.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink);
   text-decoration: none;
   border-bottom: 1px solid var(--ink);
-  padding-bottom: 3px;
+  padding-bottom: 2px;
   transition: color 0.18s ease, border-color 0.18s ease;
 }
-.lg__event__cta__arrow { font-size: 12px; transform: translateY(1px); }
+.lg__event__cta__arrow { font-size: 11px; transform: translateY(1px); }
 .lg__event__cta:hover { color: var(--ink-2); border-color: var(--ink-2); }
 
 .lg__rows {
