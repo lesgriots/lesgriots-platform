@@ -6179,6 +6179,56 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   margin: 0 0 clamp(24px, 4vh, 40px);
   color: var(--ink);
 }
+/* Bloc contact de la page À propos — même langage que Notre écosystème. */
+.lg__contact__coords {
+  max-width: 640px;
+  margin: 0 0 clamp(48px, 8vh, 96px);
+}
+.lg__contact__coords .lg__approche__about__kicker {
+  font-family: var(--font-sans);
+  font-size: clamp(18px, 2vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--ink);
+}
+.lg__contact__coords__mail {
+  margin: 0 0 10px;
+}
+.lg__contact__coords__mail a {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(20px, 2.6vw, 32px);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.lg__contact__coords__mail a:hover { opacity: 0.7; }
+.lg__contact__coords__line {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(15px, 1.4vw, 18px);
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0 0 4px;
+}
+.lg__contact__coords__line--muted {
+  font-size: 13px;
+  color: var(--ink-3, rgba(0, 0, 0, 0.55));
+}
+.lg__contact__coords__links {
+  margin: 14px 0 0;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+}
+.lg__contact__coords__links a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lg__contact__coords__links a:hover { opacity: 0.7; }
 /* Présentation de la page À propos : paragraphe de lecture, largeur de
    colonne confortable — distinct de la pile display en dessous. */
 .lg__contact__presentation {

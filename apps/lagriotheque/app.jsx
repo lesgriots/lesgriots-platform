@@ -4954,29 +4954,25 @@ function Contact() {
         </div>
       )}
 
-      <div className="lg__contact__info">
-        <p>{text("contact.line2", "Organisme de formation")}</p>
-        <p>{text("contact.line3", "de la SASU LES GRIOTS")}</p>
-        <p>{text("contact.line4", "Certifié Qualiopi")}</p>
-        <p>&nbsp;</p>
-        <p>{text("contact.location_main", "Présentiel à Paris")}</p>
-        <p>{text("contact.location_hq", "Siège social · Le Havre")}</p>
-        <p>&nbsp;</p>
-        <p><a href={"mailto:" + email}>{email}</a></p>
-        <p>&nbsp;</p>
-        <p>
+      {/* Bloc contact — même langage que « Notre écosystème ». */}
+      <div className="lg__contact__coords">
+        <p className="lg__approche__about__kicker">Contact</p>
+        <p className="lg__contact__coords__mail">
+          <a href={"mailto:" + email}>{email}</a>
+        </p>
+        <p className="lg__contact__coords__line">
+          {text("contact.location_main", "Présentiel à Paris")} · {text("contact.location_hq", "Siège social · Le Havre")}
+        </p>
+        <p className="lg__contact__coords__line lg__contact__coords__line--muted">
+          {text("contact.line2", "Organisme de formation")} {text("contact.line3", "de la SASU LES GRIOTS")} · {text("contact.line4", "Certifié Qualiopi")}
+        </p>
+        <p className="lg__contact__coords__links">
           <a href={text("contact.instagram_url", "https://instagram.com/lagriotheque")} target="_blank" rel="noopener">
-            {text("contact.instagram_label", "instagram")}
+            {text("contact.instagram_label", "instagram")} ↗
           </a>
-        </p>
-        <p>
+          {" · "}
           <a href={text("contact.linkedin_url", "https://linkedin.com")} target="_blank" rel="noopener">
-            {text("contact.linkedin_label", "linkedin")}
-          </a>
-        </p>
-        <p>
-          <a href={text("contact.studio_url", "https://lesgriotsxstudio.com")} target="_blank" rel="noopener">
-            {text("contact.studio_label", "lesgriotsxstudio.com")}
+            {text("contact.linkedin_label", "linkedin")} ↗
           </a>
         </p>
       </div>
