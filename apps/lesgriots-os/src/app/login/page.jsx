@@ -19,6 +19,8 @@ export default function LoginPage() {
     else if (err === 'account_disabled') setError('Ton compte a été désactivé.');
     else if (err === 'google_token_failed') setError('Erreur de connexion Google. Réessaie.');
     else if (err === 'auth_failed') setError('Authentification échouée. Réessaie.');
+    else if (err === 'lien_invalide') setError('Ce lien de connexion a expiré ou a déjà servi. Demande-en un nouveau.');
+    else if (err === 'lien_absent') setError('Lien de connexion incomplet.');
   }, []);
 
   const handleGoogleLogin = () => {

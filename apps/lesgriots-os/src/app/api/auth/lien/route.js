@@ -18,7 +18,7 @@ const BASE_URL = process.env.NEXTAUTH_URL || 'http://localhost:3000';
 export async function GET(request) {
   try {
     const token = new URL(request.url).searchParams.get('token') || '';
-    if (!token) return NextResponse.redirect(`${BASE_URL}/login?err=lien_absent`);
+    if (!token) return NextResponse.redirect(`${BASE_URL}/login?error=lien_absent`);
 
     const db = getDb();
     const lien = db.prepare(`
@@ -34,7 +34,7 @@ export async function GET(request) {
       || lien.used_at
       || !lien.is_active
       || new Date(lien.expires_at) < new Date();
-    if (invalide) return NextResponse.redirect(`${BASE_URL}/login?err=lien_invalide`);
+    if (invalide) return NextResponse.redirect(`${BASE_URL}/login?error=lien_invalide`);
 
     db.prepare(`UPDATE login_links SET used_at = datetime('now') WHERE id = ?`).run(lien.id);
     db.prepare(`UPDATE users SET last_login = datetime('now') WHERE id = ?`).run(lien.user_id);
@@ -51,6 +51,6 @@ export async function GET(request) {
     return response;
   } catch (e) {
     console.error('[auth/lien]', e);
-    return NextResponse.redirect(`${BASE_URL}/login?err=lien_invalide`);
+    return NextResponse.redirect(`${BASE_URL}/login?error=lien_invalide`);
   }
 }
