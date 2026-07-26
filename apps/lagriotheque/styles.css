@@ -4619,13 +4619,15 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
    contenu : la mesure ne se re-boucle plus sur elle-même). */
 @media (max-width: 700px) {
   .lg__approche__accordion .lg__section-head__title {
-    font-size: var(--fit-size, 22px);
+    /* min() = garde-fou : même si le JS calcule une valeur aberrante,
+       le titre ne peut jamais exploser au-delà de ~7vw. */
+    font-size: min(var(--fit-size, 22px), 7vw);
     line-height: 1.15;
   }
   /* État ouvert : même principe, sinon le grand titre reste tronqué à 40px. */
   .lg__approche__accordion .lg__section-big__title {
     /* ×0.88 : laisse la place du toggle − à droite. */
-    font-size: calc(var(--fit-size, 32px) * 0.88);
+    font-size: min(calc(var(--fit-size, 32px) * 0.88), 10vw);
     line-height: 1.1;
   }
 }

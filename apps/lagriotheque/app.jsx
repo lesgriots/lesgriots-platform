@@ -96,41 +96,37 @@ function BrandLogo() {
 // différente → le texte « respirait ». Une taille calculée fontes chargées
 // est définitive pour un même couple (texte, largeur).
 const FIT_SIZE_CACHE = new Map();
+let FIT_CANVAS_CTX = null;
 function useFitOne(maxSize = 200, deps = []) {
   const ref = useRef(null);
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Mesure via canvas (measureText) : déterministe, aucun reflow, insensible
+    // aux resize iOS (barre d'URL) et aux états transitoires du DOM — l'ancienne
+    // mesure par scrollWidth produisait des tailles aberrantes sur Safari.
     const fit = () => {
-      const container = el.parentElement;
-      if (!container) return;
-      // Largeur réellement disponible pour le titre lui-même (colonne 1fr,
-      // indépendante du contenu — le toggle +/− occupe la colonne de droite).
-      const cwNow = el.clientWidth || container.clientWidth;
-      const key = maxSize + "|" + cwNow + "|" + el.textContent;
-      if (FIT_SIZE_CACHE.has(key)) {
-        el.style.setProperty("--fit-size", FIT_SIZE_CACHE.get(key) + "px");
-        return;
-      }
-      // Mesure : on force temporairement maxSize pour calculer le ratio
-      el.style.fontSize = maxSize + "px";
-      el.style.whiteSpace = "nowrap";
-      const cw = el.clientWidth || container.clientWidth;
-      const tw = el.scrollWidth;
-      el.style.fontSize = "";
-      if (tw > 0 && cw > 0) {
-        const scale = Math.min(1, cw / tw);
-        const newSize = Math.floor(maxSize * scale * 0.985);
+      const cw = el.clientWidth;
+      const txt = el.textContent || "";
+      if (!cw || !txt) return;
+      const key = maxSize + "|" + cw + "|" + txt;
+      let newSize = FIT_SIZE_CACHE.get(key);
+      if (newSize == null) {
+        if (!FIT_CANVAS_CTX) FIT_CANVAS_CTX = document.createElement("canvas").getContext("2d");
+        const cs = window.getComputedStyle(el);
+        FIT_CANVAS_CTX.font = (cs.fontWeight || "500") + " 100px " + (cs.fontFamily || "sans-serif");
+        const w100 = FIT_CANVAS_CTX.measureText(txt).width;
+        if (!w100) return;
+        // Le letter-spacing négatif du vrai rendu rend le texte un peu plus
+        // étroit que la mesure canvas → marge de sécurité intégrée.
+        newSize = Math.floor(Math.min(maxSize, (cw / w100) * 100 * 0.985));
         // Cache uniquement une fois les fontes chargées (sinon la mesure se
         // fait sur la fonte de secours et fausserait la valeur mémorisée).
         if (!document.fonts || document.fonts.status === "loaded") {
           FIT_SIZE_CACHE.set(key, newSize);
         }
-        // On expose la taille via CSS variable plutôt qu'inline → permet à
-        // .is-stuck d'utiliser calc(var(--fit-size) * 0.5) pour shrinker
-        // la font sans toucher au transform (la barre garde sa pleine largeur).
-        el.style.setProperty("--fit-size", newSize + "px");
       }
+      el.style.setProperty("--fit-size", newSize + "px");
     };
     fit();
     if (document.fonts && document.fonts.ready) {
