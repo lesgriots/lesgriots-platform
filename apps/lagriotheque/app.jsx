@@ -5306,7 +5306,7 @@ function Partners() {
   return (
     <section className="lg__partners" aria-label="Partenaires">
       <div className="lg__partners__tier">
-        <p className="lg__partners__label">Ils nous ont fait confiance.</p>
+        <p className="lg__partners__label">Nos partenaires.</p>
         <div className="lg__partners__list">
           <a
             className="lg__partners__logo lg__partners__logo--img"
