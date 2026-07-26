@@ -4743,14 +4743,50 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   font-weight: 500;
   max-width: 60ch;
 }
-/* Titre « Notre écosystème » : même police que le texte (sans, pas mono). */
+/* Titre « Notre écosystème » : même police que le texte, en gras. */
 .lg__contact .lg__approche__about__kicker {
   font-family: var(--font-sans);
   font-size: clamp(18px, 2vw, 26px);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: -0.01em;
   text-transform: none;
   color: var(--ink);
+}
+/* Miniatures des sites de l'écosystème (lesgriots.com / studio). */
+.lg__contact__eco {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 640px;
+  margin-top: 22px;
+}
+.lg__contact__eco__card {
+  display: block;
+  text-decoration: none;
+  color: var(--ink);
+}
+.lg__contact__eco__card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top;
+  border: 1px solid var(--ink);
+  background: #0b0b0c;
+  transition: opacity 0.2s ease;
+}
+.lg__contact__eco__card:hover img { opacity: 0.85; }
+.lg__contact__eco__label {
+  display: inline-block;
+  margin-top: 8px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (max-width: 480px) {
+  .lg__contact__eco { grid-template-columns: 1fr; }
 }
 .lg__formation__sessions {
   list-style: none;

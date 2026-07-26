@@ -4936,14 +4936,17 @@ function Contact() {
               <p className="lg__formation__prose lg__approche__about__text">
                 {renderManifestoBrand(text("approche.about_lesgriots", ""))}
               </p>
-              <a
-                className="lg__approche__about__link"
-                href="https://lesgriots.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                lesgriots.com ↗
-              </a>
+              {/* Miniatures cliquables des sites de l'écosystème. */}
+              <div className="lg__contact__eco">
+                <a className="lg__contact__eco__card" href="https://lesgriots.com" target="_blank" rel="noopener noreferrer">
+                  <img src="img/preview-lesgriots.jpg" alt="Aperçu du site lesgriots.com" loading="lazy" />
+                  <span className="lg__contact__eco__label">lesgriots.com ↗</span>
+                </a>
+                <a className="lg__contact__eco__card" href="https://lesgriotsxstudio.com" target="_blank" rel="noopener noreferrer">
+                  <img src="img/preview-lesgriotsxstudio.jpg" alt="Aperçu du site lesgriotsxstudio.com" loading="lazy" />
+                  <span className="lg__contact__eco__label">lesgriotsxstudio.com ↗</span>
+                </a>
+              </div>
             </div>
           )}
         </div>
