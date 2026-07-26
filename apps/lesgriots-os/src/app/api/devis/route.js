@@ -30,7 +30,9 @@ async function _GET() {
     const db = getDb();
     const auj = new Date().toISOString().slice(0, 10);
     const rows = db.prepare(`
-      SELECT d.*, c.name AS client_nom
+      SELECT d.*,
+             COALESCE(NULLIF(c.company, ''),
+                      TRIM(COALESCE(c.first_name, '') || ' ' || COALESCE(c.last_name, ''))) AS client_nom
       FROM devis d
       LEFT JOIN clients c ON c.id = d.client_id
       ORDER BY d.date_emission DESC, d.created_at DESC

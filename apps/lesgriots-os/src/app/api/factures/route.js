@@ -34,7 +34,9 @@ async function _GET() {
     const db = getDb();
     const auj = new Date().toISOString().slice(0, 10);
     const rows = db.prepare(`
-      SELECT f.*, c.name AS client_nom,
+      SELECT f.*,
+             COALESCE(NULLIF(c.company, ''),
+                      TRIM(COALESCE(c.first_name, '') || ' ' || COALESCE(c.last_name, ''))) AS client_nom,
              a.first_name AS apprenant_prenom, a.last_name AS apprenant_nom
       FROM factures f
       LEFT JOIN clients c    ON c.id = f.client_id
