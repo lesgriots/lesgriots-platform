@@ -1198,7 +1198,7 @@ function initSchema(db) {
     CREATE INDEX IF NOT EXISTS idx_reclamations_recue_le ON reclamations(recue_le);
 
     -- Liens de connexion à usage unique (voie d'entrée sans Google OAuth).
-    -- Généré en ligne de commande sur le serveur : `node scripts/lien-connexion.mjs`.
+    -- Généré en ligne de commande sur le serveur : node scripts/lien-connexion.mjs
     -- Durée de vie courte + usage unique : le lien vaut mot de passe le temps
     -- d'un clic, il ne doit pas traîner. Ne remplace pas OAuth à terme.
     CREATE TABLE IF NOT EXISTS login_links (
