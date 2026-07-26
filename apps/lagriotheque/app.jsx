@@ -4924,6 +4924,30 @@ function Contact() {
       <p className="lg__contact__presentation">
         {renderManifestoBrand(text("contact.line1", "LA GRIOTHÈQUE"))}
       </p>
+
+      {/* À propos : deux textes éditables en BO, structurés — L'école (la
+          Griothèque) puis La maison (LES GRIOTS, avec lien vers le site). */}
+      {text("approche.about_lesgriots", "") && (
+        <div className="lg__approche__about">
+          {text("approche.about_lesgriots", "") && (
+            <div className="lg__approche__about__col">
+              <p className="lg__approche__about__kicker">LA MAISON</p>
+              <p className="lg__formation__prose lg__approche__about__text">
+                {renderManifestoBrand(text("approche.about_lesgriots", ""))}
+              </p>
+              <a
+                className="lg__approche__about__link"
+                href="https://lesgriots.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                lesgriots.com ↗
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="lg__contact__info">
         <p>{text("contact.line2", "Organisme de formation")}</p>
         <p>{text("contact.line3", "de la SASU LES GRIOTS")}</p>
@@ -4950,29 +4974,6 @@ function Contact() {
           </a>
         </p>
       </div>
-
-      {/* À propos : deux textes éditables en BO, structurés — L'école (la
-          Griothèque) puis La maison (LES GRIOTS, avec lien vers le site). */}
-      {text("approche.about_lesgriots", "") && (
-        <div className="lg__approche__about">
-          {text("approche.about_lesgriots", "") && (
-            <div className="lg__approche__about__col">
-              <p className="lg__approche__about__kicker">LA MAISON</p>
-              <p className="lg__formation__prose lg__approche__about__text">
-                {renderManifestoBrand(text("approche.about_lesgriots", ""))}
-              </p>
-              <a
-                className="lg__approche__about__link"
-                href="https://lesgriots.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                lesgriots.com ↗
-              </a>
-            </div>
-          )}
-        </div>
-      )}
 
       <div className="lg__contact__griot" aria-hidden="true">
         <GriotRing />

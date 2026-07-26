@@ -4729,11 +4729,11 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 @media (max-width: 700px) {
   .lg__approche__about { grid-template-columns: 1fr; gap: 28px; }
 }
-/* Le bloc La maison vit sur la page À propos (contact) — une seule colonne. */
+/* Le bloc La maison suit directement la présentation sur la page À propos. */
 .lg__contact .lg__approche__about {
   grid-template-columns: 1fr;
   max-width: 640px;
-  margin: clamp(40px, 6vh, 72px) 0 clamp(48px, 8vh, 96px);
+  margin: 0 0 clamp(40px, 6vh, 72px);
 }
 .lg__formation__sessions {
   list-style: none;
