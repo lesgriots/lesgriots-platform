@@ -1,0 +1,111 @@
+/* ─────────────────────────────────────────────────────────────
+   LES GRIOTS OS — couche responsive (mobile & tablette)
+   Breakpoints (rappel — les vars CSS ne marchent pas dans @media) :
+     --bp-md: 768px   (mobile < 768px)
+     --bp-lg: 1024px  (tablette < 1024px)
+   Le styling de l'app est 100% inline → les !important ici sont
+   volontaires : ils permettent aux classes utilitaires de gagner
+   sur les styles inline UNIQUEMENT sous le breakpoint visé.
+   Aucune règle ici ne s'applique en desktop (≥1024px).
+   ───────────────────────────────────────────────────────────── */
+
+/* ── Visibilité ── */
+@media (max-width: 767px) {
+  .resp-hide-mobile { display: none !important; }
+}
+@media (min-width: 768px) {
+  .resp-only-mobile { display: none !important; }
+}
+
+/* ── Hamburger (drawer sidebar) — display géré ici, pas en inline ── */
+.resp-hamburger { display: none; }
+@media (max-width: 767px) {
+  .resp-hamburger {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* ── Listes-tableaux en grid → empilement vertical ── */
+@media (max-width: 767px) {
+  .resp-table-head { display: none !important; }
+  .resp-table-stack > *:not(.resp-table-head),
+  .resp-table-row {
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+  }
+}
+
+/* ── Kanban → scroll horizontal + snap sous 1024px ── */
+@media (max-width: 1023px) {
+  .resp-kanban {
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .resp-kanban > * {
+    scroll-snap-align: start;
+    min-width: 260px;
+  }
+}
+
+/* ── Modales → plein écran sous 768px ── */
+@media (max-width: 767px) {
+  .resp-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* ── Grilles multi-colonnes → 1 colonne sous 768px ── */
+@media (max-width: 767px) {
+  .resp-grid-1col { grid-template-columns: 1fr !important; }
+}
+
+/* ── Sidebar dashboard : état pré-hydratation sur mobile ──
+   Avant que useMediaQuery ne s'active (SSR → false), la sidebar rend
+   son style desktop : on la masque en drawer fermé pour éviter le flash.
+   Après hydratation, les styles inline (fixed + translateX) prennent
+   le relais — identiques à ces valeurs. */
+@media (max-width: 767px) {
+  aside.os-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100dvh !important;
+    z-index: 900;
+    transform: translateX(-100%);
+    transition: transform 200ms ease;
+  }
+  aside.os-sidebar.os-sidebar-open {
+    transform: translateX(0);
+  }
+}
+
+/* ── TopBar : place pour le hamburger fixe + recherche compacte ── */
+@media (max-width: 767px) {
+  .resp-topbar { padding: 16px 16px 14px 64px !important; }
+}
+
+/* ── Scope .os-app sous 768px :
+      - font-size 16px sur les champs (évite le zoom iOS au focus)
+      - cibles tactiles ≥ 40px sur les boutons (sauf .btn-inline) ── */
+@media (max-width: 767px) {
+  .os-app input,
+  .os-app select,
+  .os-app textarea {
+    font-size: 16px !important;
+  }
+  .os-app button:not(.btn-inline) {
+    min-height: 40px;
+  }
+}

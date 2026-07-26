@@ -1,0 +1,23 @@
+# Dépendances & build
+node_modules/
+.next/
+
+# Données (base SQLite + sauvegardes) — jamais dans Git
+data/
+data/backups/
+*.db
+*.db-wal
+*.db-shm
+*.db.gz
+
+# Secrets — jamais dans Git (seul le modèle .env.example est versionné)
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store

@@ -1,0 +1,22 @@
+// Barrel export — kit UI LES GRIOTS OS
+// Usage : import { Card, Badge, Button, KpiCard, ... } from '@/components/ui';
+export { default as Card }         from './Card';
+export { default as Badge }        from './Badge';
+export { default as Button }       from './Button';
+export { default as KpiCard }      from './KpiCard';
+export { default as Skeleton }     from './Skeleton';
+export { SkeletonText }            from './Skeleton';
+export { default as EmptyState }   from './EmptyState';
+export { default as SectionTitle } from './SectionTitle';
+export { SubLabel }                from './SectionTitle';
+export { default as StatusDot }    from './StatusDot';
+export { default as AlertChip }    from './AlertChip';
+export { ToastProvider, useToast } from './Toast';
+export { ConfirmProvider, useConfirm } from './ConfirmDialog';
+export { default as CaHistoryChart } from './CaHistoryChart';
+export { default as ViewSwitcher, useViewMode } from './ViewSwitcher';
+export { default as EditableField } from './EditableField';
+export { default as StarRating } from './StarRating';
+export { default as MultiCategorySelect } from './MultiCategorySelect';
+export { HtTtc, MarginBar, CopyBtn, Pagination, Breadcrumbs } from './Misc';
+export { default as useMediaQuery } from './useMediaQuery';
