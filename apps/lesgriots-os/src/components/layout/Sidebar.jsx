@@ -46,21 +46,23 @@ const icons = {
 
 // Menu réagencé (grille Chris Do) : la Griothèque — moteur cash — passe en premier.
 const NAV = [
-  { type: 'item', href: '/', icon: 'home', label: 'Accueil' },
+  { type: 'item', href: '/', icon: 'home', label: 'Accueil', monde: 'studio' },
+  // Sur le domaine Griothèque, l'accueil est la vue d'ensemble de l'OF.
+  { type: 'item', href: '/formations', icon: 'home', label: 'Vue d ensemble', monde: 'griotheque' },
   { type: 'divider', label: 'GRIOTHÈQUE' },
   { href: '/formations', icon: 'formations', label: 'Formations' },
   { href: '/sessions-list', icon: 'sessions', label: 'Sessions' },
   { href: '/apprenants', icon: 'apprenants', label: 'Apprenants' },
   { href: '/organisme', icon: 'organisme', label: 'Organisme' },
-  { type: 'divider', label: 'STUDIO' },
-  { href: '/projects', icon: 'projects', label: 'Projets' },
-  { href: '/pipeline', icon: 'pipeline', label: 'Pipeline' },
-  { type: 'divider', label: 'ARGENT' },
-  { href: '/finances', icon: 'finances', label: 'Finances' },
-  { href: '/pricing', icon: 'pricing', label: 'TJM' },
+  { type: 'divider', label: 'STUDIO', monde: 'studio' },
+  { href: '/projects', icon: 'projects', label: 'Projets', monde: 'studio' },
+  { href: '/pipeline', icon: 'pipeline', label: 'Pipeline', monde: 'studio' },
+  { type: 'divider', label: 'ARGENT', monde: 'studio' },
+  { href: '/finances', icon: 'finances', label: 'Finances', monde: 'studio' },
+  { href: '/pricing', icon: 'pricing', label: 'TJM', monde: 'studio' },
   { type: 'divider', label: 'RÉPERTOIRE' },
   { href: '/clients', icon: 'clients', label: 'Clients' },
-  { href: '/providers', icon: 'providers', label: 'Prestataires' },
+  { href: '/providers', icon: 'providers', label: 'Prestataires', monde: 'studio' },
   { href: '/team', icon: 'team', label: 'Équipe' },
   { type: 'spacer' },
   { href: '/settings', icon: 'settings', label: 'Réglages' },
@@ -206,6 +208,23 @@ export default function Sidebar() {
         )}
       </div>
 
+      {/* Passerelle vers l'OS complet — le Studio migre vers son propre
+          domaine (os.lesgriots.com) ; ce lien disparaîtra ensuite. */}
+      {monde === 'griotheque' && !collapsed && (
+        <a
+          href="https://os.lesgriots.com"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '10px 16px', margin: '0 8px 4px',
+            fontSize: 11.5, color: 'var(--text-3)', textDecoration: 'none',
+            borderBottom: '1px solid var(--border)',
+          }}
+          title="Projets, pipeline agence, finances globales"
+        >
+          <span style={{ opacity: 0.7 }}>↗</span> LES GRIOTS OS
+        </a>
+      )}
+
       {/* Nav */}
       <nav style={{
         flex: 1,
@@ -218,7 +237,7 @@ export default function Sidebar() {
         {NAV.map((item, i) => {
           if (item.type === 'divider') {
             return (
-              <div key={i} style={{
+              <div key={i} className={item.monde ? 'nav-monde-' + item.monde : undefined} style={{
                 fontSize: 10,
                 fontWeight: 600,
                 color: 'var(--text-3)',
@@ -238,6 +257,7 @@ export default function Sidebar() {
           const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
           return (
             <Link key={item.href} href={item.href}
+            className={item.monde ? 'nav-monde-' + item.monde : undefined}
             onClick={() => { if (isMobile) setMobileOpen(false); }}
             style={{
               display: 'flex',

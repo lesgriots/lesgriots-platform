@@ -352,3 +352,12 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: var(--focus-ring);
   border-radius: var(--radius-sm);
 }
+
+/* ── DEUX MÉTIERS, DEUX ADRESSES ────────────────────────────────────────
+   app.lagriotheque.com sert l'organisme de formation, rien d'autre : les
+   entrées de menu du Studio y sont masquées. Le masquage est en CSS (et non
+   en JavaScript) parce que l'attribut data-monde est posé sur <html> AVANT le
+   premier pixel : le menu ne clignote donc jamais.
+   Cf. src/components/layout/ThemeSection.jsx pour la liste des domaines. */
+html[data-monde="griotheque"] .nav-monde-studio { display: none !important; }
+html[data-monde="studio"]     .nav-monde-griotheque { display: none !important; }

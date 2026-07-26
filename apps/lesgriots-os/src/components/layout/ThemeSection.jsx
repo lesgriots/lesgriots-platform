@@ -1,24 +1,33 @@
 'use client';
 
 /**
- * Thème par section — l'architecture « deux mondes » de LES GRIOTS OS.
+ * Monde courant — architecture « deux métiers, deux adresses ».
  *
- * La partie GRIOTHÈQUE (l'organisme de formation) reprend l'identité du site
- * lagriotheque.com : fond papier #f6f5f3, encre noire, jaune de marque. On y
- * force donc le thème clair, quelle que soit la préférence enregistrée.
+ * Décision du 26/07/2026 : `app.lagriotheque.com` est l'OS de l'ORGANISME DE
+ * FORMATION, rien d'autre. Le Studio (projets clients, pipeline agence, TJM,
+ * finances globales) partira sur sa propre adresse.
  *
- * Le reste (Studio, production, argent, répertoire) garde le cockpit encre
- * sombre, et respecte le basculeur manuel de la barre du haut — la préférence
- * reste mémorisée dans localStorage sous 'os-theme'.
+ * C'est donc le DOMAINE qui décide du monde, plus la route :
  *
- * Concrètement : entrer dans la Griothèque, c'est changer de monde ; en sortir,
- * c'est retrouver le sien.
+ *   app.lagriotheque.com  → monde « griotheque » : papier, mot-marque
+ *                           LA GRIOTHÈQUE, menu limité à la formation.
+ *   toute autre adresse    → monde « studio » : cockpit encre des trois
+ *                           piliers, menu complet. La règle par route est
+ *                           conservée là-bas, pour que les écrans de formation
+ *                           gardent leur identité papier au sein de l'OS.
+ *
+ * En développement (localhost) on reste en monde Studio pour garder le menu
+ * complet sous la main.
  */
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
-// Routes qui appartiennent à l'organisme de formation.
+// Domaines servant exclusivement l'organisme de formation.
+export const HOTES_GRIOTHEQUE = ['app.lagriotheque.com'];
+
+// Routes de formation — servent au sein de l'OS complet (monde Studio),
+// pour que ces écrans gardent le papier même hors du domaine Griothèque.
 const ROUTES_GRIOTHEQUE = [
   '/formations',
   '/sessions-list',
@@ -26,10 +35,23 @@ const ROUTES_GRIOTHEQUE = [
   '/organisme',
 ];
 
-export function estGriotheque(pathname) {
-  return ROUTES_GRIOTHEQUE.some(
-    (r) => pathname === r || pathname.startsWith(r + '/')
-  );
+export function estHoteGriotheque(hostname) {
+  return HOTES_GRIOTHEQUE.includes(String(hostname || '').toLowerCase());
+}
+
+export function estRouteGriotheque(pathname) {
+  const p = String(pathname || '');
+  return ROUTES_GRIOTHEQUE.some((r) => p === r || p.startsWith(r + '/'));
+}
+
+/**
+ * Le domaine prime : sur app.lagriotheque.com, TOUT est Griothèque, y compris
+ * les réglages. Ailleurs, on retombe sur la règle par route.
+ */
+export function estGriotheque(pathname, hostname) {
+  const hote = hostname ?? (typeof window !== 'undefined' ? window.location.hostname : '');
+  if (estHoteGriotheque(hote)) return true;
+  return estRouteGriotheque(pathname);
 }
 
 export default function ThemeSection() {
@@ -38,14 +60,12 @@ export default function ThemeSection() {
   useEffect(() => {
     const html = document.documentElement;
 
-    if (estGriotheque(pathname)) {
-      // Monde Griothèque : papier imposé, comme le site.
+    if (estGriotheque(pathname, window.location.hostname)) {
       html.setAttribute('data-theme', 'light');
       html.setAttribute('data-monde', 'griotheque');
       return;
     }
 
-    // Monde Studio : on rend la main à la préférence de l'utilisateur.
     html.setAttribute('data-monde', 'studio');
     let pref = null;
     try { pref = localStorage.getItem('os-theme'); } catch (e) { /* stockage bloqué */ }
