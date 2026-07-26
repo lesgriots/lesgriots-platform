@@ -72,12 +72,12 @@ function tonDoc(statut) {
 
 const CHAMP = {
   width: '100%', padding: '8px 10px', border: '1px solid var(--border)',
-  borderRadius: 6, background: 'var(--bg)', color: 'var(--fg)',
+  borderRadius: 6, background: 'var(--bg)', color: 'var(--text)',
   fontFamily: 'inherit', fontSize: 13,
 };
 const LABEL = {
   display: 'block', fontSize: 11, letterSpacing: '0.08em',
-  textTransform: 'uppercase', opacity: 0.6, marginBottom: 4,
+  textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 4,
 };
 
 export default function OrganismePage() {
@@ -164,12 +164,12 @@ export default function OrganismePage() {
       <div style={{ padding: '0 24px 48px', display: 'flex', flexDirection: 'column', gap: 28 }}>
 
         {erreur && (
-          <Card><p style={{ color: 'var(--danger, #b03030)', margin: 0 }}>{erreur}</p></Card>
+          <Card><p style={{ color: 'var(--danger)', margin: 0 }}>{erreur}</p></Card>
         )}
 
         {/* ── Bandeau d'alertes : ce qui exige une action maintenant ── */}
         {!loading && alertes > 0 && (
-          <Card style={{ borderLeft: '3px solid var(--warning, #ffca00)' }}>
+          <Card style={{ borderLeft: '3px solid var(--gold)' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
               {docStats.expires > 0 && (
                 <span><strong>{docStats.expires}</strong> pièce{docStats.expires > 1 ? 's' : ''} expirée{docStats.expires > 1 ? 's' : ''}</span>
