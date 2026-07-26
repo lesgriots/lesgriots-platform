@@ -3426,7 +3426,7 @@ function Events() {
             "events_page.intro",
             "La scène de La Griothèque, en vrai. Masterclasses, talks, soirées et projections pour se rencontrer, apprendre et bâtir ensemble."
           )}
-          sub={text("events_page.sub", "Masterclasses · talks · soirées · projections")}
+          sub={text("events_page.sub", "")}
         />
       </PageHero>
 
