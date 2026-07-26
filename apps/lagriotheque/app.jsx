@@ -2341,15 +2341,27 @@ function WorkshopPage({ w }) {
   const nextSession =
     upcoming.find((s) => normalizeStatus(s.status).class === "open") || upcoming[0];
   const st = nextSession ? normalizeStatus(nextSession.status) : null;
-  const cta = (extra) => (
-    <a
-      className={"lg__ws__btn" + (extra ? " " + extra : "")}
-      href={ctaHref(w, nextSession)}
-      {...(ctaIsExternal(w) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-    >
-      {ctaLabel(w)}
-    </a>
-  );
+  const [showInscription, setShowInscription] = React.useState(false);
+  // Gratuit → formulaire d'inscription maison (lead trackable dans le BO).
+  // Payant → lien direct (Stripe Payment Link configuré dans le BO).
+  const cta = (extra) =>
+    isFree(w) ? (
+      <button
+        type="button"
+        className={"lg__ws__btn" + (extra ? " " + extra : "")}
+        onClick={() => setShowInscription(true)}
+      >
+        {ctaLabel(w)}
+      </button>
+    ) : (
+      <a
+        className={"lg__ws__btn" + (extra ? " " + extra : "")}
+        href={ctaHref(w, nextSession)}
+        {...(ctaIsExternal(w) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
+        {ctaLabel(w)}
+      </a>
+    );
   return (
     <section className="lg__formation lg__ws is-workshop">
       <PageHero
@@ -2437,6 +2449,13 @@ function WorkshopPage({ w }) {
           {cta("lg__cta-final__btn--ws")}
         </div>
       </div>
+      {showInscription && (
+        <InscriptionModal
+          target={{ id: w.id, title: w.title }}
+          kind="workshop"
+          onClose={() => setShowInscription(false)}
+        />
+      )}
     </section>
   );
 }
@@ -3413,17 +3432,34 @@ function EventPage({ e }) {
   const isPast = eventIsPast(e);
   const dateLabel = [formatEventDate(e.date), e.time].filter(Boolean).join(" · ");
   const placeLabel = [e.location, e.city].filter(Boolean).join(" · ");
-  const cta = (extra) =>
-    e.link && !isPast ? (
-      <a
+  const [showInscription, setShowInscription] = React.useState(false);
+  // Lien externe (billetterie, Stripe…) → lien direct. Sinon (mailto ou rien)
+  // → formulaire d'inscription maison, comme les workshops gratuits.
+  const isExternal = /^https?:\/\//i.test(e.link || "");
+  const cta = (extra) => {
+    if (isPast) return null;
+    if (isExternal) {
+      return (
+        <a
+          className={"lg__ws__btn" + (extra ? " " + extra : "")}
+          href={e.link}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {e.link_label || "Réserver"}
+        </a>
+      );
+    }
+    return (
+      <button
+        type="button"
         className={"lg__ws__btn" + (extra ? " " + extra : "")}
-        href={e.link}
-        target="_blank"
-        rel="noopener noreferrer"
+        onClick={() => setShowInscription(true)}
       >
-        {e.link_label || "Réserver"}
-      </a>
-    ) : null;
+        {e.link_label || "Réserver gratuitement"}
+      </button>
+    );
+  };
   return (
     <section className="lg__formation lg__ws is-workshop">
       <PageHero src={(e.media && e.media.src) || ""} title={e.title}>
@@ -3469,6 +3505,13 @@ function EventPage({ e }) {
             {cta("lg__cta-final__btn--ws")}
           </div>
         </div>
+      )}
+      {showInscription && (
+        <InscriptionModal
+          target={{ id: e.id, title: e.title }}
+          kind="event"
+          onClose={() => setShowInscription(false)}
+        />
       )}
     </section>
   );
@@ -3732,6 +3775,8 @@ function AgendaEventRow({ e, isOpen, onToggle }) {
   const dateInfo = parseSessionDate(e.date);
   const status = normalizeStatus(e.status);
   const dateLong = fullDateLabel(dateInfo);
+  const [showInscription, setShowInscription] = React.useState(false);
+  const isExternal = /^https?:\/\//i.test(e.link || "");
   return (
     <div className={"lg__ag" + (isOpen ? " is-open" : "") + " is-" + status.class}>
       <button
@@ -3770,16 +3815,33 @@ function AgendaEventRow({ e, isOpen, onToggle }) {
           </div>
           {e.description && <p className="lg__ag__desc">{e.description}</p>}
           <div className="lg__ag__actions">
-            {e.link && status.class !== "past" && (
-              <a href={e.link} target="_blank" rel="noopener" className="lg__ag__btn lg__ag__btn--primary">
-                ↗ {e.link_label || "En savoir plus"}
-              </a>
+            {status.class !== "past" && (
+              isExternal ? (
+                <a href={e.link} target="_blank" rel="noopener" className="lg__ag__btn lg__ag__btn--primary">
+                  ↗ {e.link_label || "En savoir plus"}
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  className="lg__ag__btn lg__ag__btn--primary"
+                  onClick={() => setShowInscription(true)}
+                >
+                  ↓ {e.link_label || "Réserver gratuitement"}
+                </button>
+              )
             )}
-            <a href="#/events" className="lg__ag__btn">
-              → Tous les événements
+            <a href={"#/events/" + e.id} className="lg__ag__btn">
+              → Voir la page complète
             </a>
           </div>
         </div>
+      )}
+      {showInscription && (
+        <InscriptionModal
+          target={{ id: e.id, title: e.title }}
+          kind="event"
+          onClose={() => setShowInscription(false)}
+        />
       )}
     </div>
   );
@@ -4515,7 +4577,9 @@ function InscriptionModal({ target, kind, onClose }) {
               ✓ Merci{name ? `, ${name}` : ""} — ta demande d'inscription est enregistrée.
             </p>
             <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 18, opacity: 0.75 }}>
-              On te recontacte sous 48h ouvrées avec les modalités et le devis. Tu recevras un email de confirmation.
+              {kind === "formation"
+                ? "On te recontacte sous 48h ouvrées avec les modalités et le devis. Tu recevras un email de confirmation."
+                : "Ta place est demandée — on te confirme par email avec les infos pratiques."}
             </p>
             <button onClick={onClose} style={{ padding: "10px 18px", border: "1px solid var(--ink)", background: "var(--ink)", color: "var(--paper)", fontFamily: "var(--font-mono)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em", cursor: "pointer" }}>
               Fermer
