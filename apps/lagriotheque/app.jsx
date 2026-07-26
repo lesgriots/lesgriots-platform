@@ -1613,9 +1613,11 @@ function ProgramPage({ item, kind }) {
             <strong className="lg__cta-mini__price">
               {f.price || "—"}
             </strong>
-            <span className="lg__cta-mini__hint">
-              {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
-            </span>
+            {(kind !== "workshop" || !isFree(f)) && (
+              <span className="lg__cta-mini__hint">
+                {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
+              </span>
+            )}
           </div>
           {!compact && kind !== "workshop" && (f.cpf || f.rs) && (
             <p className="lg__cta-mini__cert">
@@ -1712,7 +1714,7 @@ function ProgramPage({ item, kind }) {
               S'inscrire via Mon Compte Formation
             </button>
           )}
-          {!compact && (
+          {!compact && kind !== "workshop" && (
             <button
               type="button"
               className="lg__cta-mini__btn lg__cta-mini__btn--ghost"
@@ -1744,7 +1746,7 @@ function ProgramPage({ item, kind }) {
   );
 
   return (
-    <section className="lg__formation">
+    <section className={"lg__formation" + (kind === "workshop" ? " is-workshop" : "")}>
       <PageHero src={(f.media && /\.(mp4|webm|mov|m4v)$/i.test(f.media.src || "")) ? f.media.src : text("home.hero_video", "img/hero.mp4")} poster={(f.media && f.media.poster) ? f.media.poster : undefined} title={f.title}>
         {(f.tagline || disciplineLabel) && (
           <p className="lg__formation__herosub">{f.tagline || disciplineLabel}</p>
@@ -2149,8 +2151,9 @@ function ProgramPage({ item, kind }) {
           body: (
             <div className="lg__formation__prose">
               <p>
-                Une question sur cette formation, sur le financement, ou sur
-                l'inscription ? Écris-nous.
+                {kind === "workshop"
+                  ? "Une question sur ce workshop ou sur l'inscription ? Écris-nous."
+                  : "Une question sur cette formation, sur le financement, ou sur l'inscription ? Écris-nous."}
               </p>
               <ul>
                 <li>
@@ -2159,12 +2162,14 @@ function ProgramPage({ item, kind }) {
                     formations@lesgriots.com
                   </a>
                 </li>
-                <li>
-                  <strong>Référent handicap :</strong>{" "}
-                  <a href="mailto:formations@lesgriots.com?subject=Accessibilité">
-                    formations@lesgriots.com
-                  </a>
-                </li>
+                {kind !== "workshop" && (
+                  <li>
+                    <strong>Référent handicap :</strong>{" "}
+                    <a href="mailto:formations@lesgriots.com?subject=Accessibilité">
+                      formations@lesgriots.com
+                    </a>
+                  </li>
+                )}
                 <li>
                   <strong>Réserver :</strong>{" "}
                   <a
@@ -2285,9 +2290,11 @@ function ProgramPage({ item, kind }) {
           {f.price && (
             <p className="lg__cta-final__price">
               {f.price}
-              <span className="lg__cta-final__price__ht">
-                {" "}{kind === "workshop" ? "TTC" : "HT"}
-              </span>
+              {!isFree(f) && (
+                <span className="lg__cta-final__price__ht">
+                  {" "}{kind === "workshop" ? "TTC" : "HT"}
+                </span>
+              )}
             </p>
           )}
           {kind === "workshop" ? (

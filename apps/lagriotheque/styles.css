@@ -199,6 +199,10 @@ button {
   }
 
   /* Bandeau pied de page imprimé : mentions OF + Qualiopi */
+  /* Workshops : vente directe, pas de mentions Qualiopi/NDA à l'impression. */
+  .lg__formation.is-workshop::after {
+    content: "LA GRIOTHÈQUE™ — LES GRIOTS · formations@lesgriots.com" !important;
+  }
   .lg__formation::after {
     content: "LA GRIOTHÈQUE™ — Pilier formation de la SASU LES GRIOTS · Certifié Qualiopi · NDA en cours · formations@lesgriots.com";
     display: block !important;
