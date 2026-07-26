@@ -4610,16 +4610,16 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
-/* NOTRE APPROCHE mobile : les titres des 3 points s'affichent en entier —
-   passage à la ligne autorisé au lieu du nowrap tronqué. */
+/* NOTRE APPROCHE mobile : chaque pilier tient sur UNE ligne entière —
+   la taille vient du hook de fit (--fit-size), qui réduit la font pour
+   que le titre remplisse exactement la largeur sans être tronqué. */
 @media (max-width: 700px) {
-  .lg__approche__accordion .lg__section-head__title,
-  .lg__approche__accordion .lg__section-big__title {
-    /* !important requis : le hook de fit pose un nowrap en style inline. */
-    white-space: normal !important;
-    overflow: visible;
-    font-size: 24px;
+  .lg__approche__accordion .lg__section-head__title {
+    font-size: var(--fit-size, 22px);
     line-height: 1.15;
+  }
+  .lg__approche__accordion .lg__section-big__title {
+    font-size: var(--fit-size, clamp(40px, 7vw, 140px));
   }
 }
 /* (anciennement masqué — le contenu vit maintenant dans .lg__section__body) */

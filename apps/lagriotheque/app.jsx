@@ -102,7 +102,9 @@ function useFitOne(maxSize = 200) {
       // Mesure : on force temporairement maxSize pour calculer le ratio
       el.style.fontSize = maxSize + "px";
       el.style.whiteSpace = "nowrap";
-      const cw = container.clientWidth;
+      // Largeur réellement disponible pour le titre lui-même (dans un flex
+      // avec le toggle +/− à droite, elle est plus petite que le conteneur).
+      const cw = el.clientWidth || container.clientWidth;
       const tw = el.scrollWidth;
       if (tw > 0 && cw > 0) {
         const scale = Math.min(1, cw / tw);
