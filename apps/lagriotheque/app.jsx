@@ -5382,6 +5382,92 @@ function Financement() {
   );
 }
 
+// Petit formulaire de contact (page À propos) : sujet au choix + message.
+// Poste sur /api/leads (source "contact") → visible dans le BO, onglet Leads.
+function ContactForm() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("Formations");
+  const [message, setMessage] = useState("");
+  const [state, setState] = useState("idle"); // idle | sending | done | error
+  const subjects = ["Formations", "Workshops", "Événements", "Partenariat", "Accessibilité / handicap", "Autre"];
+
+  async function submit(e) {
+    e.preventDefault();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setState("error"); return; }
+    setState("sending");
+    try {
+      const r = await fetch("https://admin.lagriotheque.com/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, subject, message, source: "contact" }),
+      });
+      setState(r.ok ? "done" : "error");
+    } catch (err) {
+      setState("error");
+    }
+  }
+
+  if (state === "done") {
+    return (
+      <div className="lg__contact__form">
+        <p className="lg__approche__about__kicker">Écris-nous</p>
+        <p className="lg__contact__form__done">
+          ✓ Message envoyé{name ? `, ${name}` : ""}. On te répond sous 48h ouvrées.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <form className="lg__contact__form" onSubmit={submit}>
+      <p className="lg__approche__about__kicker">Écris-nous</p>
+      <div className="lg__contact__form__subjects" role="radiogroup" aria-label="Sujet du message">
+        {subjects.map((s) => (
+          <button
+            key={s}
+            type="button"
+            className={"lg__contact__form__subject" + (subject === s ? " is-active" : "")}
+            onClick={() => setSubject(s)}
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+      <div className="lg__contact__form__row">
+        <input
+          type="text"
+          placeholder="Ton nom"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          autoComplete="name"
+        />
+        <input
+          type="email"
+          placeholder="Ton email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          required
+        />
+      </div>
+      <textarea
+        placeholder="Ton message"
+        rows={5}
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        required
+      />
+      {state === "error" && (
+        <p className="lg__contact__form__err">✗ Vérifie ton email et réessaie.</p>
+      )}
+      <button type="submit" className="lg__contact__form__send" disabled={state === "sending"}>
+        {state === "sending" ? "Envoi…" : "Envoyer"}
+      </button>
+    </form>
+  );
+}
+
 function Contact() {
   // Tout est éditable depuis le BO (section "contact"). On ré-applique le
   // span .lg-brand sur la 1re ligne via renderManifestoBrand pour garder le
@@ -5444,6 +5530,8 @@ function Contact() {
           </a>
         </p>
       </div>
+
+      <ContactForm />
 
       <div className="lg__contact__griot" aria-hidden="true">
         <GriotRing />

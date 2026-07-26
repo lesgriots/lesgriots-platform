@@ -6311,6 +6311,90 @@ a.lg__event, a.lg__event:hover { color: var(--ink); }
   fill: var(--ink);
 }
 
+/* Formulaire de contact (page À propos) — sujets cliquables + message. */
+.lg__contact__form {
+  max-width: 640px;
+  margin-top: clamp(36px, 6vh, 64px);
+}
+.lg__contact__form__subjects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+.lg__contact__form__subject {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  padding: 8px 14px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.lg__contact__form__subject.is-active {
+  background: var(--ink);
+  color: var(--paper);
+}
+.lg__contact__form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 560px) {
+  .lg__contact__form__row { grid-template-columns: 1fr; }
+}
+.lg__contact__form input,
+.lg__contact__form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ink);
+  border-radius: 0;
+  -webkit-appearance: none;
+}
+.lg__contact__form textarea { resize: vertical; }
+.lg__contact__form input::placeholder,
+.lg__contact__form textarea::placeholder { color: var(--ink-3); }
+.lg__contact__form input:focus,
+.lg__contact__form textarea:focus { outline: 2px solid var(--ink); outline-offset: -1px; }
+.lg__contact__form__send {
+  display: inline-block;
+  padding: 13px 26px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.lg__contact__form__send:hover { background: transparent; color: var(--ink); }
+.lg__contact__form__send:disabled { opacity: 0.6; cursor: wait; }
+.lg__contact__form__err {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: #b03030;
+  margin: 0 0 10px;
+}
+.lg__contact__form__done {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ink);
+  margin: 0;
+}
+
 @media (max-width: 900px) {
   .lg__contact { min-height: auto; padding-bottom: 240px; }
   .lg__contact__griot { width: 200px; height: 200px; bottom: 16px; right: 16px; }

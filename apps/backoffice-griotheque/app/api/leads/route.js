@@ -55,7 +55,7 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { email, name, phone, resource_id, consent, source } = body || {};
+    const { email, name, phone, resource_id, consent, source, subject, message } = body || {};
 
     // Validation basique de l'email
     if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -63,8 +63,8 @@ export async function POST(req) {
     }
 
     // source limité à une liste connue (pas de valeur arbitraire en base)
-    const src = ["site", "launch", "cpf"].includes(source) ? source : "site";
-    const lead = addLead({ email, name, phone, resource_id, consent, source: src });
+    const src = ["site", "launch", "cpf", "contact"].includes(source) ? source : "site";
+    const lead = addLead({ email, name, phone, resource_id, consent, source: src, subject, message });
 
     return NextResponse.json({ ok: true, id: lead.id }, { headers });
   } catch (err) {

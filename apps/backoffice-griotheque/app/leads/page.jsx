@@ -33,12 +33,14 @@ export default function LeadsPage() {
 
   function exportCsv() {
     const rows = [
-      ["email", "name", "phone", "source", "resource_id", "resource_title", "consent", "date"],
+      ["email", "name", "phone", "source", "subject", "message", "resource_id", "resource_title", "consent", "date"],
       ...leads.map((l) => [
         l.email,
         l.name || "",
         l.phone || "",
         l.source || "",
+        l.subject || "",
+        l.message || "",
         l.resource_id || "",
         resourcesById[l.resource_id]?.title || "",
         l.consent ? "oui" : "non",
@@ -90,6 +92,7 @@ export default function LeadsPage() {
               <th>Nom</th>
               <th>Téléphone</th>
               <th style={{ width: 80 }}>Source</th>
+              <th>Sujet / message</th>
               <th>Ressource</th>
               <th style={{ width: 100 }}>RGPD</th>
               <th style={{ width: 160 }}>Date</th>
@@ -103,6 +106,11 @@ export default function LeadsPage() {
                 <td>{l.name || "—"}</td>
                 <td>{l.phone || "—"}</td>
                 <td><span className="pill">{l.source || "site"}</span></td>
+                <td style={{ maxWidth: 320 }}>
+                  {l.subject ? <strong>{l.subject}</strong> : null}
+                  {l.subject && l.message ? " — " : null}
+                  {l.message ? <span style={{ whiteSpace: "pre-line" }}>{l.message}</span> : (!l.subject ? "—" : null)}
+                </td>
                 <td>
                   {l.resource_id ? (resourcesById[l.resource_id]?.title || l.resource_id) : "—"}
                 </td>

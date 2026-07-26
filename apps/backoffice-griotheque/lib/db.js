@@ -229,13 +229,15 @@ export function listLeads({ sort = true } = {}) {
 
 const MAX_LEADS = 10000; // garde-fou anti-spam : évite un JSON qui explose
 
-export function addLead({ email, name, phone, resource_id, consent, source }) {
+export function addLead({ email, name, phone, resource_id, consent, source, subject, message }) {
   if (!email) throw new Error("addLead: email required");
   const store = load();
   const normalized = String(email).trim().toLowerCase();
   // Dédoublonnage : même email + même contexte (ressource/source) = on
   // retourne le lead existant au lieu d'empiler des doublons.
-  const existing = (store.leads || []).find(
+  // Exception : un lead avec message (formulaire de contact) est toujours
+  // enregistré — deux messages différents ne sont pas des doublons.
+  const existing = message ? null : (store.leads || []).find(
     (l) =>
       l.email === normalized &&
       (l.resource_id || "") === (resource_id || "") &&
@@ -254,6 +256,8 @@ export function addLead({ email, name, phone, resource_id, consent, source }) {
     resource_id: resource_id || "",
     consent: !!consent,
     source: source || "site",
+    subject: subject ? String(subject).trim().slice(0, 80) : "",
+    message: message ? String(message).trim().slice(0, 2000) : "",
     created_at: new Date().toISOString(),
   };
   store.leads = [...(store.leads || []), lead];
