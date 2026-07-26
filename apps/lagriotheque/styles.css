@@ -5635,12 +5635,13 @@ a.lg__event, a.lg__event:hover { color: var(--ink); }
 .lg__event.is-past { opacity: 0.5; }
 .lg__event__main { min-width: 0; }
 .lg__event__title {
+  /* Même échelle que les titres des lignes de la page Formations. */
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(18px, 1.8vw, 24px);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  margin: 0 0 6px;
+  font-size: clamp(28px, 4vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin: 0 0 8px;
   color: var(--ink);
 }
 .lg__event__meta {
@@ -5668,7 +5669,7 @@ a.lg__event, a.lg__event:hover { color: var(--ink); }
 @media (max-width: 640px) {
   /* Même disposition qu'en desktop : titre+méta à gauche, lien à droite. */
   .lg__event { gap: 14px; padding: 18px 0; }
-  .lg__event__title { font-size: 17px; }
+  .lg__event__title { font-size: 28px; }
   .lg__event__meta { font-size: 12px; }
   .lg__event__meta__dot { padding: 0 4px; }
   .lg__event__cta { font-size: 13px; }
