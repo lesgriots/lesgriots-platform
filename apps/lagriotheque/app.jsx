@@ -5378,31 +5378,7 @@ function Contact() {
         {renderManifestoBrand(text("contact.line1", "LA GRIOTHÈQUE"))}
       </p>
 
-      {/* Bloc contact — même langage que « Notre écosystème ». */}
-      <div className="lg__contact__coords">
-        <p className="lg__approche__about__kicker">Contact</p>
-        <p className="lg__contact__coords__mail">
-          <a href={"mailto:" + email}>{email}</a>
-        </p>
-        <p className="lg__contact__coords__line">
-          Référent pédagogique et référent handicap : Moos Coulibaly
-        </p>
-        <p className="lg__contact__coords__line lg__contact__coords__line--muted">
-          {text("contact.line2", "Organisme de formation")} {text("contact.line3", "de la SASU LES GRIOTS")} · {text("contact.line4", "Certifié Qualiopi")}
-        </p>
-        <p className="lg__contact__coords__links">
-          <a href={text("contact.instagram_url", "https://instagram.com/lagriotheque")} target="_blank" rel="noopener">
-            {text("contact.instagram_label", "instagram")} ↗
-          </a>
-          {" · "}
-          <a href={text("contact.linkedin_url", "https://linkedin.com")} target="_blank" rel="noopener">
-            {text("contact.linkedin_label", "linkedin")} ↗
-          </a>
-        </p>
-      </div>
-
-      {/* À propos : deux textes éditables en BO, structurés — L'école (la
-          Griothèque) puis La maison (LES GRIOTS, avec lien vers le site). */}
+      {/* Notre écosystème d'abord, Contact ensuite (ordre demandé par Moos). */}
       {text("approche.about_lesgriots", "") && (
         <div className="lg__approche__about">
           {text("approche.about_lesgriots", "") && (
@@ -5428,6 +5404,29 @@ function Contact() {
           )}
         </div>
       )}
+
+      {/* Bloc contact — même langage que « Notre écosystème ». */}
+      <div className="lg__contact__coords">
+        <p className="lg__approche__about__kicker">Contact</p>
+        <p className="lg__contact__coords__mail">
+          <a href={"mailto:" + email}>{email}</a>
+        </p>
+        <p className="lg__contact__coords__line">
+          Référent pédagogique et référent handicap : Moos Coulibaly
+        </p>
+        <p className="lg__contact__coords__line lg__contact__coords__line--muted">
+          {text("contact.line2", "Organisme de formation")} {text("contact.line3", "de la SASU LES GRIOTS")} · {text("contact.line4", "Certifié Qualiopi")}
+        </p>
+        <p className="lg__contact__coords__links">
+          <a href={text("contact.instagram_url", "https://instagram.com/lagriotheque")} target="_blank" rel="noopener">
+            {text("contact.instagram_label", "instagram")} ↗
+          </a>
+          {" · "}
+          <a href={text("contact.linkedin_url", "https://linkedin.com")} target="_blank" rel="noopener">
+            {text("contact.linkedin_label", "linkedin")} ↗
+          </a>
+        </p>
+      </div>
 
       <div className="lg__contact__griot" aria-hidden="true">
         <GriotRing />
@@ -5485,7 +5484,13 @@ function Partners() {
   return (
     <section className="lg__partners" aria-label="Partenaires">
       <div className="lg__partners__tier">
-        <p className="lg__partners__label">Nos partenaires.</p>
+        <h2 className="lg__partners__heading">{text("approche.partners_title", "Nos partenaires")}</h2>
+        <p className="lg__partners__intro">
+          {text(
+            "approche.partners_intro",
+            "La Griothèque avance entourée de structures qui accompagnent, financent et font grandir les créatifs et les entrepreneurs."
+          )}
+        </p>
         <div className="lg__partners__list">
           <a
             className="lg__partners__logo lg__partners__logo--img"

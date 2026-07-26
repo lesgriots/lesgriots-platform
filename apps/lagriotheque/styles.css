@@ -4610,6 +4610,18 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
+/* NOTRE APPROCHE mobile : les titres des 3 points s'affichent en entier —
+   passage à la ligne autorisé au lieu du nowrap tronqué. */
+@media (max-width: 700px) {
+  .lg__approche__accordion .lg__section-head__title,
+  .lg__approche__accordion .lg__section-big__title {
+    /* !important requis : le hook de fit pose un nowrap en style inline. */
+    white-space: normal !important;
+    overflow: visible;
+    font-size: 24px;
+    line-height: 1.15;
+  }
+}
 /* (anciennement masqué — le contenu vit maintenant dans .lg__section__body) */
 /* Informations en grille pour aérer (mobile: 1 col) */
 .lg__formation__info-grid {
@@ -4766,7 +4778,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__contact .lg__approche__about__kicker {
   font-family: var(--font-sans);
   font-size: clamp(18px, 2vw, 26px);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.01em;
   text-transform: none;
   color: var(--ink);
@@ -6185,7 +6197,7 @@ a.lg__event, a.lg__event:hover { color: var(--ink); }
 .lg__contact__coords .lg__approche__about__kicker {
   font-family: var(--font-sans);
   font-size: clamp(18px, 2vw, 26px);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.01em;
   text-transform: none;
   color: var(--ink);
@@ -6319,6 +6331,25 @@ a.lg__event, a.lg__event:hover { color: var(--ink); }
   text-transform: none;
   color: var(--ink-2, #666);
   margin: 0;
+}
+/* Titre + texte d'intro de la section partenaires (page Notre approche). */
+.lg__partners__heading {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: clamp(18px, 2vw, 26px);
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink);
+}
+.lg__partners__intro {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 62ch;
+  margin: 0;
+  white-space: pre-line;
 }
 .lg__partners__list {
   display: flex;
