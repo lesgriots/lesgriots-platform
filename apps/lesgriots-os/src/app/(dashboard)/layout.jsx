@@ -5,6 +5,7 @@ import { ToastProvider, ConfirmProvider } from '@/components/ui';
 import QuickAddJournal from '@/components/QuickAddJournal';
 import CommandPalette from '@/components/CommandPalette';
 import { PinnedProvider, default as PinnedBar } from '@/components/PinnedBar';
+import ThemeSection from '@/components/layout/ThemeSection';
 
 export default function DashboardLayout({ children }) {
   return (
@@ -18,6 +19,7 @@ export default function DashboardLayout({ children }) {
           fontFamily: 'var(--font-sans)',
           color: 'var(--text)',
         }}>
+          <ThemeSection />
           <Sidebar />
           <main style={{
             flex: 1,
