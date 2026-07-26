@@ -3,7 +3,7 @@ import { usePathname } from 'next/navigation';
 import WordmarkGriotheque from './WordmarkGriotheque';
 import { estGriotheque } from './ThemeSection';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMediaQuery } from '@/components/ui';
 
 // ── Logo LES GRIOTS (inline, hérite de currentColor → s'adapte encre/papier) ──
@@ -48,12 +48,12 @@ const icons = {
 const NAV = [
   { type: 'item', href: '/', icon: 'home', label: 'Accueil', monde: 'studio' },
   // Sur le domaine Griothèque, l'accueil est la vue d'ensemble de l'OF.
-  { type: 'item', href: '/apercu', icon: 'home', label: 'Vue d ensemble', monde: 'griotheque' },
+  { type: 'item', href: '/apercu', icon: 'home', label: 'Vue d’ensemble', monde: 'griotheque' },
   { type: 'divider', label: 'GRIOTHÈQUE' },
   { href: '/catalogue', icon: 'formations', label: 'Formations' },
-  { href: '/sessions-list', icon: 'sessions', label: 'Sessions' },
-  { href: '/apprenants', icon: 'apprenants', label: 'Apprenants' },
-  { href: '/organisme', icon: 'organisme', label: 'Organisme' },
+  { href: '/sessions-list', icon: 'sessions', label: 'Sessions', compteur: 'sessions' },
+  { href: '/apprenants', icon: 'apprenants', label: 'Apprenants', compteur: 'apprenants' },
+  { href: '/organisme', icon: 'organisme', label: 'Organisme', compteur: 'conformite', ton: 'alerte' },
   { type: 'divider', label: 'STUDIO', monde: 'studio' },
   { href: '/projects', icon: 'projects', label: 'Projets', monde: 'studio' },
   { href: '/pipeline', icon: 'pipeline', label: 'Pipeline', monde: 'studio' },
@@ -68,14 +68,40 @@ const NAV = [
   { href: '/settings', icon: 'settings', label: 'Réglages' },
 ];
 
+// Deux libellés d'identité : l'initiale quand la place manque, le rôle en clair.
+const initiales = (nom) => (nom || '')
+  .split(/\s+/).filter(Boolean).slice(0, 2).map((m) => m[0].toUpperCase()).join('') || '—';
+
+const ROLES = {
+  admin: 'Administrateur',
+  formateur: 'Formateur',
+  gestionnaire: 'Responsable pédagogique',
+  lecteur: 'Lecture seule',
+};
+const roleLisible = (r) => ROLES[r] || 'Responsable pédagogique';
+
 export default function Sidebar() {
   const pathname = usePathname();
   // Deux mondes : la Griothèque porte sa propre marque, le Studio la sienne.
   const monde = estGriotheque(pathname || '') ? 'griotheque' : 'studio';
+  const [compteurs, setCompteurs] = useState({});
+  const [moi, setMoi] = useState(null);
   const [collapsedState, setCollapsed] = useState(false);
   const isMobile = useMediaQuery('(max-width: 767px)');
   const [mobileOpen, setMobileOpen] = useState(false);
   const collapsed = collapsedState && !isMobile;
+
+  // Les pastilles et l'identité ne concernent que l'organisme de formation.
+  useEffect(() => {
+    if (monde !== 'griotheque') return;
+    let vivant = true;
+    Promise.all([
+      fetch('/api/griotheque/compteurs').then((r) => (r.ok ? r.json() : {})).catch(() => ({})),
+      fetch('/api/auth/me').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    ]).then(([c, m]) => { if (vivant) { setCompteurs(c || {}); setMoi(m); } });
+    return () => { vivant = false; };
+  }, [monde]);
+
   const w = collapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)';
 
   const asideStyle = isMobile
@@ -208,23 +234,6 @@ export default function Sidebar() {
         )}
       </div>
 
-      {/* Passerelle vers l'OS complet — le Studio migre vers son propre
-          domaine (os.lesgriots.com) ; ce lien disparaîtra ensuite. */}
-      {monde === 'griotheque' && !collapsed && (
-        <a
-          href="https://os.lesgriots.com"
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            padding: '10px 16px', margin: '0 8px 4px',
-            fontSize: 11.5, color: 'var(--text-3)', textDecoration: 'none',
-            borderBottom: '1px solid var(--border)',
-          }}
-          title="Projets, pipeline agence, finances globales"
-        >
-          <span style={{ opacity: 0.7 }}>↗</span> LES GRIOTS OS
-        </a>
-      )}
-
       {/* Nav */}
       <nav style={{
         flex: 1,
@@ -292,10 +301,53 @@ export default function Sidebar() {
               )}
               <span style={{ flexShrink: 0 }}>{icons[item.icon]}</span>
               {!collapsed && <span>{item.label}</span>}
+              {!collapsed && item.compteur && compteurs[item.compteur] ? (
+                <span style={{
+                  marginLeft: 'auto',
+                  minWidth: 20,
+                  padding: '1px 6px',
+                  borderRadius: 20,
+                  fontSize: 10.5,
+                  fontWeight: 600,
+                  lineHeight: 1.6,
+                  textAlign: 'center',
+                  background: item.ton === 'alerte' ? 'var(--gold)' : 'rgba(255,255,255,0.10)',
+                  color: item.ton === 'alerte' ? '#141210' : 'var(--text-2)',
+                }}>
+                  {compteurs[item.compteur]}
+                </span>
+              ) : null}
             </Link>
           );
         })}
       </nav>
+
+      {monde === 'griotheque' && !collapsed && (
+        <div style={{ borderTop: '1px solid var(--border)', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+              background: 'var(--gold)', color: '#141210',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 11.5, fontWeight: 700, letterSpacing: '0.02em',
+            }}>
+              {initiales(moi?.name)}
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {moi?.name || 'Compte'}
+              </div>
+              <div style={{ fontSize: 10.5, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {roleLisible(moi?.role)}
+              </div>
+            </div>
+          </div>
+          <Link href="/" style={{ fontSize: 11, color: 'var(--text-3)', textDecoration: 'none' }}
+                title="Projets, pipeline agence, finances globales">
+            <span style={{ opacity: 0.7 }}>&#8599;</span> LES GRIOTS OS
+          </Link>
+        </div>
+      )}
 
       {collapsed && (
         <div style={{ padding: '12px 0', display: 'flex', justifyContent: 'center', borderTop: '1px solid var(--border)' }}>

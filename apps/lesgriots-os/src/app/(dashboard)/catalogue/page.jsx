@@ -17,6 +17,10 @@ import Link from 'next/link';
 import TopBar from '@/components/layout/TopBar';
 import { Card, Badge, Skeleton, EmptyState } from '@/components/ui';
 
+// Les statuts viennent de la base en anglais ; ils s'affichent en français.
+const STATUTS = { active: 'Active', archived: 'Archivée', draft: 'Brouillon', inactive: 'Inactive' };
+const statutLisible = (s) => STATUTS[String(s || '').toLowerCase()] || s || '—';
+
 const euros = (n) => n
   ? new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
   : '—';
@@ -109,7 +113,7 @@ export default function CataloguePage() {
                         <td style={{ padding: '13px 12px', borderBottom: '1px solid var(--border)' }}>{compteur[f.id] || 0}</td>
                         <td style={{ padding: '13px 12px', borderBottom: '1px solid var(--border)' }}>
                           <Badge tone={String(f.status || '').toLowerCase() === 'active' ? 'success' : 'neutral'}>
-                            {f.status || '—'}
+                            {statutLisible(f.status)}
                           </Badge>
                         </td>
                       </tr>

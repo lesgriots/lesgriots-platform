@@ -15,6 +15,17 @@ import { withGuard } from '@/lib/api-guard';
 
 const PIECES_ATTENDUES = ['kbis', 'nda', 'qualiopi', 'assurance_rc', 'urssaf'];
 
+// Le nom administratif exact, pas la clé technique : on lit une liste de
+// pièces à fournir, pas un schéma de base de données.
+const LIBELLES_PIECES = {
+  kbis: 'extrait Kbis',
+  nda: 'déclaration d\u2019activité (NDA)',
+  qualiopi: 'certificat Qualiopi',
+  assurance_rc: 'attestation de responsabilité civile',
+  urssaf: 'attestation de vigilance URSSAF',
+};
+const libellePiece = (t) => LIBELLES_PIECES[t] || t.replace('_', ' ');
+
 async function _GET() {
   try {
     const db = getDb();
@@ -83,13 +94,13 @@ async function _GET() {
     const aTraiter = [];
     for (const t of PIECES_ATTENDUES) {
       const p = pieces.find((x) => x.type === t);
-      if (!p) aTraiter.push({ texte: `Pièce manquante : ${t.replace('_', ' ')}`, meta: 'Dossier organisme', ton: 'danger' });
-      else if (p.expire_le && p.expire_le < auj) aTraiter.push({ texte: `Pièce expirée : ${t}`, meta: `Depuis le ${p.expire_le}`, ton: 'danger' });
+      if (!p) aTraiter.push({ texte: `Pièce manquante : ${libellePiece(t)}`, meta: 'Dossier organisme', ton: 'danger' });
+      else if (p.expire_le && p.expire_le < auj) aTraiter.push({ texte: `Pièce expirée : ${libellePiece(t)}`, meta: `Depuis le ${p.expire_le}`, ton: 'danger' });
     }
     for (const s of sessionsIncompletes.slice(0, 4)) {
       const quoi = [!s.nb_emarg && 'émargement', !s.nb_satis && 'enquête à chaud'].filter(Boolean).join(' et ');
       aTraiter.push({
-        texte: `${quoi.charAt(0).toUpperCase() + quoi.slice(1)} manquant — ${s.formation_titre || s.session_name || 'session'}`,
+        texte: `${quoi.charAt(0).toUpperCase() + quoi.slice(1)} à récupérer · ${s.formation_titre || s.session_name || 'session'}`,
         meta: `Session du ${s.start_date}`, ton: 'gold',
       });
     }
