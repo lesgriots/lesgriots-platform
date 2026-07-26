@@ -6115,6 +6115,16 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
     padding-right: 0;
   }
 }
+/* Titre de la page À propos. */
+.lg__contact__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(34px, 5vw, 64px);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin: 0 0 clamp(24px, 4vh, 40px);
+  color: var(--ink);
+}
 /* Présentation de la page À propos : paragraphe de lecture, largeur de
    colonne confortable — distinct de la pile display en dessous. */
 .lg__contact__presentation {
