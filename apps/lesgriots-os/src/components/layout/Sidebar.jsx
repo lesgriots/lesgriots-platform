@@ -48,7 +48,6 @@ const NAV = [
   { href: '/formations', icon: 'formations', label: 'Formations' },
   { href: '/sessions-list', icon: 'sessions', label: 'Sessions' },
   { href: '/apprenants', icon: 'apprenants', label: 'Apprenants' },
-  { href: '/organisme', icon: 'settings', label: 'Organisme' },
   { type: 'divider', label: 'STUDIO' },
   { href: '/projects', icon: 'projects', label: 'Projets' },
   { href: '/pipeline', icon: 'pipeline', label: 'Pipeline' },
@@ -153,10 +152,17 @@ export default function Sidebar() {
       }}>
         {!collapsed && (
           <>
-            <img src="/branding/lesgriots-sticker.png" alt="les griots" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, filter: 'drop-shadow(2px 3px 0 rgba(0,0,0,0.30))' }} />
+            {monde === 'griotheque' ? (
+              // Monde Griothèque : le mot-marque du site, encré sur le papier.
+              <div style={{ padding: '4px 0 2px' }}>
+                <WordmarkGriotheque height={17} style={{ maxWidth: '100%' }} />
+              </div>
+            ) : (
+              <img src="/branding/lesgriots-sticker.png" alt="les griots" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, filter: 'drop-shadow(2px 3px 0 rgba(0,0,0,0.30))' }} />
+            )}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.28em', fontWeight: 700, paddingLeft: 3 }}>
-                OS
+                {monde === 'griotheque' ? 'ORGANISME DE FORMATION' : 'OS'}
               </div>
               <button
                 className="resp-hide-mobile btn-inline"
@@ -179,10 +185,17 @@ export default function Sidebar() {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 3,
-          }} aria-label="les griots">
-            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#141210', display: 'block' }} />
-            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#141210', display: 'block' }} />
-            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#141210', display: 'block' }} />
+          }} aria-label={monde === 'griotheque' ? 'la griothèque' : 'les griots'}>
+            {monde === 'griotheque' ? (
+              // Replié : le mot-marque ne tient pas, on garde l'initiale de la maison.
+              <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 15, color: '#141210', lineHeight: 1 }}>G</span>
+            ) : (
+              <>
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#141210', display: 'block' }} />
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#141210', display: 'block' }} />
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#141210', display: 'block' }} />
+              </>
+            )}
           </div>
         )}
       </div>
