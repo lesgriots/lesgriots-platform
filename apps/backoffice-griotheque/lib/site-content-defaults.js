@@ -326,7 +326,7 @@ export const SITE_CONTENT_SECTIONS = [
     desc: "Carte d'identité de LA GRIOTHÈQUE + liens sociaux.",
     fields: [
       { key: "title", label: "Titre de la page (interne)", type: "text" },
-      { key: "line1", label: "Ligne 1 (nom de marque)", type: "text" },
+      { key: "line1", label: "Présentation (texte long, affiché en tête de la page)", type: "textarea", rows: 6 },
       { key: "line2", label: "Ligne 2", type: "text" },
       { key: "line3", label: "Ligne 3", type: "text" },
       { key: "line4", label: "Ligne 4", type: "text" },

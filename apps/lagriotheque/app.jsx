@@ -4945,46 +4945,38 @@ function Financement() {
 }
 
 function Contact() {
-  // Page « À propos » (route contact). Tout reste éditable depuis le BO
-  // (section "contact") : line1 = présentation, line2-4 = identité de
-  // l'organisme, lieux, email, réseaux. Structure : titre + présentation
-  // lisible + trois blocs à kicker (organisme / lieux / contact).
+  // Tout est éditable depuis le BO (section "contact"). On ré-applique le
+  // span .lg-brand sur la 1re ligne via renderManifestoBrand pour garder le
+  // style typographique du nom de marque.
   const email = text("contact.email", "formations@lesgriots.com");
   return (
     <section className="lg__contact" id="contact">
-      <h1 className="lg__contact__title">{text("contact.title", "À propos")}</h1>
-      <p className="lg__contact__lede">{renderManifestoBrand(text("contact.line1", "LA GRIOTHÈQUE"))}</p>
-      <div className="lg__contact__grid">
-        <div className="lg__contact__block">
-          <p className="lg__contact__kicker">L'organisme</p>
-          <p>{text("contact.line2", "Organisme de formation")}</p>
-          <p>{text("contact.line3", "de la SASU LES GRIOTS")}</p>
-          <p>{text("contact.line4", "Certifié Qualiopi")}</p>
-        </div>
-        <div className="lg__contact__block">
-          <p className="lg__contact__kicker">Où</p>
-          <p>{text("contact.location_main", "Présentiel à Paris")}</p>
-          <p>{text("contact.location_hq", "Siège social · Le Havre")}</p>
-        </div>
-        <div className="lg__contact__block">
-          <p className="lg__contact__kicker">Contact</p>
-          <p><a href={"mailto:" + email}>{email}</a></p>
-          <p>
-            <a href={text("contact.instagram_url", "https://instagram.com/lagriotheque")} target="_blank" rel="noopener">
-              {text("contact.instagram_label", "instagram")}
-            </a>
-          </p>
-          <p>
-            <a href={text("contact.linkedin_url", "https://linkedin.com")} target="_blank" rel="noopener">
-              {text("contact.linkedin_label", "linkedin")}
-            </a>
-          </p>
-          <p>
-            <a href={text("contact.studio_url", "https://lesgriotsxstudio.com")} target="_blank" rel="noopener">
-              {text("contact.studio_label", "lesgriotsxstudio.com")}
-            </a>
-          </p>
-        </div>
+      <div className="lg__contact__info">
+        <p>{renderManifestoBrand(text("contact.line1", "LA GRIOTHÈQUE"))}</p>
+        <p>{text("contact.line2", "Organisme de formation")}</p>
+        <p>{text("contact.line3", "de la SASU LES GRIOTS")}</p>
+        <p>{text("contact.line4", "Certifié Qualiopi")}</p>
+        <p>&nbsp;</p>
+        <p>{text("contact.location_main", "Présentiel à Paris")}</p>
+        <p>{text("contact.location_hq", "Siège social · Le Havre")}</p>
+        <p>&nbsp;</p>
+        <p><a href={"mailto:" + email}>{email}</a></p>
+        <p>&nbsp;</p>
+        <p>
+          <a href={text("contact.instagram_url", "https://instagram.com/lagriotheque")} target="_blank" rel="noopener">
+            {text("contact.instagram_label", "instagram")}
+          </a>
+        </p>
+        <p>
+          <a href={text("contact.linkedin_url", "https://linkedin.com")} target="_blank" rel="noopener">
+            {text("contact.linkedin_label", "linkedin")}
+          </a>
+        </p>
+        <p>
+          <a href={text("contact.studio_url", "https://lesgriotsxstudio.com")} target="_blank" rel="noopener">
+            {text("contact.studio_label", "lesgriotsxstudio.com")}
+          </a>
+        </p>
       </div>
       <div className="lg__contact__griot" aria-hidden="true">
         <GriotRing />
