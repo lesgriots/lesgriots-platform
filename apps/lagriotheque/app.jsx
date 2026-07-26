@@ -3252,10 +3252,7 @@ function Workshops() {
             "workshops_page.intro",
             "Des formats courts et intensifs pour les créatifs. Immersion totale, groupes restreints, accompagnement sur ton projet réel."
           )}
-          sub={text(
-            "workshops_page.sub",
-            "2026 · Paris & en résidence · sur sélection de dossier"
-          )}
+          sub={text("workshops_page.sub", "")}
         />
       </PageHero>
       <div className="lg__rows">
