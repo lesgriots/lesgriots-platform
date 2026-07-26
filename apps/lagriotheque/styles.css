@@ -4613,14 +4613,14 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
-/* NOTRE APPROCHE mobile : chaque pilier tient sur UNE ligne entière.
-   Taille FIXE calibrée sur le titre le plus long (pas de JS : le hook de
-   fit refittait au scroll/toggle et faisait « respirer » le texte). */
+/* NOTRE APPROCHE mobile : chaque pilier tient sur UNE ligne et remplit
+   la largeur — taille par titre via le hook de fit (--fit-size). Stable
+   depuis que la colonne du titre est en 1fr (largeur indépendante du
+   contenu : la mesure ne se re-boucle plus sur elle-même). */
 @media (max-width: 700px) {
   .lg__approche__accordion .lg__section-head__title {
-    font-size: clamp(9px, 3vw, 22px);
-    line-height: 1.2;
-    letter-spacing: -0.02em;
+    font-size: var(--fit-size, 22px);
+    line-height: 1.15;
   }
 }
 /* (anciennement masqué — le contenu vit maintenant dans .lg__section__body) */

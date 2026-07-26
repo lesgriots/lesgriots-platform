@@ -91,7 +91,12 @@ function BrandLogo() {
 
 // Hook qui mesure UN titre et règle font-size pour qu'il remplisse
 // la largeur du parent sur une seule ligne (sans dépasser maxSize).
-function useFitOne(maxSize = 200) {
+// Cache des tailles calculées, clé = texte + largeur dispo. Sans lui, chaque
+// re-montage (toggle accordéon) remesure et pouvait produire une valeur
+// différente → le texte « respirait ». Une taille calculée fontes chargées
+// est définitive pour un même couple (texte, largeur).
+const FIT_SIZE_CACHE = new Map();
+function useFitOne(maxSize = 200, deps = []) {
   const ref = useRef(null);
   useLayoutEffect(() => {
     const el = ref.current;
@@ -99,20 +104,31 @@ function useFitOne(maxSize = 200) {
     const fit = () => {
       const container = el.parentElement;
       if (!container) return;
+      // Largeur réellement disponible pour le titre lui-même (colonne 1fr,
+      // indépendante du contenu — le toggle +/− occupe la colonne de droite).
+      const cwNow = el.clientWidth || container.clientWidth;
+      const key = maxSize + "|" + cwNow + "|" + el.textContent;
+      if (FIT_SIZE_CACHE.has(key)) {
+        el.style.setProperty("--fit-size", FIT_SIZE_CACHE.get(key) + "px");
+        return;
+      }
       // Mesure : on force temporairement maxSize pour calculer le ratio
       el.style.fontSize = maxSize + "px";
       el.style.whiteSpace = "nowrap";
-      // Largeur réellement disponible pour le titre lui-même (dans un flex
-      // avec le toggle +/− à droite, elle est plus petite que le conteneur).
       const cw = el.clientWidth || container.clientWidth;
       const tw = el.scrollWidth;
+      el.style.fontSize = "";
       if (tw > 0 && cw > 0) {
         const scale = Math.min(1, cw / tw);
         const newSize = Math.floor(maxSize * scale * 0.985);
+        // Cache uniquement une fois les fontes chargées (sinon la mesure se
+        // fait sur la fonte de secours et fausserait la valeur mémorisée).
+        if (!document.fonts || document.fonts.status === "loaded") {
+          FIT_SIZE_CACHE.set(key, newSize);
+        }
         // On expose la taille via CSS variable plutôt qu'inline → permet à
         // .is-stuck d'utiliser calc(var(--fit-size) * 0.5) pour shrinker
         // la font sans toucher au transform (la barre garde sa pleine largeur).
-        el.style.fontSize = "";
         el.style.setProperty("--fit-size", newSize + "px");
       }
     };
@@ -122,7 +138,8 @@ function useFitOne(maxSize = 200) {
     }
     window.addEventListener("resize", fit);
     return () => window.removeEventListener("resize", fit);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
   return ref;
 }
 
@@ -726,8 +743,10 @@ function FormationRow({ f, onHover }) {
 // Rangée de section : titre cliquable. Fermée → ligne tight ; ouverte → titre
 // proportion "Seasons" (géant + numéro en exposant + rule + contenu en dessous).
 function SectionRow({ title, id, index, open, onToggle, children }) {
-  const tightRef = useFitOne(64);
-  const bigRef = useFitOne(220);
+  // deps [open] : à chaque bascule ouvert/fermé le h2 est recréé — l'effet
+  // doit se rejouer pour re-poser --fit-size sur le nouvel élément.
+  const tightRef = useFitOne(64, [open]);
+  const bigRef = useFitOne(220, [open]);
   if (open) {
     const num = "(" + String(index).padStart(2, "0") + ")";
     return (
