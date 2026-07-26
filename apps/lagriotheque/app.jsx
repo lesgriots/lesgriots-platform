@@ -2324,8 +2324,116 @@ function FormationPage({ f }) {
   return <ProgramPage item={f} kind="formation" />;
 }
 
+// Fiche WORKSHOP — layout ÉVÉNEMENT, volontairement distinct du gabarit
+// réglementaire des formations : pas d'onglets, pas de carte de réservation,
+// pas de cadre Qualiopi. Une page linéaire : hero, bandeau date/lieu/durée/
+// prix, CTA, contenu, formateur, CTA final.
 function WorkshopPage({ w }) {
-  return <ProgramPage item={w} kind="workshop" />;
+  const upcoming = SESSIONS
+    .filter((s) => sessionMatchesItem(s, w, "workshop"))
+    .sort((a, b) => parseSessionDate(a.date || a.dateLabel).sortKey
+      .localeCompare(parseSessionDate(b.date || b.dateLabel).sortKey));
+  const nextSession =
+    upcoming.find((s) => normalizeStatus(s.status).class === "open") || upcoming[0];
+  const st = nextSession ? normalizeStatus(nextSession.status) : null;
+  const cta = (extra) => (
+    <a
+      className={"lg__ws__btn" + (extra ? " " + extra : "")}
+      href={ctaHref(w, nextSession)}
+      {...(ctaIsExternal(w) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
+      {ctaLabel(w)}
+    </a>
+  );
+  return (
+    <section className="lg__formation lg__ws is-workshop">
+      <PageHero
+        src={(w.media && w.media.src) || ""}
+        poster={(w.media && w.media.poster) || undefined}
+        title={w.title}
+      >
+        {w.tagline && <p className="lg__formation__herosub">{w.tagline}</p>}
+      </PageHero>
+
+      {/* Bandeau méta — l'essentiel d'un événement, d'un coup d'œil. */}
+      <div className="lg__ws__meta">
+        {nextSession && (
+          <div className="lg__ws__meta__cell">
+            <span className="lg__ws__meta__label">Date</span>
+            <strong className="lg__ws__meta__value">{sessionDateLabel(nextSession)}</strong>
+            {st && (
+              <span className={"lg__ws__meta__status is-" + st.class}>
+                {st.label}
+                {nextSession.places && st.class === "open" && (
+                  <> · {nextSession.places} places</>
+                )}
+              </span>
+            )}
+          </div>
+        )}
+        <div className="lg__ws__meta__cell">
+          <span className="lg__ws__meta__label">Lieu</span>
+          <strong className="lg__ws__meta__value">{w.format || w.location || "—"}</strong>
+        </div>
+        <div className="lg__ws__meta__cell">
+          <span className="lg__ws__meta__label">Durée</span>
+          <strong className="lg__ws__meta__value">{formatDuration(w.duration) || "—"}</strong>
+        </div>
+        <div className="lg__ws__meta__cell">
+          <span className="lg__ws__meta__label">Prix</span>
+          <strong className="lg__ws__meta__value">{w.price || "—"}</strong>
+        </div>
+      </div>
+
+      <div className="lg__ws__ctarow">{cta()}</div>
+
+      <div className="lg__ws__body">
+        {w.description && (
+          <div className="lg__ws__block">
+            <h2 className="lg__ws__h2">Le workshop</h2>
+            <p className="lg__formation__prose lg__ws__prose">{w.description}</p>
+          </div>
+        )}
+        {Array.isArray(w.objectives) && w.objectives.length > 0 && (
+          <div className="lg__ws__block">
+            <h2 className="lg__ws__h2">Tu repars avec</h2>
+            <ul className="lg__ws__list">
+              {w.objectives.map((o, i) => <li key={i}>{o}</li>)}
+            </ul>
+          </div>
+        )}
+        {w.audience && (
+          <div className="lg__ws__block">
+            <h2 className="lg__ws__h2">Pour qui</h2>
+            <p className="lg__formation__prose lg__ws__prose">{w.audience}</p>
+            {w.prerequisites && (
+              <p className="lg__formation__prose lg__ws__prose lg__ws__prose--muted">{w.prerequisites}</p>
+            )}
+          </div>
+        )}
+        {w.location && (
+          <div className="lg__ws__block">
+            <h2 className="lg__ws__h2">Le lieu</h2>
+            <p className="lg__formation__prose lg__ws__prose">{w.location}</p>
+          </div>
+        )}
+        {w.trainer && (
+          <div className="lg__ws__block">
+            <h2 className="lg__ws__h2">Animé par</h2>
+            <TrainersInline trainers={w.trainer} />
+          </div>
+        )}
+      </div>
+
+      <div className="lg__cta-final">
+        <div className="lg__cta-final__inner">
+          <p className="lg__cta-final__kicker">On se voit là-bas ?</p>
+          <h2 className="lg__cta-final__title">{w.title}</h2>
+          {cta("lg__cta-final__btn--ws")}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function FormationDetail({ id, onClose }) {

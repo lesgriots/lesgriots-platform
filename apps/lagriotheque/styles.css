@@ -7596,3 +7596,103 @@ a.lg__partners__logo:hover {
   }
   html { scroll-behavior: auto !important; }
 }
+
+/* ===================================================================
+   FICHE WORKSHOP — layout ÉVÉNEMENT (distinct des formations).
+   Page linéaire : bandeau méta, CTA, blocs de contenu à filets.
+   =================================================================== */
+.lg__ws__meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0 clamp(16px, 3vw, 40px);
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding: 18px 0;
+  margin: 8px 0 22px;
+}
+.lg__ws__meta__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.lg__ws__meta__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3, rgba(0, 0, 0, 0.55));
+}
+.lg__ws__meta__value {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(15px, 1.6vw, 22px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.lg__ws__meta__status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.lg__ws__meta__status.is-open { color: #1a7a3a; }
+.lg__ws__meta__status.is-full,
+.lg__ws__meta__status.is-cancel { color: #b03030; }
+.lg__ws__ctarow { margin: 0 0 clamp(36px, 6vh, 64px); }
+.lg__ws__btn {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+  padding: 16px 28px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: clamp(15px, 1.3vw, 18px);
+  letter-spacing: 0;
+  text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.lg__ws__btn:hover { background: var(--accent); color: var(--ink); }
+.lg__ws__body { max-width: 760px; }
+.lg__ws__block {
+  border-top: 1px solid var(--ink);
+  padding: 18px 0 30px;
+}
+.lg__ws__h2 {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(22px, 2.6vw, 34px);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0 0 16px;
+  color: var(--ink);
+}
+.lg__ws__prose { margin: 0 0 12px; }
+.lg__ws__prose--muted { color: var(--ink-3, rgba(0, 0, 0, 0.55)); font-size: 0.92em; }
+.lg__ws__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.lg__ws__list li {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(16px, 1.5vw, 20px);
+  line-height: 1.45;
+  padding: 10px 0 10px 26px;
+  position: relative;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.lg__ws__list li:last-child { border-bottom: 0; }
+.lg__ws__list li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+}
+.lg__cta-final__btn--ws { margin-top: 8px; }
+@media (max-width: 700px) {
+  .lg__ws__meta { grid-template-columns: 1fr 1fr; gap: 18px 20px; padding: 16px 0; }
+  .lg__ws__btn { display: block; text-align: center; }
+}
