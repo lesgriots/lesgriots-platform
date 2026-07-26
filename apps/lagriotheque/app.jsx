@@ -4926,6 +4926,29 @@ function Contact() {
         {renderManifestoBrand(text("contact.line1", "LA GRIOTHÈQUE"))}
       </p>
 
+      {/* Bloc contact — même langage que « Notre écosystème ». */}
+      <div className="lg__contact__coords">
+        <p className="lg__approche__about__kicker">Contact</p>
+        <p className="lg__contact__coords__mail">
+          <a href={"mailto:" + email}>{email}</a>
+        </p>
+        <p className="lg__contact__coords__line">
+          Référent pédagogique et référent handicap : Moos Coulibaly
+        </p>
+        <p className="lg__contact__coords__line lg__contact__coords__line--muted">
+          {text("contact.line2", "Organisme de formation")} {text("contact.line3", "de la SASU LES GRIOTS")} · {text("contact.line4", "Certifié Qualiopi")}
+        </p>
+        <p className="lg__contact__coords__links">
+          <a href={text("contact.instagram_url", "https://instagram.com/lagriotheque")} target="_blank" rel="noopener">
+            {text("contact.instagram_label", "instagram")} ↗
+          </a>
+          {" · "}
+          <a href={text("contact.linkedin_url", "https://linkedin.com")} target="_blank" rel="noopener">
+            {text("contact.linkedin_label", "linkedin")} ↗
+          </a>
+        </p>
+      </div>
+
       {/* À propos : deux textes éditables en BO, structurés — L'école (la
           Griothèque) puis La maison (LES GRIOTS, avec lien vers le site). */}
       {text("approche.about_lesgriots", "") && (
@@ -4953,26 +4976,6 @@ function Contact() {
           )}
         </div>
       )}
-
-      {/* Bloc contact — même langage que « Notre écosystème ». */}
-      <div className="lg__contact__coords">
-        <p className="lg__approche__about__kicker">Contact</p>
-        <p className="lg__contact__coords__mail">
-          <a href={"mailto:" + email}>{email}</a>
-        </p>
-        <p className="lg__contact__coords__line lg__contact__coords__line--muted">
-          {text("contact.line2", "Organisme de formation")} {text("contact.line3", "de la SASU LES GRIOTS")} · {text("contact.line4", "Certifié Qualiopi")}
-        </p>
-        <p className="lg__contact__coords__links">
-          <a href={text("contact.instagram_url", "https://instagram.com/lagriotheque")} target="_blank" rel="noopener">
-            {text("contact.instagram_label", "instagram")} ↗
-          </a>
-          {" · "}
-          <a href={text("contact.linkedin_url", "https://linkedin.com")} target="_blank" rel="noopener">
-            {text("contact.linkedin_label", "linkedin")} ↗
-          </a>
-        </p>
-      </div>
 
       <div className="lg__contact__griot" aria-hidden="true">
         <GriotRing />
