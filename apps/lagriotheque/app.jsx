@@ -4941,7 +4941,7 @@ function Contact() {
                 <a className="lg__contact__eco__card" href="https://lesgriots.com" target="_blank" rel="noopener noreferrer">
                   <img src="img/preview-lesgriots.jpg" alt="Aperçu du site lesgriots.com" loading="lazy" />
                   <span className="lg__contact__eco__label">lesgriots.com ↗</span>
-                  <span className="lg__contact__eco__desc">LES GRIOTS : plateforme d'ingénierie narrative, récits et productions originales.</span>
+                  <span className="lg__contact__eco__desc"><strong>LES GRIOTS</strong> : plateforme d'ingénierie narrative, récits et productions originales.</span>
                 </a>
                 <a className="lg__contact__eco__card" href="https://lesgriotsxstudio.com" target="_blank" rel="noopener noreferrer">
                   <img src="img/preview-lesgriotsxstudio.jpg" alt="Aperçu du site lesgriotsxstudio.com" loading="lazy" />
