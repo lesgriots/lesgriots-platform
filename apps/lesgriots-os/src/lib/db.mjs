@@ -1211,6 +1211,28 @@ function initSchema(db) {
     );
     CREATE INDEX IF NOT EXISTS idx_login_links_token ON login_links(token);
 
+    -- Journal des emails : tout envoi, réel ou simulé, laisse une trace.
+    -- Sert trois choses : savoir ce qui est parti à qui et quand (l'auditeur
+    -- le demande pour les convocations et les questionnaires), diagnostiquer
+    -- un échec, et faire tourner l'app sans SMTP configuré (statut 'simule').
+    CREATE TABLE IF NOT EXISTS emails (
+      id TEXT PRIMARY KEY,
+      template_key TEXT DEFAULT '',
+      destinataire TEXT NOT NULL DEFAULT '',
+      destinataire_nom TEXT DEFAULT '',
+      objet TEXT NOT NULL DEFAULT '',
+      corps TEXT DEFAULT '',
+      statut TEXT NOT NULL DEFAULT 'simule'
+        CHECK(statut IN ('simule','envoye','echec')),
+      erreur TEXT DEFAULT '',
+      message_id TEXT DEFAULT '',
+      contexte_type TEXT DEFAULT '',
+      contexte_id TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_emails_created ON emails(created_at);
+    CREATE INDEX IF NOT EXISTS idx_emails_contexte ON emails(contexte_type, contexte_id);
+
     CREATE TABLE IF NOT EXISTS public_links (
       id TEXT PRIMARY KEY,
       kind TEXT NOT NULL CHECK(kind IN ('emargement','questionnaire')),

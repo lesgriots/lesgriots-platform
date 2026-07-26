@@ -63,6 +63,10 @@ const PERMISSIONS = {
   'phases:update':       ['admin', 'manager'],
   'phases:delete':       ['admin'],
 
+  // Emails (journal des envois + envoi manuel)
+  'emails:read':         ['admin', 'manager'],
+  'emails:send':         ['admin', 'manager'],
+
   // Organisme & qualité (pilotage de l'OF : pièces officielles, réclamations)
   'organisme:read':      ['admin', 'manager'],
   'organisme:create':    ['admin'],
