@@ -5614,7 +5614,9 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
 
 /* ===== ÉVÉNEMENTS — cartons (image en haut, date, titre, description, lien ↗) ===== */
 .lg__events {
-  padding: 12px 24px 90px;
+  /* Pas de padding horizontal propre : la grille se cale sur la gouttière
+     du conteneur .lg, comme le reste des contenus. */
+  padding: 12px 0 90px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px 16px;
@@ -5626,8 +5628,8 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   .lg__events { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
-  .lg__events { grid-template-columns: 1fr; gap: 18px; padding: 12px 24px 70px; }
-  .lg__event { max-width: 300px; }
+  /* Pleine largeur du contenu : la carte se cale sur la gouttière 24px. */
+  .lg__events { grid-template-columns: 1fr; gap: 18px; padding: 12px 0 70px; }
 }
 .lg__event {
   display: flex;
