@@ -4622,6 +4622,12 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
     font-size: var(--fit-size, 22px);
     line-height: 1.15;
   }
+  /* État ouvert : même principe, sinon le grand titre reste tronqué à 40px. */
+  .lg__approche__accordion .lg__section-big__title {
+    /* ×0.88 : laisse la place du toggle − à droite. */
+    font-size: calc(var(--fit-size, 32px) * 0.88);
+    line-height: 1.1;
+  }
 }
 /* (anciennement masqué — le contenu vit maintenant dans .lg__section__body) */
 /* Informations en grille pour aérer (mobile: 1 col) */
