@@ -3243,6 +3243,35 @@ function WorkshopRow({ w, onHover }) {
 
 function Workshops() {
   const [bg, setBg] = useState(null);
+  const [category, setCategory] = useState("all");
+  const todayKey = new Date().toISOString().slice(0, 10);
+  // Un workshop part aux archives quand toutes ses sessions datées sont passées.
+  const isPast = (w) => {
+    const ss = (typeof SESSIONS !== "undefined" ? SESSIONS : []).filter(
+      (s) => s.workshop_id === w.id && s.date
+    );
+    if (!ss.length) return false;
+    return ss.every((s) => {
+      const k = parseSessionDate(s.date).sortKey;
+      return k !== "9999-00-00" && k.slice(0, 10) < todayKey;
+    });
+  };
+  const current = WORKSHOPS.filter((w) => !isPast(w));
+  const archived = WORKSHOPS.filter(isPast);
+  const categories = React.useMemo(() => {
+    const set = new Set();
+    WORKSHOPS.forEach((w) => {
+      const cat = (w.discipline || "").split(" · ")[0].trim();
+      if (cat) set.add(cat);
+    });
+    return Array.from(set);
+  }, []);
+  const visible =
+    category === "archives"
+      ? archived
+      : category === "all"
+        ? current
+        : current.filter((w) => (w.discipline || "").split(" · ")[0].trim() === category);
   return (
     <section className="lg__catalogue" id="workshops">
       <HoverBg src={bg} />
@@ -3255,10 +3284,61 @@ function Workshops() {
           sub={text("workshops_page.sub", "")}
         />
       </PageHero>
+
+      {/* Filtres par catégorie — mêmes tabs que le catalogue formations */}
+      <nav className="lg__cat-filters" aria-label="Filtrer par catégorie">
+        <button
+          type="button"
+          className={"lg__cat-filters__btn" + (category === "all" ? " is-active" : "")}
+          onClick={() => setCategory("all")}
+        >
+          Tous <span className="lg__cat-filters__count">({current.length})</span>
+        </button>
+        {categories.map((cat) => {
+          const count = current.filter(
+            (w) => (w.discipline || "").split(" · ")[0].trim() === cat
+          ).length;
+          return (
+            <button
+              key={cat}
+              type="button"
+              className={"lg__cat-filters__btn" + (category === cat ? " is-active" : "")}
+              onClick={() => setCategory(cat)}
+            >
+              {cat.toLowerCase()} <span className="lg__cat-filters__count">({count})</span>
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          className={"lg__cat-filters__btn lg__cat-filters__btn--archives" + (category === "archives" ? " is-active" : "")}
+          onClick={() => setCategory("archives")}
+        >
+          archives <span className="lg__cat-filters__count">({archived.length})</span>
+        </button>
+      </nav>
+
       <div className="lg__rows">
-        {WORKSHOPS.map((w) => (
+        {visible.map((w) => (
           <WorkshopRow key={w.id} w={w} onHover={setBg} />
         ))}
+        {visible.length === 0 && (
+          <div className="lg__cat-empty">
+            <p>
+              {category === "archives"
+                ? "Aucun workshop passé pour le moment."
+                : "Aucun workshop programmé pour le moment."}
+            </p>
+            {category !== "archives" && (
+              <p className="lg__cat-empty__news">
+                <a href="mailto:formations@lesgriots.com?subject=Newsletter">
+                  Inscris-toi à la newsletter
+                </a>{" "}
+                pour être prévenu des prochains workshops.
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -3312,6 +3392,31 @@ function EventCard({ e }) {
 
 function Events() {
   const list = typeof EVENTS !== "undefined" ? EVENTS : [];
+  const [category, setCategory] = useState("all");
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const isPast = (e) => {
+    if ((e.status || "").toUpperCase() === "PASSÉ") return true;
+    const m = /^(\d{4}-\d{2}-\d{2})/.exec(e.date || "");
+    return m ? m[1] < todayKey : false;
+  };
+  const current = list.filter((e) => !isPast(e));
+  const archived = list.filter(isPast);
+  // Catégories construites sur les événements à venir uniquement : pas de
+  // tab fantôme à (0) pour un type qui n'existe plus qu'en archives.
+  const kinds = React.useMemo(() => {
+    const set = new Set();
+    current.forEach((e) => {
+      const k = (e.kind || "Événement").trim();
+      if (k) set.add(k);
+    });
+    return Array.from(set);
+  }, [list]);
+  const visible =
+    category === "archives"
+      ? archived
+      : category === "all"
+        ? current
+        : current.filter((e) => (e.kind || "Événement").trim() === category);
   return (
     <section className="lg__catalogue" id="events">
       <PageHero src={text("events_page.media", "")} title={text("events_page.heading", "Événements")}>
@@ -3323,13 +3428,47 @@ function Events() {
           sub={text("events_page.sub", "Masterclasses · talks · soirées · projections")}
         />
       </PageHero>
-      {list.length === 0 ? (
+
+      {/* Filtres par type — mêmes tabs que le catalogue formations */}
+      <nav className="lg__cat-filters" aria-label="Filtrer par type">
+        <button
+          type="button"
+          className={"lg__cat-filters__btn" + (category === "all" ? " is-active" : "")}
+          onClick={() => setCategory("all")}
+        >
+          Tous <span className="lg__cat-filters__count">({current.length})</span>
+        </button>
+        {kinds.map((k) => {
+          const count = current.filter((e) => (e.kind || "Événement").trim() === k).length;
+          return (
+            <button
+              key={k}
+              type="button"
+              className={"lg__cat-filters__btn" + (category === k ? " is-active" : "")}
+              onClick={() => setCategory(k)}
+            >
+              {k.toLowerCase()} <span className="lg__cat-filters__count">({count})</span>
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          className={"lg__cat-filters__btn lg__cat-filters__btn--archives" + (category === "archives" ? " is-active" : "")}
+          onClick={() => setCategory("archives")}
+        >
+          archives <span className="lg__cat-filters__count">({archived.length})</span>
+        </button>
+      </nav>
+
+      {visible.length === 0 ? (
         <p className="lg__cat-empty" style={{ padding: "40px 24px" }}>
-          Aucun événement pour le moment. Reviens bientôt.
+          {category === "archives"
+            ? "Aucun événement passé pour le moment."
+            : "Aucun événement pour le moment. Reviens bientôt."}
         </p>
       ) : (
         <div className="lg__events">
-          {list.map((e) => <EventCard key={e.id} e={e} />)}
+          {visible.map((e) => <EventCard key={e.id} e={e} />)}
         </div>
       )}
     </section>
@@ -5635,6 +5774,9 @@ function App() {
   // la page "Bientôt". L'URL /#/bientot l'affiche toujours (preview).
   const _ap = (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.activePages) || {};
   const launchMode = _ap.launch === true || _ap.home === false;
+  // Le menu du footer suit les mêmes pages actives que le header : une page
+  // désactivée dans le BO disparaît des deux.
+  const footerOn = (k) => _ap[k] !== false;
   if (route === "bientot" || launchMode) return <LaunchPage />;
 
   return (
@@ -5645,12 +5787,12 @@ function App() {
         <footer className="lg__footer">
           <div className="lg__footer__cols">
             <div className="lg__footer__col">
-              <a href="#/catalogue">formations</a>
-              <a href="#/workshops">workshops</a>
-              <a href="#/agenda">agenda</a>
-              <a href="#/ressources">ressources</a>
-              <a href="#/approche">notre approche</a>
-              <a href="#/contact">contact</a>
+              {footerOn("formations") && <a href="#/catalogue">formations</a>}
+              {footerOn("workshops") && <a href="#/workshops">workshops</a>}
+              {footerOn("agenda") && <a href="#/agenda">agenda</a>}
+              {footerOn("ressources") && <a href="#/ressources">ressources</a>}
+              {footerOn("approche") && <a href="#/approche">notre approche</a>}
+              {footerOn("contact") && <a href="#/contact">à propos</a>}
             </div>
             <div className="lg__footer__col">
               <a href="https://lesgriotsxstudio.com" target="_blank" rel="noopener">{text("footer.col2_studio_label", "les griots studio")}</a>

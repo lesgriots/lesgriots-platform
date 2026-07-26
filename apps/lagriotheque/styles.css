@@ -2782,6 +2782,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   opacity: 0.95;
   margin: 0;
   color: #fff;
+  white-space: pre-line; /* retours à la ligne du back-office respectés */
 }
 @media (max-width: 700px) {
   .lg__vision { aspect-ratio: 4 / 5; } /* plus haut en mobile */
@@ -5676,6 +5677,7 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   color: var(--ink-2);
   margin: 0 0 16px;
   max-width: 52ch;
+  white-space: pre-line; /* retours à la ligne du back-office respectés */
 }
 .lg__event__cta {
   margin-top: auto;
@@ -5815,6 +5817,16 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   padding: 40px 0;
   text-align: center;
 }
+.lg__cat-empty__news {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.lg__cat-empty__news a {
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 1px;
+}
 
 /* ----- CGV ---------------------------------------------------- */
 
@@ -5931,6 +5943,7 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   color: var(--ink-2);
   margin: 0 0 40px;
   max-width: 68ch;
+  white-space: pre-line; /* retours à la ligne du back-office respectés */
 }
 .lg__approche__feature {
   margin: 0 0 50px;
@@ -6274,6 +6287,7 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   color: var(--ink);
   max-width: 60ch;
   margin: 0 0 clamp(36px, 6vh, 64px);
+  white-space: pre-line; /* retours à la ligne du back-office respectés */
 }
 .lg__contact__info {
   font-family: var(--font-sans);
