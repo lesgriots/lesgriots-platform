@@ -4618,17 +4618,19 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
    depuis que la colonne du titre est en 1fr (largeur indépendante du
    contenu : la mesure ne se re-boucle plus sur elle-même). */
 @media (max-width: 700px) {
+  /* Piliers : même taille pour les trois, passage sur deux lignes si besoin. */
   .lg__approche__accordion .lg__section-head__title {
-    /* min() = garde-fou : même si le JS calcule une valeur aberrante,
-       le titre ne peut jamais exploser au-delà de ~7vw. */
-    font-size: min(var(--fit-size, 22px), 7vw);
+    font-size: 24px;
     line-height: 1.15;
+    white-space: normal;
+    overflow: visible;
   }
-  /* État ouvert : même principe, sinon le grand titre reste tronqué à 40px. */
   .lg__approche__accordion .lg__section-big__title {
-    /* ×0.88 : laisse la place du toggle − à droite. */
-    font-size: min(calc(var(--fit-size, 32px) * 0.88), 10vw);
+    font-size: 30px;
     line-height: 1.1;
+    white-space: normal;
+    overflow: visible;
+    padding-right: 34px; /* place du toggle − */
   }
 }
 /* (anciennement masqué — le contenu vit maintenant dans .lg__section__body) */
