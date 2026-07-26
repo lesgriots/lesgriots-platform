@@ -245,6 +245,7 @@ function Header({ route }) {
     // sert déjà de lien vers l'accueil — on évite le doublon.
     { key: "formations", node: navLink("catalogue", "Formations") },
     { key: "workshops", node: navLink("workshops", "Workshops") },
+    { key: "events", node: navLink("events", "Événements") },
     { key: "agenda", node: navLink("agenda", "Agenda") },
     { key: "ressources", node: navLink("ressources", "Ressources") },
     { key: "approche", node: navLink("approche", "Notre approche") },
@@ -5789,6 +5790,7 @@ function App() {
             <div className="lg__footer__col">
               {footerOn("formations") && <a href="#/catalogue">formations</a>}
               {footerOn("workshops") && <a href="#/workshops">workshops</a>}
+              {footerOn("events") && <a href="#/events">événements</a>}
               {footerOn("agenda") && <a href="#/agenda">agenda</a>}
               {footerOn("ressources") && <a href="#/ressources">ressources</a>}
               {footerOn("approche") && <a href="#/approche">notre approche</a>}
