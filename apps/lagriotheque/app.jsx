@@ -3524,11 +3524,14 @@ function Events() {
   const archived = list.filter(eventIsPast);
   // Catégories construites sur les événements à venir uniquement : pas de
   // tab fantôme à (0) pour un type qui n'existe plus qu'en archives.
+  // « Événement » générique n'est pas une catégorie d'événement : seuls les
+  // vrais types (masterclass, talk, soirée…) deviennent des tabs.
   const kinds = React.useMemo(() => {
     const set = new Set();
     current.forEach((e) => {
-      const k = (e.kind || "Événement").trim();
-      if (k) set.add(k);
+      const k = (e.kind || "").trim();
+      const generic = k.toLowerCase() === "événement" || k.toLowerCase() === "evenement" || k.toLowerCase() === "évènement";
+      if (k && !generic) set.add(k);
     });
     return Array.from(set);
   }, [list]);
