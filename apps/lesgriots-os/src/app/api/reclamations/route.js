@@ -29,9 +29,9 @@ async function _GET(req) {
 
     const items = db.prepare(`
       SELECT r.*,
-             s.titre  AS session_titre,
-             a.nom    AS apprenant_nom,
-             a.prenom AS apprenant_prenom
+             s.session_name AS session_titre,
+             a.last_name    AS apprenant_nom,
+             a.first_name   AS apprenant_prenom
       FROM reclamations r
       LEFT JOIN sessions   s ON s.id = r.session_id
       LEFT JOIN apprenants a ON a.id = r.apprenant_id
