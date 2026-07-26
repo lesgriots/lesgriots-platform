@@ -3659,15 +3659,15 @@ function AgendaRow({ s, item, isOpen, onToggle }) {
         onClick={onToggle}
         aria-expanded={isOpen}
       >
-        <div className="lg__ag__date">
-          {/* Date complète sur une seule ligne, sans la séparation jour/mois.
-              Le rendu lit comme une phrase courte ("Mercredi 15 avril 2026")
-              au lieu de plaquer un numéro géant + un mois en mono caps. */}
-          <div className="lg__ag__date__full">{dateLong}</div>
-        </div>
         <div className="lg__ag__main">
-          <div className="lg__ag__kind">{isWorkshop ? "workshop" : "formation"}</div>
+          {/* Même disposition que la liste Événements : titre puis ligne méta
+              (date · type), statut et caret à droite. */}
           <h3 className="lg__ag__title">{title}</h3>
+          <p className="lg__ag__meta">
+            {dateLong}
+            <span className="lg__ag__meta__dot" aria-hidden="true"> · </span>
+            <span className="lg__ag__meta__kind">{isWorkshop ? "Workshop" : "Formation"}</span>
+          </p>
         </div>
         <div className="lg__ag__side">
           <span className={"lg__ag__pill is-" + status.class}>{status.label}</span>
@@ -3740,12 +3740,19 @@ function AgendaEventRow({ e, isOpen, onToggle }) {
         onClick={onToggle}
         aria-expanded={isOpen}
       >
-        <div className="lg__ag__date">
-          <div className="lg__ag__date__full">{dateLong}</div>
-        </div>
         <div className="lg__ag__main">
-          <div className="lg__ag__kind">{(e.kind || "événement").toLowerCase()}</div>
           <h3 className="lg__ag__title">{e.title}</h3>
+          <p className="lg__ag__meta">
+            {[dateLong, e.time].filter(Boolean).join(" · ")}
+            {(e.location || e.city) && (
+              <>
+                <span className="lg__ag__meta__dot" aria-hidden="true"> · </span>
+                {[e.location, e.city].filter(Boolean).join(", ")}
+              </>
+            )}
+            <span className="lg__ag__meta__dot" aria-hidden="true"> · </span>
+            <span className="lg__ag__meta__kind">{e.kind || "Événement"}</span>
+          </p>
         </div>
         <div className="lg__ag__side">
           <span className={"lg__ag__pill is-" + status.class}>{status.label}</span>

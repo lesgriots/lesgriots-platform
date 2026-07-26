@@ -4955,8 +4955,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 
 .lg__ag {
-  border-bottom: 1px solid var(--ink);
+  border-top: 1px solid var(--ink-4, rgba(0, 0, 0, 0.14));
 }
+.lg__ag:last-child { border-bottom: 1px solid var(--ink-4, rgba(0, 0, 0, 0.14)); }
 .lg__ag.is-soon .lg__ag__title { color: var(--ink-3, rgba(0,0,0,0.55)); }
 /* Anciennes classes .lg__ag__day / .lg__ag__month retirées avec la refonte
    du format de date (one-liner "Mercredi 15 avril 2026"). */
@@ -4968,18 +4969,14 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
    donc la colonne date n'a plus besoin de faire 200px — on resserre
    à minmax(220px, 260px) pour bien laisser respirer le label. */
 .lg__ag__head {
-  display: grid;
-  grid-template-columns: minmax(220px, 260px) 1fr auto;
+  /* Même disposition que la liste Événements : titre+méta à gauche,
+     statut/caret à droite, calés sur la gouttière du conteneur. */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 24px;
-  /* align-items: start permet aux 3 colonnes de partir du haut.
-     La date (col 1) et le side (col 3) compensent ensuite via padding-top
-     pour s'aligner au TITRE (col 2) et non au kind label au-dessus. */
-  align-items: start;
   width: 100%;
-  /* Padding latéral pour décoller la date du bord gauche et le side
-     du bord droit. Le trait noir de l'état ouvert reste collé au bord
-     (inset box-shadow sur .lg__ag) pour rester visuel. */
-  padding: 18px 24px;
+  padding: 22px 0;
   background: transparent;
   border: 0;
   text-align: left;
@@ -5015,35 +5012,33 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 .lg__ag.is-soon .lg__ag__date__full { color: var(--ink-3, rgba(0,0,0,0.55)); }
 
-/* MAIN : type (mono) + titre (Geist sans medium) */
+/* MAIN : titre + ligne méta (même traitement que la liste Événements) */
 .lg__ag__main { min-width: 0; }
-.lg__ag__kind {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink-3, rgba(0,0,0,0.55));
-  margin-bottom: 6px;
-}
 .lg__ag__title {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(20px, 2.5vw, 32px);
-  line-height: 1.1;
+  font-size: clamp(18px, 1.8vw, 24px);
+  line-height: 1.15;
   letter-spacing: -0.02em;
-  margin: 0;
+  margin: 0 0 6px;
   color: var(--ink);
 }
+.lg__ag__meta {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ink-3);
+  margin: 0;
+}
+.lg__ag__meta__dot { color: var(--ink-3); padding: 0 6px; }
+.lg__ag__meta__kind { color: var(--ink); font-weight: 700; }
 
-/* SIDE : pill statut + places + caret.
-   Padding-top pour aligner avec le titre (skipper le kind label). */
+/* SIDE : pill statut + places + caret, alignés à droite sur la ligne. */
 .lg__ag__side {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
+  align-items: center;
+  gap: 12px;
   flex-shrink: 0;
-  padding-top: 22px;
 }
 .lg__ag__pill {
   font-family: var(--font-sans);
@@ -5080,9 +5075,8 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 
 /* PANEL — accordion qui se déroule sous la row */
 .lg__ag__panel {
-  padding: 4px 24px 32px;
-  /* Aligné sur la 2e col (date 260px + gap 24px) + padding gauche du head (24px) = 308px */
-  padding-left: 308px;
+  /* Plus de colonne date : le panneau s'aligne sur la gouttière, comme la head. */
+  padding: 4px 0 32px;
   max-width: 900px;
   animation: lg-ag-slide 0.32s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
@@ -5155,34 +5149,14 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__ag__btn--primary { background: var(--ink); color: var(--paper); font-weight: 600; }
 .lg__ag__btn--primary:hover { background: transparent; color: var(--ink); }
 
-/* ----- MOBILE — la grid passe en stack vertical ----- */
+/* ----- MOBILE — même disposition, tailles resserrées ----- */
 @media (max-width: 700px) {
-  .lg__ag__head {
-    /* La date est sur une ligne longue ("Mercredi 15 avril 2026"), pas
-       intéressante à mettre en colonne. On stack date au-dessus du titre. */
-    grid-template-columns: 1fr;
-    gap: 4px;
-    padding: 16px 0;
-  }
-  .lg__ag__date__full { font-size: 13px; }
-  .lg__ag__title { font-size: 16px; }
-  .lg__ag__side {
-    grid-column: 1 / -1;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 10px;
-  }
+  .lg__ag__head { gap: 14px; padding: 16px 0; }
+  .lg__ag__title { font-size: 17px; }
+  .lg__ag__meta { font-size: 12px; }
+  .lg__ag__meta__dot { padding: 0 4px; }
+  .lg__ag__places { display: none; }
   .lg__ag__caret { margin-top: 0; }
-  .lg__ag__panel {
-    /* En mobile, on garde le même padding horizontal (16px) que la head */
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-  .lg__ag__head {
-    /* La section porte déjà la gouttière : pas de retrait interne. */
-    padding: 16px 0;
-  }
   .lg__ag__panel {
     padding-left: 0;
     padding-right: 0;
