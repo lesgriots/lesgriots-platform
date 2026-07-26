@@ -372,9 +372,18 @@ html[data-monde="griotheque"] .os-sidebar {
   color: #F1EFE8;
   border-right-color: rgba(241, 239, 232, 0.12) !important;
 }
+/* !important : les entrees portent leur couleur en style en ligne, qui
+   l emporterait sur une regle de feuille. Sans ca, les libelles restent
+   gris fonce sur fond encre — illisibles. */
 html[data-monde="griotheque"] .os-sidebar a,
-html[data-monde="griotheque"] .os-sidebar button {
-  color: #F1EFE8;
+html[data-monde="griotheque"] .os-sidebar button,
+html[data-monde="griotheque"] .os-sidebar a span,
+html[data-monde="griotheque"] .os-sidebar a svg {
+  color: #F1EFE8 !important;
+}
+/* Separateurs de section : lisibles mais discrets. */
+html[data-monde="griotheque"] .os-sidebar nav > div:not([class]) {
+  color: rgba(241, 239, 232, 0.45) !important;
 }
 /* Libellés de section : discrets sur fond sombre. */
 html[data-monde="griotheque"] .os-sidebar [class*="nav-monde"],
