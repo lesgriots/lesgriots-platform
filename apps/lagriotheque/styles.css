@@ -5666,14 +5666,12 @@ a.lg__event, a.lg__event:hover { color: var(--ink); }
 }
 .lg__event__cta__arrow { font-size: 13px; transform: translateY(1px); }
 @media (max-width: 640px) {
-  .lg__event {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 18px 0;
-  }
-  .lg__event__title { font-size: 19px; }
-  .lg__event__meta { font-size: 13px; }
+  /* Même disposition qu'en desktop : titre+méta à gauche, lien à droite. */
+  .lg__event { gap: 14px; padding: 18px 0; }
+  .lg__event__title { font-size: 17px; }
+  .lg__event__meta { font-size: 12px; }
+  .lg__event__meta__dot { padding: 0 4px; }
+  .lg__event__cta { font-size: 13px; }
 }
 
 .lg__rows {
