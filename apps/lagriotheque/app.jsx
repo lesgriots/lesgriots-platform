@@ -4932,7 +4932,7 @@ function Contact() {
         <div className="lg__approche__about">
           {text("approche.about_lesgriots", "") && (
             <div className="lg__approche__about__col">
-              <p className="lg__approche__about__kicker">LA MAISON</p>
+              <p className="lg__approche__about__kicker">NOTRE ÉCOSYSTÈME</p>
               <p className="lg__formation__prose lg__approche__about__text">
                 {renderManifestoBrand(text("approche.about_lesgriots", ""))}
               </p>
