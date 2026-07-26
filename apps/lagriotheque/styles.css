@@ -1379,7 +1379,7 @@ button {
   color: var(--ink-2);
   margin: 2px 0 4px;
 }
-.lg__cta-mini__session__status.is-open { color: #1a7a3c; }
+.lg__cta-mini__session__status.is-open { color: var(--accent); font-weight: 700; }
 .lg__cta-mini__session__places { color: var(--ink-3); }
 .lg__cta-mini__btn {
   display: block;
@@ -5046,17 +5046,18 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   padding-top: 22px;
 }
 .lg__ag__pill {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 4px 10px;
   border: 1px solid currentColor;
   line-height: 1.4;
 }
-.lg__ag__pill.is-open { color: #1a7a3a; }
-.lg__ag__pill.is-full { color: #b03030; }
-.lg__ag__pill.is-cancel { color: #b03030; text-decoration: line-through; }
+.lg__ag__pill.is-open { color: var(--accent); }
+.lg__ag__pill.is-full { color: var(--ink-3); }
+.lg__ag__pill.is-cancel { color: var(--ink-3); text-decoration: line-through; }
 .lg__ag__pill.is-soon { color: var(--ink-3, rgba(0,0,0,0.55)); }
 .lg__ag__places {
   /* Donnée (= texte), pas un label → on garde sans pour rester cohérent
@@ -5612,101 +5613,68 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   color: var(--ink);
 }
 
-/* ===== ÉVÉNEMENTS — cartons (image en haut, date, titre, description, lien ↗) ===== */
+/* ===== ÉVÉNEMENTS — liste en lignes (titre + méta à gauche, lien à droite) ===== */
 .lg__events {
-  /* Pas de padding horizontal propre : la grille se cale sur la gouttière
-     du conteneur .lg, comme le reste des contenus. */
   padding: 12px 0 90px;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px 16px;
-}
-@media (max-width: 1200px) {
-  .lg__events { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-@media (max-width: 900px) {
-  .lg__events { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 560px) {
-  /* Pleine largeur du contenu : la carte se cale sur la gouttière 24px. */
-  .lg__events { grid-template-columns: 1fr; gap: 18px; padding: 12px 0 70px; }
+  display: flex;
+  flex-direction: column;
 }
 .lg__event {
   display: flex;
-  flex-direction: column;
-  border: 1px solid var(--ink);
-  background: var(--paper);
-  overflow: hidden;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 0;
+  border-top: 1px solid var(--ink-4, rgba(0, 0, 0, 0.14));
 }
-/* La carte entière est un lien vers la fiche : on neutralise le hover jaune
-   global des <a> et on anime seulement le lien du bas. */
+.lg__event:last-child { border-bottom: 1px solid var(--ink-4, rgba(0, 0, 0, 0.14)); }
+/* La ligne entière est un lien vers la fiche : on neutralise le hover jaune
+   global des <a> et on anime seulement le lien de droite. */
 a.lg__event, a.lg__event:hover { color: var(--ink); }
-.lg__event:hover .lg__event__cta { color: var(--ink-2); border-color: var(--ink-2); }
+.lg__event:hover .lg__event__cta { color: var(--ink-2); }
 .lg__event.is-past { opacity: 0.5; }
-.lg__event__media {
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  background: var(--ink);
-  border-bottom: 1px solid var(--ink);
-}
-.lg__event__media img,
-.lg__event__media video {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.lg__event__body {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  padding: 12px 14px 14px;
-}
-.lg__event__meta {
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  color: var(--ink-3);
-  margin: 0 0 6px;
-}
+.lg__event__main { min-width: 0; }
 .lg__event__title {
   font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: clamp(16px, 1.4vw, 19px);
+  font-weight: 700;
+  font-size: clamp(18px, 1.8vw, 24px);
   line-height: 1.15;
   letter-spacing: -0.02em;
   margin: 0 0 6px;
   color: var(--ink);
 }
-.lg__event__desc {
+.lg__event__meta {
   font-family: var(--font-sans);
-  font-size: 12.5px;
-  line-height: 1.45;
-  color: var(--ink-2);
-  margin: 0 0 14px;
-  max-width: 52ch;
-  white-space: pre-line; /* retours à la ligne du back-office respectés */
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ink-3);
+  margin: 0;
 }
+.lg__event__meta__dot { color: var(--ink-3); padding: 0 6px; }
+.lg__event__kind { color: var(--ink); font-weight: 700; }
 .lg__event__cta {
-  margin-top: auto;
-  align-self: flex-start;
+  flex: none;
   display: inline-flex;
   align-items: baseline;
   gap: 7px;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: -0.01em;
   color: var(--ink);
-  text-decoration: none;
-  border-bottom: 1px solid var(--ink);
-  padding-bottom: 2px;
-  transition: color 0.18s ease, border-color 0.18s ease;
+  transition: color 0.18s ease;
 }
-.lg__event__cta__arrow { font-size: 11px; transform: translateY(1px); }
-.lg__event__cta:hover { color: var(--ink-2); border-color: var(--ink-2); }
+.lg__event__cta__arrow { font-size: 13px; transform: translateY(1px); }
+@media (max-width: 640px) {
+  .lg__event {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 18px 0;
+  }
+  .lg__event__title { font-size: 19px; }
+  .lg__event__meta { font-size: 13px; }
+}
 
 .lg__rows {
   display: flex;
@@ -7665,14 +7633,17 @@ a.lg__partners__logo:hover {
   color: var(--ink);
 }
 .lg__ws__meta__status {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  /* Même traitement que les statuts de l'agenda et des sessions :
+     sans maison + jaune brand, pas de mono vert. */
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.02em;
 }
-.lg__ws__meta__status.is-open { color: #1a7a3a; }
+.lg__ws__meta__status.is-open { color: var(--accent); }
 .lg__ws__meta__status.is-full,
-.lg__ws__meta__status.is-cancel { color: #b03030; }
+.lg__ws__meta__status.is-cancel,
+.lg__ws__meta__status.is-closed { color: var(--ink-3); }
 .lg__ws__ctarow { margin: 0 0 clamp(36px, 6vh, 64px); }
 .lg__ws__btn {
   display: inline-block;

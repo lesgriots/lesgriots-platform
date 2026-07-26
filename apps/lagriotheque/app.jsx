@@ -3372,30 +3372,36 @@ function eventIsPast(e) {
 }
 
 function EventCard({ e }) {
-  const media = e.media || {};
-  const isVideo = media.type === "video" || /\.(mp4|webm|mov|m4v)(\?|$)/i.test(media.src || "");
-  const meta = [formatEventDate(e.date), e.time, e.location, e.city].filter(Boolean).join(" · ");
+  // Liste en lignes (réf. fournie) : titre + méta à gauche, lien à droite,
+  // filets horizontaux entre les lignes. Toute la ligne mène à la fiche.
   const isPast = eventIsPast(e);
-  // Toute la carte est un lien vers la fiche de l'événement.
+  const metaParts = [
+    [formatEventDate(e.date), e.time].filter(Boolean).join(" · "),
+    [e.location, e.city].filter(Boolean).join(", "),
+  ].filter(Boolean);
   return (
     <a className={"lg__event" + (isPast ? " is-past" : "")} href={"#/events/" + e.id}>
-      {media.src && (
-        <div className="lg__event__media">
-          {isVideo
-            ? <video src={media.src} autoPlay loop muted playsInline />
-            // eslint-disable-next-line @next/next/no-img-element
-            : <img src={media.src} alt={e.title || ""} loading="lazy" />}
-        </div>
-      )}
-      <div className="lg__event__body">
-        {meta && <p className="lg__event__meta">{meta}</p>}
+      <div className="lg__event__main">
         <h3 className="lg__event__title">{e.title}</h3>
-        {e.description && <p className="lg__event__desc">{e.description}</p>}
-        <span className="lg__event__cta">
-          <span>Voir l'événement</span>
-          <span className="lg__event__cta__arrow" aria-hidden="true">→</span>
-        </span>
+        <p className="lg__event__meta">
+          {metaParts.map((part, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <span className="lg__event__meta__dot" aria-hidden="true"> · </span>}
+              {part}
+            </React.Fragment>
+          ))}
+          {e.kind && (
+            <>
+              {metaParts.length > 0 && <span className="lg__event__meta__dot" aria-hidden="true"> · </span>}
+              <span className="lg__event__kind">{e.kind}</span>
+            </>
+          )}
+        </p>
       </div>
+      <span className="lg__event__cta">
+        <span>Voir l'événement</span>
+        <span className="lg__event__cta__arrow" aria-hidden="true">↗</span>
+      </span>
     </a>
   );
 }
