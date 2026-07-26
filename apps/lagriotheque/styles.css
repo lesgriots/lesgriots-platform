@@ -4776,6 +4776,15 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   transition: opacity 0.2s ease;
 }
 .lg__contact__eco__card:hover img { opacity: 0.85; }
+.lg__contact__eco__desc {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-2, rgba(0, 0, 0, 0.65));
+}
 .lg__contact__eco__label {
   display: inline-block;
   margin-top: 8px;
