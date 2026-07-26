@@ -361,3 +361,29 @@ h1, h2, h3, h4, h5, h6 {
    Cf. src/components/layout/ThemeSection.jsx pour la liste des domaines. */
 html[data-monde="griotheque"] .nav-monde-studio { display: none !important; }
 html[data-monde="studio"]     .nav-monde-griotheque { display: none !important; }
+
+/* ── BARRE LATÉRALE — MONDE GRIOTHÈQUE ──────────────────────────────────
+   Maquette validée par Moos (26/07/2026) : barre encre, canevas papier.
+   Le contraste fait la marque — le mot-marque s'inverse tout seul puisqu'il
+   hérite de currentColor. Tout passe par .os-sidebar pour n'avoir qu'un seul
+   point d'entrée, les styles en ligne du composant étant conservés. */
+html[data-monde="griotheque"] .os-sidebar {
+  background: #0B0B0A !important;
+  color: #F1EFE8;
+  border-right-color: rgba(241, 239, 232, 0.12) !important;
+}
+html[data-monde="griotheque"] .os-sidebar a,
+html[data-monde="griotheque"] .os-sidebar button {
+  color: #F1EFE8;
+}
+/* Libellés de section : discrets sur fond sombre. */
+html[data-monde="griotheque"] .os-sidebar [class*="nav-monde"],
+html[data-monde="griotheque"] .os-sidebar div {
+  border-color: rgba(241, 239, 232, 0.14);
+}
+/* L'entrée active reprend le jaune de marque plutôt qu'un fond pâle. */
+html[data-monde="griotheque"] .os-sidebar a[style*="var(--gold-soft)"],
+html[data-monde="griotheque"] .os-sidebar a[aria-current="page"] {
+  background: rgba(245, 206, 22, 0.16) !important;
+  color: #F5CE16 !important;
+}
