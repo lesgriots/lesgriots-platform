@@ -3296,18 +3296,13 @@ function EventCard({ e }) {
         </div>
       )}
       <div className="lg__event__body">
-        {(e.kind || e.status) && (
-          <p className="lg__event__eyebrow">
-            {e.kind || "Événement"}
-            {e.status ? <span className="lg__event__status"> · {e.status}</span> : null}
-          </p>
-        )}
-        <h3 className="lg__event__title">{e.title}</h3>
         {meta && <p className="lg__event__meta">{meta}</p>}
+        <h3 className="lg__event__title">{e.title}</h3>
         {e.description && <p className="lg__event__desc">{e.description}</p>}
         {e.link && !isPast && (
           <a className="lg__event__cta" href={e.link} target="_blank" rel="noopener">
-            {e.link_label || "En savoir plus"}
+            <span>{e.link_label || "En savoir plus"}</span>
+            <span className="lg__event__cta__arrow" aria-hidden="true">↗</span>
           </a>
         )}
       </div>
@@ -3774,15 +3769,32 @@ function Agenda() {
     })
     .map((s) => ({ kind: sessionKind(s), date: s.date, s }));
   const eventItems = (eventsOn ? eventsAll : [])
-    .filter((e) => (e.status || "").toUpperCase() !== "PASSÉ")
     .map((e) => ({ kind: "event", date: e.date, e }));
 
-  const sorted = [...sessionItems, ...eventItems].sort((a, b) => {
+  // Passé / à venir : une date strictement antérieure à aujourd'hui (ou un
+  // événement au statut PASSÉ) part aux ARCHIVES ; le reste est l'agenda.
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const isPast = (it) => {
+    if (it.e && (it.e.status || "").toUpperCase() === "PASSÉ") return true;
+    const k = parseSessionDate(it.date).sortKey;
+    return k !== "9999-00-00" && k.slice(0, 10) < todayKey;
+  };
+
+  const all = [...sessionItems, ...eventItems];
+  const sorted = all.filter((it) => !isPast(it)).sort((a, b) => {
     const da = parseSessionDate(a.date).sortKey;
     const db = parseSessionDate(b.date).sortKey;
     return da.localeCompare(db);
   });
-  const visible = filter === "all" ? sorted : sorted.filter((it) => it.kind === filter);
+  // Archives : du plus récent au plus ancien.
+  const archived = all.filter(isPast).sort((a, b) => {
+    const da = parseSessionDate(a.date).sortKey;
+    const db = parseSessionDate(b.date).sortKey;
+    return db.localeCompare(da);
+  });
+  const visible = filter === "archives"
+    ? archived
+    : filter === "all" ? sorted : sorted.filter((it) => it.kind === filter);
 
   // Compteurs pour les tabs (sur la base déjà filtrée par activePages)
   const counts = {
@@ -3790,6 +3802,7 @@ function Agenda() {
     formation: sorted.filter((it) => it.kind === "formation").length,
     workshop: sorted.filter((it) => it.kind === "workshop").length,
     event: sorted.filter((it) => it.kind === "event").length,
+    archives: archived.length,
   };
 
   // Si le filtre actif pointe vers un type masqué (ex: workshops désactivés
@@ -3844,6 +3857,13 @@ function Agenda() {
             événements <span className="lg__cat-filters__count">({counts.event})</span>
           </button>
         )}
+        <button
+          type="button"
+          className={"lg__cat-filters__btn lg__cat-filters__btn--archives" + (filter === "archives" ? " is-active" : "")}
+          onClick={() => setFilter("archives")}
+        >
+          archives <span className="lg__cat-filters__count">({counts.archives})</span>
+        </button>
       </nav>
 
       <div className="lg__ag__list">
@@ -3877,8 +3897,10 @@ function Agenda() {
         })}
         {visible.length === 0 && (
           <p className="lg__cat-empty">
-            Aucun élément {filter !== "all" ? `de type ${filter}` : ""} pour l'instant.
-          </p>
+              {filter === "archives"
+                ? "Aucune date passée pour le moment."
+                : "Aucune date programmée pour le moment."}
+            </p>
         )}
       </div>
     </section>
