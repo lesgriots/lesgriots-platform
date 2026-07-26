@@ -2351,8 +2351,11 @@ body.is-home .lg__latest__tabs {
   padding-left: 24px;
 }
 @media (max-width: 700px) {
-  .lg__latest__intro { padding-left: 14px; padding-right: 14px; margin-bottom: 32px; }
-  body.is-home .lg__latest__tabs { padding-left: 14px; }
+  /* La section .lg__latest porte déjà la gouttière 24px sur mobile : pas de
+     retrait interne supplémentaire — tout s'aligne sur la même marge. */
+  .lg__latest__intro { padding-left: 0; padding-right: 0; margin-bottom: 32px; }
+  body.is-home .lg__latest__tabs { padding-left: 0; }
+  .lg__latest .lg__row { padding-left: 0; }
 }
 @media (max-width: 600px) {
   body.is-home .lg__manifesto { top: 85px; }
@@ -2691,8 +2694,8 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 @media (max-width: 700px) {
   .lg__hero-yard { aspect-ratio: 4 / 5; max-height: none; }
-  .lg__hero-yard__play { top: 16px; left: 16px; font-size: 10px; padding: 6px 10px; }
-  .lg__hero-yard__tagline { bottom: 33.333vh; left: 18px; right: 18px; }
+  .lg__hero-yard__play { top: 16px; left: 24px; font-size: 10px; padding: 6px 10px; }
+  .lg__hero-yard__tagline { bottom: 33.333vh; left: 24px; right: 24px; }
   .lg__hero-yard__tagline p { font-size: clamp(22px, 7vw, 36px); }
 }
 
@@ -2768,7 +2771,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 }
 @media (max-width: 700px) {
   .lg__vision { aspect-ratio: 4 / 5; } /* plus haut en mobile */
-  .lg__vision__overlay { padding: 0 18px 8vh; }
+  .lg__vision__overlay { padding: 0 24px 8vh; }
 }
 
 .lg__latest {
