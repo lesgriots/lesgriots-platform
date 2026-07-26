@@ -2351,6 +2351,14 @@ body.is-home .lg__latest__tabs {
   justify-content: flex-start;
   padding-left: 24px;
 }
+/* Desktop : mêmes retraits que le mobile — le contenu de « Nos formations »
+   se cale sur la gouttière de la section, pas de double retrait. */
+@media (min-width: 601px) {
+  .lg__latest__intro { padding-left: 0; padding-right: 0; }
+  body.is-home .lg__latest__tabs { padding-left: 0; }
+  .lg__latest .lg__cat-filters { padding-left: 0; padding-right: 0; }
+  .lg__latest .lg__row { padding-left: 0; }
+}
 @media (max-width: 700px) {
   /* La section .lg__latest porte déjà la gouttière 24px sur mobile : pas de
      retrait interne supplémentaire — tout s'aligne sur la même marge. */
@@ -2612,8 +2620,8 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__hero-yard__tagline {
   position: absolute;
   bottom: 16vh;
-  left: 32px;
-  right: 32px;
+  left: 24px;
+  right: 24px;
   z-index: 2;
   color: var(--paper);
   pointer-events: none;
