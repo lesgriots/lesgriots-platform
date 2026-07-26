@@ -424,7 +424,7 @@ button {
   inset: 0;
   z-index: 80;
   background: rgba(0, 0, 0, 0.25);
-  animation: lg-fade 0.2s ease;
+  animation: lg-fade 0.3s ease;
 }
 .lg__drawer__panel {
   position: absolute;
@@ -439,7 +439,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 28px;
-  animation: lg-slide-right 0.25s ease;
+  animation: lg-slide-right 0.42s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 @keyframes lg-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes lg-slide-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
@@ -1450,11 +1450,12 @@ button {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  animation: lg-modal-fade 0.18s ease;
+  animation: lg-modal-fade 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 @keyframes lg-modal-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
 }
 .lg__modal__panel {
   position: relative;
@@ -3228,7 +3229,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   padding: 24px 16px 28px;
   max-height: 70vh;
   overflow-y: auto;
-  animation: lg-section-in 0.18s ease;
+  animation: lg-section-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 }
 .lg__sommaire__list {
@@ -3511,7 +3512,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__tabsec {
   margin: 0 -16px;
   padding: 16px 16px;
-  animation: lg-section-in 0.2s ease;
+  animation: lg-section-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .lg__tabsec:first-child { padding-top: 12px; }
 .lg__tabsec:last-child { padding-bottom: 40px; }
@@ -3578,10 +3579,18 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   font-size: 24px;
   line-height: 1;
   color: var(--ink);
-  transition: transform 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
   margin-left: 16px;
 }
 .lg__tabsec--coll[open] .lg__tabsec__chev { transform: rotate(45deg); }
+/* Dépliage fluide du contenu des accordéons (fondu + glissement). */
+.lg__tabsec--coll[open] .lg__tabsec__body {
+  animation: lg-acc-in 0.34s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@keyframes lg-acc-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
 .lg__tabsec--coll .lg__tabsec__body {
   padding: 4px 16px 22px;
 }
@@ -3934,7 +3943,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   padding: 22px 16px 32px;
   background: var(--paper);
   color: var(--ink);
-  animation: lg-section-in 0.2s ease;
+  animation: lg-section-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 /* === Section ouverte : proportion "Seasons" =========================
@@ -3945,7 +3954,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   padding: 24px 16px 8px;
   background: var(--paper);
   color: var(--ink);
-  animation: lg-section-in 0.2s ease;
+  animation: lg-section-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .lg__section-big__head {
   display: block;
@@ -4549,7 +4558,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   .lg__program__day { padding: 48px 20px 20px; }
 }
 @keyframes lg-section-in {
-  from { opacity: 0; transform: translateY(-4px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
 }
 .lg__section-head__label {
@@ -4960,7 +4969,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   /* Aligné sur la 2e col (date 260px + gap 24px) + padding gauche du head (24px) = 308px */
   padding-left: 308px;
   max-width: 900px;
-  animation: lg-ag-slide 0.25s ease;
+  animation: lg-ag-slide 0.32s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 @keyframes lg-ag-slide {
   from { opacity: 0; transform: translateY(-6px); }
@@ -7377,4 +7386,16 @@ a.lg__partners__logo:hover {
      CTA final, footer) reste lisible au-dessus. */
   .lg__formation { padding-bottom: calc(var(--lg-panel-h, 60svh) + 24px); }
   body.is-fiche .lg__footer { padding-bottom: calc(var(--lg-panel-h, 60svh) + 24px); }
+}
+
+/* ===================================================================
+   MOTION — respect du réglage système « réduire les animations ».
+   =================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto !important; }
 }
