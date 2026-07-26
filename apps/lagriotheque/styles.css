@@ -5638,6 +5638,10 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
   background: var(--paper);
   overflow: hidden;
 }
+/* La carte entière est un lien vers la fiche : on neutralise le hover jaune
+   global des <a> et on anime seulement le lien du bas. */
+a.lg__event, a.lg__event:hover { color: var(--ink); }
+.lg__event:hover .lg__event__cta { color: var(--ink-2); border-color: var(--ink-2); }
 .lg__event.is-past { opacity: 0.5; }
 .lg__event__media {
   width: 100%;

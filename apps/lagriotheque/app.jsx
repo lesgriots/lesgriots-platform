@@ -3365,13 +3365,20 @@ function formatEventDate(iso) {
   return full.charAt(0).toUpperCase() + full.slice(1);
 }
 
+function eventIsPast(e) {
+  if ((e.status || "").toUpperCase() === "PASSÉ") return true;
+  const m = /^(\d{4}-\d{2}-\d{2})/.exec(e.date || "");
+  return m ? m[1] < new Date().toISOString().slice(0, 10) : false;
+}
+
 function EventCard({ e }) {
   const media = e.media || {};
   const isVideo = media.type === "video" || /\.(mp4|webm|mov|m4v)(\?|$)/i.test(media.src || "");
   const meta = [formatEventDate(e.date), e.time, e.location, e.city].filter(Boolean).join(" · ");
-  const isPast = (e.status || "").toUpperCase() === "PASSÉ";
+  const isPast = eventIsPast(e);
+  // Toute la carte est un lien vers la fiche de l'événement.
   return (
-    <article className={"lg__event" + (isPast ? " is-past" : "")}>
+    <a className={"lg__event" + (isPast ? " is-past" : "")} href={"#/events/" + e.id}>
       {media.src && (
         <div className="lg__event__media">
           {isVideo
@@ -3384,28 +3391,88 @@ function EventCard({ e }) {
         {meta && <p className="lg__event__meta">{meta}</p>}
         <h3 className="lg__event__title">{e.title}</h3>
         {e.description && <p className="lg__event__desc">{e.description}</p>}
-        {e.link && !isPast && (
-          <a className="lg__event__cta" href={e.link} target="_blank" rel="noopener">
-            <span>{e.link_label || "En savoir plus"}</span>
-            <span className="lg__event__cta__arrow" aria-hidden="true">↗</span>
-          </a>
-        )}
+        <span className="lg__event__cta">
+          <span>Voir l'événement</span>
+          <span className="lg__event__cta__arrow" aria-hidden="true">→</span>
+        </span>
       </div>
-    </article>
+    </a>
+  );
+}
+
+// Fiche ÉVÉNEMENT — même gabarit linéaire que les workshops : hero, bandeau
+// date/lieu/type, CTA d'inscription (lien BO), description, CTA final.
+// Vente/inscription directe : aucun vocabulaire réglementaire.
+function EventPage({ e }) {
+  const isPast = eventIsPast(e);
+  const dateLabel = [formatEventDate(e.date), e.time].filter(Boolean).join(" · ");
+  const placeLabel = [e.location, e.city].filter(Boolean).join(" · ");
+  const cta = (extra) =>
+    e.link && !isPast ? (
+      <a
+        className={"lg__ws__btn" + (extra ? " " + extra : "")}
+        href={e.link}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {e.link_label || "Réserver"}
+      </a>
+    ) : null;
+  return (
+    <section className="lg__formation lg__ws is-workshop">
+      <PageHero src={(e.media && e.media.src) || ""} title={e.title}>
+        {e.kind && <p className="lg__formation__herosub">{e.kind}</p>}
+      </PageHero>
+
+      <div className="lg__ws__meta">
+        <div className="lg__ws__meta__cell">
+          <span className="lg__ws__meta__label">Date</span>
+          <strong className="lg__ws__meta__value">{dateLabel || "À venir"}</strong>
+          {isPast ? (
+            <span className="lg__ws__meta__status is-closed">Passé</span>
+          ) : e.status ? (
+            <span className="lg__ws__meta__status is-open">{e.status}</span>
+          ) : null}
+        </div>
+        <div className="lg__ws__meta__cell">
+          <span className="lg__ws__meta__label">Lieu</span>
+          <strong className="lg__ws__meta__value">{placeLabel || "—"}</strong>
+        </div>
+        <div className="lg__ws__meta__cell">
+          <span className="lg__ws__meta__label">Type</span>
+          <strong className="lg__ws__meta__value">{e.kind || "Événement"}</strong>
+        </div>
+      </div>
+
+      {cta() && <div className="lg__ws__ctarow">{cta()}</div>}
+
+      {e.description && (
+        <div className="lg__ws__body">
+          <div className="lg__ws__block">
+            <h2 className="lg__ws__h2">L'événement</h2>
+            <p className="lg__formation__prose lg__ws__prose">{e.description}</p>
+          </div>
+        </div>
+      )}
+
+      {!isPast && (
+        <div className="lg__cta-final">
+          <div className="lg__cta-final__inner">
+            <p className="lg__cta-final__kicker">On se voit là-bas ?</p>
+            <h2 className="lg__cta-final__title">{e.title}</h2>
+            {cta("lg__cta-final__btn--ws")}
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 
 function Events() {
   const list = typeof EVENTS !== "undefined" ? EVENTS : [];
   const [category, setCategory] = useState("all");
-  const todayKey = new Date().toISOString().slice(0, 10);
-  const isPast = (e) => {
-    if ((e.status || "").toUpperCase() === "PASSÉ") return true;
-    const m = /^(\d{4}-\d{2}-\d{2})/.exec(e.date || "");
-    return m ? m[1] < todayKey : false;
-  };
-  const current = list.filter((e) => !isPast(e));
-  const archived = list.filter(isPast);
+  const current = list.filter((e) => !eventIsPast(e));
+  const archived = list.filter(eventIsPast);
   // Catégories construites sur les événements à venir uniquement : pas de
   // tab fantôme à (0) pour un type qui n'existe plus qu'en archives.
   const kinds = React.useMemo(() => {
@@ -5708,6 +5775,7 @@ function App() {
   const routeBase = route.startsWith("formations/") ? "catalogue"
     : route.startsWith("workshops/") ? "workshops"
     : route.startsWith("ressources/") ? "ressources"
+    : route.startsWith("events/") ? "events"
     : route;
   const pageKey = ROUTE_TO_PAGE_KEY[routeBase];
   const isPageBlocked = pageKey && cfgActivePages[pageKey] === false;
@@ -5756,6 +5824,11 @@ function App() {
     const id = route.slice("ressources/".length);
     const r = RESOURCES.find((x) => x.id === id);
     page = r ? <ResourcePage r={r} /> : <Ressources />;
+  } else if (route.startsWith("events/")) {
+    const id = route.slice("events/".length);
+    const list = typeof EVENTS !== "undefined" ? EVENTS : [];
+    const e = list.find((x) => x.id === id);
+    page = e ? <EventPage e={e} /> : <Events />;
   } else {
     switch (route) {
       case "catalogue":   page = <Catalogue />; break;
