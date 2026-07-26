@@ -1,0 +1,19 @@
+# Sauvegarde quotidienne de la base SQLite de LES GRIOTHÈQUE OS.
+# Déclenchée par lesgriots-os-backup.timer (03:00). Ce VPS n'a pas de cron :
+# la planification passe par les timers systemd (convention de la machine).
+#
+# Installation :
+#   sudo cp infra/systemd/lesgriots-os-backup.{service,timer} /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now lesgriots-os-backup.timer
+
+[Unit]
+Description=LES GRIOTHÈQUE OS — sauvegarde de la base SQLite
+After=network.target
+
+[Service]
+Type=oneshot
+User=deployment
+WorkingDirectory=/var/www/ecosystem/production/lesgriots-platform/apps/lesgriots-os
+ExecStart=/var/www/ecosystem/production/lesgriots-platform/infra/scripts/backup.sh
+StandardOutput=append:/var/log/lesgriots-os-backup.log
+StandardError=append:/var/log/lesgriots-os-backup.log

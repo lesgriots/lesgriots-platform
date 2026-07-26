@@ -1,0 +1,13 @@
+# Déclencheur quotidien de la sauvegarde de la base LES GRIOTHÈQUE OS.
+# 03:00 heure serveur, avec rattrapage si le VPS était éteint (Persistent).
+
+[Unit]
+Description=LES GRIOTHÈQUE OS — sauvegarde quotidienne (03:00)
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
