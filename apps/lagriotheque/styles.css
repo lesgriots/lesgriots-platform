@@ -5636,7 +5636,7 @@ a.lg__event, a.lg__event:hover { color: var(--ink); }
 .lg__event__main { min-width: 0; }
 .lg__event__title {
   font-family: var(--font-sans);
-  font-weight: 700;
+  font-weight: 500;
   font-size: clamp(18px, 1.8vw, 24px);
   line-height: 1.15;
   letter-spacing: -0.02em;
