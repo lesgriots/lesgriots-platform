@@ -4766,7 +4766,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__contact .lg__approche__about__kicker {
   font-family: var(--font-sans);
   font-size: clamp(18px, 2vw, 26px);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.01em;
   text-transform: none;
   color: var(--ink);
@@ -6185,7 +6185,7 @@ a.lg__event, a.lg__event:hover { color: var(--ink); }
 .lg__contact__coords .lg__approche__about__kicker {
   font-family: var(--font-sans);
   font-size: clamp(18px, 2vw, 26px);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.01em;
   text-transform: none;
   color: var(--ink);
