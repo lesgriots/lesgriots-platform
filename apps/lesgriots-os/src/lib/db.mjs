@@ -1197,6 +1197,20 @@ function initSchema(db) {
     CREATE INDEX IF NOT EXISTS idx_reclamations_statut ON reclamations(statut);
     CREATE INDEX IF NOT EXISTS idx_reclamations_recue_le ON reclamations(recue_le);
 
+    -- Liens de connexion à usage unique (voie d'entrée sans Google OAuth).
+    -- Généré en ligne de commande sur le serveur : `node scripts/lien-connexion.mjs`.
+    -- Durée de vie courte + usage unique : le lien vaut mot de passe le temps
+    -- d'un clic, il ne doit pas traîner. Ne remplace pas OAuth à terme.
+    CREATE TABLE IF NOT EXISTS login_links (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token TEXT UNIQUE NOT NULL,
+      expires_at TEXT NOT NULL,
+      used_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_login_links_token ON login_links(token);
+
     CREATE TABLE IF NOT EXISTS public_links (
       id TEXT PRIMARY KEY,
       kind TEXT NOT NULL CHECK(kind IN ('emargement','questionnaire')),
