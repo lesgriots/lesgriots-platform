@@ -1,5 +1,7 @@
 'use client';
 import { usePathname } from 'next/navigation';
+import WordmarkGriotheque from './WordmarkGriotheque';
+import { estGriotheque } from './ThemeSection';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useMediaQuery } from '@/components/ui';
@@ -64,6 +66,8 @@ const NAV = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  // Deux mondes : la Griothèque porte sa propre marque, le Studio la sienne.
+  const monde = estGriotheque(pathname || '') ? 'griotheque' : 'studio';
   const [collapsedState, setCollapsed] = useState(false);
   const isMobile = useMediaQuery('(max-width: 767px)');
   const [mobileOpen, setMobileOpen] = useState(false);
