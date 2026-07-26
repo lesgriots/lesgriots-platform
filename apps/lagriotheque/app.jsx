@@ -3675,6 +3675,34 @@ function normalizeStatus(raw) {
   return { class: "soon", label: "à venir" };
 }
 
+// Les données BO historiques sont saisies en CAPITALES ("4 JOURNÉES",
+// "MOOS COULIBALY") — on les repasse en bas-de-casse éditoriale, en
+// restaurant les noms propres et sigles connus.
+const PROPER_WORDS = ["Paris", "Havre", "France", "Zoom", "Snapchat", "Moos", "Coulibaly", "Griothèque", "Griots", "TTC", "HT", "CPF", "OPCO", "TPE", "PME"];
+function unCaps(str) {
+  if (!str || typeof str !== "string") return str;
+  const letters = str.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g, "");
+  if (!letters || letters !== letters.toUpperCase()) return str; // pas tout-caps → intact
+  let out = str.toLowerCase();
+  out = out.charAt(0).toUpperCase() + out.slice(1);
+  PROPER_WORDS.forEach((w) => {
+    out = out.replace(new RegExp("\\b" + w.toLowerCase() + "\\b", "g"), w);
+  });
+  return out;
+}
+
+// Résumé court : les 1-2 premières phrases, ~200 caractères max.
+function shortSummary(str, max = 200) {
+  if (!str) return "";
+  const sentences = String(str).split(/(?<=[.!?])\s+/);
+  let out = "";
+  for (const part of sentences) {
+    if (out && (out + " " + part).length > max) break;
+    out = out ? out + " " + part : part;
+  }
+  return out;
+}
+
 // AgendaRow refondue façon agenda éditorial :
 // - Date prominente à gauche (jour très gros + mois/année dessous)
 // - Type + statut en haut à droite (pill)
@@ -3731,18 +3759,17 @@ function AgendaRow({ s, item, isOpen, onToggle }) {
             <p className="lg__ag__tagline">{item.tagline}</p>
           )}
           <div className="lg__ag__grid">
-            {item?.duration && <Pair label="Durée" value={formatDuration(item.duration)} />}
-            {item?.format && <Pair label="Format" value={item.format} />}
-            {/* Lieu : priorité au lieu défini sur la session (s.location),
-                sinon on retombe sur celui de la formation/workshop (item.location). */}
-            {(s.location || item?.location) && (
-              <Pair label="Lieu" value={s.location || item.location} />
-            )}
+            {item?.duration && <Pair label="Durée" value={unCaps(formatDuration(item.duration))} />}
+            {item?.format && <Pair label="Format" value={unCaps(item.format)} />}
+            {/* Lieu : seulement s'il est défini sur la session (court).
+                Le lieu de la formation est un paragraphe entier → trop long
+                pour une cellule, il reste sur la fiche complète. */}
+            {s.location && <Pair label="Lieu" value={unCaps(s.location)} />}
             {item?.price && <Pair label="Tarif" value={item.price} />}
-            {item?.trainer?.name && <Pair label="Intervenant" value={item.trainer.name} />}
+            {item?.trainer?.name && <Pair label="Intervenant" value={unCaps(item.trainer.name)} />}
           </div>
           {item?.description && (
-            <p className="lg__ag__desc">{item.description}</p>
+            <p className="lg__ag__desc">{shortSummary(item.description)}</p>
           )}
           <div className="lg__ag__actions">
             {status.class === "open" && (
@@ -3816,7 +3843,7 @@ function AgendaEventRow({ e, isOpen, onToggle }) {
               <Pair label="Lieu" value={[e.location, e.city].filter(Boolean).join(" — ")} />
             )}
           </div>
-          {e.description && <p className="lg__ag__desc">{e.description}</p>}
+          {e.description && <p className="lg__ag__desc">{shortSummary(e.description)}</p>}
           <div className="lg__ag__actions">
             {status.class !== "past" && (
               isExternal ? (
