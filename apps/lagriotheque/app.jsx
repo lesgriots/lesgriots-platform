@@ -4920,8 +4920,11 @@ function Contact() {
   const email = text("contact.email", "formations@lesgriots.com");
   return (
     <section className="lg__contact" id="contact">
+      {/* Présentation (texte long, éditable en BO) — style lecture, pas display. */}
+      <p className="lg__contact__presentation">
+        {renderManifestoBrand(text("contact.line1", "LA GRIOTHÈQUE"))}
+      </p>
       <div className="lg__contact__info">
-        <p>{renderManifestoBrand(text("contact.line1", "LA GRIOTHÈQUE"))}</p>
         <p>{text("contact.line2", "Organisme de formation")}</p>
         <p>{text("contact.line3", "de la SASU LES GRIOTS")}</p>
         <p>{text("contact.line4", "Certifié Qualiopi")}</p>

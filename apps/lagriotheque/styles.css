@@ -6107,6 +6107,18 @@ body:not(.is-listhero) .lg__catalogue .lg__intro__text {
     padding-right: 0;
   }
 }
+/* Présentation de la page À propos : paragraphe de lecture, largeur de
+   colonne confortable — distinct de la pile display en dessous. */
+.lg__contact__presentation {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(18px, 2vw, 26px);
+  line-height: 1.42;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  max-width: 60ch;
+  margin: 0 0 clamp(36px, 6vh, 64px);
+}
 .lg__contact__info {
   font-family: var(--font-sans);
   font-weight: 500;
