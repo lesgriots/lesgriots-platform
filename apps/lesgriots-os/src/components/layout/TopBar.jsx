@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { estGriotheque } from './ThemeSection';
 
 const CATEGORY_ICONS = {
   project: '📁', client: '🏢', provider: '👤', formation: '📚', session: '📅', apprenant: '🎓',
@@ -63,6 +64,8 @@ export default function TopBar({ title, subtitle }) {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const searchRef = useRef(null);
   const router = useRouter();
+  // Le fil d ariane annonce le monde dans lequel on se trouve.
+  const pathname = usePathname();
 
   // Load search data once on first open
   useEffect(() => {
@@ -178,7 +181,7 @@ export default function TopBar({ title, subtitle }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, flex: 1 }}>
           {/* Eyebrow — chemin / contexte */}
           <div className="eyebrow" style={{ marginBottom: 2 }}>
-            LES GRIOTS · OS
+            {estGriotheque(pathname || '') ? 'LA GRIOTHÈQUE · ORGANISME DE FORMATION' : 'LES GRIOTS · OS'}
           </div>
           <h1 style={{
             fontFamily: 'var(--font-display)',
