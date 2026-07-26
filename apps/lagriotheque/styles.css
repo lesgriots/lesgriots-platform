@@ -4690,17 +4690,44 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 @media (hover: none), (max-width: 900px) {
   .lg__row__cursorvid { display: none; }
 }
-/* À propos (page Approche) : deux textes longs, plus grands que la prose. */
+/* À propos (page Approche) : L'école + La maison — deux colonnes sur
+   desktop, empilées avec filet sur mobile. Kickers mono en tête. */
 .lg__approche__about {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(20px, 3vh, 36px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(28px, 4vw, 64px);
   margin: clamp(28px, 5vh, 56px) 0;
+}
+.lg__approche__about__col { min-width: 0; }
+.lg__approche__about__kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3, rgba(0, 0, 0, 0.55));
+  margin: 0 0 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ink);
 }
 .lg__approche__about__text {
   font-size: clamp(17px, 1.4vw, 21px) !important;
   line-height: 1.55 !important;
   max-width: 72ch;
+  margin: 0;
+}
+.lg__approche__about__link {
+  display: inline-block;
+  margin-top: 14px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.lg__approche__about__link:hover { opacity: 0.7; }
+@media (max-width: 700px) {
+  .lg__approche__about { grid-template-columns: 1fr; gap: 28px; }
 }
 .lg__formation__sessions {
   list-style: none;
