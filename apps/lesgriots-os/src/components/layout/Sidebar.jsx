@@ -431,8 +431,8 @@ export default function Sidebar() {
             </div>
           </div>
           <Link href="/appareil" style={{ fontSize: 11, color: 'var(--text-3)', textDecoration: 'none' }}
-                title="Ouvrir l'OS sur un téléphone ou un autre ordinateur">
-            <span style={{ opacity: 0.7 }}>&#9634;</span> Connecter un appareil
+                title="Mot de passe, et connexion d'un téléphone ou d'un autre ordinateur">
+            <span style={{ opacity: 0.7 }}>&#9634;</span> Accès et appareils
           </Link>
           <Link href="/" style={{ fontSize: 11, color: 'var(--text-3)', textDecoration: 'none' }}
                 title="Projets, pipeline agence, finances globales">

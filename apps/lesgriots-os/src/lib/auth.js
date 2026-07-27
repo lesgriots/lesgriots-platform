@@ -229,3 +229,48 @@ export function acceptInvitation(token, userId) {
   const db = getDb();
   db.prepare(`UPDATE invitations SET used = 1 WHERE token = ?`).run(token);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Mot de passe — la voie d'entrée autonome
+//
+// Le lien à usage unique suppose un accès au serveur, le code suppose un
+// appareil déjà connecté, le lien par email suppose une boîte configurée.
+// Aucune de ces trois voies ne marche quand on part de zéro, seul, un
+// dimanche soir. Le mot de passe, si.
+//
+// Empreinte scrypt : lente à calculer, donc coûteuse à attaquer en masse, et
+// fournie par Node sans dépendance. Sel aléatoire par utilisateur, comparaison
+// à temps constant.
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { scryptSync, randomBytes as _alea, timingSafeEqual as _egal } from 'crypto';
+
+const SCRYPT = { N: 16384, r: 8, p: 1, longueur: 64 };
+
+export function empreinteMotDePasse(motDePasse) {
+  const sel = _alea(16).toString('hex');
+  const cle = scryptSync(motDePasse, sel, SCRYPT.longueur, SCRYPT).toString('hex');
+  return `scrypt$${sel}$${cle}`;
+}
+
+export function verifierMotDePasse(motDePasse, empreinte) {
+  if (!empreinte || !motDePasse) return false;
+  const [algo, sel, attendu] = String(empreinte).split('$');
+  if (algo !== 'scrypt' || !sel || !attendu) return false;
+  try {
+    const calcule = scryptSync(motDePasse, sel, SCRYPT.longueur, SCRYPT);
+    const reference = Buffer.from(attendu, 'hex');
+    if (calcule.length !== reference.length) return false;
+    return _egal(calcule, reference);
+  } catch {
+    return false;
+  }
+}
+
+/** Douze caractères au moins : la longueur protège mieux que la ponctuation. */
+export function motDePasseAcceptable(motDePasse) {
+  const m = String(motDePasse || '');
+  if (m.length < 12) return 'Douze caractères au minimum.';
+  if (/^\d+$/.test(m)) return 'Pas uniquement des chiffres.';
+  return null;
+}

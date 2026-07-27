@@ -14,6 +14,9 @@ const PUBLIC_PATHS = [
   // Code de connexion depuis un appareil déjà connecté — le code EST
   // l'authentification, la route doit donc être joignable sans session.
   '/api/auth/code',
+  // Connexion par mot de passe : c'est une porte d'entrée, elle doit être
+  // joignable sans session. Le POST est limité en tentatives côté route.
+  '/api/auth/motdepasse',
   '/api/auth/logout',
   '/_next',
   '/favicon.ico',

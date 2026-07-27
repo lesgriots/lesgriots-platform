@@ -589,6 +589,22 @@ function initSchema(db) {
     );
   `);
 
+  // ── Mot de passe : la voie d'entrée qui ne dépend de personne ──
+  // Ni d'un email qui doit partir, ni d'un second appareil déjà connecté, ni
+  // d'un accès au serveur. Ajouté après coup, donc en ALTER : la table users
+  // existe déjà dans les bases en service.
+  try {
+    const colonnes = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
+    if (!colonnes.includes('password_hash')) {
+      db.exec("ALTER TABLE users ADD COLUMN password_hash TEXT DEFAULT ''");
+    }
+    if (!colonnes.includes('password_set_at')) {
+      db.exec("ALTER TABLE users ADD COLUMN password_set_at TEXT DEFAULT ''");
+    }
+  } catch (e) {
+    console.warn('[db] colonne mot de passe :', e.message);
+  }
+
   // ── Table formateurs ──
   db.exec(`
     CREATE TABLE IF NOT EXISTS formateurs (
