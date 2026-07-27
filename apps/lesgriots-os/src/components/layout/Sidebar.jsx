@@ -62,6 +62,7 @@ const NAV = [
   { href: '/sessions-list', icon: 'sessions', label: 'Sessions', monde: 'griotheque', compteur: 'sessions' },
   { href: '/evaluations', icon: 'formations', label: 'Évaluations', monde: 'griotheque' },
   { href: '/espace-apprenant', icon: 'apprenants', label: 'Espace apprenant', monde: 'griotheque' },
+  { href: '/emails', icon: 'clients', label: 'Emails', monde: 'griotheque' },
   // Une seule entrée « Données », qui se déplie sur les six répertoires.
   {
     type: 'groupe', label: 'Données', icon: 'donnees', monde: 'griotheque',
