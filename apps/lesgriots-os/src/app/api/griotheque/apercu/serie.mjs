@@ -27,9 +27,12 @@ export function bornes(cle, aujourdhui, premiereDate) {
     return { debut: `${an}-01-01`, fin: `${an}-12-31`, pas: 'mois' };
   }
   if (cle === 'tout') {
-    return { debut: premiereDate || ajoute(aujourdhui, -365), fin: ajoute(aujourdhui, 365), pas: 'mois' };
+    return { debut: premiereDate || ajoute(aujourdhui, -365), fin: ajoute(aujourdhui, 180), pas: 'mois' };
   }
-  return { debut: ajoute(aujourdhui, -p.jours), fin: ajoute(aujourdhui, Math.round(p.jours / 2)), pas: p.pas };
+  // On regarde en avant, mais pas indéfiniment : trois mois d'horizon suffisent
+  // à voir ce qui est posé sans étirer la courbe sur du vide.
+  const horizon = Math.min(90, Math.round(p.jours / 2));
+  return { debut: ajoute(aujourdhui, -p.jours), fin: ajoute(aujourdhui, horizon), pas: p.pas };
 }
 
 function seaux(debut, fin, pas) {

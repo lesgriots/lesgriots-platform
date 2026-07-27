@@ -30,6 +30,20 @@ function libelle(cle, pas) {
   return `${j}/${m}`;
 }
 
+function Pastille({ x, y, hauteur, fond, trait, taille, titre }) {
+  return (
+    <span
+      title={titre}
+      style={{
+        position: 'absolute', left: `${x}%`, top: (y / 100) * hauteur,
+        width: taille, height: taille, marginLeft: -taille / 2, marginTop: -taille / 2,
+        borderRadius: '50%', background: fond, border: `2px solid ${trait}`,
+        boxSizing: 'border-box', pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
 export default function CourbeCa({ serie, aujourdhui, hauteur = 260 }) {
   const [survol, setSurvol] = useState(null);
   const [tableau, setTableau] = useState(false);
@@ -71,12 +85,14 @@ export default function CourbeCa({ serie, aujourdhui, hauteur = 260 }) {
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12 }}>
           <svg width="20" height="8" aria-hidden="true"><line x1="0" y1="4" x2="20" y2="4" stroke="var(--text)" strokeWidth="2" /></svg>
           Réalisé
-          <b style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{euros(dernier.realise)}</b>
+          <b style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{euros(serie.total_realise)}</b>
         </span>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12, color: 'var(--text-2)' }}>
           <svg width="20" height="8" aria-hidden="true"><line x1="0" y1="4" x2="20" y2="4" stroke="var(--text-3)" strokeWidth="2" strokeDasharray="4 3" /></svg>
           Prévisionnel
-          <b style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{euros(dernier.previsionnel)}</b>
+          <b style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
+            {serie.total_previsionnel ? '+ ' + euros(serie.total_previsionnel) : '—'}
+          </b>
         </span>
         <button
           onClick={() => setTableau((t) => !t)}
@@ -115,27 +131,31 @@ export default function CourbeCa({ serie, aujourdhui, hauteur = 260 }) {
 
           {/* Aujourd'hui : le seul or de la figure. */}
           {geo.iAuj >= 0 && (
-            <>
-              <line x1={geo.x(geo.iAuj)} x2={geo.x(geo.iAuj)} y1="0" y2="100"
-                    stroke="var(--gold)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" opacity="0.55" />
-              <circle cx={geo.x(geo.iAuj)} cy={geo.y(points[geo.iAuj].realise)} r="4"
-                      fill="var(--gold)" stroke="var(--text)" strokeWidth="1.5"
-                      vectorEffect="non-scaling-stroke" />
-            </>
+            <line x1={geo.x(geo.iAuj)} x2={geo.x(geo.iAuj)} y1="0" y2="100"
+                  stroke="var(--gold)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" opacity="0.55" />
           )}
 
           {/* Croix de lecture au survol. */}
           {surIndex != null && (
-            <>
-              <line x1={geo.x(surIndex)} x2={geo.x(surIndex)} y1="0" y2="100"
-                    stroke="var(--text-3)" strokeWidth="1" vectorEffect="non-scaling-stroke" opacity="0.5" />
-              <circle cx={geo.x(surIndex)} cy={geo.y(points[surIndex].previsionnel)} r="3.5"
-                      fill="var(--surface)" stroke="var(--text-3)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-              <circle cx={geo.x(surIndex)} cy={geo.y(points[surIndex].realise)} r="3.5"
-                      fill="var(--surface)" stroke="var(--text)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-            </>
+            <line x1={geo.x(surIndex)} x2={geo.x(surIndex)} y1="0" y2="100"
+                  stroke="var(--text-3)" strokeWidth="1" vectorEffect="non-scaling-stroke" opacity="0.5" />
           )}
         </svg>
+
+        {/* Les pastilles sont posées en HTML : dans un SVG étiré en largeur,
+            un cercle deviendrait une ellipse. */}
+        {geo.iAuj >= 0 && (
+          <Pastille x={geo.x(geo.iAuj)} y={geo.y(points[geo.iAuj].realise)} hauteur={hauteur}
+                    fond="var(--gold)" trait="var(--text)" taille={11} titre="Aujourd’hui" />
+        )}
+        {surIndex != null && (
+          <>
+            <Pastille x={geo.x(surIndex)} y={geo.y(points[surIndex].previsionnel)} hauteur={hauteur}
+                      fond="var(--surface)" trait="var(--text-3)" taille={9} />
+            <Pastille x={geo.x(surIndex)} y={geo.y(points[surIndex].realise)} hauteur={hauteur}
+                      fond="var(--surface)" trait="var(--text)" taille={9} />
+          </>
+        )}
 
         {/* Infobulle */}
         {surIndex != null && (
