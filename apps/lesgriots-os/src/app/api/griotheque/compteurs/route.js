@@ -25,6 +25,10 @@ async function _GET() {
 
     const apprenants = db.prepare(`SELECT COUNT(*) AS n FROM apprenants`).get().n;
 
+    const pipeline = db.prepare(`
+      SELECT COUNT(*) AS n FROM formation_opportunities WHERE COALESCE(stage,'') <> 'perdu'
+    `).get().n;
+
     // Conformité : ce qui manque, pas ce qui va bien.
     const pieces = db.prepare(`SELECT type, expire_le FROM organisme_documents WHERE archived = 0`).all();
     const piecesManquantes = PIECES_ATTENDUES.filter((t) => {
@@ -45,6 +49,7 @@ async function _GET() {
 
     return NextResponse.json({
       sessions: sessions || null,
+      pipeline: pipeline || null,
       apprenants: apprenants || null,
       conformite: manques || null,
     });

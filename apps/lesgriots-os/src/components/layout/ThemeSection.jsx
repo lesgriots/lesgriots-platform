@@ -30,6 +30,7 @@ export const HOTES_GRIOTHEQUE = ['app.lagriotheque.com'];
 // pour que ces écrans gardent le papier même hors du domaine Griothèque.
 const ROUTES_GRIOTHEQUE = [
   '/formations',
+  '/pipeline-formations',
   '/sessions-list',
   '/apprenants',
   '/organisme',

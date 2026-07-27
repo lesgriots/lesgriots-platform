@@ -51,6 +51,7 @@ const NAV = [
   { type: 'item', href: '/apercu', icon: 'home', label: 'Vue d’ensemble', monde: 'griotheque' },
   { type: 'divider', label: 'GRIOTHÈQUE' },
   { href: '/catalogue', icon: 'formations', label: 'Formations' },
+  { href: '/pipeline-formations', icon: 'pipeline', label: 'Pipeline', compteur: 'pipeline' },
   { href: '/sessions-list', icon: 'sessions', label: 'Sessions', compteur: 'sessions' },
   { href: '/apprenants', icon: 'apprenants', label: 'Apprenants', compteur: 'apprenants' },
   { href: '/organisme', icon: 'organisme', label: 'Organisme', compteur: 'conformite', ton: 'alerte' },
