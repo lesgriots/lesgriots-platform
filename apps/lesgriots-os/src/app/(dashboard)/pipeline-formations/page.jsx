@@ -13,7 +13,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import TopBar from '@/components/layout/TopBar';
-import { Card, EmptyState, Skeleton } from '@/components/ui';
+import { Card, EmptyState, Skeleton, useConfirm } from '@/components/ui';
 
 const ETAPES = [
   { cle: 'prospect',           label: 'Prospect',           proba: 0.10 },
@@ -34,6 +34,7 @@ export default function PipelineFormationsPage() {
   const [enCours, setEnCours] = useState(false);
   const [survol, setSurvol] = useState(null);
   const [erreur, setErreur] = useState('');
+  const confirmer = useConfirm();
 
   const charger = useCallback(async () => {
     try {
@@ -70,6 +71,16 @@ export default function PipelineFormationsPage() {
         body: JSON.stringify({ stage: etape }),
       });
     } catch (e) { charger(); }
+  };
+
+  const supprimer = async (o) => {
+    const ok = await confirmer({
+      title: `Retirer « ${o.client_name} » du pipeline ?`,
+      confirmLabel: 'Retirer',
+    });
+    if (!ok) return;
+    setOpps((p) => p.filter((x) => x.id !== o.id));
+    await fetch(`/api/formation-opportunities/${o.id}`, { method: 'DELETE' }).catch(() => charger());
   };
 
   const actives = useMemo(() => (opps || []).filter((o) => o.stage !== 'perdu'), [opps]);
@@ -168,7 +179,19 @@ export default function PipelineFormationsPage() {
                         display: 'flex', flexDirection: 'column', gap: 3,
                       }}
                     >
-                      <div style={{ fontSize: 12.5, fontWeight: 500, lineHeight: 1.3 }}>{o.client_name}</div>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                        <div style={{ fontSize: 12.5, fontWeight: 500, lineHeight: 1.3, flex: 1 }}>{o.client_name}</div>
+                        <button
+                          onClick={() => supprimer(o)}
+                          title="Retirer du pipeline"
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                            color: 'var(--text-3)', fontSize: 14, lineHeight: 1, flexShrink: 0,
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
                       {o.formation_title && (
                         <div style={{ fontSize: 11, color: 'var(--text-3)', lineHeight: 1.3 }}>{o.formation_title}</div>
                       )}
