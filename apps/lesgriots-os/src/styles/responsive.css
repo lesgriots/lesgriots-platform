@@ -143,3 +143,18 @@
     min-height: 40px;
   }
 }
+
+
+/* ── Le tiroir de navigation sur téléphone ──
+      Défaut constaté en conditions réelles : le bouton hamburger, fixé en
+      haut à gauche, recouvrait le mot-marque une fois le menu ouvert, et la
+      liste calibrée pour un écran large n'en montrait que la moitié. Le
+      tiroir est désormais plus large, les entrées plus compactes, et la
+      liste défile sans emporter la page derrière elle. ── */
+@media (max-width: 767px) {
+  aside.os-sidebar nav {
+    padding-top: 6px !important;
+    padding-bottom: 10px !important;
+    overscroll-behavior: contain;
+  }
+}

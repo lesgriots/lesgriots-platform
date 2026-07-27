@@ -138,8 +138,10 @@ export default function Sidebar() {
 
   const asideStyle = isMobile
     ? {
-        width: 'var(--sidebar-width)',
-        minWidth: 'var(--sidebar-width)',
+        // Sur téléphone, 240 px laissaient huit entrées visibles sur dix-huit :
+        // on ouvre le tiroir plus large et on le laisse défiler d'un bloc.
+        width: 'min(86vw, 320px)',
+        minWidth: 0,
         height: '100dvh',
         background: 'var(--surface)',
         borderRight: '1px solid var(--border)',
@@ -268,7 +270,7 @@ export default function Sidebar() {
     <aside className={mobileOpen ? 'os-sidebar os-sidebar-open' : 'os-sidebar'} style={asideStyle}>
       {/* Brand */}
       <div style={{
-        padding: collapsed ? '20px 0' : '18px 16px',
+        padding: collapsed ? '20px 0' : (isMobile ? '14px 16px 14px 62px' : '18px 16px'),
         display: 'flex',
         flexDirection: 'column',
         alignItems: collapsed ? 'center' : 'stretch',
@@ -403,7 +405,11 @@ export default function Sidebar() {
       </nav>
 
       {monde === 'griotheque' && !collapsed && (
-        <div style={{ borderTop: '1px solid var(--border)', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{
+          borderTop: '1px solid var(--border)',
+          padding: isMobile ? '9px 14px' : '12px 14px',
+          display: 'flex', flexDirection: 'column', gap: isMobile ? 6 : 10, flexShrink: 0,
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
