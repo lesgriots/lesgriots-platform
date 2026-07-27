@@ -40,6 +40,8 @@ const icons = {
   finances: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>,
   pricing: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
   settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  donnees: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
+  chevron: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
   collapse: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>,
   expand: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>,
 };
@@ -56,15 +58,19 @@ const NAV = [
   { type: 'divider', label: 'CATALOGUE', monde: 'griotheque' },
   { href: '/catalogue', icon: 'formations', label: 'Formations', monde: 'griotheque' },
   { href: '/sessions-list', icon: 'sessions', label: 'Sessions', monde: 'griotheque', compteur: 'sessions' },
-  // Tout ce qui est répertoire tient en un seul endroit : DATA.
-  { type: 'divider', label: 'DATA', monde: 'griotheque' },
-  { href: '/apprenants', icon: 'apprenants', label: 'Apprenants', monde: 'griotheque', compteur: 'apprenants' },
-  { href: '/entreprises', icon: 'clients', label: 'Entreprises', monde: 'griotheque' },
-  { href: '/clients', icon: 'clients', label: 'Clients', monde: 'griotheque' },
-  { href: '/financeurs', icon: 'finances', label: 'Financeurs', monde: 'griotheque' },
-  { href: '/lieux', icon: 'projects', label: 'Lieux', monde: 'griotheque' },
+  // Une seule entrée « Données », qui se déplie sur les six répertoires.
+  {
+    type: 'groupe', label: 'Données', icon: 'donnees', monde: 'griotheque',
+    enfants: [
+      { href: '/apprenants', icon: 'apprenants', label: 'Apprenants', compteur: 'apprenants' },
+      { href: '/entreprises', icon: 'clients', label: 'Entreprises' },
+      { href: '/financeurs', icon: 'finances', label: 'Financeurs' },
+      { href: '/intervenants', icon: 'team', label: 'Intervenants' },
+      { href: '/clients', icon: 'clients', label: 'Clients' },
+      { href: '/lieux', icon: 'projects', label: 'Lieux' },
+    ],
+  },
   { type: 'divider', label: 'QUALITÉ', monde: 'griotheque' },
-  { href: '/intervenants', icon: 'team', label: 'Intervenants', monde: 'griotheque' },
   { href: '/qualite', icon: 'settings', label: 'Qualité', monde: 'griotheque' },
   { href: '/organisme', icon: 'organisme', label: 'Organisme', monde: 'griotheque', compteur: 'conformite', ton: 'alerte' },
 
@@ -105,6 +111,7 @@ export default function Sidebar() {
   const monde = estGriotheque(pathname || '') ? 'griotheque' : 'studio';
   const [compteurs, setCompteurs] = useState({});
   const [moi, setMoi] = useState(null);
+  const [groupesOuverts, setGroupesOuverts] = useState({});
   const [collapsedState, setCollapsed] = useState(false);
   const isMobile = useMediaQuery('(max-width: 767px)');
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -155,6 +162,67 @@ export default function Sidebar() {
         top: 0,
         zIndex: 50,
       };
+
+  // Un seul rendu de lien, réutilisé pour les entrées de premier niveau
+  // et pour les enfants d'un groupe (simplement décalés vers la droite).
+  const rendreLien = (item, enfant = false) => {
+          const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+    return (
+      <Link key={item.href} href={item.href}
+      className={item.monde ? 'nav-monde-' + item.monde : undefined}
+      onClick={() => { if (isMobile) setMobileOpen(false); }}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        padding: collapsed ? '9px 0' : (enfant ? '8px 12px 8px 26px' : '9px 12px'),
+        justifyContent: collapsed ? 'center' : 'flex-start',
+        borderRadius: 'var(--radius-md)',
+        color: isActive ? 'var(--gold)' : 'var(--text-2)',
+        background: isActive ? 'var(--gold-soft)' : 'transparent',
+        textDecoration: 'none',
+        fontSize: enfant ? 12.5 : 13,
+        fontWeight: isActive ? 600 : 400,
+        transition: `all var(--duration) var(--ease)`,
+        position: 'relative',
+      }}
+      onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text)'; }}}
+      onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-2)'; }}}
+      >
+        {isActive && (
+          <div style={{
+            position: 'absolute',
+            left: collapsed ? '50%' : 0,
+            transform: collapsed ? 'translateX(-50%)' : 'none',
+            top: collapsed ? 'auto' : 6,
+            bottom: collapsed ? -4 : 6,
+            width: collapsed ? 16 : 3,
+            height: collapsed ? 3 : 'auto',
+            borderRadius: 2,
+            background: 'var(--gold)',
+          }} />
+        )}
+        <span style={{ flexShrink: 0 }}>{icons[item.icon]}</span>
+        {!collapsed && <span>{item.label}</span>}
+        {!collapsed && item.compteur && compteurs[item.compteur] ? (
+          <span style={{
+            marginLeft: 'auto',
+            minWidth: 20,
+            padding: '1px 6px',
+            borderRadius: 20,
+            fontSize: 10.5,
+            fontWeight: 600,
+            lineHeight: 1.6,
+            textAlign: 'center',
+            background: item.ton === 'alerte' ? 'var(--gold)' : 'rgba(255,255,255,0.10)',
+            color: item.ton === 'alerte' ? '#141210' : 'var(--text-2)',
+          }}>
+            {compteurs[item.compteur]}
+          </span>
+        ) : null}
+      </Link>
+    );
+  };
 
   return (
     <>
@@ -262,6 +330,8 @@ export default function Sidebar() {
         gap: 1,
         overflowY: 'auto',
       }}>
+
+
         {NAV.map((item, i) => {
           if (item.type === 'divider') {
             return (
@@ -273,7 +343,7 @@ export default function Sidebar() {
                 padding: collapsed ? '16px 0 6px' : '16px 12px 6px',
                 textAlign: collapsed ? 'center' : 'left',
               }}>
-                {collapsed ? '·' : item.label}
+                {collapsed ? '\u00b7' : item.label}
               </div>
             );
           }
@@ -282,62 +352,47 @@ export default function Sidebar() {
             return <div key={i} style={{ flex: 1 }} />;
           }
 
-          const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-          return (
-            <Link key={item.href} href={item.href}
-            className={item.monde ? 'nav-monde-' + item.monde : undefined}
-            onClick={() => { if (isMobile) setMobileOpen(false); }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: collapsed ? '9px 0' : '9px 12px',
-              justifyContent: collapsed ? 'center' : 'flex-start',
-              borderRadius: 'var(--radius-md)',
-              color: isActive ? 'var(--gold)' : 'var(--text-2)',
-              background: isActive ? 'var(--gold-soft)' : 'transparent',
-              textDecoration: 'none',
-              fontSize: 13,
-              fontWeight: isActive ? 600 : 400,
-              transition: `all var(--duration) var(--ease)`,
-              position: 'relative',
-            }}
-            onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text)'; }}}
-            onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-2)'; }}}
-            >
-              {isActive && (
-                <div style={{
-                  position: 'absolute',
-                  left: collapsed ? '50%' : 0,
-                  transform: collapsed ? 'translateX(-50%)' : 'none',
-                  top: collapsed ? 'auto' : 6,
-                  bottom: collapsed ? -4 : 6,
-                  width: collapsed ? 16 : 3,
-                  height: collapsed ? 3 : 'auto',
-                  borderRadius: 2,
-                  background: 'var(--gold)',
-                }} />
-              )}
-              <span style={{ flexShrink: 0 }}>{icons[item.icon]}</span>
-              {!collapsed && <span>{item.label}</span>}
-              {!collapsed && item.compteur && compteurs[item.compteur] ? (
-                <span style={{
-                  marginLeft: 'auto',
-                  minWidth: 20,
-                  padding: '1px 6px',
-                  borderRadius: 20,
-                  fontSize: 10.5,
-                  fontWeight: 600,
-                  lineHeight: 1.6,
-                  textAlign: 'center',
-                  background: item.ton === 'alerte' ? 'var(--gold)' : 'rgba(255,255,255,0.10)',
-                  color: item.ton === 'alerte' ? '#141210' : 'var(--text-2)',
-                }}>
-                  {compteurs[item.compteur]}
-                </span>
-              ) : null}
-            </Link>
-          );
+          // Un groupe : une seule ligne, qui se déplie sur ses répertoires.
+          if (item.type === 'groupe') {
+            const contientLaPage = item.enfants.some(
+              (e) => pathname === e.href || pathname.startsWith(e.href + '/'));
+            const ouvert = groupesOuverts[item.label] ?? contientLaPage;
+            return (
+              <div key={i} className={item.monde ? 'nav-monde-' + item.monde : undefined}>
+                <button
+                  onClick={() => {
+                    if (collapsed) { setCollapsed(false); setGroupesOuverts((g) => ({ ...g, [item.label]: true })); return; }
+                    setGroupesOuverts((g) => ({ ...g, [item.label]: !ouvert }));
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                    padding: collapsed ? '9px 0' : '9px 12px',
+                    justifyContent: collapsed ? 'center' : 'flex-start',
+                    borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer',
+                    background: 'transparent',
+                    color: contientLaPage ? 'var(--gold)' : 'var(--text-2)',
+                    fontFamily: 'inherit', fontSize: 13,
+                    fontWeight: contientLaPage ? 600 : 400, textAlign: 'left',
+                  }}
+                >
+                  <span style={{ flexShrink: 0 }}>{icons[item.icon]}</span>
+                  {!collapsed && <span>{item.label}</span>}
+                  {!collapsed && (
+                    <span style={{
+                      marginLeft: 'auto', display: 'flex', opacity: 0.65,
+                      transform: ouvert ? 'rotate(90deg)' : 'none',
+                      transition: 'transform 140ms var(--ease)',
+                    }}>
+                      {icons.chevron}
+                    </span>
+                  )}
+                </button>
+                {ouvert && !collapsed && item.enfants.map((e) => rendreLien(e, true))}
+              </div>
+            );
+          }
+
+          return rendreLien(item);
         })}
       </nav>
 
