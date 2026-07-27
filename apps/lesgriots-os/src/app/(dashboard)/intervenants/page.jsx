@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * /apprenants — le répertoire des apprenants, leur parcours, leurs inscriptions et leur financement.
+ * /intervenants — les formateurs : profils, spécialités, sessions animées.
  *
  * La vue vient de `src/features/griotheque/vues.jsx` : c'est exactement celle
  * de l'ancienne interface, montée ici dans la coquille de l'OS. Aucune
@@ -9,14 +9,14 @@
  */
 
 import TopBar from '@/components/layout/TopBar';
-import { ApprenantsView } from '@/features/griotheque/vues';
+import { FormateursView } from '@/features/griotheque/vues';
 
-export default function ApprenantsPage() {
+export default function IntervenantsPage() {
   return (
     <>
-      <TopBar title="Apprenants" subtitle="Parcours, inscriptions et financements" />
+      <TopBar title="Intervenants" subtitle="Formateurs et co-animateurs" />
       <div style={{ padding: '0 24px 48px' }}>
-        <ApprenantsView />
+        <FormateursView />
       </div>
     </>
   );

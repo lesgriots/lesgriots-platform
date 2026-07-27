@@ -49,23 +49,37 @@ const NAV = [
   { type: 'item', href: '/', icon: 'home', label: 'Accueil', monde: 'studio' },
   // Sur le domaine Griothèque, l'accueil est la vue d'ensemble de l'OF.
   { type: 'item', href: '/apercu', icon: 'home', label: 'Vue d’ensemble', monde: 'griotheque' },
-  { type: 'divider', label: 'GRIOTHÈQUE' },
-  { href: '/catalogue', icon: 'formations', label: 'Formations' },
-  { href: '/pipeline-formations', icon: 'pipeline', label: 'Pipeline', compteur: 'pipeline' },
-  { href: '/sessions-list', icon: 'sessions', label: 'Sessions', compteur: 'sessions' },
-  { href: '/apprenants', icon: 'apprenants', label: 'Apprenants', compteur: 'apprenants' },
-  { href: '/organisme', icon: 'organisme', label: 'Organisme', compteur: 'conformite', ton: 'alerte' },
+
+  // ── Monde Griothèque : le découpage de l'ancienne interface, conservé ──
+  { type: 'divider', label: 'COMMERCIAL', monde: 'griotheque' },
+  { href: '/pipeline-formations', icon: 'pipeline', label: 'Pipeline', monde: 'griotheque', compteur: 'pipeline' },
+  { type: 'divider', label: 'CATALOGUE', monde: 'griotheque' },
+  { href: '/catalogue', icon: 'formations', label: 'Formations', monde: 'griotheque' },
+  { href: '/sessions-list', icon: 'sessions', label: 'Sessions', monde: 'griotheque', compteur: 'sessions' },
+  { type: 'divider', label: 'PERSONNES', monde: 'griotheque' },
+  { href: '/apprenants', icon: 'apprenants', label: 'Apprenants', monde: 'griotheque', compteur: 'apprenants' },
+  { href: '/intervenants', icon: 'team', label: 'Intervenants', monde: 'griotheque' },
+  { type: 'divider', label: 'QUALITÉ', monde: 'griotheque' },
+  { href: '/lieux', icon: 'projects', label: 'Lieux', monde: 'griotheque' },
+  { href: '/qualite', icon: 'settings', label: 'Qualité', monde: 'griotheque' },
+  { href: '/organisme', icon: 'organisme', label: 'Organisme', monde: 'griotheque', compteur: 'conformite', ton: 'alerte' },
+
+  // ── Monde Studio : inchangé ──
+  { type: 'divider', label: 'GRIOTHÈQUE', monde: 'studio' },
+  { href: '/formations', icon: 'formations', label: 'Formations', monde: 'studio' },
   { type: 'divider', label: 'STUDIO', monde: 'studio' },
   { href: '/projects', icon: 'projects', label: 'Projets', monde: 'studio' },
   { href: '/pipeline', icon: 'pipeline', label: 'Pipeline', monde: 'studio' },
   { type: 'divider', label: 'ARGENT', monde: 'studio' },
   { href: '/finances', icon: 'finances', label: 'Finances', monde: 'studio' },
   { href: '/pricing', icon: 'pricing', label: 'TJM', monde: 'studio' },
+
   { type: 'divider', label: 'RÉPERTOIRE' },
   { href: '/clients', icon: 'clients', label: 'Clients' },
   { href: '/providers', icon: 'providers', label: 'Prestataires', monde: 'studio' },
   { href: '/team', icon: 'team', label: 'Équipe' },
   { type: 'spacer' },
+  { href: '/parametres-formation', icon: 'settings', label: 'Paramètres', monde: 'griotheque' },
   { href: '/settings', icon: 'settings', label: 'Réglages' },
 ];
 
