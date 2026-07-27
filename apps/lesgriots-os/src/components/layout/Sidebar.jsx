@@ -152,6 +152,8 @@ export default function Sidebar() {
         top: 0,
         left: 0,
         zIndex: 900,
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
         transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
         transition: 'transform 200ms ease',
         boxShadow: mobileOpen ? 'var(--shadow-lg)' : 'none',
@@ -331,12 +333,12 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav style={{
-        flex: 1,
+        flex: isMobile ? 'none' : 1,
         padding: '12px 8px',
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
-        overflowY: 'auto',
+        overflowY: isMobile ? 'visible' : 'auto',
       }}>
 
 
@@ -357,7 +359,7 @@ export default function Sidebar() {
           }
 
           if (item.type === 'spacer') {
-            return <div key={i} style={{ flex: 1 }} />;
+            return <div key={i} style={{ flex: isMobile ? 'none' : 1, height: isMobile ? 10 : undefined }} />;
           }
 
           // Un groupe : une seule ligne, qui se déplie sur ses répertoires.
