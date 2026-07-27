@@ -12,6 +12,7 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db.mjs';
 import { withGuard } from '@/lib/api-guard';
+import { construireSerie, PERIODES } from './serie.mjs';
 
 const PIECES_ATTENDUES = ['kbis', 'nda', 'qualiopi', 'assurance_rc', 'urssaf'];
 
@@ -26,10 +27,13 @@ const LIBELLES_PIECES = {
 };
 const libellePiece = (t) => LIBELLES_PIECES[t] || t.replace('_', ' ');
 
-async function _GET() {
+async function _GET(request) {
   try {
     const db = getDb();
     const auj = new Date().toISOString().slice(0, 10);
+
+    // La durée choisie pilote les indicateurs ET la courbe.
+    const periode = new URL(request.url).searchParams.get('periode') || '12m';
     const dans90 = new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10);
 
     // ── Indicateurs ────────────────────────────────────────────────────
@@ -58,6 +62,12 @@ async function _GET() {
       FROM sessions s JOIN formations f ON f.id = s.formation_id
       WHERE s.end_date <> '' AND s.end_date < ?
     `).get(auj).h;
+
+    // ── Courbe de chiffre d'affaires ───────────────────────────────────
+    const toutesSessions = db.prepare(`
+      SELECT start_date, end_date, tarif, status FROM sessions
+    `).all();
+    const serie = construireSerie(toutesSessions, periode, auj);
 
     // ── Prochaines sessions ────────────────────────────────────────────
     const prochaines = db.prepare(`
@@ -122,6 +132,9 @@ async function _GET() {
     `).all();
 
     return NextResponse.json({
+      periode,
+      periodes: Object.entries(PERIODES).map(([cle, p]) => ({ cle, label: p.label })),
+      serie,
       indicateurs: {
         sessions_planifiees: sessionsAvenir,
         apprenants_inscrits: inscrits,
@@ -129,6 +142,8 @@ async function _GET() {
         satisfaction: satis.n ? satis.moy : null,
         satisfaction_nb: satis.n,
         heures_dispensees: heures,
+        ca_realise: serie.total_realise,
+        ca_previsionnel: serie.total_previsionnel,
       },
       prochaines,
       conformite: {
