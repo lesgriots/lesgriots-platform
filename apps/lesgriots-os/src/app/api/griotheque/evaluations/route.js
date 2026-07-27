@@ -102,5 +102,24 @@ async function _POST(request) {
   }
 }
 
+/** Une note saisie par erreur doit pouvoir être retirée : sans ça, la
+ *  première faute de frappe reste dans le dossier d'audit pour toujours. */
+async function _DELETE(request) {
+  try {
+    const db = getDb();
+    const p = new URL(request.url).searchParams;
+    const [session, apprenant, type] = [p.get('session_id'), p.get('apprenant_id'), p.get('type')];
+    if (!session || !apprenant || !type) {
+      return NextResponse.json({ error: 'Session, apprenant et type sont requis' }, { status: 400 });
+    }
+    const r = db.prepare('DELETE FROM evaluations WHERE session_id = ? AND apprenant_id = ? AND type = ?')
+      .run(session, apprenant, type);
+    return NextResponse.json({ supprimees: r.changes });
+  } catch (e) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
+
 export const GET = withGuard('formations:read', _GET);
 export const POST = withGuard('formations:update', _POST);
+export const DELETE = withGuard('formations:update', _DELETE);

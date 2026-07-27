@@ -55,6 +55,12 @@ export default function EvaluationsPage() {
     charger();
   };
 
+  const retirer = async (sessionId, apprenantId) => {
+    await fetch(`/api/griotheque/evaluations?session_id=${sessionId}&apprenant_id=${apprenantId}&type=${type}`,
+      { method: 'DELETE' });
+    charger();
+  };
+
   const sessions = d?.sessions || [];
   const aTraiter = sessions.filter((s) => s.manque);
   const autres = sessions.filter((s) => !s.manque);
@@ -119,7 +125,8 @@ export default function EvaluationsPage() {
                 </div>
                 {aTraiter.map((s) => (
                   <LigneSession key={s.id} s={s} type={type} ouverte={ouverte} setOuverte={setOuverte}
-                                brouillon={brouillon} setBrouillon={setBrouillon} onEnregistrer={enregistrer} alerte />
+                                brouillon={brouillon} setBrouillon={setBrouillon}
+                                onEnregistrer={enregistrer} onRetirer={retirer} alerte />
                 ))}
               </div>
             )}
@@ -129,7 +136,8 @@ export default function EvaluationsPage() {
                 <div style={{ ...mono, marginBottom: 8, marginTop: 8 }}>Autres sessions</div>
                 {autres.map((s) => (
                   <LigneSession key={s.id} s={s} type={type} ouverte={ouverte} setOuverte={setOuverte}
-                                brouillon={brouillon} setBrouillon={setBrouillon} onEnregistrer={enregistrer} />
+                                brouillon={brouillon} setBrouillon={setBrouillon}
+                                onEnregistrer={enregistrer} onRetirer={retirer} />
                 ))}
               </div>
             )}
@@ -140,7 +148,7 @@ export default function EvaluationsPage() {
   );
 }
 
-function LigneSession({ s, type, ouverte, setOuverte, brouillon, setBrouillon, onEnregistrer, alerte }) {
+function LigneSession({ s, type, ouverte, setOuverte, brouillon, setBrouillon, onEnregistrer, onRetirer, alerte }) {
   const estOuverte = ouverte === s.id;
   const faits = s.inscrits.filter((a) => a.evaluations[type]).length;
 
@@ -191,7 +199,15 @@ function LigneSession({ s, type, ouverte, setOuverte, brouillon, setBrouillon, o
                       {deja.score != null ? deja.score + ' / 5' : '—'}
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{deja.comments || '—'}</div>
-                    <div style={{ ...mono, fontSize: 9.5, color: 'var(--success)' }}>Recueilli</div>
+                    <button
+                      onClick={() => onRetirer(s.id, a.id)}
+                      title="Retirer cette note"
+                      style={{
+                        ...mono, fontSize: 9.5, color: 'var(--text-3)', background: 'none',
+                        border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px',
+                        cursor: 'pointer', textAlign: 'center',
+                      }}
+                    >Retirer</button>
                   </>
                 ) : (
                   <>
