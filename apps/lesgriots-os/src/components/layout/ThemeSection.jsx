@@ -40,6 +40,8 @@ const ROUTES_GRIOTHEQUE = [
   '/lieux',
   '/qualite',
   '/parametres-formation',
+  '/entreprises',
+  '/financeurs',
 ];
 
 export function estHoteGriotheque(hostname) {
