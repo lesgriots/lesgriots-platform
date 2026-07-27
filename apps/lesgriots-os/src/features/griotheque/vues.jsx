@@ -13,7 +13,14 @@
  * coquille change.
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import { jsxDEV as _jsx, Fragment as _Fragment } from 'react/jsx-dev-runtime';
+// Une partie de ce fichier est du JSX déjà compilé, qui appelle `jsxDEV`.
+// Or `jsxDEV` n'existe que dans le runtime de développement : en production
+// l'appel était nul et la vue plantait. On rebranche sur le runtime standard,
+// dont la signature (type, props, key) est identique sur les trois premiers
+// arguments, en aiguillant vers `jsxs` quand les enfants sont un tableau.
+import { jsx as _jsxUn, jsxs as _jsxPlusieurs, Fragment as _Fragment } from 'react/jsx-runtime';
+const _jsx = (type, props, key) =>
+  (Array.isArray(props && props.children) ? _jsxPlusieurs : _jsxUn)(type, props, key);
 import { ToastProvider, ConfirmProvider, useToast, useConfirm } from '@/components/ui';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
