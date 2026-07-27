@@ -420,6 +420,10 @@ export default function Sidebar() {
               </div>
             </div>
           </div>
+          <Link href="/appareil" style={{ fontSize: 11, color: 'var(--text-3)', textDecoration: 'none' }}
+                title="Ouvrir l'OS sur un téléphone ou un autre ordinateur">
+            <span style={{ opacity: 0.7 }}>&#9634;</span> Connecter un appareil
+          </Link>
           <Link href="/" style={{ fontSize: 11, color: 'var(--text-3)', textDecoration: 'none' }}
                 title="Projets, pipeline agence, finances globales">
             <span style={{ opacity: 0.7 }}>&#8599;</span> LES GRIOTS OS

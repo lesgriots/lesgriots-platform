@@ -11,6 +11,9 @@ const PUBLIC_PATHS = [
   '/api/auth/google',
   // Lien de connexion à usage unique — le token EST l'authentification.
   '/api/auth/lien',
+  // Code de connexion depuis un appareil déjà connecté — le code EST
+  // l'authentification, la route doit donc être joignable sans session.
+  '/api/auth/code',
   '/api/auth/logout',
   '/_next',
   '/favicon.ico',
