@@ -55,7 +55,12 @@ function enListe(v) {
     if (Array.isArray(j)) return j.filter(Boolean).map(String);
     if (typeof j === 'string') return j ? [j] : [];
   } catch { /* texte libre */ }
-  return String(v).split(/\r?\n/).map((x) => x.trim()).filter(Boolean);
+  // Tes fiches utilisent souvent la puce « • » comme séparateur au fil du
+  // texte : on la traite comme un retour à la ligne, sinon l'apprenant lit un
+  // paragraphe illisible là où il y avait une liste.
+  return String(v).split(/\r?\n|\s*•\s*|\s*·\s+-\s*/)
+    .map((x) => x.replace(/^[-–]\s*/, '').trim())
+    .filter((x) => x.length > 1);
 }
 
 export async function GET(request, { params }) {
@@ -127,8 +132,8 @@ export async function GET(request, { params }) {
         duree_heures: s.duration_hours || 0,
         niveau: s.level || '',
         objectifs: enListe(s.objectives),
-        prerequis: s.prerequisites || '',
-        public_vise: s.target_audience || '',
+        prerequis: enListe(s.prerequisites),
+        public_vise: enListe(s.target_audience),
         evaluation: enListe(s.evaluation_methods),
         accessibilite: s.accessibility || (lieu && lieu.accessibilite_pmr ? 'Locaux accessibles aux personnes à mobilité réduite.' : ''),
         lieu: lieu

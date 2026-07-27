@@ -158,9 +158,9 @@ export default function EspaceApprenant({ params }) {
             </div>
           ))}
 
-          {s.prerequis && <div style={{ marginTop: 12 }}><Ligne l="Prérequis" v={s.prerequis} /></div>}
-          {s.public_vise && <Ligne l="Public visé" v={s.public_vise} />}
-          {s.evaluation.length > 0 && <Ligne l="Évaluation" v={s.evaluation.join(' · ')} />}
+          <Bloc l="Prérequis" items={s.prerequis} />
+          <Bloc l="Public visé" items={s.public_vise} />
+          <Bloc l="Modalités d’évaluation" items={s.evaluation} />
         </section>
       )}
 
@@ -227,6 +227,24 @@ function Page({ children, organisme }) {
           {organisme?.nom || 'LA GRIOTHÈQUE'}
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Une liste quand il y a plusieurs éléments, une phrase quand il n'y en a qu'un. */
+function Bloc({ l, items }) {
+  const liste = Array.isArray(items) ? items : (items ? [items] : []);
+  if (liste.length === 0) return null;
+  return (
+    <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${P.ligne}` }}>
+      <div style={{ ...mono, marginBottom: 6 }}>{l}</div>
+      {liste.length === 1 ? (
+        <p style={{ fontSize: 13.5, color: P.texte2, margin: 0, lineHeight: 1.6 }}>{liste[0]}</p>
+      ) : (
+        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, color: P.texte2, lineHeight: 1.7 }}>
+          {liste.map((x, i) => <li key={i}>{x}</li>)}
+        </ul>
+      )}
     </div>
   );
 }
