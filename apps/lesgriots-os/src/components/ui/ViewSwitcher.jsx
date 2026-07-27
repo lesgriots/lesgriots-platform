@@ -33,7 +33,7 @@ export function useViewMode(scope, fallback = 'list') {
   return [value, update];
 }
 
-export default function ViewSwitcher({ value, onChange, options = ['list', 'cards'], style = {} }) {
+export default function ViewSwitcher({ value, onChange, options = ['list', 'cards'], style = {}, labels = {} }) {
   return (
     <div style={{
       display: 'inline-flex',
@@ -45,7 +45,9 @@ export default function ViewSwitcher({ value, onChange, options = ['list', 'card
       ...style,
     }} role="tablist" aria-label="Mode d'affichage">
       {options.map(opt => {
-        const cfg = ICONS[opt] || { glyph: '?', label: opt };
+        // `labels` permet de renommer une vue sans inventer un nouveau glyphe
+        // (ex. « timeline » présenté comme « Tunnel » dans le pipeline).
+        const cfg = { ...(ICONS[opt] || { glyph: '?', label: opt }), ...(labels[opt] || {}) };
         const active = value === opt;
         return (
           <button

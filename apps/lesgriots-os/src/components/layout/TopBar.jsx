@@ -56,7 +56,9 @@ function ThemeToggle() {
   );
 }
 
-export default function TopBar({ title, subtitle }) {
+// `right` : ce qu'une page veut poser à côté de la recherche (sélecteur de
+// vue, filtre…). Absent, la barre est exactement celle d'avant.
+export default function TopBar({ title, subtitle, right = null }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -209,6 +211,7 @@ export default function TopBar({ title, subtitle }) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {right}
         <ThemeToggle />
         <button
           onClick={() => setSearchOpen(true)}
