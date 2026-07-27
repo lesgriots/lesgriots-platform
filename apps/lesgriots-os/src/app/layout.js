@@ -7,8 +7,11 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: 'LES GRIOTS OS',
-  description: 'LES GRIOTS OS · Pilotage Agence, Production & Formations',
+  // Le nom de l'application, celui qu'on lit dans l'onglet et au partage.
+  // La raison sociale reste LES GRIOTS sur les documents officiels : c'est la
+  // SASU qui porte le SIRET et la déclaration d'activité, pas le logiciel.
+  title: 'LA GRIOTHÈQUE OS',
+  description: 'LA GRIOTHÈQUE OS · Le pilotage de l’organisme de formation',
   icons: {
     icon: [{ url: '/favicon.ico', sizes: '64x64', type: 'image/x-icon' }],
     apple: '/apple-icon.png',

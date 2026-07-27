@@ -65,7 +65,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <TopBar title="Réglages" subtitle="Configuration de LES GRIOTS OS" />
+      <TopBar title="Réglages" subtitle="Configuration de LA GRIOTHÈQUE OS" />
       <div style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 800 }}>
 
         {/* Stats summary */}

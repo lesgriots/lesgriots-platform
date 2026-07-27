@@ -289,7 +289,7 @@ export default function Sidebar() {
             )}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.28em', fontWeight: 700, paddingLeft: 3 }}>
-                {monde === 'griotheque' ? 'ORGANISME DE FORMATION' : 'OS'}
+                {monde === 'griotheque' ? 'OS · ORGANISME DE FORMATION' : 'OS'}
               </div>
               <button
                 className="resp-hide-mobile btn-inline"

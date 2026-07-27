@@ -224,7 +224,7 @@ function Page({ children, organisme }) {
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '28px 16px 64px' }}>
         {children}
         <div style={{ ...mono, textAlign: 'center', marginTop: 32 }}>
-          {organisme?.nom || 'LA GRIOTHÈQUE'}
+          LA GRIOTHÈQUE · Organisme de formation
         </div>
       </div>
     </div>

@@ -73,13 +73,13 @@ export default function LoginPage() {
         {/* Logo / Brand */}
         <div style={{ marginBottom: 12 }}>
           <span style={{
-            fontSize: 28,
+            fontSize: 'clamp(20px, 6vw, 26px)',
             fontWeight: 700,
             color: TEXT,
             letterSpacing: '0.05em',
             fontFamily: "'Space Mono', monospace",
           }}>
-            LES GRIOTS
+            LA GRIOTHÈQUE
           </span>
         </div>
         <div style={{
@@ -99,7 +99,7 @@ export default function LoginPage() {
           lineHeight: 1.6,
           marginBottom: 32,
         }}>
-          Connecte-toi pour accéder au pilotage<br />Agence · Production · Formations
+          Connecte-toi pour piloter<br />l’organisme de formation
         </p>
 
         {error && (
