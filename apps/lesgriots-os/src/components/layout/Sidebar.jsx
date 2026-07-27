@@ -71,6 +71,7 @@ const NAV = [
     ],
   },
   { type: 'divider', label: 'QUALITÉ', monde: 'griotheque' },
+  { href: '/bpf', icon: 'finances', label: 'Bilan (BPF)', monde: 'griotheque' },
   { href: '/qualite', icon: 'settings', label: 'Qualité', monde: 'griotheque' },
   { href: '/organisme', icon: 'organisme', label: 'Organisme', monde: 'griotheque', compteur: 'conformite', ton: 'alerte' },
 

@@ -42,6 +42,7 @@ const ROUTES_GRIOTHEQUE = [
   '/parametres-formation',
   '/entreprises',
   '/financeurs',
+  '/bpf',
 ];
 
 export function estHoteGriotheque(hostname) {
