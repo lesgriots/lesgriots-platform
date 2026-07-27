@@ -1335,6 +1335,22 @@ function initSchema(db) {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    -- Le lien personnel d'un apprenant vers son espace. Table à part plutôt
+    -- qu'une valeur de plus dans public_links : la contrainte CHECK de cette
+    -- table est figée dans les bases déjà déployées, et une migration de
+    -- schéma n'a pas sa place pour ajouter une porte d'entrée.
+    CREATE TABLE IF NOT EXISTS espace_liens (
+      id TEXT PRIMARY KEY,
+      token TEXT UNIQUE NOT NULL,
+      session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+      apprenant_id TEXT NOT NULL REFERENCES apprenants(id) ON DELETE CASCADE,
+      expires_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_espace_liens_token ON espace_liens(token);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_espace_liens_couple
+      ON espace_liens(session_id, apprenant_id);
+
     CREATE TABLE IF NOT EXISTS signatures (
       id TEXT PRIMARY KEY,
       session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,

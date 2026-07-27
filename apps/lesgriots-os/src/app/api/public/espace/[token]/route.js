@@ -1,0 +1,237 @@
+/**
+ * API PUBLIQUE — l'espace apprenant, par jeton personnel.
+ *
+ * SANS withGuard : c'est l'apprenant qui vient, il n'a pas de compte. Le jeton
+ * vaut l'identité, donc deux règles absolues.
+ *
+ *   1. Rien de sensible ne sort. Pas d'email, pas de téléphone, pas de tarif,
+ *      pas la liste des autres inscrits. L'apprenant voit sa formation et lui.
+ *   2. Rien ne s'écrit deux fois. Une évaluation déjà remise ne se réécrit pas,
+ *      une demi-journée déjà signée non plus.
+ *
+ * Le moteur des questionnaires existait déjà (lib/questionnaires.js) et n'avait
+ * jamais servi, faute de page pour l'afficher.
+ */
+import { NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
+import { getDb } from '@/lib/db.mjs';
+import { QUESTIONNAIRES, QUESTIONNAIRE_TYPE_TO_EVALUATION, computeScore } from '@/lib/questionnaires';
+
+const MAX_PNG = 200 * 1024;
+
+function resoudre(db, token) {
+  if (!token || typeof token !== 'string' || token.length > 128) return null;
+  const l = db.prepare('SELECT * FROM espace_liens WHERE token = ?').get(token);
+  if (!l) return null;
+  if (l.expires_at && l.expires_at < new Date().toISOString().slice(0, 10)) return null;
+  return l;
+}
+
+const reglage = (db, cle, defaut = '') => {
+  const r = db.prepare('SELECT value FROM settings WHERE key = ?').get(cle);
+  return r && r.value ? r.value : defaut;
+};
+
+/** Les jours de formation : le planning s'il existe, sinon les jours ouvrés. */
+function joursDeSession(s) {
+  try {
+    const p = JSON.parse(s.planning || 'null');
+    if (Array.isArray(p) && p.length) return p.map((j) => (typeof j === 'string' ? j : j.date)).filter(Boolean);
+  } catch { /* planning libre ou absent : on retombe sur le calcul */ }
+  if (!s.start_date) return [];
+  const jours = [];
+  const fin = s.end_date || s.start_date;
+  for (let d = new Date(s.start_date); d <= new Date(fin); d.setDate(d.getDate() + 1)) {
+    if (d.getDay() !== 0 && d.getDay() !== 6) jours.push(d.toISOString().slice(0, 10));
+  }
+  return jours.slice(0, 30);
+}
+
+/** Plusieurs champs sont stockés en JSON : on les rend lisibles ou on les tait. */
+function enListe(v) {
+  if (!v) return [];
+  try {
+    const j = JSON.parse(v);
+    if (Array.isArray(j)) return j.filter(Boolean).map(String);
+    if (typeof j === 'string') return j ? [j] : [];
+  } catch { /* texte libre */ }
+  return String(v).split(/\r?\n/).map((x) => x.trim()).filter(Boolean);
+}
+
+export async function GET(request, { params }) {
+  try {
+    const db = getDb();
+    const lien = resoudre(db, (await params).token);
+    if (!lien) return NextResponse.json({ error: 'Lien invalide ou expiré' }, { status: 404 });
+
+    const a = db.prepare('SELECT first_name, last_name FROM apprenants WHERE id = ?').get(lien.apprenant_id);
+    const s = db.prepare(`
+      SELECT s.*, f.title AS formation_titre, f.description AS formation_description,
+             f.duration_hours, f.objectives, f.prerequisites, f.target_audience,
+             f.evaluation_methods, f.accessibility, f.level
+      FROM sessions s LEFT JOIN formations f ON f.id = s.formation_id
+      WHERE s.id = ?
+    `).get(lien.session_id);
+    if (!s) return NextResponse.json({ error: 'Session introuvable' }, { status: 404 });
+
+    const lieu = s.lieu_formation_id
+      ? db.prepare('SELECT nom, adresse, postal_code, ville, accessibilite_pmr FROM lieux_formation WHERE id = ?').get(s.lieu_formation_id)
+      : null;
+
+    const modules = db.prepare(`
+      SELECT title, description, objectives, duration_hours FROM modules
+      WHERE formation_id = ? ORDER BY sort_order
+    `).all(s.formation_id);
+
+    // Documents rattachés à l'apprenant ou à sa session, et à eux seuls.
+    const documents = db.prepare(`
+      SELECT id, categorie, libelle, created_at FROM documents
+      WHERE (contexte_type = 'apprenant' AND contexte_id = ?)
+         OR (contexte_type = 'session' AND contexte_id = ?)
+      ORDER BY created_at DESC
+    `).all(lien.apprenant_id, lien.session_id);
+
+    const jours = joursDeSession(s);
+    const signees = db.prepare(`
+      SELECT date, period FROM signatures
+      WHERE session_id = ? AND apprenant_id = ? AND signer_role = 'apprenant'
+    `).all(lien.session_id, lien.apprenant_id).map((x) => x.date + '·' + x.period);
+
+    const rendues = db.prepare(`
+      SELECT type FROM evaluations WHERE session_id = ? AND apprenant_id = ?
+    `).all(lien.session_id, lien.apprenant_id).map((x) => x.type);
+
+    const auj = new Date().toISOString().slice(0, 10);
+    const terminee = s.end_date && s.end_date < auj;
+
+    // Ce qu'on demande à l'apprenant, et seulement au bon moment.
+    const aFaire = [];
+    if (!rendues.includes('positionnement')) {
+      aFaire.push({ cle: 'positionnement', label: QUESTIONNAIRES.positionnement.label, quand: 'avant la formation' });
+    }
+    if (terminee && !rendues.includes('satisfaction')) {
+      aFaire.push({ cle: 'chaud', label: QUESTIONNAIRES.chaud.label, quand: 'à la fin de la formation' });
+    }
+    if (terminee && rendues.includes('satisfaction') && !rendues.includes('froid')) {
+      aFaire.push({ cle: 'froid', label: QUESTIONNAIRES.froid.label, quand: 'quelques semaines après' });
+    }
+
+    return NextResponse.json({
+      apprenant: { prenom: a?.first_name || '', nom: a?.last_name || '' },
+      session: {
+        titre: s.session_name || s.formation_titre || 'Votre formation',
+        formation: s.formation_titre || '',
+        description: s.formation_description || '',
+        debut: s.start_date, fin: s.end_date, horaire: s.horaire || '',
+        modalite: s.modality || '', formateur: s.formateur_name || '',
+        duree_heures: s.duration_hours || 0,
+        niveau: s.level || '',
+        objectifs: enListe(s.objectives),
+        prerequis: s.prerequisites || '',
+        public_vise: s.target_audience || '',
+        evaluation: enListe(s.evaluation_methods),
+        accessibilite: s.accessibility || (lieu && lieu.accessibilite_pmr ? 'Locaux accessibles aux personnes à mobilité réduite.' : ''),
+        lieu: lieu
+          ? { nom: lieu.nom, adresse: [lieu.adresse, lieu.postal_code, lieu.ville].filter(Boolean).join(', ') }
+          : (s.adresse || s.location ? { nom: '', adresse: s.adresse || s.location } : null),
+        terminee,
+      },
+      modules: modules.map((m) => ({
+        titre: m.title, description: m.description,
+        objectifs: enListe(m.objectives), heures: m.duration_hours || 0,
+      })),
+      documents,
+      emargement: { jours, signees },
+      a_faire: aFaire,
+      rendues,
+      organisme: {
+        nom: reglage(db, 'company_name', 'LA GRIOTHÈQUE'),
+        email: reglage(db, 'email', 'formation@lesgriots.com'),
+        telephone: reglage(db, 'phone'),
+        referent_handicap: reglage(db, 'referent_handicap', reglage(db, 'representant_name')),
+      },
+    });
+  } catch (e) {
+    console.error('[public/espace]', e);
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+  }
+}
+
+export async function POST(request, { params }) {
+  try {
+    const db = getDb();
+    const lien = resoudre(db, (await params).token);
+    if (!lien) return NextResponse.json({ error: 'Lien invalide ou expiré' }, { status: 404 });
+
+    const corps = await request.json();
+
+    // ── Émargement ──────────────────────────────────────────────────
+    if (corps.action === 'emarger') {
+      const { date, period, signaturePng, signedName } = corps;
+      if (!date || !period) return NextResponse.json({ error: 'Date et demi-journée requises' }, { status: 400 });
+      if (signaturePng && signaturePng.length > MAX_PNG * 1.4) {
+        return NextResponse.json({ error: 'Signature trop lourde' }, { status: 413 });
+      }
+      if (!['matin', 'apres_midi'].includes(period)) {
+        return NextResponse.json({ error: 'Demi-journée inconnue' }, { status: 400 });
+      }
+      const deja = db.prepare(`
+        SELECT id FROM signatures WHERE session_id = ? AND apprenant_id = ?
+          AND signer_role = 'apprenant' AND date = ? AND period = ?
+      `).get(lien.session_id, lien.apprenant_id, date, period);
+      if (deja) return NextResponse.json({ error: 'Demi-journée déjà signée' }, { status: 409 });
+
+      if (!signaturePng) return NextResponse.json({ error: 'Signature manquante' }, { status: 400 });
+      db.prepare(`
+        INSERT INTO signatures (id, session_id, apprenant_id, signer_role, date, period, signature_png, signed_name, ip)
+        VALUES (?, ?, ?, 'apprenant', ?, ?, ?, ?, ?)
+      `).run(randomUUID(), lien.session_id, lien.apprenant_id, date, period,
+             signaturePng, signedName || '',
+             request.headers.get('x-forwarded-for') || '');
+
+      // La signature fait foi : la feuille de présence suit, sur la même ligne
+      // de jour, en cochant la demi-journée signée.
+      const existant = db.prepare('SELECT id FROM emargements WHERE session_id = ? AND apprenant_id = ? AND date = ?')
+        .get(lien.session_id, lien.apprenant_id, date);
+      const colonne = period === 'matin' ? 'matin' : 'apres_midi';
+      if (existant) {
+        db.prepare(`UPDATE emargements SET ${colonne} = 1 WHERE id = ?`).run(existant.id);
+      } else {
+        db.prepare(`INSERT INTO emargements (id, session_id, apprenant_id, date, ${colonne}) VALUES (?, ?, ?, ?, 1)`)
+          .run(randomUUID(), lien.session_id, lien.apprenant_id, date);
+      }
+
+      return NextResponse.json({ ok: true }, { status: 201 });
+    }
+
+    // ── Questionnaire ───────────────────────────────────────────────
+    if (corps.action === 'questionnaire') {
+      const q = QUESTIONNAIRES[corps.type];
+      if (!q) return NextResponse.json({ error: 'Questionnaire inconnu' }, { status: 400 });
+      const typeEval = QUESTIONNAIRE_TYPE_TO_EVALUATION[corps.type];
+      if (!typeEval) return NextResponse.json({ error: 'Questionnaire non recevable ici' }, { status: 400 });
+
+      const deja = db.prepare(`
+        SELECT id FROM evaluations WHERE session_id = ? AND apprenant_id = ? AND type = ?
+      `).get(lien.session_id, lien.apprenant_id, typeEval);
+      if (deja) return NextResponse.json({ error: 'Déjà répondu' }, { status: 409 });
+
+      const reponses = corps.answers || {};
+      const manquante = q.questions.find((x) => x.required && (reponses[x.key] === undefined || reponses[x.key] === ''));
+      if (manquante) return NextResponse.json({ error: `Réponse attendue : ${manquante.label}` }, { status: 400 });
+
+      db.prepare(`
+        INSERT INTO evaluations (id, session_id, apprenant_id, type, score, responses, comments)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run(randomUUID(), lien.session_id, lien.apprenant_id, typeEval,
+             computeScore(corps.type, reponses), JSON.stringify(reponses), corps.comments || '');
+
+      return NextResponse.json({ ok: true }, { status: 201 });
+    }
+
+    return NextResponse.json({ error: 'Action inconnue' }, { status: 400 });
+  } catch (e) {
+    console.error('[public/espace POST]', e);
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+  }
+}

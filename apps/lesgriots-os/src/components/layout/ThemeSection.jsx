@@ -47,6 +47,7 @@ const ROUTES_GRIOTHEQUE = [
   '/evaluations',
   '/facturation',
   '/appareil',
+  '/espace-apprenant',
 ];
 
 export function estHoteGriotheque(hostname) {
