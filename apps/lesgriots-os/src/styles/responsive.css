@@ -91,9 +91,43 @@
   }
 }
 
-/* ── TopBar : place pour le hamburger fixe + recherche compacte ── */
+/* ── TopBar : place pour le hamburger fixe + recherche compacte ──
+      Sur mobile, le bloc de droite (sélecteur de vue, durée, recherche) ne
+      rétrécit pas : sans passage à la ligne, il écrasait le titre à une
+      lettre par ligne. On empile donc titre puis commandes, et on laisse les
+      commandes défiler horizontalement plutôt que déborder. */
 @media (max-width: 767px) {
-  .resp-topbar { padding: 16px 16px 14px 64px !important; }
+  .resp-topbar {
+    padding: 14px 16px 12px 64px !important;
+    flex-wrap: wrap;
+    align-items: flex-start !important;
+    gap: 10px;
+    min-height: 0 !important;
+  }
+  .resp-topbar > div:first-child { flex: 1 1 100% !important; }
+  .resp-topbar > div:last-child {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .resp-topbar > div:last-child::-webkit-scrollbar { display: none; }
+  .resp-topbar h1 { font-size: var(--text-2xl) !important; }
+}
+
+/* ── Contenu des pages : 24px de marge latérale, c'est trop sur un
+      téléphone. On ramène à 14px sans toucher aux styles en ligne. ── */
+@media (max-width: 767px) {
+  .resp-topbar + div,
+  main > div[style*="padding: 0px 24px 48px"] {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+  /* Les grilles à colonnes fixes retombent sur une seule colonne. */
+  .apercu-colonnes { grid-template-columns: 1fr !important; }
+  /* Les tableaux larges défilent au lieu de déborder. */
+  .os-app table { display: block; overflow-x: auto; white-space: nowrap; }
 }
 
 /* ── Scope .os-app sous 768px :
