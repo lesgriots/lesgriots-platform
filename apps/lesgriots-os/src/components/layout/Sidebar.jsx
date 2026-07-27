@@ -53,11 +53,14 @@ const NAV = [
   { type: 'item', href: '/apercu', icon: 'home', label: 'Vue d’ensemble', monde: 'griotheque' },
 
   // ── Monde Griothèque : le découpage de l'ancienne interface, conservé ──
+  { href: '/agenda', icon: 'sessions', label: 'Agenda', monde: 'griotheque' },
   { type: 'divider', label: 'COMMERCIAL', monde: 'griotheque' },
   { href: '/pipeline-formations', icon: 'pipeline', label: 'Pipeline', monde: 'griotheque', compteur: 'pipeline' },
+  { href: '/facturation', icon: 'pricing', label: 'Facturation', monde: 'griotheque' },
   { type: 'divider', label: 'CATALOGUE', monde: 'griotheque' },
   { href: '/catalogue', icon: 'formations', label: 'Formations', monde: 'griotheque' },
   { href: '/sessions-list', icon: 'sessions', label: 'Sessions', monde: 'griotheque', compteur: 'sessions' },
+  { href: '/evaluations', icon: 'formations', label: 'Évaluations', monde: 'griotheque' },
   // Une seule entrée « Données », qui se déplie sur les six répertoires.
   {
     type: 'groupe', label: 'Données', icon: 'donnees', monde: 'griotheque',

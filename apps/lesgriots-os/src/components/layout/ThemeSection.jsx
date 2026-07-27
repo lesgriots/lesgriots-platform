@@ -43,6 +43,9 @@ const ROUTES_GRIOTHEQUE = [
   '/entreprises',
   '/financeurs',
   '/bpf',
+  '/agenda',
+  '/evaluations',
+  '/facturation',
 ];
 
 export function estHoteGriotheque(hostname) {
