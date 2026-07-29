@@ -21,6 +21,8 @@ const PUBLIC_PATHS = [
   '/_next',
   '/favicon.ico',
   '/apple-icon.png',
+  '/branding/',
+  '/manifest.webmanifest',
   // Pages publiques apprenants (émargement / questionnaires) — accès par token uniquement.
   // NB : '/p/' avec slash final pour ne PAS ouvrir /projects, /providers, etc.
   '/p/',
@@ -74,6 +76,6 @@ export function middleware(request) {
 export const config = {
   matcher: [
     // Match all routes except static files
-    '/((?!_next/static|_next/image|favicon.ico|apple-icon.png).*)',
+    '/((?!_next/static|_next/image|favicon.ico|apple-icon.png|branding/|manifest.webmanifest).*)',
   ],
 };

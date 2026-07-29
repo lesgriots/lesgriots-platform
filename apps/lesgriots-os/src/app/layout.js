@@ -12,9 +12,13 @@ export const metadata = {
   // SASU qui porte le SIRET et la déclaration d'activité, pas le logiciel.
   title: 'LA GRIOTHÈQUE OS',
   description: 'LA GRIOTHÈQUE OS · Le pilotage de l’organisme de formation',
+  manifest: '/manifest.webmanifest',
   icons: {
-    icon: [{ url: '/favicon.ico', sizes: '64x64', type: 'image/x-icon' }],
-    apple: '/apple-icon.png',
+    // Le symbole officiel est utilisé pour l'onglet, les raccourcis et l'app installée.
+    // Le mot-symbole complet reste affiché là où la place le permet (connexion/sidebar).
+    icon: [{ url: '/branding/griotring-ink.png', sizes: '512x512', type: 'image/png' }],
+    shortcut: [{ url: '/branding/griotring-ink.png', sizes: '512x512', type: 'image/png' }],
+    apple: [{ url: '/branding/griotring-ink.png', sizes: '512x512', type: 'image/png' }],
   },
 };
 
