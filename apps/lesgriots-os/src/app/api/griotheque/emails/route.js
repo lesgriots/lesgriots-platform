@@ -1,7 +1,8 @@
 /**
  * /api/griotheque/emails — écrire aux inscrits d'une session.
  *
- * Les cinq modèles Griothèque (convocation, rappel, enquêtes, attestation)
+ * Les modèles Griothèque (convocation, rappel, enquêtes, attestation,
+ * convention et documents de session)
  * existaient depuis le début et n'avaient jamais servi : rien ne les reliait à
  * des destinataires réels.
  *
@@ -118,11 +119,15 @@ async function _POST(request) {
     const gens = destinataires(db, session_id)
       .filter((g) => !apprenant_ids || apprenant_ids.includes(g.id));
 
-    let envoyes = 0, ignores = 0;
+    // Un statut « envoyé » ne doit être retourné que lorsque le transport SMTP
+    // l'a réellement accepté. Avant, chaque tentative était comptée comme un
+    // envoi, y compris les échecs SMTP : l'interface pouvait donc annoncer un
+    // email envoyé alors que personne ne l'avait reçu.
+    let envoyes = 0, simules = 0, echecs = 0, ignores = 0;
     for (const g of gens) {
       if (!g.email) { ignores += 1; continue; }
       const { objet, corps } = composer(db, modele, ctx, session_id, g);
-      await envoyerEmail({
+      const resultat = await envoyerEmail({
         destinataire: g.email,
         destinataire_nom: [g.first_name, g.last_name].filter(Boolean).join(' '),
         objet, corps,
@@ -130,10 +135,18 @@ async function _POST(request) {
         contexte_type: 'session',
         contexte_id: session_id,
       });
-      envoyes += 1;
+      if (resultat.statut === 'envoye') envoyes += 1;
+      else if (resultat.statut === 'simule') simules += 1;
+      else echecs += 1;
     }
 
-    return NextResponse.json({ envoyes, ignores, mode: smtpConfigure() ? 'reel' : 'simulation' }, { status: 201 });
+    return NextResponse.json({
+      envoyes,
+      simules,
+      echecs,
+      ignores,
+      mode: smtpConfigure() ? 'reel' : 'simulation',
+    }, { status: 201 });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

@@ -571,6 +571,40 @@ Ce fut un plaisir de vous compter parmi nous. Au plaisir de vous retrouver pour 
 ${SIGNATURE_GRIOTHEQUE}`;
     },
   },
+
+  {
+    key: 'convention',
+    label: 'Convention de formation',
+    description: 'Mise à disposition de la convention de formation dans l’espace apprenant.',
+    icon: '📄',
+    subject: ({ formation }) => `Votre convention — ${formation?.title || 'La Griothèque'}`,
+    body: ({ formation }) => `Bonjour,
+
+Votre convention de formation pour « ${formation?.title || 'votre formation'} » est prête.
+
+Vous pouvez la consulter depuis votre Espace Apprenant, accessible depuis le lien ci-dessous.
+
+Si une information doit être corrigée, répondez directement à cet e-mail afin que nous puissions la mettre à jour.
+
+${SIGNATURE_GRIOTHEQUE}`,
+  },
+
+  {
+    key: 'document_session',
+    label: 'Document de session',
+    description: 'Partage d’un document lié à une session de formation.',
+    icon: '📎',
+    subject: ({ formation }) => `Un document pour votre session — ${formation?.title || 'La Griothèque'}`,
+    body: ({ formation }) => `Bonjour,
+
+Un document concernant votre session « ${formation?.title || 'votre formation'} » est disponible.
+
+Vous pouvez le consulter depuis votre Espace Apprenant, accessible depuis le lien ci-dessous.
+
+Pour toute question ou correction, répondez directement à cet e-mail.
+
+${SIGNATURE_GRIOTHEQUE}`,
+  },
 ];
 
 export const GRIOTHEQUE_EMAIL_TEMPLATES_MAP = Object.fromEntries(

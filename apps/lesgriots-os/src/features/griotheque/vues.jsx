@@ -5210,7 +5210,44 @@ export function SessionsView(param) {
                 ...d,
                 documents: JSON.stringify(updated)
             }));
-        toast.success(next === 'generated' ? 'Document généré et daté' : next === 'sent' ? 'Envoi enregistré et daté' : next === 'signed' ? 'Signature enregistrée et datée' : 'Statut du document mis à jour');
+        toast.success(next === 'generated' ? 'Document généré et daté' : next === 'sent' ? 'Document envoyé et daté' : next === 'signed' ? 'Signature enregistrée et datée' : 'Statut du document mis à jour');
+    };
+    // Envoi réel d'un document de session. L'API utilise le SMTP configuré,
+    // journalise chaque tentative et ajoute un lien personnel vers l'espace
+    // apprenant : aucun statut « envoyé » n'est posé si le transport échoue.
+    const sendSessionEmail = async (docKey, templateKey = 'document_session', apprenantIds = null)=>{
+        if (!sessionDetail) return false;
+        const targetIds = apprenantIds || (sessionDetail.inscriptions || []).map((i)=>i.apprenant_id).filter(Boolean);
+        if (!targetIds.length) {
+            toast.error('Ajoutez au moins un apprenant avec une adresse e-mail avant l’envoi.');
+            return false;
+        }
+        const result = await api.post('/api/griotheque/emails', {
+            session_id: sessionDetail.id,
+            template_key: templateKey,
+            apprenant_ids: targetIds,
+        });
+        if (result?.__failed || result?.error) {
+            toast.error(result?.error || 'L’envoi de l’e-mail a échoué.');
+            return false;
+        }
+        const delivered = Number(result.envoyes || 0);
+        const simulated = Number(result.simules || 0);
+        const failures = Number(result.echecs || 0);
+        const skipped = Number(result.ignores || 0);
+        if (delivered || simulated) await setDocStatus(docKey, 'sent');
+        if (failures) {
+            toast.error(failures > 1
+                ? `${failures} e-mails n’ont pas pu être envoyés. Consultez l’historique des e-mails.`
+                : 'Un e-mail n’a pas pu être envoyé. Consultez l’historique des e-mails.');
+        } else if (delivered) {
+            toast.success(`${delivered} e-mail${delivered > 1 ? 's' : ''} envoyé${delivered > 1 ? 's' : ''} et journalisé${delivered > 1 ? 's' : ''}.`);
+        } else if (simulated) {
+            toast.success(`${simulated} e-mail${simulated > 1 ? 's' : ''} simulé${simulated > 1 ? 's' : ''} : le SMTP n’est pas configuré.`);
+        } else if (skipped) {
+            toast.error('Aucun envoi : les apprenants sélectionnés n’ont pas d’adresse e-mail.');
+        }
+        return Boolean(delivered || simulated);
     };
     const cycleDocStatus = async (docKey)=>{
         if (!sessionDetail) return;
@@ -7463,11 +7500,12 @@ export function SessionsView(param) {
                                                 {/* Send email */}
                                                 <button onClick={() => {
                                                     if (!isGenerated) {
-                                                        toast.error('Générez d’abord le document avant de l’enregistrer comme envoyé.');
+                                                        toast.error('Générez d’abord le document avant de l’envoyer.');
                                                         return;
                                                     }
-                                                    setDocStatus(docKey, 'sent');
-                                                }} title="Marquer comme envoyé par e-mail" style={{
+                                                    const templateKey = docKey === 'convocation' || docKey === 'livret_accueil' ? 'convocation' : docKey === 'attestation' ? 'envoi_attestation' : 'document_session';
+                                                    sendSessionEmail(docKey, templateKey);
+                                                }} title="Envoyer réellement par e-mail" style={{
                                                     ...iBtn, background: alpha('var(--warning)', 6), borderColor: alpha('var(--warning)', 27), color: 'var(--warning)',
                                                 }}>
                                                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="3" width="13" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><path d="M1.5 3.5l6 4.5 6-4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
@@ -7614,8 +7652,8 @@ export function SessionsView(param) {
                                                     }}>⌕</button>
                                                     <button onClick={() => {
                                                         if (!ready) { toast.error('Générez d’abord ce document.'); return; }
-                                                        setDocStatus(docKey, 'sent');
-                                                    }} title="Enregistrer l’envoi par e-mail" style={{
+                                                        sendSessionEmail(docKey, 'document_session');
+                                                    }} title="Envoyer réellement par e-mail" style={{
                                                         width: 32, height: 32, borderRadius: 7, border: `1px solid ${alpha('var(--warning)', 28)}`, background: alpha('var(--warning)', 7), color: 'var(--warning)', cursor: 'pointer', fontWeight: 700,
                                                     }}>✉</button>
                                                 </div>
@@ -7636,7 +7674,7 @@ export function SessionsView(param) {
                                                 <div style={{ display: 'flex', gap: 7 }}>
                                                     <button onClick={() => { generatePdf('convention'); setDocStatus('convention', 'generated'); }} style={{ padding: '8px 12px', borderRadius: 7, border: `1px solid ${alpha('var(--success)', 28)}`, background: alpha('var(--success)', 7), color: 'var(--success)', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>Générer</button>
                                                     <button onClick={() => previewDoc('convention', 'Dossier conventions et contrats')} style={{ padding: '8px 12px', borderRadius: 7, border: `1px solid ${T.border2}`, background: T.card, color: T.textSub, cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>Prévisualiser</button>
-                                                    <button onClick={() => { if (!conventionsGenerated) { toast.error('Générez d’abord le dossier.'); return; } setDocStatus('convention', 'sent'); }} style={{ padding: '8px 12px', borderRadius: 7, border: `1px solid ${alpha('var(--warning)', 28)}`, background: alpha('var(--warning)', 7), color: 'var(--warning)', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>E-mail</button>
+                                                    <button onClick={() => { if (!conventionsGenerated) { toast.error('Générez d’abord le dossier.'); return; } sendSessionEmail('convention', 'convention'); }} style={{ padding: '8px 12px', borderRadius: 7, border: `1px solid ${alpha('var(--warning)', 28)}`, background: alpha('var(--warning)', 7), color: 'var(--warning)', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>E-mail</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -7661,7 +7699,7 @@ export function SessionsView(param) {
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
                                                         <button onClick={() => { generatePdf('convention', members[0]?.apprenant_id); setDocStatus('convention', 'generated'); }} style={{ padding: '7px 10px', borderRadius: 7, border: `1px solid ${alpha('var(--success)', 28)}`, background: alpha('var(--success)', 7), color: 'var(--success)', cursor: 'pointer', fontWeight: 700, fontSize: 11 }}>{conventionsGenerated ? 'Mettre à jour' : 'Générer'}</button>
                                                         <button onClick={() => previewDoc('convention', `Convention — ${company}`, members[0]?.apprenant_id)} style={{ padding: '7px 10px', borderRadius: 7, border: `1px solid ${T.border2}`, background: T.card, color: T.textSub, cursor: 'pointer', fontWeight: 700, fontSize: 11 }}>Voir</button>
-                                                        <button onClick={() => { if (!conventionsGenerated) { toast.error('Générez d’abord la convention.'); return; } setDocStatus('convention', 'sent'); }} style={{ padding: '7px 10px', borderRadius: 7, border: `1px solid ${alpha('var(--warning)', 28)}`, background: alpha('var(--warning)', 7), color: 'var(--warning)', cursor: 'pointer', fontWeight: 700, fontSize: 11 }}>E-mail</button>
+                                                        <button onClick={() => { if (!conventionsGenerated) { toast.error('Générez d’abord la convention.'); return; } sendSessionEmail('convention', 'convention', members.map((member)=>member.apprenant_id).filter(Boolean)); }} style={{ padding: '7px 10px', borderRadius: 7, border: `1px solid ${alpha('var(--warning)', 28)}`, background: alpha('var(--warning)', 7), color: 'var(--warning)', cursor: 'pointer', fontWeight: 700, fontSize: 11 }}>E-mail</button>
                                                         <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 9px', borderRadius: 7, background: alpha(allSigned ? 'var(--success)' : T.textMuted, 7), color: allSigned ? 'var(--success)' : T.textSub, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
                                                             <input type="checkbox" checked={allSigned} onChange={event => setCompanyConventionsSigned(members, event.target.checked)} style={{ accentColor: 'var(--success)' }} /> Signée
                                                         </label>
