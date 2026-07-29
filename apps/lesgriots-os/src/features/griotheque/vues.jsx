@@ -4741,7 +4741,7 @@ const DOC_STATUS_MAP = {
 };
 
 // ── Smart Advancement Calculator ──
-function computeSmartAdvancement(sess) {
+function computeSmartAdvancement(sess, evaluations = []) {
     if (!sess) return null;
 
     const inscriptions = sess.inscriptions || [];
@@ -4753,6 +4753,10 @@ function computeSmartAdvancement(sess) {
         }
     })();
     const nbApprenants = inscriptions.length;
+    const evaluationTypes = ['positionnement', 'acquis', 'satisfaction'];
+    const evaluationKeys = new Set((evaluations || []).filter((evaluation) => evaluationTypes.includes(evaluation.type)).map((evaluation) => `${evaluation.apprenant_id}:${evaluation.type}`));
+    const evaluationsCompleted = evaluationKeys.size;
+    const evaluationsExpected = nbApprenants * evaluationTypes.length;
 
     // ── CONFIGURATION ──
     const configuration = {
@@ -4760,16 +4764,16 @@ function computeSmartAdvancement(sess) {
         icon: '⚙️',
         color: 'var(--pillar-prod)',
         items: [
-            { key: 'dates', label: 'Dates définies', done: !!(sess.start_date && sess.end_date), detail: sess.start_date ? `Du ${sess.start_date} au ${sess.end_date}` : null, goto: 'info' },
-            { key: 'lieu', label: 'Lieu de formation', done: !!(sess.location), detail: sess.location || null, goto: 'info' },
-            { key: 'client', label: 'Client rattaché', done: !!(sess.client_id), detail: null, goto: 'info' },
-            { key: 'devis', label: 'Devis', done: !!(docs.devis && docs.devis !== 'none'), detail: docs.devis ? `Statut : ${docs.devis}` : null, goto: 'documents', sub: docs.devis ? [
+            { key: 'dates', label: 'Dates définies', done: !!(sess.start_date && sess.end_date), detail: sess.start_date ? `Du ${sess.start_date} au ${sess.end_date}` : null, goto: 'info', configSubTab: 'dates_prix', scrollTarget: 'section-dates', action: 'Modifier' },
+            { key: 'lieu', label: 'Lieu de formation', done: !!(sess.location), detail: sess.location || null, goto: 'info', configSubTab: 'initialisation', scrollTarget: 'section-dates', action: 'Modifier' },
+            { key: 'client', label: 'Client rattaché', done: !!(sess.client_id), detail: null, goto: 'info', configSubTab: 'dates_prix', scrollTarget: 'section-dates', action: 'Modifier' },
+            { key: 'devis', label: 'Devis', done: !!(docs.devis && docs.devis !== 'none'), detail: docs.devis ? `Statut : ${docs.devis}` : null, goto: 'documents', gestionSubTab: 'conventions', scrollTarget: 'section-conventions', action: 'Gérer', sub: docs.devis ? [
                 { label: 'Envoyés par e-mail', value: docs.devis === 'sent' || docs.devis === 'signed' ? '1/1' : '0/1', ok: docs.devis === 'sent' || docs.devis === 'signed' },
                 { label: 'Signés', value: docs.devis === 'signed' ? '1/1' : '0/1', ok: docs.devis === 'signed' },
             ] : null },
-            { key: 'apprenants', label: 'Apprenants inscrits', done: nbApprenants > 0, detail: nbApprenants > 0 ? `${nbApprenants} apprenant${nbApprenants > 1 ? 's' : ''} inscrit${nbApprenants > 1 ? 's' : ''}` : null, goto: 'apprenants' },
-            { key: 'programme', label: 'Programme', done: !!(sess.formation_title), detail: sess.formation_title || null, goto: 'info' },
-            { key: 'formateur', label: 'Intervenants', done: !!(sess.formateur_name), detail: sess.formateur_name || null, goto: 'info' },
+            { key: 'apprenants', label: 'Apprenants inscrits', done: nbApprenants > 0, detail: nbApprenants > 0 ? `${nbApprenants} apprenant${nbApprenants > 1 ? 's' : ''} inscrit${nbApprenants > 1 ? 's' : ''}` : null, goto: 'apprenants', scrollTarget: 'section-apprenants', action: 'Gérer' },
+            { key: 'programme', label: 'Programme', done: !!(sess.formation_title), detail: sess.formation_title || null, goto: 'programme', configSubTab: 'programme', action: 'Modifier' },
+            { key: 'formateur', label: 'Intervenants', done: !!(sess.formateur_name), detail: sess.formateur_name || null, goto: 'info', configSubTab: 'intervenants', scrollTarget: 'sub-intervenants', action: 'Modifier' },
         ]
     };
 
@@ -4781,20 +4785,20 @@ function computeSmartAdvancement(sess) {
         icon: '📋',
         color: 'var(--success)',
         items: [
-            { key: 'conventions', label: 'Conventions', done: nbApprenants > 0 && conventionsDone === nbApprenants, goto: 'documents', sub: [
+            { key: 'conventions', label: 'Conventions', done: nbApprenants > 0 && conventionsDone === nbApprenants, goto: 'documents', gestionSubTab: 'conventions', scrollTarget: 'section-conventions', action: 'Gérer', sub: [
                 { label: 'Documents générés', value: `${docs.convention === 'generated' || docs.convention === 'sent' || docs.convention === 'signed' ? nbApprenants : 0}/${nbApprenants}`, ok: docs.convention && docs.convention !== 'none' },
                 { label: 'Envoyés par e-mail', value: `${conventionsDone}/${nbApprenants}`, ok: conventionsDone === nbApprenants },
                 { label: 'Signés', value: `${conventionsDone}/${nbApprenants}`, ok: conventionsDone === nbApprenants },
             ]},
-            { key: 'convocations', label: 'Convocations', done: nbApprenants > 0 && convocationsDone === nbApprenants, goto: 'documents', sub: [
+            { key: 'convocations', label: 'Convocations', done: nbApprenants > 0 && convocationsDone === nbApprenants, goto: 'documents', gestionSubTab: 'convocations', scrollTarget: 'section-convocations', action: 'Gérer', sub: [
                 { label: 'Documents générés', value: `${docs.convocation && docs.convocation !== 'none' ? nbApprenants : 0}/${nbApprenants}`, ok: docs.convocation && docs.convocation !== 'none' },
                 { label: 'Envoyés par e-mail', value: `${convocationsDone}/${nbApprenants}`, ok: convocationsDone === nbApprenants },
             ]},
-            { key: 'evaluations', label: 'Évaluations', done: false, goto: 'documents', sub: [
-                { label: 'Complétées', value: `0/${nbApprenants}`, ok: false },
-                { label: 'Évaluations envoyées', value: `0/${nbApprenants}`, ok: false },
+            { key: 'evaluations', label: 'Évaluations', done: evaluationsExpected > 0 && evaluationsCompleted >= evaluationsExpected, goto: 'documents', gestionSubTab: 'evaluations', evalSubTab: 'positionnement', scrollTarget: 'section-evaluations', action: 'Gérer', sub: [
+                { label: 'Complétées', value: `${evaluationsCompleted}/${evaluationsExpected || 0}`, ok: evaluationsExpected > 0 && evaluationsCompleted >= evaluationsExpected },
+                { label: 'Modèles actifs', value: `${evaluationKeys.size}/${evaluationsExpected || 0}`, ok: evaluationKeys.size > 0 },
             ]},
-            { key: 'factures', label: 'Factures', done: false, goto: 'documents', detail: 'Aucune facture pour le moment' },
+            { key: 'factures', label: 'Factures', done: false, goto: 'documents', gestionSubTab: 'finances', action: 'Gérer', detail: 'Aucune facture pour le moment' },
         ]
     };
 
@@ -4805,8 +4809,8 @@ function computeSmartAdvancement(sess) {
         icon: '🎓',
         color: 'var(--pillar-studio)',
         items: [
-            { key: 'fiches', label: 'Fiches apprenants', done: nbApprenants > 0 && completeFiches === nbApprenants, detail: `${completeFiches}/${nbApprenants} fiches complètes`, goto: 'apprenants' },
-            { key: 'financement', label: 'Financements identifiés', done: inscriptions.filter(i => i.financement).length === nbApprenants && nbApprenants > 0, detail: `${inscriptions.filter(i => i.financement).length}/${nbApprenants} renseignés`, goto: 'apprenants' },
+            { key: 'fiches', label: 'Fiches apprenants', done: nbApprenants > 0 && completeFiches === nbApprenants, detail: `${completeFiches}/${nbApprenants} fiches complètes`, goto: 'apprenants', scrollTarget: 'section-apprenants', action: 'Gérer' },
+            { key: 'financement', label: 'Financements identifiés', done: inscriptions.filter(i => i.financement).length === nbApprenants && nbApprenants > 0, detail: `${inscriptions.filter(i => i.financement).length}/${nbApprenants} renseignés`, goto: 'apprenants', scrollTarget: 'section-apprenants', action: 'Gérer' },
         ]
     };
 
@@ -4817,15 +4821,15 @@ function computeSmartAdvancement(sess) {
         icon: '✅',
         color: 'var(--warning)',
         items: [
-            { key: 'emargements', label: 'Émargements', done: !!(docs.emargement === 'signed'), goto: 'emargements', sub: [
+            { key: 'emargements', label: 'Émargements', done: !!(docs.emargement === 'signed'), goto: 'emargements', suiviSubTab: 'emargements', scrollTarget: 'section-emargements', action: 'Gérer', sub: [
                 { label: 'Apprenants', value: `${docs.emargement === 'signed' ? nbApprenants : 0}/${nbApprenants}`, ok: docs.emargement === 'signed' },
                 { label: 'Intervenants', value: `${docs.emargement === 'signed' ? 1 : 0}/1`, ok: docs.emargement === 'signed' },
             ]},
-            { key: 'certificats', label: 'Certificats', done: !!(docs.certificat === 'sent' || docs.certificat === 'signed'), goto: 'documents', sub: [
+            { key: 'certificats', label: 'Certificats', done: !!(docs.certificat === 'sent' || docs.certificat === 'signed'), goto: 'documents', gestionSubTab: 'conventions', scrollTarget: 'section-conventions', action: 'Gérer', sub: [
                 { label: 'Documents générés', value: `${docs.certificat && docs.certificat !== 'none' ? nbApprenants : 0}/${nbApprenants}`, ok: docs.certificat && docs.certificat !== 'none' },
                 { label: 'Envoyés par e-mail', value: `${docs.certificat === 'sent' || docs.certificat === 'signed' ? nbApprenants : 0}/${nbApprenants}`, ok: docs.certificat === 'sent' || docs.certificat === 'signed' },
             ]},
-            { key: 'attestations', label: 'Attestations', done: nbApprenants > 0 && attestationsDone === nbApprenants, goto: 'documents', sub: [
+            { key: 'attestations', label: 'Attestations', done: nbApprenants > 0 && attestationsDone === nbApprenants, goto: 'documents', gestionSubTab: 'conventions', scrollTarget: 'section-conventions', action: 'Gérer', sub: [
                 { label: 'Documents générés', value: `${docs.attestation && docs.attestation !== 'none' ? nbApprenants : 0}/${nbApprenants}`, ok: docs.attestation && docs.attestation !== 'none' },
                 { label: 'Envoyés par e-mail', value: `${attestationsDone}/${nbApprenants}`, ok: attestationsDone === nbApprenants },
             ]},
@@ -5111,6 +5115,25 @@ export function SessionsView(param) {
         });
         loadDetail(selected.id);
     };
+    const handleInscriptionFlag = async (inscId, field, current)=>{
+        const updated = await api.patch('/api/inscriptions', {
+            id: inscId,
+            [field]: current ? 0 : 1
+        });
+        if (updated && !updated.__failed) {
+            toast.success(current ? 'Statut annulé' : 'Statut mis à jour');
+            loadDetail(selected.id);
+        }
+    };
+    const openAdvancementItem = (item)=>{
+        if (!item.goto) return;
+        setDetailTab(item.goto);
+        if (item.configSubTab) setConfigSubTab(item.configSubTab);
+        if (item.gestionSubTab) setGestionSubTab(item.gestionSubTab);
+        if (item.suiviSubTab) setSuiviSubTab(item.suiviSubTab);
+        if (item.evalSubTab) setEvalSubTab(item.evalSubTab);
+        if (item.scrollTarget) setScrollTarget(item.scrollTarget);
+    };
     // ── Advancement helpers ──
     const getAdvancement = (sess)=>{
         if (!sess) return DEFAULT_ADVANCEMENT;
@@ -5165,29 +5188,37 @@ export function SessionsView(param) {
             return {};
         }
     };
-    const cycleDocStatus = async (docKey)=>{
+    const setDocStatus = async (docKey, next)=>{
         if (!sessionDetail) return;
         const docs = getDocuments(sessionDetail);
-        const order = [
-            'none',
-            'generated',
-            'sent',
-            'signed'
-        ];
-        const cur = docs[docKey] || 'none';
-        const next = order[(order.indexOf(cur) + 1) % order.length];
+        const timestamp = new Date().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         const updated = {
             ...docs,
             [docKey]: next,
-            ...(next === 'generated' ? { [docKey + '_date']: new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) } : {}),
+            [docKey + '_updated_at']: timestamp,
+            ...(next !== 'none' ? { [docKey + '_' + next + '_at']: timestamp } : {}),
+            ...(next === 'generated' ? { [docKey + '_date']: timestamp } : {}),
         };
-        await api.patch("/api/sessions/".concat(sessionDetail.id), {
+        const saved = await api.patch("/api/sessions/".concat(sessionDetail.id), {
             documents: updated
         });
+        if (saved?.__failed) {
+            toast.error('La mise à jour du document a échoué.');
+            return;
+        }
         setSessionDetail((d)=>({
                 ...d,
                 documents: JSON.stringify(updated)
             }));
+        toast.success(next === 'generated' ? 'Document généré et daté' : next === 'sent' ? 'Envoi enregistré et daté' : next === 'signed' ? 'Signature enregistrée et datée' : 'Statut du document mis à jour');
+    };
+    const cycleDocStatus = async (docKey)=>{
+        if (!sessionDetail) return;
+        const docs = getDocuments(sessionDetail);
+        const order = ['none', 'generated', 'sent', 'signed'];
+        const current = docs[docKey] || 'none';
+        const next = order[(order.indexOf(current) + 1) % order.length];
+        return setDocStatus(docKey, next);
     };
     // ── Financial ──
     const getCA = (detail)=>{
@@ -7038,7 +7069,7 @@ export function SessionsView(param) {
                                 }, void 0, true);
                             })(),
                             detailTab === 'advancement' && (() => {
-                                const smart = computeSmartAdvancement(sessionDetail);
+                                const smart = computeSmartAdvancement(sessionDetail, evals);
                                 if (!smart) return null;
 
                                 const phases = [smart.configuration, smart.gestion, smart.espaceApprenant, smart.suivi];
@@ -7138,38 +7169,27 @@ export function SessionsView(param) {
                                                 {/* Items list with padding for badge */}
                                                 <div style={{ padding: '16px 16px 12px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
                                                     {phase.items.map((item, iIdx) => (
-                                                        <div key={iIdx} onClick={() => {
-                                                            if (item.goto) {
-                                                                setDetailTab(item.goto);
-                                                                // Auto-navigate to correct gestion sub-tab
-                                                                if (item.goto === 'documents') {
-                                                                    const subMap = { conventions: 'conventions', convocations: 'convocations', evaluations: 'evaluations', factures: 'finances', emargements: 'conventions', certificats: 'conventions', attestations: 'conventions', devis: 'conventions' };
-                                                                    if (subMap[item.key]) setGestionSubTab(subMap[item.key]);
-                                                                }
-                                                                // Scroll to the specific section
-                                                                setScrollTarget('section-' + item.key);
-                                                            }
-                                                        }} style={{
-                                                            background: item.done ? 'transparent' : 'var(--danger-soft)',
-                                                            padding: '10px 12px',
-                                                            borderRadius: 6,
-                                                            borderLeft: `3px solid ${phase.color}`,
+                                                        <div key={iIdx} onClick={() => openAdvancementItem(item)} style={{
+                                                            background: item.done ? alpha(phase.color, 8) : 'var(--danger-soft)',
+                                                            padding: '12px',
+                                                            borderRadius: 8,
+                                                            borderLeft: `5px solid ${item.done ? phase.color : 'var(--danger)'}`,
                                                             cursor: item.goto ? 'pointer' : 'default',
                                                             transition: 'background 0.15s',
-                                                        }} onMouseOver={e => { if (item.goto) e.currentTarget.style.background = item.done ? T.cardHover || 'var(--surface-2)' : 'var(--danger-soft)'; }} onMouseOut={e => { e.currentTarget.style.background = item.done ? 'transparent' : 'var(--danger-soft)'; }}>
+                                                        }} onMouseOver={e => { if (item.goto) e.currentTarget.style.background = item.done ? alpha(phase.color, 14) : 'var(--danger-soft)'; }} onMouseOut={e => { e.currentTarget.style.background = item.done ? alpha(phase.color, 8) : 'var(--danger-soft)'; }}>
                                                             <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: item.sub ? 8 : 0 }}>
                                                                 <span style={{
-                                                                    fontSize: 16,
-                                                                    flexShrink: 0,
-                                                                    marginTop: 2
+                                                                    width: 24, height: 24, borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                                                    marginTop: 0, fontSize: 14, fontWeight: 800, color: 'var(--on-solid)',
+                                                                    background: item.done ? phase.color : 'var(--danger)'
                                                                 }}>
                                                                     {item.done ? '✓' : '!'}
                                                                 </span>
                                                                 <div style={{ flex: 1 }}>
                                                                     <div style={{
-                                                                        fontSize: 12,
-                                                                        fontWeight: 600,
-                                                                        color: phase.color,
+                                                                        fontSize: 13,
+                                                                        fontWeight: 700,
+                                                                        color: item.done ? phase.color : 'var(--danger)',
                                                                         marginBottom: item.detail ? 4 : 0
                                                                     }}>
                                                                         {item.label}
@@ -7178,7 +7198,7 @@ export function SessionsView(param) {
                                                                         {item.detail}
                                                                     </div>}
                                                                 </div>
-                                                                {item.goto && <span style={{ fontSize: 11, color: T.textMuted, flexShrink: 0 }}>→</span>}
+                                                                {item.goto && <span style={{ fontSize: 10, color: item.done ? phase.color : 'var(--danger)', fontWeight: 700, flexShrink: 0 }}>{item.action || 'Ouvrir'} →</span>}
                                                             </div>
                                                             {item.sub && <div style={{ marginLeft: 24, display: 'flex', flexDirection: 'column', gap: 6 }}>
                                                                 {item.sub.map((sub, sIdx) => (
@@ -7322,6 +7342,7 @@ export function SessionsView(param) {
                                     inscriptions.forEach((ins, idx)=>{
                                         setTimeout(()=>generatePdf(type, ins.apprenant_id), idx * 300);
                                     });
+                                    setDocStatus(type, 'generated');
                                 };
 
                                 const GESTION_SUBTABS = [
@@ -7385,12 +7406,14 @@ export function SessionsView(param) {
                                     const st = docs[docKey] || 'none';
                                     const info = DOC_STATUS_MAP[st] || DOC_STATUS_MAP.none;
                                     const dateGenerated = docs[docKey + '_date'] || null;
+                                    const lastUpdate = docs[docKey + '_updated_at'] || dateGenerated;
+                                    const statusDate = docs[docKey + '_' + st + '_at'] || lastUpdate;
                                     const isGenerated = st !== 'none';
                                     const iBtn = { width: 36, height: 36, borderRadius: 8, border: `1px solid ${T.border2}`, background: T.card, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 14, color: T.textSub, transition: 'all 0.15s' };
                                     return <div style={{ background: T.card, border: `1px solid ${T.border2}`, borderRadius: 10, padding: '16px 20px', marginBottom: 12 }}>
                                         {/* Date line */}
-                                        {dateGenerated && <div style={{ fontSize: 11, color: T.textMuted, marginBottom: 10 }}>
-                                            Généré le {dateGenerated}
+                                        {statusDate && <div style={{ fontSize: 11, color: T.textMuted, marginBottom: 10 }}>
+                                            {st === 'generated' ? 'Généré' : st === 'sent' ? 'Envoyé' : st === 'signed' ? 'Signé' : 'Mis à jour'} le {statusDate}
                                         </div>}
 
                                         {/* Main row */}
@@ -7420,6 +7443,7 @@ export function SessionsView(param) {
                                                 {canGenerate && !(perApprenant && inscriptions.length > 1) && <button onClick={() => {
                                                     const aid = perApprenant && inscriptions.length === 1 ? inscriptions[0].apprenant_id : undefined;
                                                     generatePdf(docKey, aid);
+                                                    setDocStatus(docKey, 'generated');
                                                 }} title={isGenerated ? 'Régénérer' : 'Générer le PDF'} style={{
                                                     ...iBtn, background: alpha('var(--success)', 6), borderColor: alpha('var(--success)', 27), color: 'var(--success)',
                                                 }}>
@@ -7437,7 +7461,13 @@ export function SessionsView(param) {
                                                 </button>
 
                                                 {/* Send email */}
-                                                <button title="Envoyer par email" style={{
+                                                <button onClick={() => {
+                                                    if (!isGenerated) {
+                                                        toast.error('Générez d’abord le document avant de l’enregistrer comme envoyé.');
+                                                        return;
+                                                    }
+                                                    setDocStatus(docKey, 'sent');
+                                                }} title="Marquer comme envoyé par e-mail" style={{
                                                     ...iBtn, background: alpha('var(--warning)', 6), borderColor: alpha('var(--warning)', 27), color: 'var(--warning)',
                                                 }}>
                                                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="3" width="13" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><path d="M1.5 3.5l6 4.5 6-4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
@@ -7545,93 +7575,110 @@ export function SessionsView(param) {
                                         }
                                         const companyList = Object.entries(companyGroups);
                                         const colors_avatar = ['#8B5CF6','#3B82F6','#10B981','#F59E0B','#EF4444','#EC4899','#06B6D4'];
+                                        const conventionsGenerated = (docs.convention || 'none') !== 'none';
+                                        const signedConventions = inscriptions.filter(i => i.convention_signed).length;
+
+                                        const setCompanyConventionsSigned = async (members, signed) => {
+                                            if (!members.length) return;
+                                            const results = await Promise.all(members.map(member => api.patch('/api/inscriptions', {
+                                                id: member.id,
+                                                convention_signed: signed ? 1 : 0,
+                                            })));
+                                            if (results.some(result => result?.__failed)) {
+                                                toast.error('Impossible de mettre à jour la signature de cette convention.');
+                                                return;
+                                            }
+                                            toast.success(signed ? 'Convention marquée comme signée.' : 'Signature de la convention retirée.');
+                                            loadDetail(selected.id);
+                                        };
+
+                                        const CompactContractDoc = ({ docKey, label, description }) => {
+                                            const status = docs[docKey] || 'none';
+                                            const statusInfo = DOC_STATUS_MAP[status] || DOC_STATUS_MAP.none;
+                                            const updatedAt = docs[docKey + '_' + status + '_at'] || docs[docKey + '_updated_at'] || docs[docKey + '_date'];
+                                            const ready = status !== 'none';
+                                            return <div style={{
+                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                                                padding: '14px 16px', border: `1px solid ${T.border2}`, borderRadius: 10, background: T.card,
+                                            }}>
+                                                <div style={{ minWidth: 0 }}>
+                                                    <div style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{label}</div>
+                                                    <div style={{ fontSize: 11, color: T.textMuted, marginTop: 3 }}>{updatedAt ? `${statusInfo.l} le ${updatedAt}` : description}</div>
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                                                    <button onClick={() => { generatePdf(docKey); setDocStatus(docKey, 'generated'); }} title={ready ? 'Régénérer le document' : 'Générer le document'} style={{
+                                                        width: 32, height: 32, borderRadius: 7, border: `1px solid ${alpha('var(--success)', 28)}`, background: alpha('var(--success)', 7), color: 'var(--success)', cursor: 'pointer', fontWeight: 700,
+                                                    }}>↓</button>
+                                                    <button onClick={() => previewDoc(docKey, label)} title="Prévisualiser" style={{
+                                                        width: 32, height: 32, borderRadius: 7, border: `1px solid ${alpha('var(--info)', 28)}`, background: alpha('var(--info)', 7), color: 'var(--info)', cursor: 'pointer', fontWeight: 700,
+                                                    }}>⌕</button>
+                                                    <button onClick={() => {
+                                                        if (!ready) { toast.error('Générez d’abord ce document.'); return; }
+                                                        setDocStatus(docKey, 'sent');
+                                                    }} title="Enregistrer l’envoi par e-mail" style={{
+                                                        width: 32, height: 32, borderRadius: 7, border: `1px solid ${alpha('var(--warning)', 28)}`, background: alpha('var(--warning)', 7), color: 'var(--warning)', cursor: 'pointer', fontWeight: 700,
+                                                    }}>✉</button>
+                                                </div>
+                                            </div>;
+                                        };
 
                                         return <div id="section-conventions">
-                                        <SectionHeader title="Conventions et contrats" description={isInter ? `Session INTER — ${companyList.length} entreprise${companyList.length > 1 ? 's' : ''}, ${inscriptions.length} apprenant${inscriptions.length > 1 ? 's' : ''}` : 'Générez et suivez les conventions de formation par client.'} />
+                                        <SectionHeader title="Conventions et contrats par client" />
 
-                                        {companyList.map(([company, members], idx) => <div key={company} style={{ marginBottom: 20 }}>
-                                            {/* Company block */}
-                                            <div style={{ background: 'var(--surface-2)', borderRadius: 10, padding: '14px 18px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 14 }}>
-                                                <div style={{ width: 44, height: 44, borderRadius: 10, background: colors_avatar[idx % colors_avatar.length], display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: 'var(--on-solid)' }}>
-                                                    {company.charAt(0).toUpperCase()}
-                                                </div>
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--on-solid)' }}>{company}</div>
-                                                    <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{members.length} apprenant{members.length > 1 ? 's' : ''} : {members.map(i => `${i.first_name} ${i.last_name}`).join(', ')}</div>
-                                                </div>
-                                                {/* Quick actions for this company */}
-                                                <div style={{ display: 'flex', gap: 6 }}>
-                                                    <button onClick={() => previewDoc('convention', `Convention — ${company}`)} title="Prévisualiser la convention" style={{
-                                                        width: 32, height: 32, borderRadius: 8, border: '1px solid color-mix(in srgb, var(--info) 27%, transparent)', background: 'color-mix(in srgb, var(--info) 7%, transparent)',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--info)',
-                                                    }}>
-                                                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5"/><path d="M1.5 8s2.5-4.5 6.5-4.5S14.5 8 14.5 8s-2.5 4.5-6.5 4.5S1.5 8 1.5 8z" stroke="currentColor" strokeWidth="1.5"/></svg>
-                                                    </button>
-                                                    <button onClick={() => downloadDoc('convention')} title="Télécharger" style={{
-                                                        width: 32, height: 32, borderRadius: 8, border: `1px solid ${T.border2}`, background: 'transparent',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-3)',
-                                                    }}>
-                                                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v8m0 0L5 7m3 3l3-3M3 12h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            {/* Convention DocCard for this company */}
-                                            <DocCard docKey="convention" label={`Convention — ${company}`} icon="" canGenerate={true} perApprenant={false} />
-
-                                            {/* ── Devis et documents du client (Digiforma-style) ── */}
-                                            <DevisClientBlock
-                                                company={company}
-                                                members={members}
-                                                sessionDetail={sessionDetail}
-                                                isInter={isInter}
-                                                colorIdx={idx}
-                                                colorsAvatar={colors_avatar}
-                                            />
-                                        </div>)}
-
-                                        {/* Convention globale (session complète) */}
-                                        {companyList.length > 1 && <div style={{ marginTop: 8, marginBottom: 20, padding: '12px 16px', background: alpha('var(--success)', 6), border: '1px solid color-mix(in srgb, var(--success) 20%, transparent)', borderRadius: 10 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <div style={{ background: T.card, border: `1px solid ${T.border2}`, borderRadius: 12, padding: '16px 18px', marginBottom: 16 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
                                                 <div>
-                                                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--success)' }}>Convention globale session</div>
-                                                    <div style={{ fontSize: 11, color: T.textMuted }}>Tous les apprenants ({inscriptions.length})</div>
+                                                    <div style={{ fontSize: 13, fontWeight: 700, color: T.text }}>Dossier complet de la session</div>
+                                                    <div style={{ fontSize: 11, color: T.textMuted, marginTop: 3 }}>
+                                                        {conventionsGenerated ? `${signedConventions}/${inscriptions.length} convention${inscriptions.length > 1 ? 's' : ''} signée${signedConventions > 1 ? 's' : ''}` : 'Pas encore généré'}
+                                                    </div>
                                                 </div>
-                                                <div style={{ display: 'flex', gap: 6 }}>
-                                                    <button onClick={() => previewDoc('convention', 'Convention globale')} style={{
-                                                        padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                                                        background: alpha('var(--info)', 7), border: '1px solid color-mix(in srgb, var(--info) 27%, transparent)', color: 'var(--info)',
-                                                    }}>Prévisualiser</button>
-                                                    <button onClick={() => downloadDoc('convention')} style={{
-                                                        padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                                                        background: T.card, border: `1px solid ${T.border2}`, color: T.textSub,
-                                                    }}>Télécharger</button>
+                                                <div style={{ display: 'flex', gap: 7 }}>
+                                                    <button onClick={() => { generatePdf('convention'); setDocStatus('convention', 'generated'); }} style={{ padding: '8px 12px', borderRadius: 7, border: `1px solid ${alpha('var(--success)', 28)}`, background: alpha('var(--success)', 7), color: 'var(--success)', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>Générer</button>
+                                                    <button onClick={() => previewDoc('convention', 'Dossier conventions et contrats')} style={{ padding: '8px 12px', borderRadius: 7, border: `1px solid ${T.border2}`, background: T.card, color: T.textSub, cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>Prévisualiser</button>
+                                                    <button onClick={() => { if (!conventionsGenerated) { toast.error('Générez d’abord le dossier.'); return; } setDocStatus('convention', 'sent'); }} style={{ padding: '8px 12px', borderRadius: 7, border: `1px solid ${alpha('var(--warning)', 28)}`, background: alpha('var(--warning)', 7), color: 'var(--warning)', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>E-mail</button>
                                                 </div>
                                             </div>
-                                        </div>}
+                                        </div>
+
+                                        {companyList.map(([company, members], idx) => {
+                                            const allSigned = members.length > 0 && members.every(member => member.convention_signed);
+                                            const contactNames = members.map(member => `${member.first_name || ''} ${member.last_name || ''}`.trim()).filter(Boolean);
+                                            return <div key={company} style={{ background: T.card, border: `1px solid ${T.border2}`, borderRadius: 12, overflow: 'hidden', marginBottom: 14 }}>
+                                                <div style={{ background: 'var(--surface-2)', padding: '13px 16px', display: 'flex', alignItems: 'center', gap: 11 }}>
+                                                    <div style={{ width: 36, height: 36, borderRadius: 9, background: colors_avatar[idx % colors_avatar.length], display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--on-solid)', fontWeight: 800 }}>{company.charAt(0).toUpperCase()}</div>
+                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                        <div style={{ fontSize: 14, fontWeight: 800, color: T.text }}>{company}</div>
+                                                        <div style={{ fontSize: 11, color: T.textMuted, marginTop: 2 }}>{members.length} apprenant{members.length > 1 ? 's' : ''}{contactNames.length ? ` · ${contactNames.join(', ')}` : ''}</div>
+                                                    </div>
+                                                    <span style={{ padding: '4px 8px', borderRadius: 99, background: alpha(allSigned ? 'var(--success)' : 'var(--warning)', 10), color: allSigned ? 'var(--success)' : 'var(--warning)', fontWeight: 700, fontSize: 10 }}>{allSigned ? 'Signée' : 'À signer'}</span>
+                                                </div>
+                                                <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
+                                                    <div>
+                                                        <div style={{ fontSize: 13, fontWeight: 700, color: T.text }}>Convention entreprise</div>
+                                                        <div style={{ fontSize: 11, color: T.textMuted, marginTop: 3 }}>{conventionsGenerated ? 'Document disponible et modifiable' : 'Générez la convention pour ce client'}</div>
+                                                    </div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
+                                                        <button onClick={() => { generatePdf('convention', members[0]?.apprenant_id); setDocStatus('convention', 'generated'); }} style={{ padding: '7px 10px', borderRadius: 7, border: `1px solid ${alpha('var(--success)', 28)}`, background: alpha('var(--success)', 7), color: 'var(--success)', cursor: 'pointer', fontWeight: 700, fontSize: 11 }}>{conventionsGenerated ? 'Mettre à jour' : 'Générer'}</button>
+                                                        <button onClick={() => previewDoc('convention', `Convention — ${company}`, members[0]?.apprenant_id)} style={{ padding: '7px 10px', borderRadius: 7, border: `1px solid ${T.border2}`, background: T.card, color: T.textSub, cursor: 'pointer', fontWeight: 700, fontSize: 11 }}>Voir</button>
+                                                        <button onClick={() => { if (!conventionsGenerated) { toast.error('Générez d’abord la convention.'); return; } setDocStatus('convention', 'sent'); }} style={{ padding: '7px 10px', borderRadius: 7, border: `1px solid ${alpha('var(--warning)', 28)}`, background: alpha('var(--warning)', 7), color: 'var(--warning)', cursor: 'pointer', fontWeight: 700, fontSize: 11 }}>E-mail</button>
+                                                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 9px', borderRadius: 7, background: alpha(allSigned ? 'var(--success)' : T.textMuted, 7), color: allSigned ? 'var(--success)' : T.textSub, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+                                                            <input type="checkbox" checked={allSigned} onChange={event => setCompanyConventionsSigned(members, event.target.checked)} style={{ accentColor: 'var(--success)' }} /> Signée
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>;
+                                        })}
 
                                         <div style={{ marginTop: 24 }}>
                                             <SectionHeader title="Autres documents contractuels" />
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 10 }}>
                                                 {[
-                                                    { key: 'programme', label: 'Programme', icon: '📄' },
-                                                    { key: 'cgv', label: 'CGV', icon: '📑' },
-                                                    { key: 'reglement', label: 'Règlement intérieur', icon: '📜' },
-                                                    { key: 'confidentialite', label: 'Politique de confidentialité', icon: '🔒' },
-                                                ].map(d => {
-                                                    const st = docs[d.key] || 'none';
-                                                    const info = DOC_STATUS_MAP[st] || DOC_STATUS_MAP.none;
-                                                    return <div key={d.key} style={{ background: T.card, border: `1px solid ${T.border2}`, borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                            <span style={{ fontSize: 14 }}>{d.icon}</span>
-                                                            <span style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{d.label}</span>
-                                                        </div>
-                                                        <button onClick={() => cycleDocStatus(d.key)} style={{
-                                                            padding: '3px 10px', borderRadius: 5, fontSize: 10, fontWeight: 700, cursor: 'pointer',
-                                                            background: alpha(info.c, 9), border: `1px solid ${alpha(info.c, 27)}`, color: info.c,
-                                                        }}>{info.l}</button>
-                                                    </div>;
-                                                })}
+                                                    { key: 'programme', label: 'Programme', description: 'Programme de formation' },
+                                                    { key: 'cgv', label: 'CGV', description: 'Conditions générales de vente' },
+                                                    { key: 'reglement', label: 'Règlement intérieur', description: 'Document interne de la session' },
+                                                    { key: 'confidentialite', label: 'Politique de confidentialité', description: 'Information données personnelles' },
+                                                ].map(d => <CompactContractDoc key={d.key} docKey={d.key} label={d.label} description={d.description} />)}
                                             </div>
                                         </div>
                                     </div>;
@@ -7695,10 +7742,17 @@ export function SessionsView(param) {
                                                             <span style={{ fontSize: 13, fontWeight: 500, color: T.text }}>{ins.first_name} {ins.last_name}</span>
                                                             {ins.company && <span style={{ fontSize: 11, color: T.textMuted }}>— {ins.company}</span>}
                                                         </div>
-                                                        <span style={{
-                                                            fontSize: 11, fontWeight: 600,
-                                                            color: convSent ? 'var(--success)' : 'var(--warning)',
-                                                        }}>{convSent ? 'Envoyée' : 'Non envoyée'}</span>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                                            <span style={{
+                                                                fontSize: 11, fontWeight: 600,
+                                                                color: convSent ? 'var(--success)' : 'var(--warning)',
+                                                            }}>{convSent ? 'Envoyée' : 'Non envoyée'}</span>
+                                                            <button onClick={() => handleInscriptionFlag(ins.id, 'convocation_sent', !!convSent)} style={{
+                                                                padding: '5px 9px', borderRadius: 6, border: `1px solid ${convSent ? alpha('var(--success)', 30) : T.border2}`,
+                                                                background: convSent ? alpha('var(--success)', 8) : T.card, color: convSent ? 'var(--success)' : T.textSub,
+                                                                cursor: 'pointer', fontSize: 10, fontWeight: 700,
+                                                            }}>{convSent ? 'Annuler l’envoi' : 'Marquer envoyée'}</button>
+                                                        </div>
                                                     </div>;
                                                 })}
                                             </div>}
