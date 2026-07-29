@@ -10472,21 +10472,29 @@ export default function AncienneApplicationFormations() {
 
       {/* SIDEBAR */}
       <aside className="grio-sidebar" style={{
-        width: 220, minWidth: 220, height: '100vh', background: 'var(--surface)',
+        '--surface': '#0D0D0C',
+        '--surface-2': '#171613',
+        '--surface-3': '#24221E',
+        '--border': 'rgba(246,245,243,0.10)',
+        '--border-2': 'rgba(246,245,243,0.20)',
+        '--hover': 'rgba(246,245,243,0.06)',
+        '--text': '#F6F5F3',
+        '--text-2': '#D4D0C8',
+        '--text-3': '#918C82',
+        '--gold-deep': '#FFCC00',
+        width: 220, minWidth: 220, height: '100vh', background: '#0D0D0C',
         borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column',
         position: 'sticky', top: 0, overflow: 'hidden', flexShrink: 0,
       }}>
-        {/* Logo + Branding */}
+      {/* Logo + Branding */}
         <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border)' }}>
-          <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 10 }}>
-            <img src="/logo.png" alt="LES GRIOTS" style={{ height: 28, borderRadius: 4, objectFit: 'contain' }} />
-            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold-deep)', letterSpacing: '0.06em', fontFamily: "'Space Mono', monospace" }}>OS</span>
+          <a href="/apercu" style={{ display: 'block', textDecoration: 'none', marginBottom: 12 }}>
+            <img src="/branding/griotheque-wordmark-paper.svg" alt="LA GRIOTHÈQUE" style={{ width: '100%', maxWidth: 174, height: 'auto', display: 'block' }} />
           </a>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 15, fontWeight: 400, letterSpacing: '-0.01em', fontFamily: T.fontDisplay, color: 'var(--text)', textTransform: 'uppercase' }}>La Griothèque</span>
+            <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.20em', textTransform: 'uppercase' }}>OS · Organisme de formation</span>
             <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--text)', background: 'color-mix(in srgb, var(--text) 9%, transparent)', border: '1px solid color-mix(in srgb, var(--text) 20%, transparent)', padding: '1px 5px', borderRadius: 3, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Qualiopi</span>
           </div>
-          <div style={{ fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: 2 }}>Centre de formation</div>
         </div>
 
         {/* Nav items */}

@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { estGriotheque } from './ThemeSection';
+import { sessionHref } from '@/lib/navigation';
 
 const CATEGORY_ICONS = {
   project: '📁', client: '🏢', provider: '👤', formation: '📚', session: '📅', apprenant: '🎓',
@@ -120,7 +121,7 @@ export default function TopBar({ title, subtitle, right = null }) {
     }
     for (const s of searchData.sessions) {
       if ((s.code || '').toLowerCase().includes(q) || (s.formateur_name || '').toLowerCase().includes(q)) {
-        r.push({ type: 'session', id: s.id, title: s.code, sub: s.formateur_name, href: '/sessions-list' });
+        r.push({ type: 'session', id: s.id, title: s.code, sub: s.formateur_name, href: sessionHref(s.id) });
       }
     }
     for (const a of searchData.apprenants) {

@@ -7,10 +7,11 @@ async function _GET(req) {
   const { searchParams } = new URL(req.url);
   const stage = searchParams.get('stage');
   const formationId = searchParams.get('formation_id');
+  const archives = searchParams.get('archives') === '1';
 
   let query = 'SELECT fo.*, f.title as formation_title, f.code as formation_code FROM formation_opportunities fo LEFT JOIN formations f ON fo.formation_id = f.id';
-  const conditions = [];
-  const params = [];
+  const conditions = ['COALESCE(fo.archived, 0) = ?'];
+  const params = [archives ? 1 : 0];
 
   if (stage) { conditions.push('fo.stage = ?'); params.push(stage); }
   if (formationId) { conditions.push('fo.formation_id = ?'); params.push(formationId); }
@@ -28,10 +29,11 @@ async function _POST(req) {
   const id = 'fo_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
   const now = new Date().toISOString();
 
-  db.prepare(`INSERT INTO formation_opportunities (id, formation_id, client_name, client_email, client_phone, contact_name, company, stage, revenue, financement, notes, source, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+  db.prepare(`INSERT INTO formation_opportunities (id, formation_id, session_id, client_name, client_email, client_phone, contact_name, company, stage, revenue, financement, notes, source, archived, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
     id,
     body.formation_id || null,
+    body.session_id || null,
     body.client_name || '',
     body.client_email || '',
     body.client_phone || '',
@@ -42,6 +44,7 @@ async function _POST(req) {
     body.financement || '',
     body.notes || '',
     body.source || '',
+    body.archived ? 1 : 0,
     now, now,
   );
 

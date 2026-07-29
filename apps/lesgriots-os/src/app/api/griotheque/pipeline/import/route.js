@@ -84,16 +84,16 @@ async function _POST() {
 
   const inserer = db.prepare(`
     INSERT INTO formation_opportunities
-      (id, formation_id, client_name, client_email, client_phone, contact_name,
+      (id, formation_id, session_id, client_name, client_email, client_phone, contact_name,
        company, stage, revenue, financement, notes, source, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '', ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', ?, ?, ?, ?)
   `);
 
   const tout = db.transaction((rows) => {
     rows.forEach((o, i) => {
       inserer.run(
         'fo_import_' + Date.now() + '_' + i,
-        o.formation_id, o.client_name, o.client_email, o.client_phone,
+        o.formation_id, o.source.slice('session:'.length), o.client_name, o.client_email, o.client_phone,
         o.contact_name, o.company, o.stage, o.revenue, o.notes, o.source,
         maintenant, maintenant,
       );

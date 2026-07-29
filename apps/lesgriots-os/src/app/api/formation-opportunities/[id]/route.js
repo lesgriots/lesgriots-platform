@@ -18,10 +18,10 @@ async function _PATCH(req, { params }) {
 
   const body = await req.json();
   const map = {
-    formation_id: 'formation_id', client_name: 'client_name', client_email: 'client_email',
+    formation_id: 'formation_id', session_id: 'session_id', client_name: 'client_name', client_email: 'client_email',
     client_phone: 'client_phone', contact_name: 'contact_name', company: 'company',
     stage: 'stage', revenue: 'revenue', financement: 'financement',
-    notes: 'notes', source: 'source',
+    notes: 'notes', source: 'source', archived: 'archived',
   };
 
   const sets = ['updated_at = ?'];

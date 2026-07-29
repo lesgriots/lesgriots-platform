@@ -1,6 +1,5 @@
 'use client';
 import { usePathname } from 'next/navigation';
-import WordmarkGriotheque from './WordmarkGriotheque';
 import { estGriotheque } from './ThemeSection';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
@@ -58,9 +57,18 @@ const NAV = [
   { href: '/pipeline-formations', icon: 'pipeline', label: 'Pipeline', monde: 'griotheque', compteur: 'pipeline' },
   { href: '/facturation', icon: 'pricing', label: 'Facturation', monde: 'griotheque' },
   { type: 'divider', label: 'CATALOGUE', monde: 'griotheque' },
-  { href: '/catalogue', icon: 'formations', label: 'Formations', monde: 'griotheque' },
+  {
+    type: 'groupe', label: 'Bibliothèque', icon: 'formations', monde: 'griotheque',
+    enfants: [
+      { href: '/catalogue', icon: 'formations', label: 'Programmes' },
+      { href: '/catalogue?vue=blocs', icon: 'projects', label: 'Blocs pédagogiques' },
+      { href: '/catalogue?vue=evaluations', icon: 'formations', label: 'Évaluations' },
+      { href: '/catalogue?vue=programmes-archives', icon: 'projects', label: 'Programmes archivés' },
+      { href: '/catalogue?vue=blocs-archives', icon: 'projects', label: 'Blocs archivés' },
+    ],
+  },
   { href: '/sessions-list', icon: 'sessions', label: 'Sessions', monde: 'griotheque', compteur: 'sessions' },
-  { href: '/evaluations', icon: 'formations', label: 'Évaluations', monde: 'griotheque' },
+  { href: '/evaluations', icon: 'formations', label: 'Résultats évaluations', monde: 'griotheque' },
   { href: '/espace-apprenant', icon: 'apprenants', label: 'Espace apprenant', monde: 'griotheque' },
   { href: '/emails', icon: 'clients', label: 'Emails', monde: 'griotheque' },
   // Une seule entrée « Données », qui se déplie sur les six répertoires.
@@ -111,7 +119,7 @@ const ROLES = {
 };
 const roleLisible = (r) => ROLES[r] || 'Responsable pédagogique';
 
-export default function Sidebar() {
+function ClassicSidebar() {
   const pathname = usePathname();
   // Deux mondes : la Griothèque porte sa propre marque, le Studio la sienne.
   const monde = estGriotheque(pathname || '') ? 'griotheque' : 'studio';
@@ -135,6 +143,21 @@ export default function Sidebar() {
   }, [monde]);
 
   const w = collapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)';
+  // La Griothèque conserve une navigation sombre, indépendamment du thème clair
+  // utilisé pour la surface de travail. Les variables restent ainsi confinées au menu.
+  const griothequeSidebarTokens = monde === 'griotheque' ? {
+    '--surface': '#0D0D0C',
+    '--surface-2': '#171613',
+    '--surface-3': '#24221E',
+    '--border': 'rgba(246,245,243,0.10)',
+    '--border-2': 'rgba(246,245,243,0.20)',
+    '--hover': 'rgba(246,245,243,0.06)',
+    '--text': '#F6F5F3',
+    '--text-2': '#D4D0C8',
+    '--text-3': '#918C82',
+    '--gold': '#FFCC00',
+    '--gold-soft': 'rgba(255,204,0,0.13)',
+  } : {};
 
   const asideStyle = isMobile
     ? {
@@ -143,7 +166,7 @@ export default function Sidebar() {
         width: 'min(86vw, 320px)',
         minWidth: 0,
         height: '100dvh',
-        background: 'var(--surface)',
+        background: monde === 'griotheque' ? '#0D0D0C' : 'var(--surface)',
         borderRight: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column',
@@ -157,12 +180,13 @@ export default function Sidebar() {
         transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
         transition: 'transform 200ms ease',
         boxShadow: mobileOpen ? 'var(--shadow-lg)' : 'none',
+        ...griothequeSidebarTokens,
       }
     : {
         width: w,
         minWidth: w,
         height: '100vh',
-        background: 'var(--surface)',
+        background: monde === 'griotheque' ? '#0D0D0C' : 'var(--surface)',
         borderRight: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column',
@@ -171,6 +195,7 @@ export default function Sidebar() {
         position: 'sticky',
         top: 0,
         zIndex: 50,
+        ...griothequeSidebarTokens,
       };
 
   // Un seul rendu de lien, réutilisé pour les entrées de premier niveau
@@ -284,9 +309,13 @@ export default function Sidebar() {
         {!collapsed && (
           <>
             {monde === 'griotheque' ? (
-              // Monde Griothèque : le mot-marque du site, encré sur le papier.
+              // Le mot-marque officiel est blanc pour rester lisible sur le menu noir.
               <div style={{ padding: '4px 0 2px' }}>
-                <WordmarkGriotheque height={17} style={{ maxWidth: '100%' }} />
+                <img
+                  src="/branding/griotheque-wordmark-paper.svg"
+                  alt="LA GRIOTHÈQUE"
+                  style={{ width: '100%', maxWidth: 178, height: 'auto', display: 'block' }}
+                />
               </div>
             ) : (
               <img src="/branding/lesgriots-sticker.png" alt="les griots" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10, filter: 'drop-shadow(2px 3px 0 rgba(0,0,0,0.30))' }} />
@@ -454,4 +483,271 @@ export default function Sidebar() {
     </aside>
     </>
   );
+}
+
+/*
+ * Navigation de l'organisme de formation
+ *
+ * Un rail ne doit pas seulement être « joli » : il rend les grands ensembles
+ * métier accessibles sans transformer chaque page en arbre de 20 liens. Les
+ * panneaux reprennent le fonctionnement demandé : clic sur une rubrique, panneau
+ * contextuel, puis lien direct vers l'écran concerné.
+ */
+const RAIL_SECTIONS = [
+  {
+    id: 'pilotage', icon: 'home', label: 'Pilotage',
+    links: [
+      { href: '/apercu', label: "Vue d'ensemble" },
+      { href: '/agenda', label: 'Agenda' },
+    ],
+  },
+  {
+    id: 'commercial', icon: 'pricing', label: 'Gestion commerciale',
+    links: [
+      { href: '/pipeline-formations', label: 'Tunnel de vente' },
+      { href: '/recyclages', label: 'Suivi des recyclages' },
+      { href: '/inscriptions', label: 'Inscriptions' },
+      { divider: true },
+      { href: '/opportunites-archivees', label: 'Opportunités archivées' },
+    ],
+  },
+  {
+    id: 'sessions', icon: 'sessions', label: 'Sessions de formation',
+    links: [
+      { href: '/sessions-list', label: 'Toutes mes sessions' },
+      { divider: true },
+      { href: '/sessions/demo-game-of-work-2026', label: 'GAME OF WORK – Stratégie de contenu & création vidéo au téléphone' },
+      { divider: true },
+      { href: '/sessions-list?vue=archivees', label: 'Sessions archivées' },
+    ],
+  },
+  {
+    id: 'bibliotheque', icon: 'formations', label: 'Bibliothèque',
+    links: [
+      { href: '/catalogue', label: 'Programmes' },
+      { href: '/catalogue?vue=evaluations', label: 'Évaluations' },
+      { divider: true },
+      { href: '/catalogue?vue=programmes-archives', label: 'Programmes archivés' },
+      { href: '/catalogue?vue=blocs-archives', label: 'Blocs pédagogiques archivés' },
+    ],
+  },
+  {
+    id: 'rapports', icon: 'finances', label: "Rapports d'activité",
+    links: [
+      { href: '/apercu', label: "Suivi de l'activité" },
+      { href: '/facturation', label: 'Suivi des factures' },
+      { href: '/pipeline-formations', label: 'Suivi commercial' },
+      { href: '/bpf', label: 'Bilan pédagogique et financier' },
+      { href: '/qualite', label: 'Suivi qualité' },
+      { href: '/qualite?vue=amelioration', label: 'Amélioration continue' },
+      { href: '/qualite?vue=marketplace', label: 'Suivi de la Marketplace' },
+    ],
+  },
+  {
+    id: 'donnees', icon: 'donnees', label: 'Données',
+    links: [
+      { href: '/entreprises', label: 'Entreprises' },
+      { href: '/apprenants', label: 'Apprenants' },
+      { href: '/intervenants', label: 'Intervenants' },
+      { href: '/financeurs', label: 'Financeurs externes' },
+      { href: '/lieux', label: 'Lieux de formation' },
+    ],
+  },
+  {
+    id: 'configuration', icon: 'settings', label: 'Configuration',
+    links: [
+      { href: '/workflows', label: 'Automatisations' },
+      { href: '/parametres-formation', label: 'Interconnexions' },
+      { divider: true },
+      { href: '/parametres-formation?vue=documents', label: 'Modèles de documents' },
+      { href: '/emails', label: "Modèles d'e-mails" },
+      { href: '/workflows?vue=listes-taches', label: 'Modèles de listes de tâches' },
+      { href: '/settings?vue=notifications', label: 'Notifications' },
+      { href: '/parametres-formation?vue=competences', label: 'Domaines de compétences' },
+      { divider: true },
+      { href: '/settings', label: "Comptes d'accès" },
+      { divider: true },
+      { href: '/organisme?vue=catalogue', label: 'Ma marque – Catalogue en ligne' },
+      { href: '/inscriptions', label: "Formulaire individuel d’inscription" },
+      { href: '/espace-apprenant', label: 'Espace apprenant' },
+    ],
+  },
+];
+
+function GriothequeSidebar() {
+  const pathname = usePathname() || '/apercu';
+  const [ouvert, setOuvert] = useState(null);
+  const [compact, setCompact] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 767px)');
+  const isCondensed = compact || isMobile;
+  const railWidth = isCondensed ? (isMobile ? 60 : 76) : 248;
+  const isActiveLink = (href) => {
+    const [targetPath] = href.split('?');
+    return pathname === targetPath || pathname.startsWith(`${targetPath}/`);
+  };
+  const sectionActive = RAIL_SECTIONS.find((section) => section.links.some(
+    (link) => link.href && isActiveLink(link.href),
+  ));
+
+  useEffect(() => {
+    const fermer = (event) => { if (event.key === 'Escape') setOuvert(null); };
+    window.addEventListener('keydown', fermer);
+    return () => window.removeEventListener('keydown', fermer);
+  }, []);
+
+  const section = RAIL_SECTIONS.find((item) => item.id === ouvert);
+  const railStyle = {
+    width: railWidth,
+    minWidth: railWidth,
+    height: '100vh',
+    position: 'sticky', top: 0, zIndex: 80,
+    // Le rail reprend le socle visuel de l'OS : encre chaude + signature
+    // jaune. Les panneaux conservent, eux, les couleurs de la page courante.
+    background: '#171613',
+    display: 'flex', flexDirection: 'column', alignItems: isCondensed ? 'center' : 'stretch',
+    overflowY: 'auto',
+    boxShadow: 'inset -1px 0 0 rgba(255,255,255,.18)',
+  };
+
+  return (
+    <aside aria-label="Navigation principale de La Griothèque" style={railStyle}>
+      {isCondensed ? (
+        <>
+          <Link
+            href="/apercu"
+            aria-label="La Griothèque — vue d'ensemble"
+            onClick={() => setOuvert(null)}
+            style={{ width: 52, minHeight: 44, margin: '14px 0 20px', padding: '0 3px', display: 'grid', placeItems: 'center', textDecoration: 'none' }}
+          >
+            <img src="/branding/griotheque-wordmark-paper.svg" alt="LA GRIOTHÈQUE" style={{ width: '100%', height: 'auto', display: 'block' }} />
+          </Link>
+
+          <nav aria-label="Rubriques" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7, width: '100%' }}>
+            {RAIL_SECTIONS.map((item) => {
+              const selected = ouvert === item.id;
+              const active = sectionActive?.id === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-label={item.label}
+                  aria-expanded={selected}
+                  title={item.label}
+                  onClick={() => setOuvert((current) => current === item.id ? null : item.id)}
+                  style={{
+                    width: isMobile ? 52 : 62, height: isMobile ? 52 : 62,
+                    border: 'none', cursor: 'pointer', color: selected || active ? 'var(--gold-ink)' : '#CBC7BC',
+                    display: 'grid', placeItems: 'center', position: 'relative',
+                    background: selected || active ? 'var(--gold)' : 'transparent',
+                    borderRadius: selected || active ? '50%' : 14,
+                    boxShadow: selected ? '0 0 0 8px var(--gold-soft)' : 'none',
+                    transition: 'background 150ms var(--ease), box-shadow 150ms var(--ease)',
+                  }}
+                >
+                  <span style={{ transform: 'scale(1.28)', display: 'grid', placeItems: 'center' }}>{icons[item.icon]}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </>
+      ) : (
+        <>
+          <div style={{ padding: '25px 20px 18px', borderBottom: '1px solid rgba(255,255,255,.09)' }}>
+            <Link href="/apercu" aria-label="La Griothèque — vue d'ensemble" onClick={() => setOuvert(null)} style={{ display: 'block', textDecoration: 'none' }}>
+              <img src="/branding/griotheque-wordmark-paper.svg" alt="LA GRIOTHÈQUE" style={{ width: '100%', maxWidth: 174, height: 'auto', display: 'block' }} />
+            </Link>
+            <p style={{ margin: '11px 0 0', color: '#89857B', fontSize: 10, fontWeight: 700, letterSpacing: '.18em', lineHeight: 1.55 }}>OS · ORGANISME DE FORMATION</p>
+          </div>
+
+          <nav aria-label="Rubriques" style={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%', padding: '14px 11px 18px' }}>
+            {RAIL_SECTIONS.map((item) => {
+              const selected = ouvert === item.id;
+              const active = sectionActive?.id === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-expanded={selected}
+                  onClick={() => setOuvert((current) => current === item.id ? null : item.id)}
+                  style={{
+                    width: '100%', minHeight: 43, padding: '0 12px', border: 'none', borderLeft: active || selected ? '3px solid #FFCC00' : '3px solid transparent',
+                    cursor: 'pointer', color: active || selected ? '#FFCC00' : '#E4E0D8', background: active || selected ? 'rgba(255,204,0,.11)' : 'transparent',
+                    borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left',
+                    fontSize: 14, fontWeight: 650, transition: 'all .18s ease',
+                  }}
+                >
+                  <span>{item.label}</span>
+                  <span aria-hidden="true" style={{ color: active || selected ? '#FFCC00' : '#89857B', fontSize: 18, fontWeight: 400 }}>{selected ? '−' : '›'}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </>
+      )}
+
+      {!isMobile && (
+        <button type="button" onClick={() => { setCompact((current) => !current); setOuvert(null); }}
+          aria-label={isCondensed ? 'Développer le menu' : 'Réduire le menu'} title={isCondensed ? 'Développer le menu' : 'Réduire le menu'}
+          style={{ margin: 'auto 11px 8px', minHeight: 40, padding: isCondensed ? 0 : '0 12px', border: '1px solid rgba(255,255,255,.14)', borderRadius: 8, cursor: 'pointer', color: '#CBC7BC', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 650 }}>
+          {isCondensed ? 'Développer' : 'Réduire le menu'}
+        </button>
+      )}
+
+      <Link href="/appareil" title="Aide, accès et appareils" aria-label="Aide, accès et appareils"
+        style={{ margin: isCondensed ? '0 0 16px' : '0 11px 16px', color: '#CBC7BC', display: 'flex', alignItems: 'center', justifyContent: 'center', width: isCondensed ? 48 : 'auto', minHeight: 40, padding: isCondensed ? 0 : '0 12px', textDecoration: 'none', borderRadius: 8, fontSize: 13, fontWeight: 650 }}>
+        {isCondensed ? <span style={{ fontSize: 25, fontWeight: 700 }}>?</span> : 'Aide & ressources'}
+      </Link>
+
+      {section && (
+        <div
+          role="dialog"
+          aria-label={section.label}
+          style={{
+            position: 'fixed', top: isMobile ? 12 : 18, left: isMobile ? 70 : railWidth + 16,
+            zIndex: 100, width: isMobile ? 'min(390px, calc(100vw - 82px))' : `min(390px, calc(100vw - ${railWidth + 30}px))`, maxHeight: 'calc(100dvh - 36px)',
+            overflowY: 'auto', background: 'var(--surface)', color: 'var(--text)', borderRadius: 22,
+            boxShadow: 'var(--shadow-lg)', border: '1px solid var(--border)',
+          }}
+        >
+          <div style={{
+            padding: '20px 24px', borderRadius: '21px 21px 0 0', color: 'var(--gold-ink)',
+            background: 'var(--gold)', fontSize: 16,
+            fontWeight: 800, letterSpacing: '.015em', textTransform: 'uppercase',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            {section.label}
+            <button type="button" onClick={() => setOuvert(null)} aria-label="Fermer le menu" style={{ border: 0, background: 'transparent', color: 'var(--gold-ink)', fontSize: 24, lineHeight: 1, cursor: 'pointer', padding: 0 }}>×</button>
+          </div>
+          <div style={{ padding: '13px 16px 18px' }}>
+            {section.links.map((link, index) => {
+              if (link.divider) {
+                return <div key={`divider-${index}`} style={{ height: 1, background: 'var(--border)', margin: '9px 2px' }} />;
+              }
+              const active = isActiveLink(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOuvert(null)}
+                  style={{
+                    display: 'block', padding: '13px 14px', borderRadius: 12,
+                    color: 'var(--text)', textDecoration: 'none', fontSize: 16, fontWeight: 650,
+                    background: active ? 'var(--gold-soft)' : 'transparent',
+                  }}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+            {section.footer && <p style={{ margin: '12px 14px 4px', color: 'var(--text-3)', fontSize: 12.5, lineHeight: 1.5 }}>{section.footer}</p>}
+          </div>
+        </div>
+      )}
+    </aside>
+  );
+}
+
+export default function Sidebar() {
+  const pathname = usePathname();
+  return estGriotheque(pathname || '') ? <GriothequeSidebar /> : <ClassicSidebar />;
 }

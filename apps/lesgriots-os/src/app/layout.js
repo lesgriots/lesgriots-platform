@@ -29,7 +29,7 @@ export default function RootLayout({ children }) {
             La liste des routes doit rester alignée sur ThemeSection.jsx. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var p=location.pathname,h=location.hostname.toLowerCase(),g=h==='app.lagriotheque.com'||['/formations','/pipeline-formations','/sessions-list','/apprenants','/organisme','/apercu','/catalogue','/intervenants','/lieux','/qualite','/parametres-formation','/entreprises','/financeurs','/bpf','/agenda','/evaluations','/facturation','/appareil','/espace-apprenant','/emails'].some(function(r){return p===r||p.indexOf(r+'/')===0});if(g||localStorage.getItem('os-theme')==='light')document.documentElement.setAttribute('data-theme','light');document.documentElement.setAttribute('data-monde',g?'griotheque':'studio')}catch(e){}`,
+            __html: `try{var p=location.pathname,h=location.hostname.toLowerCase(),g=h==='app.lagriotheque.com'||['/formations','/pipeline-formations','/sessions','/sessions-list','/apprenants','/organisme','/apercu','/catalogue','/intervenants','/lieux','/qualite','/parametres-formation','/entreprises','/financeurs','/bpf','/agenda','/evaluations','/facturation','/appareil','/espace-apprenant','/emails','/inscriptions','/recyclages','/opportunites-archivees','/workflows','/settings'].some(function(r){return p===r||p.indexOf(r+'/')===0});if(g||localStorage.getItem('os-theme')==='light')document.documentElement.setAttribute('data-theme','light');document.documentElement.setAttribute('data-monde',g?'griotheque':'studio')}catch(e){}`,
           }}
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

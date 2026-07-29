@@ -10,6 +10,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui';
+import { sessionHref } from '@/lib/navigation';
 
 const ENTITY_ICON = {
   project: '📁',
@@ -209,7 +210,7 @@ export default function CommandPalette() {
         type: 'session',
         title: s_.session_name || s_.code_interne || `Session ${(s_.id || '').slice(0, 8)}`,
         subtitle: `${s_.code_interne || ''} · ${s_.start_date || ''}`,
-        href: `/sessions-list`,
+        href: sessionHref(s_.id),
         score: ssc,
       });
     }

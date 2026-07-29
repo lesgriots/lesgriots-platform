@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db.mjs';
-import { randomUUID } from 'crypto';
 import { withGuard } from '@/lib/api-guard';
+import { enrollLearnerInSession } from '@/lib/inscription-flow';
 
 async function _GET(req) {
   try {
@@ -43,35 +43,11 @@ async function _POST(req) {
       return NextResponse.json({ error: 'session_id et apprenant_id requis' }, { status: 400 });
     }
 
-    // Vérifier doublon
-    const existing = db.prepare(
-      'SELECT id FROM inscriptions WHERE session_id = ? AND apprenant_id = ?'
-    ).get(session_id, apprenant_id);
-    if (existing) return NextResponse.json({ error: 'Déjà inscrit à cette session' }, { status: 409 });
-
-    const id = randomUUID();
-    db.prepare(`
-      INSERT INTO inscriptions (id, session_id, apprenant_id, status, financement, price_ht)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(id, session_id, apprenant_id, status, financement, price_ht);
-
-    // Créer automatiquement les émargements pour chaque jour de la session
     const session = db.prepare('SELECT start_date, end_date FROM sessions WHERE id = ?').get(session_id);
-    if (session) {
-      const start = new Date(session.start_date);
-      const end = new Date(session.end_date);
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        const dateStr = d.toISOString().split('T')[0];
-        const emId = randomUUID();
-        db.prepare(`
-          INSERT OR IGNORE INTO emargements (id, session_id, apprenant_id, date, matin, apres_midi)
-          VALUES (?, ?, ?, ?, 0, 0)
-        `).run(emId, session_id, apprenant_id, dateStr);
-      }
-    }
-
-    const inscription = db.prepare('SELECT * FROM inscriptions WHERE id = ?').get(id);
-    return NextResponse.json(inscription, { status: 201 });
+    if (!session) return NextResponse.json({ error: 'Session introuvable' }, { status: 404 });
+    const result = enrollLearnerInSession(db, { sessionId: session_id, apprenantId: apprenant_id, session, status, financement, priceHt: price_ht });
+    if (result.alreadyEnrolled) return NextResponse.json({ error: 'Déjà inscrit à cette session' }, { status: 409 });
+    return NextResponse.json(result.inscription, { status: 201 });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
@@ -85,7 +61,8 @@ async function _PATCH(req) {
     if (!id) return NextResponse.json({ error: 'id requis' }, { status: 400 });
 
     const allowed = ['status','financement','price_ht','convention_signed','convocation_sent','attestation_sent',
-      'positionnement_decision','positionnement_amenagement','positionnement_notes'];
+      'positionnement_decision','positionnement_amenagement','positionnement_notes',
+      'valid_until','follow_up_date','follow_up_status'];
     const sets = [];
     const vals = [];
     for (const key of allowed) {

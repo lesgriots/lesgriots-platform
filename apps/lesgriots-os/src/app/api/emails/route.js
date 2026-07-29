@@ -13,16 +13,28 @@ import { getDb } from '@/lib/db.mjs';
 import { withGuard } from '@/lib/api-guard';
 import { envoyerEmail, smtpConfigure, expediteur } from '@/lib/mailer';
 
-async function _GET() {
+async function _GET(req) {
   try {
     const db = getDb();
+    const { searchParams } = new URL(req.url);
+    const conditions = [];
+    const params = [];
+    for (const field of ['contexte_type', 'contexte_id']) {
+      const value = searchParams.get(field);
+      if (value) {
+        conditions.push(`${field} = ?`);
+        params.push(value);
+      }
+    }
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
     const items = db.prepare(`
       SELECT id, template_key, destinataire, destinataire_nom, objet,
              statut, erreur, contexte_type, contexte_id, created_at
       FROM emails
+      ${where}
       ORDER BY created_at DESC
       LIMIT 200
-    `).all();
+    `).all(...params);
 
     const stats = db.prepare(`
       SELECT
@@ -31,7 +43,8 @@ async function _GET() {
         SUM(CASE WHEN statut = 'simule' THEN 1 ELSE 0 END) AS simules,
         SUM(CASE WHEN statut = 'echec'  THEN 1 ELSE 0 END) AS echecs
       FROM emails
-    `).get();
+      ${where}
+    `).get(...params);
 
     return NextResponse.json({
       items,

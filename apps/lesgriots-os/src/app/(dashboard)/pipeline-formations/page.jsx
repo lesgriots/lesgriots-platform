@@ -18,8 +18,10 @@
  */
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import TopBar from '@/components/layout/TopBar';
 import { Card, EmptyState, Skeleton, ViewSwitcher, useViewMode, useConfirm } from '@/components/ui';
+import { sessionHref } from '@/lib/navigation';
 
 const ETAPES = [
   { cle: 'prospect',           label: 'Prospect',           proba: 0.10 },
@@ -30,6 +32,15 @@ const ETAPES = [
   { cle: 'session_planifiee',  label: 'Session planifiée',  proba: 1.00 },
 ];
 const PAR_CLE = Object.fromEntries(ETAPES.map((e) => [e.cle, e]));
+
+// Une affaire reprise depuis une session conserve sa référence source.
+// Elle doit rester navigable : le pipeline n'est pas une impasse après
+// laquelle on peut déplacer une session sans plus pouvoir la consulter.
+const sessionIdDepuisSource = (opportunite) => (
+  opportunite.session_id || (String(opportunite.source || '').startsWith('session:')
+    ? String(opportunite.source).slice('session:'.length)
+    : null)
+);
 
 // L'étape qui demande une décision : la plus avancée avant la signature.
 const ETAPE_A_RELANCER = 'devis_envoye';
@@ -46,6 +57,7 @@ const th = { ...mono, fontWeight: 400, textAlign: 'left', padding: '11px 10px', 
 const td = { padding: '12px 10px', borderBottom: '1px solid var(--border)', fontSize: 13.5 };
 
 export default function PipelineFormationsPage() {
+  const router = useRouter();
   const [opps, setOpps] = useState(null);
   const [formations, setFormations] = useState([]);
   const [reprise, setReprise] = useState(null);
@@ -76,10 +88,17 @@ export default function PipelineFormationsPage() {
     }).catch(charger);
   };
 
+  const ouvrirSession = (opportunite) => {
+    const sessionId = sessionIdDepuisSource(opportunite);
+    if (sessionId) router.push(sessionHref(sessionId));
+  };
+
   const supprimer = async (o) => {
-    if (!(await confirmer({ title: `Retirer « ${o.client_name} » du pipeline ?`, confirmLabel: 'Retirer' }))) return;
+    if (!(await confirmer({ title: `Archiver « ${o.client_name} » ?`, message: 'L’affaire restera consultable et pourra être restaurée.', confirmLabel: 'Archiver' }))) return;
     setOpps((p) => p.filter((x) => x.id !== o.id));
-    await fetch(`/api/formation-opportunities/${o.id}`, { method: 'DELETE' }).catch(charger);
+    await fetch(`/api/formation-opportunities/${o.id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ archived: 1 }),
+    }).catch(charger);
   };
 
   const creer = async (valeurs) => {
@@ -220,7 +239,7 @@ export default function PipelineFormationsPage() {
                         </div>
                       );
                     })}
-                    <Liste opps={triees} onEtape={majEtape} onSupprimer={supprimer} compact />
+                    <Liste opps={triees} onEtape={majEtape} onSupprimer={supprimer} onOuvrirSession={ouvrirSession} compact />
                   </Card>
                 )}
 
@@ -266,6 +285,16 @@ export default function PipelineFormationsPage() {
                             >
                               <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
                                 <div style={{ fontSize: 11.5, fontWeight: 500, lineHeight: 1.3, flex: 1 }}>{o.client_name}</div>
+                                {sessionIdDepuisSource(o) && (
+                                  <button
+                                    onClick={(ev) => { ev.stopPropagation(); ouvrirSession(o); }}
+                                    onMouseDown={(ev) => ev.stopPropagation()}
+                                    draggable={false}
+                                    title="Ouvrir la session"
+                                    aria-label={`Ouvrir la session de ${o.client_name}`}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--text-2)', fontSize: 12, lineHeight: 1 }}
+                                  >↗</button>
+                                )}
                                 <button onClick={() => supprimer(o)} title="Retirer"
                                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--text-3)', fontSize: 13, lineHeight: 1 }}>×</button>
                               </div>
@@ -285,7 +314,7 @@ export default function PipelineFormationsPage() {
 
                 {vue === 'list' && (
                   <Card padding="none">
-                    <Liste opps={triees} onEtape={majEtape} onSupprimer={supprimer} />
+                    <Liste opps={triees} onEtape={majEtape} onSupprimer={supprimer} onOuvrirSession={ouvrirSession} />
                   </Card>
                 )}
               </>
@@ -314,7 +343,7 @@ export default function PipelineFormationsPage() {
 }
 
 /* ── La liste, partagée par la vue Tunnel et la vue Liste ─────────────── */
-function Liste({ opps, onEtape, onSupprimer, compact = false }) {
+function Liste({ opps, onEtape, onSupprimer, onOuvrirSession, compact = false }) {
   return (
     <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: compact ? 22 : 0 }}>
       <thead>
@@ -331,7 +360,15 @@ function Liste({ opps, onEtape, onSupprimer, compact = false }) {
           const relance = o.stage === ETAPE_A_RELANCER;
           return (
             <tr key={o.id} style={relance ? { background: 'var(--gold-soft)' } : undefined}>
-              <td style={{ ...td, fontWeight: 500 }}>{o.client_name}</td>
+              <td style={{ ...td, fontWeight: 500 }}>
+                {sessionIdDepuisSource(o) ? (
+                  <button
+                    onClick={() => onOuvrirSession(o)}
+                    title="Ouvrir la session"
+                    style={{ padding: 0, border: 'none', background: 'none', color: 'inherit', cursor: 'pointer', font: 'inherit', fontWeight: 'inherit', textAlign: 'left', textDecoration: 'underline', textUnderlineOffset: 3 }}
+                  >{o.client_name}</button>
+                ) : o.client_name}
+              </td>
               <td style={{ ...td, color: 'var(--text-3)' }}>{o.formation_title || '—'}</td>
               <td style={td}>
                 <select

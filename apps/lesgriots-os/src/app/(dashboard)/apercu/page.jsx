@@ -17,6 +17,7 @@ import Link from 'next/link';
 import TopBar from '@/components/layout/TopBar';
 import { Card, Badge, Skeleton } from '@/components/ui';
 import CourbeCa from '@/components/charts/CourbeCa';
+import { sessionHref } from '@/lib/navigation';
 
 const euros = (n) => new Intl.NumberFormat('fr-FR', {
   style: 'currency', currency: 'EUR', maximumFractionDigits: 0,
@@ -186,7 +187,7 @@ export default function ApercuPage() {
                         return (
                           <tr key={s.id}>
                             <td style={{ padding: '11px 8px 11px 0', borderBottom: '1px solid var(--border)' }}>
-                              <div style={{ fontWeight: 500 }}>{s.formation_titre || s.session_name || '—'}</div>
+                              <Link href={sessionHref(s.id)} style={{ fontWeight: 500, color: 'inherit' }}>{s.formation_titre || s.session_name || '—'}</Link>
                               {s.location && <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{s.location}</div>}
                             </td>
                             <td style={{ padding: '11px 8px 11px 0', borderBottom: '1px solid var(--border)' }}>{dateFr(s.start_date)}</td>

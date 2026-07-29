@@ -43,7 +43,7 @@ async function _POST(req) {
     if (!session_id || !apprenant_id || !type) {
       return NextResponse.json({ error: 'session_id, apprenant_id et type requis' }, { status: 400 });
     }
-    if (!['positionnement', 'acquis', 'satisfaction'].includes(type)) {
+    if (!['positionnement', 'acquis', 'satisfaction', 'froid'].includes(type)) {
       return NextResponse.json({ error: 'type invalide' }, { status: 400 });
     }
 

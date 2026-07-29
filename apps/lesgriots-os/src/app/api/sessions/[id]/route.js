@@ -63,6 +63,7 @@ async function _PATCH(req, { params }) {
       'gestionnaire_1','gestionnaire_2','inter_entreprise','exclure_catalogue',
       'sous_traitance','fuseau_horaire','type_action_formation','specialite_formation',
       'diplome_vise','nom_titre_vise','formation_a_distance','lieu_formation_id'];
+    allowed.push('convocation_auto_enabled','convocation_lead_days','convocation_document_template','convocation_email_template');
 
     const updates = [];
     const values = [];

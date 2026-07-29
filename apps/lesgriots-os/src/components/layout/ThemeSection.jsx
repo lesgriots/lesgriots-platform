@@ -31,6 +31,9 @@ export const HOTES_GRIOTHEQUE = ['app.lagriotheque.com'];
 const ROUTES_GRIOTHEQUE = [
   '/formations',
   '/pipeline-formations',
+  // La fiche d'une session vit sous /sessions/[id] (distinct de la liste).
+  // Sans cette entrée, elle retombait dans le monde Studio au clic sur le rail.
+  '/sessions',
   '/sessions-list',
   '/apprenants',
   '/organisme',
@@ -49,6 +52,11 @@ const ROUTES_GRIOTHEQUE = [
   '/appareil',
   '/espace-apprenant',
   '/emails',
+  '/inscriptions',
+  '/recyclages',
+  '/opportunites-archivees',
+  '/workflows',
+  '/settings',
 ];
 
 export function estHoteGriotheque(hostname) {

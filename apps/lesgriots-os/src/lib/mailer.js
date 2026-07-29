@@ -48,6 +48,8 @@ export async function envoyerEmail({
   destinataire_nom = '',
   objet = '',
   corps = '',
+  html = '',
+  pieces = [],
   template_key = '',
   contexte_type = '',
   contexte_id = '',
@@ -88,12 +90,16 @@ export async function envoyerEmail({
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
     });
 
+    // Le texte brut reste envoyé en parallèle du HTML : certains clients ne
+    // rendent pas le HTML, et un message illisible vaut un message perdu.
     const info = await transport.sendMail({
       from: expediteur(),
       to: destinataire_nom ? `${destinataire_nom} <${destinataire}>` : destinataire,
       replyTo: process.env.MAIL_REPLY_TO || undefined,
       subject: objet,
       text: corps,
+      ...(html ? { html } : {}),
+      ...(pieces.length ? { attachments: pieces } : {}),
     });
 
     return journaliser('envoye', '', info?.messageId || '');

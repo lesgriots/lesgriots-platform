@@ -8,22 +8,17 @@
  * fonctionnalité n'est perdue au passage.
  */
 
-import TopBar from '@/components/layout/TopBar';
-import { SessionsView, useDonneesFormation } from '@/features/griotheque/vues';
+import { useEffect, useState } from 'react';
+import SessionWorkspace from '@/components/sessions/SessionWorkspace';
 
 export default function SessionsListPage() {
-  const { formations, sessions, clients, categories, chargement, recharger } = useDonneesFormation();
+  const [initialSessionId, setInitialSessionId] = useState();
 
-  return (
-    <>
-      <TopBar title="Sessions" subtitle={sessions.length ? `${sessions.length} session(s)` : ''} />
-      <div style={{ padding: '0 24px 48px' }}>
-        {chargement ? (
-          <p style={{ color: 'var(--text-3)', fontSize: 13 }}>Chargement…</p>
-        ) : (
-          <SessionsView sessions={sessions} formations={formations} clients={clients} onRefresh={recharger} />
-        )}
-      </div>
-    </>
-  );
+  // Cette page est rendue côté client : lire l'URL ici évite de rendre toute
+  // la page dynamique uniquement pour un paramètre de navigation.
+  useEffect(() => {
+    setInitialSessionId(new URLSearchParams(window.location.search).get('session') || undefined);
+  }, []);
+
+  return <SessionWorkspace initialSessionId={initialSessionId} />;
 }

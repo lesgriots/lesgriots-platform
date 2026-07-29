@@ -645,6 +645,73 @@ function initSchema(db) {
   // Index on modules.formation_id
   db.exec('CREATE INDEX IF NOT EXISTS idx_modules_formation_id ON modules(formation_id)');
 
+  // ── Bibliothèque pédagogique ────────────────────────────────────────────
+  // Les blocs sont indépendants des programmes : une mise à jour de bloc peut
+  // donc être réutilisée dans plusieurs formations, sans dupliquer le contenu.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS pedagogical_blocks (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      objectives TEXT DEFAULT '[]',
+      content TEXT DEFAULT '[]',
+      category TEXT DEFAULT '',
+      archived INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS formation_blocks (
+      formation_id TEXT NOT NULL REFERENCES formations(id) ON DELETE CASCADE,
+      block_id TEXT NOT NULL REFERENCES pedagogical_blocks(id) ON DELETE CASCADE,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (formation_id, block_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS formation_resources (
+      id TEXT PRIMARY KEY,
+      formation_id TEXT NOT NULL REFERENCES formations(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      scope TEXT NOT NULL DEFAULT 'internal' CHECK(scope IN ('internal','learner')),
+      resource_type TEXT NOT NULL DEFAULT 'document',
+      url TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS evaluation_templates (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL UNIQUE,
+      title TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      automatic INTEGER NOT NULL DEFAULT 0,
+      archived INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+  `);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_pedagogical_blocks_archived ON pedagogical_blocks(archived)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_formation_resources_formation_id ON formation_resources(formation_id)');
+
+  const evaluationTemplateCount = db.prepare('SELECT COUNT(*) AS count FROM evaluation_templates').get().count;
+  if (evaluationTemplateCount === 0) {
+    const addEvaluationTemplate = db.prepare('INSERT INTO evaluation_templates (id, type, title, description, automatic) VALUES (?, ?, ?, ?, ?)');
+    [
+      ['eval-positionnement', 'positionnement', 'Évaluation préformation pour les apprenants', 'Sonde les attentes et diagnostique le besoin avant la session.', 0],
+      ['eval-chaud', 'chaud', 'Évaluation à chaud pour les apprenants', 'Mesure la satisfaction immédiatement après la formation.', 1],
+      ['eval-froid', 'froid', 'Évaluation à froid pour les apprenants', 'Mesure l’impact professionnel après la formation.', 1],
+      ['eval-manager', 'manager', 'Questionnaire pour les managers des apprenants', 'Recueille le retour du responsable hiérarchique.', 0],
+      ['eval-formateur', 'formateur', 'Questionnaire pour les intervenants', 'Recueille le retour de l’intervenant.', 0],
+      ['eval-financeur', 'financeur', 'Questionnaire pour les financeurs et commanditaires', 'Recueille le retour du financeur.', 0],
+    ].forEach(([id, type, title, description, automatic]) => addEvaluationTemplate.run(id, type, title, description, automatic));
+  }
+
+  // ── Inscriptions : validité et relance de recyclage ────────────────────
+  // Une inscription reste la source de vérité ; ces trois champs permettent
+  // de suivre une certification à renouveler sans créer une fiche doublon.
+  const inscriptionCols = db.prepare("PRAGMA table_info(inscriptions)").all().map(c => c.name);
+  if (!inscriptionCols.includes('valid_until')) db.exec("ALTER TABLE inscriptions ADD COLUMN valid_until TEXT DEFAULT ''");
+  if (!inscriptionCols.includes('follow_up_date')) db.exec("ALTER TABLE inscriptions ADD COLUMN follow_up_date TEXT DEFAULT ''");
+  if (!inscriptionCols.includes('follow_up_status')) db.exec("ALTER TABLE inscriptions ADD COLUMN follow_up_status TEXT DEFAULT 'a_relancer'");
+  db.exec('CREATE INDEX IF NOT EXISTS idx_inscriptions_valid_until ON inscriptions(valid_until)');
+
   // ── Table session_modules (modules copiés par session avec durées personnalisables) ──
   db.exec(`
     CREATE TABLE IF NOT EXISTS session_modules (
@@ -909,6 +976,10 @@ function initSchema(db) {
     ["diplome_vise", "TEXT DEFAULT 'Aucun'"],
     ["nom_titre_vise", "TEXT DEFAULT ''"],
     ["formation_a_distance", "INTEGER DEFAULT 0"],
+    ["convocation_auto_enabled", "INTEGER DEFAULT 0"],
+    ["convocation_lead_days", "INTEGER DEFAULT 4"],
+    ["convocation_document_template", "TEXT DEFAULT 'Modèle par défaut'"],
+    ["convocation_email_template", "TEXT DEFAULT 'Modèle par défaut'"],
   ];
   for (const [col, def] of sessMigrations) {
     if (!sCols5.includes(col)) {
@@ -1099,6 +1170,7 @@ function initSchema(db) {
     CREATE TABLE IF NOT EXISTS formation_opportunities (
       id TEXT PRIMARY KEY,
       formation_id TEXT REFERENCES formations(id) ON DELETE SET NULL,
+      session_id TEXT REFERENCES sessions(id) ON DELETE SET NULL,
       client_name TEXT NOT NULL DEFAULT '',
       client_email TEXT DEFAULT '',
       client_phone TEXT DEFAULT '',
@@ -1113,8 +1185,19 @@ function initSchema(db) {
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `);
+  const opportunityCols = db.prepare("PRAGMA table_info(formation_opportunities)").all().map(c => c.name);
+  if (!opportunityCols.includes('session_id')) {
+    db.exec('ALTER TABLE formation_opportunities ADD COLUMN session_id TEXT REFERENCES sessions(id)');
+  }
+  if (!opportunityCols.includes('archived')) {
+    db.exec('ALTER TABLE formation_opportunities ADD COLUMN archived INTEGER NOT NULL DEFAULT 0');
+  }
+  // Migration des affaires déjà importées avant l'existence de session_id.
+  db.exec("UPDATE formation_opportunities SET session_id = substr(source, 9) WHERE session_id IS NULL AND source LIKE 'session:%'");
   db.exec('CREATE INDEX IF NOT EXISTS idx_fo_stage ON formation_opportunities(stage)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_fo_formation_id ON formation_opportunities(formation_id)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_fo_session_id ON formation_opportunities(session_id)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_fo_archived ON formation_opportunities(archived)');
 
   // ── Migration: élargir CHECK constraint evaluations pour ajouter 'froid' ──
   try {
@@ -1366,6 +1449,19 @@ function initSchema(db) {
     CREATE INDEX IF NOT EXISTS idx_espace_liens_token ON espace_liens(token);
     CREATE UNIQUE INDEX IF NOT EXISTS idx_espace_liens_couple
       ON espace_liens(session_id, apprenant_id);
+
+    -- Lien public d'inscription, séparé des liens de présence/questionnaire
+    -- afin de conserver la contrainte CHECK historique de public_links.
+    CREATE TABLE IF NOT EXISTS session_registration_links (
+      id TEXT PRIMARY KEY,
+      token TEXT UNIQUE NOT NULL,
+      session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+      expires_at TEXT,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_session_registration_links_token ON session_registration_links(token);
+    CREATE INDEX IF NOT EXISTS idx_session_registration_links_session_id ON session_registration_links(session_id);
 
     CREATE TABLE IF NOT EXISTS signatures (
       id TEXT PRIMARY KEY,
