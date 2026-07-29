@@ -4836,7 +4836,7 @@ function computeSmartAdvancement(sess) {
 }
 
 export function SessionsView(param) {
-    let { sessions, formations, clients = [], onRefresh, initialSessionId, onSessionOpened } = param;
+    let { sessions, formations, clients = [], onRefresh, initialSessionId, onSessionOpened, onSessionNavigate } = param;
     const confirm = useConfirm();
     const { toast } = useToast();
     var _sessionDetail_inscriptions, _sessionDetail_inscriptions1, _sessionDetail_inscriptions2;
@@ -5000,6 +5000,10 @@ export function SessionsView(param) {
         }
     }["SessionsView.useCallback[loadDetail]"], []);
     const handleSelect = async (s)=>{
+        if (onSessionNavigate) {
+            onSessionNavigate(s.id);
+            return;
+        }
         setSelected(s);
         setDetailTab('advancement');
         await loadDetail(s.id);

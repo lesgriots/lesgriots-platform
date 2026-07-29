@@ -50,6 +50,7 @@ export default function SessionWorkspace({ initialSessionId }) {
             clients={clients}
             initialSessionId={initialSessionId}
             onRefresh={recharger}
+            onSessionNavigate={(sessionId) => window.location.assign(`/sessions/${sessionId}`)}
           />
         )}
       </div>

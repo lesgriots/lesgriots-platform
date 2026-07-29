@@ -516,8 +516,6 @@ const RAIL_SECTIONS = [
     links: [
       { href: '/sessions-list', label: 'Toutes mes sessions' },
       { divider: true },
-      { href: '/sessions/demo-game-of-work-2026', label: 'GAME OF WORK – Stratégie de contenu & création vidéo au téléphone' },
-      { divider: true },
       { href: '/sessions-list?vue=archivees', label: 'Sessions archivées' },
     ],
   },
