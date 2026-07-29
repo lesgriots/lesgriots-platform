@@ -1,16 +1,19 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-const GOLD = 'var(--gold-deep)';
-const BG = 'var(--bg)';
-const SURFACE = 'var(--surface)';
-const TEXT = 'var(--text)';
-const TEXT2 = 'var(--text-3)';
-const BORDER = 'var(--border)';
+// The login stays in the La Griothèque dark universe, whatever the in-app theme.
+const GOLD = '#f0c64f';
+const BG = '#090909';
+const SURFACE = '#171716';
+const SURFACE_2 = '#211f1c';
+const INPUT_BG = '#0e0e0d';
+const TEXT = '#f6f5f3';
+const TEXT2 = '#a39f98';
+const BORDER = '#37342f';
 
 const etiquette = {
   display: 'block', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase',
-  color: 'var(--text-3)', marginBottom: 6,
+  color: TEXT2, marginBottom: 6,
 };
 const champ = (bordure, fond, texte) => ({
   width: '100%', padding: '13px 15px', borderRadius: 10,
@@ -103,29 +106,26 @@ export default function LoginPage() {
         background: SURFACE,
         borderRadius: 16,
         border: `1px solid ${BORDER}`,
+        boxShadow: '0 24px 80px rgba(0, 0, 0, 0.5)',
         textAlign: 'center',
       }}>
         {/* Logo / Brand */}
-        <div style={{ marginBottom: 12 }}>
-          <span style={{
-            fontSize: 'clamp(20px, 6vw, 26px)',
-            fontWeight: 700,
-            color: TEXT,
-            letterSpacing: '0.05em',
-            fontFamily: "'Space Mono', monospace",
-          }}>
-            LA GRIOTHÈQUE
-          </span>
+        <div style={{ margin: '0 auto 16px', maxWidth: 280 }}>
+          <img
+            src="/branding/griotheque-wordmark-paper.svg"
+            alt="La Griothèque"
+            style={{ display: 'block', width: '100%', height: 'auto' }}
+          />
         </div>
         <div style={{
-          fontSize: 13,
-          color: GOLD,
-          letterSpacing: '0.15em',
+          fontSize: 11,
+          color: TEXT2,
+          letterSpacing: '0.16em',
           textTransform: 'uppercase',
-          fontWeight: 500,
-          marginBottom: 48,
+          fontWeight: 600,
+          marginBottom: 44,
         }}>
-          OS
+          Organisme de formation · OS
         </div>
 
         <p style={{
@@ -139,12 +139,12 @@ export default function LoginPage() {
 
         {error && (
           <div style={{
-            background: 'var(--danger-soft)',
-            border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)',
+            background: '#2b1717',
+            border: '1px solid #75413f',
             borderRadius: 8,
             padding: '12px 16px',
             marginBottom: 24,
-            color: 'var(--danger)',
+            color: '#ffaaa3',
             fontSize: 13,
           }}>
             {error}
@@ -154,7 +154,7 @@ export default function LoginPage() {
         {/* Deux onglets : mot de passe par défaut, code en secours */}
         <div style={{
           display: 'flex', gap: 2, padding: 2, marginBottom: 18,
-          background: 'var(--surface-2)', border: `1px solid ${BORDER}`, borderRadius: 9,
+          background: SURFACE_2, border: `1px solid ${BORDER}`, borderRadius: 9,
         }}>
           {[['motdepasse', 'Mot de passe'], ['code', 'Code']].map(([cle, libelle]) => (
             <button
@@ -180,20 +180,20 @@ export default function LoginPage() {
               id="email" type="email" value={email} autoComplete="username"
               onChange={(e) => setEmail(e.target.value)}
               placeholder="toi@lesgriots.com"
-              style={{ ...champ(BORDER, BG, TEXT), marginBottom: 12 }}
+              style={{ ...champ(BORDER, INPUT_BG, TEXT), marginBottom: 12 }}
             />
             <label htmlFor="mdp" style={etiquette}>Mot de passe</label>
             <input
               id="mdp" type="password" value={motdepasse} autoComplete="current-password"
               onChange={(e) => setMotdepasse(e.target.value)}
-              style={champ(BORDER, BG, TEXT)}
+              style={champ(BORDER, INPUT_BG, TEXT)}
             />
             <button
               type="submit"
               disabled={envoi || !email.trim() || !motdepasse}
               style={{
                 width: '100%', marginTop: 14, padding: '14px 24px',
-                background: 'var(--gold)', color: '#141210', border: 'none', borderRadius: 10,
+                background: GOLD, color: '#141210', border: 'none', borderRadius: 10,
                 fontSize: 15, fontWeight: 600, fontFamily: "'Geist Sans', 'DM Sans', sans-serif",
                 cursor: envoi ? 'default' : 'pointer',
                 opacity: envoi || !email.trim() || !motdepasse ? 0.5 : 1,
@@ -218,7 +218,7 @@ export default function LoginPage() {
               autoCorrect="off"
               spellCheck={false}
               style={{
-                ...champ(BORDER, BG, TEXT),
+                ...champ(BORDER, INPUT_BG, TEXT),
                 fontFamily: "'Geist Mono', monospace", fontSize: 20,
                 letterSpacing: '0.14em', textAlign: 'center',
               }}
@@ -228,7 +228,7 @@ export default function LoginPage() {
               disabled={envoi || !code.trim()}
               style={{
                 width: '100%', marginTop: 12, padding: '14px 24px',
-                background: 'var(--gold)', color: '#141210', border: 'none', borderRadius: 10,
+                background: GOLD, color: '#141210', border: 'none', borderRadius: 10,
                 fontSize: 15, fontWeight: 600, fontFamily: "'Geist Sans', 'DM Sans', sans-serif",
                 cursor: envoi || !code.trim() ? 'default' : 'pointer',
                 opacity: envoi || !code.trim() ? 0.5 : 1,
