@@ -1743,7 +1743,7 @@ export function EntreprisesView({ clients = [], sessions = [], onRefresh }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: 'var(--surface-2)', borderBottom: `1px solid ${T.border2}` }}>
-                {['Raison sociale', 'Contact', 'SIRET', 'Ville', 'Apprenants', 'Sessions'].map(h => (
+                {['Raison sociale', 'Contact', 'SIRET', 'Ville', 'Sessions', 'Fiche'].map(h => (
                   <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>{h}</th>
                 ))}
               </tr>
@@ -1756,7 +1756,9 @@ export function EntreprisesView({ clients = [], sessions = [], onRefresh }) {
                   <td style={{ padding: '11px 16px', color: T.textSub, fontSize: 11 }}>{c.siret || '—'}</td>
                   <td style={{ padding: '11px 16px', color: T.textSub }}>{c.city || '—'}</td>
                   <td style={{ padding: '11px 16px', color: T.textMuted }}>{sessions.filter(s => s.client_id === c.id).length || '—'}</td>
-                  <td style={{ padding: '11px 16px', color: T.textMuted }}>{sessions.filter(s => s.client_id === c.id).length || '—'}</td>
+                  <td style={{ padding: '11px 16px' }} onClick={(e) => e.stopPropagation()}>
+                    <a href={`/entreprises/${c.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 11px', borderRadius: 9, border: '1.5px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12, fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap' }}>Ouvrir la fiche →</a>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -4861,6 +4863,8 @@ export function SessionsView(param) {
     const [detailTab, setDetailTab] = useState('info');
     const [gestionSubTab, setGestionSubTab] = useState('conventions');
     const [pdfPreview, setPdfPreview] = useState(null); // { url, title } or null
+    const [quoteEmailDialog, setQuoteEmailDialog] = useState(null);
+    const [quoteSending, setQuoteSending] = useState(false);
     const [scrollTarget, setScrollTarget] = useState(null); // id to scroll to after tab change
     // ── Session modules (programme personnalisable) ──
     const [sessMods, setSessMods] = useState([]);
@@ -5248,6 +5252,54 @@ export function SessionsView(param) {
             toast.error('Aucun envoi : les apprenants sélectionnés n’ont pas d’adresse e-mail.');
         }
         return Boolean(delivered || simulated);
+    };
+    // Le devis doit toujours être envoyé volontairement : le destinataire est
+    // prérempli depuis la session, mais reste visible et modifiable avant l'envoi.
+    const openQuoteEmail = (inscription = null)=>{
+        if (!sessionDetail) return;
+        const isIntra = (sessionDetail.type_session || '').toLowerCase().includes('intra');
+        let candidates;
+        if (isIntra) {
+            const client = clientsList.find((c)=>c.id === sessionDetail.client_id) || clients.find((c)=>c.id === sessionDetail.client_id) || {};
+            const name = sessionDetail.client_company || client.company || `${client.first_name || ''} ${client.last_name || ''}`.trim() || 'Client';
+            candidates = [{ apprenantId: '', name, email: sessionDetail.client_email || client.email || '' }];
+        } else {
+            candidates = (sessionDetail.inscriptions || []).map((i)=>({
+                    apprenantId: i.apprenant_id,
+                    name: `${i.first_name || ''} ${i.last_name || ''}`.trim() || 'Apprenant',
+                    email: i.email || i.apprenant_email || ''
+                }));
+            if (!candidates.length) {
+                toast.error('Ajoutez au moins un apprenant avant d’envoyer un devis.');
+                return;
+            }
+        }
+        const preferred = inscription
+            ? candidates.find((candidate)=>candidate.apprenantId === inscription.apprenant_id)
+            : candidates.find((candidate)=>candidate.email) || candidates[0];
+        setQuoteEmailDialog({ ...preferred, candidates });
+    };
+    const sendQuoteEmail = async ()=>{
+        if (!sessionDetail || !quoteEmailDialog || quoteSending) return;
+        const email = (quoteEmailDialog.email || '').trim();
+        if (!email) {
+            toast.error('Ajoutez l’adresse e-mail du destinataire.');
+            return;
+        }
+        setQuoteSending(true);
+        const result = await api.post(`/api/sessions/${sessionDetail.id}/devis`, {
+            apprenant_id: quoteEmailDialog.apprenantId || undefined,
+            destinataire: email,
+            destinataire_nom: quoteEmailDialog.name || ''
+        });
+        setQuoteSending(false);
+        if (result?.__failed || result?.error || result?.statut === 'echec') {
+            toast.error(result?.error || 'L’envoi du devis a échoué.');
+            return;
+        }
+        await setDocStatus('devis', 'sent');
+        if (result.mode === 'simulation') toast.success('Le devis a été simulé : configurez le SMTP pour un envoi réel.');
+        setQuoteEmailDialog(null);
     };
     const cycleDocStatus = async (docKey)=>{
         if (!sessionDetail) return;
@@ -8165,6 +8217,11 @@ export function SessionsView(param) {
                                                     border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer',
                                                 }}>📄 Devis</button>
 
+                                                <button onClick={() => openQuoteEmail()} style={{
+                                                    padding: '10px 20px', background: 'color-mix(in srgb, var(--info) 15%, var(--surface-2))', color: 'var(--info)',
+                                                    border: '1px solid color-mix(in srgb, var(--info) 42%, transparent)', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                                                }}>✉️ Envoyer le devis</button>
+
                                                 <button onClick={() => {
                                                     const isIntra = (sessionDetail.type_session || '').toLowerCase().includes('intra');
                                                     if (isIntra) {
@@ -8188,7 +8245,22 @@ export function SessionsView(param) {
                                     })()}
                                 </div>;
                             })(),
-                            detailTab === 'apprenants' && /*#__PURE__*/ _jsx("div", {
+                            detailTab === 'apprenants' && /*#__PURE__*/ _jsx(ClientApprenantsPanel, {
+                                sessionDetail: sessionDetail,
+                                documents: getDocuments(sessionDetail),
+                                onAddApprenant: async () => {
+                                    const list = await api.get('/api/apprenants');
+                                    setApprenants(list);
+                                    setShowAddApprenant(true);
+                                },
+                                onPreviewDevis: inscription => setPdfPreview({
+                                    url: `/api/sessions/${sessionDetail.id}/devis?apprenant_id=${inscription.apprenant_id}`,
+                                    title: `Devis — ${(inscription.first_name || '').trim()} ${(inscription.last_name || '').trim()}`.trim()
+                                }),
+                                onSendDevis: inscription => openQuoteEmail(inscription),
+                                onInscriptionStatus: handleInscriptionStatus
+                            }, void 0, false),
+                            detailTab === 'apprenants' && false && /*#__PURE__*/ _jsx("div", {
                                 id: 'section-apprenants',
                                 children: [
                                     /*#__PURE__*/ _jsx("div", {
@@ -8313,36 +8385,10 @@ export function SessionsView(param) {
                                                                 status: i.status
                                                             }, void 0, false),
                                                             /*#__PURE__*/ _jsx("button", {
-                                                                onClick: async ()=>{
-                                                                    // Open devis PDF in new tab
-                                                                    window.open("/api/sessions/".concat(sessionDetail.id, "/devis?apprenant_id=").concat(i.apprenant_id), '_blank');
-                                                                    // Fire webhook to Make
-                                                                    try {
-                                                                        const webhookUrl = localStorage.getItem('lesgriots_make_webhook_devis') || 'https://hook.eu2.make.com/7pw58igocyspb4oz98fp8475nq6o53du';
-                                                                        if (webhookUrl) {
-                                                                            await fetch(webhookUrl, {
-                                                                                method: 'POST',
-                                                                                headers: { 'Content-Type': 'application/json' },
-                                                                                body: JSON.stringify({
-                                                                                    session_id: sessionDetail.id,
-                                                                                    apprenant_id: i.apprenant_id,
-                                                                                    apprenant_name: (i.first_name + ' ' + i.last_name).trim(),
-                                                                                    apprenant_email: i.email || '',
-                                                                                    apprenant_company: i.company || '',
-                                                                                    formation_title: sessionDetail.formation_title || '',
-                                                                                    formation_code: sessionDetail.formation_code || '',
-                                                                                    start_date: sessionDetail.start_date,
-                                                                                    end_date: sessionDetail.end_date,
-                                                                                    tarif: i.price_ht || sessionDetail.tarif,
-                                                                                    type_session: sessionDetail.type_session,
-                                                                                    financement: i.financement || '',
-                                                                                    devis_pdf_url: window.location.origin + "/api/sessions/" + sessionDetail.id + "/devis?apprenant_id=" + i.apprenant_id,
-                                                                                    timestamp: new Date().toISOString(),
-                                                                                }),
-                                                                            });
-                                                                        }
-                                                                    } catch(whErr) { console.error('Webhook devis error:', whErr); }
-                                                                },
+                                                                onClick: ()=>setPdfPreview({
+                                                                        url: "/api/sessions/".concat(sessionDetail.id, "/devis?apprenant_id=").concat(i.apprenant_id),
+                                                                        title: "Devis — ".concat(i.first_name || '', " ").concat(i.last_name || '')
+                                                                    }),
                                                                 style: {
                                                                     padding: '3px 10px',
                                                                     background: alpha('var(--gold-deep)', 13),
@@ -8822,6 +8868,34 @@ export function SessionsView(param) {
                     </object>
                 </div>
             </div>,
+            quoteEmailDialog && <Modal title="Envoyer le devis" onClose={() => !quoteSending && setQuoteEmailDialog(null)} width={520}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <p style={{ margin: 0, color: 'var(--text-2)', fontSize: 13, lineHeight: 1.55 }}>
+                        Le devis sera généré au moment de l’envoi puis joint en PDF à l’e-mail. L’envoi sera conservé dans l’historique de la session.
+                    </p>
+                    {quoteEmailDialog.candidates.length > 1 && <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--text-2)' }}>
+                        Apprenant destinataire
+                        <select value={quoteEmailDialog.apprenantId} onChange={e => {
+                            const candidate = quoteEmailDialog.candidates.find(c => String(c.apprenantId) === e.target.value);
+                            if (candidate) setQuoteEmailDialog(prev => ({ ...prev, ...candidate }));
+                        }} style={{ padding: '10px 12px', borderRadius: 8, background: 'var(--surface-2)', border: '1px solid var(--border-2)', color: 'var(--text)', fontFamily: 'inherit' }}>
+                            {quoteEmailDialog.candidates.map(candidate => <option key={candidate.apprenantId} value={candidate.apprenantId}>{candidate.name}{candidate.email ? ` — ${candidate.email}` : ' — adresse à renseigner'}</option>)}
+                        </select>
+                    </label>}
+                    <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--text-2)' }}>
+                        Nom du destinataire
+                        <input value={quoteEmailDialog.name} onChange={e => setQuoteEmailDialog(prev => ({ ...prev, name: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, background: 'var(--surface-2)', border: '1px solid var(--border-2)', color: 'var(--text)', fontFamily: 'inherit' }} />
+                    </label>
+                    <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--text-2)' }}>
+                        Adresse e-mail
+                        <input type="email" value={quoteEmailDialog.email} onChange={e => setQuoteEmailDialog(prev => ({ ...prev, email: e.target.value }))} placeholder="contact@entreprise.fr" style={{ padding: '10px 12px', borderRadius: 8, background: 'var(--surface-2)', border: '1px solid var(--border-2)', color: 'var(--text)', fontFamily: 'inherit' }} />
+                    </label>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 4 }}>
+                        <button disabled={quoteSending} onClick={() => setQuoteEmailDialog(null)} style={{ padding: '9px 15px', borderRadius: 8, border: '1px solid var(--border-2)', background: 'var(--surface-2)', color: 'var(--text-2)', fontWeight: 700, cursor: quoteSending ? 'wait' : 'pointer', fontFamily: 'inherit' }}>Annuler</button>
+                        <button disabled={quoteSending} onClick={sendQuoteEmail} style={{ padding: '9px 15px', borderRadius: 8, border: 'none', background: 'var(--info)', color: 'var(--on-solid)', fontWeight: 700, cursor: quoteSending ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: quoteSending ? .65 : 1 }}>{quoteSending ? 'Envoi en cours…' : '✉ Envoyer le devis'}</button>
+                    </div>
+                </div>
+            </Modal>,
             showAddApprenant && (()=>{
                 const existingIds = ((sessionDetail === null || sessionDetail === void 0 ? void 0 : sessionDetail.inscriptions) || []).map((i)=>i.apprenant_id);
                 return /*#__PURE__*/ _jsx(Modal, {
@@ -10103,6 +10177,124 @@ export function GrioOverview({ formations, sessions, clients, onNavigateSession 
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Component: ClientApprenantsPanel (session learners grouped by company) ──
+function ClientApprenantsPanel({ sessionDetail, documents, onAddApprenant, onPreviewDevis, onSendDevis, onInscriptionStatus }) {
+  const inscriptions = Array.isArray(sessionDetail?.inscriptions) ? sessionDetail.inscriptions : [];
+  const groups = Object.values(inscriptions.reduce((all, inscription) => {
+    const company = String(inscription.company || sessionDetail?.client_company || 'Particuliers').trim() || 'Particuliers';
+    if (!all[company]) all[company] = { company, members: [] };
+    all[company].members.push(inscription);
+    return all;
+  }, {}));
+
+  return (
+    <section id="section-apprenants" style={{ display: 'grid', gap: 16 }}>
+      <div style={{ display: 'flex', gap: 14, justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: T.text }}>Clients et apprenants</div>
+          <div style={{ fontSize: 12, color: T.textMuted, marginTop: 3 }}>
+            {groups.length} client{groups.length > 1 ? 's' : ''} · {inscriptions.length} apprenant{inscriptions.length > 1 ? 's' : ''}
+            {sessionDetail?.capacite_max ? ` / ${sessionDetail.capacite_max} places` : ''}
+          </div>
+        </div>
+        <button type="button" onClick={onAddApprenant} className="btn-primary" style={{ minHeight: 38 }}>
+          + Ajouter un apprenant
+        </button>
+      </div>
+
+      {groups.length === 0 ? (
+        <div style={{ padding: '36px 24px', border: `1px dashed ${T.border}`, borderRadius: 14, textAlign: 'center', color: T.textMuted, background: T.card }}>
+          Aucun apprenant inscrit pour le moment. Ajoutez un client ou partagez le formulaire d’inscription de la session.
+        </div>
+      ) : groups.map(group => (
+        <ClientApprenantsBlock
+          key={group.company}
+          company={group.company}
+          members={group.members}
+          sessionDetail={sessionDetail}
+          documents={documents}
+          onPreviewDevis={onPreviewDevis}
+          onSendDevis={onSendDevis}
+          onInscriptionStatus={onInscriptionStatus}
+        />
+      ))}
+    </section>
+  );
+}
+
+function ClientApprenantsBlock({ company, members, sessionDetail, documents, onPreviewDevis, onSendDevis, onInscriptionStatus }) {
+  const [documentsOpen, setDocumentsOpen] = useState(false);
+  const firstMember = members[0];
+  const quoteDate = documents?.devis_updated_at || documents?.devis_date || documents?.devis?.updated_at || documents?.devis?.sent_at;
+  const quoteDateLabel = quoteDate ? (() => {
+    const parsedDate = new Date(quoteDate);
+    return Number.isNaN(parsedDate.valueOf())
+      ? String(quoteDate)
+      : new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(parsedDate);
+  })() : null;
+  const total = members.reduce((sum, member) => sum + Number(member.price_ht || sessionDetail?.tarif || sessionDetail?.formation_price_ht || 0), 0);
+  const statusLabel = status => ({ confirme: 'Confirmé', annule: 'Annulé', en_attente: 'En attente' }[status] || 'En attente');
+  const statusColor = status => status === 'confirme' ? 'var(--success)' : status === 'annule' ? 'var(--danger)' : 'var(--warning)';
+
+  return (
+    <article style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden' }}>
+      <div style={{ padding: '16px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, background: T.cardHover, borderBottom: `1px solid ${T.border}`, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div style={{ width: 38, height: 38, borderRadius: 12, display: 'grid', placeItems: 'center', fontWeight: 800, color: T.gold, background: 'color-mix(in srgb, var(--accent) 12%, transparent)' }}>▦</div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: T.text }}>{company}</div>
+            <div style={{ color: T.textMuted, fontSize: 12 }}>{members.length} apprenant{members.length > 1 ? 's' : ''}</div>
+          </div>
+        </div>
+        {total > 0 && <div style={{ fontSize: 13, color: T.textMuted }}>Montant prévu <strong style={{ color: T.text }}>{total.toFixed(2)} € HT</strong></div>}
+      </div>
+
+      <div>
+        {members.map(member => {
+          const fullName = `${member.first_name || ''} ${member.last_name || ''}`.trim() || 'Apprenant';
+          return (
+            <div key={member.id} style={{ padding: '14px 18px', display: 'flex', gap: 12, alignItems: 'center', borderBottom: `1px solid ${T.border}`, flexWrap: 'wrap' }}>
+              <div style={{ width: 32, height: 32, borderRadius: '50%', display: 'grid', placeItems: 'center', background: T.cardHover, color: T.gold, fontSize: 11, fontWeight: 800 }}>
+                {fullName.split(' ').filter(Boolean).slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+              </div>
+              <div style={{ flex: '1 1 220px' }}>
+                <div style={{ fontWeight: 700, color: T.text, fontSize: 14 }}>{fullName}</div>
+                <div style={{ color: T.textMuted, fontSize: 12 }}>{member.email || 'E-mail non renseigné'}</div>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 700, borderRadius: 99, padding: '5px 8px', color: statusColor(member.status), background: 'color-mix(in srgb, currentColor 11%, transparent)' }}>{statusLabel(member.status)}</span>
+              <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+                <button type="button" className="btn-ghost" onClick={() => onPreviewDevis(member)}>Voir le devis</button>
+                <button type="button" className="btn-ghost" onClick={() => onSendDevis(member)}>Envoyer</button>
+                {member.status !== 'confirme' && <button type="button" className="btn-ghost" onClick={() => onInscriptionStatus(member.id, 'confirme')}>Confirmer</button>}
+                {member.status !== 'annule' && <button type="button" className="btn-ghost" onClick={() => onInscriptionStatus(member.id, 'annule')}>Annuler</button>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ borderTop: `1px solid ${T.border}` }}>
+        <button type="button" onClick={() => setDocumentsOpen(value => !value)} style={{ width: '100%', border: 0, background: 'transparent', color: T.text, padding: '15px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 750, cursor: 'pointer' }}>
+          <span>▱ Devis et documents du client</span><span>{documentsOpen ? '⌃' : '⌄'}</span>
+        </button>
+        {documentsOpen && <div style={{ padding: '0 18px 18px', display: 'grid', gap: 11 }}>
+          <div style={{ padding: 13, borderRadius: 10, background: T.cardHover, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontWeight: 700, color: T.text, fontSize: 13 }}>Devis de la session</div>
+              <div style={{ color: T.textMuted, fontSize: 12, marginTop: 2 }}>{quoteDateLabel ? `Mis à jour le ${quoteDateLabel}` : 'Aucun devis n’a encore été généré.'}</div>
+            </div>
+            <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+              <button type="button" className="btn-ghost" onClick={() => onPreviewDevis(firstMember)}>Prévisualiser</button>
+              <button type="button" className="btn-primary" onClick={() => onSendDevis(firstMember)}>Envoyer par e-mail</button>
+            </div>
+          </div>
+          <div style={{ fontSize: 12, color: T.textMuted }}>Les envois sont conservés dans l’historique des e-mails de la session. Les conventions, convocations et attestations restent accessibles dans leurs rubriques dédiées.</div>
+        </div>}
+      </div>
+    </article>
   );
 }
 

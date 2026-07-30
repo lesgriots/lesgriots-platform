@@ -24,6 +24,19 @@ function mapClient(c) {
     tvaApplicable: c.tva_applicable === 1 || c.tva_applicable === undefined,
     tvaRate: c.tva_rate !== undefined ? c.tva_rate : 20.0,
     typeClient: c.type_client || 'entreprise',
+    // ── Ce qu'exige une convention, un dossier OPCO et une facture ──
+    formeJuridique: c.forme_juridique || '',
+    codeNaf: c.code_naf || '',
+    effectif: c.effectif || '',
+    siteWeb: c.site_web || '',
+    adresseFacturation: c.adresse_facturation || '',
+    emailFacturation: c.email_facturation || '',
+    conditionsReglement: c.conditions_reglement || '',
+    referenceCommande: c.reference_commande || '',
+    chorusServiceCode: c.chorus_service_code || '',
+    chorusEngagement: c.chorus_engagement || '',
+    opcoNom: c.opco_nom || '',
+    opcoNumeroAdherent: c.opco_numero_adherent || '',
     createdAt: c.created_at,
   };
 }
@@ -44,6 +57,11 @@ async function _PUT(req, { params }) {
     postalCode: 'postal_code', city: 'city', country: 'country',
     siret: 'siret', tvaNumber: 'tva_number', notes: 'notes',
     pillar: 'pillar', tvaApplicable: 'tva_applicable', tvaRate: 'tva_rate', typeClient: 'type_client',
+    formeJuridique: 'forme_juridique', codeNaf: 'code_naf', effectif: 'effectif', siteWeb: 'site_web',
+    adresseFacturation: 'adresse_facturation', emailFacturation: 'email_facturation',
+    conditionsReglement: 'conditions_reglement', referenceCommande: 'reference_commande',
+    chorusServiceCode: 'chorus_service_code', chorusEngagement: 'chorus_engagement',
+    opcoNom: 'opco_nom', opcoNumeroAdherent: 'opco_numero_adherent',
   };
   const fields = [];
   const values = [];
@@ -71,4 +89,5 @@ function _DELETE(req, { params }) {
 // ── Exports protégés (auth + permissions — voir src/lib/api-guard.js) ──
 export const GET = withGuard('clients:read', _GET);
 export const PUT = withGuard('clients:update', _PUT);
+export const PATCH = withGuard('clients:update', _PUT);
 export const DELETE = withGuard('clients:delete', _DELETE);

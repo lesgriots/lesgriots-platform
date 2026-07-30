@@ -220,6 +220,30 @@ function initSchema(db) {
     INSERT OR IGNORE INTO settings (key, value) VALUES ('pricing_smic_net', '1400');
   `);
 
+  // ── Fiche entreprise : ce qu'un organisme de formation doit détenir ──
+  // Une entreprise cliente n'est pas seulement un nom et une adresse. Sans
+  // ces champs, on ne peut ni éditer une convention conforme, ni monter un
+  // dossier OPCO, ni router une facture électronique (obligatoire à la
+  // réception au 1er septembre 2026), ni renseigner le BPF.
+  const colsClients = db.prepare("PRAGMA table_info(clients)").all().map(c => c.name);
+  const champsEntreprise = [
+    ['forme_juridique', "TEXT DEFAULT ''"],      // SAS, SARL, association, auto-entrepreneur
+    ['code_naf', "TEXT DEFAULT ''"],             // APE : sert au BPF et au ciblage
+    ['effectif', "TEXT DEFAULT ''"],             // tranche : conditionne l'OPCO et le financement
+    ['site_web', "TEXT DEFAULT ''"],
+    ['adresse_facturation', "TEXT DEFAULT ''"],  // quand la facture ne va pas au siège
+    ['email_facturation', "TEXT DEFAULT ''"],    // la compta, pas le contact commercial
+    ['conditions_reglement', "TEXT DEFAULT ''"], // 30 jours fin de mois, à réception…
+    ['reference_commande', "TEXT DEFAULT ''"],   // bon de commande : sans lui, facture rejetée
+    ['chorus_service_code', "TEXT DEFAULT ''"],  // secteur public : code service Chorus Pro
+    ['chorus_engagement', "TEXT DEFAULT ''"],    // secteur public : numéro d'engagement
+    ['opco_nom', "TEXT DEFAULT ''"],
+    ['opco_numero_adherent', "TEXT DEFAULT ''"],
+  ];
+  for (const [nom, type] of champsEntreprise) {
+    if (!colsClients.includes(nom)) db.exec(`ALTER TABLE clients ADD COLUMN ${nom} ${type}`);
+  }
+
   // Migrations for existing databases
   const cols = db.prepare("PRAGMA table_info(providers)").all().map(c => c.name);
   if (!cols.includes('categories')) {
