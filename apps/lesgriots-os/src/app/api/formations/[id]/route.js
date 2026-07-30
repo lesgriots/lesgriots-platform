@@ -36,7 +36,7 @@ async function _PATCH(req, { params }) {
 
     const allowed = ['title','description','objectives','duration_hours','duration_days',
       'modality','level','price_ht','max_participants','prerequisites','program',
-      'evaluation_methods','target_audience','accessibility','status','thematique',
+      'evaluation_methods','evaluations_associees','target_audience','accessibility','status','thematique',
       'certification','financement_eligible','probleme_resolu','livrables_cles','format_label',
       'delais_acces','modalites_pedagogiques','moyens_materiels','positionnement_grille','categorie','type_formation'];
 

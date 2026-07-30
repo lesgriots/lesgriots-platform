@@ -220,6 +220,17 @@ function initSchema(db) {
     INSERT OR IGNORE INTO settings (key, value) VALUES ('pricing_smic_net', '1400');
   `);
 
+  // ── Questionnaires associés à un programme ──
+  // Le lien existait déjà, mais il écrivait dans `evaluation_methods`, la
+  // colonne qui porte les modalités d'évaluation en toutes lettres : celles
+  // qu'on imprime sur le programme et qu'on montre à l'apprenant. Cocher un
+  // modèle effaçait donc ce texte. Le rattachement a maintenant sa propre
+  // colonne, et la prose reste la prose.
+  const colsFormationsEval = db.prepare("PRAGMA table_info(formations)").all().map(c => c.name);
+  if (!colsFormationsEval.includes('evaluations_associees')) {
+    db.exec("ALTER TABLE formations ADD COLUMN evaluations_associees TEXT DEFAULT '[]'");
+  }
+
   // ── Les envois automatiques, au-delà de la convocation ──
   // Le rappel se joue avant la session, les deux enquêtes après. Chacun a
   // son interrupteur et son délai, parce qu'un organisme ne veut pas
