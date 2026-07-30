@@ -1,12 +1,14 @@
-# Chaque matin à 07:30, heure serveur. Le matin, comme chez Digiforma :
+# Chaque matin à 07:30 heure de Paris. Le serveur tourne en UTC : sans le
+# fuseau explicite, l'envoi glisserait d'une heure entre l'été et l'hiver.
+# Le matin, comme chez Digiforma :
 # une convocation qui arrive à 3 h du matin se lit mal.
 # Persistent=true rattrape le tir si le VPS était éteint.
 
 [Unit]
-Description=LES GRIOTHÈQUE OS — convocations automatiques (07:30)
+Description=LES GRIOTHÈQUE OS — convocations automatiques (07:30 Paris)
 
 [Timer]
-OnCalendar=*-*-* 07:30:00
+OnCalendar=*-*-* 07:30:00 Europe/Paris
 Persistent=true
 RandomizedDelaySec=120
 
