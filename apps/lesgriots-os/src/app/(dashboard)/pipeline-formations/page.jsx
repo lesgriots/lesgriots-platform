@@ -298,6 +298,11 @@ export default function PipelineFormationsPage() {
                                 <button onClick={() => supprimer(o)} title="Retirer"
                                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--text-3)', fontSize: 13, lineHeight: 1 }}>×</button>
                               </div>
+                              <a href={`/opportunites/${o.id}`} onClick={(ev) => ev.stopPropagation()} onMouseDown={(ev) => ev.stopPropagation()} draggable={false} style={{
+                                display: 'block', marginTop: 6, padding: '5px 0', textAlign: 'center', borderRadius: 7,
+                                border: '1.5px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)',
+                                fontSize: 10.5, fontWeight: 800, textDecoration: 'none',
+                              }}>Ouvrir l’affaire →</a>
                               {o.formation_title && (
                                 <div style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 2, lineHeight: 1.3 }}>{o.formation_title}</div>
                               )}
@@ -352,6 +357,7 @@ function Liste({ opps, onEtape, onSupprimer, onOuvrirSession, compact = false })
           <th style={th}>Formation</th>
           <th style={th}>Étape</th>
           <th style={{ ...th, textAlign: 'right' }}>Montant</th>
+          <th style={{ ...th, textAlign: 'right' }}>Ouvrir</th>
           <th style={{ ...th, width: 36 }} />
         </tr>
       </thead>
@@ -361,13 +367,7 @@ function Liste({ opps, onEtape, onSupprimer, onOuvrirSession, compact = false })
           return (
             <tr key={o.id} style={relance ? { background: 'var(--gold-soft)' } : undefined}>
               <td style={{ ...td, fontWeight: 500 }}>
-                {sessionIdDepuisSource(o) ? (
-                  <button
-                    onClick={() => onOuvrirSession(o)}
-                    title="Ouvrir la session"
-                    style={{ padding: 0, border: 'none', background: 'none', color: 'inherit', cursor: 'pointer', font: 'inherit', fontWeight: 'inherit', textAlign: 'left', textDecoration: 'underline', textUnderlineOffset: 3 }}
-                  >{o.client_name}</button>
-                ) : o.client_name}
+                <a href={`/opportunites/${o.id}`} title="Ouvrir l’affaire" style={{ color: 'inherit', fontWeight: 'inherit', textDecoration: 'underline', textUnderlineOffset: 3 }}>{o.client_name}</a>
               </td>
               <td style={{ ...td, color: 'var(--text-3)' }}>{o.formation_title || '—'}</td>
               <td style={td}>
@@ -386,6 +386,20 @@ function Liste({ opps, onEtape, onSupprimer, onOuvrirSession, compact = false })
               </td>
               <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
                 {o.revenue ? euros(o.revenue) : '—'}
+              </td>
+              <td style={{ ...td, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                <a href={`/opportunites/${o.id}`} style={{
+                  display: 'inline-flex', alignItems: 'center', padding: '6px 10px', borderRadius: 8,
+                  border: '1.5px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)',
+                  fontSize: 11.5, fontWeight: 800, textDecoration: 'none',
+                }}>L’affaire →</a>
+                {sessionIdDepuisSource(o) && (
+                  <button onClick={() => onOuvrirSession(o)} title="Ouvrir la session" style={{
+                    marginLeft: 6, padding: '6px 10px', borderRadius: 8, border: '1.5px solid var(--border-2)',
+                    background: 'var(--surface)', color: 'var(--text-2)', fontSize: 11.5, fontWeight: 800,
+                    cursor: 'pointer', fontFamily: 'inherit',
+                  }}>Session ↗</button>
+                )}
               </td>
               <td style={{ ...td, textAlign: 'right' }}>
                 <button onClick={() => onSupprimer(o)} title="Retirer du pipeline"
