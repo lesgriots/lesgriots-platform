@@ -27,6 +27,9 @@ const PUBLIC_PATHS = [
   // NB : '/p/' avec slash final pour ne PAS ouvrir /projects, /providers, etc.
   '/p/',
   '/api/public',
+  // La porte de l'espace apprenant : l'apprenant n'a pas de compte, il demande
+  // son lien avec son adresse. Sans cette ligne, la page renvoyait vers /login.
+  '/espace',
 ];
 
 const API_PREFIX = '/api/';
