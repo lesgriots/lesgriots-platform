@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import ClientsSession from './ClientsSession';
 import EspaceApprenantConfig from './EspaceApprenantConfig';
+import EnvoisAutomatiques from './EnvoisAutomatiques';
 import { useEffect, useMemo, useState } from 'react';
 
 const STEPS = [
@@ -18,7 +19,7 @@ const SUBNAV = {
     ['initialisation', 'Initialisation'], ['programme', 'Programme'], ['intervenants', 'Intervenants'], ['dates', 'Dates et prix'], ['clients', 'Clients et prix'], ['apprenants', 'Apprenants'],
   ],
   gestion: [
-    ['conventions', 'Conventions'], ['convocations', 'Convocations'], ['evaluations', 'Évaluations'], ['finances', 'Finances'], ['entreprise', 'Espace entreprise'],
+    ['conventions', 'Conventions'], ['convocations', 'Convocations'], ['evaluations', 'Évaluations'], ['automatisations', 'Envois automatiques'], ['finances', 'Finances'], ['entreprise', 'Espace entreprise'],
   ],
   apprenant: [
     ['acces', 'Accès'], ['affichage', 'Configuration'], ['documents', 'Documents'], ['elearning', 'E-learning'],
@@ -527,6 +528,7 @@ export default function SessionCockpit({ sessionId }) {
   const renderClients = () => <ClientsSession sessionId={sessionId} onNotice={setNotice} />;
 
   const renderGestion = () => {
+    if (currentSub === 'automatisations') return <EnvoisAutomatiques sessionId={sessionId} session={session} onNotice={setNotice} onRecharger={load} />;
     if (currentSub === 'convocations') return <>
       <section style={card}>
         <h2 style={title}>Envoi automatique</h2>

@@ -220,6 +220,24 @@ function initSchema(db) {
     INSERT OR IGNORE INTO settings (key, value) VALUES ('pricing_smic_net', '1400');
   `);
 
+  // ── Les envois automatiques, au-delà de la convocation ──
+  // Le rappel se joue avant la session, les deux enquêtes après. Chacun a
+  // son interrupteur et son délai, parce qu'un organisme ne veut pas
+  // forcément relancer un intra de deux personnes comme un inter de douze.
+  // Tout est désarmé par défaut : une automatisation qu'on n'a pas choisie
+  // est une automatisation qui surprend.
+  const colsEnvois = db.prepare("PRAGMA table_info(sessions)").all().map(c => c.name);
+  for (const [nom, type] of [
+    ['rappel_auto_enabled', 'INTEGER DEFAULT 0'],
+    ['rappel_lead_days', 'INTEGER DEFAULT 7'],
+    ['chaud_auto_enabled', 'INTEGER DEFAULT 0'],
+    ['chaud_delai_jours', 'INTEGER DEFAULT 1'],    // le lendemain de la fin
+    ['froid_auto_enabled', 'INTEGER DEFAULT 0'],
+    ['froid_delai_jours', 'INTEGER DEFAULT 90'],   // trois mois après
+  ]) {
+    if (!colsEnvois.includes(nom)) db.exec(`ALTER TABLE sessions ADD COLUMN ${nom} ${type}`);
+  }
+
   // ── Espace apprenant : ce que la session en montre ──
   // L'espace affichait tout, tout le temps. Or ce qui doit être visible
   // dépend de la session : un intra n'expose pas la liste des participants,

@@ -1,25 +1,32 @@
 /**
- * /api/griotheque/envois-auto — l'envoi automatique des convocations.
+ * /api/griotheque/envois-auto — les envois qui partent tout seuls.
  *
- * Jusqu'ici, la case « activer l'envoi automatique » de l'écran Convocations
- * enregistrait une préférence que rien n'exécutait. Un interrupteur qui ne
- * fait rien est moins grave qu'un interrupteur qui fait croire : celui-là
- * laissait penser que les convocations partaient seules.
+ * Quatre campagnes, chacune accrochée à un moment du cycle de la session :
  *
- * Cette route est le moteur qui manquait. Elle est appelée chaque matin par
- * un timer systemd (le VPS n'a pas de cron), avec la clé d'API du serveur.
+ *   convocation     N jours avant le début     (défaut 4)
+ *   rappel J-7      N jours avant le début     (défaut 7)
+ *   enquête à chaud N jours après la fin       (défaut 1)
+ *   enquête à froid N jours après la fin       (défaut 90)
  *
- * Trois garde-fous, parce qu'un envoi automatique qui se trompe est pire
+ * Les deux enquêtes ne sont pas du confort : l'indicateur 30 du référentiel
+ * national qualité demande de recueillir les appréciations des apprenants,
+ * et rien ne le remplira tant que l'envoi reste manuel.
+ *
+ * Cette route est appelée chaque matin par un timer systemd (le VPS n'a pas
+ * de cron), avec la clé d'API du serveur.
+ *
+ * Quatre garde-fous, parce qu'un envoi automatique qui se trompe est pire
  * qu'un envoi manuel oublié :
  *
- *   1. Idempotence. Un apprenant qui a déjà reçu sa convocation pour cette
- *      session ne la reçoit jamais deux fois. La preuve est le journal des
+ *   1. Idempotence. Un apprenant qui a déjà reçu ce message pour cette
+ *      session ne le reçoit jamais deux fois. La preuve est le journal des
  *      e-mails, pas une case cochée à la main.
- *   2. Fenêtre, pas instant. On envoie quand il reste au plus N jours avant
- *      le début, et pas après le début. Si le serveur était éteint un matin,
- *      le rattrapage du lendemain fonctionne encore.
- *   3. Essai à blanc. Avec ?simulation=1, la route dit exactement ce qu'elle
- *      ferait sans rien envoyer. C'est ce qu'on regarde avant d'activer.
+ *   2. Fenêtre, pas instant. On envoie dans un intervalle, pas à une date
+ *      exacte : si le serveur était éteint un matin, le lendemain rattrape.
+ *   3. Fenêtre fermée à l'autre bout. On ne réveille pas une session d'il y
+ *      a deux ans parce que quelqu'un vient d'armer un interrupteur.
+ *   4. Essai à blanc. Un GET dit exactement ce qui partirait sans rien
+ *      envoyer. C'est ce qu'on regarde avant d'armer.
  */
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db.mjs';
@@ -28,22 +35,62 @@ import { smtpConfigure } from '@/lib/mailer';
 
 const BASE = process.env.NEXTAUTH_URL || 'https://app.lagriotheque.com';
 
-/** Les sessions dont l'envoi automatique est armé et qui approchent. */
-function sessionsEligibles(db, aujourdhui) {
-  return db.prepare(`
-    SELECT s.id, s.start_date, s.session_name,
-           COALESCE(s.convocation_lead_days, 4) AS jours,
-           COALESCE(f.title, s.session_name, s.id) AS titre
-    FROM sessions s LEFT JOIN formations f ON f.id = s.formation_id
-    WHERE COALESCE(s.convocation_auto_enabled, 0) = 1
-      AND COALESCE(s.start_date, '') <> ''
-      AND s.start_date >= ?
-      AND COALESCE(s.status, '') NOT IN ('annulee', 'archivee')
-  `).all(aujourdhui);
+/**
+ * Les campagnes. `jours()` donne le délai réglé sur la session, `ouverte()`
+ * dit si on est dans la fenêtre d'envoi, à partir des dates de la session.
+ */
+export const CAMPAGNES = [
+  {
+    cle: 'convocation', template: 'convocation', libelle: 'Convocation',
+    actif: (s) => Number(s.convocation_auto_enabled) === 1,
+    jours: (s) => Number(s.convocation_lead_days ?? 4),
+    ouverte: (s, auj, n) => {
+      if (!s.start_date) return false;
+      const reste = ecart(s.start_date, auj);
+      return reste <= n && reste >= 0;
+    },
+  },
+  {
+    cle: 'rappel', template: 'rappel_j7', libelle: 'Rappel avant la session',
+    actif: (s) => Number(s.rappel_auto_enabled) === 1,
+    jours: (s) => Number(s.rappel_lead_days ?? 7),
+    ouverte: (s, auj, n) => {
+      if (!s.start_date) return false;
+      const reste = ecart(s.start_date, auj);
+      return reste <= n && reste >= 0;
+    },
+  },
+  {
+    cle: 'chaud', template: 'enquete_chaud', libelle: 'Enquête à chaud',
+    actif: (s) => Number(s.chaud_auto_enabled) === 1,
+    jours: (s) => Number(s.chaud_delai_jours ?? 1),
+    ouverte: (s, auj, n) => {
+      const fin = s.end_date || s.start_date;
+      if (!fin) return false;
+      const depuis = -ecart(fin, auj);            // jours écoulés depuis la fin
+      return depuis >= n && depuis <= n + 30;     // un mois pour rattraper
+    },
+  },
+  {
+    cle: 'froid', template: 'enquete_froid', libelle: 'Enquête à froid',
+    actif: (s) => Number(s.froid_auto_enabled) === 1,
+    jours: (s) => Number(s.froid_delai_jours ?? 90),
+    ouverte: (s, auj, n) => {
+      const fin = s.end_date || s.start_date;
+      if (!fin) return false;
+      const depuis = -ecart(fin, auj);
+      return depuis >= n && depuis <= n + 60;     // deux mois pour rattraper
+    },
+  },
+];
+
+/** Jours entre une date et aujourd'hui : positif si la date est à venir. */
+function ecart(date, auj) {
+  return Math.round((new Date(`${String(date).slice(0, 10)}T12:00:00`) - new Date(`${auj}T12:00:00`)) / 86400000);
 }
 
-/** Les apprenants de la session qui n'ont pas encore reçu leur convocation. */
-function aConvoquer(db, session_id) {
+/** Les apprenants de la session qui n'ont pas encore reçu ce message. */
+function aRelancer(db, session_id, template_key) {
   return db.prepare(`
     SELECT a.id, a.first_name, a.last_name, a.email
     FROM inscriptions i JOIN apprenants a ON a.id = i.apprenant_id
@@ -51,21 +98,15 @@ function aConvoquer(db, session_id) {
       AND COALESCE(a.email, '') <> ''
       AND NOT EXISTS (
         SELECT 1 FROM emails e
-        WHERE e.template_key = 'convocation'
+        WHERE e.template_key = ?
           AND e.contexte_id = i.session_id
           AND e.destinataire = a.email
           AND e.statut IN ('envoye', 'simule')
-          -- Un e-mail de test envoyé à soi-même ne vaut pas convocation :
-          -- sans cette ligne, tester un modèle sur sa propre adresse
-          -- empêcherait l'apprenant qui partage cette adresse de recevoir
-          -- la sienne. Les tests sont journalisés en contexte « test ».
+          -- Un e-mail de test envoyé à soi-même ne vaut pas envoi réel.
           AND COALESCE(e.contexte_type, '') <> 'test'
       )
-  `).all(session_id);
+  `).all(session_id, template_key);
 }
-
-const joursAvant = (depart, aujourdhui) =>
-  Math.round((new Date(`${depart}T12:00:00`) - new Date(`${aujourdhui}T12:00:00`)) / 86400000);
 
 async function _POST(request) {
   try {
@@ -75,67 +116,71 @@ async function _POST(request) {
     const aujourdhui = params.get('date') || new Date().toISOString().slice(0, 10);
 
     const rapport = {
-      date: aujourdhui,
-      simulation,
+      date: aujourdhui, simulation,
       mode_smtp: smtpConfigure() ? 'reel' : 'simulation',
-      sessions_armees: 0,
-      sessions_traitees: [],
-      envoyes: 0,
-      ignores_sans_email: 0,
+      campagnes: {}, envoyes: 0, ignores_sans_email: 0, traces: [],
     };
 
-    const sessions = sessionsEligibles(db, aujourdhui);
-    rapport.sessions_armees = sessions.length;
+    // Toutes les sessions vivantes : la fenêtre de chaque campagne fera le tri.
+    const sessions = db.prepare(`
+      SELECT s.*, COALESCE(f.title, s.session_name, s.id) AS titre
+      FROM sessions s LEFT JOIN formations f ON f.id = s.formation_id
+      WHERE COALESCE(s.status, '') NOT IN ('annulee', 'archivee')
+        AND COALESCE(s.start_date, '') <> ''
+    `).all();
 
-    for (const s of sessions) {
-      const reste = joursAvant(s.start_date, aujourdhui);
-      // Fenêtre : on entre dans la zone d'envoi et on n'en est pas sorti.
-      if (reste > Number(s.jours)) continue;
+    for (const c of CAMPAGNES) {
+      rapport.campagnes[c.cle] = { libelle: c.libelle, sessions_armees: 0, envoyes: 0 };
 
-      const cibles = aConvoquer(db, s.id);
-      const sansEmail = db.prepare(`
-        SELECT COUNT(*) AS n FROM inscriptions i JOIN apprenants a ON a.id = i.apprenant_id
-        WHERE i.session_id = ? AND COALESCE(a.email, '') = ''
-      `).get(s.id).n;
-      rapport.ignores_sans_email += sansEmail;
+      for (const s of sessions) {
+        if (!c.actif(s)) continue;
+        rapport.campagnes[c.cle].sessions_armees += 1;
 
-      const trace = {
-        session_id: s.id, titre: s.titre, debut: s.start_date,
-        jours_avant: reste, delai_configure: Number(s.jours),
-        a_convoquer: cibles.map((c) => [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email),
-        sans_email: sansEmail,
-        envoyes: 0,
-      };
+        const n = c.jours(s);
+        if (!c.ouverte(s, aujourdhui, n)) continue;
 
-      if (!cibles.length) { rapport.sessions_traitees.push(trace); continue; }
+        const cibles = aRelancer(db, s.id, c.template);
+        const sansEmail = db.prepare(`
+          SELECT COUNT(*) AS n FROM inscriptions i JOIN apprenants a ON a.id = i.apprenant_id
+          WHERE i.session_id = ? AND COALESCE(a.email, '') = ''
+        `).get(s.id).n;
+        rapport.ignores_sans_email += sansEmail;
 
-      if (!simulation) {
-        // On réutilise le moteur habillé plutôt que d'en réécrire un second :
-        // même modèle, même logo, même programme joint, même journalisation.
-        const r = await fetch(`${BASE}/api/griotheque/emails`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.OS_API_KEY || '' },
-          body: JSON.stringify({
-            session_id: s.id, template_key: 'convocation',
-            apprenant_ids: cibles.map((c) => c.id),
-          }),
-        });
-        const d = await r.json().catch(() => ({}));
-        trace.envoyes = Number(d.envoyes || 0) + Number(d.simules || 0);
-        trace.echecs = Number(d.echecs || 0);
-        rapport.envoyes += trace.envoyes;
+        const trace = {
+          campagne: c.cle, libelle: c.libelle,
+          session_id: s.id, titre: s.titre,
+          debut: s.start_date, fin: s.end_date || s.start_date,
+          delai_configure: n, sans_email: sansEmail,
+          a_convoquer: cibles.map((x) => [x.first_name, x.last_name].filter(Boolean).join(' ') || x.email),
+          envoyes: 0,
+        };
+        if (!cibles.length) { rapport.traces.push(trace); continue; }
 
-        // La case « convocation envoyée » de la fiche suit l'envoi réel.
-        if (trace.envoyes) {
-          const marquer = db.prepare('UPDATE inscriptions SET convocation_sent = 1 WHERE session_id = ? AND apprenant_id = ?');
-          for (const c of cibles) { try { marquer.run(s.id, c.id); } catch (e) { console.error('[envois-auto]', e.message); } }
+        if (!simulation) {
+          // On réutilise le moteur habillé plutôt que d'en écrire un second :
+          // même modèle, même logo, même journalisation.
+          const r = await fetch(`${BASE}/api/griotheque/emails`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.OS_API_KEY || '' },
+            body: JSON.stringify({ session_id: s.id, template_key: c.template, apprenant_ids: cibles.map((x) => x.id) }),
+          });
+          const d = await r.json().catch(() => ({}));
+          trace.envoyes = Number(d.envoyes || 0) + Number(d.simules || 0);
+          trace.echecs = Number(d.echecs || 0);
+          rapport.envoyes += trace.envoyes;
+          rapport.campagnes[c.cle].envoyes += trace.envoyes;
+
+          if (c.cle === 'convocation' && trace.envoyes) {
+            const marquer = db.prepare('UPDATE inscriptions SET convocation_sent = 1 WHERE session_id = ? AND apprenant_id = ?');
+            for (const x of cibles) { try { marquer.run(s.id, x.id); } catch (e) { console.error('[envois-auto]', e.message); } }
+          }
         }
-      }
 
-      rapport.sessions_traitees.push(trace);
+        rapport.traces.push(trace);
+      }
     }
 
-    console.info(`[envois-auto] ${aujourdhui} · ${rapport.sessions_armees} session(s) armée(s) · ${rapport.envoyes} envoi(s)${simulation ? ' (simulation)' : ''}`);
+    console.info(`[envois-auto] ${aujourdhui} · ${rapport.envoyes} envoi(s)${simulation ? ' (simulation)' : ''}`);
     return NextResponse.json(rapport);
   } catch (e) {
     console.error('[envois-auto] échec :', e.message);
