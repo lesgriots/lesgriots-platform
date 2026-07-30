@@ -97,8 +97,66 @@ export function calculerBpf(db, annee) {
     WHERE s.start_date >= ? AND s.start_date <= ? AND COALESCE(s.formateur_id,'') <> ''
   `).get(debut, fin).n;
 
+  // ── Contrôle de cohérence : deux sources, un seul chiffre attendu ──
+  //
+  // Les produits du Cerfa sont aujourd'hui déduits des inscriptions et de
+  // leur champ « financement », saisi en texte libre. Les clients de session
+  // déclarent la même chose, mais explicitement : un payeur, un prix, et les
+  // cases qui désignent la ligne du Cerfa.
+  //
+  // Tant que les deux coexistent, on ne bascule pas la source : on compare.
+  // Une session dont les deux totaux divergent est une session dont la
+  // déclaration sera fausse, quel que soit le camp choisi. Aucun montant
+  // n'est modifié ici — c'est un contrôle, pas un calcul.
+  const sessionsExercice = db.prepare(`
+    SELECT s.id, s.start_date, s.session_name,
+           COALESCE(f.title, s.session_name, s.id) AS titre,
+           (SELECT COALESCE(SUM(i.price_ht), 0) FROM inscriptions i WHERE i.session_id = s.id) AS total_inscriptions,
+           (SELECT COUNT(*) FROM inscriptions i WHERE i.session_id = s.id) AS nb_inscriptions,
+           (SELECT COALESCE(SUM(sc.prix), 0) FROM session_clients sc WHERE sc.session_id = s.id) AS total_clients,
+           (SELECT COUNT(*) FROM session_clients sc WHERE sc.session_id = s.id) AS nb_clients
+    FROM sessions s LEFT JOIN formations f ON f.id = s.formation_id
+    WHERE s.start_date >= ? AND s.start_date <= ?
+    ORDER BY s.start_date ASC
+  `).all(debut, fin);
+
+  const EPSILON = 1;   // un euro d'écart n'est qu'un arrondi
+  const coherence = {
+    sessions: sessionsExercice.map((s) => {
+      const ecart = Number(s.total_clients) - Number(s.total_inscriptions);
+      let statut = 'ok';
+      if (!s.nb_clients) statut = 'sans_clients';
+      else if (Math.abs(ecart) > EPSILON) statut = 'ecart';
+      return {
+        session_id: s.id, titre: s.titre, date: s.start_date,
+        nb_inscriptions: s.nb_inscriptions, nb_clients: s.nb_clients,
+        total_inscriptions: Number(s.total_inscriptions),
+        total_clients: Number(s.total_clients),
+        ecart, statut,
+      };
+    }),
+    total_inscriptions: sessionsExercice.reduce((t, s) => t + Number(s.total_inscriptions), 0),
+    total_clients: sessionsExercice.reduce((t, s) => t + Number(s.total_clients), 0),
+    sessions_sans_clients: sessionsExercice.filter((s) => !s.nb_clients).length,
+    sessions_en_ecart: sessionsExercice.filter((s) => s.nb_clients && Math.abs(Number(s.total_clients) - Number(s.total_inscriptions)) > 1).length,
+  };
+
   // ── Ce qui manque pour que la déclaration tienne ────────────────────
   const alertes = [];
+  if (coherence.sessions_en_ecart) {
+    alertes.push({
+      niveau: 'bloquant',
+      texte: `${coherence.sessions_en_ecart} session(s) où le prix des clients ne correspond pas aux inscriptions`,
+      quoi: 'Les deux sources donnent un montant différent : la déclaration sera fausse quelle que soit celle retenue. Le détail est plus bas, session par session.',
+    });
+  }
+  if (coherence.sessions_sans_clients && coherence.sessions.length) {
+    alertes.push({
+      niveau: 'attention',
+      texte: `${coherence.sessions_sans_clients} session(s) sur ${coherence.sessions.length} sans client déclaré`,
+      quoi: 'Leur montant ne peut venir que des inscriptions et de leur financement en texte libre. Renseigne les clients dans Configuration puis Clients et prix.',
+    });
+  }
   if (nonVentile) {
     alertes.push({
       niveau: 'bloquant',
@@ -139,6 +197,7 @@ export function calculerBpf(db, annee) {
       formateurs,
     },
     alertes,
+    coherence,
     lignes_comptees: lignes.length,
   };
 }
