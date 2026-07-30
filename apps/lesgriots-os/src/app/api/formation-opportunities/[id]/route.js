@@ -14,16 +14,40 @@ async function _GET(req, { params }) {
   ).all(id);
 
   // La session rattachée, s'il y en a une : c'est elle qui dit où on en est.
+  //
+  // On remonte aussi ce qui se lit sur la fiche sans avoir à ouvrir la
+  // session : inter ou intra, le type d'action, la spécialité. Ce sont les
+  // trois lignes que l'auditeur et le BPF réclament.
   const session = row.session_id
     ? db.prepare(`
         SELECT s.id, s.start_date, s.end_date, s.status, s.session_name, s.tarif,
+               s.type_session, s.inter_entreprise, s.type_action_formation,
+               s.specialite_formation, s.code_interne,
                f.title AS formation_title,
                (SELECT COUNT(*) FROM inscriptions i WHERE i.session_id = s.id) AS inscrits
         FROM sessions s LEFT JOIN formations f ON f.id = s.formation_id WHERE s.id = ?
       `).get(row.session_id)
     : null;
 
-  return NextResponse.json({ ...row, evenements, session });
+  // Les modules vendus, et leur prix. C'est cette ligne à ligne qui fait le
+  // montant : un total saisi à côté finit toujours par mentir.
+  const modules = row.session_id
+    ? db.prepare(`
+        SELECT id, title, duration_hours, prix_ht, nature, sort_order
+        FROM session_modules WHERE session_id = ? ORDER BY sort_order ASC, created_at ASC
+      `).all(row.session_id)
+    : [];
+
+  // Les devis émis pour cette session : leur numéro, leur date, leur sort.
+  const devis = row.session_id
+    ? db.prepare(`
+        SELECT id, numero, objet, montant_ht, montant_ttc, statut,
+               date_emission, date_envoi, date_reponse, fichier
+        FROM devis WHERE session_id = ? ORDER BY date_emission DESC, numero DESC
+      `).all(row.session_id)
+    : [];
+
+  return NextResponse.json({ ...row, evenements, session, modules, devis });
 }
 
 async function _PATCH(req, { params }) {

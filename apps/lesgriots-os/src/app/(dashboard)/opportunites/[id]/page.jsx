@@ -132,6 +132,35 @@ export default function FicheOpportunitePage() {
     } finally { setOccupe(''); }
   };
 
+  const modules = aff?.modules || [];
+  const devis = aff?.devis || [];
+
+  // Le montant vient des modules quand ils sont valorisés. Un total saisi à
+  // côté de ses lignes finit toujours par mentir.
+  const montantModules = useMemo(
+    () => modules.reduce((t, m) => t + (Number(m.prix_ht) || 0), 0),
+    [modules],
+  );
+  const montantAffaire = montantModules || Number(aff?.session?.tarif) || Number(aff?.revenue) || 0;
+
+  /**
+   * Cocher « Accepté » date la réponse. C'est cette date que l'on regarde
+   * pour mesurer le délai entre l'envoi et la décision.
+   */
+  const accepterDevis = async (d, accepte) => {
+    setErreur(''); setMessage('');
+    const r = await fetch(`/api/devis/${d.id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        statut: accepte ? 'accepte' : 'envoye',
+        date_reponse: accepte ? new Date().toISOString().slice(0, 10) : '',
+      }),
+    });
+    if (!r.ok) { setErreur('Le devis n’a pas pu être mis à jour.'); return; }
+    setMessage(accepte ? `Devis ${d.numero} marqué accepté.` : `Devis ${d.numero} remis en attente.`);
+    await charger();
+  };
+
   const entreprise = useMemo(
     () => clients.find((c) => c.id === aff?.client_id)
       || clients.find((c) => (c.company || '').toLowerCase() === String(aff?.company || '').toLowerCase() && aff?.company),
@@ -164,8 +193,10 @@ export default function FicheOpportunitePage() {
       {onglet === 'infos' ? <>
 
         <section style={{ ...carte, display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'center' }}>
-          <Trio libelle="Montant" valeur={euros(aff.revenue)} />
+          <Trio libelle="Montant" valeur={euros(montantAffaire)} />
+          <Trio libelle="Commercial" valeur={aff.gestionnaire || '—'} />
           <Trio libelle="Financement" valeur={aff.financement || 'À définir'} />
+          <Trio libelle="Apprenants" valeur={aff.session ? `${aff.session.inscrits}` : '—'} />
           <Trio libelle="Entreprise" valeur={entreprise ? (entreprise.company || 'Fiche client') : (aff.company || 'Particulier')} lien={entreprise ? `/entreprises/${entreprise.id}` : undefined} />
           <label style={{ display: 'grid', gap: 5, flex: '1 1 220px' }}>
             <span style={{ ...attenue, fontSize: 10, textTransform: 'uppercase', letterSpacing: '.08em', fontWeight: 800 }}>Étape</span>
@@ -196,8 +227,45 @@ export default function FicheOpportunitePage() {
           <h2 style={titre}>Session de formation</h2>
           {aff.session ? <>
             <p style={{ ...attenue, margin: '6px 0 14px' }}>
-              Session du {dateFr(aff.session.start_date)} · {aff.session.inscrits} inscrit(s) · {euros(aff.session.tarif)}
+              Session du {dateFr(aff.session.start_date)} · {aff.session.inscrits} inscrit(s)
+              {aff.session.code_interne ? ` · ${aff.session.code_interne}` : ''}
             </p>
+
+            <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', padding: '12px 0 16px', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: 14 }}>
+              <Trio libelle="Type de client" valeur={aff.session.inter_entreprise ? 'Inter-entreprise' : 'Intra-entreprise'} />
+              <Trio libelle="Type d’action de formation" valeur={aff.session.type_action_formation || '—'} />
+              <Trio libelle="Domaine" valeur={aff.session.specialite_formation || '—'} />
+            </div>
+
+            {modules.length > 0 && (
+              <div style={{ marginBottom: 14 }}>
+                {modules.map((m, i) => (
+                  <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 0', borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
+                    <span style={{ flex: '1 1 240px', fontSize: 13, fontWeight: 700 }}>
+                      {m.title || `Module ${i + 1}`}
+                      {m.duration_hours ? <span style={{ ...attenue, fontWeight: 400, marginLeft: 8 }}>{m.duration_hours} h</span> : null}
+                    </span>
+                    <span style={{ ...attenue, flex: '0 0 auto' }}>{m.nature || 'Formation'}</span>
+                    <span style={{ flex: '0 0 auto', fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700 }}>
+                      {euros(m.prix_ht)} <span style={{ ...attenue, fontSize: 10 }}>HT</span>
+                    </span>
+                  </div>
+                ))}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 14 }}>
+                  <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: '.02em' }}>MONTANT TOTAL</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 17, fontWeight: 800 }}>
+                    {euros(montantModules || aff.session.tarif)} <span style={{ ...attenue, fontSize: 11 }}>HT</span>
+                  </span>
+                </div>
+                {!montantModules && (
+                  <p style={{ ...attenue, margin: '8px 0 0' }}>
+                    Aucun prix n’est encore posé sur les modules : le montant affiché est le tarif de la
+                    session. Les prix se saisissent dans le cockpit, onglet Dates et prix.
+                  </p>
+                )}
+              </div>
+            )}
+
             <Link href={`/sessions/${aff.session.id}`} style={bouton(false)}>Ouvrir la session →</Link>
           </> : <>
             <p style={{ ...attenue, margin: '6px 0 14px' }}>
@@ -228,14 +296,43 @@ export default function FicheOpportunitePage() {
         </section>
 
         <section style={carte}>
-          <h2 style={titre}>Devis et facture</h2>
+          <h2 style={titre}>Devis</h2>
           <p style={{ ...attenue, margin: '6px 0 14px' }}>
             {aff.session
               ? 'Les pièces se génèrent depuis la session, avec ses apprenants et son programme.'
-              : 'Le devis et la facture ont besoin d’une session : elle porte le programme, les dates et les apprenants.'}
+              : 'Le devis a besoin d’une session : elle porte le programme, les dates et les apprenants.'}
           </p>
+
+          {devis.length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              {devis.map((d) => (
+                <div key={d.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '11px 0', borderTop: '1px solid var(--border)', flexWrap: 'wrap' }}>
+                  <span style={{ flex: '1 1 220px' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700 }}>Devis n° {d.numero}</span>
+                    <span style={{ ...attenue, display: 'block', marginTop: 2 }}>
+                      du {dateFr(d.date_emission)}{d.date_envoi ? ` · envoyé le ${dateFr(d.date_envoi)}` : ' · pas encore envoyé'}
+                    </span>
+                  </span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700 }}>{euros(d.montant_ht)} HT</span>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={d.statut === 'accepte'}
+                      onChange={(e) => accepterDevis(d, e.target.checked)}
+                      style={{ width: 16, height: 16, accentColor: 'var(--gold)' }}
+                    />
+                    Accepté
+                  </label>
+                  {d.fichier && <a href={d.fichier} style={bouton(true)}>Télécharger</a>}
+                </div>
+              ))}
+            </div>
+          )}
+
           <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
-            <Link href={aff.session ? `/sessions/${aff.session.id}` : '#'} style={bouton(false, !aff.session)} aria-disabled={!aff.session}>Générer le devis</Link>
+            <Link href={aff.session ? `/sessions/${aff.session.id}` : '#'} style={bouton(false, !aff.session)} aria-disabled={!aff.session}>
+              {devis.length ? 'Créer un autre devis' : 'Créer un devis'}
+            </Link>
             <Link href="/facturation" style={bouton(true)}>Ouvrir la facturation →</Link>
           </div>
         </section>

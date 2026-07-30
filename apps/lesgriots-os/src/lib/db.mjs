@@ -304,6 +304,15 @@ function initSchema(db) {
   if (!colsRecl.includes('axe_id')) db.exec("ALTER TABLE reclamations ADD COLUMN axe_id TEXT DEFAULT ''");
   if (!colsRecl.includes('cause')) db.exec("ALTER TABLE reclamations ADD COLUMN cause TEXT DEFAULT ''");
 
+  // ── Le prix, module par module ────────────────────────────────────────
+  //
+  // Une session ne se vend pas d'un bloc : le client achète trois modules à
+  // cinq cents euros, et c'est cette ligne à ligne qui part au devis. Le
+  // montant total de l'affaire en découle, il ne se saisit pas à côté.
+  const modCols = db.prepare("PRAGMA table_info(session_modules)").all().map((c) => c.name);
+  if (!modCols.includes('prix_ht')) db.exec("ALTER TABLE session_modules ADD COLUMN prix_ht REAL DEFAULT 0");
+  if (!modCols.includes('nature')) db.exec("ALTER TABLE session_modules ADD COLUMN nature TEXT DEFAULT 'Formation'");
+
   // ── Les envois automatiques, au-delà de la convocation ──
   // Le rappel se joue avant la session, les deux enquêtes après. Chacun a
   // son interrupteur et son délai, parce qu'un organisme ne veut pas

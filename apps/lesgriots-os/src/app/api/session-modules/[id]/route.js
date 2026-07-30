@@ -21,6 +21,8 @@ async function _PATCH(req, { params }) {
     if ('description' in body) { fields.push('description = ?'); values.push(body.description); }
     if ('duration_hours' in body) { fields.push('duration_hours = ?'); values.push(parseFloat(body.duration_hours) || 0); }
     if ('sort_order' in body) { fields.push('sort_order = ?'); values.push(body.sort_order); }
+    if ('prix_ht' in body) { fields.push('prix_ht = ?'); values.push(parseFloat(body.prix_ht) || 0); }
+    if ('nature' in body) { fields.push('nature = ?'); values.push(body.nature); }
     if ('objectives' in body) {
       const obj = typeof body.objectives === 'object' ? JSON.stringify(body.objectives) : body.objectives;
       fields.push('objectives = ?'); values.push(obj);
