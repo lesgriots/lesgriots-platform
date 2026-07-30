@@ -88,11 +88,16 @@ export async function GET(request, { params }) {
       WHERE formation_id = ? ORDER BY sort_order
     `).all(s.formation_id);
 
-    // Documents rattachés à l'apprenant ou à sa session, et à eux seuls.
+    // Documents de l'apprenant, et documents de session à l'exception des
+    // pièces commerciales. Une facture ou une convention de session porte le
+    // prix payé par l'employeur : elle ne regarde pas l'apprenant. Ses
+    // propres pièces nominatives, elles, lui appartiennent.
+    const CATEGORIES_PRIVEES = ['facture', 'devis', 'convention'];
     const documents = db.prepare(`
       SELECT id, categorie, libelle, created_at FROM documents
       WHERE (contexte_type = 'apprenant' AND contexte_id = ?)
-         OR (contexte_type = 'session' AND contexte_id = ?)
+         OR (contexte_type = 'session' AND contexte_id = ?
+             AND COALESCE(categorie, '') NOT IN ('facture', 'devis', 'convention'))
       ORDER BY created_at DESC
     `).all(lien.apprenant_id, lien.session_id);
 
@@ -179,6 +184,15 @@ export async function POST(request, { params }) {
       }
       if (!['matin', 'apres_midi'].includes(period)) {
         return NextResponse.json({ error: 'Demi-journée inconnue' }, { status: 400 });
+      }
+      // On ne signe pas l'avenir. Une présence attestée avant la séance ne
+      // prouve rien, et un auditeur écarte la feuille entière pour ça.
+      const aujourdhui = new Date().toISOString().slice(0, 10);
+      if (String(date) > aujourdhui) {
+        return NextResponse.json(
+          { error: 'Cette demi-journée n’a pas encore eu lieu : l’émargement s’ouvre le jour même.' },
+          { status: 409 },
+        );
       }
       const deja = db.prepare(`
         SELECT id FROM signatures WHERE session_id = ? AND apprenant_id = ?

@@ -83,6 +83,14 @@ export default function EspaceApprenant({ params }) {
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {[['matin', 'Matin'], ['apres_midi', 'Après-midi']].map(([cle, label]) => {
                   const fait = d.emargement.signees.includes(j + '·' + cle);
+                  // L'émargement s'ouvre le jour même : on ne signe pas l'avenir.
+                  const aVenir = j > new Date().toISOString().slice(0, 10);
+                  if (!fait && aVenir) return (
+                    <span key={cle} style={{
+                      padding: '8px 14px', borderRadius: 8, fontSize: 13,
+                      border: `1px dashed ${P.ligne}`, color: P.texte3,
+                    }}>{label} · le jour même</span>
+                  );
                   return fait ? (
                     <span key={cle} style={{
                       padding: '8px 14px', borderRadius: 8, fontSize: 13,
