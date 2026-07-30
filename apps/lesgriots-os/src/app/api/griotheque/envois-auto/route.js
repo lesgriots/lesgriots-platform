@@ -55,6 +55,11 @@ function aConvoquer(db, session_id) {
           AND e.contexte_id = i.session_id
           AND e.destinataire = a.email
           AND e.statut IN ('envoye', 'simule')
+          -- Un e-mail de test envoyé à soi-même ne vaut pas convocation :
+          -- sans cette ligne, tester un modèle sur sa propre adresse
+          -- empêcherait l'apprenant qui partage cette adresse de recevoir
+          -- la sienne. Les tests sont journalisés en contexte « test ».
+          AND COALESCE(e.contexte_type, '') <> 'test'
       )
   `).all(session_id);
 }
