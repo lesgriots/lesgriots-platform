@@ -15,7 +15,7 @@
  *
  * Variables attendues (toutes optionnelles) :
  *   SMTP_HOST, SMTP_PORT (587), SMTP_USER, SMTP_PASS, SMTP_SECURE (0/1)
- *   MAIL_FROM       ex. "LA GRIOTHÈQUE <formations@lesgriots.com>"
+ *   MAIL_FROM       ex. "LA GRIOTHÈQUE <formation@lesgriots.com>"
  *   MAIL_REPLY_TO   ex. "formations@lesgriots.com"
  *   MAIL_DRY_RUN=1  force la simulation même si le SMTP est configuré (recette)
  */
@@ -29,7 +29,7 @@ export function smtpConfigure() {
 }
 
 export function expediteur() {
-  return process.env.MAIL_FROM || 'LA GRIOTHÈQUE <formations@lesgriots.com>';
+  return process.env.MAIL_FROM || 'LA GRIOTHÈQUE <formation@lesgriots.com>';
 }
 
 function emailValide(adresse) {
