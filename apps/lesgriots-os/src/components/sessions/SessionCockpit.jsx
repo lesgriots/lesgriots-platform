@@ -175,9 +175,16 @@ export default function SessionCockpit({ sessionId }) {
     const labels = { programme: 'Programme', convocation: 'Convocation', emargement: 'Feuille d’émargement', attestation: 'Attestation', certificat: 'Certificat', facture: 'Facture' };
     try {
       const response = await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-        categorie: type === 'programme' ? 'programme' : type === 'attestation' ? 'attestation' : type === 'certificat' ? 'certificat' : type === 'emargement' ? 'emargement' : type === 'facture' ? 'facture' : 'autre',
+        categorie: ['programme', 'attestation', 'certificat', 'emargement', 'facture', 'convocation'].includes(type) ? type : 'autre',
         libelle: `${labels[type] || 'Document'}${learner ? ` · ${learner.first_name} ${learner.last_name}` : ''}`,
-        fichier, contexte_type: 'session', contexte_id: sessionId, notes: 'Généré depuis la fiche de session',
+        fichier,
+        // Un document nominatif se rattache à SON apprenant, pas à la session :
+        // l'espace apprenant affiche les documents de la session à tous ses
+        // inscrits, donc rattacher une convocation nominative à la session la
+        // rendrait visible par les autres stagiaires.
+        contexte_type: apprenantId ? 'apprenant' : 'session',
+        contexte_id: apprenantId || sessionId,
+        notes: apprenantId ? `Généré depuis la session ${sessionId}` : 'Généré depuis la fiche de session',
       }) });
       const created = await response.json();
       if (!response.ok) throw new Error(created.error || 'Document non archivé');
@@ -190,7 +197,16 @@ export default function SessionCockpit({ sessionId }) {
     const fichier = `/api/sessions/${sessionId}/convention`;
     window.open(fichier, '_blank', 'noopener,noreferrer');
     try {
-      const response = await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ categorie: 'convention', libelle: `Convention${learner ? ` · ${learner.first_name} ${learner.last_name}` : ''}`, fichier, contexte_type: 'session', contexte_id: sessionId, notes: 'Générée depuis la fiche de session' }) });
+      const response = await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        categorie: 'convention',
+        libelle: `Convention${learner ? ` · ${learner.first_name} ${learner.last_name}` : ''}`,
+        fichier,
+        // Même règle que les autres documents nominatifs : rattaché à
+        // l'apprenant concerné, sinon les autres inscrits le verraient.
+        contexte_type: learner?.apprenant_id ? 'apprenant' : 'session',
+        contexte_id: learner?.apprenant_id || sessionId,
+        notes: learner?.apprenant_id ? `Générée depuis la session ${sessionId}` : 'Générée depuis la fiche de session',
+      }) });
       const created = await response.json();
       if (!response.ok) throw new Error(created.error || 'Convention non archivée');
       setDocuments((current) => [created, ...current]);
