@@ -43,7 +43,9 @@ export default function Badge({
 
   const variantStyle = {
     soft:    { background: palette.bg, color: palette.fg, border: '1px solid transparent' },
-    solid:   { background: palette.fg, color: 'var(--bg)', border: '1px solid transparent' },
+    // Sur un aplat, le texte prend l'encre prévue pour lui. `--bg` suivait le
+    // thème : en papier, cela donnait du crème sur de l'or, illisible.
+    solid:   { background: palette.fg, color: tone === 'gold' ? 'var(--gold-ink)' : 'var(--on-solid)', border: '1px solid transparent' },
     outline: { background: 'transparent', color: palette.fg, border: `1px solid ${palette.border || palette.fg}` },
   }[variant] || {};
 

@@ -1,6 +1,20 @@
 // Barrel export — kit UI LES GRIOTS OS
 // Usage : import { Card, Badge, Button, KpiCard, ... } from '@/components/ui';
 export { default as Card }         from './Card';
+export { default as Carte }        from './Card';
+
+// ── Les cinq primitives ───────────────────────────────────────────────────
+// Un bouton, un champ, une carte, un tableau, une étiquette. Écrits une fois,
+// posés sur les jetons, avec leurs états dans styles/primitives.css. Tout
+// écran neuf part d'ici ; les anciens noms restent le temps de la reprise.
+export { default as Bouton }       from './Bouton';
+export { default as Bloc }         from './Bloc';
+export { Pile, Page }              from './Bloc';
+export { default as Champ }        from './Champ';
+export { Saisie, Zone, Choix, Case, Grille } from './Champ';
+export { default as Tableau }      from './Tableau';
+export { Sous }                    from './Tableau';
+export { default as Etiquette }    from './Badge';
 export { default as Badge }        from './Badge';
 export { default as Button }       from './Button';
 export { default as KpiCard }      from './KpiCard';

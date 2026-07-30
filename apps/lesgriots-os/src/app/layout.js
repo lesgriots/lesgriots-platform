@@ -1,5 +1,6 @@
 import '@/styles/tokens.css';
 import '@/styles/responsive.css';
+import '@/styles/primitives.css';
 
 export const viewport = {
   width: 'device-width',

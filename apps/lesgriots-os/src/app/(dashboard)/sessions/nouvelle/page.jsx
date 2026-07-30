@@ -14,66 +14,20 @@
  *
  * Tout le reste garde une valeur par défaut raisonnable : on peut créer une
  * session en remplissant seulement le programme et les dates.
+ *
+ * Écran repris sur les primitives : il déclarait son bouton, son champ, son
+ * étiquette et sa grille. Il n'en déclare plus aucun.
  */
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import TopBar from '@/components/layout/TopBar';
-import { Card } from '@/components/ui';
+import {
+  Bloc, Pile, Page, Bouton, Champ, Saisie, Choix, Case, Grille,
+} from '@/components/ui';
 import {
   TYPES_ACTION, SPECIALITES, DIPLOMES, FUSEAUX, TYPES_SESSION,
 } from '@/lib/formation-officiel';
-
-const champ = {
-  width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 9,
-  border: '1px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)',
-  fontSize: 13.5, fontFamily: 'inherit',
-};
-const etiquette = {
-  display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-3)',
-  marginBottom: 5, letterSpacing: '0.02em',
-};
-const aide = { margin: '5px 0 0', fontSize: 11, color: 'var(--text-3)', lineHeight: 1.45 };
-const grille = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 };
-const titreBloc = { fontSize: 15, fontWeight: 700, margin: '0 0 4px' };
-
-const bouton = (principal = true) => ({
-  display: 'inline-flex', alignItems: 'center', gap: 7, padding: '11px 18px',
-  borderRadius: 10, fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
-  background: principal ? 'var(--gold)' : 'var(--surface)',
-  color: principal ? 'var(--gold-ink)' : 'var(--text)',
-  border: `1.5px solid ${principal ? 'var(--gold)' : 'var(--border-2)'}`,
-});
-
-function Champ({ label, note, children }) {
-  return (
-    <div>
-      <label style={etiquette}>{label}</label>
-      {children}
-      {note && <p style={aide}>{note}</p>}
-    </div>
-  );
-}
-
-/** Une case à cocher qui dit ce qu'elle change, pas seulement son nom. */
-function Case({ coche, sur, titre, explication }) {
-  return (
-    <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer' }}>
-      <input
-        type="checkbox"
-        checked={coche}
-        onChange={(e) => sur(e.target.checked)}
-        style={{ marginTop: 2, width: 16, height: 16, accentColor: 'var(--gold)', flexShrink: 0 }}
-      />
-      <span>
-        <span style={{ fontSize: 13, fontWeight: 600 }}>{titre}</span>
-        <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-3)', marginTop: 3, lineHeight: 1.45 }}>
-          {explication}
-        </span>
-      </span>
-    </label>
-  );
-}
 
 const AUTRE = '__autre__';
 
@@ -107,6 +61,8 @@ export default function NouvelleSessionPage() {
     start_date: aujourdhui,
     end_date: aujourdhui,
   });
+  const maj = (k) => (e) => setF((v) => ({ ...v, [k]: e.target.value }));
+  const cocher = (k) => (b) => setF((v) => ({ ...v, [k]: b }));
 
   // La date cliquée dans l'agenda arrive par l'URL. On la lit après le montage
   // plutôt qu'avec useSearchParams : sinon toute la page devient dynamique, et
@@ -115,8 +71,6 @@ export default function NouvelleSessionPage() {
     const jour = new URLSearchParams(window.location.search).get('date');
     if (jour) setF((v) => ({ ...v, start_date: jour, end_date: jour }));
   }, []);
-  const maj = (k) => (e) => setF((v) => ({ ...v, [k]: e.target.value }));
-  const cocher = (k) => (b) => setF((v) => ({ ...v, [k]: b }));
 
   useEffect(() => {
     Promise.all([
@@ -153,14 +107,14 @@ export default function NouvelleSessionPage() {
     ? f.specialite_libre.trim()
     : f.specialite_formation;
 
-  const valide = f.formation_id && f.start_date && f.end_date
-    && f.start_date <= f.end_date
+  const datesInversees = f.start_date > f.end_date;
+  const valide = f.formation_id && f.start_date && f.end_date && !datesInversees
     && (f.specialite_formation !== AUTRE || f.specialite_libre.trim());
 
   const enregistrer = async () => {
     setErreur('');
     if (!valide) {
-      setErreur(f.start_date > f.end_date
+      setErreur(datesInversees
         ? 'La fin ne peut pas précéder le début.'
         : 'Il manque le programme, les dates, ou la spécialité.');
       return;
@@ -191,7 +145,9 @@ export default function NouvelleSessionPage() {
           formation_a_distance: f.formation_a_distance ? 1 : 0,
           lieu_formation_id: f.formation_a_distance ? null : (f.lieu_formation_id || null),
           modality: f.formation_a_distance ? 'distanciel' : 'presentiel',
-          location: f.formation_a_distance ? 'À distance' : (lieu ? `${lieu.nom}${lieu.ville ? `, ${lieu.ville}` : ''}` : ''),
+          location: f.formation_a_distance
+            ? 'À distance'
+            : (lieu ? `${lieu.nom}${lieu.ville ? `, ${lieu.ville}` : ''}` : ''),
         }),
       });
       const d = await r.json().catch(() => ({}));
@@ -204,184 +160,163 @@ export default function NouvelleSessionPage() {
     }
   };
 
+  const actions = (
+    <>
+      <Bouton occupe={occupe} disabled={!valide} onClick={enregistrer}>
+        {occupe ? 'Création…' : 'Créer la session'}
+      </Bouton>
+      <Bouton discret onClick={() => router.push('/sessions-list')}>Annuler</Bouton>
+    </>
+  );
+
   return (
     <>
-      <TopBar title="Créer une session" subtitle="Ce qui est saisi ici ne sera pas à retrouver au moment du BPF" />
+      <TopBar title="Créer une session" subtitle="Ce qui est saisi ici ne sera pas à retrouver au moment du BPF" right={actions} />
 
-      <div style={{ padding: '0 24px 56px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <Page>
+        <Pile>
+          {erreur && <Bloc><p style={{ color: 'var(--danger)', margin: 0, fontSize: 13 }}>{erreur}</p></Bloc>}
 
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <button type="button" style={bouton()} disabled={occupe || !valide} onClick={enregistrer}>
-            {occupe ? 'Création…' : 'Créer la session'}
-          </button>
-          <button type="button" style={bouton(false)} onClick={() => router.push('/sessions-list')}>
-            Annuler
-          </button>
-        </div>
-
-        {erreur && <Card><p style={{ color: 'var(--danger)', margin: 0, fontSize: 13 }}>{erreur}</p></Card>}
-
-        {/* ── Informations générales ──────────────────────────────────── */}
-        <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <div>
-              <h2 style={titreBloc}>Informations générales</h2>
-              <p style={{ ...aide, margin: 0 }}>Le programme et les dates suffisent à créer la session. Le reste peut attendre.</p>
-            </div>
-
-            <Champ label="Programme" note="La session hérite des modules du programme choisi.">
-              <select style={champ} value={f.formation_id} onChange={maj('formation_id')}>
-                <option value="">Choisir un programme</option>
-                {formations.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
-              </select>
-            </Champ>
-
-            <Champ label="Nom de la session" note="Proposé d'après le programme, modifiable.">
-              <input
-                style={champ}
-                value={f.session_name}
-                onChange={(e) => { setNomTouche(true); setF((v) => ({ ...v, session_name: e.target.value })); }}
-                placeholder="Ma session de formation"
-              />
-            </Champ>
-
-            <div style={grille}>
-              <Champ label="Début">
-                <input type="date" style={champ} value={f.start_date} onChange={maj('start_date')} />
-              </Champ>
-              <Champ label="Fin">
-                <input type="date" style={champ} value={f.end_date} onChange={maj('end_date')} />
-              </Champ>
-              <Champ label="Type de session" note="Inter : plusieurs entreprises. Intra : une seule.">
-                <select style={champ} value={f.type_session} onChange={maj('type_session')}>
-                  {TYPES_SESSION.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-              </Champ>
-              <Champ label="Code interne" note="Laissé vide, il se génère : AF26001, AF26002…">
-                <input style={champ} value={f.code_interne} onChange={maj('code_interne')} placeholder="Automatique" />
-              </Champ>
-              <Champ label="Gestionnaire n° 1">
-                <input style={champ} value={f.gestionnaire_1} onChange={maj('gestionnaire_1')} list="equipe-os" />
-              </Champ>
-              <Champ label="Gestionnaire n° 2">
-                <input style={champ} value={f.gestionnaire_2} onChange={maj('gestionnaire_2')} list="equipe-os" placeholder="Facultatif" />
-              </Champ>
-              <Champ label="Fuseau horaire" note="Sert aux heures des modules et aux convocations.">
-                <select style={champ} value={f.fuseau_horaire} onChange={maj('fuseau_horaire')}>
-                  {FUSEAUX.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-              </Champ>
-            </div>
-            <datalist id="equipe-os">
-              {equipe.map((n) => <option key={n} value={n} />)}
-            </datalist>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-              <Case
-                coche={f.exclure_catalogue}
-                sur={cocher('exclure_catalogue')}
-                titre="Exclure du catalogue en ligne"
-                explication="La session existe, mais personne ne peut s’y inscrire depuis le site."
-              />
-              <Case
-                coche={f.sous_traitance}
-                sur={cocher('sous_traitance')}
-                titre="Réalisée en sous-traitance d’un autre organisme"
-                explication="Ligne distincte au bilan pédagogique et financier : le chiffre d’affaires n’est pas déclaré au même endroit."
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* ── Formation professionnelle ───────────────────────────────── */}
-        <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <div>
-              <h2 style={titreBloc}>Formation professionnelle</h2>
-              <p style={{ ...aide, margin: 0 }}>
-                Ces trois lignes partent telles quelles dans le bilan pédagogique et financier.
-              </p>
-            </div>
-
-            <div style={grille}>
-              <Champ label="Type d’action de formation" note="Article L.6313-1 du code du travail.">
-                <select style={champ} value={f.type_action_formation} onChange={maj('type_action_formation')}>
-                  {TYPES_ACTION.map((t) => <option key={t} value={t}>{t}</option>)}
-                </select>
+          <Bloc
+            titre="Informations générales"
+            chapeau="Le programme et les dates suffisent à créer la session. Le reste peut attendre."
+          >
+            <Pile gap={18}>
+              <Champ label="Programme" aide="La session hérite des modules du programme choisi." requis>
+                <Choix
+                  options={formations.map((p) => [p.id, p.title])}
+                  vide="Choisir un programme"
+                  value={f.formation_id}
+                  onChange={maj('formation_id')}
+                />
               </Champ>
 
-              <Champ label="Spécialité de formation" note="Nomenclature NSF.">
-                <select style={champ} value={f.specialite_formation} onChange={maj('specialite_formation')}>
-                  {SPECIALITES.map((s) => <option key={s} value={s}>{s}</option>)}
+              <Champ label="Nom de la session" aide="Proposé d’après le programme, modifiable.">
+                <Saisie
+                  value={f.session_name}
+                  onChange={(e) => { setNomTouche(true); setF((v) => ({ ...v, session_name: e.target.value })); }}
+                  placeholder="Ma session de formation"
+                />
+              </Champ>
+
+              <Grille>
+                <Champ label="Début" requis>
+                  <Saisie type="date" value={f.start_date} onChange={maj('start_date')} faux={datesInversees} />
+                </Champ>
+                <Champ
+                  label="Fin"
+                  requis
+                  erreur={datesInversees ? 'La fin ne peut pas précéder le début.' : ''}
+                >
+                  <Saisie type="date" value={f.end_date} onChange={maj('end_date')} faux={datesInversees} />
+                </Champ>
+                <Champ label="Type de session" aide="Inter : plusieurs entreprises. Intra : une seule.">
+                  <Choix options={TYPES_SESSION} value={f.type_session} onChange={maj('type_session')} />
+                </Champ>
+                <Champ label="Code interne" aide="Laissé vide, il se génère : AF26001, AF26002…">
+                  <Saisie value={f.code_interne} onChange={maj('code_interne')} placeholder="Automatique" />
+                </Champ>
+                <Champ label="Gestionnaire n° 1">
+                  <Saisie value={f.gestionnaire_1} onChange={maj('gestionnaire_1')} list="equipe-os" />
+                </Champ>
+                <Champ label="Gestionnaire n° 2">
+                  <Saisie value={f.gestionnaire_2} onChange={maj('gestionnaire_2')} list="equipe-os" placeholder="Facultatif" />
+                </Champ>
+                <Champ label="Fuseau horaire" aide="Sert aux heures des modules et aux convocations.">
+                  <Choix options={FUSEAUX} value={f.fuseau_horaire} onChange={maj('fuseau_horaire')} />
+                </Champ>
+              </Grille>
+              <datalist id="equipe-os">
+                {equipe.map((n) => <option key={n} value={n} />)}
+              </datalist>
+
+              <Grille min={280}>
+                <Case
+                  coche={f.exclure_catalogue}
+                  sur={cocher('exclure_catalogue')}
+                  titre="Exclure du catalogue en ligne"
+                  aide="La session existe, mais personne ne peut s’y inscrire depuis le site."
+                />
+                <Case
+                  coche={f.sous_traitance}
+                  sur={cocher('sous_traitance')}
+                  titre="Réalisée en sous-traitance d’un autre organisme"
+                  aide="Ligne distincte au bilan pédagogique et financier : le chiffre d’affaires n’est pas déclaré au même endroit."
+                />
+              </Grille>
+            </Pile>
+          </Bloc>
+
+          <Bloc
+            titre="Formation professionnelle"
+            chapeau="Ces trois lignes partent telles quelles dans le bilan pédagogique et financier."
+          >
+            <Grille>
+              <Champ label="Type d’action de formation" aide="Article L.6313-1 du code du travail.">
+                <Choix options={TYPES_ACTION} value={f.type_action_formation} onChange={maj('type_action_formation')} />
+              </Champ>
+
+              <Champ label="Spécialité de formation" aide="Nomenclature NSF.">
+                <Choix options={SPECIALITES} value={f.specialite_formation} onChange={maj('specialite_formation')}>
                   <option value={AUTRE}>Autre spécialité (saisir le code)</option>
-                </select>
+                </Choix>
               </Champ>
 
               {f.specialite_formation === AUTRE && (
-                <Champ label="Code et libellé NSF" note="Format « 123 - Libellé de la spécialité ».">
-                  <input style={champ} value={f.specialite_libre} onChange={maj('specialite_libre')} placeholder="326 - Informatique…" />
+                <Champ label="Code et libellé NSF" aide="Format « 123 - Libellé de la spécialité »." requis>
+                  <Saisie value={f.specialite_libre} onChange={maj('specialite_libre')} placeholder="326 - Informatique…" />
                 </Champ>
               )}
 
               <Champ label="Diplôme visé">
-                <select style={champ} value={f.diplome_vise} onChange={maj('diplome_vise')}>
-                  {DIPLOMES.map((d) => <option key={d} value={d}>{d}</option>)}
-                </select>
+                <Choix options={DIPLOMES} value={f.diplome_vise} onChange={maj('diplome_vise')} />
               </Champ>
 
               {f.diplome_vise !== 'Aucun' && (
-                <Champ label="Nom du titre visé" note="Tel qu’il figure au répertoire.">
-                  <input style={champ} value={f.nom_titre_vise} onChange={maj('nom_titre_vise')} />
+                <Champ label="Nom du titre visé" aide="Tel qu’il figure au répertoire.">
+                  <Saisie value={f.nom_titre_vise} onChange={maj('nom_titre_vise')} />
                 </Champ>
               )}
-            </div>
+            </Grille>
+          </Bloc>
+
+          <Bloc
+            titre="Lieu de formation"
+            chapeau="Le lieu par défaut des modules. Il reste modifiable créneau par créneau, et se retrouve sur la convocation comme sur l’agenda."
+          >
+            <Pile gap={18}>
+              <Case
+                coche={f.formation_a_distance}
+                sur={cocher('formation_a_distance')}
+                titre="Formation à distance"
+                aide="Aucune adresse ne sera imprimée sur les documents."
+              />
+
+              {!f.formation_a_distance && (
+                <Champ
+                  label="Lieu"
+                  aide={lieux.length
+                    ? 'Choisi ici, il sert de valeur par défaut à tous les modules.'
+                    : 'Aucun lieu enregistré pour l’instant : créez-en un depuis Données · Lieux de formation.'}
+                >
+                  <Choix
+                    options={lieux.map((l) => [l.id, `${l.nom}${l.ville ? ` — ${l.ville}` : ''}`])}
+                    vide="À définir plus tard"
+                    value={f.lieu_formation_id}
+                    onChange={maj('lieu_formation_id')}
+                  />
+                </Champ>
+              )}
+            </Pile>
+          </Bloc>
+
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Bouton grand occupe={occupe} disabled={!valide} onClick={enregistrer}>
+              {occupe ? 'Création…' : 'Créer la session'}
+            </Bouton>
           </div>
-        </Card>
-
-        {/* ── Lieu de formation ───────────────────────────────────────── */}
-        <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <div>
-              <h2 style={titreBloc}>Lieu de formation</h2>
-              <p style={{ ...aide, margin: 0 }}>
-                Le lieu par défaut des modules. Il reste modifiable créneau par créneau, et
-                se retrouve sur la convocation comme sur l’agenda.
-              </p>
-            </div>
-
-            <Case
-              coche={f.formation_a_distance}
-              sur={cocher('formation_a_distance')}
-              titre="Formation à distance"
-              explication="Aucune adresse ne sera imprimée sur les documents."
-            />
-
-            {!f.formation_a_distance && (
-              <Champ
-                label="Lieu"
-                note={lieux.length
-                  ? 'Choisi ici, il sert de valeur par défaut à tous les modules.'
-                  : 'Aucun lieu enregistré pour l’instant : créez-en un depuis Données · Lieux de formation.'}
-              >
-                <select style={champ} value={f.lieu_formation_id} onChange={maj('lieu_formation_id')}>
-                  <option value="">À définir plus tard</option>
-                  {lieux.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.nom}{l.ville ? ` — ${l.ville}` : ''}
-                    </option>
-                  ))}
-                </select>
-              </Champ>
-            )}
-          </div>
-        </Card>
-
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button type="button" style={bouton()} disabled={occupe || !valide} onClick={enregistrer}>
-            {occupe ? 'Création…' : 'Créer la session'}
-          </button>
-        </div>
-      </div>
+        </Pile>
+      </Page>
     </>
   );
 }

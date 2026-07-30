@@ -12,11 +12,17 @@
  * L'auditeur ne cherche pas trois listes côte à côte : il cherche le lien de
  * cause à effet. C'est pourquoi chaque ligne d'action affiche son incident
  * d'origine, et chaque axe affiche combien d'incidents et d'actions il porte.
+ *
+ * Écran repris sur les primitives : cette page déclarait son bouton, son
+ * champ, son tableau et son étiquette. Elle n'en déclare plus aucun.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import TopBar from '@/components/layout/TopBar';
-import { Card, EmptyState, Skeleton, useConfirm } from '@/components/ui';
+import {
+  Bloc, Pile, Page, Bouton, Champ, Saisie, Zone, Choix, Grille,
+  Tableau, Sous, Etiquette, EmptyState, Skeleton, useConfirm,
+} from '@/components/ui';
 
 /* ── Vocabulaire ──────────────────────────────────────────────────────── */
 
@@ -69,7 +75,7 @@ const STATUTS_AXE = [
   ['abandonne', 'Abandonné'],
 ];
 
-/** Les causes courantes en organisme de formation. Champ libre malgré tout. */
+/** Les causes courantes en organisme de formation. */
 const CAUSES = [
   'Organisation et logistique',
   'Contenu pédagogique',
@@ -81,133 +87,40 @@ const CAUSES = [
   'Autre',
 ];
 
-const libelle = (liste, valeur) => (liste.find(([v]) => v === valeur) || [null, valeur || '—'])[1];
+const libelle = (liste, valeur) => (liste.find(([v]) => v === valeur) || [null, valeur || ''])[1];
 
+/** La gravité et les statuts se lisent en couleur, mais sur la même échelle. */
 const TON = {
-  ouverte: 'danger', en_cours: 'gold', resolue: 'ok', classee: 'neutre',
-  a_faire: 'danger', faite: 'ok', abandonnee: 'neutre',
-  ouvert: 'danger', atteint: 'ok', abandonne: 'neutre',
-  critique: 'danger', majeure: 'gold', mineure: 'neutre',
+  ouverte: 'danger', en_cours: 'warning', resolue: 'success', classee: 'neutral',
+  a_faire: 'danger', faite: 'success', abandonnee: 'neutral',
+  ouvert: 'danger', atteint: 'success', abandonne: 'neutral',
+  critique: 'danger', majeure: 'warning', mineure: 'neutral',
 };
 
-const COULEURS = {
-  danger: { fg: 'var(--danger)', bg: 'color-mix(in srgb, var(--danger) 12%, transparent)' },
-  gold: { fg: 'var(--gold)', bg: 'color-mix(in srgb, var(--gold) 14%, transparent)' },
-  ok: { fg: 'var(--success, #35C46B)', bg: 'color-mix(in srgb, var(--success, #35C46B) 14%, transparent)' },
-  neutre: { fg: 'var(--text-3)', bg: 'var(--surface-2)' },
-};
+/* ── Utilitaires d'affichage ──────────────────────────────────────────── */
 
-function Etiquette({ valeur, liste }) {
-  const c = COULEURS[TON[valeur] || 'neutre'] || COULEURS.neutre;
-  return (
-    <span style={{
-      display: 'inline-block', padding: '3px 9px', borderRadius: 999, fontSize: 11,
-      fontWeight: 600, color: c.fg, background: c.bg, whiteSpace: 'nowrap',
-    }}
-    >
-      {libelle(liste, valeur)}
-    </span>
-  );
-}
-
-/* ── Styles partagés ──────────────────────────────────────────────────── */
-
-const entete = {
-  textAlign: 'left', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase',
-  color: 'var(--text-3)', fontWeight: 500, padding: '13px 12px',
-  borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap',
-};
-const cellule = { padding: '12px', borderBottom: '1px solid var(--border)', fontSize: 13, verticalAlign: 'top' };
-
-const champ = {
-  width: '100%', boxSizing: 'border-box', padding: '9px 11px', borderRadius: 9,
-  border: '1px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)',
-  fontSize: 13, fontFamily: 'inherit',
-};
-
-const etiquetteChamp = {
-  display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-3)',
-  marginBottom: 5, letterSpacing: '0.02em',
-};
-
-const bouton = (principal = true) => ({
-  display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 16px',
-  borderRadius: 10, fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
-  background: principal ? 'var(--gold)' : 'var(--surface)',
-  color: principal ? 'var(--gold-ink)' : 'var(--text)',
-  border: `1.5px solid ${principal ? 'var(--gold)' : 'var(--border-2)'}`,
-});
-
-const tabsWrap = {
-  display: 'inline-flex', gap: 4, padding: 4, background: 'var(--surface-2)',
-  border: '1px solid var(--border)', borderRadius: 12, maxWidth: '100%', flexWrap: 'wrap',
-};
-const tab = (actif) => ({
-  border: `1.5px solid ${actif ? 'var(--gold)' : 'transparent'}`,
-  background: actif ? 'var(--gold)' : 'transparent',
-  color: actif ? 'var(--gold-ink)' : 'var(--text-2)',
-  padding: '9px 15px', borderRadius: 9, fontSize: 12.5, fontWeight: 800,
-  cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
-});
-
-/** Une croix discrète : on efface une saisie fausse, pas une histoire vraie. */
-function Croix({ onClick, titre }) {
-  return (
-    <button
-      type="button"
-      title={titre}
-      aria-label={titre}
-      onClick={onClick}
-      style={{
-        border: '1px solid var(--border-2)', background: 'transparent', color: 'var(--text-3)',
-        width: 26, height: 26, borderRadius: 7, cursor: 'pointer', fontSize: 14,
-        lineHeight: 1, fontFamily: 'inherit', padding: 0,
-      }}
-    >
-      ×
-    </button>
-  );
-}
-
-function Champ({ label, aide, children }) {
-  return (
-    <div>
-      <label style={etiquetteChamp}>{label}</label>
-      {children}
-      {aide && <p style={{ margin: '5px 0 0', fontSize: 11, color: 'var(--text-3)' }}>{aide}</p>}
-    </div>
-  );
-}
-
-const Options = ({ liste, vide }) => (
-  <>
-    {vide && <option value="">{vide}</option>}
-    {liste.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-  </>
-);
-
-const grille = (min = 220) => ({
-  display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${min}px, 1fr))`, gap: 14,
-});
-
-/** Une date au format court, ou un tiret. Jamais « Invalid Date ». */
 const jour = (d) => {
-  if (!d) return '—';
+  if (!d) return '';
   const t = new Date(d);
   return Number.isNaN(t.getTime()) ? d : t.toLocaleDateString('fr-FR');
 };
 
 /** Une échéance dépassée se voit. C'est tout l'intérêt d'en poser une. */
 function Echeance({ date, clos }) {
-  if (!date) return <span style={{ color: 'var(--text-3)' }}>—</span>;
+  if (!date) return null;
   const enRetard = !clos && new Date(date) < new Date(new Date().toISOString().slice(0, 10));
   return (
     <span style={{ color: enRetard ? 'var(--danger)' : 'inherit', fontWeight: enRetard ? 700 : 400 }}>
       {jour(date)}
-      {enRetard && <span style={{ fontSize: 11, marginLeft: 6 }}>en retard</span>}
+      {enRetard && <Sous>en retard</Sous>}
     </span>
   );
 }
+
+const tabsWrap = {
+  display: 'inline-flex', gap: 4, padding: 4, background: 'var(--surface-2)',
+  border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', maxWidth: '100%', flexWrap: 'wrap',
+};
 
 /* ── La page ──────────────────────────────────────────────────────────── */
 
@@ -217,7 +130,8 @@ export default function AmeliorationContinuePage() {
   const [actions, setActions] = useState(null);
   const [axes, setAxes] = useState(null);
   const [erreur, setErreur] = useState('');
-  const [formulaire, setFormulaire] = useState(null); // 'incident' | 'action' | 'axe'
+  const [formulaire, setFormulaire] = useState(null);
+  const confirmer = useConfirm();
 
   const charger = useCallback(async () => {
     try {
@@ -242,7 +156,7 @@ export default function AmeliorationContinuePage() {
     });
     if (!r.ok) {
       const d = await r.json().catch(() => ({}));
-      setErreur(d.error || "L’enregistrement a échoué.");
+      setErreur(d.error || 'L’enregistrement a échoué.');
       return false;
     }
     setFormulaire(null);
@@ -250,9 +164,6 @@ export default function AmeliorationContinuePage() {
     return true;
   };
 
-  const confirmer = useConfirm();
-
-  /** Suppression d'une ligne, après confirmation. Les liens survivent. */
   const supprimer = async (url, titre, message) => {
     const ok = await confirmer({ title: titre, message, confirmLabel: 'Supprimer' });
     if (!ok) return;
@@ -272,70 +183,70 @@ export default function AmeliorationContinuePage() {
   const sousTitre = chargement ? '' : `${compteurs.incidents} incident(s) en cours · `
     + `${compteurs.actions} action(s) à mener · ${compteurs.axes} axe(s) ouvert(s)`;
 
+  const commun = { enregistrer, supprimer, ouvert: null, setOuvert: null };
+
   return (
     <>
       <TopBar title="Amélioration continue" subtitle={sousTitre} />
 
-      <div style={{ padding: '0 24px 48px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <Page>
+        <Pile>
+          <Bloc chapeau="Un incident se déclare, on lui trouve une cause, la cause rejoint un axe, l’axe produit des actions datées. C’est ce chemin, et pas la longueur des listes, qui prouve les indicateurs 31 et 32 du référentiel." />
 
-        {/* Ce que l'auditeur vient chercher, dit en une phrase. */}
-        <Card>
-          <p style={{ margin: 0, fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6 }}>
-            Un incident se déclare, on lui trouve une cause, la cause rejoint un axe,
-            l’axe produit des actions datées. C’est ce chemin, et pas la longueur des
-            listes, qui prouve les indicateurs 31 et 32 du référentiel.
-          </p>
-        </Card>
+          <div style={tabsWrap} role="tablist">
+            {[
+              ['incidents', 'Incidents qualité', (incidents || []).length],
+              ['actions', 'Actions correctives', (actions || []).length],
+              ['axes', 'Axes d’amélioration', (axes || []).length],
+            ].map(([id, label, n]) => (
+              <Bouton
+                key={id}
+                role="tab"
+                aria-selected={onglet === id}
+                discret={onglet !== id}
+                fantome={onglet !== id}
+                onClick={() => { setOnglet(id); setFormulaire(null); }}
+              >
+                {label}
+                {!chargement && <span style={{ opacity: 0.65, marginLeft: 6 }}>{n}</span>}
+              </Bouton>
+            ))}
+          </div>
 
-        <div style={tabsWrap}>
-          {[
-            ['incidents', 'Incidents qualité', (incidents || []).length],
-            ['actions', 'Actions correctives', (actions || []).length],
-            ['axes', 'Axes d’amélioration', (axes || []).length],
-          ].map(([id, label, n]) => (
-            <button key={id} type="button" style={tab(onglet === id)} onClick={() => { setOnglet(id); setFormulaire(null); }}>
-              {label}
-              {!chargement && <span style={{ opacity: 0.65, marginLeft: 6 }}>{n}</span>}
-            </button>
-          ))}
-        </div>
+          {erreur && <Bloc><p style={{ color: 'var(--danger)', margin: 0, fontSize: 13 }}>{erreur}</p></Bloc>}
+          {chargement && <Skeleton />}
 
-        {erreur && <Card><p style={{ color: 'var(--danger)', margin: 0, fontSize: 13 }}>{erreur}</p></Card>}
-        {chargement && <Skeleton />}
+          {!chargement && onglet === 'incidents' && (
+            <OngletIncidents
+              {...commun}
+              incidents={incidents}
+              axes={axes}
+              ouvert={formulaire === 'incident'}
+              setOuvert={(v) => setFormulaire(v ? 'incident' : null)}
+            />
+          )}
 
-        {!chargement && onglet === 'incidents' && (
-          <OngletIncidents
-            incidents={incidents}
-            axes={axes}
-            ouvert={formulaire === 'incident'}
-            setOuvert={(v) => setFormulaire(v ? 'incident' : null)}
-            enregistrer={enregistrer}
-            supprimer={supprimer}
-          />
-        )}
+          {!chargement && onglet === 'actions' && (
+            <OngletActions
+              {...commun}
+              actions={actions}
+              incidents={incidents}
+              axes={axes}
+              ouvert={formulaire === 'action'}
+              setOuvert={(v) => setFormulaire(v ? 'action' : null)}
+            />
+          )}
 
-        {!chargement && onglet === 'actions' && (
-          <OngletActions
-            actions={actions}
-            incidents={incidents}
-            axes={axes}
-            ouvert={formulaire === 'action'}
-            setOuvert={(v) => setFormulaire(v ? 'action' : null)}
-            enregistrer={enregistrer}
-            supprimer={supprimer}
-          />
-        )}
-
-        {!chargement && onglet === 'axes' && (
-          <OngletAxes
-            axes={axes}
-            ouvert={formulaire === 'axe'}
-            setOuvert={(v) => setFormulaire(v ? 'axe' : null)}
-            enregistrer={enregistrer}
-            supprimer={supprimer}
-          />
-        )}
-      </div>
+          {!chargement && onglet === 'axes' && (
+            <OngletAxes
+              {...commun}
+              axes={axes}
+              ouvert={formulaire === 'axe'}
+              setOuvert={(v) => setFormulaire(v ? 'axe' : null)}
+            />
+          )}
+        </Pile>
+      </Page>
     </>
   );
 }
@@ -365,122 +276,113 @@ function OngletIncidents({ incidents, axes, ouvert, setOuvert, enregistrer, supp
 
   return (
     <>
-      {!ouvert && (
-        <div>
-          <button type="button" style={bouton()} onClick={() => setOuvert(true)}>+ Ajouter un incident</button>
-        </div>
-      )}
+      {!ouvert && <div><Bouton onClick={() => setOuvert(true)}>＋ Ajouter un incident</Bouton></div>}
 
       {ouvert && (
-        <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>Nouvel incident</div>
-            <div style={grille()}>
-              <Champ label="Objet">
-                <input style={champ} value={f.objet} onChange={maj('objet')} placeholder="Salle non accessible en fauteuil" />
+        <Bloc titre="Nouvel incident">
+          <Pile>
+            <Grille>
+              <Champ label="Objet" requis>
+                <Saisie value={f.objet} onChange={maj('objet')} placeholder="Salle non accessible en fauteuil" />
               </Champ>
-              <Champ label="Nature">
-                <select style={champ} value={f.nature} onChange={maj('nature')}><Options liste={NATURES} /></select>
-              </Champ>
-              <Champ label="Origine">
-                <select style={champ} value={f.origine} onChange={maj('origine')}><Options liste={ORIGINES} /></select>
-              </Champ>
-              <Champ label="Gravité">
-                <select style={champ} value={f.gravite} onChange={maj('gravite')}><Options liste={GRAVITES} /></select>
-              </Champ>
+              <Champ label="Nature"><Choix options={NATURES} value={f.nature} onChange={maj('nature')} /></Champ>
+              <Champ label="Origine"><Choix options={ORIGINES} value={f.origine} onChange={maj('origine')} /></Champ>
+              <Champ label="Gravité"><Choix options={GRAVITES} value={f.gravite} onChange={maj('gravite')} /></Champ>
               <Champ label="Cause" aide="La famille de problème, pas le récit.">
-                <select style={champ} value={f.cause} onChange={maj('cause')}>
-                  <option value="">À qualifier</option>
-                  {CAUSES.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <Choix options={CAUSES} vide="À qualifier" value={f.cause} onChange={maj('cause')} />
               </Champ>
               <Champ label="Axe d’amélioration" aide="Rattacher tout de suite, ou plus tard.">
-                <select style={champ} value={f.axe_id} onChange={maj('axe_id')}>
-                  <option value="">Aucun pour l’instant</option>
-                  {axes.map((a) => <option key={a.id} value={a.id}>{a.nom}</option>)}
-                </select>
+                <Choix
+                  options={axes.map((a) => [a.id, a.nom])}
+                  vide="Aucun pour l’instant"
+                  value={f.axe_id}
+                  onChange={maj('axe_id')}
+                />
               </Champ>
-              <Champ label="Signalé par">
-                <input style={champ} value={f.auteur_nom} onChange={maj('auteur_nom')} placeholder="Nom" />
-              </Champ>
+              <Champ label="Signalé par"><Saisie value={f.auteur_nom} onChange={maj('auteur_nom')} placeholder="Nom" /></Champ>
               <Champ label="Responsable du traitement">
-                <input style={champ} value={f.responsable} onChange={maj('responsable')} placeholder="Qui s’en occupe" />
+                <Saisie value={f.responsable} onChange={maj('responsable')} placeholder="Qui s’en occupe" />
               </Champ>
-              <Champ label="Reçu le">
-                <input type="date" style={champ} value={f.recue_le} onChange={maj('recue_le')} />
-              </Champ>
-            </div>
-            <Champ label="Description">
-              <textarea style={{ ...champ, minHeight: 80, resize: 'vertical' }} value={f.description} onChange={maj('description')} />
-            </Champ>
+              <Champ label="Reçu le"><Saisie type="date" value={f.recue_le} onChange={maj('recue_le')} /></Champ>
+            </Grille>
+            <Champ label="Description"><Zone value={f.description} onChange={maj('description')} /></Champ>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button type="button" style={bouton()} disabled={occupe || !f.objet.trim()} onClick={soumettre}>
+              <Bouton occupe={occupe} disabled={!f.objet.trim()} onClick={soumettre}>
                 {occupe ? 'Enregistrement…' : 'Enregistrer'}
-              </button>
-              <button type="button" style={bouton(false)} onClick={() => setOuvert(false)}>Annuler</button>
+              </Bouton>
+              <Bouton discret onClick={() => setOuvert(false)}>Annuler</Bouton>
             </div>
-          </div>
-        </Card>
+          </Pile>
+        </Bloc>
       )}
 
-      <Card padding="none">
-        {!incidents.length ? (
-          <EmptyState
-            title="Aucun incident consigné"
-            description="Un registre vide mais tenu est recevable. Un registre inexistant, non."
-          />
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={entete}>Référence</th>
-                  <th style={entete}>Objet</th>
-                  <th style={entete}>Cause</th>
-                  <th style={entete}>Gravité</th>
-                  <th style={entete}>Nature</th>
-                  <th style={entete}>Axe d’amélioration</th>
-                  <th style={entete}>Reçu le</th>
-                  <th style={entete}>Statut</th>
-                  <th style={entete} />
-                </tr>
-              </thead>
-              <tbody>
-                {incidents.map((i) => (
-                  <tr key={i.id}>
-                    <td style={{ ...cellule, fontFamily: 'ui-monospace, monospace', fontSize: 12, color: 'var(--text-3)' }}>{i.reference}</td>
-                    <td style={{ ...cellule, fontWeight: 600, minWidth: 200 }}>
-                      {i.objet}
-                      {i.auteur_nom && <div style={{ fontWeight: 400, fontSize: 11, color: 'var(--text-3)', marginTop: 3 }}>{i.auteur_nom} · {libelle(ORIGINES, i.origine)}</div>}
-                    </td>
-                    <td style={cellule}>{i.cause || <span style={{ color: 'var(--danger)', fontSize: 12 }}>à qualifier</span>}</td>
-                    <td style={cellule}><Etiquette valeur={i.gravite} liste={GRAVITES} /></td>
-                    <td style={cellule}>{libelle(NATURES, i.nature)}</td>
-                    <td style={cellule}>{axes.find((a) => a.id === i.axe_id)?.nom || <span style={{ color: 'var(--text-3)' }}>—</span>}</td>
-                    <td style={cellule}>{jour(i.recue_le)}</td>
-                    <td style={cellule}>
-                      <select
-                        style={{ ...champ, width: 'auto', padding: '6px 9px', fontSize: 12 }}
-                        value={i.statut || 'ouverte'}
-                        onChange={(e) => changerStatut(i.id, e.target.value)}
-                      >
-                        <Options liste={STATUTS_INCIDENT} />
-                      </select>
-                    </td>
-                    <td style={cellule}>
-                      <Croix
-                        titre="Supprimer cet incident"
-                        onClick={() => supprimer(`/api/reclamations/${i.id}`, 'Supprimer cet incident ?',
-                          'Les actions correctives déjà écrites restent, elles perdent seulement ce rattachement.')}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+      <Bloc padding="none">
+        <Tableau
+          lignes={incidents}
+          vide={(
+            <div style={{ padding: 20 }}>
+              <EmptyState
+                title="Aucun incident consigné"
+                description="Un registre vide mais tenu est recevable. Un registre inexistant, non."
+              />
+            </div>
+          )}
+          colonnes={[
+            { titre: 'Référence', mono: true, attenue: true, rendu: (i) => i.reference },
+            {
+              titre: 'Objet',
+              fort: true,
+              minLargeur: 200,
+              rendu: (i) => (
+                <>
+                  {i.objet}
+                  <Sous>{i.auteur_nom ? `${i.auteur_nom} · ${libelle(ORIGINES, i.origine)}` : libelle(ORIGINES, i.origine)}</Sous>
+                </>
+              ),
+            },
+            {
+              titre: 'Cause',
+              rendu: (i) => (i.cause
+                ? i.cause
+                : <span style={{ color: 'var(--danger)', fontSize: 12 }}>à qualifier</span>),
+            },
+            { titre: 'Gravité', rendu: (i) => <Etiquette tone={TON[i.gravite]}>{libelle(GRAVITES, i.gravite)}</Etiquette> },
+            { titre: 'Nature', rendu: (i) => libelle(NATURES, i.nature) },
+            { titre: 'Axe d’amélioration', rendu: (i) => axes.find((a) => a.id === i.axe_id)?.nom },
+            { titre: 'Reçu le', rendu: (i) => jour(i.recue_le) },
+            {
+              titre: 'Statut',
+              rendu: (i) => (
+                <Choix
+                  compact
+                  options={STATUTS_INCIDENT}
+                  value={i.statut || 'ouverte'}
+                  onChange={(e) => changerStatut(i.id, e.target.value)}
+                />
+              ),
+            },
+            {
+              titre: '',
+              largeur: 44,
+              rendu: (i) => (
+                <Bouton
+                  fantome
+                  petit
+                  aria-label="Supprimer cet incident"
+                  title="Supprimer cet incident"
+                  onClick={() => supprimer(
+                    `/api/reclamations/${i.id}`,
+                    'Supprimer cet incident ?',
+                    'Les actions correctives déjà écrites restent, elles perdent seulement ce rattachement.',
+                  )}
+                >
+                  ×
+                </Bouton>
+              ),
+            },
+          ]}
+        />
+      </Bloc>
     </>
   );
 }
@@ -509,120 +411,105 @@ function OngletActions({ actions, incidents, axes, ouvert, setOuvert, enregistre
 
   return (
     <>
-      {!ouvert && (
-        <div>
-          <button type="button" style={bouton()} onClick={() => setOuvert(true)}>+ Ajouter une action corrective</button>
-        </div>
-      )}
+      {!ouvert && <div><Bouton onClick={() => setOuvert(true)}>＋ Ajouter une action corrective</Bouton></div>}
 
       {ouvert && (
-        <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>Nouvelle action</div>
-            <div style={grille()}>
-              <Champ label="Nom de l’action">
-                <input style={champ} value={f.nom} onChange={maj('nom')} placeholder="Vérifier l’accessibilité de la salle avant chaque session" />
+        <Bloc titre="Nouvelle action">
+          <Pile>
+            <Grille>
+              <Champ label="Nom de l’action" requis>
+                <Saisie value={f.nom} onChange={maj('nom')} placeholder="Vérifier l’accessibilité de la salle avant chaque session" />
               </Champ>
-              <Champ label="Type">
-                <select style={champ} value={f.type} onChange={maj('type')}><Options liste={TYPES_ACTION} /></select>
-              </Champ>
+              <Champ label="Type"><Choix options={TYPES_ACTION} value={f.type} onChange={maj('type')} /></Champ>
               <Champ label="Incident d’origine" aide="Ce qui a déclenché l’action.">
-                <select style={champ} value={f.incident_id} onChange={maj('incident_id')}>
-                  <option value="">Aucun</option>
-                  {incidents.map((i) => <option key={i.id} value={i.id}>{i.reference} · {i.objet}</option>)}
-                </select>
+                <Choix
+                  options={incidents.map((i) => [i.id, `${i.reference} · ${i.objet}`])}
+                  vide="Aucun"
+                  value={f.incident_id}
+                  onChange={maj('incident_id')}
+                />
               </Champ>
               <Champ label="Axe d’amélioration">
-                <select style={champ} value={f.axe_id} onChange={maj('axe_id')}>
-                  <option value="">Aucun</option>
-                  {axes.map((a) => <option key={a.id} value={a.id}>{a.nom}</option>)}
-                </select>
+                <Choix options={axes.map((a) => [a.id, a.nom])} vide="Aucun" value={f.axe_id} onChange={maj('axe_id')} />
               </Champ>
-              <Champ label="Responsable">
-                <input style={champ} value={f.responsable} onChange={maj('responsable')} />
-              </Champ>
-              <Champ label="Statut">
-                <select style={champ} value={f.statut} onChange={maj('statut')}><Options liste={STATUTS_ACTION} /></select>
-              </Champ>
-              <Champ label="Date d’échéance">
-                <input type="date" style={champ} value={f.date_echeance} onChange={maj('date_echeance')} />
-              </Champ>
+              <Champ label="Responsable"><Saisie value={f.responsable} onChange={maj('responsable')} /></Champ>
+              <Champ label="Statut"><Choix options={STATUTS_ACTION} value={f.statut} onChange={maj('statut')} /></Champ>
+              <Champ label="Date d’échéance"><Saisie type="date" value={f.date_echeance} onChange={maj('date_echeance')} /></Champ>
               <Champ label="Date de réalisation" aide="Se remplit seule quand l’action passe à « faite ».">
-                <input type="date" style={champ} value={f.date_realisation} onChange={maj('date_realisation')} />
+                <Saisie type="date" value={f.date_realisation} onChange={maj('date_realisation')} />
               </Champ>
-            </div>
+            </Grille>
             <Champ label="Preuve" aide="Où se trouve la trace : un document, un e-mail, une capture.">
-              <input style={champ} value={f.preuve} onChange={maj('preuve')} />
+              <Saisie value={f.preuve} onChange={maj('preuve')} />
             </Champ>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button type="button" style={bouton()} disabled={occupe || !f.nom.trim()} onClick={soumettre}>
+              <Bouton occupe={occupe} disabled={!f.nom.trim()} onClick={soumettre}>
                 {occupe ? 'Enregistrement…' : 'Enregistrer'}
-              </button>
-              <button type="button" style={bouton(false)} onClick={() => setOuvert(false)}>Annuler</button>
+              </Bouton>
+              <Bouton discret onClick={() => setOuvert(false)}>Annuler</Bouton>
             </div>
-          </div>
-        </Card>
+          </Pile>
+        </Bloc>
       )}
 
-      <Card padding="none">
-        {!actions.length ? (
-          <EmptyState
-            title="Aucune action corrective"
-            description="Un incident sans action derrière est un incident qu’on n’a pas traité."
-          />
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={entete}>Date de réalisation</th>
-                  <th style={entete}>Date d’échéance</th>
-                  <th style={entete}>Incident</th>
-                  <th style={entete}>Nom de l’action corrective</th>
-                  <th style={entete}>Statut</th>
-                  <th style={entete}>Type</th>
-                  <th style={entete} />
-                </tr>
-              </thead>
-              <tbody>
-                {actions.map((a) => (
-                  <tr key={a.id}>
-                    <td style={cellule}>{jour(a.date_realisation)}</td>
-                    <td style={cellule}>
-                      <Echeance date={a.date_echeance} clos={['faite', 'abandonnee'].includes(a.statut)} />
-                    </td>
-                    <td style={cellule}>
-                      {a.incident_objet || <span style={{ color: 'var(--text-3)' }}>—</span>}
-                      {a.axe_nom && <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3 }}>Axe : {a.axe_nom}</div>}
-                    </td>
-                    <td style={{ ...cellule, fontWeight: 600, minWidth: 220 }}>
-                      {a.nom}
-                      {a.responsable && <div style={{ fontWeight: 400, fontSize: 11, color: 'var(--text-3)', marginTop: 3 }}>{a.responsable}</div>}
-                    </td>
-                    <td style={cellule}>
-                      <select
-                        style={{ ...champ, width: 'auto', padding: '6px 9px', fontSize: 12 }}
-                        value={a.statut || 'a_faire'}
-                        onChange={(e) => changerStatut(a.id, e.target.value)}
-                      >
-                        <Options liste={STATUTS_ACTION} />
-                      </select>
-                    </td>
-                    <td style={cellule}>{libelle(TYPES_ACTION, a.type)}</td>
-                    <td style={cellule}>
-                      <Croix
-                        titre="Supprimer cette action"
-                        onClick={() => supprimer(`/api/qualite/actions?id=${a.id}`, 'Supprimer cette action ?',
-                          'L’incident d’origine reste au registre.')}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+      <Bloc padding="none">
+        <Tableau
+          lignes={actions}
+          vide={(
+            <div style={{ padding: 20 }}>
+              <EmptyState
+                title="Aucune action corrective"
+                description="Un incident sans action derrière est un incident qu’on n’a pas traité."
+              />
+            </div>
+          )}
+          colonnes={[
+            { titre: 'Date de réalisation', rendu: (a) => jour(a.date_realisation) },
+            {
+              titre: 'Date d’échéance',
+              rendu: (a) => <Echeance date={a.date_echeance} clos={['faite', 'abandonnee'].includes(a.statut)} />,
+            },
+            {
+              titre: 'Incident',
+              rendu: (a) => (a.incident_objet
+                ? <>{a.incident_objet}{a.axe_nom && <Sous>Axe : {a.axe_nom}</Sous>}</>
+                : (a.axe_nom ? <>Axe : {a.axe_nom}</> : null)),
+            },
+            {
+              titre: 'Nom de l’action corrective',
+              fort: true,
+              minLargeur: 220,
+              rendu: (a) => <>{a.nom}<Sous>{a.responsable}</Sous></>,
+            },
+            {
+              titre: 'Statut',
+              rendu: (a) => (
+                <Choix compact options={STATUTS_ACTION} value={a.statut || 'a_faire'} onChange={(e) => changerStatut(a.id, e.target.value)} />
+              ),
+            },
+            { titre: 'Type', rendu: (a) => libelle(TYPES_ACTION, a.type) },
+            {
+              titre: '',
+              largeur: 44,
+              rendu: (a) => (
+                <Bouton
+                  fantome
+                  petit
+                  aria-label="Supprimer cette action"
+                  title="Supprimer cette action"
+                  onClick={() => supprimer(
+                    `/api/qualite/actions?id=${a.id}`,
+                    'Supprimer cette action ?',
+                    'L’incident d’origine reste au registre.',
+                  )}
+                >
+                  ×
+                </Bouton>
+              ),
+            },
+          ]}
+        />
+      </Bloc>
     </>
   );
 }
@@ -648,94 +535,86 @@ function OngletAxes({ axes, ouvert, setOuvert, enregistrer, supprimer }) {
 
   return (
     <>
-      {!ouvert && (
-        <div>
-          <button type="button" style={bouton()} onClick={() => setOuvert(true)}>+ Ajouter un axe d’amélioration</button>
-        </div>
-      )}
+      {!ouvert && <div><Bouton onClick={() => setOuvert(true)}>＋ Ajouter un axe d’amélioration</Bouton></div>}
 
       {ouvert && (
-        <Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>Nouvel axe</div>
-            <div style={grille()}>
-              <Champ label="Nom de l’axe">
-                <input style={champ} value={f.nom} onChange={maj('nom')} placeholder="Fiabiliser l’accueil des personnes en situation de handicap" />
+        <Bloc titre="Nouvel axe">
+          <Pile>
+            <Grille>
+              <Champ label="Nom de l’axe" requis>
+                <Saisie value={f.nom} onChange={maj('nom')} placeholder="Fiabiliser l’accueil des personnes en situation de handicap" />
               </Champ>
-              <Champ label="Statut">
-                <select style={champ} value={f.statut} onChange={maj('statut')}><Options liste={STATUTS_AXE} /></select>
-              </Champ>
+              <Champ label="Statut"><Choix options={STATUTS_AXE} value={f.statut} onChange={maj('statut')} /></Champ>
               <Champ label="Date d’échéance" aide="Un axe sans échéance ne se relit jamais.">
-                <input type="date" style={champ} value={f.date_echeance} onChange={maj('date_echeance')} />
+                <Saisie type="date" value={f.date_echeance} onChange={maj('date_echeance')} />
               </Champ>
-            </div>
-            <Champ label="Description">
-              <textarea style={{ ...champ, minHeight: 80, resize: 'vertical' }} value={f.description} onChange={maj('description')} />
-            </Champ>
+            </Grille>
+            <Champ label="Description"><Zone value={f.description} onChange={maj('description')} /></Champ>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button type="button" style={bouton()} disabled={occupe || !f.nom.trim()} onClick={soumettre}>
+              <Bouton occupe={occupe} disabled={!f.nom.trim()} onClick={soumettre}>
                 {occupe ? 'Enregistrement…' : 'Enregistrer'}
-              </button>
-              <button type="button" style={bouton(false)} onClick={() => setOuvert(false)}>Annuler</button>
+              </Bouton>
+              <Bouton discret onClick={() => setOuvert(false)}>Annuler</Bouton>
             </div>
-          </div>
-        </Card>
+          </Pile>
+        </Bloc>
       )}
 
-      <Card padding="none">
-        {!axes.length ? (
-          <EmptyState
-            title="Aucun axe d’amélioration"
-            description="Un axe regroupe les incidents qui se ressemblent, et porte les actions qui les font disparaître."
-          />
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={entete}>Date d’échéance</th>
-                  <th style={entete}>Nom de l’axe d’amélioration</th>
-                  <th style={entete}>Rattachements</th>
-                  <th style={entete}>Statut</th>
-                  <th style={entete} />
-                </tr>
-              </thead>
-              <tbody>
-                {axes.map((a) => (
-                  <tr key={a.id}>
-                    <td style={cellule}>
-                      <Echeance date={a.date_echeance} clos={['atteint', 'abandonne'].includes(a.statut)} />
-                    </td>
-                    <td style={{ ...cellule, fontWeight: 600, minWidth: 240 }}>
-                      {a.nom}
-                      {a.description && <div style={{ fontWeight: 400, fontSize: 11.5, color: 'var(--text-3)', marginTop: 4, lineHeight: 1.5 }}>{a.description}</div>}
-                    </td>
-                    <td style={{ ...cellule, fontSize: 12, color: 'var(--text-2)' }}>
-                      {a.incidents || 0} incident(s) · {a.actions || 0} action(s)
-                    </td>
-                    <td style={cellule}>
-                      <select
-                        style={{ ...champ, width: 'auto', padding: '6px 9px', fontSize: 12 }}
-                        value={a.statut || 'ouvert'}
-                        onChange={(e) => changerStatut(a.id, e.target.value)}
-                      >
-                        <Options liste={STATUTS_AXE} />
-                      </select>
-                    </td>
-                    <td style={cellule}>
-                      <Croix
-                        titre="Supprimer cet axe"
-                        onClick={() => supprimer(`/api/qualite/axes?id=${a.id}`, 'Supprimer cet axe ?',
-                          'Ses incidents et ses actions restent, ils perdent seulement le rattachement.')}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+      <Bloc padding="none">
+        <Tableau
+          lignes={axes}
+          vide={(
+            <div style={{ padding: 20 }}>
+              <EmptyState
+                title="Aucun axe d’amélioration"
+                description="Un axe regroupe les incidents qui se ressemblent, et porte les actions qui les font disparaître."
+              />
+            </div>
+          )}
+          colonnes={[
+            {
+              titre: 'Date d’échéance',
+              rendu: (a) => <Echeance date={a.date_echeance} clos={['atteint', 'abandonne'].includes(a.statut)} />,
+            },
+            {
+              titre: 'Nom de l’axe d’amélioration',
+              fort: true,
+              minLargeur: 240,
+              rendu: (a) => <>{a.nom}<Sous>{a.description}</Sous></>,
+            },
+            {
+              titre: 'Rattachements',
+              attenue: true,
+              rendu: (a) => `${a.incidents || 0} incident(s) · ${a.actions || 0} action(s)`,
+            },
+            {
+              titre: 'Statut',
+              rendu: (a) => (
+                <Choix compact options={STATUTS_AXE} value={a.statut || 'ouvert'} onChange={(e) => changerStatut(a.id, e.target.value)} />
+              ),
+            },
+            {
+              titre: '',
+              largeur: 44,
+              rendu: (a) => (
+                <Bouton
+                  fantome
+                  petit
+                  aria-label="Supprimer cet axe"
+                  title="Supprimer cet axe"
+                  onClick={() => supprimer(
+                    `/api/qualite/axes?id=${a.id}`,
+                    'Supprimer cet axe ?',
+                    'Ses incidents et ses actions restent, ils perdent seulement le rattachement.',
+                  )}
+                >
+                  ×
+                </Bouton>
+              ),
+            },
+          ]}
+        />
+      </Bloc>
     </>
   );
 }

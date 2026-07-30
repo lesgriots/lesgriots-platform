@@ -1,0 +1,252 @@
+/* ══════════════════════════════════════════════════════════════
+   Primitives — les états, en CSS, une seule fois.
+   ══════════════════════════════════════════════════════════════
+
+   Pourquoi un fichier de styles alors que tout le reste est en
+   styles inline : parce que le survol, le focus clavier et l'état
+   désactivé ne s'écrivent pas en inline. Chaque composant les
+   redéclarait en JavaScript, avec un onMouseEnter et un
+   onMouseLeave. Résultat, l'anneau de focus n'existait nulle part.
+
+   Ici les valeurs viennent toutes des jetons. Aucune couleur, aucun
+   rayon, aucune durée écrits à la main.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Le bouton ───────────────────────────────────────────────── */
+
+.lg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    background var(--duration) var(--ease),
+    border-color var(--duration) var(--ease),
+    color var(--duration) var(--ease),
+    transform var(--duration-fast) var(--ease);
+}
+
+.lg-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.lg-btn:not(:disabled):not([aria-disabled='true']):active {
+  transform: scale(0.975);
+}
+
+.lg-btn:disabled,
+.lg-btn[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+}
+
+/* Tailles */
+.lg-btn--sm { padding: 6px 11px;  font-size: var(--text-sm);   min-height: 30px; }
+.lg-btn--md { padding: 9px 15px;  font-size: var(--text-md);   min-height: 38px; }
+.lg-btn--lg { padding: 12px 20px; font-size: var(--text-base); min-height: 46px; }
+
+/* Variantes */
+.lg-btn--primary {
+  background: var(--gold);
+  color: var(--gold-ink);
+  border-color: var(--gold);
+  font-weight: 700;
+}
+.lg-btn--primary:not(:disabled):not([aria-disabled='true']):hover {
+  background: var(--saffron-deep);
+  border-color: var(--saffron-deep);
+}
+
+.lg-btn--secondary {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border-2);
+}
+.lg-btn--secondary:not(:disabled):not([aria-disabled='true']):hover {
+  background: var(--surface-2);
+}
+
+.lg-btn--ghost {
+  background: transparent;
+  color: var(--text-2);
+  border-color: transparent;
+}
+.lg-btn--ghost:not(:disabled):not([aria-disabled='true']):hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.lg-btn--danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.lg-btn--danger:not(:disabled):not([aria-disabled='true']):hover {
+  background: var(--danger);
+  color: var(--on-solid);
+}
+
+.lg-btn--block { width: 100%; }
+
+/* Le point qui tourne pendant un enregistrement. */
+.lg-btn__travail {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: lg-tourne 640ms linear infinite;
+  flex: 0 0 auto;
+}
+@keyframes lg-tourne { to { transform: rotate(360deg); } }
+
+/* ── Le champ ────────────────────────────────────────────────── */
+
+.lg-champ {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.lg-champ__label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-3);
+}
+
+.lg-champ__aide {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+.lg-champ__erreur {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.lg-saisie {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  min-height: 38px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  transition: border-color var(--duration) var(--ease), background var(--duration) var(--ease);
+}
+
+.lg-saisie::placeholder { color: var(--text-3); }
+
+.lg-saisie:hover:not(:disabled) { border-color: var(--text-3); }
+
+.lg-saisie:focus-visible,
+.lg-saisie:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: var(--focus-ring);
+}
+
+.lg-saisie:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: var(--surface-2);
+}
+
+.lg-saisie--faux { border-color: var(--danger); }
+
+.lg-saisie--zone { min-height: 84px; resize: vertical; line-height: 1.5; }
+
+.lg-saisie--compact { padding: 6px 9px; min-height: 30px; font-size: var(--text-sm); width: auto; }
+
+/* La case à cocher qui dit ce qu'elle change. */
+.lg-case {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+  cursor: pointer;
+}
+.lg-case input {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+.lg-case input:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 3px; }
+.lg-case__titre { font-size: var(--text-md); font-weight: 600; }
+.lg-case__aide  { display: block; margin-top: 3px; font-size: var(--text-xs); line-height: 1.45; color: var(--text-3); }
+
+/* ── Le tableau ──────────────────────────────────────────────── */
+
+.lg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+}
+
+.lg-table th {
+  text-align: left;
+  padding: 13px 12px;
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--text-3);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.lg-table td {
+  padding: 12px;
+  font-size: var(--text-md);
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+.lg-table tbody tr:last-child td { border-bottom: 0; }
+
+.lg-table--cliquable tbody tr { cursor: pointer; }
+.lg-table--cliquable tbody tr:hover td { background: var(--surface-2); }
+
+.lg-table__nombre { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+
+.lg-table__enveloppe { overflow-x: auto; }
+
+/* ── Le titre de bloc ────────────────────────────────────────── */
+
+.lg-bloc__titre {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: var(--tracking-snug);
+  color: var(--text);
+}
+
+.lg-bloc__chapeau {
+  margin: 5px 0 0;
+  font-size: var(--text-md);
+  line-height: 1.55;
+  color: var(--text-3);
+}
