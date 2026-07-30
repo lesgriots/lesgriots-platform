@@ -613,7 +613,46 @@ export default function SessionCockpit({ sessionId }) {
     if (currentSub === 'elearning') return <section style={card}><h2 style={title}>Séquences e-learning</h2><p style={muted}>Crée ou associe un parcours e-learning à cette session, puis suis la progression par apprenant.</p><Empty>Aucune séquence n’est encore associée à ce parcours.</Empty></section>;
     if (currentSub === 'affichage') return <EspaceApprenantConfig sessionId={sessionId} session={session} onNotice={setNotice} onRecharger={load} />;
     const accessLink = links.find((item) => item.kind === 'questionnaire') || links.find((item) => item.kind === 'emargement');
-    return <section style={card}><h2 style={title}>Accès sécurisé</h2><p style={muted}>Crée des liens temporaires pour l’émargement et les questionnaires de cette session.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '16px 0' }}><Action onClick={() => createLink('emargement')}>Créer le lien d’émargement</Action><Action secondary onClick={() => createLink('questionnaire', 'positionnement')}>Créer le lien de positionnement</Action></div>{accessLink ? <div style={{ ...card, background: 'var(--surface-2)', padding: 12 }}><div style={muted}>Dernier lien actif</div><code style={{ color: 'var(--gold)', fontSize: 12 }}>{typeof window !== 'undefined' ? window.location.origin : ''}{accessLink.url}</code></div> : <Empty>Aucun lien d’accès n’a encore été créé.</Empty>}</section>;
+    return <div style={{ display: 'grid', gap: 14 }}>
+      <section style={card}>
+        <h2 style={title}>Comment l’apprenant entre</h2>
+        <p style={{ ...muted, margin: '6px 0 14px' }}>
+          Deux portes, et elles ne se valent pas.
+        </p>
+        <div style={{ padding: 14, borderRadius: 11, border: '1.5px solid color-mix(in srgb, var(--success) 40%, transparent)', background: 'var(--success-soft)' }}>
+          <b style={{ fontSize: 13.5 }}>Par son adresse e-mail · recommandé</b>
+          <p style={{ ...muted, margin: '5px 0 10px', color: 'var(--text)' }}>
+            L’apprenant saisit l’adresse à laquelle tu l’as inscrit et reçoit un lien qui expire au bout de deux heures. Transféré à quelqu’un d’autre, il ne vaudra bientôt plus rien.
+          </p>
+          <code style={{ display: 'block', padding: '9px 11px', borderRadius: 8, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--gold)', fontSize: 12.5, wordBreak: 'break-all' }}>
+            {typeof window !== 'undefined' ? window.location.origin : ''}/espace
+          </code>
+          <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap', marginTop: 11 }}>
+            <Action small secondary onClick={() => { navigator.clipboard?.writeText(`${window.location.origin}/espace`); setNotice('Adresse copiée. Elle est la même pour toutes tes sessions.'); }}>Copier l’adresse</Action>
+            <Action small href="/espace">Ouvrir la page</Action>
+          </div>
+        </div>
+        <div style={{ padding: 14, borderRadius: 11, border: '1px solid var(--border)', background: 'var(--surface-2)', marginTop: 12 }}>
+          <b style={{ fontSize: 13.5 }}>Par son lien personnel</b>
+          <p style={{ ...muted, margin: '5px 0 0' }}>
+            C’est le lien glissé au bas de chaque convocation : un clic, aucune saisie. Mais il est permanent, donc quiconque le reçoit ouvre le dossier de l’apprenant. À réserver aux envois que tu maîtrises.
+          </p>
+        </div>
+      </section>
+
+      <section style={card}>
+        <h2 style={title}>Liens d’action</h2>
+        <p style={muted}>Des liens ponctuels pour l’émargement et les questionnaires de cette session.</p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '16px 0' }}>
+          <Action onClick={() => createLink('emargement')}>Créer le lien d’émargement</Action>
+          <Action secondary onClick={() => createLink('questionnaire', 'positionnement')}>Créer le lien de positionnement</Action>
+        </div>
+        {accessLink ? <div style={{ ...card, background: 'var(--surface-2)', padding: 12 }}>
+          <div style={muted}>Dernier lien actif</div>
+          <code style={{ color: 'var(--gold)', fontSize: 12, wordBreak: 'break-all' }}>{typeof window !== 'undefined' ? window.location.origin : ''}{accessLink.url}</code>
+        </div> : <Empty>Aucun lien d’accès n’a encore été créé.</Empty>}
+      </section>
+    </div>;
   };
 
   const renderSuivi = () => {

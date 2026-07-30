@@ -19,8 +19,23 @@ import { QUESTIONNAIRES, QUESTIONNAIRE_TYPE_TO_EVALUATION, computeScore } from '
 
 const MAX_PNG = 200 * 1024;
 
+/**
+ * Deux sortes de jetons ouvrent le même espace.
+ *
+ * Le lien personnel, permanent, qui part dans les convocations. Et le lien
+ * temporaire, que l'apprenant se fait envoyer sur son adresse et qui meurt
+ * après deux heures. Le second est le plus sûr : transféré, il ne vaudra
+ * bientôt plus rien.
+ */
 function resoudre(db, token) {
   if (!token || typeof token !== 'string' || token.length > 128) return null;
+
+  const temporaire = db.prepare('SELECT * FROM espace_acces WHERE token = ?').get(token);
+  if (temporaire) {
+    if (temporaire.expires_at && temporaire.expires_at < new Date().toISOString()) return null;
+    return { ...temporaire, temporaire: true };
+  }
+
   const l = db.prepare('SELECT * FROM espace_liens WHERE token = ?').get(token);
   if (!l) return null;
   if (l.expires_at && l.expires_at < new Date().toISOString().slice(0, 10)) return null;

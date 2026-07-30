@@ -83,7 +83,7 @@ function composer(db, modele, ctx, session_id, apprenant) {
   const lien = lienEspace(db, session_id, apprenant.id);
   const prenom = apprenant.first_name || '';
   const corps = corpsBase.replace(/^Bonjour,/, prenom ? `Bonjour ${prenom},` : 'Bonjour,')
-    + `\n\n———\nVOTRE ESPACE APPRENANT\nTout s'y trouve : votre programme, vos documents, l'émargement et les questionnaires.\n${lien}\n`;
+    + `\n\n———\nVOTRE ESPACE APPRENANT\nTout s'y trouve : votre programme, vos documents, l'émargement et les questionnaires.\n${lien}\n\nLien perdu ou expiré ? Demandez-en un nouveau avec votre adresse e-mail sur ${BASE}/espace\n`;
   // La version HTML porte la marque ; le texte reste envoyé en parallèle pour
   // les clients qui ne rendent pas le HTML.
   const html = habiller({ objet, corps: corpsBase.replace(/^Bonjour,/, prenom ? `Bonjour ${prenom},` : 'Bonjour,'), lien, organisme: organisme(db) });

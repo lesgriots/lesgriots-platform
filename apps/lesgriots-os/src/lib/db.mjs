@@ -1622,6 +1622,26 @@ function initSchema(db) {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
     CREATE INDEX IF NOT EXISTS idx_espace_liens_token ON espace_liens(token);
+
+    -- Accès à usage limité, demandé par l'apprenant lui-même.
+    --
+    -- Le lien personnel permanent a un défaut que Digiforma reconnaît dans
+    -- sa propre interface : transféré à quelqu'un d'autre, il ouvre l'espace
+    -- à cette personne, indéfiniment. Ici l'apprenant saisit son adresse et
+    -- reçoit un lien qui meurt après quelques heures. L'adresse devient la
+    -- preuve d'identité, et le lien n'est plus qu'un ticket.
+    CREATE TABLE IF NOT EXISTS espace_acces (
+      id TEXT PRIMARY KEY,
+      token TEXT UNIQUE NOT NULL,
+      session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+      apprenant_id TEXT NOT NULL REFERENCES apprenants(id) ON DELETE CASCADE,
+      email TEXT NOT NULL DEFAULT '',
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      ip TEXT DEFAULT ''
+    );
+    CREATE INDEX IF NOT EXISTS idx_espace_acces_token ON espace_acces(token);
+    CREATE INDEX IF NOT EXISTS idx_espace_acces_email ON espace_acces(email, created_at);
     CREATE UNIQUE INDEX IF NOT EXISTS idx_espace_liens_couple
       ON espace_liens(session_id, apprenant_id);
 
