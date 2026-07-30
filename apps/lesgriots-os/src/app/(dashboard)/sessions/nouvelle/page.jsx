@@ -17,7 +17,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import TopBar from '@/components/layout/TopBar';
 import { Card } from '@/components/ui';
 import {
@@ -79,8 +79,7 @@ const AUTRE = '__autre__';
 
 export default function NouvelleSessionPage() {
   const router = useRouter();
-  const params = useSearchParams();
-  const dateProposee = params.get('date') || new Date().toISOString().slice(0, 10);
+  const aujourdhui = new Date().toISOString().slice(0, 10);
 
   const [formations, setFormations] = useState([]);
   const [lieux, setLieux] = useState([]);
@@ -105,9 +104,17 @@ export default function NouvelleSessionPage() {
     nom_titre_vise: '',
     formation_a_distance: false,
     lieu_formation_id: '',
-    start_date: dateProposee,
-    end_date: dateProposee,
+    start_date: aujourdhui,
+    end_date: aujourdhui,
   });
+
+  // La date cliquée dans l'agenda arrive par l'URL. On la lit après le montage
+  // plutôt qu'avec useSearchParams : sinon toute la page devient dynamique, et
+  // Next refuse de la prérendre sans frontière de suspension.
+  useEffect(() => {
+    const jour = new URLSearchParams(window.location.search).get('date');
+    if (jour) setF((v) => ({ ...v, start_date: jour, end_date: jour }));
+  }, []);
   const maj = (k) => (e) => setF((v) => ({ ...v, [k]: e.target.value }));
   const cocher = (k) => (b) => setF((v) => ({ ...v, [k]: b }));
 
