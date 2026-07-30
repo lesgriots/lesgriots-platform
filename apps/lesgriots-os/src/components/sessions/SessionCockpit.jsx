@@ -32,10 +32,17 @@ const EVALUATION_TYPES = [
   { id: 'froid', questionnaireType: 'froid', title: 'Évaluation à froid pour les apprenants', description: 'Mesurez l’impact professionnel de la formation après sa réalisation.', model: 'Modèle d’évaluation à froid', automated: true },
 ];
 
-const pill = (active, tone = 'var(--gold)') => ({
-  border: `1px solid ${active ? tone : 'var(--border)'}`, background: active ? tone : 'transparent',
-  color: active ? 'var(--gold-ink)' : 'var(--text-2)', padding: '9px 12px', borderRadius: 9,
-  fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+const tabsWrap = {
+  display: 'inline-flex', gap: 4, padding: 4, background: 'var(--surface-2)',
+  border: '1px solid var(--border)', borderRadius: 12, maxWidth: '100%',
+};
+const tab = (active) => ({
+  border: `1.5px solid ${active ? 'var(--gold)' : 'transparent'}`,
+  background: active ? 'var(--gold)' : 'transparent',
+  color: active ? 'var(--gold-ink)' : 'var(--text-2)',
+  padding: '9px 15px', borderRadius: 9, fontSize: 12.5, fontWeight: 800,
+  cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+  boxShadow: active ? '0 1px 3px rgba(0,0,0,.22)' : 'none',
 });
 const card = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 18 };
 const muted = { color: 'var(--text-3)', fontSize: 12, lineHeight: 1.5 };
@@ -51,8 +58,18 @@ function Empty({ children }) {
   return <div style={{ ...card, ...muted, textAlign: 'center', padding: '32px 16px', borderStyle: 'dashed' }}>{children}</div>;
 }
 
-function Action({ children, onClick, href, secondary = false, disabled = false }) {
-  const style = { ...pill(!secondary, secondary ? 'var(--surface)' : 'var(--gold)'), opacity: disabled ? .45 : 1, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 };
+function Action({ children, onClick, href, secondary = false, disabled = false, small = false }) {
+  const style = {
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+    padding: small ? '8px 12px' : '11px 16px', borderRadius: 10,
+    fontSize: small ? 12 : 13, fontWeight: 800, fontFamily: 'inherit',
+    whiteSpace: 'nowrap', textDecoration: 'none', lineHeight: 1.2,
+    cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? .42 : 1,
+    background: secondary ? 'var(--surface)' : 'var(--gold)',
+    color: secondary ? 'var(--text)' : 'var(--gold-ink)',
+    border: `1.5px solid ${secondary ? 'var(--border-2)' : 'var(--gold)'}`,
+    boxShadow: secondary ? 'none' : '0 2px 10px rgba(255, 202, 0, .22)',
+  };
   if (href) return <a href={href} target={href.startsWith('/') ? '_blank' : undefined} rel="noreferrer" style={style}>{children}</a>;
   return <button type="button" onClick={onClick} disabled={disabled} style={style}>{children}</button>;
 }
@@ -570,10 +587,18 @@ export default function SessionCockpit({ sessionId }) {
     <Link href="/sessions-list" style={{ ...muted, textDecoration: 'none', display: 'inline-block', marginBottom: 12 }}>← Toutes les sessions</Link>
     <h1 style={{ margin: 0, fontSize: 'clamp(23px, 3vw, 34px)', letterSpacing: '-.04em' }}>{session.formation_title || 'Session de formation'}</h1>
     <p style={{ ...muted, margin: '5px 0 22px' }}>{dateFr(session.start_date)} → {dateFr(session.end_date)} · {session.code_interne || 'Sans code interne'}</p>
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(112px, 1fr))', gap: 8, borderBottom: '1px solid var(--border)', paddingBottom: 18, marginBottom: 12, overflowX: 'auto' }}>
-      {STEPS.map((item, index) => <button key={item.id} type="button" onClick={() => setStep(item.id)} style={{ border: 0, background: 'transparent', color: step === item.id ? 'var(--gold)' : 'var(--text-3)', cursor: 'pointer', textAlign: 'center', fontFamily: 'inherit', fontWeight: 800, fontSize: 12, padding: 4 }}><span style={{ width: 42, height: 42, margin: '0 auto 7px', borderRadius: '50%', display: 'grid', placeItems: 'center', background: step === item.id ? 'var(--gold)' : 'var(--surface-2)', color: step === item.id ? 'var(--gold-ink)' : 'var(--text-3)', border: '1px solid var(--border)', fontSize: 20 }}>{item.mark}</span>{item.label}</button>)}
+    <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(5, minmax(112px, 1fr))', gap: 8, borderBottom: '1px solid var(--border)', paddingBottom: 14, marginBottom: 12, overflowX: 'auto' }}>
+      <span aria-hidden="true" style={{ position: 'absolute', top: 25, left: '10%', right: '10%', height: 2, background: 'var(--border)', borderRadius: 2 }} />
+      {STEPS.map((item) => {
+        const actif = step === item.id;
+        return <button key={item.id} type="button" aria-current={actif ? 'step' : undefined} onClick={() => setStep(item.id)} style={{ position: 'relative', border: 0, background: 'transparent', color: actif ? 'var(--text)' : 'var(--text-3)', cursor: 'pointer', textAlign: 'center', fontFamily: 'inherit', fontWeight: 800, fontSize: 12, padding: '0 4px 10px' }}>
+          <span style={{ width: 46, height: 46, margin: '0 auto 8px', borderRadius: '50%', display: 'grid', placeItems: 'center', background: actif ? 'var(--gold)' : 'var(--surface-2)', color: actif ? 'var(--gold-ink)' : 'var(--text-3)', border: `1.5px solid ${actif ? 'var(--gold)' : 'var(--border-2)'}`, boxShadow: actif ? '0 2px 12px rgba(255, 202, 0, .26)' : 'none', fontSize: 20 }}>{item.mark}</span>
+          {item.label}
+          {actif && <span aria-hidden="true" style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 34, height: 3, borderRadius: 3, background: 'var(--gold)' }} />}
+        </button>;
+      })}
     </div>
-    {SUBNAV[step] && <div style={{ display: 'flex', gap: 7, overflowX: 'auto', padding: '7px 0 16px', marginBottom: 4 }}>{SUBNAV[step].map(([key, label]) => <button key={key} type="button" onClick={() => setCurrentSub(key)} style={pill(currentSub === key)}>{label}</button>)}</div>}
+    {SUBNAV[step] && <div style={{ overflowX: 'auto', padding: '7px 0 16px', marginBottom: 4 }}><div role="tablist" style={tabsWrap}>{SUBNAV[step].map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={currentSub === key} onClick={() => setCurrentSub(key)} style={tab(currentSub === key)}>{label}</button>)}</div></div>}
     {notice && <div role="status" style={{ marginBottom: 14, padding: '10px 12px', background: 'var(--gold-soft)', color: 'var(--text)', borderRadius: 9, fontSize: 12 }}>{notice}</div>}
     <div style={{ display: 'grid', gap: 14 }}>{content}</div>
   </div>;
@@ -582,13 +607,12 @@ export default function SessionCockpit({ sessionId }) {
 function FollowUpColumn({ title: label, eyebrow, icon, tone, items, onNavigate }) {
   const completed = items.filter((item) => item.state === 'done').length;
   return <section aria-label={`${label} : ${completed} étapes finalisées sur ${items.length}`} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 8px 22px rgba(0,0,0,.04)', minHeight: 570 }}>
-    <div style={{ minHeight: 66, padding: '11px 14px', background: tone, color: 'var(--gold-ink)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, position: 'relative', overflow: 'hidden' }}>
-      <span aria-hidden="true" style={{ position: 'absolute', width: 106, height: 106, borderRadius: '50%', border: '18px solid rgba(255,255,255,.16)', right: -34, top: -50 }} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, position: 'relative' }}>
-        <span aria-hidden="true" style={{ width: 36, height: 36, borderRadius: '50%', display: 'grid', placeItems: 'center', border: '2px solid currentColor', fontSize: 19, fontWeight: 900 }}>{icon}</span>
-        <div><div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.09em', fontWeight: 900, opacity: .72 }}>{eyebrow}</div><h2 style={{ margin: '2px 0 0', fontSize: 17, letterSpacing: '-.02em' }}>{label}</h2></div>
+    <div style={{ minHeight: 62, padding: '12px 14px', background: 'var(--surface-2)', color: 'var(--text)', borderBottom: `2px solid ${tone}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span aria-hidden="true" style={{ width: 34, height: 34, borderRadius: '50%', display: 'grid', placeItems: 'center', background: `color-mix(in srgb, ${tone} 18%, transparent)`, border: `1.5px solid ${tone}`, color: tone, fontSize: 17, fontWeight: 900 }}>{icon}</span>
+        <div><div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.09em', fontWeight: 900, color: 'var(--text-3)' }}>{eyebrow}</div><h2 style={{ margin: '2px 0 0', fontSize: 16, letterSpacing: '-.02em', color: 'var(--text)' }}>{label}</h2></div>
       </div>
-      <span style={{ position: 'relative', borderRadius: 999, padding: '5px 8px', background: 'rgba(255,255,255,.24)', fontSize: 12, fontWeight: 900, whiteSpace: 'nowrap' }}>{completed}/{items.length}</span>
+      <span style={{ borderRadius: 999, padding: '5px 9px', background: `color-mix(in srgb, ${tone} 16%, transparent)`, color: tone, border: `1px solid color-mix(in srgb, ${tone} 34%, transparent)`, fontSize: 12, fontWeight: 900, whiteSpace: 'nowrap' }}>{completed}/{items.length}</span>
     </div>
     <div style={{ padding: '20px 14px 24px' }}>
       {items.map((item, index) => <FollowUpItem key={item.label} {...item} isLast={index === items.length - 1} onClick={() => onNavigate(item.step, item.sub)} />)}
@@ -599,7 +623,7 @@ function FollowUpColumn({ title: label, eyebrow, icon, tone, items, onNavigate }
 function FollowUpItem({ label, detail, state, isLast, onClick }) {
   const stateStyle = {
     done: { mark: '✓', color: 'var(--success)', soft: 'var(--success-soft)', text: 'Validé', action: 'Modifier' },
-    alert: { mark: '!', color: 'var(--danger)', soft: 'var(--danger-soft)', text: 'À traiter', action: 'Compléter' },
+    alert: { mark: '!', color: 'var(--danger)', soft: 'var(--danger-soft)', text: 'À traiter', action: 'Compléter', solid: true },
     pending: { mark: '○', color: 'var(--gold)', soft: 'var(--gold-soft)', text: 'À suivre', action: 'Ouvrir' },
   }[state];
   return <button type="button" onClick={onClick} aria-label={`${stateStyle.action} : ${label}`} title={`${stateStyle.action} : ${label}`} style={{ width: '100%', padding: 0, border: 0, background: 'transparent', color: 'var(--text)', display: 'grid', gridTemplateColumns: '40px minmax(0, 1fr)', gap: 11, alignItems: 'stretch', textAlign: 'left', fontFamily: 'inherit', cursor: 'pointer' }}>
@@ -609,7 +633,7 @@ function FollowUpItem({ label, detail, state, isLast, onClick }) {
     </span>
     <span style={{ minWidth: 0, paddingBottom: isLast ? 0 : 12 }}>
       <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, color: stateStyle.color, fontSize: 15, fontWeight: 900, lineHeight: 1.2 }}><span>{label}</span><span aria-hidden="true" style={{ fontSize: 16, color: 'var(--text-3)' }}>›</span></span>
-      <span style={{ display: 'block', marginTop: 8, padding: '12px 13px', borderRadius: 11, background: stateStyle.soft, border: `1px solid color-mix(in srgb, ${stateStyle.color} 28%, transparent)`, color: 'var(--text)', whiteSpace: 'pre-line', fontSize: 12.5, fontWeight: 700, lineHeight: 1.48 }}>{detail}<span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 10, padding: '4px 7px', borderRadius: 999, background: 'var(--surface)', color: stateStyle.color, fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.04em' }}>{stateStyle.action} <span aria-hidden="true">→</span></span></span>
+      <span style={{ display: 'block', marginTop: 8, padding: '12px 13px', borderRadius: 11, background: stateStyle.soft, border: `1px solid color-mix(in srgb, ${stateStyle.color} 28%, transparent)`, color: 'var(--text)', whiteSpace: 'pre-line', fontSize: 12.5, fontWeight: 700, lineHeight: 1.48 }}>{detail}<span style={{ display: 'flex', marginTop: 12 }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 14px', borderRadius: 10, background: stateStyle.solid ? 'var(--gold)' : 'var(--surface)', color: stateStyle.solid ? 'var(--gold-ink)' : 'var(--text)', border: `1.5px solid ${stateStyle.solid ? 'var(--gold)' : 'var(--border-2)'}`, boxShadow: stateStyle.solid ? '0 2px 10px rgba(255, 202, 0, .22)' : 'none', fontSize: 12.5, fontWeight: 800 }}>{stateStyle.action} <span aria-hidden="true">→</span></span></span></span>
     </span>
   </button>;
 }
@@ -669,7 +693,7 @@ function EditableLearner({ item, onReload, onNotice }) {
 
 function DocumentRegister({ documents, onRegenerate }) {
   if (!documents.length) return <Empty>Aucun document n’a encore été généré et archivé dans cette session.</Empty>;
-  return <div style={{ overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}><thead><tr>{['Document', 'Version', 'Généré le', 'Mise à jour'].map((label) => <th key={label} style={{ textAlign: 'left', color: 'var(--text-3)', padding: '10px', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', fontSize: 10 }}>{label}</th>)}</tr></thead><tbody>{documents.map((doc) => <tr key={doc.id}><td style={{ padding: '11px 10px', borderBottom: '1px solid var(--border)', color: 'var(--text)', fontWeight: 700 }}>{doc.libelle}<div style={muted}>{doc.notes || 'Document de session'}</div></td><td style={{ padding: '11px 10px', borderBottom: '1px solid var(--border)' }}>v{doc.version || 1}</td><td style={{ padding: '11px 10px', borderBottom: '1px solid var(--border)' }}>{dateTimeFr(doc.created_at)}</td><td style={{ padding: '11px 10px', borderBottom: '1px solid var(--border)' }}><div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}><a href={doc.fichier} target="_blank" rel="noreferrer" style={{ color: 'var(--gold)', fontWeight: 800 }}>Ouvrir</a><button type="button" onClick={() => onRegenerate(doc)} style={{ border: 0, padding: 0, background: 'transparent', color: 'var(--info)', font: 'inherit', fontWeight: 800, cursor: 'pointer' }}>Mettre à jour</button></div></td></tr>)}</tbody></table></div>;
+  return <div style={{ overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}><thead><tr>{['Document', 'Version', 'Généré le', 'Mise à jour'].map((label) => <th key={label} style={{ textAlign: 'left', color: 'var(--text-3)', padding: '10px', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', fontSize: 10 }}>{label}</th>)}</tr></thead><tbody>{documents.map((doc) => <tr key={doc.id}><td style={{ padding: '11px 10px', borderBottom: '1px solid var(--border)', color: 'var(--text)', fontWeight: 700 }}>{doc.libelle}<div style={muted}>{doc.notes || 'Document de session'}</div></td><td style={{ padding: '11px 10px', borderBottom: '1px solid var(--border)' }}>v{doc.version || 1}</td><td style={{ padding: '11px 10px', borderBottom: '1px solid var(--border)' }}>{dateTimeFr(doc.created_at)}</td><td style={{ padding: '11px 10px', borderBottom: '1px solid var(--border)' }}><div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}><Action small href={doc.fichier}>Ouvrir</Action><Action small secondary onClick={() => onRegenerate(doc)}>Mettre à jour</Action></div></td></tr>)}</tbody></table></div>;
 }
 
 function EmailHistory({ emails, mode }) {
