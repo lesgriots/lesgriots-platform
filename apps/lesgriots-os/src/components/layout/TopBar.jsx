@@ -98,7 +98,10 @@ function FilAriane({ pathname, title }) {
   }
 
   // Sur une liste, le titre de la page redit déjà la dernière étape.
-  const memeMot = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+  // L'apostrophe courbe et la droite disent le même mot : « Vue d’ensemble »
+  // au menu et « Vue d'ensemble » en titre ne doivent pas s'afficher deux fois.
+  const nu = (t) => String(t || '').trim().toLowerCase().replace(/[’']/g, "'");
+  const memeMot = (a, b) => nu(a) === nu(b);
 
   if (!chemin.fiche) {
     return (
