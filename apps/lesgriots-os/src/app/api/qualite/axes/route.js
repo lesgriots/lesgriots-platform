@@ -44,6 +44,23 @@ async function _PATCH(request) {
   } catch (e) { return NextResponse.json({ error: e.message }, { status: 500 }); }
 }
 
+/**
+ * Un axe se supprime, mais rien ne disparaît avec lui : incidents et actions
+ * gardent leur trace, ils perdent seulement le rattachement.
+ */
+async function _DELETE(request) {
+  try {
+    const db = getDb();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    db.prepare("UPDATE reclamations SET axe_id = '' WHERE axe_id = ?").run(id);
+    const res = db.prepare('DELETE FROM axes_amelioration WHERE id = ?').run(id);
+    if (!res.changes) return NextResponse.json({ error: 'introuvable' }, { status: 404 });
+    return NextResponse.json({ ok: true });
+  } catch (e) { return NextResponse.json({ error: e.message }, { status: 500 }); }
+}
+
 export const GET = withGuard('qualite:read', _GET);
 export const POST = withGuard('qualite:create', _POST);
 export const PATCH = withGuard('qualite:create', _PATCH);
+export const DELETE = withGuard('qualite:delete', _DELETE);

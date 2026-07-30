@@ -42,6 +42,11 @@ const ROUTES_GRIOTHEQUE = [
   '/intervenants',
   '/lieux',
   '/qualite',
+  // Écrans de qualité et de pilotage : sans eux, le serveur rendait le menu
+  // Studio et le client le remplaçait au montage. Un clignotement, et une
+  // erreur d'hydratation à chaque chargement.
+  '/amelioration-continue',
+  '/a-construire',
   '/parametres-formation',
   '/entreprises',
   '/financeurs',

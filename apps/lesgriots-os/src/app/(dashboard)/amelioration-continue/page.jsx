@@ -16,7 +16,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import TopBar from '@/components/layout/TopBar';
-import { Card, EmptyState, Skeleton } from '@/components/ui';
+import { Card, EmptyState, Skeleton, useConfirm } from '@/components/ui';
 
 /* ── Vocabulaire ──────────────────────────────────────────────────────── */
 
@@ -150,6 +150,25 @@ const tab = (actif) => ({
   cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
 });
 
+/** Une croix discrète : on efface une saisie fausse, pas une histoire vraie. */
+function Croix({ onClick, titre }) {
+  return (
+    <button
+      type="button"
+      title={titre}
+      aria-label={titre}
+      onClick={onClick}
+      style={{
+        border: '1px solid var(--border-2)', background: 'transparent', color: 'var(--text-3)',
+        width: 26, height: 26, borderRadius: 7, cursor: 'pointer', fontSize: 14,
+        lineHeight: 1, fontFamily: 'inherit', padding: 0,
+      }}
+    >
+      ×
+    </button>
+  );
+}
+
 function Champ({ label, aide, children }) {
   return (
     <div>
@@ -231,6 +250,17 @@ export default function AmeliorationContinuePage() {
     return true;
   };
 
+  const confirmer = useConfirm();
+
+  /** Suppression d'une ligne, après confirmation. Les liens survivent. */
+  const supprimer = async (url, titre, message) => {
+    const ok = await confirmer({ title: titre, message, confirmLabel: 'Supprimer' });
+    if (!ok) return;
+    const r = await fetch(url, { method: 'DELETE' });
+    if (!r.ok) { setErreur('La suppression a échoué.'); return; }
+    await charger();
+  };
+
   const chargement = incidents === null || actions === null || axes === null;
 
   const compteurs = useMemo(() => ({
@@ -280,6 +310,7 @@ export default function AmeliorationContinuePage() {
             ouvert={formulaire === 'incident'}
             setOuvert={(v) => setFormulaire(v ? 'incident' : null)}
             enregistrer={enregistrer}
+            supprimer={supprimer}
           />
         )}
 
@@ -291,6 +322,7 @@ export default function AmeliorationContinuePage() {
             ouvert={formulaire === 'action'}
             setOuvert={(v) => setFormulaire(v ? 'action' : null)}
             enregistrer={enregistrer}
+            supprimer={supprimer}
           />
         )}
 
@@ -300,6 +332,7 @@ export default function AmeliorationContinuePage() {
             ouvert={formulaire === 'axe'}
             setOuvert={(v) => setFormulaire(v ? 'axe' : null)}
             enregistrer={enregistrer}
+            supprimer={supprimer}
           />
         )}
       </div>
@@ -315,7 +348,7 @@ const INCIDENT_VIDE = {
   recue_le: new Date().toISOString().slice(0, 10),
 };
 
-function OngletIncidents({ incidents, axes, ouvert, setOuvert, enregistrer }) {
+function OngletIncidents({ incidents, axes, ouvert, setOuvert, enregistrer, supprimer }) {
   const [f, setF] = useState(INCIDENT_VIDE);
   const [occupe, setOccupe] = useState(false);
   const maj = (k) => (e) => setF({ ...f, [k]: e.target.value });
@@ -409,6 +442,7 @@ function OngletIncidents({ incidents, axes, ouvert, setOuvert, enregistrer }) {
                   <th style={entete}>Axe d’amélioration</th>
                   <th style={entete}>Reçu le</th>
                   <th style={entete}>Statut</th>
+                  <th style={entete} />
                 </tr>
               </thead>
               <tbody>
@@ -433,6 +467,13 @@ function OngletIncidents({ incidents, axes, ouvert, setOuvert, enregistrer }) {
                         <Options liste={STATUTS_INCIDENT} />
                       </select>
                     </td>
+                    <td style={cellule}>
+                      <Croix
+                        titre="Supprimer cet incident"
+                        onClick={() => supprimer(`/api/reclamations/${i.id}`, 'Supprimer cet incident ?',
+                          'Les actions correctives déjà écrites restent, elles perdent seulement ce rattachement.')}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -451,7 +492,7 @@ const ACTION_VIDE = {
   statut: 'a_faire', date_echeance: '', date_realisation: '', preuve: '',
 };
 
-function OngletActions({ actions, incidents, axes, ouvert, setOuvert, enregistrer }) {
+function OngletActions({ actions, incidents, axes, ouvert, setOuvert, enregistrer, supprimer }) {
   const [f, setF] = useState(ACTION_VIDE);
   const [occupe, setOccupe] = useState(false);
   const maj = (k) => (e) => setF({ ...f, [k]: e.target.value });
@@ -540,6 +581,7 @@ function OngletActions({ actions, incidents, axes, ouvert, setOuvert, enregistre
                   <th style={entete}>Nom de l’action corrective</th>
                   <th style={entete}>Statut</th>
                   <th style={entete}>Type</th>
+                  <th style={entete} />
                 </tr>
               </thead>
               <tbody>
@@ -567,6 +609,13 @@ function OngletActions({ actions, incidents, axes, ouvert, setOuvert, enregistre
                       </select>
                     </td>
                     <td style={cellule}>{libelle(TYPES_ACTION, a.type)}</td>
+                    <td style={cellule}>
+                      <Croix
+                        titre="Supprimer cette action"
+                        onClick={() => supprimer(`/api/qualite/actions?id=${a.id}`, 'Supprimer cette action ?',
+                          'L’incident d’origine reste au registre.')}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -582,7 +631,7 @@ function OngletActions({ actions, incidents, axes, ouvert, setOuvert, enregistre
 
 const AXE_VIDE = { nom: '', description: '', statut: 'ouvert', date_echeance: '' };
 
-function OngletAxes({ axes, ouvert, setOuvert, enregistrer }) {
+function OngletAxes({ axes, ouvert, setOuvert, enregistrer, supprimer }) {
   const [f, setF] = useState(AXE_VIDE);
   const [occupe, setOccupe] = useState(false);
   const maj = (k) => (e) => setF({ ...f, [k]: e.target.value });
@@ -648,6 +697,7 @@ function OngletAxes({ axes, ouvert, setOuvert, enregistrer }) {
                   <th style={entete}>Nom de l’axe d’amélioration</th>
                   <th style={entete}>Rattachements</th>
                   <th style={entete}>Statut</th>
+                  <th style={entete} />
                 </tr>
               </thead>
               <tbody>
@@ -671,6 +721,13 @@ function OngletAxes({ axes, ouvert, setOuvert, enregistrer }) {
                       >
                         <Options liste={STATUTS_AXE} />
                       </select>
+                    </td>
+                    <td style={cellule}>
+                      <Croix
+                        titre="Supprimer cet axe"
+                        onClick={() => supprimer(`/api/qualite/axes?id=${a.id}`, 'Supprimer cet axe ?',
+                          'Ses incidents et ses actions restent, ils perdent seulement le rattachement.')}
+                      />
                     </td>
                   </tr>
                 ))}
