@@ -47,6 +47,10 @@ const ROUTES_GRIOTHEQUE = [
   // erreur d'hydratation à chaque chargement.
   '/amelioration-continue',
   '/a-construire',
+  // La fiche d'une affaire vit ici : sans elle, le serveur rendait le menu
+  // Studio et le navigateur le remplaçait au montage.
+  '/opportunites',
+  '/legal',
   '/parametres-formation',
   '/entreprises',
   '/financeurs',
