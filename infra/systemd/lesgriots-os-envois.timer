@@ -1,0 +1,14 @@
+# Chaque matin à 07:30, heure serveur. Le matin, comme chez Digiforma :
+# une convocation qui arrive à 3 h du matin se lit mal.
+# Persistent=true rattrape le tir si le VPS était éteint.
+
+[Unit]
+Description=LES GRIOTHÈQUE OS — convocations automatiques (07:30)
+
+[Timer]
+OnCalendar=*-*-* 07:30:00
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target

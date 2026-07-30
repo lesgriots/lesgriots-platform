@@ -1,0 +1,23 @@
+# Envoi automatique des convocations aux apprenants.
+# Déclenché par lesgriots-os-envois.timer (07:30). Ce VPS n'a pas de cron :
+# la planification passe par les timers systemd (convention de la machine).
+#
+# Installation :
+#   sudo cp infra/systemd/lesgriots-os-envois.{service,timer} /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now lesgriots-os-envois.timer
+#
+# Essai à blanc, sans rien envoyer :
+#   curl -s -H "x-api-key: $OS_API_KEY" https://app.lagriotheque.com/api/griotheque/envois-auto
+
+[Unit]
+Description=LES GRIOTHÈQUE OS — convocations automatiques
+After=network-online.target lesgriots-os.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=deployment
+WorkingDirectory=/var/www/ecosystem/production/lesgriots-platform/apps/lesgriots-os
+ExecStart=/var/www/ecosystem/production/lesgriots-platform/infra/scripts/envois-auto.sh
+StandardOutput=append:/var/log/lesgriots-os-envois.log
+StandardError=append:/var/log/lesgriots-os-envois.log

@@ -134,6 +134,7 @@ export default function SessionCockpit({ sessionId }) {
   const [step, setStep] = useState('avancement');
   const [sub, setSub] = useState({ configuration: 'initialisation', gestion: 'conventions', apprenant: 'acces', suivi: 'emargements' });
   const [envoi, setEnvoi] = useState(null);
+  const [essaiAuto, setEssaiAuto] = useState(null);
   const [notice, setNotice] = useState('');
   const [convocationConfig, setConvocationConfig] = useState({ enabled: false, leadDays: 4, documentTemplate: 'Modèle par défaut', emailTemplate: 'Modèle par défaut' });
   const [datesConfig, setDatesConfig] = useState({ startDate: '', endDate: '', location: '', horaire: '', modality: 'Présentiel', tarif: '', maxParticipants: '' });
@@ -511,6 +512,17 @@ export default function SessionCockpit({ sessionId }) {
     return <section style={card}><h2 style={title}>Informations générales</h2><p style={muted}>Les champs ci-dessous sont propres à cette session. Le programme associé se modifie depuis sa fiche catalogue.</p><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginTop: 18 }}><label style={{ display: 'grid', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--text-3)' }}>Programme associé<input value={session.formation_title || ''} readOnly style={{ ...inputStyle, opacity: .7 }} /></label><label style={{ display: 'grid', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--text-3)' }}>Code interne<input value={generalConfig.codeInterne} onChange={(event) => setGeneralConfig((current) => ({ ...current, codeInterne: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--text-3)' }}>Type de session<select value={generalConfig.typeSession} onChange={(event) => setGeneralConfig((current) => ({ ...current, typeSession: event.target.value }))} style={{ ...selectStyle, width: '100%' }}><option value="">À définir</option><option value="INTER">Inter entreprise</option><option value="INTRA">Intra entreprise</option></select></label><label style={{ display: 'grid', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--text-3)' }}>Statut<select value={generalConfig.status} onChange={(event) => setGeneralConfig((current) => ({ ...current, status: event.target.value }))} style={{ ...selectStyle, width: '100%' }}><option value="">À définir</option><option>Projet</option><option>Planifiée</option><option>En cours</option><option>Terminée</option><option>Archivée</option></select></label><label style={{ display: 'grid', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--text-3)' }}>Gestionnaire n°1<input value={generalConfig.manager} onChange={(event) => setGeneralConfig((current) => ({ ...current, manager: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--text-3)' }}>Gestionnaire n°2<input value={generalConfig.manager2} onChange={(event) => setGeneralConfig((current) => ({ ...current, manager2: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--text-3)' }}>Fuseau horaire<input value={generalConfig.timeZone} onChange={(event) => setGeneralConfig((current) => ({ ...current, timeZone: event.target.value }))} style={inputStyle} /></label></div><label style={{ display: 'grid', gap: 6, marginTop: 14, fontSize: 12, fontWeight: 700, color: 'var(--text-3)' }}>Notes de session<textarea value={generalConfig.notes} onChange={(event) => setGeneralConfig((current) => ({ ...current, notes: event.target.value }))} rows={4} style={{ ...inputStyle, resize: 'vertical' }} /></label><div style={{ marginTop: 18 }}><Action onClick={saveGeneralConfig}>Enregistrer les informations</Action></div></section>;
   };
 
+  /** Ce que l'envoi automatique ferait ce matin, sans rien envoyer. */
+  const essayerEnvoiAuto = async () => {
+    setEssaiAuto('chargement');
+    try {
+      const r = await fetch('/api/griotheque/envois-auto');
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Essai impossible');
+      setEssaiAuto(d.sessions_traitees?.find((x) => x.session_id === sessionId) || { aucun: true, mode: d.mode_smtp, armees: d.sessions_armees });
+    } catch (e) { setNotice(e.message); setEssaiAuto(null); }
+  };
+
   const renderClients = () => <ClientsSession sessionId={sessionId} onNotice={setNotice} />;
 
   const renderGestion = () => {
@@ -526,7 +538,30 @@ export default function SessionCockpit({ sessionId }) {
             <label style={{ display: 'grid', gap: 6, fontSize: 12, color: 'var(--text-3)', fontWeight: 700 }}>Modèle de document<select value={convocationConfig.documentTemplate} onChange={(event) => setConvocationConfig((current) => ({ ...current, documentTemplate: event.target.value }))} style={selectStyle}><option>Modèle par défaut</option><option>Convocation standard</option></select></label>
             <label style={{ display: 'grid', gap: 6, fontSize: 12, color: 'var(--text-3)', fontWeight: 700 }}>Modèle d’e-mail<select value={convocationConfig.emailTemplate} onChange={(event) => setConvocationConfig((current) => ({ ...current, emailTemplate: event.target.value }))} style={selectStyle}><option>Modèle par défaut</option><option>E-mail de convocation</option></select></label>
           </div>
-          <div><Action onClick={saveConvocationConfig}>Enregistrer</Action></div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+            <Action onClick={saveConvocationConfig}>Enregistrer</Action>
+            <Action secondary onClick={essayerEnvoiAuto}>Voir ce qui partirait</Action>
+          </div>
+
+          <div style={{ padding: '12px 14px', borderRadius: 10, background: convocationConfig.enabled ? 'var(--success-soft)' : 'var(--surface-2)', border: `1.5px solid ${convocationConfig.enabled ? 'color-mix(in srgb, var(--success) 40%, transparent)' : 'var(--border)'}`, fontSize: 12.5, lineHeight: 1.6 }}>
+            {convocationConfig.enabled ? <>
+              <b>L’envoi automatique est armé.</b> Un travail tourne sur le serveur chaque matin à 7 h 30 et envoie la convocation à tout apprenant qui n’en a pas déjà reçu une, dès qu’il reste {convocationConfig.leadDays} jour(s) ou moins avant le début.
+              {session.start_date && <> Pour cette session, la fenêtre s’ouvre le {dateFr(new Date(new Date(`${String(session.start_date).slice(0, 10)}T12:00:00`).getTime() - Number(convocationConfig.leadDays || 0) * 86400000).toISOString().slice(0, 10))}.</>}
+            </> : <>
+              <b>L’envoi automatique est désarmé.</b> Rien ne partira tout seul pour cette session : les convocations restent à envoyer à la main depuis la fenêtre d’envoi.
+            </>}
+          </div>
+
+          {essaiAuto && <div style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--border)', fontSize: 12.5, lineHeight: 1.6 }}>
+            {essaiAuto === 'chargement' ? 'Essai en cours…' : essaiAuto.aucun ? <>
+              Rien ne partirait pour cette session aujourd’hui{essaiAuto.armees ? ` (${essaiAuto.armees} session(s) armée(s) au total)` : ''}. Soit l’envoi n’est pas activé, soit la fenêtre n’est pas ouverte, soit tout le monde a déjà reçu sa convocation.
+            </> : <>
+              <b>Aujourd’hui, {essaiAuto.a_convoquer.length} convocation(s) partiraient</b> pour cette session, à {essaiAuto.jours_avant} jour(s) du début.
+              {essaiAuto.a_convoquer.length > 0 && <> Destinataires : {essaiAuto.a_convoquer.join(', ')}.</>}
+              {essaiAuto.sans_email > 0 && <> {essaiAuto.sans_email} apprenant(s) sans adresse seraient ignorés.</>}
+              {' '}Aucun e-mail n’a été envoyé : c’est un essai à blanc.
+            </>}
+          </div>}
         </div>
       </section>
       <section style={card}>
