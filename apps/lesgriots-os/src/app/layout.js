@@ -13,13 +13,14 @@ export const metadata = {
   title: 'LA GRIOTHÈQUE OS',
   description: 'LA GRIOTHÈQUE OS · Le pilotage de l’organisme de formation',
   manifest: '/manifest.webmanifest',
-  icons: {
-    // Le symbole officiel est utilisé pour l'onglet, les raccourcis et l'app installée.
-    // Le mot-symbole complet reste affiché là où la place le permet (connexion/sidebar).
-    icon: [{ url: '/branding/griotring-ink.png', sizes: '512x512', type: 'image/png' }],
-    shortcut: [{ url: '/branding/griotring-ink.png', sizes: '512x512', type: 'image/png' }],
-    apple: [{ url: '/branding/griotring-ink.png', sizes: '512x512', type: 'image/png' }],
-  },
+  // Les icônes ne sont pas déclarées ici : Next sert `src/app/icon.png` et
+  // `src/app/apple-icon.png`, qui priment de toute façon sur ce champ. C'est
+  // ce doublon qui faisait afficher un fragment d'image dans l'onglet pendant
+  // que le vrai symbole dormait dans /branding.
+  //
+  // Le signe choisi est le G du mot-marque LA GRIOTHÈQUE, encre sur or : le
+  // sceau du griot est trop fin pour tenir dans 16 pixels, il reste le
+  // symbole des grands formats (connexion, sidebar, documents).
 };
 
 export default function RootLayout({ children }) {

@@ -1,6 +1,7 @@
 'use client';
 import { usePathname } from 'next/navigation';
 import { estGriotheque } from './ThemeSection';
+import { NAV, RAIL_SECTIONS } from '@/lib/menu';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useMediaQuery } from '@/components/ui';
@@ -46,69 +47,6 @@ const icons = {
 };
 
 // Menu réagencé (grille Chris Do) : la Griothèque — moteur cash — passe en premier.
-const NAV = [
-  { type: 'item', href: '/', icon: 'home', label: 'Accueil', monde: 'studio' },
-  // Sur le domaine Griothèque, l'accueil est la vue d'ensemble de l'OF.
-  { type: 'item', href: '/apercu', icon: 'home', label: 'Vue d’ensemble', monde: 'griotheque' },
-
-  // ── Monde Griothèque : le découpage de l'ancienne interface, conservé ──
-  { href: '/agenda', icon: 'sessions', label: 'Agenda', monde: 'griotheque' },
-  { type: 'divider', label: 'COMMERCIAL', monde: 'griotheque' },
-  { href: '/pipeline-formations', icon: 'pipeline', label: 'Pipeline', monde: 'griotheque', compteur: 'pipeline' },
-  { href: '/facturation', icon: 'pricing', label: 'Facturation', monde: 'griotheque' },
-  { type: 'divider', label: 'CATALOGUE', monde: 'griotheque' },
-  {
-    type: 'groupe', label: 'Bibliothèque', icon: 'formations', monde: 'griotheque',
-    enfants: [
-      { href: '/catalogue', icon: 'formations', label: 'Programmes' },
-      { href: '/catalogue?vue=blocs', icon: 'projects', label: 'Blocs pédagogiques' },
-      { href: '/catalogue?vue=evaluations', icon: 'formations', label: 'Évaluations' },
-      { href: '/catalogue?vue=programmes-archives', icon: 'projects', label: 'Programmes archivés' },
-      { href: '/catalogue?vue=blocs-archives', icon: 'projects', label: 'Blocs archivés' },
-    ],
-  },
-  { href: '/sessions-list', icon: 'sessions', label: 'Sessions', monde: 'griotheque', compteur: 'sessions' },
-  { href: '/evaluations', icon: 'formations', label: 'Résultats évaluations', monde: 'griotheque' },
-  { href: '/espace-apprenant', icon: 'apprenants', label: 'Espace apprenant', monde: 'griotheque' },
-  { href: '/emails', icon: 'clients', label: 'Emails', monde: 'griotheque' },
-  // Une seule entrée « Données », qui se déplie sur les six répertoires.
-  {
-    type: 'groupe', label: 'Données', icon: 'donnees', monde: 'griotheque',
-    enfants: [
-      { href: '/apprenants', icon: 'apprenants', label: 'Apprenants', compteur: 'apprenants' },
-      { href: '/entreprises', icon: 'clients', label: 'Entreprises' },
-      { href: '/financeurs', icon: 'finances', label: 'Financeurs' },
-      { href: '/intervenants', icon: 'team', label: 'Intervenants' },
-      // « Clients » vivait ici en double d'« Entreprises » : deux écrans sur
-      // la même table, l'un hérité de l'agence, l'autre avec les fiches de
-      // l'organisme. Entreprises fait foi. L'écran agence reste accessible
-      // depuis le monde Studio, où il a son propre usage.
-      { href: '/lieux', icon: 'projects', label: 'Lieux' },
-    ],
-  },
-  { type: 'divider', label: 'QUALITÉ', monde: 'griotheque' },
-  { href: '/bpf', icon: 'finances', label: 'Bilan (BPF)', monde: 'griotheque' },
-  { href: '/qualite', icon: 'settings', label: 'Qualité', monde: 'griotheque' },
-  { href: '/organisme', icon: 'organisme', label: 'Organisme', monde: 'griotheque', compteur: 'conformite', ton: 'alerte' },
-
-  // ── Monde Studio : inchangé ──
-  { type: 'divider', label: 'GRIOTHÈQUE', monde: 'studio' },
-  { href: '/formations', icon: 'formations', label: 'Formations', monde: 'studio' },
-  { type: 'divider', label: 'STUDIO', monde: 'studio' },
-  { href: '/projects', icon: 'projects', label: 'Projets', monde: 'studio' },
-  { href: '/pipeline', icon: 'pipeline', label: 'Pipeline', monde: 'studio' },
-  { type: 'divider', label: 'ARGENT', monde: 'studio' },
-  { href: '/finances', icon: 'finances', label: 'Finances', monde: 'studio' },
-  { href: '/pricing', icon: 'pricing', label: 'TJM', monde: 'studio' },
-
-  { type: 'divider', label: 'RÉPERTOIRE', monde: 'studio' },
-  { href: '/clients', icon: 'clients', label: 'Clients', monde: 'studio' },
-  { href: '/providers', icon: 'providers', label: 'Prestataires', monde: 'studio' },
-  { href: '/team', icon: 'team', label: 'Équipe', monde: 'studio' },
-  { type: 'spacer' },
-  { href: '/parametres-formation', icon: 'settings', label: 'Paramètres', monde: 'griotheque' },
-  { href: '/settings', icon: 'settings', label: 'Réglages' },
-];
 
 // Deux libellés d'identité : l'initiale quand la place manque, le rôle en clair.
 const initiales = (nom) => (nom || '')
@@ -496,85 +434,6 @@ function ClassicSidebar() {
  * panneaux reprennent le fonctionnement demandé : clic sur une rubrique, panneau
  * contextuel, puis lien direct vers l'écran concerné.
  */
-const RAIL_SECTIONS = [
-  {
-    id: 'pilotage', icon: 'home', label: 'Pilotage',
-    links: [
-      { href: '/apercu', label: "Vue d'ensemble" },
-      { href: '/agenda', label: 'Agenda' },
-    ],
-  },
-  {
-    id: 'commercial', icon: 'pricing', label: 'Gestion commerciale',
-    links: [
-      { href: '/pipeline-formations', label: 'Tunnel de vente' },
-      { href: '/recyclages', label: 'Suivi des recyclages' },
-      { href: '/inscriptions', label: 'Inscriptions' },
-      { divider: true },
-      { href: '/opportunites-archivees', label: 'Opportunités archivées' },
-    ],
-  },
-  {
-    id: 'sessions', icon: 'sessions', label: 'Sessions de formation',
-    links: [
-      { href: '/sessions-list', label: 'Toutes mes sessions' },
-      { divider: true },
-      { href: '/sessions-list?vue=archivees', label: 'Sessions archivées' },
-    ],
-  },
-  {
-    id: 'bibliotheque', icon: 'formations', label: 'Bibliothèque',
-    links: [
-      { href: '/catalogue', label: 'Programmes' },
-      { href: '/catalogue?vue=evaluations', label: 'Évaluations' },
-      { divider: true },
-      { href: '/catalogue?vue=programmes-archives', label: 'Programmes archivés' },
-      { href: '/catalogue?vue=blocs-archives', label: 'Blocs pédagogiques archivés' },
-    ],
-  },
-  {
-    id: 'rapports', icon: 'finances', label: "Rapports d'activité",
-    links: [
-      { href: '/apercu', label: "Suivi de l'activité" },
-      { href: '/facturation', label: 'Suivi des factures' },
-      { href: '/pipeline-formations', label: 'Suivi commercial' },
-      { href: '/bpf', label: 'Bilan pédagogique et financier' },
-      { href: '/qualite', label: 'Suivi qualité' },
-      { href: '/amelioration-continue', label: 'Amélioration continue' },
-    ],
-  },
-  {
-    id: 'donnees', icon: 'donnees', label: 'Données',
-    links: [
-      { href: '/entreprises', label: 'Entreprises' },
-      { href: '/apprenants', label: 'Apprenants' },
-      { href: '/intervenants', label: 'Intervenants' },
-      { href: '/financeurs', label: 'Financeurs externes' },
-      { href: '/lieux', label: 'Lieux de formation' },
-    ],
-  },
-  {
-    // Ce menu avait été écrit sur le modèle de Digiforma, avant que les écrans
-    // existent : sept entrées sur onze menaient ailleurs que ce qu'elles
-    // annonçaient. Cinq portaient un « ?vue= » que personne ne lisait, et
-    // « Comptes d'accès » ouvrait les coordonnées bancaires.
-    //
-    // Il ne reste ici que ce qui existe vraiment. Ce qui manque n'a pas
-    // disparu : il est listé, avec sa raison d'être, dans « Ce qui reste à
-    // construire ». Un menu qui ment coûte plus cher qu'un menu court.
-    id: 'configuration', icon: 'settings', label: 'Configuration',
-    links: [
-      { href: '/parametres-formation', label: "Identité de l’organisme" },
-      { href: '/organisme', label: 'Pièces de l’organisme' },
-      { divider: true },
-      { href: '/emails', label: "Modèles d'e-mails" },
-      { href: '/espace-apprenant', label: 'Espace apprenant' },
-      { href: '/workflows', label: 'Workflows agence' },
-      { divider: true },
-      { href: '/a-construire', label: 'Ce qui reste à construire' },
-    ],
-  },
-];
 
 function GriothequeSidebar() {
   const pathname = usePathname() || '/apercu';

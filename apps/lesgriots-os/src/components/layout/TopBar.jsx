@@ -1,7 +1,9 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { estGriotheque } from './ThemeSection';
+import { cheminGriotheque } from '@/lib/menu';
 import { sessionHref } from '@/lib/navigation';
 
 const CATEGORY_ICONS = {
@@ -54,6 +56,40 @@ function ThemeToggle() {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       )}
     </button>
+  );
+}
+
+
+/**
+ * FilAriane — la position dans l'application, lue au-dessus du titre.
+ *
+ * La maison d'abord, puis la section du menu, puis l'écran. Le dernier
+ * segment n'est pas répété quand il dit déjà la même chose que le titre :
+ * une ligne qui se répète ne renseigne personne.
+ */
+function FilAriane({ pathname, title }) {
+  const griotheque = estGriotheque(pathname || '');
+  const racine = griotheque ? 'LA GRIOTHÈQUE' : 'LES GRIOTS · OS';
+  const chemin = griotheque ? cheminGriotheque(pathname) : [];
+
+  // Un écran dont le nom de menu est déjà le titre n'a pas à le redire.
+  const normalise = (t) => String(t || '').trim().toLowerCase();
+  const etapes = chemin.filter((e, i) => !(i === chemin.length - 1 && normalise(e) === normalise(title)));
+
+  const sep = { color: 'var(--text-3)', opacity: 0.5, margin: '0 6px' };
+
+  return (
+    <div className="eyebrow" style={{ marginBottom: 2, display: 'flex', alignItems: 'center', flexWrap: 'wrap', minWidth: 0 }}>
+      <Link href={griotheque ? '/apercu' : '/'} style={{ color: 'inherit', textDecoration: 'none' }}>
+        {racine}
+      </Link>
+      {etapes.map((etape) => (
+        <span key={etape} style={{ display: 'inline-flex', alignItems: 'center', minWidth: 0 }}>
+          <span style={sep} aria-hidden="true">·</span>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{etape}</span>
+        </span>
+      ))}
+    </div>
   );
 }
 
@@ -182,10 +218,8 @@ export default function TopBar({ title, subtitle, right = null }) {
         zIndex: 40,
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, flex: 1 }}>
-          {/* Eyebrow — chemin / contexte */}
-          <div className="eyebrow" style={{ marginBottom: 2 }}>
-            {estGriotheque(pathname || '') ? 'LA GRIOTHÈQUE · ORGANISME DE FORMATION' : 'LES GRIOTS · OS'}
-          </div>
+          {/* Le fil d'Ariane : d'où l'on vient, avant de dire où l'on est. */}
+          <FilAriane pathname={pathname} title={title} />
           <h1 style={{
             fontFamily: 'var(--font-display)',
             fontWeight: 500,

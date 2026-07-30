@@ -4,14 +4,20 @@
   "description": "Le pilotage de l’organisme de formation LA GRIOTHÈQUE.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f6f5f3",
+  "background_color": "#FFCA00",
   "theme_color": "#090909",
   "icons": [
     {
-      "src": "/branding/griotring-ink.png",
+      "src": "/branding/griotheque-app-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/branding/griotheque-app-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
