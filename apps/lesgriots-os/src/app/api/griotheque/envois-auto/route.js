@@ -84,6 +84,21 @@ export const CAMPAGNES = [
   },
 ];
 
+/**
+ * Le programme retient-il ce questionnaire ?
+ *
+ * La fiche du programme décide des questionnaires servis. Une enquête que
+ * l'espace apprenant ne proposera pas ne doit pas partir : sinon l'apprenant
+ * reçoit un e-mail, clique, et ne trouve rien à remplir. Liste vide = tout
+ * est servi, comme partout ailleurs.
+ */
+function retenuParLeProgramme(session, campagne) {
+  if (campagne !== 'chaud' && campagne !== 'froid') return true;
+  let retenus = [];
+  try { retenus = JSON.parse(session.formation_evaluations || '[]') || []; } catch { retenus = []; }
+  return !retenus.length || retenus.includes(campagne);
+}
+
 /** Jours entre une date et aujourd'hui : positif si la date est à venir. */
 function ecart(date, auj) {
   return Math.round((new Date(`${String(date).slice(0, 10)}T12:00:00`) - new Date(`${auj}T12:00:00`)) / 86400000);
@@ -123,7 +138,8 @@ async function _POST(request) {
 
     // Toutes les sessions vivantes : la fenêtre de chaque campagne fera le tri.
     const sessions = db.prepare(`
-      SELECT s.*, COALESCE(f.title, s.session_name, s.id) AS titre
+      SELECT s.*, COALESCE(f.title, s.session_name, s.id) AS titre,
+             f.evaluations_associees AS formation_evaluations
       FROM sessions s LEFT JOIN formations f ON f.id = s.formation_id
       WHERE COALESCE(s.status, '') NOT IN ('annulee', 'archivee')
         AND COALESCE(s.start_date, '') <> ''
@@ -134,6 +150,10 @@ async function _POST(request) {
 
       for (const s of sessions) {
         if (!c.actif(s)) continue;
+        // Cohérence avec la fiche du programme : inutile d'envoyer une
+        // enquête que l'espace apprenant ne proposera pas. L'apprenant
+        // cliquerait pour ne rien trouver à remplir.
+        if (!retenuParLeProgramme(s, c.cle)) continue;
         rapport.campagnes[c.cle].sessions_armees += 1;
 
         const n = c.jours(s);
