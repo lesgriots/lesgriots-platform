@@ -34,7 +34,7 @@ const BLOCS = [
     id: 'competence', titre: 'Preuve de compétence',
     intro: 'Indicateur 21 : l’auditeur veut voir, pour chaque intervenant, une preuve datée de ce qu’il sait faire. Indicateur 22 : la preuve qu’il continue de se former.',
     champs: [
-      { cle: 'domaines', libelle: 'Domaines d’intervention', aide: 'Les formations qu’il peut animer. Sert aussi à choisir vite quand une date bouge.', lignes: 2, large: true, requis: true },
+      { cle: 'domaines', libelle: 'Domaines d’intervention', aide: 'Séparés par des virgules. Les formations qu’il peut animer, ce qui sert aussi à choisir vite quand une date bouge.', lignes: 2, large: true, requis: true },
       { cle: 'qualifications', libelle: 'Diplômes et certifications', aide: 'Intitulé, organisme, année. C’est la pièce que l’auditeur ouvre en premier.', lignes: 2, large: true },
       { cle: 'biographie', libelle: 'Parcours', aide: 'Trois lignes de références réelles, reprises telles quelles sur le programme.', lignes: 3, large: true },
       { cle: 'cv_date', libelle: 'Date du CV au dossier', type: 'date', aide: 'Un CV de plus de deux ans se fait retoquer. Celui-ci est la preuve de l’indicateur 21.' },
@@ -62,6 +62,19 @@ const INDISPENSABLES = [
   ['domaines', 'les domaines d’intervention, exigés par l’indicateur 21'],
 ];
 
+/** Les domaines vivent en JSON dans la base ; ils se lisent en clair. */
+function domainesEnTexte(valeur) {
+  if (!valeur) return '';
+  try {
+    const liste = JSON.parse(valeur);
+    return Array.isArray(liste) ? liste.join(', ') : String(valeur);
+  } catch { return String(valeur); }
+}
+function domainesEnJson(texte) {
+  const liste = String(texte || '').split(',').map((t) => t.trim()).filter(Boolean);
+  return JSON.stringify(liste);
+}
+
 /** Une date de plus de N mois est périmée. */
 function perime(valeur, mois) {
   if (!valeur) return false;
@@ -84,7 +97,10 @@ export default function FicheIntervenantPage() {
   useEffect(() => {
     fetch(`/api/formateurs/${id}`)
       .then((r) => r.ok ? r.json() : Promise.reject(new Error('Intervenant introuvable')))
-      .then((d) => { setFiche(d); setBrouillon(d); })
+      .then((d) => {
+        const lisible = { ...d, domaines: domainesEnTexte(d.domaines) };
+        setFiche(lisible); setBrouillon(lisible);
+      })
       .catch((e) => setErreur(e.message));
   }, [id]);
 
@@ -104,10 +120,14 @@ export default function FicheIntervenantPage() {
   const enregistrer = async () => {
     setOccupe(true); setErreur(''); setMessage('');
     try {
-      const r = await fetch(`/api/formateurs/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(brouillon) });
+      const r = await fetch(`/api/formateurs/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...brouillon, domaines: domainesEnJson(brouillon.domaines) }),
+      });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || 'Enregistrement impossible');
-      setFiche(d); setBrouillon(d);
+      const lisible = { ...d, domaines: domainesEnTexte(d.domaines) };
+      setFiche(lisible); setBrouillon(lisible);
       setMessage('Fiche enregistrée.');
     } catch (e) { setErreur(e.message); } finally { setOccupe(false); }
   };
@@ -115,7 +135,7 @@ export default function FicheIntervenantPage() {
   if (!fiche) return <><TopBar title="Intervenant" /><div style={{ padding: 24, ...styleAttenue }}>{erreur || 'Chargement…'}</div></>;
 
   return <>
-    <TopBar title={[fiche.first_name, fiche.last_name].filter(Boolean).join(' ') || 'Intervenant'} subtitle={fiche.specialite || fiche.contrat_type || ''} />
+    <TopBar title={[fiche.first_name, fiche.last_name].filter(Boolean).join(' ') || 'Intervenant'} subtitle={String(fiche.specialite || '').trim() || fiche.contrat_type || ''} />
     <div style={{ padding: '0 24px 48px', maxWidth: 1100, width: '100%', boxSizing: 'border-box', display: 'grid', gap: 16 }}>
       <Link href="/intervenants" style={{ ...styleAttenue, textDecoration: 'none' }}>← Tous les intervenants</Link>
       {alertes.length > 0 && <section style={{ ...styleCarte, borderColor: 'color-mix(in srgb, var(--danger) 40%, transparent)', background: 'var(--danger-soft)' }}>
