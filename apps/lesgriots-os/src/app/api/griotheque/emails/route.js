@@ -21,6 +21,21 @@ import { getDb } from '@/lib/db.mjs';
 import { withGuard } from '@/lib/api-guard';
 import { envoyerEmail, smtpConfigure, expediteur } from '@/lib/mailer';
 import { GRIOTHEQUE_EMAIL_TEMPLATES, GRIOTHEQUE_EMAIL_TEMPLATES_MAP } from '@/lib/email-templates';
+import { habiller, pieceLogo } from '@/lib/email-marque';
+
+/** L'identité de l'organisme, pour la mention légale en pied d'email. */
+function organisme(db) {
+  const lire = (cle, defaut = '') => {
+    const r = db.prepare('SELECT value FROM settings WHERE key = ?').get(cle);
+    return r && r.value ? r.value : defaut;
+  };
+  return {
+    raison_sociale: lire('company_name', 'LES GRIOTS'),
+    nda: lire('nda') || lire('numero_declaration'),
+    siret: lire('siret'),
+    email: lire('email'),
+  };
+}
 
 const BASE = process.env.NEXTAUTH_URL || 'https://app.lagriotheque.com';
 
@@ -69,7 +84,10 @@ function composer(db, modele, ctx, session_id, apprenant) {
   const prenom = apprenant.first_name || '';
   const corps = corpsBase.replace(/^Bonjour,/, prenom ? `Bonjour ${prenom},` : 'Bonjour,')
     + `\n\n———\nVOTRE ESPACE APPRENANT\nTout s'y trouve : votre programme, vos documents, l'émargement et les questionnaires.\n${lien}\n`;
-  return { objet, corps, lien };
+  // La version HTML porte la marque ; le texte reste envoyé en parallèle pour
+  // les clients qui ne rendent pas le HTML.
+  const html = habiller({ objet, corps: corpsBase.replace(/^Bonjour,/, prenom ? `Bonjour ${prenom},` : 'Bonjour,'), lien, organisme: organisme(db) });
+  return { objet, corps, html, lien };
 }
 
 async function _GET(request) {
@@ -126,11 +144,12 @@ async function _POST(request) {
     let envoyes = 0, simules = 0, echecs = 0, ignores = 0;
     for (const g of gens) {
       if (!g.email) { ignores += 1; continue; }
-      const { objet, corps } = composer(db, modele, ctx, session_id, g);
+      const { objet, corps, html } = composer(db, modele, ctx, session_id, g);
       const resultat = await envoyerEmail({
         destinataire: g.email,
         destinataire_nom: [g.first_name, g.last_name].filter(Boolean).join(' '),
-        objet, corps,
+        objet, corps, html,
+        pieces: pieceLogo(),
         template_key,
         contexte_type: 'session',
         contexte_id: session_id,
