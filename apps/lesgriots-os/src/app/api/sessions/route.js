@@ -46,7 +46,16 @@ async function _POST(req) {
       code_interne = '', advancement = '{}', documents = '{}', taux_marge = 0,
       lien_emargement = '', url_programme = '', formation_prete = 0,
       planning = '[]', client_id = null,
-      project_id = null, cout_total = 0, ca_confirmed = 0
+      project_id = null, cout_total = 0, ca_confirmed = 0,
+      // Les champs de la fiche de création : ils existaient en base sans
+      // qu'aucun écran ne sache les écrire.
+      session_name = '', gestionnaire_1 = '', gestionnaire_2 = '',
+      inter_entreprise = 1, exclure_catalogue = 0, sous_traitance = 0,
+      fuseau_horaire = 'Europe/Paris',
+      type_action_formation = 'Action de formation',
+      specialite_formation = '100 - Formations générales',
+      diplome_vise = 'Aucun', nom_titre_vise = '',
+      formation_a_distance = 0, lieu_formation_id = null,
     } = body;
 
     if (!formation_id || !start_date || !end_date) {
@@ -68,14 +77,23 @@ async function _POST(req) {
         max_participants, status, formateur_id, formateur_name, notes,
         type_session, horaire, tarif, adresse, code_interne, advancement, documents, taux_marge,
         lien_emargement, url_programme, formation_prete, planning, client_id,
-        project_id, cout_total, ca_confirmed)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        project_id, cout_total, ca_confirmed,
+        session_name, gestionnaire_1, gestionnaire_2, inter_entreprise,
+        exclure_catalogue, sous_traitance, fuseau_horaire, type_action_formation,
+        specialite_formation, diplome_vise, nom_titre_vise, formation_a_distance,
+        lieu_formation_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+              ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(id, formation_id, start_date, end_date, location, modality,
       toNum(max_participants, 12), status, formateur_id, formateur_name, notes,
       type_session, horaire, toNum(tarif), adresse, finalCodeInterne, advancement, documents, toNum(taux_marge),
       lien_emargement, url_programme, formation_prete,
       typeof planning === 'string' ? planning : JSON.stringify(planning),
-      client_id, project_id, toNum(cout_total), toNum(ca_confirmed));
+      client_id, project_id, toNum(cout_total), toNum(ca_confirmed),
+      session_name, gestionnaire_1, gestionnaire_2, inter_entreprise ? 1 : 0,
+      exclure_catalogue ? 1 : 0, sous_traitance ? 1 : 0, fuseau_horaire,
+      type_action_formation, specialite_formation, diplome_vise, nom_titre_vise,
+      formation_a_distance ? 1 : 0, lieu_formation_id || null);
 
     // Auto-copy formation modules to session_modules with default durations
     const formationModules = db.prepare(

@@ -42,6 +42,18 @@ export default function SessionWorkspace({ initialSessionId, vue = 'actives' }) 
       <TopBar
         title={vue === 'archivees' ? 'Sessions archivées' : title}
         subtitle={session?.code_interne || (sessions.length ? `${sessions.length} session(s)` : '')}
+        right={vue === 'archivees' ? null : (
+          <a
+            href="/sessions/nouvelle"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 13px',
+              borderRadius: 'var(--radius-md)', background: 'var(--gold)', color: 'var(--gold-ink)',
+              border: '1.5px solid var(--gold)', fontSize: 12.5, fontWeight: 800, textDecoration: 'none',
+            }}
+          >
+            ＋ Créer une session
+          </a>
+        )}
       />
       <div style={{ padding: '0 24px 48px' }}>
         {vue === 'archivees' && (

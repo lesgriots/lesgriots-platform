@@ -4,7 +4,7 @@
  * Agenda de formation — calendrier opérationnel.
  *
  * La page reprend le contenu métier attendu d'un agenda d'OF : création
- * directe, filtres de sessions, trois lectures temporelles et détail sans
+ * depuis la fiche complète, filtres de sessions, trois lectures temporelles et détail sans
  * quitter le calendrier. Elle utilise volontairement les tokens visuels de
  * La Griothèque, plutôt que la direction artistique de l'outil de référence.
  */
@@ -30,7 +30,6 @@ const button = {
 
 export default function AgendaPage() {
   const [sessions, setSessions] = useState(null);
-  const [formations, setFormations] = useState([]);
   const [curseur, setCurseur] = useState(() => { const d = new Date(); d.setDate(1); return d; });
   const [vue, setVue] = useState('calendar');
   const [recherche, setRecherche] = useState('');
@@ -39,14 +38,12 @@ export default function AgendaPage() {
   const [modalite, setModalite] = useState('all');
   const [lieu, setLieu] = useState('all');
   const [selection, setSelection] = useState(null);
-  const [creation, setCreation] = useState(false);
 
   const charger = () => Promise.all([
     fetch('/api/sessions').then((r) => r.ok ? r.json() : []).catch(() => []),
     fetch('/api/formations').then((r) => r.ok ? r.json() : []).catch(() => []),
   ]).then(([liste, programmes]) => {
     const titres = Object.fromEntries((Array.isArray(programmes) ? programmes : []).map((item) => [item.id, item.title]));
-    setFormations(Array.isArray(programmes) ? programmes : []);
     setSessions((Array.isArray(liste) ? liste : []).map((item) => ({ ...item, formation_titre: item.formation_title || titres[item.formation_id] || '' })));
   });
 
@@ -88,7 +85,7 @@ export default function AgendaPage() {
       <div style={{ padding: '18px 24px 48px', maxWidth: 1900, margin: '0 auto' }}>
         {!sessions ? <Skeleton /> : <>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-            <button type="button" onClick={() => setCreation(true)} style={{ ...button, background: 'var(--gold)', color: 'var(--gold-ink)', borderColor: 'var(--gold)' }}>＋ Créer une session</button>
+            <Link href="/sessions/nouvelle" style={{ ...button, background: 'var(--gold)', color: 'var(--gold-ink)', borderColor: 'var(--gold)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>＋ Créer une session</Link>
             <span style={{ ...token, marginLeft: 2 }}>Planning des formations</span>
           </div>
 
@@ -121,11 +118,10 @@ export default function AgendaPage() {
               {vue === 'planning' && <Planning sessions={dated} onSelect={(sessionId) => setSelection({ sessionId })} />}
               {vue === 'timeline' && <Timeline sessions={dated} onSelect={(sessionId) => setSelection({ sessionId })} />}
             </div>
-            <AgendaDetail selection={selection} session={detail} onCreate={() => setCreation(true)} />
+            <AgendaDetail selection={selection} session={detail} />
           </div>
         </>}
       </div>
-      {creation && <CreateSession formations={formations} onClose={() => setCreation(false)} onCreated={() => { setCreation(false); charger(); }} />}
     </>
   );
 }
@@ -146,9 +142,9 @@ function CalendarGrid({ cells, onSelectDay, onSelectSession }) {
   </div></Card>;
 }
 
-function AgendaDetail({ selection, session, onCreate }) {
+function AgendaDetail({ selection, session }) {
   if (session) return <aside style={side}><div style={token}>Détails de la session</div><h2 style={{ fontSize: 16, margin: '8px 0 4px' }}>{session.session_name || session.formation_titre || 'Session'}</h2><p style={{ margin: '0 0 14px', color: 'var(--text-3)', fontSize: 12 }}>{session.code_interne || 'Sans code'}</p><Detail label="Dates" value={`${dateFr(session.start_date)} → ${dateFr(session.end_date || session.start_date)}`} /><Detail label="Statut" value={STATUTS[String(session.status || '').toLowerCase()] || session.status || '—'} /><Detail label="Formateur" value={session.formateur_name || 'Non attribué'} /><Detail label="Lieu" value={session.location || session.adresse || 'À préciser'} /><Detail label="Inscrits" value={`${session.inscriptions_count || 0} apprenant(s)`} /><Link href={sessionHref(session.id)} style={{ display: 'block', marginTop: 16, padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'var(--gold)', color: 'var(--gold-ink)', textAlign: 'center', textDecoration: 'none', fontSize: 12, fontWeight: 700 }}>Ouvrir la session</Link></aside>;
-  if (selection?.date) return <aside style={side}><div style={token}>Journée sélectionnée</div><h2 style={{ fontSize: 16, margin: '8px 0' }}>{dateFr(selection.date)}</h2><p style={{ color: 'var(--text-3)', fontSize: 12, lineHeight: 1.5 }}>Aucune session ne correspond à cette journée avec les filtres actuels.</p><button type="button" onClick={onCreate} style={{ ...button, width: '100%', marginTop: 12, background: 'var(--gold)', color: 'var(--gold-ink)', borderColor: 'var(--gold)' }}>＋ Créer une session</button></aside>;
+  if (selection?.date) return <aside style={side}><div style={token}>Journée sélectionnée</div><h2 style={{ fontSize: 16, margin: '8px 0' }}>{dateFr(selection.date)}</h2><p style={{ color: 'var(--text-3)', fontSize: 12, lineHeight: 1.5 }}>Aucune session ne correspond à cette journée avec les filtres actuels.</p><Link href={`/sessions/nouvelle?date=${selection.date}`} style={{ ...button, width: '100%', marginTop: 12, background: 'var(--gold)', color: 'var(--gold-ink)', borderColor: 'var(--gold)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>＋ Créer une session</Link></aside>;
   return <aside style={side}><div style={token}>Détails</div><p style={{ color: 'var(--text-2)', fontSize: 13, lineHeight: 1.55 }}>Sélectionne un jour ou une session pour consulter ses informations et l’ouvrir directement.</p><div style={{ borderTop: '1px solid var(--border)', marginTop: 16, paddingTop: 14 }}><div style={token}>Guide</div><p style={{ color: 'var(--text-3)', fontSize: 12, lineHeight: 1.5 }}>Utilise Calendrier pour le mois, Planning pour la liste chronologique et Frise pour situer les sessions dans le temps.</p></div></aside>;
 }
 const side = { alignSelf: 'start', position: 'sticky', top: 104, padding: 16, border: '1px solid var(--border)', background: 'var(--surface)', borderRadius: 'var(--radius-lg)' };
@@ -168,11 +164,5 @@ function Timeline({ sessions, onSelect }) {
   return <Card><div>{sessions.map((item) => { const left = pos(item.start_date); const width = Math.max(pos(item.end_date || item.start_date) - left, 1.5); return <button key={item.id} type="button" onClick={() => onSelect(item.id)} style={{ display: 'grid', gridTemplateColumns: 'minmax(150px, 26%) 1fr', gap: 12, alignItems: 'center', width: '100%', padding: '7px 0', border: 0, background: 'transparent', color: 'var(--text)', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 12 }}>{item.session_name || item.formation_titre || 'Session'}</span><span style={{ height: 20, position: 'relative', background: 'var(--surface-2)', borderRadius: 3 }}><span style={{ position: 'absolute', left: `${left}%`, width: `${width}%`, top: 4, bottom: 4, minWidth: 6, borderRadius: 2, background: 'var(--gold)' }} /></span></button>; })}</div><div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, marginLeft: '27%' }}><span style={token}>{dateFr(dates[0])}</span><span style={token}>{dateFr(dates[dates.length - 1])}</span></div></Card>;
 }
 
-function CreateSession({ formations, onClose, onCreated }) {
-  const [formationId, setFormationId] = useState(formations[0]?.id || '');
-  const [start, setStart] = useState(''); const [end, setEnd] = useState(''); const [location, setLocation] = useState(''); const [saving, setSaving] = useState(false); const [error, setError] = useState('');
-  const submit = async (event) => { event.preventDefault(); setSaving(true); setError(''); try { const response = await fetch('/api/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ formation_id: formationId, start_date: start, end_date: end || start, location }) }); if (!response.ok) throw new Error((await response.json()).error || 'Création impossible'); onCreated(); } catch (err) { setError(err.message); } finally { setSaving(false); } };
-  return <div role="dialog" aria-modal="true" aria-label="Créer une session" style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'var(--overlay)', display: 'grid', placeItems: 'center', padding: 16 }} onClick={onClose}><form onSubmit={submit} onClick={(event) => event.stopPropagation()} style={{ width: 'min(460px, 100%)', padding: 22, background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)' }}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}><h2 style={{ fontSize: 19 }}>Créer une session</h2><button type="button" onClick={onClose} aria-label="Fermer" style={{ ...button, padding: '2px 8px' }}>×</button></div><label style={field}>Programme<select required value={formationId} onChange={(event) => setFormationId(event.target.value)} style={input}><option value="">Choisir un programme</option>{formations.map((formation) => <option key={formation.id} value={formation.id}>{formation.title}</option>)}</select></label><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}><label style={field}>Début<input required type="date" value={start} onChange={(event) => setStart(event.target.value)} style={input} /></label><label style={field}>Fin<input required type="date" value={end} onChange={(event) => setEnd(event.target.value)} style={input} /></label></div><label style={field}>Lieu<input value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Lieu ou ville" style={input} /></label>{error && <p style={{ color: 'var(--danger)', fontSize: 12 }}>{error}</p>}<button disabled={saving || !formations.length} type="submit" style={{ ...button, width: '100%', marginTop: 8, background: 'var(--gold)', color: 'var(--gold-ink)', borderColor: 'var(--gold)' }}>{saving ? 'Création…' : 'Créer la session'}</button></form></div>;
-}
 const field = { display: 'grid', gap: 5, marginBottom: 12, color: 'var(--text-2)', fontSize: 12, fontWeight: 600 };
 const input = { minHeight: 36, padding: '6px 9px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-2)', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'inherit', fontSize: 13 };
