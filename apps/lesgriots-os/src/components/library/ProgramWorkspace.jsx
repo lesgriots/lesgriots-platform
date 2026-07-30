@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import EditeurQuestionnaires from './EditeurQuestionnaires';
 
 const inputStyle = { width: '100%', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', padding: '10px 11px', boxSizing: 'border-box', font: 'inherit' };
 const panel = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 };
@@ -47,7 +48,7 @@ export default function ProgramWorkspace({ formationId }) {
     {section === 'learner' && <Resources scope="learner" resources={resources} draft={resourceDraft} setDraft={setResourceDraft} add={addResource} />}
     {section === 'internal' && <Resources scope="internal" resources={resources} draft={resourceDraft} setDraft={setResourceDraft} add={addResource} />}
     {section === 'quality' && <Quality formation={formation} />}
-    {section === 'evaluations' && <div style={{ display: 'grid', gap: 12 }}>{templates.map(t => <label key={t.id} style={{ ...panel, display: 'flex', gap: 12, alignItems: 'start', cursor: 'pointer' }}><input type="checkbox" checked={selectedTypes.has(t.type)} onChange={() => toggleEvaluation(t.type)} style={{ marginTop: 4 }} /><span><strong>{t.title}</strong><span style={{ display: 'block', marginTop: 5, color: 'var(--text-2)', fontSize: 13 }}>{t.description}</span></span></label>)}</div>}
+    {section === 'evaluations' && <div style={{ display: 'grid', gap: 18 }}><EditeurQuestionnaires formationId={formationId} /><div style={{ display: 'grid', gap: 12 }}>{templates.map(t => <label key={t.id} style={{ ...panel, display: 'flex', gap: 12, alignItems: 'start', cursor: 'pointer' }}><input type="checkbox" checked={selectedTypes.has(t.type)} onChange={() => toggleEvaluation(t.type)} style={{ marginTop: 4 }} /><span><strong>{t.title}</strong><span style={{ display: 'block', marginTop: 5, color: 'var(--text-2)', fontSize: 13 }}>{t.description}</span></span></label>)}</div></div>}
     {section === 'diffusion' && <div style={panel}><h2 style={{ marginTop: 0 }}>Diffusion du programme</h2><p style={{ color: 'var(--text-2)' }}>Ce programme est {formation.status === 'archived' ? 'archivé' : 'actif'} dans la bibliothèque. Les ressources apprenant associées seront reprises dans les sessions créées depuis ce programme.</p><p style={{ color: 'var(--text-2)', fontSize: 13 }}>La publication sur un catalogue en ligne reste volontairement séparée de cette bibliothèque interne.</p></div>}
   </div>;
 }

@@ -220,6 +220,29 @@ function initSchema(db) {
     INSERT OR IGNORE INTO settings (key, value) VALUES ('pricing_smic_net', '1400');
   `);
 
+  // ── Questionnaires sur mesure, programme par programme ──
+  //
+  // Le tronc commun reste dans le code : c'est lui qui garantit qu'une note
+  // de satisfaction veut dire la même chose d'une formation à l'autre.
+  // Cette table ne porte que l'écart au tronc :
+  //
+  //   positionnement  → remplacement complet. Les questions génériques
+  //                     n'apprennent rien ; celles du programme, oui.
+  //   chaud, froid    → questions ajoutées à la fin, après le tronc commun.
+  //                     La moyenne reste comparable, tes questions passent
+  //                     quand même.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS formation_questionnaires (
+      id TEXT PRIMARY KEY,
+      formation_id TEXT NOT NULL REFERENCES formations(id) ON DELETE CASCADE,
+      moment TEXT NOT NULL CHECK(moment IN ('positionnement','chaud','froid')),
+      questions TEXT NOT NULL DEFAULT '[]',
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_formation_questionnaires
+      ON formation_questionnaires(formation_id, moment);
+  `);
+
   // ── Questionnaires associés à un programme ──
   // Le lien existait déjà, mais il écrivait dans `evaluation_methods`, la
   // colonne qui porte les modalités d'évaluation en toutes lettres : celles

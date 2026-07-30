@@ -15,7 +15,8 @@
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { getDb } from '@/lib/db.mjs';
-import { QUESTIONNAIRES, QUESTIONNAIRE_TYPE_TO_EVALUATION, computeScore } from '@/lib/questionnaires';
+import { QUESTIONNAIRES, QUESTIONNAIRE_TYPE_TO_EVALUATION } from '@/lib/questionnaires';
+import { definitionEffective, calculerScore } from '@/lib/questionnaires-formation.mjs';
 
 const MAX_PNG = 200 * 1024;
 
@@ -269,7 +270,10 @@ export async function POST(request, { params }) {
 
     // ── Questionnaire ───────────────────────────────────────────────
     if (corps.action === 'questionnaire') {
-      const q = QUESTIONNAIRES[corps.type];
+      // On valide et on note sur les questions réellement posées, celles du
+      // programme : sinon une question sur mesure serait ignorée en silence.
+      const laSession = db.prepare('SELECT formation_id FROM sessions WHERE id = ?').get(lien.session_id);
+      const q = definitionEffective(db, laSession?.formation_id, corps.type);
       if (!q) return NextResponse.json({ error: 'Questionnaire inconnu' }, { status: 400 });
       const typeEval = QUESTIONNAIRE_TYPE_TO_EVALUATION[corps.type];
       if (!typeEval) return NextResponse.json({ error: 'Questionnaire non recevable ici' }, { status: 400 });
@@ -280,14 +284,15 @@ export async function POST(request, { params }) {
       if (deja) return NextResponse.json({ error: 'Déjà répondu' }, { status: 409 });
 
       const reponses = corps.answers || {};
-      const manquante = q.questions.find((x) => x.required && (reponses[x.key] === undefined || reponses[x.key] === ''));
+      const vide = (v) => v === undefined || v === '' || (Array.isArray(v) && v.length === 0);
+      const manquante = q.questions.find((x) => x.required && x.type !== 'section' && vide(reponses[x.key]));
       if (manquante) return NextResponse.json({ error: `Réponse attendue : ${manquante.label}` }, { status: 400 });
 
       db.prepare(`
         INSERT INTO evaluations (id, session_id, apprenant_id, type, score, responses, comments)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `).run(randomUUID(), lien.session_id, lien.apprenant_id, typeEval,
-             computeScore(corps.type, reponses), JSON.stringify(reponses), corps.comments || '');
+             calculerScore(q.questions, reponses), JSON.stringify(reponses), corps.comments || '');
 
       return NextResponse.json({ ok: true }, { status: 201 });
     }

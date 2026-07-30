@@ -383,9 +383,13 @@ function Questionnaire({ token, type, onFermer, onFait }) {
     <Volet titre={def.label} sousTitre={def.intro} onFermer={onFermer}>
       {def.questions.map((q) => (
         <div key={q.key} style={{ marginBottom: 18 }}>
-          <label style={{ display: 'block', fontSize: 13.5, fontWeight: 500, marginBottom: 7 }}>
-            {q.label}{q.required && <span style={{ color: P.texte3, fontWeight: 400 }}> *</span>}
-          </label>
+          {q.type === 'section' ? (
+            <div style={{ fontSize: 12, letterSpacing: '.12em', textTransform: 'uppercase', color: P.texte3, fontWeight: 700, marginTop: 8, paddingTop: 14, borderTop: `1px solid ${P.ligne}` }}>{q.label}</div>
+          ) : (
+            <label style={{ display: 'block', fontSize: 13.5, fontWeight: 500, marginBottom: 7 }}>
+              {q.label}{q.required && <span style={{ color: P.texte3, fontWeight: 400 }}> *</span>}
+            </label>
+          )}
 
           {q.type === 'note' && (
             <div style={{ display: 'flex', gap: 6 }}>
@@ -418,6 +422,43 @@ function Questionnaire({ token, type, onFermer, onFait }) {
                 }}>{l}</button>
               ))}
             </div>
+          )}
+          {q.type === 'echelle' && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {(q.options || []).map((o) => (
+                <button key={o} onClick={() => setRep((r) => ({ ...r, [q.key]: o }))} style={{
+                  ...pastille(rep[q.key] === o), width: 'auto', padding: '9px 13px', fontSize: 13,
+                }}>{o}</button>
+              ))}
+            </div>
+          )}
+          {q.type === 'multi' && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {(q.options || []).map((o) => {
+                const choisies = Array.isArray(rep[q.key]) ? rep[q.key] : [];
+                const prise = choisies.includes(o);
+                return (
+                  <button key={o} onClick={() => setRep((r) => {
+                    const c = Array.isArray(r[q.key]) ? r[q.key] : [];
+                    return { ...r, [q.key]: prise ? c.filter((x) => x !== o) : [...c, o] };
+                  })} style={{
+                    ...pastille(prise), width: 'auto', padding: '9px 13px', fontSize: 13,
+                  }}>{prise ? '✓ ' : ''}{o}</button>
+                );
+              })}
+            </div>
+          )}
+          {(q.type === 'nombre' || q.type === 'date') && (
+            <input
+              type={q.type === 'date' ? 'date' : 'number'}
+              value={rep[q.key] || ''}
+              onChange={(e) => setRep((r) => ({ ...r, [q.key]: e.target.value }))}
+              style={{
+                width: '100%', maxWidth: 220, padding: '10px 12px', borderRadius: 9,
+                border: `1px solid ${P.ligne}`, background: P.surface, color: P.encre,
+                fontFamily: 'inherit', fontSize: 16,
+              }}
+            />
           )}
           {q.type === 'text' && (
             <textarea
