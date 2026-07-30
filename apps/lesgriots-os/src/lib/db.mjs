@@ -220,6 +220,70 @@ function initSchema(db) {
     INSERT OR IGNORE INTO settings (key, value) VALUES ('pricing_smic_net', '1400');
   `);
 
+  // ── Fiche lieu : ce que l'audit Qualiopi et l'apprenant demandent ──
+  // L'indicateur 26 porte sur l'accessibilité aux personnes en situation de
+  // handicap : il faut pouvoir dire, lieu par lieu, ce qui est accessible et
+  // qui contacter. Le reste sert à convoquer sans rappeler personne.
+  const colsLieux = db.prepare("PRAGMA table_info(lieux_formation)").all().map(c => c.name);
+  const champsLieu = [
+    ['type_lieu', "TEXT DEFAULT ''"],           // nos locaux, locaux du client, distanciel
+    ['acces_transport', "TEXT DEFAULT ''"],     // métro, gare, parking : ça part dans la convocation
+    ['horaires_acces', "TEXT DEFAULT ''"],      // à quelle heure le lieu ouvre vraiment
+    ['referent_handicap', "TEXT DEFAULT ''"],   // qui prévenir sur place, indicateur 26
+    ['consignes_securite', "TEXT DEFAULT ''"],  // issues de secours, consignes à énoncer
+    ['cout_location', "TEXT DEFAULT ''"],       // pour la marge réelle d'une session
+  ];
+  for (const [nom, type] of champsLieu) {
+    if (!colsLieux.includes(nom)) db.exec(`ALTER TABLE lieux_formation ADD COLUMN ${nom} ${type}`);
+  }
+
+  // ── Fiche intervenant : les preuves qu'un auditeur réclame ──
+  // Indicateur 21 : la compétence des intervenants doit être prouvée, pas
+  // affirmée. Et dès 5 000 € de prestation, la loi impose de vérifier la
+  // vigilance URSSAF de son sous-traitant, tous les six mois.
+  const colsFormateurs = db.prepare("PRAGMA table_info(formateurs)").all().map(c => c.name);
+  const champsFormateur = [
+    ['siret', "TEXT DEFAULT ''"],
+    ['nda_numero', "TEXT DEFAULT ''"],            // s'il est lui-même organisme de formation
+    ['assurance_rc', "TEXT DEFAULT ''"],          // assureur et numéro de police
+    ['assurance_echeance', "TEXT DEFAULT ''"],    // une RC pro périmée invalide la sous-traitance
+    ['urssaf_vigilance_date', "TEXT DEFAULT ''"], // attestation à renouveler tous les six mois
+    ['cv_date', "TEXT DEFAULT ''"],               // date du CV au dossier, preuve de l'indicateur 21
+    ['contrat_type', "TEXT DEFAULT ''"],          // salarié, prestation, sous-traitance
+  ];
+  for (const [nom, type] of champsFormateur) {
+    if (!colsFormateurs.includes(nom)) db.exec(`ALTER TABLE formateurs ADD COLUMN ${nom} ${type}`);
+  }
+
+  // ── Financeurs : jusqu'ici déduits des inscriptions, jamais tenus ──
+  // Un financeur est une organisation avec laquelle on traite plusieurs fois :
+  // un portail, une procédure, des pièces exigées, un délai de paiement.
+  // Rien de tout ça ne tient dans un champ texte d'inscription.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS financeurs (
+      id TEXT PRIMARY KEY,
+      nom TEXT NOT NULL DEFAULT '',
+      type TEXT DEFAULT '',                 -- OPCO, FAF, France Travail, Région, CPF, Entreprise
+      siret TEXT DEFAULT '',
+      adresse TEXT DEFAULT '',
+      postal_code TEXT DEFAULT '',
+      ville TEXT DEFAULT '',
+      contact_nom TEXT DEFAULT '',
+      contact_email TEXT DEFAULT '',
+      contact_tel TEXT DEFAULT '',
+      numero_adherent TEXT DEFAULT '',      -- notre identifiant chez eux
+      portail_url TEXT DEFAULT '',          -- où déposer le dossier
+      identifiant_portail TEXT DEFAULT '',  -- l'identifiant, jamais le mot de passe
+      pieces_exigees TEXT DEFAULT '',       -- ce qu'ils réclament à chaque dossier
+      delai_depot TEXT DEFAULT '',          -- combien de jours avant la session
+      subrogation TEXT DEFAULT '',          -- paiement direct à l'organisme, ou non
+      delai_paiement TEXT DEFAULT '',
+      notes TEXT DEFAULT '',
+      actif INTEGER DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+  `);
+
   // ── Fiche entreprise : ce qu'un organisme de formation doit détenir ──
   // Une entreprise cliente n'est pas seulement un nom et une adresse. Sans
   // ces champs, on ne peut ni éditer une convention conforme, ni monter un

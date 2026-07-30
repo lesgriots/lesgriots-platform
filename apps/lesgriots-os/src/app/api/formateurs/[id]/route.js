@@ -34,6 +34,8 @@ async function _PATCH(req, { params }) {
       'qualifications', 'domaines', 'specialite', 'statut_juridique',
       'statut_collab', 'evaluation', 'feedback_interne',
       'date_dernier_dev_pro', 'tarif_jour', 'notes',
+      'siret', 'nda_numero', 'assurance_rc', 'assurance_echeance',
+      'urssaf_vigilance_date', 'cv_date', 'contrat_type',
     ];
     const sets = [];
     const vals = [];

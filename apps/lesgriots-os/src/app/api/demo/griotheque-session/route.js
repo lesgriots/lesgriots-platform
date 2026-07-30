@@ -27,7 +27,7 @@ async function _POST() {
       .run(IDS.formateur, 'Moustapha', 'COULIBALY', 'work@mooscoulibaly.com', JSON.stringify(['Stratégie de contenu', 'Réalisation vidéo']));
     db.prepare(`INSERT OR IGNORE INTO formations (id, code, title, description, objectives, duration_hours, duration_days, modality, price_ht, max_participants, target_audience, prerequisites, status, categorie)
       VALUES (?, ?, ?, ?, ?, 14, 2, 'presentiel', 2000, 12, ?, ?, 'active', 'Réalisation')`)
-      .run(IDS.formation, 'PR26001', 'Stratégie de contenu & création vidéo au téléphone - LA GRIOTHEQUE',
+      .run(IDS.formation, 'PR26001', 'Stratégie de contenu & création vidéo au téléphone - LA GRIOTHÈQUE',
         'Une formation de deux jours pour structurer sa stratégie de contenu et produire ses vidéos au téléphone.',
         JSON.stringify(['Filmer, monter et publier avec un smartphone', 'Construire une stratégie éditoriale activable']),
         'Entrepreneurs, équipes et créatifs indépendants.', 'Aucun prérequis technique.');

@@ -11,6 +11,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import { Card, EmptyState, Skeleton } from '@/components/ui';
+import Link from 'next/link';
 
 const euros = (n) => new Intl.NumberFormat('fr-FR', {
   style: 'currency', currency: 'EUR', maximumFractionDigits: 0,
@@ -34,6 +35,31 @@ export default function FinanceursPage() {
       .catch(() => setErreur('Chargement impossible.'));
   }, []);
 
+  const [carnet, setCarnet] = useState([]);
+  const [nouveau, setNouveau] = useState('');
+  const [occupe, setOccupe] = useState(false);
+
+  const chargerCarnet = () => fetch('/api/financeurs')
+    .then((r) => r.ok ? r.json() : [])
+    .then((d) => setCarnet(Array.isArray(d) ? d.filter((f) => f.actif !== 0) : []))
+    .catch(() => {});
+
+  useEffect(() => { chargerCarnet(); }, []);
+
+  /** Créer une fiche pour un organisme avec lequel on traite vraiment. */
+  const creer = async (nom) => {
+    const propre = String(nom || '').trim();
+    if (!propre) return;
+    setOccupe(true);
+    try {
+      const r = await fetch('/api/financeurs', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nom: propre }),
+      });
+      if (r.ok) { setNouveau(''); await chargerCarnet(); }
+    } finally { setOccupe(false); }
+  };
+
   const total = data?.familles?.reduce((t, f) => t + f.montant, 0) || 0;
 
   return (
@@ -47,6 +73,43 @@ export default function FinanceursPage() {
 
         {erreur && <Card><p style={{ color: 'var(--danger)', margin: 0 }}>{erreur}</p></Card>}
         {!data && !erreur && <Skeleton />}
+
+        {/* ── Le carnet : la procédure de chaque organisme, tenue une fois ── */}
+        <Card padding="none">
+          <div style={{ padding: '16px 16px 0' }}>
+            <div style={{ fontWeight: 500 }}>Carnet des financeurs</div>
+            <div style={{ fontSize: 12.5, color: 'var(--text-3)', marginBottom: 12 }}>
+              Le tableau ci-dessous dit combien chaque dispositif a payé. Le carnet dit comment déposer un dossier chez eux : portail, identifiant, pièces exigées, délai, subrogation.
+            </div>
+          </div>
+          <div style={{ padding: '0 16px 16px', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+            <input
+              value={nouveau}
+              onChange={(e) => setNouveau(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') creer(nouveau); }}
+              placeholder="Nom d’un financeur, par exemple AFDAS"
+              style={{ padding: '10px 12px', border: '1.5px solid var(--border-2)', borderRadius: 9, background: 'var(--surface-2)', color: 'var(--text)', font: 'inherit', fontSize: 13, minWidth: 260 }}
+            />
+            <button type="button" disabled={!nouveau.trim() || occupe} onClick={() => creer(nouveau)} style={{
+              padding: '11px 16px', borderRadius: 10, fontSize: 13, fontWeight: 800, fontFamily: 'inherit',
+              cursor: (!nouveau.trim() || occupe) ? 'not-allowed' : 'pointer', opacity: (!nouveau.trim() || occupe) ? .45 : 1,
+              background: 'var(--gold)', color: 'var(--gold-ink)', border: '1.5px solid var(--gold)',
+            }}>Créer la fiche</button>
+          </div>
+          {carnet.length ? <div style={{ padding: '0 16px 16px', display: 'grid', gap: 8 }}>
+            {carnet.map((f) => <div key={f.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap', padding: '11px 13px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-2)' }}>
+              <div>
+                <b style={{ fontSize: 13 }}>{f.nom}</b>
+                <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
+                  {f.type || 'Type à définir'}{f.delai_depot ? ` · dépôt ${f.delai_depot}` : ''}{f.subrogation ? ` · ${f.subrogation.startsWith('Oui') ? 'subrogation' : 'sans subrogation'}` : ''}
+                </div>
+              </div>
+              <Link href={`/financeurs/${f.id}`} style={{ padding: '7px 11px', borderRadius: 9, border: '1.5px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12, fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap' }}>Ouvrir la fiche →</Link>
+            </div>)}
+          </div> : <div style={{ padding: '0 16px 18px', fontSize: 12.5, color: 'var(--text-3)' }}>
+            Aucune fiche pour l’instant. Commence par ceux avec qui tu traites réellement : ce sont eux dont tu cherches le portail à chaque dossier.
+          </div>}
+        </Card>
 
         {data && (
           <>

@@ -29,7 +29,8 @@ async function _PATCH(req, { params }) {
     const { id } = await params;
     const body = await req.json();
     const allowed = ['nom','adresse','postal_code','ville','pays','capacite',
-      'accessibilite_pmr','equipements','contact_nom','contact_email','contact_tel','notes','active'];
+      'accessibilite_pmr','equipements','contact_nom','contact_email','contact_tel','notes','active',
+      'type_lieu','acces_transport','horaires_acces','referent_handicap','consignes_securite','cout_location'];
     const updates = [];
     const values = [];
     for (const key of allowed) {

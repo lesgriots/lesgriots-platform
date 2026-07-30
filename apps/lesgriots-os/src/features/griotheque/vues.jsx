@@ -1181,7 +1181,7 @@ export function FormateursView() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: 'var(--surface-2)', borderBottom: `1px solid ${T.border2}` }}>
-                {['Prénom', 'Nom', 'Statut', 'Domaines', 'Sessions', 'Tarif', ''].map(h => (
+                {['Prénom', 'Nom', 'Statut', 'Domaines', 'Sessions', 'Tarif', 'Fiche'].map(h => (
                   <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>{h}</th>
                 ))}
               </tr>
@@ -1204,7 +1204,8 @@ export function FormateursView() {
                     <td style={{ padding: '11px 16px', color: T.textMuted }}>{f.sessions_count || 0}</td>
                     <td style={{ padding: '11px 16px', color: T.textSub }}>{f.tarif_jour > 0 ? `${f.tarif_jour}€/j` : '—'}</td>
                     <td style={{ padding: '11px 16px' }}>
-                      <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
+                        <a href={`/intervenants/${f.id}`} onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 11px', borderRadius: 9, border: '1.5px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12, fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap' }}>Ouvrir la fiche →</a>
                         <button onClick={() => setEditing(f)} style={{ padding: '4px 10px', background: 'transparent', border: `1px solid ${T.border3}`, borderRadius: 6, color: T.textMuted, fontSize: 12, cursor: 'pointer' }}>✏</button>
                         <button onClick={async () => { if (await confirm({ title: 'Supprimer cet intervenant ?', confirmLabel: 'Supprimer' })) { const r = await api.del(`/api/formateurs/${f.id}`); if (!r?.__failed) toast.success('Intervenant supprimé'); load(); } }} style={{ padding: '4px 10px', background: 'transparent', border: `1px solid ${T.border3}`, borderRadius: 6, color: T.danger, fontSize: 12, cursor: 'pointer' }}>×</button>
                       </div>
@@ -1337,7 +1338,7 @@ export function LieuxFormationView() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: 'var(--surface-2)', borderBottom: `1px solid ${T.border2}` }}>
-                {['Nom', 'Ville', 'Capacité', 'PMR', 'Sessions', ''].map(h => (
+                {['Nom', 'Ville', 'Capacité', 'PMR', 'Sessions', 'Fiche'].map(h => (
                   <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>{h}</th>
                 ))}
               </tr>
@@ -1351,7 +1352,8 @@ export function LieuxFormationView() {
                   <td style={{ padding: '11px 16px', color: T.textSub }}>{l.accessibilite_pmr ? '✓' : '—'}</td>
                   <td style={{ padding: '11px 16px', color: T.textMuted }}>{l.sessions_count || 0}</td>
                   <td style={{ padding: '11px 16px' }}>
-                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
+                      <a href={`/lieux/${l.id}`} onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 11px', borderRadius: 9, border: '1.5px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12, fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap' }}>Ouvrir la fiche →</a>
                       <button onClick={() => setEditing(l)} style={{ padding: '4px 10px', background: 'transparent', border: `1px solid ${T.border3}`, borderRadius: 6, color: T.textMuted, fontSize: 12, cursor: 'pointer' }}>✏</button>
                       <button onClick={async () => { if (await confirm({ title: 'Supprimer ce lieu ?', confirmLabel: 'Supprimer' })) { const r = await api.del(`/api/lieux-formation/${l.id}`); if (!r?.__failed) toast.success('Lieu supprimé'); load(); } }} style={{ padding: '4px 10px', background: 'transparent', border: `1px solid ${T.border3}`, borderRadius: 6, color: T.danger, fontSize: 12, cursor: 'pointer' }}>×</button>
                     </div>
@@ -9495,7 +9497,8 @@ export function ApprenantsView() {
                       {a.financement ? <span style={{ fontSize: 10, fontWeight: 600, color: FINANCEMENT_COLOR[a.financement] || T.textMuted }}>{a.financement}</span> : '—'}
                     </td>
                     <td style={{ padding: '10px 14px' }}>
-                      <div style={{ display: 'flex', gap: 4 }}>
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <a href={`/apprenants/${a.id}`} onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 11px', borderRadius: 9, border: '1.5px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12, fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap' }}>Ouvrir la fiche →</a>
                         <button onClick={e => { e.stopPropagation(); setEditing(a); }} style={{ background: 'none', border: `1px solid ${T.border}`, borderRadius: 5, padding: '3px 8px', fontSize: 11, cursor: 'pointer', color: T.textMuted }}>✏</button>
                         <button onClick={e => { e.stopPropagation(); handleDelete(a.id); }} style={{ background: 'none', border: `1px solid ${alpha(T.danger, 20)}`, borderRadius: 5, padding: '3px 8px', fontSize: 11, cursor: 'pointer', color: T.danger }}>×</button>
                       </div>
