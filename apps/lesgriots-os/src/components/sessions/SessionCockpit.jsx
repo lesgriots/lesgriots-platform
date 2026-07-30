@@ -790,7 +790,7 @@ function FenetreEnvoi({ sessionId, templateKey, apprenantId, onFermer, onEnvoye 
 
           <section style={{ padding: 14, borderRadius: 12, background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
             <b style={{ fontSize: 13 }}>M’envoyer un test d’abord</b>
-            <p style={{ ...muted, margin: '4px 0 10px' }}>Le message exact, objet préfixé « [TEST] », sans toucher aux apprenants.</p>
+            <p style={{ ...muted, margin: '4px 0 10px' }}>Le message exact, avec « (test) » en fin d’objet, sans toucher aux apprenants. Envoie-le à ton adresse, pas à celle d’un client : un message de test reçu par un vrai destinataire abîme ta réputation d’expéditeur.</p>
             <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap', alignItems: 'center' }}>
               <input type="email" value={adresseTest} onChange={(event) => setAdresseTest(event.target.value)} placeholder="ton@adresse.com" style={{ ...inputStyle, width: 'min(300px, 100%)' }} />
               <Action secondary small disabled={!adresseTest.trim() || occupe === 'test'} onClick={envoyerTest}>{occupe === 'test' ? 'Envoi du test…' : 'Envoyer le test'}</Action>

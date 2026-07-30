@@ -179,7 +179,7 @@ async function _POST(request) {
       for (const adresse of test_emails) {
         const r = await envoyerEmail({
           destinataire: String(adresse).trim(),
-          objet: `[TEST] ${objet}`,
+          objet: `${objet} (test)`,
           corps, html,
           pieces: jointes,
           template_key,
