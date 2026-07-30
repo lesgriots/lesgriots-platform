@@ -362,6 +362,6 @@ function StatCard({ label, value, hint, tone = 'neutral' }) {
 const pageStyle = {
   padding: 'var(--sp-6)',
   display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)',
-  maxWidth: 'var(--content-max)', margin: '0 auto', width: '100%',
+  maxWidth: 'var(--content-max)', margin: '0 auto', width: '100%', boxSizing: 'border-box',
 };
 const breadcrumbLink = { color: 'var(--text-3)', textDecoration: 'none' };

@@ -638,7 +638,7 @@ function BreakRow({ label, formula, value, accent = false }) {
 const pageStyle = {
   padding: 'var(--sp-6)',
   display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)',
-  maxWidth: 'var(--content-max)', margin: '0 auto', width: '100%',
+  maxWidth: 'var(--content-max)', margin: '0 auto', width: '100%', boxSizing: 'border-box',
 };
 const fieldLabel = {
   display: 'block',

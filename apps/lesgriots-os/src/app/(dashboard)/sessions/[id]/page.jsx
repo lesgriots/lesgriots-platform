@@ -11,7 +11,7 @@ export default function SessionDetailPage() {
 
   return <>
     <TopBar title="Session de formation" subtitle="Pilotage, documents et suivi opérationnel" />
-    <div style={{ padding: '18px 24px 48px', maxWidth: 1900, margin: '0 auto', width: '100%' }}>
+    <div style={{ padding: '18px 24px 48px', maxWidth: 1900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       <SessionCockpit sessionId={id} />
     </div>
   </>;
