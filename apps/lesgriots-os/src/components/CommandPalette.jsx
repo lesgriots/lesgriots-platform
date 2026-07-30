@@ -46,7 +46,8 @@ const PILLAR_LABEL = {
 const ACTIONS = [
   { id: 'act-pipeline',   label: 'Aller au Pipeline',     href: '/pipeline',     icon: '⊞' },
   { id: 'act-projects',   label: 'Voir les Projets',      href: '/projects',     icon: '📁' },
-  { id: 'act-clients',    label: 'Voir les Clients',      href: '/clients',      icon: '🏢' },
+  { id: 'act-entreprises', label: 'Voir les Entreprises', href: '/entreprises',  icon: '🏢' },
+  { id: 'act-clients',    label: 'Voir les Clients (agence)', href: '/clients', icon: '🏢' },
   { id: 'act-providers',  label: 'Voir les Prestataires', href: '/providers',    icon: '👤' },
   { id: 'act-tasks',      label: 'Voir les Tâches',       href: '/tasks',        icon: '✓' },
   { id: 'act-sessions',   label: 'Voir les Sessions',     href: '/sessions-list', icon: '📅' },

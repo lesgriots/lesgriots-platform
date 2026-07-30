@@ -105,7 +105,7 @@ export default function TopBar({ title, subtitle, right = null }) {
     for (const c of searchData.clients) {
       const name = c.company || `${c.first_name} ${c.last_name}`;
       if (name.toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q)) {
-        r.push({ type: 'client', id: c.id, title: name, sub: c.email, href: '/clients' });
+        r.push({ type: 'client', id: c.id, title: name, sub: c.email, href: `/entreprises/${c.id}` });
       }
     }
     for (const p of searchData.providers) {

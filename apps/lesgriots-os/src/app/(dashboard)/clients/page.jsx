@@ -72,6 +72,14 @@ export default function ClientsPage() {
         title="Clients"
         subtitle={`${clients.length} client${clients.length > 1 ? 's' : ''}`}
       />
+      {/* Deux écrans lisent la même table : celui-ci, hérité de l'agence, et
+          Entreprises, avec les fiches de l'organisme de formation. C'est
+          Entreprises qui fait foi ; on le dit ici plutôt que de laisser
+          saisir au mauvais endroit. */}
+      <div style={{ margin: '0 24px 16px', padding: '12px 14px', borderRadius: 10, background: 'var(--gold-soft)', border: '1.5px solid color-mix(in srgb, var(--gold) 45%, transparent)', fontSize: 12.5, lineHeight: 1.6 }}>
+        Écran hérité de l’agence. Pour l’organisme de formation, l’écran de référence est{' '}
+        <a href="/entreprises" style={{ color: 'var(--gold)', fontWeight: 700 }}>Entreprises</a>, avec les fiches complètes : SIRET, facturation, OPCO, contacts et leurs rôles.
+      </div>
       <div style={{
         padding: 'var(--sp-6)',
         display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)',

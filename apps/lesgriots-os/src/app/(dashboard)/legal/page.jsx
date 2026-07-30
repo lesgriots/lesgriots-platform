@@ -85,7 +85,7 @@ const GENERATORS = [
     title: 'NDA — Accord de confidentialité',
     description: 'Génère un NDA réciproque en français, pré-rempli depuis une fiche client.',
     where: 'Bouton « Générer NDA » sur la fiche client.',
-    cta: { label: 'Voir les clients', href: '/clients' },
+    cta: { label: 'Voir les entreprises', href: '/entreprises' },
     available: true,
   },
   {
@@ -101,7 +101,7 @@ const GENERATORS = [
     title: 'Contrat-cadre de prestation (MSA)',
     description: 'Génère un contrat-cadre de prestation de services en droit français, pré-rempli depuis une fiche client. Inclut cession CPI, confidentialité, RGPD, juridiction.',
     where: 'Bouton « Générer MSA » sur la fiche client.',
-    cta: { label: 'Voir les clients', href: '/clients' },
+    cta: { label: 'Voir les entreprises', href: '/entreprises' },
     available: true,
   },
 ];

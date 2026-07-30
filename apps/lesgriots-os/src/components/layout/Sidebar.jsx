@@ -79,7 +79,10 @@ const NAV = [
       { href: '/entreprises', icon: 'clients', label: 'Entreprises' },
       { href: '/financeurs', icon: 'finances', label: 'Financeurs' },
       { href: '/intervenants', icon: 'team', label: 'Intervenants' },
-      { href: '/clients', icon: 'clients', label: 'Clients' },
+      // « Clients » vivait ici en double d'« Entreprises » : deux écrans sur
+      // la même table, l'un hérité de l'agence, l'autre avec les fiches de
+      // l'organisme. Entreprises fait foi. L'écran agence reste accessible
+      // depuis le monde Studio, où il a son propre usage.
       { href: '/lieux', icon: 'projects', label: 'Lieux' },
     ],
   },
