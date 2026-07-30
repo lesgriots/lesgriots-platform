@@ -66,6 +66,14 @@ export default function SettingsPage() {
   return (
     <>
       <TopBar title="Réglages" subtitle="Configuration de LA GRIOTHÈQUE OS" />
+      {/* Deux écrans éditaient les mêmes champs sans le savoir : celui-ci et
+          « Identité de l'organisme ». Ils écrivent dans les mêmes réglages,
+          donc le dernier enregistré écrase l'autre. On le dit, plutôt que de
+          laisser deux portes mener à la même pièce en silence. */}
+      <div style={{ margin: '0 24px 16px', padding: '12px 14px', borderRadius: 10, background: 'var(--gold-soft)', border: '1.5px solid color-mix(in srgb, var(--gold) 45%, transparent)', fontSize: 12.5, lineHeight: 1.6 }}>
+        Ces champs sont les mêmes que ceux de <a href="/parametres-formation" style={{ color: 'var(--gold)', fontWeight: 700 }}>Identité de l’organisme</a>, l’écran de référence, plus complet.
+        Les deux écrivent au même endroit : n’en tiens qu’un ouvert à la fois, sinon le dernier enregistré écrase l’autre.
+      </div>
       <div style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 800 }}>
 
         {/* Stats summary */}

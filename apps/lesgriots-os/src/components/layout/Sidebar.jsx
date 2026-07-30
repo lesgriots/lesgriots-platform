@@ -552,22 +552,24 @@ const RAIL_SECTIONS = [
     ],
   },
   {
+    // Ce menu avait été écrit sur le modèle de Digiforma, avant que les écrans
+    // existent : sept entrées sur onze menaient ailleurs que ce qu'elles
+    // annonçaient. Cinq portaient un « ?vue= » que personne ne lisait, et
+    // « Comptes d'accès » ouvrait les coordonnées bancaires.
+    //
+    // Il ne reste ici que ce qui existe vraiment. Ce qui manque n'a pas
+    // disparu : il est listé, avec sa raison d'être, dans « Ce qui reste à
+    // construire ». Un menu qui ment coûte plus cher qu'un menu court.
     id: 'configuration', icon: 'settings', label: 'Configuration',
     links: [
-      { href: '/workflows', label: 'Automatisations' },
-      { href: '/parametres-formation', label: 'Interconnexions' },
+      { href: '/parametres-formation', label: "Identité de l’organisme" },
+      { href: '/organisme', label: 'Pièces de l’organisme' },
       { divider: true },
-      { href: '/parametres-formation?vue=documents', label: 'Modèles de documents' },
       { href: '/emails', label: "Modèles d'e-mails" },
-      { href: '/workflows?vue=listes-taches', label: 'Modèles de listes de tâches' },
-      { href: '/settings?vue=notifications', label: 'Notifications' },
-      { href: '/parametres-formation?vue=competences', label: 'Domaines de compétences' },
-      { divider: true },
-      { href: '/settings', label: "Comptes d'accès" },
-      { divider: true },
-      { href: '/organisme?vue=catalogue', label: 'Ma marque – Catalogue en ligne' },
-      { href: '/inscriptions', label: "Formulaire individuel d’inscription" },
       { href: '/espace-apprenant', label: 'Espace apprenant' },
+      { href: '/workflows', label: 'Workflows agence' },
+      { divider: true },
+      { href: '/a-construire', label: 'Ce qui reste à construire' },
     ],
   },
 ];
