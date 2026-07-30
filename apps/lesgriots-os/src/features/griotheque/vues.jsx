@@ -9404,8 +9404,9 @@ export function ApprenantsView() {
                     onMouseEnter={e => { e.currentTarget.style.borderColor = alpha(etatInfo.c, 33); e.currentTarget.style.boxShadow = `0 2px 8px ${alpha(etatInfo.c, 8)}`; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = T.border; e.currentTarget.style.boxShadow = 'none'; }}
                     >
-                      <div style={{ fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 2 }}>
-                        {a.first_name} {a.last_name}
+                      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 6, marginBottom: 2 }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{a.first_name} {a.last_name}</span>
+                        <a href={`/apprenants/${a.id}`} onClick={(e) => e.stopPropagation()} title="Ouvrir la fiche" style={{ fontSize: 10, fontWeight: 800, color: 'var(--gold)', textDecoration: 'none', whiteSpace: 'nowrap' }}>fiche →</a>
                       </div>
                       {a.email && <div style={{ fontSize: 10, color: T.textMuted, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.email}</div>}
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>

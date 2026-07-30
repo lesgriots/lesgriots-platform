@@ -96,6 +96,21 @@ export default function FinanceursPage() {
               background: 'var(--gold)', color: 'var(--gold-ink)', border: '1.5px solid var(--gold)',
             }}>Créer la fiche</button>
           </div>
+          {/* Les organismes déjà cités sur les fiches apprenants : un clic suffit. */}
+          {data?.organismes?.filter((o) => !carnet.some((f) => f.nom.toLowerCase() === String(o.nom || o.label || '').toLowerCase())).length > 0 && (
+            <div style={{ padding: '0 16px 16px', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Déjà cités sur tes dossiers :</span>
+              {data.organismes
+                .filter((o) => !carnet.some((f) => f.nom.toLowerCase() === String(o.nom || o.label || '').toLowerCase()))
+                .map((o) => {
+                  const nom = o.nom || o.label || '';
+                  return <button key={nom} type="button" disabled={occupe} onClick={() => creer(nom)} style={{
+                    padding: '7px 11px', borderRadius: 9, border: '1.5px solid var(--border-2)', background: 'var(--surface)',
+                    color: 'var(--text)', fontSize: 12, fontWeight: 800, cursor: occupe ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+                  }}>+ {nom}</button>;
+                })}
+            </div>
+          )}
           {carnet.length ? <div style={{ padding: '0 16px 16px', display: 'grid', gap: 8 }}>
             {carnet.map((f) => <div key={f.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap', padding: '11px 13px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-2)' }}>
               <div>
