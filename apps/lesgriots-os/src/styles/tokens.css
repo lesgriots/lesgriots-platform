@@ -61,6 +61,19 @@
   --pillar-prod:       #B584D6;  /* violet — Production */
   --pillar-griotheque: #E0A72E;  /* ambre — Formations */
 
+
+  /* ── L'interrupteur ──
+     Le vert dit « en marche ». L'or reste à ce qui demande une décision :
+     un bouton d'action, une échéance, une relance. Deux rôles, deux couleurs.
+
+     Ces deux valeurs ne changent pas d'un thème à l'autre, volontairement.
+     Un pouce blanc sur ce vert donne un rapport de contraste de 5,6 ; sur le
+     vert clair du thème encre il tomberait à 2,2, et la bascule cesserait de
+     se lire pour qui distingue mal les couleurs. */
+  --actif:       #1E8449;
+  --actif-pouce: #FFFFFF;
+  --actif-soft:  rgba(30, 132, 73, 0.14);
+
   /* ── Spacing (base 4px) ── */
   --sp-1: 4px;
   --sp-2: 8px;
@@ -173,6 +186,7 @@ html[data-theme="light"] {
 
   --success:      #1E8449;
   --success-soft: rgba(30, 132, 73, 0.10);
+  --actif-soft:   rgba(30, 132, 73, 0.10);
   --warning:      #C9821C;
   --warning-soft: rgba(201, 130, 28, 0.12);
   --danger:       #B83328;

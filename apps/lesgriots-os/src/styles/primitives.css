@@ -257,8 +257,9 @@
    carte virait au vert pendant que l'interrupteur virait à l'or. Deux
    couleurs pour un seul booléen, c'est une couleur de trop.
 
-   Règle : l'or dit allumé, partout. Le pouce garde l'encre de l'or, seule
-   teinte qui tienne le contraste sur du jaune vif, en encre comme en papier.
+   Règle : le vert dit « en marche ». L'or est réservé à ce qui demande une
+   décision, un bouton d'action, une relance, une échéance. Une couleur par
+   rôle : sinon l'or finit par ne plus rien signaler du tout.
    ─────────────────────────────────────────────────────────────────────── */
 
 .lg-inter {
@@ -281,8 +282,8 @@
 .lg-inter:not(:disabled):hover { border-color: var(--text-3); }
 
 .lg-inter[aria-checked='true'] {
-  background: var(--gold);
-  border-color: var(--gold);
+  background: var(--actif);
+  border-color: var(--actif);
 }
 
 .lg-inter:disabled {
@@ -301,7 +302,7 @@
 }
 
 .lg-inter[aria-checked='true'] .lg-inter__pouce {
-  background: var(--gold-ink);
+  background: var(--actif-pouce);
   transform: translateX(17px);
 }
 

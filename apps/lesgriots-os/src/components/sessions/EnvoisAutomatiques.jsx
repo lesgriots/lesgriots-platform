@@ -146,10 +146,10 @@ export default function EnvoisAutomatiques({ sessionId, session, onNotice, onRec
           return (
             <div key={c.cle} style={{
               padding: 14, borderRadius: 11,
-              // Une campagne armée se signale à l'or, comme son interrupteur.
-              // Le vert disait la même chose dans une autre langue.
-              border: `1.5px solid ${arme ? 'var(--gold)' : 'var(--border)'}`,
-              background: arme ? 'var(--gold-soft)' : 'var(--surface-2)',
+              // Une campagne armée se signale au vert, comme son interrupteur.
+              // Une seule langue pour un seul booléen.
+              border: `1.5px solid ${arme ? 'var(--actif)' : 'var(--border)'}`,
+              background: arme ? 'var(--actif-soft)' : 'var(--surface-2)',
             }}>
               <Interrupteur
                 actif={arme}
