@@ -159,39 +159,49 @@ export const RAIL_SECTIONS = [
  * pourtant une place évidente. On la déclare ici plutôt que de laisser le
  * fil muet.
  */
+// [ section, libellé de l'étape, adresse de retour ]
+// L'adresse de retour n'est pas toujours le préfixe : la fiche d'une session
+// vit sous /sessions/… mais la liste, elle, est à /sessions-list.
 const RATTACHEMENTS = {
-  '/sessions': ['Sessions de formation', 'Toutes mes sessions'],
-  '/opportunites': ['Gestion commerciale', 'Tunnel de vente'],
-  '/formations': ['Bibliothèque', 'Programmes'],
-  '/evaluations': ["Rapports d'activité", 'Résultats des évaluations'],
-  '/settings': ['Configuration', 'Réglages'],
-  '/appareil': ['Configuration', 'Appareil'],
-  '/legal': ['Configuration', 'Mentions légales'],
+  '/sessions': ['Sessions de formation', 'Toutes mes sessions', '/sessions-list'],
+  '/opportunites': ['Gestion commerciale', 'Tunnel de vente', '/pipeline-formations'],
+  '/formations': ['Bibliothèque', 'Programmes', '/catalogue'],
+  '/evaluations': ["Rapports d'activité", 'Résultats des évaluations', '/evaluations'],
+  '/settings': ['Configuration', 'Réglages', '/settings'],
+  '/appareil': ['Configuration', 'Appareil', '/appareil'],
+  '/legal': ['Configuration', 'Mentions légales', '/legal'],
 };
 
 /**
  * Le chemin qui mène à une route, tel qu'il se lit dans le menu.
  *
- *   /amelioration-continue → [Rapports d'activité, Amélioration continue]
- *   /entreprises/42        → [Données, Entreprises]
+ *   /amelioration-continue → { section: "Rapports d'activité",
+ *                              page: 'Amélioration continue',
+ *                              href: '/amelioration-continue', fiche: false }
+ *   /entreprises/42        → { section: 'Données', page: 'Entreprises',
+ *                              href: '/entreprises', fiche: true }
  *
- * La fiche elle-même n'est pas une étape : son nom est déjà le titre de la
- * page. Le fil dit d'où l'on vient, pas où l'on est.
+ * `fiche` distingue l'écran de liste de la fiche ouverte depuis cette liste :
+ * sur une fiche, le fil doit ramener à la liste, et le nom de la fiche devient
+ * la dernière étape.
  *
  * Une route inconnue ne renvoie rien : mieux vaut pas de fil du tout qu'un
  * fil inventé.
  */
 export function cheminGriotheque(pathname) {
   const p = String(pathname || '').split('?')[0];
-  if (!p || p === '/') return [];
+  if (!p || p === '/') return null;
 
   let exact = null;
   let parent = null;
 
-  const retenir = (cible, section, page) => {
-    if (p === cible) { if (!exact) exact = [section, page]; return; }
-    if (p.startsWith(cible + '/') && (!parent || cible.length > parent[0])) {
-      parent = [cible.length, section, page];
+  const retenir = (cible, section, page, retour = cible) => {
+    if (p === cible) {
+      if (!exact) exact = { section, page, href: retour, fiche: false };
+      return;
+    }
+    if (p.startsWith(cible + '/') && (!parent || cible.length > parent.prefixe.length)) {
+      parent = { section, page, href: retour, prefixe: cible, fiche: true };
     }
   };
 
@@ -203,11 +213,9 @@ export function cheminGriotheque(pathname) {
       retenir(lien.href, section.label, lien.label);
     }
   }
-  for (const [cible, [section, page]] of Object.entries(RATTACHEMENTS)) {
-    retenir(cible, section, page);
+  for (const [cible, [section, page, retour]] of Object.entries(RATTACHEMENTS)) {
+    retenir(cible, section, page, retour);
   }
 
-  if (exact) return exact;
-  if (parent) return [parent[1], parent[2]];
-  return [];
+  return exact || parent;
 }

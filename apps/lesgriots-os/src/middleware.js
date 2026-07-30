@@ -21,6 +21,10 @@ const PUBLIC_PATHS = [
   '/_next',
   '/favicon.ico',
   '/apple-icon.png',
+  // L'onglet réclame l'icône avant toute session : si elle passe par la porte
+  // d'authentification, le navigateur reçoit la page de connexion, met cet
+  // échec en cache, et l'onglet reste vide.
+  '/icon.png',
   '/branding/',
   '/manifest.webmanifest',
   // Pages publiques apprenants (émargement / questionnaires) — accès par token uniquement.
@@ -79,6 +83,6 @@ export function middleware(request) {
 export const config = {
   matcher: [
     // Match all routes except static files
-    '/((?!_next/static|_next/image|favicon.ico|apple-icon.png|branding/|manifest.webmanifest).*)',
+    '/((?!_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|branding/|manifest.webmanifest).*)',
   ],
 };

@@ -63,32 +63,72 @@ function ThemeToggle() {
 /**
  * FilAriane — la position dans l'application, lue au-dessus du titre.
  *
- * La maison d'abord, puis la section du menu, puis l'écran. Le dernier
- * segment n'est pas répété quand il dit déjà la même chose que le titre :
- * une ligne qui se répète ne renseigne personne.
+ * Deux formes, comme dans Digiforma :
+ *
+ *   sur une liste  ·  Rapports d'activité › Amélioration continue
+ *   sur une fiche  ·  ‹ Toutes mes sessions › ECOHESENS - Stratégie de…
+ *
+ * Sur une fiche, la première étape est un lien de retour : le chevron et le
+ * libellé ramènent à la liste d'où l'on vient. Le nom de la fiche ferme le
+ * chemin, tronqué s'il est long, jamais coupé au milieu d'un mot visible.
+ *
+ * Une route absente du menu n'affiche que la maison. Un fil inventé
+ * désoriente plus qu'il ne guide.
  */
 function FilAriane({ pathname, title }) {
   const griotheque = estGriotheque(pathname || '');
+  const chemin = griotheque ? cheminGriotheque(pathname) : null;
   const racine = griotheque ? 'LA GRIOTHÈQUE' : 'LES GRIOTS · OS';
-  const chemin = griotheque ? cheminGriotheque(pathname) : [];
 
-  // Un écran dont le nom de menu est déjà le titre n'a pas à le redire.
-  const normalise = (t) => String(t || '').trim().toLowerCase();
-  const etapes = chemin.filter((e, i) => !(i === chemin.length - 1 && normalise(e) === normalise(title)));
+  const separateur = (
+    <span aria-hidden="true" style={{ opacity: 0.45, margin: '0 7px' }}>›</span>
+  );
+  const lien = { color: 'inherit', textDecoration: 'none', whiteSpace: 'nowrap' };
+  const enveloppe = {
+    marginBottom: 2, display: 'flex', alignItems: 'center',
+    minWidth: 0, maxWidth: '100%',
+  };
 
-  const sep = { color: 'var(--text-3)', opacity: 0.5, margin: '0 6px' };
+  if (!chemin) {
+    return (
+      <div className="eyebrow" style={enveloppe}>
+        <Link href={griotheque ? '/apercu' : '/'} style={lien}>{racine}</Link>
+      </div>
+    );
+  }
+
+  // Sur une liste, le titre de la page redit déjà la dernière étape.
+  const memeMot = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+
+  if (!chemin.fiche) {
+    return (
+      <div className="eyebrow" style={enveloppe}>
+        <Link href="/apercu" style={lien}>{racine}</Link>
+        {separateur}
+        <span style={{ whiteSpace: 'nowrap' }}>{chemin.section}</span>
+        {!memeMot(chemin.page, title) && (
+          <>
+            {separateur}
+            <span style={{ whiteSpace: 'nowrap' }}>{chemin.page}</span>
+          </>
+        )}
+      </div>
+    );
+  }
 
   return (
-    <div className="eyebrow" style={{ marginBottom: 2, display: 'flex', alignItems: 'center', flexWrap: 'wrap', minWidth: 0 }}>
-      <Link href={griotheque ? '/apercu' : '/'} style={{ color: 'inherit', textDecoration: 'none' }}>
-        {racine}
+    <div className="eyebrow" style={enveloppe}>
+      <Link href={chemin.href} style={{ ...lien, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+        <span aria-hidden="true" style={{ opacity: 0.6 }}>‹</span>
+        {chemin.page}
       </Link>
-      {etapes.map((etape) => (
-        <span key={etape} style={{ display: 'inline-flex', alignItems: 'center', minWidth: 0 }}>
-          <span style={sep} aria-hidden="true">·</span>
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{etape}</span>
-        </span>
-      ))}
+      {separateur}
+      <span
+        title={title}
+        style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}
+      >
+        {title}
+      </span>
     </div>
   );
 }
