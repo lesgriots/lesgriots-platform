@@ -123,15 +123,18 @@ export default function NouvelleSessionPage() {
       fetch('/api/formations').then((r) => (r.ok ? r.json() : [])),
       fetch('/api/lieux-formation').then((r) => (r.ok ? r.json() : [])).catch(() => []),
       fetch('/api/team').then((r) => (r.ok ? r.json() : [])).catch(() => []),
-    ]).then(([fo, li, membres]) => {
+      fetch('/api/auth/me').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    ]).then(([fo, li, membres, moi]) => {
       setFormations(Array.isArray(fo) ? fo : fo?.items || []);
       const liste = Array.isArray(li) ? li : li?.items || [];
       setLieux(liste.filter((l) => l.active !== 0));
       const noms = (Array.isArray(membres) ? membres : membres?.items || [])
         .map((m) => m.name || m.nom).filter(Boolean);
-      const equipeFinale = noms.length ? noms : ['COULIBALY Moustapha'];
-      setEquipe(equipeFinale);
-      setF((v) => ({ ...v, gestionnaire_1: v.gestionnaire_1 || equipeFinale[0] }));
+      setEquipe(noms);
+      // Le gestionnaire par défaut, c'est celui qui crée la session. Pas le
+      // premier nom de l'équipe par ordre alphabétique.
+      const soi = moi?.name || moi?.nom || moi?.email || noms[0] || '';
+      setF((v) => ({ ...v, gestionnaire_1: v.gestionnaire_1 || soi }));
     }).catch(() => setErreur('Chargement impossible.'));
   }, []);
 
