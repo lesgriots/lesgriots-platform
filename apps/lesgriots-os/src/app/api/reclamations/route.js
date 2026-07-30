@@ -63,7 +63,7 @@ async function _POST(req) {
       auteur_nom = '', auteur_email = '', objet = '', description = '',
       gravite = 'mineure', analyse = '', action_corrective = '',
       responsable = '', session_id = null, apprenant_id = null,
-      recue_le = '',
+      recue_le = '', cause = '', axe_id = '',
     } = body;
 
     if (!objet) return NextResponse.json({ error: 'objet requis' }, { status: 400 });
@@ -76,11 +76,11 @@ async function _POST(req) {
       INSERT INTO reclamations
         (id, reference, nature, origine, canal, auteur_nom, auteur_email,
          objet, description, gravite, analyse, action_corrective, responsable,
-         session_id, apprenant_id, recue_le)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         session_id, apprenant_id, recue_le, cause, axe_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(id, reference, nature, origine, canal, auteur_nom, auteur_email,
       objet, description, gravite, analyse, action_corrective, responsable,
-      session_id || null, apprenant_id || null, date);
+      session_id || null, apprenant_id || null, date, cause, axe_id);
 
     const item = db.prepare('SELECT * FROM reclamations WHERE id = ?').get(id);
     return NextResponse.json(item, { status: 201 });

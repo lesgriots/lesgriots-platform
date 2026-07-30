@@ -13,6 +13,7 @@ const CHAMPS = [
   'nature', 'origine', 'canal', 'auteur_nom', 'auteur_email', 'objet',
   'description', 'gravite', 'statut', 'analyse', 'action_corrective',
   'responsable', 'session_id', 'apprenant_id', 'recue_le', 'resolue_le',
+  'cause', 'axe_id',
 ];
 
 async function _PATCH(req, { params }) {

@@ -254,6 +254,56 @@ function initSchema(db) {
     db.exec("ALTER TABLE formations ADD COLUMN evaluations_associees TEXT DEFAULT '[]'");
   }
 
+  // ── Amélioration continue : indicateurs 31 et 32 ──
+  //
+  // Trois niveaux, et c'est leur emboîtement qui fait la démarche qualité :
+  //
+  //   Axe d'amélioration   la grande ligne qu'on suit sur l'année
+  //     ↳ Incident         ce qui a été constaté : réclamation, incident,
+  //                        suggestion, note basse, abandon
+  //       ↳ Action         ce qu'on change, qui le fait, pour quand
+  //
+  // L'auditeur ne regarde pas trois listes côte à côte : il cherche le lien
+  // de cause à effet. Une action doit pointer vers l'incident qui l'a
+  // déclenchée, et l'incident vers l'axe qu'il alimente.
+  //
+  // La table `reclamations` existait déjà et tient le rôle d'incident : on
+  // l'étend plutôt que d'en créer une seconde qui dirait la même chose.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS axes_amelioration (
+      id TEXT PRIMARY KEY,
+      nom TEXT NOT NULL DEFAULT '',
+      description TEXT DEFAULT '',
+      statut TEXT NOT NULL DEFAULT 'ouvert'
+        CHECK(statut IN ('ouvert','en_cours','atteint','abandonne')),
+      date_echeance TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS actions_correctives (
+      id TEXT PRIMARY KEY,
+      incident_id TEXT REFERENCES reclamations(id) ON DELETE SET NULL,
+      axe_id TEXT REFERENCES axes_amelioration(id) ON DELETE SET NULL,
+      nom TEXT NOT NULL DEFAULT '',
+      type TEXT NOT NULL DEFAULT 'corrective'
+        CHECK(type IN ('corrective','preventive','amelioration')),
+      responsable TEXT DEFAULT '',
+      statut TEXT NOT NULL DEFAULT 'a_faire'
+        CHECK(statut IN ('a_faire','en_cours','faite','abandonnee')),
+      date_echeance TEXT DEFAULT '',
+      date_realisation TEXT DEFAULT '',
+      preuve TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_actions_incident ON actions_correctives(incident_id);
+    CREATE INDEX IF NOT EXISTS idx_actions_axe ON actions_correctives(axe_id);
+  `);
+
+  // L'incident se rattache à un axe, et porte sa cause.
+  const colsRecl = db.prepare("PRAGMA table_info(reclamations)").all().map(c => c.name);
+  if (!colsRecl.includes('axe_id')) db.exec("ALTER TABLE reclamations ADD COLUMN axe_id TEXT DEFAULT ''");
+  if (!colsRecl.includes('cause')) db.exec("ALTER TABLE reclamations ADD COLUMN cause TEXT DEFAULT ''");
+
   // ── Les envois automatiques, au-delà de la convocation ──
   // Le rappel se joue avant la session, les deux enquêtes après. Chacun a
   // son interrupteur et son délai, parce qu'un organisme ne veut pas
