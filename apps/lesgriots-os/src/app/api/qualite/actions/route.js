@@ -10,6 +10,12 @@ import { withGuard } from '@/lib/api-guard';
 
 const CHAMPS = ['incident_id', 'axe_id', 'nom', 'type', 'responsable', 'statut', 'date_echeance', 'date_realisation', 'preuve'];
 
+// Les deux rattachements sont des clés étrangères : une chaîne vide venue d'un
+// menu déroulant « Aucun » ne pointe sur rien et fait échouer l'insertion.
+// C'est null qu'il faut écrire, pas ''.
+const LIENS = ['incident_id', 'axe_id'];
+const valeur = (champ, v) => (LIENS.includes(champ) ? (v || null) : v);
+
 async function _GET() {
   try {
     const db = getDb();
@@ -32,7 +38,7 @@ async function _POST(request) {
     const id = `act_${Date.now()}`;
     const presents = CHAMPS.filter((c) => c in corps);
     db.prepare(`INSERT INTO actions_correctives (id, ${presents.join(', ')}) VALUES (?, ${presents.map(() => '?').join(', ')})`)
-      .run(id, ...presents.map((c) => corps[c]));
+      .run(id, ...presents.map((c) => valeur(c, corps[c])));
     return NextResponse.json(db.prepare('SELECT * FROM actions_correctives WHERE id = ?').get(id), { status: 201 });
   } catch (e) { return NextResponse.json({ error: e.message }, { status: 500 }); }
 }
@@ -42,7 +48,7 @@ async function _PATCH(request) {
     const db = getDb();
     const { id, ...corps } = await request.json();
     const sets = [], valeurs = [];
-    for (const c of CHAMPS) if (c in corps) { sets.push(`${c} = ?`); valeurs.push(corps[c]); }
+    for (const c of CHAMPS) if (c in corps) { sets.push(`${c} = ?`); valeurs.push(valeur(c, corps[c])); }
     if (!sets.length) return NextResponse.json({ error: 'Rien à modifier' }, { status: 400 });
     // Une action passée à « faite » sans date se date d'aujourd'hui.
     if (corps.statut === 'faite' && !corps.date_realisation) {
