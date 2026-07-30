@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import ClientsSession from './ClientsSession';
+import EspaceApprenantConfig from './EspaceApprenantConfig';
 import { useEffect, useMemo, useState } from 'react';
 
 const STEPS = [
@@ -610,7 +611,7 @@ export default function SessionCockpit({ sessionId }) {
   const renderApprenant = () => {
     if (currentSub === 'documents') return <section style={card}><h2 style={title}>Documents partagés</h2><p style={muted}>Chaque document généré est ajouté au registre de cette session avec sa date et sa version. « Mettre à jour » crée une nouvelle version, sans effacer l’ancienne.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '16px 0' }}><Action onClick={() => openDocument('programme')}>Générer le programme</Action><Action secondary onClick={() => openDocument('emargement')}>Générer la feuille d’émargement</Action>{inscriptions.map((item) => <Action key={item.id} secondary onClick={() => openDocument('attestation', item.apprenant_id)}>Attestation · {item.first_name}</Action>)}</div><DocumentRegister documents={documents} onRegenerate={(doc) => { try { const url = new URL(doc.fichier, window.location.origin); openDocument(url.searchParams.get('type') || 'programme', url.searchParams.get('apprenant_id')); } catch { window.open(doc.fichier, '_blank', 'noopener,noreferrer'); } }} /></section>;
     if (currentSub === 'elearning') return <section style={card}><h2 style={title}>Séquences e-learning</h2><p style={muted}>Crée ou associe un parcours e-learning à cette session, puis suis la progression par apprenant.</p><Empty>Aucune séquence n’est encore associée à ce parcours.</Empty></section>;
-    if (currentSub === 'affichage') return <section style={card}><h2 style={title}>Configuration de l’espace apprenant</h2><p style={muted}>Personnalise le nom et les éléments visibles par les apprenants.</p><Info label="Nom affiché" value={session.formation_title} /><div style={{ height: 1, background: 'var(--border)', margin: '16px 0' }} /><Action secondary onClick={() => setNotice('La personnalisation visuelle de l’espace apprenant arrive dans le prochain bloc.')}>Configurer l’affichage</Action></section>;
+    if (currentSub === 'affichage') return <EspaceApprenantConfig sessionId={sessionId} session={session} onNotice={setNotice} onRecharger={load} />;
     const accessLink = links.find((item) => item.kind === 'questionnaire') || links.find((item) => item.kind === 'emargement');
     return <section style={card}><h2 style={title}>Accès sécurisé</h2><p style={muted}>Crée des liens temporaires pour l’émargement et les questionnaires de cette session.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '16px 0' }}><Action onClick={() => createLink('emargement')}>Créer le lien d’émargement</Action><Action secondary onClick={() => createLink('questionnaire', 'positionnement')}>Créer le lien de positionnement</Action></div>{accessLink ? <div style={{ ...card, background: 'var(--surface-2)', padding: 12 }}><div style={muted}>Dernier lien actif</div><code style={{ color: 'var(--gold)', fontSize: 12 }}>{typeof window !== 'undefined' ? window.location.origin : ''}{accessLink.url}</code></div> : <Empty>Aucun lien d’accès n’a encore été créé.</Empty>}</section>;
   };

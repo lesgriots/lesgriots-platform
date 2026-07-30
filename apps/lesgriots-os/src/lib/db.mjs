@@ -220,6 +220,21 @@ function initSchema(db) {
     INSERT OR IGNORE INTO settings (key, value) VALUES ('pricing_smic_net', '1400');
   `);
 
+  // ── Espace apprenant : ce que la session en montre ──
+  // L'espace affichait tout, tout le temps. Or ce qui doit être visible
+  // dépend de la session : un intra n'expose pas la liste des participants,
+  // et les boutons d'émargement n'ont de sens que si la présence se signe
+  // en ligne. Le nom interne d'une session n'est pas non plus celui qu'on
+  // montre à l'apprenant.
+  const colsSessionsEspace = db.prepare("PRAGMA table_info(sessions)").all().map(c => c.name);
+  for (const [nom, type] of [
+    ['espace_nom_public', "TEXT DEFAULT ''"],
+    ['espace_description', "TEXT DEFAULT ''"],
+    ['espace_options', "TEXT DEFAULT ''"],   // JSON, vide = on prend les réglages par défaut
+  ]) {
+    if (!colsSessionsEspace.includes(nom)) db.exec(`ALTER TABLE sessions ADD COLUMN ${nom} ${type}`);
+  }
+
   // ── Les clients d'une session ──
   // Une session n'a pas un client, elle en a autant qu'il y a de payeurs.
   // Chacun a son prix, son nombre d'apprenants au devis, son bon de commande

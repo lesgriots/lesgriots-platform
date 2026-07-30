@@ -63,6 +63,30 @@ function enListe(v) {
     .filter((x) => x.length > 1);
 }
 
+/**
+ * Ce que l'espace montre. Chaque option a une raison d'être réglable :
+ * un intra n'expose pas la liste des participants, les boutons d'émargement
+ * n'ont de sens que si la présence se signe en ligne, et le programme n'est
+ * pas toujours prêt à être publié.
+ */
+export const OPTIONS_ESPACE = {
+  lieu: true,
+  formateur: true,
+  programme: true,
+  documents: true,
+  emargement: true,
+  questionnaires: true,
+};
+
+/** Réglages de la session, sinon ceux de l'organisme, sinon la valeur d'usine. */
+function optionsEspace(db, session) {
+  let defauts = {};
+  try { defauts = JSON.parse(reglage(db, 'espace_options_defaut', '{}')) || {}; } catch { defauts = {}; }
+  let propres = {};
+  try { propres = JSON.parse(session.espace_options || '{}') || {}; } catch { propres = {}; }
+  return { ...OPTIONS_ESPACE, ...defauts, ...propres };
+}
+
 export async function GET(request, { params }) {
   try {
     const db = getDb();
@@ -126,10 +150,14 @@ export async function GET(request, { params }) {
       aFaire.push({ cle: 'froid', label: QUESTIONNAIRES.froid.label, quand: 'quelques semaines après' });
     }
 
+    const options = optionsEspace(db, s);
+
     return NextResponse.json({
+      options,
       apprenant: { prenom: a?.first_name || '', nom: a?.last_name || '' },
       session: {
-        titre: s.session_name || s.formation_titre || 'Votre formation',
+        titre: s.espace_nom_public || s.session_name || s.formation_titre || 'Votre formation',
+        presentation: s.espace_description || '',
         formation: s.formation_titre || '',
         description: s.formation_description || '',
         debut: s.start_date, fin: s.end_date, horaire: s.horaire || '',
@@ -141,18 +169,19 @@ export async function GET(request, { params }) {
         public_vise: enListe(s.target_audience),
         evaluation: enListe(s.evaluation_methods),
         accessibilite: s.accessibility || (lieu && lieu.accessibilite_pmr ? 'Locaux accessibles aux personnes à mobilité réduite.' : ''),
-        lieu: lieu
+        formateur_visible: options.formateur !== false,
+        lieu: options.lieu === false ? null : (lieu
           ? { nom: lieu.nom, adresse: [lieu.adresse, lieu.postal_code, lieu.ville].filter(Boolean).join(', ') }
-          : (s.adresse || s.location ? { nom: '', adresse: s.adresse || s.location } : null),
+          : (s.adresse || s.location ? { nom: '', adresse: s.adresse || s.location } : null)),
         terminee,
       },
-      modules: modules.map((m) => ({
+      modules: options.programme === false ? [] : modules.map((m) => ({
         titre: m.title, description: m.description,
         objectifs: enListe(m.objectives), heures: m.duration_hours || 0,
       })),
-      documents,
-      emargement: { jours, signees },
-      a_faire: aFaire,
+      documents: options.documents === false ? [] : documents,
+      emargement: options.emargement === false ? { jours: [], signees } : { jours, signees },
+      a_faire: options.questionnaires === false ? [] : aFaire,
       rendues,
       organisme: {
         nom: reglage(db, 'company_name', 'LA GRIOTHÈQUE'),

@@ -130,6 +130,12 @@ export default function EspaceApprenant({ params }) {
         </section>
       )}
 
+      {s.presentation && (
+        <section style={carte}>
+          <p style={{ fontSize: 14, color: P.texte2, margin: 0, lineHeight: 1.65, whiteSpace: 'pre-line' }}>{s.presentation}</p>
+        </section>
+      )}
+
       {/* ── Ma session ────────────────────────────────────────────── */}
       <section style={carte}>
         <div style={{ ...mono, marginBottom: 10 }}>Ma session</div>
@@ -138,7 +144,7 @@ export default function EspaceApprenant({ params }) {
         {s.duree_heures ? <Ligne l="Durée" v={`${s.duree_heures} heures`} /> : null}
         {s.lieu && <Ligne l="Lieu" v={[s.lieu.nom, s.lieu.adresse].filter(Boolean).join(' · ')} />}
         {s.modalite && <Ligne l="Modalité" v={s.modalite} />}
-        {s.formateur && <Ligne l="Formateur" v={s.formateur} />}
+        {s.formateur && s.formateur_visible !== false && <Ligne l="Formateur" v={s.formateur} />}
         {s.accessibilite && <Ligne l="Accessibilité" v={s.accessibilite} />}
       </section>
 
