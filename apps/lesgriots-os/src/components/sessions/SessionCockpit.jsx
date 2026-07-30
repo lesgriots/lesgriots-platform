@@ -26,6 +26,19 @@ const SUBNAV = {
   ],
 };
 
+const MODELES_EMAIL = [
+  ['convocation', 'Convocation'],
+  ['rappel_j7', 'Rappel J-7'],
+  ['enquete_chaud', 'Enquête à chaud'],
+  ['enquete_froid', 'Enquête à froid'],
+  ['envoi_attestation', 'Envoi attestation'],
+  ['convention', 'Convention de formation'],
+  ['document_session', 'Document de session'],
+];
+const LIBELLE_MODELE = Object.fromEntries(MODELES_EMAIL);
+/** Les modèles qui partent avec le programme de formation en pièce jointe. */
+const MODELES_AVEC_PROGRAMME = ['convocation', 'rappel_j7'];
+
 const EVALUATION_TYPES = [
   { id: 'positionnement', questionnaireType: 'positionnement', title: 'Évaluation préformation pour les apprenants', description: 'Sondez les attentes et diagnostiquez le besoin avant la session.', model: 'Modèle d’évaluation de préformation' },
   { id: 'satisfaction', questionnaireType: 'chaud', title: 'Évaluation à chaud pour les apprenants', description: 'Envoyez une évaluation dématérialisée à l’apprenant pour qu’il note la formation.', model: 'Modèle d’évaluation de satisfaction à chaud', automated: true },
@@ -58,6 +71,10 @@ function Empty({ children }) {
   return <div style={{ ...card, ...muted, textAlign: 'center', padding: '32px 16px', borderStyle: 'dashed' }}>{children}</div>;
 }
 
+/** Le point vert de « déjà envoyé », posé sur le coin du bouton. */
+function Pastille() {
+  return <span aria-label="déjà envoyé" title="Déjà envoyé" style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', display: 'inline-block', flex: 'none' }} />;
+}
 function Action({ children, onClick, href, secondary = false, disabled = false, small = false }) {
   const style = {
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
@@ -115,7 +132,7 @@ export default function SessionCockpit({ sessionId }) {
   const [error, setError] = useState('');
   const [step, setStep] = useState('avancement');
   const [sub, setSub] = useState({ configuration: 'initialisation', gestion: 'conventions', apprenant: 'acces', suivi: 'emargements' });
-  const [emailPreview, setEmailPreview] = useState(null);
+  const [envoi, setEnvoi] = useState(null);
   const [notice, setNotice] = useState('');
   const [convocationConfig, setConvocationConfig] = useState({ enabled: false, leadDays: 4, documentTemplate: 'Modèle par défaut', emailTemplate: 'Modèle par défaut' });
   const [datesConfig, setDatesConfig] = useState({ startDate: '', endDate: '', location: '', horaire: '', modality: 'Présentiel', tarif: '', maxParticipants: '' });
@@ -293,30 +310,17 @@ export default function SessionCockpit({ sessionId }) {
     } catch (err) { setNotice(err.message || 'Impossible de préparer les formulaires.'); }
   };
 
-  const prepareEmail = async (type, recipient = null) => {
-    try {
-      const response = await fetch(`/api/sessions/${sessionId}/emails?type=${type}`);
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Modèle indisponible');
-      setEmailPreview({ ...data, type, recipient });
-    } catch (err) { setNotice(err.message || 'Impossible de préparer cet e-mail.'); }
-  };
+  /**
+   * Ouvre la fenêtre d'envoi. Avant, ce clic préparait un aperçu qui ne
+   * s'affichait que dans l'onglet Suivi > E-mails : depuis Convocations,
+   * il ne se passait rien à l'écran et on ne pouvait pas envoyer.
+   */
+  /** Un e-mail de ce modèle est-il déjà parti à cette adresse ? */
+  const dejaEnvoye = (templateKey, email) => Boolean(email) && emailHistory.some((item) =>
+    item.template_key === templateKey && item.destinataire === email && item.statut === 'envoye');
 
-  const sendPreparedEmail = async () => {
-    if (!emailPreview) return;
-    const recipient = emailPreview.recipient || inscriptions.find((item) => item.email);
-    if (!recipient?.email) { setNotice('Renseigne l’e-mail d’un apprenant avant d’envoyer ce message.'); return; }
-    try {
-      const response = await fetch('/api/emails', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-        destinataire: recipient.email, destinataire_nom: `${recipient.first_name || ''} ${recipient.last_name || ''}`.trim(), objet: emailPreview.subject, corps: emailPreview.body,
-        template_key: emailPreview.type, contexte_type: 'session', contexte_id: sessionId,
-      }) });
-      const sent = await response.json();
-      if (!response.ok) throw new Error(sent.error || 'Envoi impossible');
-      setEmailHistory((current) => [sent, ...current]);
-      setNotice(sent.statut === 'envoye' ? 'E-mail envoyé et archivé.' : 'E-mail simulé et archivé. Configure SMTP pour un envoi réel.');
-      setEmailPreview(null);
-    } catch (err) { setNotice(err.message || 'Impossible d’envoyer cet e-mail.'); }
+  const prepareEmail = (type, inscription = null) => {
+    setEnvoi({ templateKey: type, apprenantId: inscription?.apprenant_id || null });
   };
 
   const updateInscription = async (id, patch) => {
@@ -460,7 +464,7 @@ export default function SessionCockpit({ sessionId }) {
         { label: 'Émargements', detail: `Signatures enregistrées\n${stats.signedAttendance}/${stats.totalAttendance || 0}`, state: stats.totalAttendance && stats.signedAttendance === stats.totalAttendance ? 'done' : stats.signedAttendance ? 'pending' : 'alert', step: 'suivi', sub: 'emargements' },
         { label: 'Absences', detail: stats.totalAttendance && stats.signedAttendance === stats.totalAttendance ? 'Aucune absence à traiter' : 'Présences à contrôler', state: stats.totalAttendance && stats.signedAttendance === stats.totalAttendance ? 'done' : 'pending', step: 'suivi', sub: 'absences' },
         { label: 'Certificats & attestations', detail: `Envoyés par e-mail\n${inscriptions.filter((item) => item.attestation_sent).length}/${inscriptions.length}`, state: everyLearner('attestation_sent') ? 'done' : allLearners ? 'pending' : 'alert', step: 'suivi', sub: 'attestations' },
-        { label: 'E-mails', detail: emailPreview ? 'E-mail prêt à envoyer' : 'Historique et relances', state: emailPreview ? 'done' : 'pending', step: 'suivi', sub: 'emails' },
+        { label: 'E-mails', detail: emailHistory.length ? `${emailHistory.filter((item) => item.statut === 'envoye').length} envoyé(s) sur ${emailHistory.length} trace(s)` : 'Aucun e-mail envoyé', state: emailHistory.some((item) => item.statut === 'envoye') ? 'done' : 'pending', step: 'suivi', sub: 'emails' },
       ],
     },
   ];
@@ -524,11 +528,11 @@ export default function SessionCockpit({ sessionId }) {
       <section style={card}>
         <h2 style={title}>Génération et envoi manuel</h2>
         <p style={{ ...muted, margin: '5px 0 14px' }}>Générez le document, puis indiquez précisément à qui la convocation a été envoyée.</p>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}><Action onClick={() => openDocument('convocation')} disabled={!inscriptions.length}>Générer les convocations</Action><Action secondary onClick={() => prepareEmail('convocation')} disabled={!inscriptions.length}>Préparer l’e-mail</Action></div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}><Action onClick={() => openDocument('convocation')} disabled={!inscriptions.length}>Générer les convocations</Action><Action secondary onClick={() => prepareEmail('convocation')} disabled={!inscriptions.length}>✉ Envoyer les convocations</Action></div>
         {inscriptions.length ? <div style={{ display: 'grid', gap: 10 }}>
           {inscriptions.map((item) => <div key={item.id} style={{ padding: 14, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
             <div><b>{item.first_name} {item.last_name}</b><div style={muted}>{item.email || 'E-mail à renseigner'} · {item.convocation_sent ? 'Convocation envoyée' : 'Convocation à envoyer'}</div></div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><Action secondary onClick={() => openDocument('convocation', item.apprenant_id)}>Générer / mettre à jour</Action><Action secondary onClick={() => prepareEmail('convocation', item)}>E-mail</Action><Toggle checked={Boolean(item.convocation_sent)} onChange={(value) => updateInscription(item.id, { convocation_sent: value ? 1 : 0 })} label={item.convocation_sent ? 'Envoyée' : 'Marquer envoyée'} /></div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><Action secondary onClick={() => openDocument('convocation', item.apprenant_id)}>Générer / mettre à jour</Action><Action secondary onClick={() => prepareEmail('convocation', item)}>✉ Envoyer{dejaEnvoye('convocation', item.email) && <Pastille />}</Action><Toggle checked={Boolean(item.convocation_sent)} onChange={(value) => updateInscription(item.id, { convocation_sent: value ? 1 : 0 })} label={item.convocation_sent ? 'Envoyée' : 'Marquer envoyée'} /></div>
           </div>)}
         </div> : <Empty>Ajoute au moins un apprenant pour générer et suivre ses convocations.</Empty>}
       </section>
@@ -557,7 +561,7 @@ export default function SessionCockpit({ sessionId }) {
     if (currentSub === 'finances') return <section style={card}><h2 style={title}>Finances</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 16 }}><Metric label="Coût formation" value={`${Number(session.tarif || 0).toLocaleString('fr-FR')} €`} note="HT" /><Metric label="Total facturé" value={`${Number(session.ca_confirmed || 0).toLocaleString('fr-FR')} €`} note="HT" /><Metric label="Marge" value={`${Number(session.taux_marge || 0)} %`} note="estimation" /></div><div style={{ marginTop: 16 }}><Action onClick={() => openDocument('facture')}>Générer / mettre à jour la facture</Action></div></section>;
     if (currentSub === 'entreprise') return <section style={card}><h2 style={title}>Espace entreprise</h2><p style={muted}>Le client entreprise pourra suivre les informations et documents de sa session depuis un espace dédié.</p><Empty>L’espace entreprise sera activé lorsque le client et ses contacts auront été renseignés pour cette session.</Empty></section>;
     return <>
-      <section style={card}><h2 style={title}>Conventions et contrats par client</h2><p style={{ ...muted, margin: '5px 0 15px' }}>Chaque génération est archivée, datée et versionnée dans cette session.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}><Action onClick={() => openConvention()}>Générer / mettre à jour les conventions</Action><Action secondary onClick={() => prepareEmail('convocation')} disabled={!inscriptions.length}>Préparer l’envoi</Action></div>
+      <section style={card}><h2 style={title}>Conventions et contrats par client</h2><p style={{ ...muted, margin: '5px 0 15px' }}>Chaque génération est archivée, datée et versionnée dans cette session.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}><Action onClick={() => openConvention()}>Générer / mettre à jour les conventions</Action><Action secondary onClick={() => prepareEmail('convention')} disabled={!inscriptions.length}>✉ Envoyer la convention</Action></div>
         {inscriptions.length ? <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}><div style={{ padding: '12px 14px', background: 'var(--surface-2)' }}><b>{clientName || 'Client à associer'}</b><div style={muted}>{inscriptions.length} apprenant{inscriptions.length > 1 ? 's' : ''} : {inscriptions.map((item) => `${item.first_name} ${item.last_name}`).join(', ')}</div></div><div style={{ display: 'grid', gap: 8, padding: 12 }}>{inscriptions.map((item) => <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}><div><b>Convention entreprise · {item.first_name} {item.last_name}</b><div style={muted}>{item.convention_signed ? 'Convention signée' : 'Signature en attente'}</div></div><div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}><Action secondary onClick={() => openConvention(item)}>Générer / mettre à jour</Action><Toggle checked={Boolean(item.convention_signed)} onChange={(value) => updateInscription(item.id, { convention_signed: value ? 1 : 0 })} label={item.convention_signed ? 'Signée' : 'Marquer signée'} /></div></div>)}</div></div> : <Empty>Ajoute un client et au moins un apprenant pour générer la convention.</Empty>}
       </section>
       <section style={card}><h2 style={title}>Autres documents contractuels</h2><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}><Action secondary onClick={() => openDocument('programme')}>Programme</Action><span style={{ ...muted, alignSelf: 'center' }}>CGV et politique de confidentialité : à gérer depuis les modèles de documents.</span></div></section>
@@ -574,7 +578,7 @@ export default function SessionCockpit({ sessionId }) {
 
   const renderSuivi = () => {
     if (currentSub === 'absences') return <section style={card}><h2 style={title}>Absences et abandons</h2><p style={muted}>Corrige directement les présences par demi-journée : la synthèse des absences se met à jour immédiatement.</p><AttendanceTable rows={emargements} mode="absence" onUpdate={updateAttendance} /></section>;
-    if (currentSub === 'emails') return <section style={card}><h2 style={title}>E-mails</h2><p style={muted}>Prépare, personnalise et envoie depuis la session. Tous les envois sont conservés ici avec leur statut et leur date.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '12px 0 18px' }}><Action onClick={() => prepareEmail('convocation')}>Convocation</Action><Action secondary onClick={() => prepareEmail('rappel_j7')}>Rappel J-7</Action><Action secondary onClick={() => prepareEmail('enquete_chaud')}>Enquête à chaud</Action><Action secondary onClick={() => prepareEmail('envoi_attestation')}>Attestation</Action></div>{emailPreview ? <div style={{ ...card, background: 'var(--surface-2)', display: 'grid', gap: 12 }}><label style={{ display: 'grid', gap: 6, fontSize: 12, color: 'var(--text-3)', fontWeight: 700 }}>Destinataire<select value={emailPreview.recipient?.id || ''} onChange={(event) => setEmailPreview((current) => ({ ...current, recipient: inscriptions.find((item) => String(item.id) === event.target.value) || null }))} style={selectStyle}><option value="">Choisir un apprenant</option>{inscriptions.map((item) => <option key={item.id} value={item.id}>{item.first_name} {item.last_name} · {item.email || 'sans e-mail'}</option>)}</select></label><div><div style={muted}>Objet</div><b>{emailPreview.subject}</b></div><pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', fontSize: 12, lineHeight: 1.55, color: 'var(--text-2)', margin: 0 }}>{emailPreview.body}</pre><div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}><Action onClick={sendPreparedEmail}>{emailMode === 'reel' ? 'Envoyer l’e-mail' : 'Simuler et archiver l’e-mail'}</Action><Action secondary onClick={() => setEmailPreview(null)}>Annuler</Action><span style={muted}>{emailMode === 'reel' ? 'SMTP configuré : envoi réel.' : 'SMTP non configuré : l’envoi sera journalisé comme simulation.'}</span></div></div> : <Empty>Sélectionne un modèle d’e-mail pour le préparer avec les données de la session.</Empty>}<div style={{ marginTop: 18 }}><EmailHistory emails={emailHistory} mode={emailMode} /></div></section>;
+    if (currentSub === 'emails') return <section style={card}><h2 style={title}>E-mails</h2><p style={muted}>Choisis un modèle : la fenêtre d’envoi s’ouvre avec la liste des apprenants, l’aperçu réel et les pièces jointes. Tous les envois sont conservés ici, avec leur statut et leur date.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '12px 0 18px' }}>{MODELES_EMAIL.map(([cle, libelle], index) => <Action key={cle} secondary={index > 0} onClick={() => prepareEmail(cle)}>✉ {libelle}</Action>)}</div><EmailHistory emails={emailHistory} mode={emailMode} /></section>;
     if (currentSub === 'attestations') return <section style={card}><h2 style={title}>Attestations et certificats</h2><p style={muted}>Les documents sont générés par apprenant une fois la session réalisée.</p><div style={{ display: 'grid', gap: 10, marginTop: 16 }}>{inscriptions.map((item) => <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 12, background: 'var(--surface-2)', borderRadius: 9 }}><b>{item.first_name} {item.last_name}</b><div style={{ display: 'flex', gap: 8 }}><Action secondary onClick={() => openDocument('certificat', item.apprenant_id)}>Certificat</Action><Action secondary onClick={() => openDocument('attestation', item.apprenant_id)}>Attestation</Action></div></div>)}</div>{!inscriptions.length && <Empty>Aucun apprenant inscrit.</Empty>}</section>;
     if (currentSub === 'elearning') return <section style={card}><h2 style={title}>Suivi e-learning</h2><p style={muted}>Progression, scores et participation des apprenants aux séquences.</p><Empty>Aucune séquence e-learning n’est associée à cette session.</Empty></section>;
     if (currentSub === 'qualite') return <section style={card}><h2 style={title}>Suivi qualité</h2><p style={muted}>Centralise les évaluations à chaud et à froid pour produire le bilan qualité de la session.</p><Metric label="Satisfaction moyenne" value={evaluations.length ? `${(evaluations.reduce((sum, item) => sum + Number(item.score || 0), 0) / evaluations.length).toFixed(1)}/10` : '—'} note={`${evaluations.length} réponse(s)`} /></section>;
@@ -601,6 +605,210 @@ export default function SessionCockpit({ sessionId }) {
     {SUBNAV[step] && <div style={{ overflowX: 'auto', padding: '7px 0 16px', marginBottom: 4 }}><div role="tablist" style={tabsWrap}>{SUBNAV[step].map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={currentSub === key} onClick={() => setCurrentSub(key)} style={tab(currentSub === key)}>{label}</button>)}</div></div>}
     {notice && <div role="status" style={{ marginBottom: 14, padding: '10px 12px', background: 'var(--gold-soft)', color: 'var(--text)', borderRadius: 9, fontSize: 12 }}>{notice}</div>}
     <div style={{ display: 'grid', gap: 14 }}>{content}</div>
+    {envoi && <FenetreEnvoi
+      sessionId={sessionId}
+      templateKey={envoi.templateKey}
+      apprenantId={envoi.apprenantId}
+      onFermer={() => setEnvoi(null)}
+      onEnvoye={(bilan, modele) => {
+        setNotice(bilan.envoyes
+          ? `${LIBELLE_MODELE[modele] || 'E-mail'} : ${bilan.envoyes} envoi(s) réussi(s).`
+          : `${LIBELLE_MODELE[modele] || 'E-mail'} : ${bilan.simules || 0} simulation(s) archivée(s).`);
+        load();
+      }}
+    />}
+  </div>;
+}
+
+/**
+ * La fenêtre d'envoi. Un seul endroit dans toute l'application où un e-mail
+ * part vraiment, ouvrable depuis n'importe quel bouton ✉ de la session.
+ *
+ * Elle appelle /api/griotheque/emails, le moteur habillé : logo en en-tête,
+ * programme joint en PDF pour la convocation et le rappel, prénom de chaque
+ * apprenant, lien personnel vers son espace. L'ancien chemin passait par
+ * /api/emails et expédiait du texte nu.
+ *
+ * Trois règles tenues ici :
+ *   1. On voit qui va recevoir avant d'envoyer, nom et adresse.
+ *   2. Une adresse manquante est dite, pas ignorée en silence.
+ *   3. Le mode est annoncé : « envoi réel » ou « simulation », jamais un
+ *      bouton qui laisse croire qu'un message est parti.
+ */
+function FenetreEnvoi({ sessionId, templateKey, apprenantId, onFermer, onEnvoye }) {
+  const [modele, setModele] = useState(templateKey);
+  const [donnees, setDonnees] = useState(null);
+  const [choisis, setChoisis] = useState(new Set());
+  const [erreur, setErreur] = useState('');
+  const [occupe, setOccupe] = useState('');
+  const [bilan, setBilan] = useState(null);
+  const [adresseTest, setAdresseTest] = useState('');
+  const [testEnvoye, setTestEnvoye] = useState('');
+
+  useEffect(() => {
+    const surTouche = (event) => { if (event.key === 'Escape') onFermer(); };
+    document.addEventListener('keydown', surTouche);
+    return () => document.removeEventListener('keydown', surTouche);
+  }, [onFermer]);
+
+  useEffect(() => {
+    let vivant = true;
+    setDonnees(null); setErreur(''); setBilan(null); setTestEnvoye('');
+    fetch(`/api/griotheque/emails?session_id=${encodeURIComponent(sessionId)}&template_key=${encodeURIComponent(modele)}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (!vivant) return;
+        if (d.error) { setErreur(d.error); return; }
+        setDonnees(d);
+        const joignables = (d.destinataires || []).filter((item) => item.joignable);
+        const cible = apprenantId ? joignables.filter((item) => item.id === apprenantId) : joignables;
+        setChoisis(new Set((cible.length ? cible : joignables).map((item) => item.id)));
+      })
+      .catch(() => { if (vivant) setErreur('Impossible de préparer cet e-mail.'); });
+    return () => { vivant = false; };
+  }, [sessionId, modele, apprenantId]);
+
+  const basculer = (id) => setChoisis((current) => {
+    const suivant = new Set(current);
+    if (suivant.has(id)) suivant.delete(id); else suivant.add(id);
+    return suivant;
+  });
+
+  const destinataires = donnees?.destinataires || [];
+  const joignables = destinataires.filter((item) => item.joignable);
+  const sansAdresse = destinataires.filter((item) => !item.joignable);
+  const reel = donnees?.mode === 'reel';
+
+  const envoyer = async () => {
+    if (!choisis.size) return;
+    setOccupe('envoi'); setErreur('');
+    try {
+      const r = await fetch('/api/griotheque/emails', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, template_key: modele, apprenant_ids: [...choisis] }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Envoi impossible');
+      setBilan(d);
+      onEnvoye?.(d, modele);
+    } catch (e) { setErreur(e.message || 'Envoi impossible.'); }
+    finally { setOccupe(''); }
+  };
+
+  const envoyerTest = async () => {
+    const adresse = adresseTest.trim();
+    if (!adresse) return;
+    setOccupe('test'); setErreur('');
+    try {
+      const r = await fetch('/api/griotheque/emails', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, template_key: modele, test_emails: [adresse] }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Test impossible');
+      setTestEnvoye(d.envoyes ? `Test parti à ${adresse}.` : `Le test n’a pas pu partir à ${adresse}.`);
+    } catch (e) { setErreur(e.message || 'Test impossible.'); }
+    finally { setOccupe(''); }
+  };
+
+  const etiquette = LIBELLE_MODELE[modele] || modele;
+
+  return <div role="dialog" aria-modal="true" aria-label={`Envoyer : ${etiquette}`}
+    onClick={(event) => { if (event.target === event.currentTarget) onFermer(); }}
+    style={{ position: 'fixed', inset: 0, zIndex: 90, background: 'var(--overlay)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '4vh 16px', overflowY: 'auto' }}>
+    <div style={{ width: 'min(760px, 100%)', background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 16, boxShadow: '0 24px 60px rgba(0,0,0,.45)', overflow: 'hidden' }}>
+
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div>
+          <div style={{ ...muted, fontSize: 10, textTransform: 'uppercase', letterSpacing: '.09em', fontWeight: 900 }}>Envoyer un e-mail</div>
+          <h2 style={{ ...title, fontSize: 19, marginTop: 3 }}>{etiquette}</h2>
+        </div>
+        <button type="button" onClick={onFermer} aria-label="Fermer" style={{ width: 34, height: 34, borderRadius: 9, border: '1.5px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)', fontSize: 17, cursor: 'pointer', fontFamily: 'inherit' }}>×</button>
+      </div>
+
+      <div style={{ padding: 20, display: 'grid', gap: 18 }}>
+
+        <div style={{ overflowX: 'auto' }}><div role="tablist" style={tabsWrap}>
+          {MODELES_EMAIL.map(([cle, libelle]) => <button key={cle} type="button" role="tab" aria-selected={modele === cle} onClick={() => setModele(cle)} style={tab(modele === cle)}>{libelle}</button>)}
+        </div></div>
+
+        <div style={{ padding: '10px 13px', borderRadius: 10, border: `1.5px solid ${reel ? 'color-mix(in srgb, var(--success) 40%, transparent)' : 'color-mix(in srgb, var(--gold) 45%, transparent)'}`, background: reel ? 'var(--success-soft)' : 'var(--gold-soft)', color: 'var(--text)', fontSize: 12.5, fontWeight: 700 }}>
+          {reel ? `Envoi réel, depuis ${donnees?.expediteur || 'la boîte de l’organisme'}.` : 'SMTP non configuré : l’envoi sera archivé comme simulation, personne ne recevra rien.'}
+        </div>
+
+        {erreur && <div style={{ padding: '10px 13px', borderRadius: 10, background: 'var(--danger-soft)', border: '1.5px solid color-mix(in srgb, var(--danger) 40%, transparent)', color: 'var(--text)', fontSize: 12.5, fontWeight: 700 }}>{erreur}</div>}
+
+        {!donnees && !erreur && <div style={{ ...muted, padding: '18px 0' }}>Préparation de l’e-mail…</div>}
+
+        {bilan ? <div style={{ display: 'grid', gap: 14 }}>
+          <div style={{ padding: 16, borderRadius: 12, background: 'var(--success-soft)', border: '1.5px solid color-mix(in srgb, var(--success) 40%, transparent)' }}>
+            <b style={{ fontSize: 15 }}>{bilan.envoyes ? `${bilan.envoyes} e-mail(s) envoyé(s).` : bilan.simules ? `${bilan.simules} e-mail(s) simulé(s) et archivé(s).` : 'Aucun e-mail n’est parti.'}</b>
+            <div style={{ ...muted, marginTop: 6 }}>
+              {bilan.echecs ? `${bilan.echecs} échec(s). ` : ''}
+              {bilan.ignores ? `${bilan.ignores} apprenant(s) sans adresse, ignoré(s). ` : ''}
+              Chaque envoi est tracé dans le journal de la session.
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <Action onClick={onFermer}>Fermer</Action>
+            <Action secondary onClick={() => setBilan(null)}>Envoyer un autre e-mail</Action>
+          </div>
+        </div> : donnees && <>
+
+          <section>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 9 }}>
+              <b style={{ fontSize: 13.5 }}>Destinataires · {choisis.size} sur {joignables.length}</b>
+              {joignables.length > 1 && <button type="button" onClick={() => setChoisis(choisis.size === joignables.length ? new Set() : new Set(joignables.map((item) => item.id)))} style={{ border: 0, background: 'transparent', color: 'var(--gold)', font: 'inherit', fontSize: 12, fontWeight: 800, cursor: 'pointer', padding: 0 }}>
+                {choisis.size === joignables.length ? 'Tout décocher' : 'Tout cocher'}
+              </button>}
+            </div>
+            {destinataires.length ? <div style={{ display: 'grid', gap: 7 }}>
+              {joignables.map((item) => <label key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 12px', border: `1.5px solid ${choisis.has(item.id) ? 'color-mix(in srgb, var(--gold) 50%, transparent)' : 'var(--border)'}`, background: choisis.has(item.id) ? 'var(--gold-soft)' : 'var(--surface-2)', borderRadius: 10, cursor: 'pointer' }}>
+                <input type="checkbox" checked={choisis.has(item.id)} onChange={() => basculer(item.id)} style={{ width: 17, height: 17, accentColor: 'var(--gold)', cursor: 'pointer' }} />
+                <span style={{ minWidth: 0 }}><b style={{ fontSize: 13 }}>{item.nom}</b><div style={{ ...muted, fontSize: 12 }}>{item.email}</div></span>
+              </label>)}
+              {sansAdresse.map((item) => <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 12px', border: '1.5px dashed color-mix(in srgb, var(--danger) 38%, transparent)', borderRadius: 10, background: 'var(--danger-soft)' }}>
+                <span aria-hidden="true" style={{ width: 17, textAlign: 'center', color: 'var(--danger)', fontWeight: 900 }}>!</span>
+                <span><b style={{ fontSize: 13 }}>{item.nom}</b><div style={{ ...muted, fontSize: 12 }}>Aucune adresse e-mail : renseigne-la dans Configuration puis Apprenants.</div></span>
+              </div>)}
+            </div> : <Empty>Aucun apprenant inscrit : il n’y a personne à qui envoyer.</Empty>}
+          </section>
+
+          <section>
+            <b style={{ fontSize: 13.5 }}>Aperçu {donnees.apercu ? `pour ${(joignables[0] || destinataires[0])?.nom || 'le premier apprenant'}` : ''}</b>
+            {donnees.apercu ? <div style={{ marginTop: 9, border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+              <div style={{ padding: '11px 13px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ ...muted, fontSize: 10, textTransform: 'uppercase', letterSpacing: '.08em', fontWeight: 900 }}>Objet</div>
+                <b style={{ fontSize: 13.5 }}>{donnees.apercu.objet}</b>
+              </div>
+              <pre style={{ margin: 0, padding: 14, maxHeight: 260, overflowY: 'auto', whiteSpace: 'pre-wrap', fontFamily: 'inherit', fontSize: 12.5, lineHeight: 1.6, color: 'var(--text-2)' }}>{donnees.apercu.corps}</pre>
+              <div style={{ padding: '10px 13px', borderTop: '1px solid var(--border)', ...muted, fontSize: 12 }}>
+                Pièces jointes : le logo de La Griothèque en en-tête{MODELES_AVEC_PROGRAMME.includes(modele) ? ', et le programme de formation en PDF' : ''}. Chaque apprenant reçoit son prénom et son lien personnel.
+              </div>
+            </div> : <p style={{ ...muted, marginTop: 6 }}>L’aperçu se construit à partir d’un apprenant inscrit. Inscris quelqu’un pour le voir.</p>}
+          </section>
+
+          <section style={{ padding: 14, borderRadius: 12, background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+            <b style={{ fontSize: 13 }}>M’envoyer un test d’abord</b>
+            <p style={{ ...muted, margin: '4px 0 10px' }}>Le message exact, objet préfixé « [TEST] », sans toucher aux apprenants.</p>
+            <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap', alignItems: 'center' }}>
+              <input type="email" value={adresseTest} onChange={(event) => setAdresseTest(event.target.value)} placeholder="ton@adresse.com" style={{ ...inputStyle, width: 'min(300px, 100%)' }} />
+              <Action secondary small disabled={!adresseTest.trim() || occupe === 'test'} onClick={envoyerTest}>{occupe === 'test' ? 'Envoi du test…' : 'Envoyer le test'}</Action>
+              {testEnvoye && <span style={{ ...muted, color: 'var(--success)', fontWeight: 700 }}>{testEnvoye}</span>}
+            </div>
+          </section>
+
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+            <Action disabled={!choisis.size || occupe === 'envoi'} onClick={envoyer}>
+              {occupe === 'envoi' ? 'Envoi en cours…' : reel
+                ? `Envoyer à ${choisis.size} apprenant${choisis.size > 1 ? 's' : ''}`
+                : `Simuler pour ${choisis.size} apprenant${choisis.size > 1 ? 's' : ''}`}
+            </Action>
+            <Action secondary onClick={onFermer}>Annuler</Action>
+          </div>
+        </>}
+      </div>
+    </div>
   </div>;
 }
 
