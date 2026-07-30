@@ -220,6 +220,36 @@ function initSchema(db) {
     INSERT OR IGNORE INTO settings (key, value) VALUES ('pricing_smic_net', '1400');
   `);
 
+  // ── Fiche opportunité : de quoi entrer dans l'affaire, pas seulement la voir ──
+  // Une carte de pipeline qu'on déplace sans pouvoir l'ouvrir ne sert qu'à
+  // décorer. Ces colonnes rattachent l'opportunité au client, au bon de
+  // commande et à la date visée, pour que la session se crée depuis elle.
+  const colsOpp = db.prepare("PRAGMA table_info(formation_opportunities)").all().map(c => c.name);
+  const champsOpp = [
+    ['client_id', "TEXT DEFAULT ''"],            // rattachement à la fiche entreprise
+    ['bon_commande', "TEXT DEFAULT ''"],         // référence exigée par les grands comptes
+    ['date_session_prevue', "TEXT DEFAULT ''"],  // la date visée, avant qu'une session existe
+    ['gestionnaire', "TEXT DEFAULT ''"],         // qui suit l'affaire
+    ['financeur_id', "TEXT DEFAULT ''"],         // fiche financeur, quand il y en a un
+  ];
+  for (const [nom, type] of champsOpp) {
+    if (!colsOpp.includes(nom)) db.exec(`ALTER TABLE formation_opportunities ADD COLUMN ${nom} ${type}`);
+  }
+
+  // Le journal de l'affaire : qui l'a déplacée, quand, d'où vers où. C'est
+  // ce qu'on relit six mois plus tard pour comprendre pourquoi elle traîne.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS opportunite_evenements (
+      id TEXT PRIMARY KEY,
+      opportunite_id TEXT NOT NULL REFERENCES formation_opportunities(id) ON DELETE CASCADE,
+      type TEXT NOT NULL DEFAULT 'note',
+      texte TEXT NOT NULL DEFAULT '',
+      auteur TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_opp_evenements ON opportunite_evenements(opportunite_id);
+  `);
+
   // ── Fiche lieu : ce que l'audit Qualiopi et l'apprenant demandent ──
   // L'indicateur 26 porte sur l'accessibilité aux personnes en situation de
   // handicap : il faut pouvoir dire, lieu par lieu, ce qui est accessible et

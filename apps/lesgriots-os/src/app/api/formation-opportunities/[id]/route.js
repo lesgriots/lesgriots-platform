@@ -7,7 +7,23 @@ async function _GET(req, { params }) {
   const { id } = await params;
   const row = db.prepare('SELECT fo.*, f.title as formation_title, f.code as formation_code FROM formation_opportunities fo LEFT JOIN formations f ON fo.formation_id = f.id WHERE fo.id = ?').get(id);
   if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json(row);
+
+  // Le journal de l'affaire, du plus récent au plus ancien.
+  const evenements = db.prepare(
+    'SELECT * FROM opportunite_evenements WHERE opportunite_id = ? ORDER BY created_at DESC'
+  ).all(id);
+
+  // La session rattachée, s'il y en a une : c'est elle qui dit où on en est.
+  const session = row.session_id
+    ? db.prepare(`
+        SELECT s.id, s.start_date, s.end_date, s.status, s.session_name, s.tarif,
+               f.title AS formation_title,
+               (SELECT COUNT(*) FROM inscriptions i WHERE i.session_id = s.id) AS inscrits
+        FROM sessions s LEFT JOIN formations f ON f.id = s.formation_id WHERE s.id = ?
+      `).get(row.session_id)
+    : null;
+
+  return NextResponse.json({ ...row, evenements, session });
 }
 
 async function _PATCH(req, { params }) {
@@ -22,6 +38,22 @@ async function _PATCH(req, { params }) {
     client_phone: 'client_phone', contact_name: 'contact_name', company: 'company',
     stage: 'stage', revenue: 'revenue', financement: 'financement',
     notes: 'notes', source: 'source', archived: 'archived',
+    client_id: 'client_id', bon_commande: 'bon_commande',
+    date_session_prevue: 'date_session_prevue', gestionnaire: 'gestionnaire',
+    financeur_id: 'financeur_id',
+  };
+
+  // Un changement d'étape se journalise tout seul : c'est la trace qu'on
+  // relira pour comprendre pourquoi une affaire a mis six mois.
+  const avant = db.prepare('SELECT stage, session_id FROM formation_opportunities WHERE id = ?').get(id);
+  const journaliser = (type, texte) => {
+    try {
+      db.prepare(
+        'INSERT INTO opportunite_evenements (id, opportunite_id, type, texte, auteur) VALUES (?, ?, ?, ?, ?)'
+      ).run(`ev_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, id, type, texte, body.auteur || '');
+    } catch (e) {
+      console.error('[opportunites] journalisation impossible :', e.message);
+    }
   };
 
   const sets = ['updated_at = ?'];
@@ -32,6 +64,13 @@ async function _PATCH(req, { params }) {
 
   vals.push(id);
   db.prepare(`UPDATE formation_opportunities SET ${sets.join(', ')} WHERE id = ?`).run(...vals);
+
+  if (body.stage !== undefined && avant && body.stage !== avant.stage) {
+    journaliser('etape', `Déplacement de l’opportunité de l’étape ${avant.stage} à l’étape ${body.stage}`);
+  }
+  if (body.session_id !== undefined && avant && body.session_id !== avant.session_id && body.session_id) {
+    journaliser('session', 'Une session de formation a été rattachée à cette opportunité');
+  }
 
   const updated = db.prepare('SELECT fo.*, f.title as formation_title, f.code as formation_code FROM formation_opportunities fo LEFT JOIN formations f ON fo.formation_id = f.id WHERE fo.id = ?').get(id);
   return NextResponse.json(updated);

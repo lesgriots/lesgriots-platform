@@ -9841,6 +9841,12 @@ export function GrioPipelineView({ formations }) {
                       {o.formation_title && <div style={{ fontSize: 10, color: 'var(--pillar-prod)', marginBottom: 2 }}>📚 {o.formation_title}</div>}
                       {o.revenue > 0 && <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--warning)', marginTop: 4 }}>{o.revenue.toLocaleString('fr-FR')}€</div>}
                       {o.financement && <div style={{ fontSize: 9, color: T.textDim, marginTop: 2, background: T.bg, padding: '2px 6px', borderRadius: 4, display: 'inline-block' }}>{o.financement}</div>}
+                      {/* La porte d'entrée : une carte qu'on déplace doit aussi pouvoir s'ouvrir. */}
+                      <a href={`/opportunites/${o.id}`} onClick={(e) => e.stopPropagation()} style={{
+                        display: 'block', marginTop: 8, padding: '6px 0', textAlign: 'center', borderRadius: 8,
+                        border: '1.5px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)',
+                        fontSize: 11, fontWeight: 800, textDecoration: 'none',
+                      }}>Ouvrir l’affaire →</a>
                     </div>
                   ))}
                   {colOpps.length === 0 && <div style={{ fontSize: 11, color: T.textDim, textAlign: 'center', padding: '20px 0', fontStyle: 'italic', opacity: 0.5 }}>vide</div>}
