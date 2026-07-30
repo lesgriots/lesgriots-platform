@@ -220,6 +220,48 @@ function initSchema(db) {
     INSERT OR IGNORE INTO settings (key, value) VALUES ('pricing_smic_net', '1400');
   `);
 
+  // ── Les clients d'une session ──
+  // Une session n'a pas un client, elle en a autant qu'il y a de payeurs.
+  // Chacun a son prix, son nombre d'apprenants au devis, son bon de commande
+  // et surtout ses cases de BPF : c'est là que se décide dans quelle ligne du
+  // Cerfa tombera l'argent. Jusqu'ici la session portait un seul `client_id`
+  // et un seul tarif, ce qui rendait toute session inter-entreprises fausse.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS session_clients (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+      client_id TEXT DEFAULT '',
+      commercial TEXT DEFAULT '',
+      nb_apprenants_devis INTEGER DEFAULT 0,
+
+      -- Tarif propre à ce client sur cette session
+      tarif_special INTEGER DEFAULT 0,
+      type_prix TEXT DEFAULT 'Formation & frais pédagogiques',
+      description_prix TEXT DEFAULT '',
+      mode_facturation TEXT DEFAULT 'Par client',
+      prix REAL DEFAULT 0,
+      tva REAL DEFAULT 0,
+
+      code_client_comptable TEXT DEFAULT '',
+      bon_commande TEXT DEFAULT '',
+
+      -- Les quatre cases qui orientent le BPF
+      sous_traitance INTEGER DEFAULT 0,
+      dispositif_recherche_emploi INTEGER DEFAULT 0,
+      bpf_autres_produits INTEGER DEFAULT 0,
+      bpf_autres_apprenants INTEGER DEFAULT 0,
+
+      -- Financeur externe, et qui il paie
+      financeur_id TEXT DEFAULT '',
+      subrogation INTEGER DEFAULT 0,
+      montant_finance REAL DEFAULT 0,
+
+      notes TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_session_clients ON session_clients(session_id);
+  `);
+
   // ── Fiche opportunité : de quoi entrer dans l'affaire, pas seulement la voir ──
   // Une carte de pipeline qu'on déplace sans pouvoir l'ouvrir ne sert qu'à
   // décorer. Ces colonnes rattachent l'opportunité au client, au bon de
