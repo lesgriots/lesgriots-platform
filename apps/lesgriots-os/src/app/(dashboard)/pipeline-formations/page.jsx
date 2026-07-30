@@ -20,7 +20,10 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import TopBar from '@/components/layout/TopBar';
-import { Card, EmptyState, Skeleton, ViewSwitcher, useViewMode, useConfirm } from '@/components/ui';
+import {
+  Card, EmptyState, Skeleton, ViewSwitcher, useViewMode, useConfirm,
+  Bouton, Champ, Saisie, Zone, Choix, Grille, Tableau, Sous,
+} from '@/components/ui';
 import { sessionHref } from '@/lib/navigation';
 
 const ETAPES = [
@@ -53,8 +56,6 @@ const mono = {
   fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.14em',
   textTransform: 'uppercase', color: 'var(--text-3)',
 };
-const th = { ...mono, fontWeight: 400, textAlign: 'left', padding: '11px 10px', borderBottom: '1px solid var(--border-2)' };
-const td = { padding: '12px 10px', borderBottom: '1px solid var(--border)', fontSize: 13.5 };
 
 export default function PipelineFormationsPage() {
   const router = useRouter();
@@ -169,16 +170,12 @@ export default function PipelineFormationsPage() {
                   }}>{v}</div>
                 </div>
               ))}
-              <button
+              <Bouton
+                style={{ marginLeft: 'auto' }}
                 onClick={() => setFormulaire({ client_name: '', company: '', client_email: '', client_phone: '', formation_id: '', revenue: '', financement: '', source: '', notes: '', stage: 'prospect' })}
-                style={{
-                  marginLeft: 'auto', padding: '9px 16px', borderRadius: 'var(--radius-md)',
-                  border: 'none', cursor: 'pointer', background: 'var(--gold)', color: '#141210',
-                  fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600,
-                }}
               >
                 Nouvelle affaire
-              </button>
+              </Bouton>
             </div>
 
             {reprise?.a_creer > 0 && (
@@ -192,11 +189,7 @@ export default function PipelineFormationsPage() {
                       {euros(reprise.montant)} au total, avec leur tarif et leur date d’origine.
                     </div>
                   </div>
-                  <button onClick={reprendre} style={{
-                    padding: '9px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-2)',
-                    cursor: 'pointer', background: 'var(--surface)', color: 'var(--text)',
-                    fontFamily: 'inherit', fontSize: 12.5, fontWeight: 500,
-                  }}>Reprendre mes données</button>
+                  <Bouton discret onClick={reprendre}>Reprendre mes données</Bouton>
                 </div>
               </Card>
             )}
@@ -286,23 +279,36 @@ export default function PipelineFormationsPage() {
                               <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
                                 <div style={{ fontSize: 11.5, fontWeight: 500, lineHeight: 1.3, flex: 1 }}>{o.client_name}</div>
                                 {sessionIdDepuisSource(o) && (
-                                  <button
+                                  <Bouton
+                                    fantome
+                                    petit
                                     onClick={(ev) => { ev.stopPropagation(); ouvrirSession(o); }}
                                     onMouseDown={(ev) => ev.stopPropagation()}
                                     draggable={false}
                                     title="Ouvrir la session"
                                     aria-label={`Ouvrir la session de ${o.client_name}`}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--text-2)', fontSize: 12, lineHeight: 1 }}
-                                  >↗</button>
+                                    style={{ padding: 2, minHeight: 0 }}
+                                  >↗</Bouton>
                                 )}
-                                <button onClick={() => supprimer(o)} title="Retirer"
-                                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--text-3)', fontSize: 13, lineHeight: 1 }}>×</button>
+                                <Bouton
+                                  fantome
+                                  petit
+                                  onClick={() => supprimer(o)}
+                                  title="Retirer"
+                                  aria-label={`Retirer ${o.client_name} du pipeline`}
+                                  style={{ padding: 2, minHeight: 0 }}
+                                >×</Bouton>
                               </div>
-                              <a href={`/opportunites/${o.id}`} onClick={(ev) => ev.stopPropagation()} onMouseDown={(ev) => ev.stopPropagation()} draggable={false} style={{
-                                display: 'block', marginTop: 6, padding: '5px 0', textAlign: 'center', borderRadius: 7,
-                                border: '1.5px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)',
-                                fontSize: 10.5, fontWeight: 800, textDecoration: 'none',
-                              }}>Ouvrir l’affaire →</a>
+                              <Bouton
+                                discret
+                                petit
+                                pleineLargeur
+                                href={`/opportunites/${o.id}`}
+                                onClick={(ev) => ev.stopPropagation()}
+                                onMouseDown={(ev) => ev.stopPropagation()}
+                                draggable={false}
+                                style={{ marginTop: 6 }}
+                              >Ouvrir l’affaire →</Bouton>
                               {o.formation_title && (
                                 <div style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 2, lineHeight: 1.3 }}>{o.formation_title}</div>
                               )}
@@ -350,76 +356,71 @@ export default function PipelineFormationsPage() {
 /* ── La liste, partagée par la vue Tunnel et la vue Liste ─────────────── */
 function Liste({ opps, onEtape, onSupprimer, onOuvrirSession, compact = false }) {
   return (
-    <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: compact ? 22 : 0 }}>
-      <thead>
-        <tr>
-          <th style={th}>Affaire</th>
-          <th style={th}>Formation</th>
-          <th style={th}>Étape</th>
-          <th style={{ ...th, textAlign: 'right' }}>Montant</th>
-          <th style={{ ...th, textAlign: 'right' }}>Ouvrir</th>
-          <th style={{ ...th, width: 36 }} />
-        </tr>
-      </thead>
-      <tbody>
-        {opps.map((o) => {
-          const relance = o.stage === ETAPE_A_RELANCER;
-          return (
-            <tr key={o.id} style={relance ? { background: 'var(--gold-soft)' } : undefined}>
-              <td style={{ ...td, fontWeight: 500 }}>
-                <a href={`/opportunites/${o.id}`} title="Ouvrir l’affaire" style={{ color: 'inherit', fontWeight: 'inherit', textDecoration: 'underline', textUnderlineOffset: 3 }}>{o.client_name}</a>
-              </td>
-              <td style={{ ...td, color: 'var(--text-3)' }}>{o.formation_title || '—'}</td>
-              <td style={td}>
-                <select
-                  value={o.stage}
-                  onChange={(e) => onEtape(o.id, e.target.value)}
-                  style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 10.5, letterSpacing: '0.06em',
-                    textTransform: 'uppercase', color: 'var(--text-2)', background: 'transparent',
-                    border: '1px solid var(--border)', borderRadius: 6, padding: '3px 6px', cursor: 'pointer',
-                  }}
-                >
-                  {ETAPES.map((e) => <option key={e.cle} value={e.cle}>{e.label}</option>)}
-                  <option value="perdu">Perdue</option>
-                </select>
-              </td>
-              <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                {o.revenue ? euros(o.revenue) : '—'}
-              </td>
-              <td style={{ ...td, textAlign: 'right', whiteSpace: 'nowrap' }}>
-                <a href={`/opportunites/${o.id}`} style={{
-                  display: 'inline-flex', alignItems: 'center', padding: '6px 10px', borderRadius: 8,
-                  border: '1.5px solid var(--border-2)', background: 'var(--surface)', color: 'var(--text)',
-                  fontSize: 11.5, fontWeight: 800, textDecoration: 'none',
-                }}>L’affaire →</a>
-                {sessionIdDepuisSource(o) && (
-                  <button onClick={() => onOuvrirSession(o)} title="Ouvrir la session" style={{
-                    marginLeft: 6, padding: '6px 10px', borderRadius: 8, border: '1.5px solid var(--border-2)',
-                    background: 'var(--surface)', color: 'var(--text-2)', fontSize: 11.5, fontWeight: 800,
-                    cursor: 'pointer', fontFamily: 'inherit',
-                  }}>Session ↗</button>
-                )}
-              </td>
-              <td style={{ ...td, textAlign: 'right' }}>
-                <button onClick={() => onSupprimer(o)} title="Retirer du pipeline"
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', fontSize: 14, lineHeight: 1, padding: 0 }}>×</button>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <Tableau
+      style={{ marginTop: compact ? 22 : 0 }}
+      lignes={opps}
+      colonnes={[
+        {
+          titre: 'Affaire',
+          fort: true,
+          rendu: (o) => (
+            <>
+              <a
+                href={`/opportunites/${o.id}`}
+                title="Ouvrir l’affaire"
+                style={{ color: 'inherit', textDecoration: 'underline', textUnderlineOffset: 3 }}
+              >
+                {o.client_name}
+              </a>
+              {o.stage === ETAPE_A_RELANCER && <Sous>devis envoyé, en attente de réponse</Sous>}
+            </>
+          ),
+        },
+        { titre: 'Formation', attenue: true, rendu: (o) => o.formation_title },
+        {
+          titre: 'Étape',
+          rendu: (o) => (
+            <Choix
+              compact
+              value={o.stage}
+              onChange={(e) => onEtape(o.id, e.target.value)}
+              options={[...ETAPES.map((e) => [e.cle, e.label]), ['perdu', 'Perdue']]}
+            />
+          ),
+        },
+        { titre: 'Montant', nombre: true, rendu: (o) => (o.revenue ? euros(o.revenue) : null) },
+        {
+          titre: 'Ouvrir',
+          nombre: true,
+          rendu: (o) => (
+            <span style={{ display: 'inline-flex', gap: 6, justifyContent: 'flex-end' }}>
+              <Bouton discret petit href={`/opportunites/${o.id}`}>L’affaire →</Bouton>
+              {sessionIdDepuisSource(o) && (
+                <Bouton discret petit onClick={() => onOuvrirSession(o)} title="Ouvrir la session">Session ↗</Bouton>
+              )}
+            </span>
+          ),
+        },
+        {
+          titre: '',
+          largeur: 44,
+          rendu: (o) => (
+            <Bouton
+              fantome
+              petit
+              onClick={() => onSupprimer(o)}
+              title="Retirer du pipeline"
+              aria-label={`Retirer ${o.client_name} du pipeline`}
+            >×</Bouton>
+          ),
+        },
+      ]}
+    />
   );
 }
 
 /* ── Nouvelle affaire ─────────────────────────────────────────────────── */
 function Formulaire({ valeurs, formations, onChange, onValider, onFermer }) {
-  const champ = {
-    width: '100%', padding: '8px 11px', borderRadius: 'var(--radius-sm)',
-    border: '1px solid var(--border-2)', background: 'var(--surface)',
-    color: 'var(--text)', fontFamily: 'inherit', fontSize: 13,
-  };
   const maj = (k) => (e) => onChange({ ...valeurs, [k]: e.target.value });
 
   return (
@@ -428,80 +429,67 @@ function Formulaire({ valeurs, formations, onChange, onValider, onFermer }) {
       style={{ position: 'fixed', inset: 0, background: 'var(--overlay)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Nouvelle affaire"
         onClick={(e) => e.stopPropagation()}
-        style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, width: 'min(560px, 100%)', maxHeight: '86vh', overflowY: 'auto', padding: 22 }}
+        style={{
+          background: 'var(--surface)', border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)', width: 'min(560px, 100%)',
+          maxHeight: '86vh', overflowY: 'auto', padding: 'var(--sp-6)',
+        }}
       >
-        <div style={{ fontSize: 17, fontWeight: 600, letterSpacing: '-0.02em' }}>Nouvelle affaire</div>
-        <div style={{ fontSize: 12.5, color: 'var(--text-3)', marginTop: 2, marginBottom: 16 }}>
+        <h2 className="lg-bloc__titre">Nouvelle affaire</h2>
+        <p className="lg-bloc__chapeau" style={{ marginBottom: 18 }}>
           Le nom du client suffit pour commencer, le reste peut attendre.
-        </div>
+        </p>
 
-        <div style={{ display: 'grid', gap: 11 }}>
+        <div style={{ display: 'grid', gap: 14 }}>
           {[
             ['client_name', 'Client', 'Nom de la personne ou de la structure'],
             ['company', 'Société', 'Raison sociale'],
-            ['client_email', 'Email', 'contact@exemple.com'],
+            ['client_email', 'E-mail', 'contact@exemple.com'],
             ['client_phone', 'Téléphone', ''],
           ].map(([k, l, ph]) => (
-            <label key={k} style={{ display: 'block' }}>
-              <span style={{ ...mono, display: 'block', marginBottom: 4 }}>{l}</span>
-              <input value={valeurs[k]} onChange={maj(k)} placeholder={ph} style={champ} />
-            </label>
+            <Champ key={k} label={l} requis={k === 'client_name'}>
+              <Saisie value={valeurs[k]} onChange={maj(k)} placeholder={ph} />
+            </Champ>
           ))}
 
-          <label style={{ display: 'block' }}>
-            <span style={{ ...mono, display: 'block', marginBottom: 4 }}>Formation</span>
-            <select value={valeurs.formation_id} onChange={maj('formation_id')} style={champ}>
-              <option value="">Pas encore décidée</option>
-              {formations.map((f) => <option key={f.id} value={f.id}>{f.title}</option>)}
-            </select>
-          </label>
+          <Champ label="Formation">
+            <Choix
+              value={valeurs.formation_id}
+              onChange={maj('formation_id')}
+              vide="Pas encore décidée"
+              options={formations.map((f) => [f.id, f.title])}
+            />
+          </Champ>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 11 }}>
-            <label>
-              <span style={{ ...mono, display: 'block', marginBottom: 4 }}>Montant HT</span>
-              <input value={valeurs.revenue} onChange={maj('revenue')} placeholder="0" inputMode="decimal" style={champ} />
-            </label>
-            <label>
-              <span style={{ ...mono, display: 'block', marginBottom: 4 }}>Étape</span>
-              <select value={valeurs.stage} onChange={maj('stage')} style={champ}>
-                {ETAPES.map((e) => <option key={e.cle} value={e.cle}>{e.label}</option>)}
-              </select>
-            </label>
-          </div>
+          <Grille min={200} gap={14}>
+            <Champ label="Montant HT">
+              <Saisie value={valeurs.revenue} onChange={maj('revenue')} placeholder="0" inputMode="decimal" />
+            </Champ>
+            <Champ label="Étape">
+              <Choix value={valeurs.stage} onChange={maj('stage')} options={ETAPES.map((e) => [e.cle, e.label])} />
+            </Champ>
+            <Champ label="Financement">
+              <Saisie value={valeurs.financement} onChange={maj('financement')} placeholder="OPCO, CPF, entreprise…" />
+            </Champ>
+            <Champ label="Source">
+              <Saisie value={valeurs.source} onChange={maj('source')} placeholder="Site, recommandation…" />
+            </Champ>
+          </Grille>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 11 }}>
-            <label>
-              <span style={{ ...mono, display: 'block', marginBottom: 4 }}>Financement</span>
-              <input value={valeurs.financement} onChange={maj('financement')} placeholder="OPCO, CPF, entreprise…" style={champ} />
-            </label>
-            <label>
-              <span style={{ ...mono, display: 'block', marginBottom: 4 }}>Source</span>
-              <input value={valeurs.source} onChange={maj('source')} placeholder="Site, recommandation…" style={champ} />
-            </label>
-          </div>
-
-          <label>
-            <span style={{ ...mono, display: 'block', marginBottom: 4 }}>Notes</span>
-            <textarea value={valeurs.notes} onChange={maj('notes')} rows={3} style={{ ...champ, resize: 'vertical' }} />
-          </label>
+          <Champ label="Notes">
+            <Zone value={valeurs.notes} onChange={maj('notes')} rows={3} />
+          </Champ>
         </div>
 
-        <div style={{ display: 'flex', gap: 9, justifyContent: 'flex-end', marginTop: 18 }}>
-          <button onClick={onFermer} style={{
-            padding: '9px 15px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-2)',
-            background: 'transparent', color: 'var(--text-2)', fontFamily: 'inherit', fontSize: 12.5, cursor: 'pointer',
-          }}>Annuler</button>
-          <button
-            onClick={() => onValider(valeurs)}
-            disabled={!valeurs.client_name.trim()}
-            style={{
-              padding: '9px 16px', borderRadius: 'var(--radius-md)', border: 'none',
-              background: 'var(--gold)', color: '#141210', fontFamily: 'inherit',
-              fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
-              opacity: valeurs.client_name.trim() ? 1 : 0.45,
-            }}
-          >Créer l’affaire</button>
+        <div style={{ display: 'flex', gap: 9, justifyContent: 'flex-end', marginTop: 20 }}>
+          <Bouton discret onClick={onFermer}>Annuler</Bouton>
+          <Bouton disabled={!valeurs.client_name?.trim()} onClick={() => onValider(valeurs)}>
+            Créer l’affaire
+          </Bouton>
         </div>
       </div>
     </div>
