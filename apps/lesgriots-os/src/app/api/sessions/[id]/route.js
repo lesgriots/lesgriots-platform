@@ -9,6 +9,7 @@ async function _GET(req, { params }) {
     const { id } = await params;
     const session = db.prepare(`
       SELECT s.*, f.title as formation_title, f.code as formation_code,
+             f.evaluations_associees as formation_evaluations,
         f.duration_hours, f.price_ht as formation_price_ht,
         c.company as client_company, c.first_name as client_first_name,
         c.last_name as client_last_name, c.email as client_email,

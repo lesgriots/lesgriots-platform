@@ -48,7 +48,38 @@ export default function ProgramWorkspace({ formationId }) {
     {section === 'learner' && <Resources scope="learner" resources={resources} draft={resourceDraft} setDraft={setResourceDraft} add={addResource} />}
     {section === 'internal' && <Resources scope="internal" resources={resources} draft={resourceDraft} setDraft={setResourceDraft} add={addResource} />}
     {section === 'quality' && <Quality formation={formation} />}
-    {section === 'evaluations' && <div style={{ display: 'grid', gap: 18 }}><EditeurQuestionnaires formationId={formationId} /><div style={{ display: 'grid', gap: 12 }}>{templates.map(t => <label key={t.id} style={{ ...panel, display: 'flex', gap: 12, alignItems: 'start', cursor: 'pointer' }}><input type="checkbox" checked={selectedTypes.has(t.type)} onChange={() => toggleEvaluation(t.type)} style={{ marginTop: 4 }} /><span><strong>{t.title}</strong><span style={{ display: 'block', marginTop: 5, color: 'var(--text-2)', fontSize: 13 }}>{t.description}</span></span></label>)}</div></div>}
+    {section === 'evaluations' && <div style={{ display: 'grid', gap: 22 }}>
+      <EditeurQuestionnaires formationId={formationId} />
+      <div style={{ display: 'grid', gap: 12 }}>
+        <div>
+          <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>Questionnaires servis par ce programme</h3>
+          <p style={{ margin: 0, color: 'var(--text-3)', fontSize: 12.5, lineHeight: 1.55, maxWidth: 660 }}>
+            Ce que l’apprenant se verra proposer dans son espace. Ne rien cocher revient à tout servir : c’est le comportement actuel de tes programmes.
+            Les questionnaires destinés à d’autres publics ne sont pas encore adressables, faute d’un lien pour les leur envoyer.
+          </p>
+        </div>
+        {templates.map(t => {
+          const servable = ['positionnement', 'chaud', 'froid'].includes(t.type);
+          return (
+            <label key={t.id} style={{
+              ...panel, display: 'flex', gap: 12, alignItems: 'start',
+              cursor: servable ? 'pointer' : 'not-allowed', opacity: servable ? 1 : .55,
+            }}>
+              <input type="checkbox" disabled={!servable} checked={servable && selectedTypes.has(t.type)}
+                onChange={() => servable && toggleEvaluation(t.type)} style={{ marginTop: 4 }} />
+              <span>
+                <strong>{t.title}</strong>
+                {!servable && <span style={{ marginLeft: 8, fontSize: 10.5, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--text-3)', border: '1px solid var(--border-2)', borderRadius: 999, padding: '2px 7px' }}>autre public</span>}
+                <span style={{ display: 'block', marginTop: 5, color: 'var(--text-2)', fontSize: 13 }}>{t.description}</span>
+                {!servable && <span style={{ display: 'block', marginTop: 4, color: 'var(--text-3)', fontSize: 12 }}>
+                  Ce questionnaire ne s’adresse pas à l’apprenant : il faudra un lien propre à son destinataire avant de pouvoir l’envoyer.
+                </span>}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </div>}
     {section === 'diffusion' && <div style={panel}><h2 style={{ marginTop: 0 }}>Diffusion du programme</h2><p style={{ color: 'var(--text-2)' }}>Ce programme est {formation.status === 'archived' ? 'archivé' : 'actif'} dans la bibliothèque. Les ressources apprenant associées seront reprises dans les sessions créées depuis ce programme.</p><p style={{ color: 'var(--text-2)', fontSize: 13 }}>La publication sur un catalogue en ligne reste volontairement séparée de cette bibliothèque interne.</p></div>}
   </div>;
 }

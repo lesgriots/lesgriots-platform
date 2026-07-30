@@ -112,6 +112,7 @@ export async function GET(request, { params }) {
     const a = db.prepare('SELECT first_name, last_name FROM apprenants WHERE id = ?').get(lien.apprenant_id);
     const s = db.prepare(`
       SELECT s.*, f.title AS formation_titre, f.description AS formation_description,
+             f.evaluations_associees AS formation_evaluations,
              f.duration_hours, f.objectives, f.prerequisites, f.target_audience,
              f.evaluation_methods, f.accessibility, f.level
       FROM sessions s LEFT JOIN formations f ON f.id = s.formation_id
@@ -155,15 +156,26 @@ export async function GET(request, { params }) {
     const terminee = s.end_date && s.end_date < auj;
 
     // Ce qu'on demande à l'apprenant, et seulement au bon moment.
+    /**
+     * Les questionnaires retenus sur la fiche du programme.
+     *
+     * Jusqu'ici cette sélection était écrite mais jamais lue : cocher ou
+     * décocher ne changeait rien pour l'apprenant. Une liste vide veut dire
+     * « rien de choisi », et on sert alors les trois, comme avant.
+     */
+    let retenus = [];
+    try { retenus = JSON.parse(s.formation_evaluations || '[]') || []; } catch { retenus = []; }
+    const retenu = (cle) => !retenus.length || retenus.includes(cle);
+
     const aFaire = [];
     if (!rendues.includes('positionnement')) {
-      aFaire.push({ cle: 'positionnement', label: QUESTIONNAIRES.positionnement.label, quand: 'avant la formation' });
+      if (retenu('positionnement')) aFaire.push({ cle: 'positionnement', label: QUESTIONNAIRES.positionnement.label, quand: 'avant la formation' });
     }
     if (terminee && !rendues.includes('satisfaction')) {
-      aFaire.push({ cle: 'chaud', label: QUESTIONNAIRES.chaud.label, quand: 'à la fin de la formation' });
+      if (retenu('chaud')) aFaire.push({ cle: 'chaud', label: QUESTIONNAIRES.chaud.label, quand: 'à la fin de la formation' });
     }
     if (terminee && rendues.includes('satisfaction') && !rendues.includes('froid')) {
-      aFaire.push({ cle: 'froid', label: QUESTIONNAIRES.froid.label, quand: 'quelques semaines après' });
+      if (retenu('froid')) aFaire.push({ cle: 'froid', label: QUESTIONNAIRES.froid.label, quand: 'quelques semaines après' });
     }
 
     const options = optionsEspace(db, s);

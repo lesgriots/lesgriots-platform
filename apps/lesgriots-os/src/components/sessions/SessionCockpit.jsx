@@ -585,7 +585,12 @@ export default function SessionCockpit({ sessionId }) {
         <p style={{ ...muted, margin: '4px 0 10px' }}>Dès l’inscription, les liens individuels préformation, à chaud et à froid sont préparés. Ils sont visibles ici, datés et prêts à partager ; aucun e-mail n’est envoyé sans votre action.</p>
         {inscriptions.length > 0 && <Action secondary onClick={prepareMissingQuestionnaires}>Préparer les formulaires manquants</Action>}
       </section>
-      {EVALUATION_TYPES.map((definition) => {
+      {/* Le programme décide des questionnaires servis ; rien de coché = les trois. */}
+      {EVALUATION_TYPES.filter((definition) => {
+        let retenus = [];
+        try { retenus = JSON.parse(session.formation_evaluations || '[]') || []; } catch { retenus = []; }
+        return !retenus.length || retenus.includes(definition.questionnaireType);
+      }).map((definition) => {
       const answers = evaluations.filter((item) => item.type === definition.id || (definition.id === 'satisfaction' && item.type === 'acquis'));
       const answeredIds = new Set(answers.map((item) => item.apprenant_id));
       const questionnaireLinks = links.filter((item) => item.kind === 'questionnaire' && item.questionnaire_type === definition.questionnaireType);
