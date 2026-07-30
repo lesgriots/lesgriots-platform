@@ -3,8 +3,12 @@ node_modules/
 .next/
 
 # Données (base SQLite + sauvegardes) — jamais dans Git
-data/
-data/backups/
+# La base SQLite et ses sauvegardes, à la racine de l'app.
+# La barre de tête est indispensable : sans elle, la règle attrape aussi
+# src/app/api/data, et la route du même nom n'a jamais été versionnée.
+# C'est ce qui a laissé la page Clients sans données depuis le début.
+/data/
+/data/backups/
 *.db
 *.db-wal
 *.db-shm

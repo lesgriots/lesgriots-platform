@@ -89,8 +89,6 @@ export default function LibraryWorkspace() {
     <div style={{ ...card, padding: 16 }}>
       <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap', marginBottom: 16 }}>
         <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Rechercher" style={{ ...inputStyle, maxWidth: 360 }} />
-        <button style={quiet}>Trier</button><button style={quiet}>Catégorie</button>
-        {view === 'programmes' && <><button style={quiet}>Bloc de compétences</button><button style={quiet}>Visibilité en ligne</button></>}
         <button style={quiet} onClick={() => setQuery('')}>Effacer tout</button>
       </div>
       {view.startsWith('programmes') ? <Programs rows={activeFormations} archived={view === 'programmes-archives'} onArchive={archive} /> : view.startsWith('blocs') ? <Blocks rows={visibleBlocks} archived={view === 'blocs-archives'} onArchive={archive} /> : <Templates rows={templates.filter(t => `${t.title} ${t.description}`.toLocaleLowerCase('fr').includes(normalized))} onArchive={archive} />}
