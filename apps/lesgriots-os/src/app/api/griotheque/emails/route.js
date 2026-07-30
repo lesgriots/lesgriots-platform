@@ -126,10 +126,37 @@ async function _GET(request) {
   }
 }
 
+/**
+ * Le programme de la formation, en pièce jointe.
+ *
+ * Le générateur existe déjà en interne ; on l'appelle par HTTP avec la clé
+ * d'API du serveur plutôt que de dupliquer sa logique. Un échec ne bloque
+ * jamais l'envoi : un email sans pièce jointe vaut mieux qu'un email jamais
+ * parti.
+ */
+async function piecesDocuments(session_id, template_key) {
+  if (!['convocation', 'rappel_j7'].includes(template_key)) return [];
+  try {
+    const r = await fetch(`${BASE}/api/sessions/${session_id}/programme`, {
+      headers: { 'x-api-key': process.env.OS_API_KEY || '' },
+    });
+    if (!r.ok) return [];
+    const contenu = Buffer.from(await r.arrayBuffer());
+    if (!contenu.length) return [];
+    return [{ filename: 'Programme-de-formation.pdf', content: contenu, contentType: 'application/pdf' }];
+  } catch (e) {
+    console.warn('[emails] programme non joint :', e.message);
+    return [];
+  }
+}
+
 async function _POST(request) {
   try {
     const db = getDb();
-    const { session_id, template_key, apprenant_ids } = await request.json();
+    // `test_emails` : envoyer le message exact à soi-même avant la vraie
+    // salve. C'est la seule façon de vérifier la mise en forme chez le
+    // destinataire plutôt que dans un aperçu.
+    const { session_id, template_key, apprenant_ids, test_emails } = await request.json();
     const modele = GRIOTHEQUE_EMAIL_TEMPLATES_MAP[template_key];
     const ctx = contexte(db, session_id);
     if (!modele || !ctx) return NextResponse.json({ error: 'Session ou modèle inconnu' }, { status: 400 });
@@ -141,6 +168,32 @@ async function _POST(request) {
     // l'a réellement accepté. Avant, chaque tentative était comptée comme un
     // envoi, y compris les échecs SMTP : l'interface pouvait donc annoncer un
     // email envoyé alors que personne ne l'avait reçu.
+    const documents = await piecesDocuments(session_id, template_key);
+    const jointes = [...pieceLogo(), ...documents];
+
+    // ── Envoi de test : le message part aux adresses données, tel quel ──
+    if (Array.isArray(test_emails) && test_emails.length) {
+      const modele_apprenant = gens[0] || { id: null, first_name: '', last_name: '' };
+      const { objet, corps, html } = composer(db, modele, ctx, session_id, modele_apprenant);
+      let partis = 0;
+      for (const adresse of test_emails) {
+        const r = await envoyerEmail({
+          destinataire: String(adresse).trim(),
+          objet: `[TEST] ${objet}`,
+          corps, html,
+          pieces: jointes,
+          template_key,
+          contexte_type: 'test',
+          contexte_id: session_id,
+        });
+        if (r.statut !== 'echec') partis += 1;
+      }
+      return NextResponse.json({
+        test: true, envoyes: partis, pieces: documents.length,
+        mode: smtpConfigure() ? 'reel' : 'simulation',
+      }, { status: 201 });
+    }
+
     let envoyes = 0, simules = 0, echecs = 0, ignores = 0;
     for (const g of gens) {
       if (!g.email) { ignores += 1; continue; }
@@ -149,7 +202,7 @@ async function _POST(request) {
         destinataire: g.email,
         destinataire_nom: [g.first_name, g.last_name].filter(Boolean).join(' '),
         objet, corps, html,
-        pieces: pieceLogo(),
+        pieces: jointes,
         template_key,
         contexte_type: 'session',
         contexte_id: session_id,
