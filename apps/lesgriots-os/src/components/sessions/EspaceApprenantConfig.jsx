@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { Interrupteur } from '@/components/ui';
 
 const carte = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 18 };
 const attenue = { color: 'var(--text-3)', fontSize: 12, lineHeight: 1.5 };
@@ -119,11 +120,11 @@ export default function EspaceApprenantConfig({ sessionId, session, onNotice, on
       <div style={{ display: 'grid', gap: 14 }}>
         {VISIBILITES.map((v) => (
           <label key={v.cle} style={{ display: 'grid', gridTemplateColumns: '44px minmax(0, 1fr)', gap: 12, cursor: 'pointer', alignItems: 'start' }}>
-            <button type="button" role="switch" aria-checked={actif(v.cle)} aria-label={v.libelle}
-              onClick={() => setOptions((c) => ({ ...c, [v.cle]: !actif(v.cle) }))}
-              style={{ width: 40, height: 23, padding: 3, border: '1px solid var(--border-2)', borderRadius: 99, background: actif(v.cle) ? 'var(--gold)' : 'var(--surface-2)', cursor: 'pointer', marginTop: 2 }}>
-              <span style={{ display: 'block', width: 15, height: 15, borderRadius: '50%', background: actif(v.cle) ? 'var(--gold-ink)' : 'var(--text-3)', transform: actif(v.cle) ? 'translateX(17px)' : 'translateX(0)', transition: 'transform .16s ease' }} />
-            </button>
+<Interrupteur
+              actif={actif(v.cle)}
+              sur={() => setOptions((c) => ({ ...c, [v.cle]: !actif(v.cle) }))}
+              label={v.libelle}
+            />
             <span>
               <span style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text)' }}>{v.libelle}</span>
               <span style={{ ...attenue, display: 'block', marginTop: 2 }}>{v.aide}</span>

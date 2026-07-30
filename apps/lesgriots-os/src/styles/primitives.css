@@ -250,3 +250,68 @@
   line-height: 1.55;
   color: var(--text-3);
 }
+
+/* ── L'interrupteur ──────────────────────────────────────────────────────
+   Trois écrans en dessinaient un, avec trois tailles (40×23, 40×23, 38×22)
+   et trois fonds d'état éteint. Pire : dans les envois automatiques, la
+   carte virait au vert pendant que l'interrupteur virait à l'or. Deux
+   couleurs pour un seul booléen, c'est une couleur de trop.
+
+   Règle : l'or dit allumé, partout. Le pouce garde l'encre de l'or, seule
+   teinte qui tienne le contraste sur du jaune vif, en encre comme en papier.
+   ─────────────────────────────────────────────────────────────────────── */
+
+.lg-inter {
+  width: 40px;
+  height: 23px;
+  flex: 0 0 auto;
+  padding: 3px;
+  border: 1px solid var(--border-2);
+  border-radius: 999px;
+  background: var(--surface-3);
+  cursor: pointer;
+  transition: background var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+
+.lg-inter:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.lg-inter:not(:disabled):hover { border-color: var(--text-3); }
+
+.lg-inter[aria-checked='true'] {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+.lg-inter:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.lg-inter__pouce {
+  display: block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--text-3);
+  transform: translateX(0);
+  transition: transform 160ms var(--ease-out), background var(--duration) var(--ease);
+}
+
+.lg-inter[aria-checked='true'] .lg-inter__pouce {
+  background: var(--gold-ink);
+  transform: translateX(17px);
+}
+
+/* La ligne complète : l'interrupteur, son nom, sa conséquence. */
+.lg-inter-ligne {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: var(--sp-3);
+  align-items: start;
+  cursor: pointer;
+}
+.lg-inter-ligne__titre { font-size: var(--text-base); font-weight: 700; color: var(--text); }
+.lg-inter-ligne__aide  { display: block; margin-top: 3px; font-size: var(--text-xs); line-height: 1.45; color: var(--text-3); }

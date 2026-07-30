@@ -15,6 +15,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { Interrupteur } from '@/components/ui';
 
 const carte = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 18 };
 const attenue = { color: 'var(--text-3)', fontSize: 12, lineHeight: 1.5 };
@@ -145,20 +146,17 @@ export default function EnvoisAutomatiques({ sessionId, session, onNotice, onRec
           return (
             <div key={c.cle} style={{
               padding: 14, borderRadius: 11,
-              border: `1.5px solid ${arme ? 'color-mix(in srgb, var(--success) 40%, transparent)' : 'var(--border)'}`,
-              background: arme ? 'var(--success-soft)' : 'var(--surface-2)',
+              // Une campagne armée se signale à l'or, comme son interrupteur.
+              // Le vert disait la même chose dans une autre langue.
+              border: `1.5px solid ${arme ? 'var(--gold)' : 'var(--border)'}`,
+              background: arme ? 'var(--gold-soft)' : 'var(--surface-2)',
             }}>
-              <label style={{ display: 'grid', gridTemplateColumns: '44px minmax(0, 1fr)', gap: 12, cursor: 'pointer', alignItems: 'start' }}>
-                <button type="button" role="switch" aria-checked={arme} aria-label={c.libelle}
-                  onClick={() => setEtat((e) => ({ ...e, [c.champActif]: !arme }))}
-                  style={{ width: 40, height: 23, padding: 3, border: '1px solid var(--border-2)', borderRadius: 99, background: arme ? 'var(--gold)' : 'var(--surface)', cursor: 'pointer', marginTop: 2 }}>
-                  <span style={{ display: 'block', width: 15, height: 15, borderRadius: '50%', background: arme ? 'var(--gold-ink)' : 'var(--text-3)', transform: arme ? 'translateX(17px)' : 'translateX(0)', transition: 'transform .16s ease' }} />
-                </button>
-                <span>
-                  <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text)' }}>{c.libelle}</span>
-                  <span style={{ ...attenue, display: 'block', marginTop: 3 }}>{c.aide}</span>
-                </span>
-              </label>
+              <Interrupteur
+                actif={arme}
+                sur={() => setEtat((e) => ({ ...e, [c.champActif]: !arme }))}
+                titre={c.libelle}
+                aide={c.aide}
+              />
 
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 12, paddingLeft: 56 }}>
                 <input type="number" min="0" value={etat[c.champJours] ?? c.defaut}

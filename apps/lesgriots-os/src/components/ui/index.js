@@ -12,6 +12,7 @@ export { default as Bloc }         from './Bloc';
 export { Pile, Page }              from './Bloc';
 export { default as Champ }        from './Champ';
 export { Saisie, Zone, Choix, Case, Grille } from './Champ';
+export { default as Interrupteur } from './Interrupteur';
 export { default as Tableau }      from './Tableau';
 export { Sous }                    from './Tableau';
 export { default as Etiquette }    from './Badge';

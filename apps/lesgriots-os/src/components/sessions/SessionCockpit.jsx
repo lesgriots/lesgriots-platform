@@ -5,6 +5,7 @@ import ClientsSession from './ClientsSession';
 import EspaceApprenantConfig from './EspaceApprenantConfig';
 import EnvoisAutomatiques from './EnvoisAutomatiques';
 import { useEffect, useMemo, useState } from 'react';
+import { Interrupteur } from '@/components/ui';
 
 const STEPS = [
   { id: 'avancement', label: 'Avancement', mark: '↗' },
@@ -112,7 +113,7 @@ function dateTimeFr(value) {
 
 function Toggle({ checked, onChange, label, disabled = false }) {
   return <label style={{ display: 'inline-flex', alignItems: 'center', gap: 9, color: disabled ? 'var(--text-3)' : 'var(--text)', fontSize: 13, fontWeight: 700, cursor: disabled ? 'not-allowed' : 'pointer' }}>
-    <button type="button" role="switch" aria-checked={checked} aria-label={label} disabled={disabled} onClick={() => onChange?.(!checked)} style={{ width: 38, height: 22, padding: 3, border: '1px solid var(--border)', borderRadius: 99, background: checked ? 'var(--gold)' : 'var(--surface-2)', cursor: disabled ? 'not-allowed' : 'pointer' }}><span style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', background: checked ? 'var(--gold-ink)' : 'var(--text-3)', transform: checked ? 'translateX(16px)' : 'translateX(0)', transition: 'transform .16s ease' }} /></button>
+    <Interrupteur actif={checked} sur={onChange} label={label} disabled={disabled} />
     {label && <span>{label}</span>}
   </label>;
 }
