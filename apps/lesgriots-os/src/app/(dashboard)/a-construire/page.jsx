@@ -41,6 +41,11 @@ const CHANTIERS = [
     pourquoi: 'Les compétences sont aujourd’hui du texte libre, différent d’un programme à l’autre.',
   },
   {
+    titre: 'Amélioration continue',
+    quoi: 'Le registre des réclamations, des non-conformités et des actions correctives, avec leur suivi dans le temps.',
+    pourquoi: 'C’est l’indicateur 32 du référentiel. L’écran Qualité affiche des chiffres mais ne permet pas encore d’y consigner une action.',
+  },
+  {
     titre: 'Notifications',
     quoi: 'Décider ce qui te fait signe : une session incomplète, une pièce expirée, un questionnaire sans réponse.',
     pourquoi: 'Les alertes existent déjà mais ne vivent que dans les écrans où on les affiche.',

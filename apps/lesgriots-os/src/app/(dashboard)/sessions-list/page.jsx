@@ -16,9 +16,13 @@ export default function SessionsListPage() {
 
   // Cette page est rendue côté client : lire l'URL ici évite de rendre toute
   // la page dynamique uniquement pour un paramètre de navigation.
+  const [vue, setVue] = useState('actives');
+
   useEffect(() => {
-    setInitialSessionId(new URLSearchParams(window.location.search).get('session') || undefined);
+    const params = new URLSearchParams(window.location.search);
+    setInitialSessionId(params.get('session') || undefined);
+    setVue(params.get('vue') === 'archivees' ? 'archivees' : 'actives');
   }, []);
 
-  return <SessionWorkspace initialSessionId={initialSessionId} />;
+  return <SessionWorkspace initialSessionId={initialSessionId} vue={vue} />;
 }

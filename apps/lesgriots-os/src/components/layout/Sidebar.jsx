@@ -540,8 +540,6 @@ const RAIL_SECTIONS = [
       { href: '/pipeline-formations', label: 'Suivi commercial' },
       { href: '/bpf', label: 'Bilan pédagogique et financier' },
       { href: '/qualite', label: 'Suivi qualité' },
-      { href: '/qualite?vue=amelioration', label: 'Amélioration continue' },
-      { href: '/qualite?vue=marketplace', label: 'Suivi de la Marketplace' },
     ],
   },
   {
