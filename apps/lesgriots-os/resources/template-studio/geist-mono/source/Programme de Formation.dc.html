@@ -16,6 +16,14 @@
   body { margin: 0; background:#E6E4DD; }
   .gp-h { font-family:'Geist',sans-serif; font-weight:600; font-size:9pt; letter-spacing:0.18em; text-transform:uppercase; color:#0B0B0A; margin:26px 0 10px; break-after:avoid; }
   .gp-sec { break-inside:avoid; }
+  /* Les bandes réservées par l'en-tête et le pied de page répétés. Le moteur
+     de pagination les mesure et les publie (--doc-hdr-h, --doc-ftr-h, plus
+     0,35 pouce de respiration chacune) : on les lit au lieu de les figer en
+     millimètres. Si une ligne s'allonge, tout se recale tout seul. */
+  .avec-bandes {
+    --bande-haute: calc(var(--doc-hdr-h, 0px) + var(--doc-hdr-pad, 0px));
+    --bande-basse: calc(var(--doc-ftr-h, 0px) + var(--doc-ftr-pad, 0px));
+  }
   .gp-body { font-family:'Geist',sans-serif; font-weight:400; font-size:10.5pt; line-height:1.55; color:#2a2a26; margin:0 0 9px; }
   .gp-li { font-family:'Geist',sans-serif; font-weight:400; font-size:10.5pt; line-height:1.5; color:#2a2a26; }
 </style>
@@ -46,12 +54,12 @@
   <!-- 277mm et non 297 : le pied de page répété réserve sa bande en bas de
        chaque page (sa hauteur plus 0,35 pouce de respiration), et une
        couverture pleine hauteur déborderait sur une deuxième page. -->
-  <div style="position:relative; z-index:1; width:100%; height:242mm; background:#0B0B0A; break-after:page;">
+  <div class="avec-bandes" style="position:relative; z-index:1; width:100%; height:calc(297mm - var(--bande-haute) - var(--bande-basse) - 2mm); background:#0B0B0A; break-after:page;">
     <!-- L'or continue aussi au-dessus, sous la bande de l'en-tête. -->
-    <div style="position:absolute; left:0; right:0; bottom:calc(100% - 1mm); height:33mm; background:#0B0B0A;"></div>
+    <div style="position:absolute; left:0; right:0; bottom:calc(100% - 1mm); height:calc(var(--bande-haute) + 6mm); background:#0B0B0A;"></div>
     <!-- L'or continue sous la bande réservée au pied de page : la première
          page est pleine, et la ligne légale s'imprime en noir dessus. -->
-    <div style="position:absolute; left:0; right:0; top:calc(100% - 1mm); height:29.9mm; background:#0B0B0A;"></div>
+    <div style="position:absolute; left:0; right:0; top:calc(100% - 1mm); height:calc(var(--bande-basse) + 2.6mm); background:#0B0B0A;"></div>
     <div style="position:absolute; top:-8mm; left:18mm; right:18mm; display:flex; align-items:flex-start; justify-content:space-between;">
       <img src="logo-wordmark.svg" alt="LA GRIOTHÈQUE" style="height:18px; display:block; filter:invert(1);">
       <span style="font-family:'Geist',sans-serif; font-weight:600; font-size:9pt; letter-spacing:0.14em; text-transform:uppercase; color:#f6f5f3; text-align:right;">Programme<br>de formation</span>
@@ -197,9 +205,9 @@
          couverture. Le bloc s'évade du padding du conteneur par ses marges
          négatives, et deux extensions peignent les bandes d'en-tête et de
          pied de page, qu'il recouvre (z-index 1, DOM plus tard). -->
-    <div style="break-before:page; position:relative; z-index:1; background:#0B0B0A; margin:-14mm -18mm; padding:34mm 18mm 0; height:215mm;">
-      <div style="position:absolute; left:0; right:0; bottom:calc(100% - 1mm); height:13.2mm; background:#0B0B0A;"></div>
-      <div style="position:absolute; left:0; right:0; top:calc(100% - 3mm); height:38.5mm; background:#0B0B0A;"></div>
+    <div class="avec-bandes" style="break-before:page; position:relative; z-index:1; background:#0B0B0A; margin:-14mm -18mm; padding:34mm 18mm 0; height:calc(274mm - var(--bande-haute) - var(--bande-basse));">
+      <div style="position:absolute; left:0; right:0; bottom:calc(100% - 1mm); height:calc(var(--bande-haute) - 13mm); background:#0B0B0A;"></div>
+      <div style="position:absolute; left:0; right:0; top:calc(100% - 3mm); height:calc(var(--bande-basse) + 5.6mm); background:#0B0B0A;"></div>
       <img src="logo-wordmark.svg" alt="LA GRIOTHÈQUE" style="height:15px; display:block; filter:invert(1); margin-bottom:16mm;">
       <div class="gp-h" style="margin-top:0; color:#f6f5f3;">L'organisme de formation</div>
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px 20px; border-top:1px solid rgba(246,245,243,0.25); padding-top:14px;">
