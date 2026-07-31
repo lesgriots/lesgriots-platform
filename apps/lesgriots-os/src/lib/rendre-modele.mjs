@@ -14,13 +14,19 @@
  *
  *   node rendre-modele.mjs <modele.dc.html> <valeurs.json> <sortie.pdf>
  *
- * Le modèle est copié dans un dossier temporaire avec ses voisins,
- * support.js, doc-page.js et le logo, pour que les chemins relatifs
- * continuent de fonctionner sans rien exposer publiquement.
+ * Une note sur le petit serveur ci-dessous, qui a l'air superflu et ne
+ * l'est pas. Le premier essai chargeait la page en `file://` : Chromium
+ * imprimait quatre pages blanches. La raison est que le composant de
+ * pagination est importé en module ES, et qu'un navigateur refuse les
+ * modules servis en `file://`. Le composant ne se définissait jamais, et
+ * la règle `doc-page:not(:defined) { visibility: hidden }` faisait le
+ * reste. On sert donc le dossier de travail en HTTP sur la boucle locale,
+ * sur un port éphémère, le temps de l'impression.
  */
 
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { createServer } from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
@@ -32,6 +38,16 @@ const CHROMIUM = process.env.CHROMIUM_BIN || '/usr/bin/chromium';
 /** Les fichiers dont un modèle a besoin à côté de lui. */
 const VOISINS = ['support.js', 'doc-page.js', 'logo-wordmark.svg'];
 
+const TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.woff2': 'font/woff2',
+};
+
 /**
  * Injecte les valeurs sans toucher à la structure du modèle.
  *
@@ -41,6 +57,7 @@ const VOISINS = ['support.js', 'doc-page.js', 'logo-wordmark.svg'];
  * un navigateur, il continue de s'afficher comme avant.
  */
 export function injecter(html, valeurs) {
+  if (!valeurs) return html;
   const donnees = JSON.stringify(valeurs).replace(/</g, '\\u003c');
   const amorce = `<script>globalThis.__VALEURS = ${donnees};</script>`;
 
@@ -58,23 +75,44 @@ export function injecter(html, valeurs) {
   return sortie;
 }
 
+/** Sert un dossier sur la boucle locale, le temps d'une impression. */
+function servir(dossier) {
+  return new Promise((resolve) => {
+    const serveur = createServer(async (req, res) => {
+      const nom = decodeURIComponent((req.url || '/').split('?')[0]);
+      const cible = path.join(dossier, path.normalize(nom).replace(/^(\.\.[/\\])+/, ''));
+      try {
+        const corps = await fs.readFile(cible);
+        res.writeHead(200, { 'Content-Type': TYPES[path.extname(cible)] || 'application/octet-stream' });
+        res.end(corps);
+      } catch {
+        res.writeHead(404); res.end('introuvable');
+      }
+    });
+    serveur.listen(0, '127.0.0.1', () => resolve({ serveur, port: serveur.address().port }));
+  });
+}
+
 /** Rend un modèle en PDF et renvoie le chemin du fichier produit. */
 export async function rendre(cheminModele, valeurs, cheminSortie) {
   const dossierSource = path.dirname(cheminModele);
   const atelier = await fs.mkdtemp(path.join(os.tmpdir(), 'modele-'));
+  let serveur = null;
 
   try {
     for (const voisin of VOISINS) {
-      const src = path.join(dossierSource, voisin);
-      try { await fs.copyFile(src, path.join(atelier, voisin)); } catch { /* absent, tant pis */ }
+      try { await fs.copyFile(path.join(dossierSource, voisin), path.join(atelier, voisin)); } catch { /* absent */ }
     }
 
     const html = await fs.readFile(cheminModele, 'utf8');
-    const page = path.join(atelier, 'document.html');
-    await fs.writeFile(page, injecter(html, valeurs), 'utf8');
+    await fs.writeFile(path.join(atelier, 'document.html'), injecter(html, valeurs), 'utf8');
+
+    const site = await servir(atelier);
+    serveur = site.serveur;
 
     // `--virtual-time-budget` laisse au composant le temps de se définir et
-    // aux polices d'arriver. Sans lui, Chromium imprime une page blanche.
+    // aux polices d'arriver. Sans lui, Chromium imprime avant que la page
+    // n'existe.
     await executer(CHROMIUM, [
       '--headless',
       '--no-sandbox',
@@ -82,15 +120,18 @@ export async function rendre(cheminModele, valeurs, cheminSortie) {
       '--hide-scrollbars',
       '--no-pdf-header-footer',
       '--run-all-compositor-stages-before-draw',
-      '--virtual-time-budget=12000',
+      '--virtual-time-budget=15000',
       `--print-to-pdf=${cheminSortie}`,
-      `file://${page}`,
-    ], { timeout: 60000, maxBuffer: 8 * 1024 * 1024 });
+      `http://127.0.0.1:${site.port}/document.html`,
+    ], { timeout: 90000, maxBuffer: 8 * 1024 * 1024 });
 
     const { size } = await fs.stat(cheminSortie);
-    if (size < 1000) throw new Error('Le PDF produit est vide.');
+    if (size < 4000) {
+      throw new Error(`Le PDF produit fait ${size} octets : la page est probablement restée vide.`);
+    }
     return { chemin: cheminSortie, octets: size };
   } finally {
+    if (serveur) serveur.close();
     await fs.rm(atelier, { recursive: true, force: true });
   }
 }
@@ -103,7 +144,6 @@ if (process.argv[1] && process.argv[1].endsWith('rendre-modele.mjs')) {
     process.exit(2);
   }
   const brut = valeurs && valeurs !== '-' ? await fs.readFile(valeurs, 'utf8') : 'null';
-  const donnees = JSON.parse(brut);
-  const r = await rendre(path.resolve(modele), donnees, path.resolve(sortie));
+  const r = await rendre(path.resolve(modele), JSON.parse(brut), path.resolve(sortie));
   console.log(`ok ${r.chemin} · ${Math.round(r.octets / 1024)} Ko`);
 }
