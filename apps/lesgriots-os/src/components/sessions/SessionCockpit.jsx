@@ -4,6 +4,7 @@ import Link from 'next/link';
 import ClientsSession from './ClientsSession';
 import EspaceApprenantConfig from './EspaceApprenantConfig';
 import EnvoisAutomatiques from './EnvoisAutomatiques';
+import ApercuDocument from '@/components/ui/ApercuDocument';
 import { useEffect, useMemo, useState } from 'react';
 import { Interrupteur } from '@/components/ui';
 
@@ -130,6 +131,8 @@ export default function SessionCockpit({ sessionId }) {
   const [links, setLinks] = useState([]);
   const [registrationLink, setRegistrationLink] = useState(null);
   const [documents, setDocuments] = useState([]);
+  // Le document en cours de consultation, affiché dans l'app.
+  const [apercu, setApercu] = useState(null);
   const [emailHistory, setEmailHistory] = useState([]);
   const [emailMode, setEmailMode] = useState('simulation');
   const [loading, setLoading] = useState(true);
@@ -209,9 +212,9 @@ export default function SessionCockpit({ sessionId }) {
     const fichier = type === 'facture'
       ? `/api/sessions/${sessionId}/facture${apprenantId ? `?apprenant_id=${encodeURIComponent(apprenantId)}` : ''}`
       : `/api/sessions/${sessionId}/documents?type=${type}${query}`;
-    window.open(fichier, '_blank', 'noopener,noreferrer');
     const learner = inscriptions.find((item) => String(item.apprenant_id) === String(apprenantId));
     const labels = { programme: 'Programme', convocation: 'Convocation', emargement: 'Feuille d’émargement', attestation: 'Attestation', certificat: 'Certificat', facture: 'Facture' };
+    setApercu({ url: fichier, titre: `${labels[type] || 'Document'}${learner ? ` · ${learner.first_name} ${learner.last_name}` : ''}` });
     try {
       const response = await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         categorie: ['programme', 'attestation', 'certificat', 'emargement', 'facture', 'convocation'].includes(type) ? type : 'autre',
@@ -234,7 +237,7 @@ export default function SessionCockpit({ sessionId }) {
 
   const openConvention = async (learner) => {
     const fichier = `/api/sessions/${sessionId}/convention`;
-    window.open(fichier, '_blank', 'noopener,noreferrer');
+    setApercu({ url: fichier, titre: `Convention${learner ? ` · ${learner.first_name} ${learner.last_name}` : ''}` });
     try {
       const response = await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         categorie: 'convention',
@@ -617,7 +620,7 @@ export default function SessionCockpit({ sessionId }) {
   };
 
   const renderApprenant = () => {
-    if (currentSub === 'documents') return <section style={card}><h2 style={title}>Documents partagés</h2><p style={muted}>Chaque document généré est ajouté au registre de cette session avec sa date et sa version. « Mettre à jour » crée une nouvelle version, sans effacer l’ancienne.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '16px 0' }}><Action onClick={() => openDocument('programme')}>Générer le programme</Action><Action secondary onClick={() => openDocument('emargement')}>Générer la feuille d’émargement</Action>{inscriptions.map((item) => <Action key={item.id} secondary onClick={() => openDocument('attestation', item.apprenant_id)}>Attestation · {item.first_name}</Action>)}</div><DocumentRegister documents={documents} onRegenerate={(doc) => { try { const url = new URL(doc.fichier, window.location.origin); openDocument(url.searchParams.get('type') || 'programme', url.searchParams.get('apprenant_id')); } catch { window.open(doc.fichier, '_blank', 'noopener,noreferrer'); } }} /></section>;
+    if (currentSub === 'documents') return <section style={card}><h2 style={title}>Documents partagés</h2><p style={muted}>Chaque document généré est ajouté au registre de cette session avec sa date et sa version. « Mettre à jour » crée une nouvelle version, sans effacer l’ancienne.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '16px 0' }}><Action onClick={() => openDocument('programme')}>Générer le programme</Action><Action secondary onClick={() => openDocument('emargement')}>Générer la feuille d’émargement</Action>{inscriptions.map((item) => <Action key={item.id} secondary onClick={() => openDocument('attestation', item.apprenant_id)}>Attestation · {item.first_name}</Action>)}</div><DocumentRegister documents={documents} onRegenerate={(doc) => { try { const url = new URL(doc.fichier, window.location.origin); openDocument(url.searchParams.get('type') || 'programme', url.searchParams.get('apprenant_id')); } catch { setApercu({ url: doc.fichier, titre: doc.libelle || 'Document' }); } }} /></section>;
     if (currentSub === 'elearning') return <section style={card}><h2 style={title}>Séquences e-learning</h2><p style={muted}>Crée ou associe un parcours e-learning à cette session, puis suis la progression par apprenant.</p><Empty>Aucune séquence n’est encore associée à ce parcours.</Empty></section>;
     if (currentSub === 'affichage') return <EspaceApprenantConfig sessionId={sessionId} session={session} onNotice={setNotice} onRecharger={load} />;
     const accessLink = links.find((item) => item.kind === 'questionnaire') || links.find((item) => item.kind === 'emargement');
@@ -675,6 +678,7 @@ export default function SessionCockpit({ sessionId }) {
   const content = step === 'avancement' ? renderAdvancement() : step === 'configuration' ? renderConfiguration() : step === 'gestion' ? renderGestion() : step === 'apprenant' ? renderApprenant() : renderSuivi();
 
   return <div style={{ maxWidth: 1500, margin: '0 auto', padding: '0 0 48px' }}>
+    <ApercuDocument url={apercu?.url} titre={apercu?.titre} onFermer={() => setApercu(null)} />
     <Link href="/sessions-list" style={{ ...muted, textDecoration: 'none', display: 'inline-block', marginBottom: 12 }}>← Toutes les sessions</Link>
     <h1 style={{ margin: 0, fontSize: 'clamp(23px, 3vw, 34px)', letterSpacing: '-.04em' }}>{session.formation_title || 'Session de formation'}</h1>
     <p style={{ ...muted, margin: '5px 0 22px' }}>{dateFr(session.start_date)} → {dateFr(session.end_date)} · {session.code_interne || 'Sans code interne'}</p>
