@@ -56,8 +56,58 @@ const TYPES = {
  * existe. Le modèle garde ses valeurs de démonstration : ouvert seul dans
  * un navigateur, il continue de s'afficher comme avant.
  */
+
+/**
+ * Retire du HTML les blocs marqués `data-si="…"` dont toutes les valeurs
+ * sont vides. Un programme sans intervenant renseigné ne doit pas imprimer
+ * le titre « Intervenants » au-dessus du vide.
+ *
+ * Le retrait se fait ici, sur la chaîne servie à Chromium, et pas dans un
+ * script embarqué dans la page : le moteur de rendu des modèles reconstruit
+ * le document depuis sa propre copie du contenu, et un retrait fait au
+ * chargement peut être écrasé. Côté serveur, il n'y a pas de course.
+ */
+export function retirerBlocsVides(html, valeurs) {
+  const vide = (x) => {
+    if (x === null || x === undefined) return true;
+    if (Array.isArray(x)) return x.length === 0;
+    if (typeof x === 'object') return false;
+    return String(x).trim() === '';
+  };
+
+  let sortie = html;
+  let curseur = 0;
+  for (;;) {
+    const attr = sortie.slice(curseur).match(/<div\b[^>]*\bdata-si="([^"]+)"[^>]*>/);
+    if (!attr) break;
+    const debut = curseur + attr.index;
+    const cles = attr[1].split(' ');
+
+    // Trouver la fin du bloc en comptant les <div> imbriqués.
+    let profondeur = 0;
+    let i = debut;
+    let fin = -1;
+    const balise = /<div\b|<\/div>/g;
+    balise.lastIndex = debut;
+    for (let m; (m = balise.exec(sortie));) {
+      profondeur += m[0] === '</div>' ? -1 : 1;
+      if (profondeur === 0) { fin = m.index + m[0].length; break; }
+    }
+    if (fin === -1) break; // balises déséquilibrées : on ne touche à rien
+
+    if (cles.every((c) => vide(valeurs?.[c]))) {
+      sortie = sortie.slice(0, debut) + sortie.slice(fin);
+      curseur = debut;
+    } else {
+      curseur = debut + attr[0].length;
+    }
+  }
+  return sortie;
+}
+
 export function injecter(html, valeurs) {
   if (!valeurs) return html;
+  html = retirerBlocsVides(html, valeurs);
   const donnees = JSON.stringify(valeurs).replace(/</g, '\\u003c');
   const amorce = `<script>globalThis.__VALEURS = ${donnees};</script>`;
 

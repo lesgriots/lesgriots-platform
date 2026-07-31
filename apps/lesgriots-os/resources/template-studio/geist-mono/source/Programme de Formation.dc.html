@@ -210,26 +210,6 @@
 </x-import>
 </x-dc>
 
-  <!-- Un bloc sans contenu disparaît du document : il n'imprime pas son titre
-       au-dessus du vide. Ce script s'exécute avant le composant de pagination
-       (les modules sont différés), donc les blocs retirés ne sont jamais
-       mesurés. Ouvert sans valeurs injectées, le modèle garde sa démo. -->
-  <script>
-    (function () {
-      var v = globalThis.__VALEURS;
-      if (!v) return;
-      var vide = function (x) {
-        if (x == null) return true;
-        if (Array.isArray(x)) return x.length === 0;
-        if (typeof x === 'object') return false;
-        return String(x).trim() === '';
-      };
-      document.querySelectorAll('[data-si]').forEach(function (el) {
-        var cles = el.getAttribute('data-si').split(' ');
-        if (cles.every(function (c) { return vide(v[c]); })) el.remove();
-      });
-    })();
-  </script>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900,&quot;height&quot;:1273},&quot;formationIndex&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Vidéo au téléphone (2 j)&quot;,&quot;Réseaux sociaux TPE (4 j)&quot;,&quot;Stratégie &amp; storytelling (1 j)&quot;],&quot;default&quot;:&quot;Vidéo au téléphone (2 j)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;}}">
 class Component extends DCLogic {
   data() {
