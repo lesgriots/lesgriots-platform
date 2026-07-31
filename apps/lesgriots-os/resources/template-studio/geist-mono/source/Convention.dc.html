@@ -57,9 +57,13 @@
       <sc-for list="{{ caracteristiques }}" as="c">
         <p class="ct-p" style="margin-bottom:1mm;"><strong>{{ c.label }} :</strong> <span style="white-space:pre-line;">{{ c.value }}</span></p>
       </sc-for>
-      <sc-for list="{{ objectifs }}" as="o">
-        <p class="ct-p" style="margin:0.5mm 0 0.5mm 5mm;">– {{ o }}</p>
-      </sc-for>
+      <div data-si="objectifs" style="margin-top:2.5mm;">
+        <p class="ct-p" style="margin-bottom:0.8mm;"><strong>Objectifs pédagogiques</strong></p>
+        <p class="ct-p" data-si="objectifsIntro" style="margin-bottom:0.8mm;">{{ objectifsIntro }}</p>
+        <sc-for list="{{ objectifs }}" as="o">
+          <p class="ct-p" style="margin:0.5mm 0 0.5mm 5mm;">– {{ o }}</p>
+        </sc-for>
+      </div>
     </div>
     <div style="margin-top:5mm; break-inside:avoid-page;">
       <div class="ct-h">Article 3 — Stagiaires</div>
@@ -213,6 +217,7 @@ class Component extends DCLogic {
         { label: "Lieu", value: "15 rue de la Beaune, 93100 Montreuil" },
       ],
       objectifs: ["Comprendre les principes fondamentaux de l'étalonnage", "Réaliser une correction colorimétrique primaire"],
+      objectifsIntro: "À l’issue de la formation, le participant sera capable de :",
       stagiaires: ["Prénom Nom", "Prénom Nom"],
       nbStagiaires: 2,
       prixHT: "1 500,00 €",

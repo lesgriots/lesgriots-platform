@@ -51,12 +51,29 @@ export function construireConvention(db, sessionId) {
 
   const numero = `CF-${String(s.start_date || '').slice(0, 4) || new Date().getFullYear()}-${texte(s.code_interne) || String(sessionId).slice(0, 8).toUpperCase()}`;
 
-  const objectifs = (() => {
+  /*
+   * Les objectifs, et la phrase qui les introduit.
+   *
+   * Beaucoup de fiches formation commencent leur champ « objectifs » par la
+   * phrase d'amorce (« À l'issue de la formation, le participant sera capable
+   * de : »). Rendue telle quelle, elle devenait le premier objectif de la
+   * liste, précédée d'un tiret : une phrase d'introduction déguisée en item.
+   * On la sépare donc du reste, et on lui garde sa place de phrase.
+   */
+  const objectifsBruts = (() => {
     const brut = s.objectives;
     if (!brut) return [];
     try { const j = JSON.parse(brut); if (Array.isArray(j)) return j.map(String).map((x) => x.trim()).filter(Boolean); } catch { /* texte */ }
     return String(brut).split(/\r?\n/).map((x) => x.replace(/^\s*[-—•*]\s*/, '').trim()).filter(Boolean);
   })();
+
+  const estAmorce = (ligne) => /\u00e0\s+l.issue\s+de\s+la\s+formation/i.test(ligne) || /\bsera\s+capable\s+de\s*:?\s*$/i.test(ligne);
+
+  const objectifsIntro = estAmorce(objectifsBruts[0] || '')
+    ? objectifsBruts[0]
+    : 'À l’issue de la formation, le participant sera capable de :';
+
+  const objectifs = estAmorce(objectifsBruts[0] || '') ? objectifsBruts.slice(1) : objectifsBruts;
 
   // L'annexe : le programme de la formation, tel que le construit déjà le
   // générateur de programmes. L'article 1 promet qu'il est annexé ; il l'est.
@@ -105,6 +122,7 @@ export function construireConvention(db, sessionId) {
     ].filter((c) => c.value),
 
     objectifs,
+    objectifsIntro: objectifs.length ? objectifsIntro : '',
     stagiaires: stagiaires.length ? stagiaires : ['(liste à compléter)'],
     nbStagiaires: stagiaires.length || 1,
 
