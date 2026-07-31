@@ -128,11 +128,12 @@ export function construireLivret(db, sessionId = null) {
       { n: '05', label: 'Accessibilité', href: '#acces' },
       { n: '06', label: 'Vos contacts', href: '#contacts' },
     ],
-    // Les trois piliers de « Notre approche », repris du site lagriotheque.com.
+    // Les trois piliers de « Notre approche », textes réels du site
+    // (SITE_CONTENT de lagriotheque.com, pas les textes de secours).
     valeurs: [
-      { titre: 'Le storytelling au centre', texte: "Le récit comme boussole. Stratégie, direction artistique, structure : tout en découle. Avant les outils, avant les formats, avant les plateformes, il y a l'histoire que tu portes et la façon dont les autres se la racontent." },
-      { titre: 'Par des professionnels en activité', texte: "Universal, Sony, Accor Arena, Zéniths. Tes formateurs livrent maintenant, pas en 2015. La méthode arrive du terrain et y retourne : ce qu'on enseigne, on le pratique encore." },
-      { titre: 'Formations pratiques', texte: "Pédagogie par le faire, tes propres récits comme matière. Tu repars avec un livrable concret : plateforme de marque, plan éditorial, vidéo finie, calendrier, utilisable dès le lundi matin." },
+      { titre: 'Le récit comme point de départ', texte: "Avant les outils, il y a une vision. Chaque création forte commence par une histoire à raconter. Nous aidons les créatifs à clarifier leur intention, structurer leur pensée et construire un récit cohérent qui donne du sens à leur travail." },
+      { titre: "L'expérience du terrain comme transmission", texte: "Apprendre de ceux qui créent aujourd'hui. Nos formations sont animées par des professionnels en activité qui partagent leurs expériences, leurs méthodes et les enseignements issus de projets réels." },
+      { titre: 'La pratique comme moteur', texte: "Les compétences se construisent en faisant. Nos formations privilégient l'expérimentation, les cas concrets et la mise en application pour transformer les connaissances en savoir-faire." },
     ],
     etapes: [
       { quand: 'J-14', titre: 'Confirmation et auto-positionnement', texte: 'Vous recevez votre convocation, le programme détaillé et un court questionnaire pour situer votre niveau et vos attentes.' },
