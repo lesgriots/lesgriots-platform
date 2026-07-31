@@ -105,6 +105,9 @@ export function construireLivret(db, sessionId = null) {
   const contactEmail = texte(reglages.email) || 'contact@lesgriots.com';
 
   return {
+    piedDePage: piedDePage(reglages),
+    contactEmail,
+    contactAccessibilite: contactEmail,
     promo: String(new Date(s?.start_date || Date.now()).getFullYear()),
     maj: new Date().toLocaleDateString('fr-FR'),
     sommaire: [
