@@ -75,6 +75,9 @@ export function retirerBlocsVides(html, valeurs) {
     return String(x).trim() === '';
   };
 
+  // Les clés acceptent un chemin pointé : data-si="annexe.objectifs".
+  const lire = (cle) => cle.split('.').reduce((o, k) => (o == null ? undefined : o[k]), valeurs);
+
   let sortie = html;
   let curseur = 0;
   for (;;) {
@@ -95,7 +98,7 @@ export function retirerBlocsVides(html, valeurs) {
     }
     if (fin === -1) break; // balises déséquilibrées : on ne touche à rien
 
-    if (cles.every((c) => vide(valeurs?.[c]))) {
+    if (cles.every((c) => vide(lire(c)))) {
       sortie = sortie.slice(0, debut) + sortie.slice(fin);
       curseur = debut;
     } else {

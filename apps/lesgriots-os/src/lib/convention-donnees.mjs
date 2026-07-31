@@ -6,6 +6,8 @@
  * les parties, l'action de formation, les stagiaires, le prix.
  */
 
+import { construireProgramme } from './programme-donnees.mjs';
+
 const texte = (v) => String(v ?? '').trim();
 
 const euros = (n) => new Intl.NumberFormat('fr-FR', {
@@ -56,7 +58,30 @@ export function construireConvention(db, sessionId) {
     return String(brut).split(/\r?\n/).map((x) => x.replace(/^\s*[-—•*]\s*/, '').trim()).filter(Boolean);
   })();
 
+  // L'annexe : le programme de la formation, tel que le construit déjà le
+  // générateur de programmes. L'article 1 promet qu'il est annexé ; il l'est.
+  let annexe = null;
+  try {
+    const { valeurs } = construireProgramme(db, s.formation_id);
+    annexe = {
+      objectifs: valeurs.objectifs || [],
+      audience: valeurs.audience || [],
+      prerequis: valeurs.prerequis || [],
+      modules: valeurs.modules || [],
+      totalHeures: valeurs.totalHeures || '',
+      methodes: valeurs.methodes || '',
+      evaluation: Array.isArray(valeurs.evaluation) ? valeurs.evaluation.join(' ') : (valeurs.evaluation || ''),
+      moyens: valeurs.moyens || '',
+      accessibilite: valeurs.accessibilite || '',
+    };
+    // Une annexe vide n'a pas à imprimer sa page de titre : si le programme
+    // n'a rien à dire, l'annexe disparaît et l'article 1 devra attendre.
+    const rien = Object.values(annexe).every((v) => (Array.isArray(v) ? !v.length : !texte(v)));
+    if (rien) annexe = null;
+  } catch { /* formation introuvable : la convention reste valide sans annexe */ }
+
   return {
+    annexe,
     numero,
     etablieLe: new Date().toLocaleDateString('fr-FR'),
     titre: texte(s.formation_titre),

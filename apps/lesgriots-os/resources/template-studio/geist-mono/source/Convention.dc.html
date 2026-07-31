@@ -118,6 +118,68 @@
       </div>
     </div>
 
+
+    <!-- ANNEXE : le programme, promis par l'article 1 -->
+    <div data-si="annexe" style="break-before:page;">
+      <div style="text-align:center; margin-bottom:6mm;">
+        <div style="font-weight:700; font-size:12pt; color:#0B0B0A;">Annexe — Programme de formation</div>
+        <div style="font-size:9pt; color:#6b6b6b; margin-top:1.5mm;">{{ titre }}</div>
+      </div>
+
+      <div data-si="annexe.objectifs" style="margin-top:4mm;">
+        <div class="ct-h">Objectifs pédagogiques</div>
+        <sc-for list="{{ annexe.objectifs }}" as="o">
+          <p class="ct-p" style="margin:0.5mm 0 0.5mm 5mm;">– {{ o }}</p>
+        </sc-for>
+      </div>
+
+      <div data-si="annexe.audience" style="margin-top:4mm;">
+        <div class="ct-h">Public visé</div>
+        <sc-for list="{{ annexe.audience }}" as="a">
+          <p class="ct-p" style="margin:0.5mm 0 0.5mm 5mm;">– {{ a }}</p>
+        </sc-for>
+      </div>
+
+      <div data-si="annexe.prerequis" style="margin-top:4mm;">
+        <div class="ct-h">Prérequis</div>
+        <sc-for list="{{ annexe.prerequis }}" as="pr">
+          <p class="ct-p" style="margin:0.5mm 0 0.5mm 5mm;">– {{ pr }}</p>
+        </sc-for>
+      </div>
+
+      <div data-si="annexe.modules" style="margin-top:4mm;">
+        <div class="ct-h">Contenu détaillé</div>
+        <sc-for list="{{ annexe.modules }}" as="m">
+          <div style="break-inside:avoid; margin-bottom:2mm;">
+            <p class="ct-p" style="margin:0;"><strong>{{ m.label }}</strong> <span style="color:#6b6b6b;">{{ m.heures }}</span></p>
+            <p class="ct-p" style="margin:0 0 0 5mm;">{{ m.detail }}</p>
+          </div>
+        </sc-for>
+        <p class="ct-p" style="margin-top:1.5mm;"><strong>Durée totale :</strong> {{ annexe.totalHeures }}</p>
+      </div>
+
+      <div data-si="annexe.methodes" style="margin-top:4mm;">
+        <div class="ct-h">Méthodes pédagogiques</div>
+        <p class="ct-p">{{ annexe.methodes }}</p>
+      </div>
+
+      <div data-si="annexe.moyens" style="margin-top:4mm;">
+        <div class="ct-h">Moyens techniques et d'encadrement</div>
+        <p class="ct-p">{{ annexe.moyens }}</p>
+      </div>
+
+      <div data-si="annexe.evaluation" style="margin-top:4mm;">
+        <div class="ct-h">Modalités de suivi et d'évaluation</div>
+        <p class="ct-p">{{ annexe.evaluation }}</p>
+        <p class="ct-p">L'exécution de l'action est attestée par des feuilles d'émargement signées par demi-journée. À l'issue de la formation, un certificat de réalisation est remis à chaque stagiaire.</p>
+      </div>
+
+      <div data-si="annexe.accessibilite" style="margin-top:4mm;">
+        <div class="ct-h">Accessibilité et handicap</div>
+        <p class="ct-p">{{ annexe.accessibilite }}</p>
+      </div>
+    </div>
+
   </div>
 
 </x-import>
@@ -155,6 +217,17 @@ class Component extends DCLogic {
       contactEmail: "contact@lesgriots.com",
       piedDePage: "LES GRIOTS · SIRET [à compléter] · Déclaration d'activité [à compléter]",
       maj: "31/07/2026",
+      annexe: {
+        objectifs: ["Comprendre les principes fondamentaux", "Réaliser une correction primaire"],
+        audience: ["Créateurs de contenu et monteurs"],
+        prerequis: ["Notions de base en montage vidéo"],
+        modules: [{ label: "Module 1", detail: "Description du module.", heures: "7 h" }],
+        totalHeures: "14 h",
+        methodes: "Alternance d'apports théoriques et d'ateliers pratiques.",
+        moyens: "Salle équipée, vidéoprojecteur, postes de montage.",
+        evaluation: "Évaluation diagnostique, formative et mise en situation professionnelle.",
+        accessibilite: "Un référent handicap étudie chaque situation en amont.",
+      },
     };
   }
 }
