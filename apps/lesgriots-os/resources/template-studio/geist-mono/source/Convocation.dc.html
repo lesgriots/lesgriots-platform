@@ -21,41 +21,44 @@
 </helmet>
 <x-import component-from-global-scope="doc-page" from="./doc-page.js" size="a4" margin="0" hint-size="100%,100%">
 
-  <div style="position:relative; width:100%; height:297mm; background:#ffffff; font-family:'Geist',sans-serif;">
+  <!-- La page vit en flux : le contenu pousse, les mentions se placent en
+       bas quand il reste de la place (margin-top:auto), et si les horaires
+       détaillés allongent la lettre, tout pagine au lieu de se chevaucher. -->
+  <div style="width:100%; min-height:296.5mm; background:#ffffff; font-family:'Geist',sans-serif; display:flex; flex-direction:column; padding:14mm 18mm 9mm; box-sizing:border-box;">
 
     <!-- en-tête -->
-    <div style="position:absolute; top:18mm; left:18mm; right:18mm; display:flex; align-items:flex-start; justify-content:space-between; padding-bottom:5mm; border-bottom:1px solid rgba(11,11,10,0.18);">
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; padding-bottom:5mm; border-bottom:1px solid rgba(11,11,10,0.18);">
       <img src="logo-wordmark.svg" alt="LA GRIOTHÈQUE" style="height:15px; display:block;">
       <span style="font-weight:600; font-size:9pt; letter-spacing:0.18em; text-transform:uppercase; color:#0B0B0A;">Convocation</span>
     </div>
 
     <!-- destinataire -->
-    <div style="position:absolute; top:42mm; right:18mm; text-align:right;">
+    <div style="margin-top:8mm; text-align:right;">
       <div style="font-weight:600; font-size:11.5pt; color:#0B0B0A;">{{ apprenant }}</div>
       <div data-si="entreprise" style="font-size:10pt; color:#6b6b6b; margin-top:2px;">{{ entreprise }}</div>
       <div data-si="apprenantEmail" style="font-size:9.5pt; color:#6b6b6b; margin-top:2px;">{{ apprenantEmail }}</div>
     </div>
 
     <!-- objet -->
-    <div style="position:absolute; top:72mm; left:18mm; right:18mm;">
+    <div style="margin-top:9mm;">
       <div style="font-weight:600; font-size:9pt; letter-spacing:0.18em; text-transform:uppercase; color:#0B0B0A; margin-bottom:6mm;">Convocation à la formation</div>
-      <h1 style="font-weight:700; font-size:24pt; line-height:1.05; letter-spacing:-0.02em; margin:0 0 10mm; color:#0B0B0A; text-wrap:balance;">{{ titre }}</h1>
+      <h1 style="font-weight:700; font-size:24pt; line-height:1.05; letter-spacing:-0.02em; margin:0 0 7mm; color:#0B0B0A; text-wrap:balance;">{{ titre }}</h1>
 
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:7mm 8mm; border-top:2px solid #0B0B0A; padding-top:6mm;">
         <div><div class="cv-h">Dates</div><div class="cv-v">{{ dates }}</div></div>
         <div><div class="cv-h">Horaires</div><div class="cv-v">{{ horaires }}</div></div>
-        <div><div class="cv-h">Durée</div><div class="cv-v">{{ duree }}</div></div>
+        <div data-si="duree"><div class="cv-h">Durée</div><div class="cv-v">{{ duree }}</div></div>
         <div><div class="cv-h">Lieu</div><div class="cv-v">{{ lieu }}</div></div>
         <div><div class="cv-h">Modalité</div><div class="cv-v">{{ modalite }}</div></div>
         <div data-si="formateur"><div class="cv-h">Intervenant</div><div class="cv-v">{{ formateur }}</div></div>
       </div>
 
-      <div style="margin-top:12mm;">
+      <div style="margin-top:8mm;">
         <p class="cv-p">Bonjour,</p>
         <p class="cv-p">Nous avons le plaisir de vous confirmer votre inscription à la formation citée ci-dessus, et vous prions de bien vouloir vous présenter sur le lieu de formation <strong>quinze minutes avant le début de la première journée</strong>, muni(e) d'une pièce d'identité.</p>
         <p class="cv-p">L'émargement est réalisé par demi-journée : il conditionne la délivrance de votre certificat de réalisation. En cas de retard ou d'empêchement, merci de nous prévenir au plus vite à l'adresse ci-dessous.</p>
         <p class="cv-p">Si vous êtes en situation de handicap ou avez besoin d'une adaptation, contactez-nous en amont : nous mettrons en place les aménagements nécessaires.</p>
-        <p class="cv-p" style="margin-top:8mm;">Nous nous réjouissons de vous accueillir,</p>
+        <p class="cv-p" style="margin-top:5mm;">Nous nous réjouissons de vous accueillir,</p>
         <div style="margin-top:6mm;">
           <div style="font-weight:600; font-size:10.5pt; color:#0B0B0A;">{{ representant }}</div>
           <div style="font-size:9.5pt; color:#6b6b6b;">{{ organisme }} · {{ contactEmail }}</div>
@@ -63,10 +66,12 @@
       </div>
     </div>
 
-    <!-- mentions -->
-    <div style="position:absolute; left:18mm; right:18mm; bottom:10mm; border-top:1px solid rgba(11,11,10,0.18); padding-top:4mm; font-size:6.5pt; letter-spacing:0.03em; color:#6b6b6b; text-align:center;">
-      {{ piedDePage }}<br>
-      L'enregistrement de la déclaration d'activité ne vaut pas agrément de l'État (art. L.6352-12 du Code du travail) · Certification Qualiopi délivrée au titre de la catégorie : actions de formation · Convocation émise le {{ maj }}
+    <!-- mentions : en bas de page quand il reste de la place, à la suite sinon -->
+    <div style="margin-top:auto; padding-top:8mm;">
+      <div style="border-top:1px solid rgba(11,11,10,0.18); padding-top:4mm; font-size:6.5pt; letter-spacing:0.03em; color:#6b6b6b; text-align:center;">
+        {{ piedDePage }}<br>
+        L'enregistrement de la déclaration d'activité ne vaut pas agrément de l'État (art. L.6352-12 du Code du travail) · Certification Qualiopi délivrée au titre de la catégorie : actions de formation · Convocation émise le {{ maj }}
+      </div>
     </div>
 
   </div>
