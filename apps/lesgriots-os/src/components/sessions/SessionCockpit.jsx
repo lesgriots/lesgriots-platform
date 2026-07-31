@@ -80,6 +80,81 @@ function Empty({ children }) {
 function Pastille() {
   return <span aria-label="déjà envoyé" title="Déjà envoyé" style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', display: 'inline-block', flex: 'none' }} />;
 }
+/* ── Le registre de pièces : voir la pièce, pas seulement le bouton ─────
+ *
+ * Un onglet de gestion doit répondre à trois questions d'un coup d'œil :
+ * la pièce existe-t-elle, de quand date-t-elle, et est-elle partie. Une
+ * rangée de boutons d'action ne répond à aucune des trois : elle dit ce
+ * qu'on peut faire, jamais où on en est. On affiche donc la pièce
+ * elle-même, datée, et les gestes se replient en icônes autour.
+ */
+
+const ICONES = {
+  oeil: 'M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8Z M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
+  telecharger: 'M8 2v8 M4.5 7 8 10.5 11.5 7 M2.5 13.5h11',
+  enveloppe: 'M1.8 4.2h12.4v7.6H1.8z M1.8 4.6 8 9l6.2-4.4',
+  rafraichir: 'M13.2 8a5.2 5.2 0 1 1-1.6-3.8 M13.6 2.4v3.2h-3.2',
+};
+
+/** Un geste réduit à son icône, avec son nom en infobulle. */
+function Geste({ nom, icone, onClick, href, disabled = false, actif = false }) {
+  const style = {
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+    width: 32, height: 32, padding: 0, borderRadius: 8,
+    border: '1px solid var(--border)',
+    background: actif ? 'var(--gold)' : 'var(--surface)',
+    color: actif ? 'var(--gold-ink)' : 'var(--text-2)',
+    cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1,
+    flex: 'none',
+  };
+  const dessin = (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+      strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={ICONES[icone]} />
+    </svg>
+  );
+  if (href) {
+    return <a href={href} download title={nom} aria-label={nom} style={{ ...style, textDecoration: 'none' }}>{dessin}</a>;
+  }
+  return <button type="button" title={nom} aria-label={nom} onClick={onClick} disabled={disabled} style={style}>{dessin}</button>;
+}
+
+/**
+ * La pièce produite, avec sa date. Cliquable : elle ouvre l'aperçu.
+ * Quand elle n'existe pas encore, on le dit plutôt que de laisser un vide.
+ */
+function Piece({ libelle, document: doc, onVoir }) {
+  if (!doc) {
+    return <span style={{ ...muted, fontStyle: 'italic' }}>Pas encore générée</span>;
+  }
+  return <button type="button" onClick={onVoir} style={{
+    display: 'inline-flex', alignItems: 'center', gap: 9, textAlign: 'left',
+    padding: '7px 11px', borderRadius: 9, border: '1px solid var(--border)',
+    background: 'var(--surface)', color: 'var(--text)', font: 'inherit', cursor: 'pointer',
+  }}>
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4"
+      strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none', color: 'var(--text-3)' }} aria-hidden="true">
+      <path d="M9.2 1.6H4a1.4 1.4 0 0 0-1.4 1.4v10a1.4 1.4 0 0 0 1.4 1.4h8a1.4 1.4 0 0 0 1.4-1.4V5.8Z M9.2 1.6v4.2h4.2" />
+    </svg>
+    <span>
+      <span style={{ display: 'block', fontSize: 12, fontWeight: 800 }}>{libelle}{doc.version > 1 ? ` · v${doc.version}` : ''}</span>
+      <span style={{ display: 'block', ...muted, fontSize: 11 }}>Généré le {dateTimeFr(doc.created_at)}</span>
+    </span>
+  </button>;
+}
+
+/** Où en est l'envoi, dit en toutes lettres plutôt qu'en interrupteur. */
+function EtatEnvoi({ envoye, date }) {
+  const couleur = envoye ? 'var(--success)' : 'var(--text-3)';
+  return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12, fontWeight: 800, color: couleur }}>
+    <span style={{ width: 7, height: 7, borderRadius: '50%', background: couleur, flex: 'none' }} />
+    <span>
+      {envoye ? 'Envoyée' : 'À envoyer'}
+      {envoye && date && <span style={{ ...muted, fontWeight: 500, marginLeft: 6 }}>le {dateTimeFr(date)}</span>}
+    </span>
+  </span>;
+}
+
 function Action({ children, onClick, href, secondary = false, disabled = false, small = false }) {
   const style = {
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
@@ -207,14 +282,14 @@ export default function SessionCockpit({ sessionId }) {
     return { totalAttendance, signedAttendance, evaluated };
   }, [emargements, evaluations]);
 
-  const openDocument = async (type, apprenantId) => {
+  const openDocument = async (type, apprenantId, { montrer = true } = {}) => {
     const query = apprenantId ? `&apprenant_id=${encodeURIComponent(apprenantId)}` : '';
     const fichier = type === 'facture'
       ? `/api/sessions/${sessionId}/facture${apprenantId ? `?apprenant_id=${encodeURIComponent(apprenantId)}` : ''}`
       : `/api/sessions/${sessionId}/documents?type=${type}${query}`;
     const learner = inscriptions.find((item) => String(item.apprenant_id) === String(apprenantId));
     const labels = { programme: 'Programme', convocation: 'Convocation', emargement: 'Feuille d’émargement', attestation: 'Attestation', certificat: 'Certificat', facture: 'Facture' };
-    setApercu({ url: fichier, titre: `${labels[type] || 'Document'}${learner ? ` · ${learner.first_name} ${learner.last_name}` : ''}` });
+    if (montrer) setApercu({ url: fichier, titre: `${labels[type] || 'Document'}${learner ? ` · ${learner.first_name} ${learner.last_name}` : ''}` });
     try {
       const response = await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         categorie: ['programme', 'attestation', 'certificat', 'emargement', 'facture', 'convocation'].includes(type) ? type : 'autre',
@@ -352,6 +427,38 @@ export default function SessionCockpit({ sessionId }) {
   /** Un e-mail de ce modèle est-il déjà parti à cette adresse ? */
   const dejaEnvoye = (templateKey, email) => Boolean(email) && emailHistory.some((item) =>
     item.template_key === templateKey && item.destinataire === email && item.statut === 'envoye');
+
+  /**
+   * Le dernier envoi réussi vers cette adresse : c'est lui qui porte la date
+   * qu'on affiche. Sans date, « envoyée » ne veut rien dire pour un auditeur
+   * comme pour l'apprenant qui appelle en disant qu'il n'a rien reçu.
+   */
+  const dernierEnvoi = (templateKey, email) => {
+    if (!email) return null;
+    return emailHistory
+      .filter((item) => item.template_key === templateKey && item.destinataire === email && item.statut === 'envoye')
+      .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0] || null;
+  };
+
+  /** La dernière convocation archivée pour cet apprenant, s'il en a une. */
+  const convocationDe = (apprenantId) => documents
+    .filter((doc) => doc.categorie === 'convocation' && String(doc.contexte_id) === String(apprenantId))
+    .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0] || null;
+
+  const convocationsProduites = inscriptions.filter((item) => convocationDe(item.apprenant_id)).length;
+
+  /**
+   * Produire toutes les convocations d'un coup. En série et sans ouvrir de
+   * fenêtre : dix aperçus qui se recouvrent ne servent personne, et chaque
+   * apprenant a besoin de SA pièce, pas d'un exemplaire commun.
+   */
+  const genererToutesConvocations = async () => {
+    for (const item of inscriptions) {
+      // eslint-disable-next-line no-await-in-loop
+      await openDocument('convocation', item.apprenant_id, { montrer: false });
+    }
+    setNotice(`${inscriptions.length} convocation${inscriptions.length > 1 ? 's' : ''} produite${inscriptions.length > 1 ? 's' : ''} et archivée${inscriptions.length > 1 ? 's' : ''}.`);
+  };
 
   const prepareEmail = (type, inscription = null) => {
     setEnvoi({ templateKey: type, apprenantId: inscription?.apprenant_id || null });
@@ -598,14 +705,35 @@ export default function SessionCockpit({ sessionId }) {
         </div>
       </section>
       <section style={card}>
-        <h2 style={title}>Génération et envoi manuel</h2>
-        <p style={{ ...muted, margin: '5px 0 14px' }}>Générez le document, puis indiquez précisément à qui la convocation a été envoyée.</p>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}><Action onClick={() => openDocument('convocation')} disabled={!inscriptions.length}>Générer les convocations</Action><Action secondary onClick={() => prepareEmail('convocation')} disabled={!inscriptions.length}>✉ Envoyer les convocations</Action></div>
-        {inscriptions.length ? <div style={{ display: 'grid', gap: 10 }}>
-          {inscriptions.map((item) => <div key={item.id} style={{ padding: 14, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
-            <div><b>{item.first_name} {item.last_name}</b><div style={muted}>{item.email || 'E-mail à renseigner'} · {item.convocation_sent ? 'Convocation envoyée' : 'Convocation à envoyer'}</div></div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><Action secondary onClick={() => openDocument('convocation', item.apprenant_id)}>Générer / mettre à jour</Action><Action secondary onClick={() => prepareEmail('convocation', item)}>✉ Envoyer{dejaEnvoye('convocation', item.email) && <Pastille />}</Action><Toggle checked={Boolean(item.convocation_sent)} onChange={(value) => updateInscription(item.id, { convocation_sent: value ? 1 : 0 })} label={item.convocation_sent ? 'Envoyée' : 'Marquer envoyée'} /></div>
-          </div>)}
+        <h2 style={title}>Convocations des apprenants</h2>
+        <p style={{ ...muted, margin: '5px 0 14px' }}>Une ligne par apprenant : sa convocation, la date à laquelle elle a été produite, et où en est son envoi.</p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16, alignItems: 'center' }}>
+          <Action onClick={genererToutesConvocations} disabled={!inscriptions.length}>Générer toutes les convocations</Action>
+          <Action secondary onClick={() => prepareEmail('convocation')} disabled={!inscriptions.length}>✉ Envoyer les convocations</Action>
+          <span style={muted}>{convocationsProduites}/{inscriptions.length} produite{convocationsProduites > 1 ? 's' : ''} · {inscriptions.filter((item) => item.convocation_sent).length}/{inscriptions.length} envoyée{inscriptions.filter((item) => item.convocation_sent).length > 1 ? 's' : ''}</span>
+        </div>
+        {inscriptions.length ? <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(180px,1.4fr) minmax(190px,1.3fr) minmax(150px,1fr) auto', gap: 12, alignItems: 'center', padding: '9px 14px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', ...muted, textTransform: 'uppercase', letterSpacing: '.07em', fontSize: 10, fontWeight: 700 }}>
+            <span>Apprenant</span><span>Convocation</span><span>Envoi</span><span />
+          </div>
+          {inscriptions.map((item) => {
+            const piece = convocationDe(item.apprenant_id);
+            const envoi = dernierEnvoi('convocation', item.email);
+            return <div key={item.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(180px,1.4fr) minmax(190px,1.3fr) minmax(150px,1fr) auto', gap: 12, alignItems: 'center', padding: '11px 14px', borderBottom: '1px solid var(--border)' }}>
+              <div><b style={{ fontSize: 13 }}>{item.last_name?.toUpperCase()} {item.first_name}</b><div style={muted}>{item.email || 'E-mail à renseigner'}</div></div>
+              <Piece libelle="Convocation" document={piece} onVoir={() => setApercu({ url: piece.fichier, titre: `Convocation · ${item.first_name} ${item.last_name}` })} />
+              <div style={{ display: 'grid', gap: 6, justifyItems: 'start' }}>
+                <EtatEnvoi envoye={Boolean(item.convocation_sent || envoi)} date={envoi?.created_at} />
+                <Toggle checked={Boolean(item.convocation_sent)} onChange={(value) => updateInscription(item.id, { convocation_sent: value ? 1 : 0 })} label="" />
+              </div>
+              <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                <Geste nom={piece ? 'Voir la convocation' : 'Générer la convocation'} icone="oeil" onClick={() => openDocument('convocation', item.apprenant_id)} />
+                <Geste nom="Télécharger" icone="telecharger" href={piece?.fichier} disabled={!piece} />
+                <Geste nom="Envoyer par e-mail" icone="enveloppe" onClick={() => prepareEmail('convocation', item)} actif={Boolean(envoi)} disabled={!item.email} />
+                <Geste nom="Régénérer une nouvelle version" icone="rafraichir" onClick={() => openDocument('convocation', item.apprenant_id)} />
+              </div>
+            </div>;
+          })}
         </div> : <Empty>Ajoute au moins un apprenant pour générer et suivre ses convocations.</Empty>}
       </section>
     </>;
