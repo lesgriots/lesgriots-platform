@@ -150,7 +150,11 @@
       </div>
       <div data-si="evaluation">
         <div class="gp-h">Modalités d'évaluation</div>
-        <p class="gp-body">{{ evaluation }}</p>
+        <ul style="margin:0; padding-left:0; list-style:none;">
+          <sc-for list="{{ evaluation }}" as="ev" hint-placeholder-count="3">
+            <li class="gp-li" style="display:flex; gap:12px; padding:5px 0;"><span style="color:#FFCA00;">●</span><span>{{ ev }}</span></li>
+          </sc-for>
+        </ul>
       </div>
     </div>
 

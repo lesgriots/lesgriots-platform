@@ -37,7 +37,7 @@ export function liste(brut) {
     } catch { /* ce n'était pas du JSON */ }
   }
   return texte
-    .split(/\r?\n|·|;/)
+    .split(/\r?\n|·|•|;/)
     .map((s) => s.replace(/^\s*[-—•*]\s*/, '').trim())
     .filter(Boolean);
 }
@@ -259,7 +259,15 @@ export function construireProgramme(db, formationId) {
 
       // ── Les six blocs qui manquaient ────────────────────────────────
       methodes: texte(f.modalites_pedagogiques),
-      evaluation: texte(f.evaluation_methods),
+      // Les modalités d'évaluation : si le texte porte de vraies puces « • »,
+      // chacune devient un point, retours à la ligne internes ravalés. Sinon,
+      // découpage ligne à ligne classique.
+      evaluation: (() => {
+        const brut = texte(f.evaluation_methods);
+        return brut.includes('•')
+          ? brut.split('•').map((x) => x.replace(/\s+/g, ' ').trim()).filter(Boolean)
+          : liste(brut);
+      })(),
       moyens: texte(f.moyens_materiels),
       accessibilite: texte(f.accessibility),
       intervenants: intervenantsRendus,
