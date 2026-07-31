@@ -112,7 +112,11 @@
       </div>
       <div>
         <div class="gp-h">Prérequis</div>
-        <p class="gp-body">{{ prerequis }}</p>
+        <ul style="margin:0; padding-left:0; list-style:none;">
+          <sc-for list="{{ prerequis }}" as="pr" hint-placeholder-count="2">
+            <li class="gp-li" style="display:flex; gap:12px; padding:5px 0;"><span style="color:#FFCA00;">●</span><span>{{ pr }}</span></li>
+          </sc-for>
+        </ul>
         <div class="gp-h">Effectif</div>
         <p class="gp-body">{{ effectif }}</p>
       </div>
@@ -211,7 +215,7 @@ class Component extends DCLogic {
         category: "Stratégie", kicker: "Formation",
         title: "Stratégie de contenu et création vidéo au téléphone",
         constat: "Trop de talents avancent sans cadre. En deux jours, les participants repartent avec une ligne éditoriale claire et la capacité de tourner, monter et publier leurs vidéos en autonomie, avec leur seul smartphone.",
-        prerequis: "Aucune compétence technique requise. Disposer d'un smartphone récent.",
+        prerequis: ["Aucune compétence technique requise", "Disposer d'un smartphone récent"],
         effectif: "8 participants maximum.",
         objectifs: [
           "Définir une ligne éditoriale et des formats adaptés à ses objectifs",
@@ -244,7 +248,7 @@ class Component extends DCLogic {
         category: "Stratégie", kicker: "Formation",
         title: "Communiquer sur les réseaux sociaux pour promouvoir sa TPE",
         constat: "Votre TPE mérite d'être vue. En quatre jours, les participants construisent une présence qui attire leurs clients : stratégie, contenus et canaux maîtrisés de bout en bout.",
-        prerequis: "Avoir une activité professionnelle en cours.",
+        prerequis: ["Avoir une activité professionnelle en cours"],
         effectif: "8 participants maximum.",
         objectifs: [
           "Diagnostiquer sa présence et définir son positionnement",
@@ -278,7 +282,7 @@ class Component extends DCLogic {
         category: "Workshop", kicker: "Workshop",
         title: "Stratégie et storytelling de marque",
         constat: "Un récit flou ne marque personne. En une journée intensive, les participants clarifient leur positionnement et structurent le storytelling qui rend leur marque mémorable.",
-        prerequis: "Aucun prérequis. Venir avec son projet ou sa marque.",
+        prerequis: ["Aucun prérequis", "Venir avec son projet ou sa marque"],
         effectif: "8 participants maximum.",
         objectifs: [
           "Clarifier sa raison d'être et son territoire de marque",

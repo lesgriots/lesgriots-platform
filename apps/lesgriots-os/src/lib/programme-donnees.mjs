@@ -241,7 +241,7 @@ export function construireProgramme(db, formationId) {
       title: texte(f.title),
       heroMeta: dureeLisible,
       constat: texte(f.description) || texte(f.probleme_resolu),
-      prerequis: liste(f.prerequisites).join(' ') || '',
+      prerequis: liste(f.prerequisites),
       effectif: f.max_participants ? `${f.max_participants} participants maximum.` : '',
       objectifs: liste(f.objectives),
       audience: liste(f.target_audience),
