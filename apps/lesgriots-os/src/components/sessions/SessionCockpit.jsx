@@ -123,9 +123,9 @@ function Geste({ nom, icone, onClick, href, disabled = false, actif = false }) {
  * La pièce produite, avec sa date. Cliquable : elle ouvre l'aperçu.
  * Quand elle n'existe pas encore, on le dit plutôt que de laisser un vide.
  */
-function Piece({ libelle, document: doc, onVoir }) {
+function Piece({ libelle, document: doc, onVoir, verbe = 'Généré', absent = 'Pas encore générée' }) {
   if (!doc) {
-    return <span style={{ ...muted, fontStyle: 'italic' }}>Pas encore générée</span>;
+    return <span style={{ ...muted, fontStyle: 'italic' }}>{absent}</span>;
   }
   return <button type="button" onClick={onVoir} style={{
     display: 'inline-flex', alignItems: 'center', gap: 9, textAlign: 'left',
@@ -138,7 +138,7 @@ function Piece({ libelle, document: doc, onVoir }) {
     </svg>
     <span>
       <span style={{ display: 'block', fontSize: 12, fontWeight: 800 }}>{libelle}{doc.version > 1 ? ` · v${doc.version}` : ''}</span>
-      <span style={{ display: 'block', ...muted, fontSize: 11 }}>Généré le {dateTimeFr(doc.created_at)}</span>
+      <span style={{ display: 'block', ...muted, fontSize: 11 }}>{verbe} le {dateTimeFr(doc.created_at)}</span>
     </span>
   </button>;
 }
@@ -448,6 +448,9 @@ export default function SessionCockpit({ sessionId }) {
   const convocationsProduites = inscriptions.filter((item) => convocationDe(item.apprenant_id)).length;
   const conventionsSignees = inscriptions.filter((item) => item.convention_signed).length;
   const pieceConvention = pieceDe('convention', sessionId);
+  const feuillesSignees = documents
+    .filter((doc) => doc.categorie === 'emargement' && doc.signe && String(doc.contexte_id) === String(sessionId))
+    .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
 
   /**
    * Produire toutes les convocations d'un coup. En série et sans ouvrir de
@@ -877,7 +880,16 @@ export default function SessionCockpit({ sessionId }) {
     if (currentSub === 'attestations') return <section style={card}><h2 style={title}>Attestations et certificats</h2><p style={muted}>Les documents sont générés par apprenant une fois la session réalisée.</p><div style={{ display: 'grid', gap: 10, marginTop: 16 }}>{inscriptions.map((item) => <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 12, background: 'var(--surface-2)', borderRadius: 9 }}><b>{item.first_name} {item.last_name}</b><div style={{ display: 'flex', gap: 8 }}><Action secondary onClick={() => openDocument('certificat', item.apprenant_id)}>Certificat</Action><Action secondary onClick={() => openDocument('attestation', item.apprenant_id)}>Attestation</Action></div></div>)}</div>{!inscriptions.length && <Empty>Aucun apprenant inscrit.</Empty>}</section>;
     if (currentSub === 'elearning') return <section style={card}><h2 style={title}>Suivi e-learning</h2><p style={muted}>Progression, scores et participation des apprenants aux séquences.</p><Empty>Aucune séquence e-learning n’est associée à cette session.</Empty></section>;
     if (currentSub === 'qualite') return <section style={card}><h2 style={title}>Suivi qualité</h2><p style={muted}>Centralise les évaluations à chaud et à froid pour produire le bilan qualité de la session.</p><Metric label="Satisfaction moyenne" value={evaluations.length ? `${(evaluations.reduce((sum, item) => sum + Number(item.score || 0), 0) / evaluations.length).toFixed(1)}/10` : '—'} note={`${evaluations.length} réponse(s)`} /></section>;
-    return <section style={card}><h2 style={title}>Suivi des émargements</h2><div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', margin: '10px 0 16px' }}><p style={muted}>Signe ou contrôle les présences par demi-journée. Chaque modification est sauvegardée immédiatement.</p><Action secondary onClick={() => openDocument('emargement')}>Générer / mettre à jour la feuille</Action></div><AttendanceTable rows={emargements} onUpdate={updateAttendance} /></section>;
+    return <>
+      <section style={card}><h2 style={title}>Suivi des émargements</h2><div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', margin: '10px 0 16px' }}><p style={muted}>Signe ou contrôle les présences par demi-journée. Chaque modification est sauvegardée immédiatement.</p><Action secondary onClick={() => openDocument('emargement')}>Générer / mettre à jour la feuille</Action></div><AttendanceTable rows={emargements} onUpdate={updateAttendance} /></section>
+      <ArchiveEmargements
+        sessionId={sessionId}
+        feuilles={feuillesSignees}
+        onDepot={(doc) => { setDocuments((current) => [doc, ...current]); setNotice('Feuille signée archivée dans cette session.'); }}
+        onErreur={setNotice}
+        onVoir={(doc) => setApercu({ url: doc.fichier, titre: doc.libelle || 'Feuille signée' })}
+      />
+    </>;
   };
 
   const content = step === 'avancement' ? renderAdvancement() : step === 'configuration' ? renderConfiguration() : step === 'gestion' ? renderGestion() : step === 'apprenant' ? renderApprenant() : renderSuivi();
@@ -1197,6 +1209,78 @@ function EditableLearner({ item, onReload, onNotice }) {
     finally { setSaving(false); }
   };
   return <div style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-2)' }}><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}><label style={{ display: 'grid', gap: 5, fontSize: 11, color: 'var(--text-3)', fontWeight: 700 }}>PRÉNOM<input value={draft.first_name} onChange={(event) => setDraft((current) => ({ ...current, first_name: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 5, fontSize: 11, color: 'var(--text-3)', fontWeight: 700 }}>NOM<input value={draft.last_name} onChange={(event) => setDraft((current) => ({ ...current, last_name: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 5, fontSize: 11, color: 'var(--text-3)', fontWeight: 700 }}>E-MAIL<input type="email" value={draft.email} onChange={(event) => setDraft((current) => ({ ...current, email: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 5, fontSize: 11, color: 'var(--text-3)', fontWeight: 700 }}>TÉLÉPHONE<input value={draft.phone} onChange={(event) => setDraft((current) => ({ ...current, phone: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 5, fontSize: 11, color: 'var(--text-3)', fontWeight: 700 }}>ENTREPRISE<input value={draft.company} onChange={(event) => setDraft((current) => ({ ...current, company: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 5, fontSize: 11, color: 'var(--text-3)', fontWeight: 700 }}>STATUT<select value={draft.status} onChange={(event) => setDraft((current) => ({ ...current, status: event.target.value }))} style={{ ...selectStyle, width: '100%' }}><option value="">À définir</option><option>Prospect</option><option>Confirmé</option><option>Annulé</option><option>Terminé</option></select></label></div><div style={{ marginTop: 12 }}><Action secondary onClick={save} disabled={saving}>{saving ? 'Enregistrement…' : 'Enregistrer cet apprenant'}</Action></div></div>;
+}
+
+/**
+ * L'archivage des feuilles signées.
+ *
+ * En présentiel, la preuve de réalisation reste une feuille de papier signée
+ * au stylo. Elle ne vaut que si on peut la ressortir un an plus tard : c'est
+ * ici qu'on la range. Le scan rejoint le registre de la session, daté, à côté
+ * des documents produits par l'OS.
+ */
+function ArchiveEmargements({ sessionId, feuilles, onDepot, onErreur, onVoir }) {
+  const [envoi, setEnvoi] = useState(false);
+
+  const deposer = async (fichier) => {
+    if (!fichier) return;
+    setEnvoi(true);
+    try {
+      const corps = new FormData();
+      corps.append('fichier', fichier);
+      const reponse = await fetch(`/api/sessions/${sessionId}/emargement-signe`, { method: 'POST', body: corps });
+      const cree = await reponse.json();
+      if (!reponse.ok) throw new Error(cree.error || 'Dépôt refusé');
+      onDepot?.(cree);
+    } catch (err) {
+      onErreur?.(`La feuille n’a pas pu être archivée : ${err.message}`);
+    } finally {
+      setEnvoi(false);
+    }
+  };
+
+  return <section style={{ ...card, marginTop: 14 }}>
+    <h2 style={title}>Archivage des feuilles signées</h2>
+    <p style={{ ...muted, margin: '5px 0 14px' }}>
+      Une fois la feuille signée, dépose son scan ici pour en garder une archive numérique.
+      PDF ou photo, 25 Mo maximum. Les feuilles archivées ne sont visibles que depuis l’OS.
+    </p>
+
+    <label style={{
+      display: 'inline-flex', alignItems: 'center', gap: 9, padding: '11px 16px', borderRadius: 10,
+      border: '1px dashed var(--border)', background: 'var(--surface-2)', color: 'var(--text)',
+      fontSize: 13, fontWeight: 800, cursor: envoi ? 'progress' : 'pointer', opacity: envoi ? 0.6 : 1,
+    }}>
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4"
+        strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M8 11V3 M4.5 6.5 8 3l3.5 3.5 M2.5 13.5h11" />
+      </svg>
+      {envoi ? 'Dépôt en cours…' : 'Ajouter une feuille signée'}
+      <input
+        type="file"
+        accept="application/pdf,image/png,image/jpeg,image/heic,image/webp"
+        disabled={envoi}
+        style={{ display: 'none' }}
+        onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; deposer(f); }}
+      />
+    </label>
+
+    <div style={{ marginTop: 14 }}>
+      {feuilles.length ? <div style={{ display: 'grid', gap: 8 }}>
+        {feuilles.map((doc) => <div key={doc.id} style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap',
+          padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-2)',
+        }}>
+          <Piece libelle={doc.libelle || 'Feuille signée'} document={doc} verbe="Déposée" onVoir={() => onVoir?.(doc)} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <Etat actif oui="Signée" non="" />
+            <Geste nom="Voir la feuille" icone="oeil" onClick={() => onVoir?.(doc)} />
+            <Geste nom="Télécharger" icone="telecharger" href={doc.fichier} />
+          </div>
+        </div>)}
+      </div> : <Empty>Aucune feuille signée n’a encore été archivée pour cette session.</Empty>}
+    </div>
+  </section>;
 }
 
 function DocumentRegister({ documents, onRegenerate }) {
