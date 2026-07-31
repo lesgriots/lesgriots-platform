@@ -46,11 +46,22 @@
 
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:7mm 8mm; border-top:2px solid #0B0B0A; padding-top:6mm;">
         <div><div class="cv-h">Dates</div><div class="cv-v">{{ dates }}</div></div>
-        <div><div class="cv-h">Horaires</div><div class="cv-v">{{ horaires }}</div></div>
+        <div data-si="horaires"><div class="cv-h">Horaires</div><div class="cv-v">{{ horaires }}</div></div>
         <div data-si="duree"><div class="cv-h">Durée</div><div class="cv-v">{{ duree }}</div></div>
         <div><div class="cv-h">Lieu</div><div class="cv-v">{{ lieu }}</div></div>
         <div><div class="cv-h">Modalité</div><div class="cv-v">{{ modalite }}</div></div>
         <div data-si="formateur"><div class="cv-h">Intervenant</div><div class="cv-v">{{ formateur }}</div></div>
+      </div>
+
+      <!-- Planning jour par jour, pleine largeur : n'apparaît que si la
+           session détaille ses journées. -->
+      <div data-si="planning" style="margin-top:7mm; border-top:2px solid #0B0B0A;">
+        <sc-for list="{{ planning }}" as="j">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8mm; padding:2.8mm 0; border-bottom:1px solid rgba(11,11,10,0.12);">
+            <span style="font-weight:600; font-size:10.5pt; color:#0B0B0A;">{{ j.jour }}</span>
+            <span style="font-weight:500; font-size:10.5pt; color:#0B0B0A; white-space:nowrap;">{{ j.creneaux }}</span>
+          </div>
+        </sc-for>
       </div>
 
       <div style="margin-top:8mm;">
@@ -88,7 +99,11 @@ class Component extends DCLogic {
       apprenantEmail: "participant@exemple.com",
       titre: "Introduction à l'étalonnage vidéo avec DaVinci Resolve",
       dates: "Du 18 au 19 mai 2026",
-      horaires: "9h00 - 13h00 / 14h00 - 17h00",
+      horaires: "",
+      planning: [
+        { jour: "Lundi 18 mai", creneaux: "9h00 - 13h00 · 14h00 - 17h00" },
+        { jour: "Mardi 19 mai", creneaux: "9h00 - 13h00 · 14h00 - 17h00" },
+      ],
       duree: "14 h",
       lieu: "15 rue de la Beaune, 93100 Montreuil",
       modalite: "Présentiel",
