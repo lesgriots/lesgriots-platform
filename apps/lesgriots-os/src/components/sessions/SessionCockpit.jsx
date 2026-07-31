@@ -5,7 +5,7 @@ import ClientsSession from './ClientsSession';
 import EspaceApprenantConfig from './EspaceApprenantConfig';
 import EnvoisAutomatiques from './EnvoisAutomatiques';
 import ApercuDocument from '@/components/ui/ApercuDocument';
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { Interrupteur } from '@/components/ui';
 
 const STEPS = [
@@ -226,6 +226,7 @@ export default function SessionCockpit({ sessionId }) {
   const [apercu, setApercu] = useState(null);
   const [emailHistory, setEmailHistory] = useState([]);
   const [emailMode, setEmailMode] = useState('simulation');
+  const [ongletEmail, setOngletEmail] = useState('envoyes');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [step, setStep] = useState('avancement');
@@ -914,7 +915,48 @@ export default function SessionCockpit({ sessionId }) {
 
   const renderSuivi = () => {
     if (currentSub === 'absences') return <section style={card}><h2 style={title}>Absences et abandons</h2><p style={muted}>Corrige directement les présences par demi-journée : la synthèse des absences se met à jour immédiatement.</p><AttendanceTable rows={emargements} mode="absence" onUpdate={updateAttendance} /></section>;
-    if (currentSub === 'emails') return <section style={card}><h2 style={title}>E-mails</h2><p style={muted}>Choisis un modèle : la fenêtre d’envoi s’ouvre avec la liste des apprenants, l’aperçu réel et les pièces jointes. Tous les envois sont conservés ici, avec leur statut et leur date.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '12px 0 18px' }}>{MODELES_EMAIL.map(([cle, libelle], index) => <Action key={cle} secondary={index > 0} onClick={() => prepareEmail(cle)}>✉ {libelle}</Action>)}</div><EmailHistory emails={emailHistory} mode={emailMode} /></section>;
+    if (currentSub === 'emails') return <>
+      <section style={card}>
+        <h2 style={title}>Envoyer un e-mail</h2>
+        <p style={{ ...muted, margin: '5px 0 14px' }}>Choisis un modèle : la fenêtre d’envoi s’ouvre avec la liste des destinataires, l’aperçu réel et les pièces jointes.</p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {MODELES_EMAIL.map(([cle, libelle], index) => <Action key={cle} secondary={index > 0} onClick={() => prepareEmail(cle)}>✉ {libelle}</Action>)}
+        </div>
+      </section>
+      <section style={{ ...card, marginTop: 14 }}>
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', borderBottom: '1px solid var(--border)', marginBottom: 16 }}>
+          {[['envoyes', 'E-mails envoyés'], ['planifies', 'E-mails planifiés'], ['auto', 'E-mails automatiques']].map(([cle, libelle]) => <button
+            key={cle}
+            type="button"
+            onClick={() => setOngletEmail(cle)}
+            style={{
+              border: 'none', background: 'none', font: 'inherit', cursor: 'pointer',
+              padding: '9px 14px', fontSize: 13, fontWeight: 800,
+              color: ongletEmail === cle ? 'var(--text)' : 'var(--text-3)',
+              borderBottom: `2px solid ${ongletEmail === cle ? 'var(--gold)' : 'transparent'}`,
+              marginBottom: -1,
+            }}
+          >{libelle}</button>)}
+        </div>
+
+        {ongletEmail === 'envoyes' && <EmailHistory
+          emails={emailHistory}
+          mode={emailMode}
+          onRenvoyer={(email) => setEnvoi({
+            templateKey: email.template_key,
+            apprenantId: inscriptions.find((i) => i.email === email.destinataire)?.apprenant_id || null,
+          })}
+        />}
+
+        {ongletEmail === 'planifies' && <EmailsPlanifies
+          essai={essaiAuto}
+          onEssayer={essayerEnvoiAuto}
+          session={session}
+        />}
+
+        {ongletEmail === 'auto' && <EnvoisAutomatiques sessionId={sessionId} session={session} onNotice={setNotice} onRecharger={load} />}
+      </section>
+    </>;
     if (currentSub === 'attestations') return <section style={card}><h2 style={title}>Attestations et certificats</h2><p style={muted}>Les documents sont générés par apprenant une fois la session réalisée.</p><div style={{ display: 'grid', gap: 10, marginTop: 16 }}>{inscriptions.map((item) => <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 12, background: 'var(--surface-2)', borderRadius: 9 }}><b>{item.first_name} {item.last_name}</b><div style={{ display: 'flex', gap: 8 }}><Action secondary onClick={() => openDocument('certificat', item.apprenant_id)}>Certificat</Action><Action secondary onClick={() => openDocument('attestation', item.apprenant_id)}>Attestation</Action></div></div>)}</div>{!inscriptions.length && <Empty>Aucun apprenant inscrit.</Empty>}</section>;
     if (currentSub === 'elearning') return <section style={card}><h2 style={title}>Suivi e-learning</h2><p style={muted}>Progression, scores et participation des apprenants aux séquences.</p><Empty>Aucune séquence e-learning n’est associée à cette session.</Empty></section>;
     if (currentSub === 'qualite') return <section style={card}><h2 style={title}>Suivi qualité</h2><p style={muted}>Centralise les évaluations à chaud et à froid pour produire le bilan qualité de la session.</p><Metric label="Satisfaction moyenne" value={evaluations.length ? `${(evaluations.reduce((sum, item) => sum + Number(item.score || 0), 0) / evaluations.length).toFixed(1)}/10` : '—'} note={`${evaluations.length} réponse(s)`} /></section>;
@@ -1368,9 +1410,177 @@ function DocumentRegister({ documents, onRegenerate }) {
   return <div style={{ overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}><thead><tr>{['Document', 'Version', 'Généré le', 'Mise à jour'].map((label) => <th key={label} style={{ textAlign: 'left', color: 'var(--text-3)', padding: '10px', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', fontSize: 10 }}>{label}</th>)}</tr></thead><tbody>{documents.map((doc) => <tr key={doc.id}><td style={{ padding: '11px 10px', borderBottom: '1px solid var(--border)', color: 'var(--text)', fontWeight: 700 }}>{doc.libelle}<div style={muted}>{doc.notes || 'Document de session'}</div></td><td style={{ padding: '11px 10px', borderBottom: '1px solid var(--border)' }}>v{doc.version || 1}</td><td style={{ padding: '11px 10px', borderBottom: '1px solid var(--border)' }}>{dateTimeFr(doc.created_at)}</td><td style={{ padding: '11px 10px', borderBottom: '1px solid var(--border)' }}><div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}><Action small href={doc.fichier}>Ouvrir</Action><Action small secondary onClick={() => onRegenerate(doc)}>Mettre à jour</Action></div></td></tr>)}</tbody></table></div>;
 }
 
-function EmailHistory({ emails, mode }) {
+/**
+ * Ce qui partira tout seul.
+ *
+ * Chez Digiforma, cet onglet liste une file d'envois programmés qu'on peut
+ * annuler un par un. Ici il n'y a pas de file : l'envoi automatique est une
+ * règle, relue chaque matin par un travail sur le serveur. Afficher une
+ * fausse file serait pire que rien, parce qu'on croirait pouvoir y toucher.
+ *
+ * On montre donc la règle telle qu'elle est, et surtout ce qu'elle ferait
+ * aujourd'hui, en le demandant au serveur sans rien envoyer. C'est la seule
+ * réponse honnête à la question « qu'est-ce qui va partir ».
+ */
+function EmailsPlanifies({ essai, onEssayer, session }) {
+  const arme = Boolean(session?.convocation_auto_enabled);
+  const jours = Number(session?.convocation_auto_lead_days) || 0;
+
+  return <div>
+    <p style={{ ...muted, margin: '0 0 14px', maxWidth: 720 }}>
+      Rien n’est mis en file d’attente : un travail tourne sur le serveur chaque matin à 7 h 30 et
+      relit les règles d’envoi automatique de la session. Ce tableau montre ce qu’il ferait
+      maintenant, sans rien envoyer.
+    </p>
+
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+      <Action secondary onClick={onEssayer}>Voir ce qui partirait</Action>
+      <Etat
+        actif={arme}
+        oui={`Envoi automatique armé · ${jours} jour(s) avant le début`}
+        non="Aucun envoi automatique armé pour cette session"
+      />
+    </div>
+
+    {essai === 'chargement' && <div style={muted}>Lecture des règles…</div>}
+
+    {essai && essai !== 'chargement' && (essai.aucun
+      ? <Empty>Rien ne partirait pour cette session aujourd’hui. Soit l’envoi n’est pas activé, soit la fenêtre n’est pas ouverte, soit tout le monde a déjà reçu son message.</Empty>
+      : <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+        <div style={{ padding: '10px 14px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', ...muted, textTransform: 'uppercase', letterSpacing: '.07em', fontSize: 10, fontWeight: 700 }}>
+          Partirait maintenant
+        </div>
+        <div style={{ padding: '12px 14px', fontSize: 12, color: 'var(--text-2)' }}>
+          {(essai.destinataires || essai.envoyes || essai.apprenants)
+            ? <pre style={{ margin: 0, whiteSpace: 'pre-wrap', font: 'inherit' }}>{JSON.stringify(essai, null, 2)}</pre>
+            : 'Aucun destinataire à servir dans la fenêtre actuelle.'}
+        </div>
+      </div>)}
+
+    {!essai && <Empty>Clique sur « Voir ce qui partirait » pour interroger le serveur.</Empty>}
+  </div>;
+}
+
+/**
+ * Le journal des envois.
+ *
+ * Un tableau d'e-mails ne sert qu'à répondre à une question précise : est-ce
+ * que CE message est parti à CETTE personne, et quand. D'où un filtre par
+ * colonne plutôt qu'une recherche globale, et le corps réellement envoyé
+ * dépliable sous la ligne. Ce qui a été écrit compte autant que la date : un
+ * modèle a pu changer depuis, le journal doit garder la version d'alors.
+ */
+function EmailHistory({ emails, mode, onRenvoyer }) {
+  const [filtres, setFiltres] = useState({ date: '', destinataire: '', type: '', sujet: '', statut: '' });
+  const [ouverte, setOuverte] = useState(null);
+
   if (!emails.length) return <Empty>Aucun e-mail n’a encore été envoyé ou simulé pour cette session.</Empty>;
-  return <div><div style={{ ...muted, marginBottom: 9 }}>{mode === 'reel' ? 'Journal des envois réels' : 'Journal des e-mails simulés ou envoyés'}</div><div style={{ overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}><thead><tr>{['Date', 'Destinataire', 'Objet', 'Statut'].map((label) => <th key={label} style={{ textAlign: 'left', color: 'var(--text-3)', padding: '10px', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', fontSize: 10 }}>{label}</th>)}</tr></thead><tbody>{emails.map((email) => <tr key={email.id}><td style={{ padding: '10px', borderBottom: '1px solid var(--border)' }}>{dateTimeFr(email.created_at)}</td><td style={{ padding: '10px', borderBottom: '1px solid var(--border)' }}><b>{email.destinataire_nom || '—'}</b><div style={muted}>{email.destinataire}</div></td><td style={{ padding: '10px', borderBottom: '1px solid var(--border)' }}>{email.objet}</td><td style={{ padding: '10px', borderBottom: '1px solid var(--border)', color: email.statut === 'echec' ? 'var(--danger)' : email.statut === 'envoye' ? 'var(--success)' : 'var(--gold)', fontWeight: 800 }}>{email.statut === 'envoye' ? 'Envoyé' : email.statut === 'simule' ? 'Simulé' : 'Échec'}</td></tr>)}</tbody></table></div></div>;
+
+  const contient = (valeur, recherche) => !recherche
+    || String(valeur || '').toLowerCase().includes(recherche.toLowerCase());
+
+  const visibles = emails.filter((email) => contient(dateTimeFr(email.created_at), filtres.date)
+    && contient(`${email.destinataire} ${email.destinataire_nom || ''}`, filtres.destinataire)
+    && contient(LIBELLE_MODELE[email.template_key] || email.template_key, filtres.type)
+    && contient(email.objet, filtres.sujet)
+    && (!filtres.statut || email.statut === filtres.statut));
+
+  const cellule = { padding: '10px', borderBottom: '1px solid var(--border)', verticalAlign: 'top' };
+  const entete = {
+    textAlign: 'left', color: 'var(--text-3)', padding: '10px', borderBottom: '1px solid var(--border)',
+    textTransform: 'uppercase', fontSize: 10, letterSpacing: '.07em', fontWeight: 700, whiteSpace: 'nowrap',
+  };
+  const champFiltre = {
+    width: '100%', boxSizing: 'border-box', padding: '5px 8px', fontSize: 11, font: 'inherit', fontSize: 11,
+    border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface-2)', color: 'var(--text)',
+  };
+
+  const COULEUR = { echec: 'var(--danger)', envoye: 'var(--success)', simule: 'var(--gold)' };
+  const LIBELLE = { echec: 'Échec', envoye: 'Envoyé', simule: 'Simulé' };
+
+  return <div>
+    <div style={{ ...muted, marginBottom: 9 }}>
+      {mode === 'reel' ? 'Journal des envois réels' : 'Journal des e-mails simulés ou envoyés'}
+      {visibles.length !== emails.length && ` · ${visibles.length} sur ${emails.length} affichés`}
+    </div>
+    <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 10 }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+        <thead>
+          <tr>
+            <th style={{ ...entete, width: 26 }} />
+            <th style={entete}>Envoyé le</th>
+            <th style={entete}>Destinataire</th>
+            <th style={entete}>Type</th>
+            <th style={entete}>Sujet</th>
+            <th style={entete}>Statut</th>
+            <th style={entete}>Actions</th>
+          </tr>
+          <tr>
+            <th style={{ ...cellule, padding: '6px 10px' }} />
+            {['date', 'destinataire', 'type', 'sujet'].map((cle) => <th key={cle} style={{ ...cellule, padding: '6px 10px' }}>
+              <input
+                value={filtres[cle]}
+                onChange={(e) => setFiltres((c) => ({ ...c, [cle]: e.target.value }))}
+                placeholder="Filtrer"
+                style={champFiltre}
+              />
+            </th>)}
+            <th style={{ ...cellule, padding: '6px 10px' }}>
+              <select value={filtres.statut} onChange={(e) => setFiltres((c) => ({ ...c, statut: e.target.value }))} style={champFiltre}>
+                <option value="">(tous)</option>
+                <option value="envoye">Envoyé</option>
+                <option value="simule">Simulé</option>
+                <option value="echec">Échec</option>
+              </select>
+            </th>
+            <th style={{ ...cellule, padding: '6px 10px' }} />
+          </tr>
+        </thead>
+        <tbody>
+          {visibles.map((email) => <Fragment key={email.id}>
+            <tr>
+              <td style={{ ...cellule, padding: '10px 4px 10px 10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setOuverte(ouverte === email.id ? null : email.id)}
+                  title={ouverte === email.id ? 'Replier' : 'Voir le message envoyé'}
+                  style={{ border: 'none', background: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 0, lineHeight: 1 }}
+                >
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"
+                    strokeLinecap="round" strokeLinejoin="round"
+                    style={{ transform: ouverte === email.id ? 'rotate(180deg)' : 'none' }} aria-hidden="true">
+                    <path d="m4 6 4 4 4-4" />
+                  </svg>
+                </button>
+              </td>
+              <td style={{ ...cellule, whiteSpace: 'nowrap' }}>{dateTimeFr(email.created_at)}</td>
+              <td style={cellule}><b>{email.destinataire_nom || '—'}</b><div style={muted}>{email.destinataire}</div></td>
+              <td style={cellule}>{LIBELLE_MODELE[email.template_key] || email.template_key || '—'}</td>
+              <td style={cellule}>{email.objet}</td>
+              <td style={{ ...cellule, color: COULEUR[email.statut] || 'var(--text-2)', fontWeight: 800, whiteSpace: 'nowrap' }}>
+                {LIBELLE[email.statut] || email.statut}
+              </td>
+              <td style={cellule}>
+                {email.template_key && onRenvoyer
+                  ? <Action small secondary onClick={() => onRenvoyer(email)}>Renvoyer</Action>
+                  : <span style={muted}>—</span>}
+              </td>
+            </tr>
+            {ouverte === email.id && <tr>
+              <td colSpan={7} style={{ padding: '12px 14px 16px 40px', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }}>
+                <div style={{ fontWeight: 800, fontSize: 12, marginBottom: 6 }}>{email.objet}</div>
+                {email.corps
+                  ? <div style={{ ...muted, whiteSpace: 'pre-wrap', color: 'var(--text-2)', maxWidth: 760 }}>{email.corps}</div>
+                  : <div style={{ ...muted, fontStyle: 'italic' }}>Le corps du message n’a pas été conservé pour cet envoi.</div>}
+                {email.erreur && <div style={{ ...muted, color: 'var(--danger)', marginTop: 8 }}>Erreur : {email.erreur}</div>}
+              </td>
+            </tr>}
+          </Fragment>)}
+        </tbody>
+      </table>
+    </div>
+    {!visibles.length && <div style={{ ...muted, padding: '14px 4px' }}>Aucun envoi ne correspond à ces filtres.</div>}
+  </div>;
 }
 
 function AttendanceTable({ rows, mode, onUpdate }) {
