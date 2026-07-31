@@ -143,16 +143,31 @@ function Piece({ libelle, document: doc, onVoir }) {
   </button>;
 }
 
-/** Où en est l'envoi, dit en toutes lettres plutôt qu'en interrupteur. */
-function EtatEnvoi({ envoye, date }) {
-  const couleur = envoye ? 'var(--success)' : 'var(--text-3)';
+/** Où en est une pièce, dit en toutes lettres plutôt qu'en interrupteur. */
+function Etat({ actif, oui, non, date }) {
+  const couleur = actif ? 'var(--success)' : 'var(--text-3)';
   return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12, fontWeight: 800, color: couleur }}>
     <span style={{ width: 7, height: 7, borderRadius: '50%', background: couleur, flex: 'none' }} />
     <span>
-      {envoye ? 'Envoyée' : 'À envoyer'}
-      {envoye && date && <span style={{ ...muted, fontWeight: 500, marginLeft: 6 }}>le {dateTimeFr(date)}</span>}
+      {actif ? oui : non}
+      {actif && date && <span style={{ ...muted, fontWeight: 500, marginLeft: 6 }}>le {dateTimeFr(date)}</span>}
     </span>
   </span>;
+}
+
+/** L'en-tête d'une carte client : qui signe, et pour quels apprenants. */
+function EnteteClient({ nom, inscriptions }) {
+  return <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 14px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 9, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)', flex: 'none' }}>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M2.5 14V3.2a.7.7 0 0 1 .7-.7h6.1a.7.7 0 0 1 .7.7V14 M9.9 6.4h3a.7.7 0 0 1 .7.7V14 M1 14h14 M5 5.2h2.3 M5 8h2.3 M5 10.8h2.3" />
+      </svg>
+    </span>
+    <div>
+      <b style={{ fontSize: 13 }}>{nom || 'Client à associer'}</b>
+      <div style={muted}>{inscriptions.length} apprenant{inscriptions.length > 1 ? 's' : ''} : {inscriptions.map((item) => `${item.first_name} ${item.last_name}`).join(', ')}</div>
+    </div>
+  </div>;
 }
 
 function Action({ children, onClick, href, secondary = false, disabled = false, small = false }) {
@@ -322,7 +337,7 @@ export default function SessionCockpit({ sessionId }) {
     setApercu({ url: fichier, titre: libelle });
     try {
       const response = await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-        categorie: ['convention', 'convocation'].includes(type) ? type : 'autre',
+        categorie: ['convention', 'convocation', 'devis', 'livret'].includes(type) ? type : 'autre',
         libelle,
         fichier,
         contexte_type: learner?.apprenant_id ? 'apprenant' : 'session',
@@ -334,27 +349,6 @@ export default function SessionCockpit({ sessionId }) {
       setDocuments((current) => [created, ...current]);
       setNotice(`${libelle} généré et archivé dans cette session.`);
     } catch (err) { setNotice(`Document affiché, mais son archivage a échoué : ${err.message}`); }
-  };
-
-  const openConvention = async (learner) => {
-    const fichier = `/api/sessions/${sessionId}/convention`;
-    setApercu({ url: fichier, titre: `Convention${learner ? ` · ${learner.first_name} ${learner.last_name}` : ''}` });
-    try {
-      const response = await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-        categorie: 'convention',
-        libelle: `Convention${learner ? ` · ${learner.first_name} ${learner.last_name}` : ''}`,
-        fichier,
-        // Même règle que les autres documents nominatifs : rattaché à
-        // l'apprenant concerné, sinon les autres inscrits le verraient.
-        contexte_type: learner?.apprenant_id ? 'apprenant' : 'session',
-        contexte_id: learner?.apprenant_id || sessionId,
-        notes: learner?.apprenant_id ? `Générée depuis la session ${sessionId}` : 'Générée depuis la fiche de session',
-      }) });
-      const created = await response.json();
-      if (!response.ok) throw new Error(created.error || 'Convention non archivée');
-      setDocuments((current) => [created, ...current]);
-      setNotice('Convention générée et archivée dans cette session.');
-    } catch (err) { setNotice(`Convention ouverte, mais son archivage a échoué : ${err.message}`); }
   };
 
   const createLink = async (kind, questionnaireType, apprenantId = null) => {
@@ -440,12 +434,20 @@ export default function SessionCockpit({ sessionId }) {
       .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0] || null;
   };
 
-  /** La dernière convocation archivée pour cet apprenant, s'il en a une. */
-  const convocationDe = (apprenantId) => documents
-    .filter((doc) => doc.categorie === 'convocation' && String(doc.contexte_id) === String(apprenantId))
+  /**
+   * La dernière pièce archivée d'une catégorie, pour un contexte donné : un
+   * apprenant pour les documents nominatifs, la session pour les autres. On
+   * prend la plus récente, c'est elle qui fait foi.
+   */
+  const pieceDe = (categorie, contexteId) => documents
+    .filter((doc) => doc.categorie === categorie && String(doc.contexte_id) === String(contexteId))
     .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0] || null;
 
+  const convocationDe = (apprenantId) => pieceDe('convocation', apprenantId);
+
   const convocationsProduites = inscriptions.filter((item) => convocationDe(item.apprenant_id)).length;
+  const conventionsSignees = inscriptions.filter((item) => item.convention_signed).length;
+  const pieceConvention = pieceDe('convention', sessionId);
 
   /**
    * Produire toutes les convocations d'un coup. En série et sans ouvrir de
@@ -723,7 +725,7 @@ export default function SessionCockpit({ sessionId }) {
               <div><b style={{ fontSize: 13 }}>{item.last_name?.toUpperCase()} {item.first_name}</b><div style={muted}>{item.email || 'E-mail à renseigner'}</div></div>
               <Piece libelle="Convocation" document={piece} onVoir={() => setApercu({ url: piece.fichier, titre: `Convocation · ${item.first_name} ${item.last_name}` })} />
               <div style={{ display: 'grid', gap: 6, justifyItems: 'start' }}>
-                <EtatEnvoi envoye={Boolean(item.convocation_sent || envoi)} date={envoi?.created_at} />
+                <Etat actif={Boolean(item.convocation_sent || envoi)} oui="Envoyée" non="À envoyer" date={envoi?.created_at} />
                 <Toggle checked={Boolean(item.convocation_sent)} onChange={(value) => updateInscription(item.id, { convocation_sent: value ? 1 : 0 })} label="" />
               </div>
               <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
@@ -766,10 +768,59 @@ export default function SessionCockpit({ sessionId }) {
     if (currentSub === 'finances') return <section style={card}><h2 style={title}>Finances</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 16 }}><Metric label="Coût formation" value={`${Number(session.tarif || 0).toLocaleString('fr-FR')} €`} note="HT" /><Metric label="Total facturé" value={`${Number(session.ca_confirmed || 0).toLocaleString('fr-FR')} €`} note="HT" /><Metric label="Marge" value={`${Number(session.taux_marge || 0)} %`} note="estimation" /></div><div style={{ marginTop: 16 }}><Action onClick={() => openDocument('facture')}>Générer / mettre à jour la facture</Action></div></section>;
     if (currentSub === 'entreprise') return <section style={card}><h2 style={title}>Espace entreprise</h2><p style={muted}>Le client entreprise pourra suivre les informations et documents de sa session depuis un espace dédié.</p><Empty>L’espace entreprise sera activé lorsque le client et ses contacts auront été renseignés pour cette session.</Empty></section>;
     return <>
-      <section style={card}><h2 style={title}>Conventions et contrats par client</h2><p style={{ ...muted, margin: '5px 0 15px' }}>Chaque génération est archivée, datée et versionnée dans cette session.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}><Action onClick={() => openConvention()}>Générer / mettre à jour les conventions</Action><Action secondary onClick={() => prepareEmail('convention')} disabled={!inscriptions.length}>✉ Envoyer la convention</Action></div>
-        {inscriptions.length ? <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}><div style={{ padding: '12px 14px', background: 'var(--surface-2)' }}><b>{clientName || 'Client à associer'}</b><div style={muted}>{inscriptions.length} apprenant{inscriptions.length > 1 ? 's' : ''} : {inscriptions.map((item) => `${item.first_name} ${item.last_name}`).join(', ')}</div></div><div style={{ display: 'grid', gap: 8, padding: 12 }}>{inscriptions.map((item) => <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}><div><b>Convention entreprise · {item.first_name} {item.last_name}</b><div style={muted}>{item.convention_signed ? 'Convention signée' : 'Signature en attente'}</div></div><div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}><Action secondary onClick={() => openConvention(item)}>Générer / mettre à jour</Action><Toggle checked={Boolean(item.convention_signed)} onChange={(value) => updateInscription(item.id, { convention_signed: value ? 1 : 0 })} label={item.convention_signed ? 'Signée' : 'Marquer signée'} /></div></div>)}</div></div> : <Empty>Ajoute un client et au moins un apprenant pour générer la convention.</Empty>}
+      <section style={card}>
+        <h2 style={title}>Conventions et contrats par client</h2>
+        <p style={{ ...muted, margin: '5px 0 15px' }}>La convention vaut pour le client et sa session. Chaque génération est archivée, datée et versionnée ; les signatures se suivent apprenant par apprenant.</p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16, alignItems: 'center' }}>
+          <Action onClick={() => apercuDocument('convention')}>Générer / mettre à jour la convention</Action>
+          <Action secondary onClick={() => prepareEmail('convention')} disabled={!inscriptions.length}>✉ Envoyer la convention</Action>
+          <span style={muted}>{conventionsSignees}/{inscriptions.length} signature{conventionsSignees > 1 ? 's' : ''} recueillie{conventionsSignees > 1 ? 's' : ''}</span>
+        </div>
+        {inscriptions.length ? <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+          <EnteteClient nom={clientName} inscriptions={inscriptions} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', padding: '12px 14px', borderBottom: '1px solid var(--border)' }}>
+            <Piece libelle="Convention de formation" document={pieceConvention} onVoir={() => setApercu({ url: pieceConvention.fichier, titre: 'Convention de formation' })} />
+            <div style={{ display: 'flex', gap: 6 }}>
+              <Geste nom={pieceConvention ? 'Voir la convention' : 'Générer la convention'} icone="oeil" onClick={() => apercuDocument('convention')} />
+              <Geste nom="Télécharger" icone="telecharger" href={pieceConvention?.fichier} disabled={!pieceConvention} />
+              <Geste nom="Envoyer par e-mail" icone="enveloppe" onClick={() => prepareEmail('convention')} />
+              <Geste nom="Régénérer une nouvelle version" icone="rafraichir" onClick={() => apercuDocument('convention')} />
+            </div>
+          </div>
+          <div style={{ padding: '4px 14px 10px' }}>
+            <div style={{ ...muted, textTransform: 'uppercase', letterSpacing: '.07em', fontSize: 10, fontWeight: 700, padding: '10px 0 6px' }}>Signatures</div>
+            {inscriptions.map((item) => <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', padding: '8px 0', borderTop: '1px solid var(--border)' }}>
+              <div><b style={{ fontSize: 13 }}>{item.last_name?.toUpperCase()} {item.first_name}</b><div style={muted}>{item.email || 'E-mail à renseigner'}</div></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                <Etat actif={Boolean(item.convention_signed)} oui="Signée" non="Signature en attente" />
+                <Toggle checked={Boolean(item.convention_signed)} onChange={(value) => updateInscription(item.id, { convention_signed: value ? 1 : 0 })} label="" />
+              </div>
+            </div>)}
+          </div>
+        </div> : <Empty>Ajoute un client et au moins un apprenant pour générer la convention.</Empty>}
       </section>
-      <section style={card}><h2 style={title}>Autres documents contractuels</h2><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}><Action secondary onClick={() => openDocument('programme')}>Programme</Action><Action secondary onClick={() => apercuDocument('devis')}>Devis</Action><Action secondary onClick={() => apercuDocument('livret')}>Livret d’accueil</Action><Action secondary onClick={() => apercuDocument('convocation')} disabled={!inscriptions.length}>Convocation</Action><span style={{ ...muted, alignSelf: 'center' }}>CGV et politique de confidentialité : à gérer depuis les modèles de documents.</span></div></section>
+      <section style={card}>
+        <h2 style={title}>Autres documents contractuels</h2>
+        <p style={{ ...muted, margin: '5px 0 15px' }}>Les pièces qui accompagnent la convention. Elles portent la date de leur dernière production.</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 10 }}>
+          {[
+            { cle: 'programme', libelle: 'Programme de formation', ouvrir: () => openDocument('programme') },
+            { cle: 'devis', libelle: 'Devis', ouvrir: () => apercuDocument('devis') },
+            { cle: 'livret', libelle: 'Livret d’accueil', ouvrir: () => apercuDocument('livret') },
+          ].map(({ cle, libelle, ouvrir }) => {
+            const piece = pieceDe(cle, sessionId);
+            return <div key={cle} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-2)' }}>
+              <Piece libelle={libelle} document={piece} onVoir={() => setApercu({ url: piece.fichier, titre: libelle })} />
+              <div style={{ display: 'flex', gap: 6 }}>
+                <Geste nom={piece ? `Voir : ${libelle}` : `Générer : ${libelle}`} icone="oeil" onClick={ouvrir} />
+                <Geste nom="Télécharger" icone="telecharger" href={piece?.fichier} disabled={!piece} />
+                <Geste nom="Régénérer une nouvelle version" icone="rafraichir" onClick={ouvrir} />
+              </div>
+            </div>;
+          })}
+        </div>
+        <p style={{ ...muted, marginTop: 14 }}>CGV et politique de confidentialité : à gérer depuis les modèles de documents.</p>
+      </section>
     </>;
   };
 
