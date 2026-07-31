@@ -128,10 +128,11 @@ export function construireLivret(db, sessionId = null) {
       { n: '05', label: 'Accessibilité', href: '#acces' },
       { n: '06', label: 'Vos contacts', href: '#contacts' },
     ],
+    // Les trois piliers de « Notre approche », repris du site lagriotheque.com.
     valeurs: [
-      { titre: 'Transmettre', texte: 'Des savoir-faire concrets, transmis par celles et ceux qui les pratiquent.' },
-      { titre: 'Pratiquer', texte: 'Chaque session avance sur votre projet réel, pas sur un cas fictif.' },
-      { titre: 'Relier', texte: "Une communauté qui continue d'échanger après la formation." },
+      { titre: 'Le storytelling au centre', texte: "Le récit comme boussole. Stratégie, direction artistique, structure : tout en découle. Avant les outils, avant les formats, avant les plateformes, il y a l'histoire que tu portes et la façon dont les autres se la racontent." },
+      { titre: 'Par des professionnels en activité', texte: "Universal, Sony, Accor Arena, Zéniths. Tes formateurs livrent maintenant, pas en 2015. La méthode arrive du terrain et y retourne : ce qu'on enseigne, on le pratique encore." },
+      { titre: 'Formations pratiques', texte: "Pédagogie par le faire, tes propres récits comme matière. Tu repars avec un livrable concret : plateforme de marque, plan éditorial, vidéo finie, calendrier, utilisable dès le lundi matin." },
     ],
     etapes: [
       { quand: 'J-14', titre: 'Confirmation et auto-positionnement', texte: 'Vous recevez votre convocation, le programme détaillé et un court questionnaire pour situer votre niveau et vos attentes.' },
