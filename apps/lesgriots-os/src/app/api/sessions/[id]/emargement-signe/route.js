@@ -116,5 +116,5 @@ async function _GET(req, { params }) {
   }
 }
 
-export const POST = withGuard('sessions:write', _POST);
+export const POST = withGuard('sessions:update', _POST);
 export const GET = withGuard('sessions:read', _GET);
