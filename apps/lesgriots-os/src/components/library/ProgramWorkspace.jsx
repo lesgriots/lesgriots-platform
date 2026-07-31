@@ -13,11 +13,16 @@ function parse(value) { try { return Array.isArray(value) ? value : JSON.parse(v
 
 export default function ProgramWorkspace({ formationId }) {
   const [formation, setFormation] = useState(null), [templates, setTemplates] = useState([]), [blocks, setBlocks] = useState([]), [allBlocks, setAllBlocks] = useState([]), [resources, setResources] = useState([]);
+  const [controle, setControle] = useState(null);
   const [section, setSection] = useState('detail'), [area, setArea] = useState('content'), [editing, setEditing] = useState(false), [notice, setNotice] = useState(''), [resourceDraft, setResourceDraft] = useState({ title: '', url: '' });
   const load = async () => {
     const [f, t, b, a, r] = await Promise.all([
       fetch(`/api/formations/${formationId}`).then(x => x.json()), fetch('/api/evaluation-templates').then(x => x.json()), fetch(`/api/formations/${formationId}/blocks`).then(x => x.json()), fetch('/api/pedagogical-blocks').then(x => x.json()), fetch(`/api/formations/${formationId}/resources`).then(x => x.json()),
     ]);
+    // Le contrôle des onze mentions obligatoires, à côté de la fiche : il ne
+    // juge pas la qualité du texte, il dit ce qui n'existe pas encore.
+    fetch(`/api/formations/${formationId}/programme?controle=1`)
+      .then(x => x.json()).then(x => setControle(x?.manques ? x : null)).catch(() => setControle(null));
     setFormation(f?.id ? f : null); setTemplates(Array.isArray(t) ? t : []); setBlocks(Array.isArray(b) ? b : []); setAllBlocks(Array.isArray(a) ? a : []); setResources(Array.isArray(r) ? r : []);
   };
   useEffect(() => { load(); }, [formationId]);
@@ -38,7 +43,8 @@ export default function ProgramWorkspace({ formationId }) {
   function chooseArea(nextArea) { setArea(nextArea); setSection(navigation[nextArea][0][0]); }
   return <div style={{ maxWidth: 1420, margin: '0 auto', padding: '28px 28px 56px' }}>
     <Link href="/catalogue" style={{ color: 'var(--gold)', fontSize: 13, textDecoration: 'none' }}>← Bibliothèque</Link>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 18, marginTop: 10 }}><div><p style={{ color: 'var(--text-3)', margin: 0, fontSize: 13 }}>{formation.code}</p><h1 style={{ margin: '4px 0 8px', fontSize: 30 }}>{formation.title}</h1><p style={{ margin: 0, color: 'var(--text-2)' }}>{formation.duration_hours || 0} heures · {formation.modality || 'Présentiel'} · {formation.sessions?.length || 0} session{formation.sessions?.length !== 1 ? 's' : ''}</p></div><button style={quiet} onClick={() => save({ status: formation.status === 'archived' ? 'active' : 'archived' })}>{formation.status === 'archived' ? 'Restaurer' : 'Archiver'}</button></div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 18, marginTop: 10 }}><div><p style={{ color: 'var(--text-3)', margin: 0, fontSize: 13 }}>{formation.code}</p><h1 style={{ margin: '4px 0 8px', fontSize: 30 }}>{formation.title}</h1><p style={{ margin: 0, color: 'var(--text-2)' }}>{formation.duration_hours || 0} heures · {formation.modality || 'Présentiel'} · {formation.sessions?.length || 0} session{formation.sessions?.length !== 1 ? 's' : ''}</p></div><div style={{ display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}><a href={`/api/formations/${formationId}/programme${controle && !controle.complet ? '?force=1' : ''}`} target="_blank" rel="noreferrer" style={{ ...(controle?.complet ? primary : quiet), textDecoration: 'none', display: 'inline-block' }}>{controle?.complet ? 'Télécharger le programme' : 'Document de travail'}</a><button style={quiet} onClick={() => save({ status: formation.status === 'archived' ? 'active' : 'archived' })}>{formation.status === 'archived' ? 'Restaurer' : 'Archiver'}</button></div></div>
+    <Controle controle={controle} />
     <nav aria-label="Espaces du programme" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', margin: '22px 0 18px' }}>
       <div style={{ display: 'flex' }}>{[['content', 'Contenu'], ['quality', 'Qualité'], ['diffusion', 'Diffusion']].map(([key, title]) => <button key={key} onClick={() => chooseArea(key)} style={{ flex: 1, border: 0, cursor: 'pointer', padding: '13px 10px', fontWeight: 750, background: area === key ? 'var(--gold-soft)' : 'transparent', color: area === key ? 'var(--gold)' : 'var(--text-2)', borderBottom: area === key ? '3px solid var(--gold)' : '3px solid transparent' }}>{title}</button>)}</div>
       <div style={{ display: 'flex', background: 'var(--surface-2)' }}>{navigation[area].map(([key, title]) => <button key={key} onClick={() => setSection(key)} style={{ flex: 1, border: 0, cursor: 'pointer', padding: '10px', fontWeight: 700, background: section === key ? 'var(--surface)' : 'transparent', color: section === key ? 'var(--text)' : 'var(--text-2)', boxShadow: section === key ? 'inset 0 -3px 0 var(--gold)' : 'none' }}>{title}</button>)}</div>
@@ -82,6 +88,38 @@ export default function ProgramWorkspace({ formationId }) {
     </div>}
     {section === 'diffusion' && <div style={panel}><h2 style={{ marginTop: 0 }}>Diffusion du programme</h2><p style={{ color: 'var(--text-2)' }}>Ce programme est {formation.status === 'archived' ? 'archivé' : 'actif'} dans la bibliothèque. Les ressources apprenant associées seront reprises dans les sessions créées depuis ce programme.</p><p style={{ color: 'var(--text-2)', fontSize: 13 }}>La publication sur un catalogue en ligne reste volontairement séparée de cette bibliothèque interne.</p></div>}
   </div>;
+}
+
+/**
+ * Ce qui manque à un programme avant d'être publiable.
+ *
+ * On ne montre pas un pourcentage seul : un chiffre sans la liste oblige à
+ * chercher. Chaque manque porte l'endroit exact où aller le remplir.
+ */
+function Controle({ controle }) {
+  if (!controle || !Array.isArray(controle.manques)) return null;
+  const total = controle.total || 11;
+  const remplies = controle.remplies ?? (total - controle.manques.length);
+  const pct = controle.pourcentage ?? Math.round((remplies / total) * 100);
+  const complet = controle.manques.length === 0;
+  return (
+    <div style={{ ...panel, padding: '14px 18px', marginTop: 16, borderColor: complet ? 'var(--actif)' : 'var(--gold)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <span style={{ width: 96, height: 6, borderRadius: 999, overflow: 'hidden', background: 'var(--surface-3)', display: 'block', flexShrink: 0 }}>
+          <span style={{ display: 'block', height: '100%', width: `${pct}%`, background: complet ? 'var(--actif)' : 'var(--gold)', transition: 'width 240ms var(--ease-out)' }} />
+        </span>
+        <strong style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: complet ? 'var(--actif)' : 'var(--text)' }}>{pct} %</strong>
+        <span style={{ color: 'var(--text-2)', fontSize: 13 }}>
+          {complet
+            ? 'Les onze mentions obligatoires sont renseignées. Le programme est publiable.'
+            : `${remplies} mentions sur ${total}. Il en manque ${controle.manques.length} avant publication.`}
+        </span>
+      </div>
+      {!complet && <ul style={{ margin: '12px 0 0', paddingLeft: 18, color: 'var(--text-2)', fontSize: 13, lineHeight: 1.7 }}>
+        {controle.manques.map((m, i) => <li key={i}><strong style={{ color: 'var(--text)' }}>{m.libelle}</strong> · <span style={{ color: 'var(--text-3)' }}>{m.ou_remplir}</span></li>)}
+      </ul>}
+    </div>
+  );
 }
 
 function Detail({ formation, editing, setEditing, save, blocks, allBlocks, attach, detach }) { const [draft, setDraft] = useState({ title: formation.title, description: formation.description || '', objectives: parse(formation.objectives).join('\n'), prerequisites: formation.prerequisites || '' }); useEffect(() => setDraft({ title: formation.title, description: formation.description || '', objectives: parse(formation.objectives).join('\n'), prerequisites: formation.prerequisites || '' }), [formation]); const attached = new Set(blocks.map(b => b.id)); return <div style={{ display: 'grid', gap: 16 }}><div style={panel}><div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><div><h2 style={{ marginTop: 0 }}>Détail du programme</h2><p style={{ color: 'var(--text-2)', marginTop: -6 }}>Le contenu source, réutilisable dans chaque session.</p></div><button style={quiet} onClick={() => editing ? save({ title: draft.title, description: draft.description, objectives: draft.objectives.split('\n').map(x => x.trim()).filter(Boolean), prerequisites: draft.prerequisites }) : setEditing(true)}>{editing ? 'Enregistrer' : 'Modifier le contenu'}</button></div>{editing ? <div style={{ display: 'grid', gap: 11 }}><input value={draft.title} onChange={e => setDraft({ ...draft, title: e.target.value })} style={inputStyle} /><textarea value={draft.description} onChange={e => setDraft({ ...draft, description: e.target.value })} style={{ ...inputStyle, minHeight: 120 }} placeholder="Description" /><textarea value={draft.objectives} onChange={e => setDraft({ ...draft, objectives: e.target.value })} style={{ ...inputStyle, minHeight: 110 }} placeholder="Un objectif par ligne" /><textarea value={draft.prerequisites} onChange={e => setDraft({ ...draft, prerequisites: e.target.value })} style={{ ...inputStyle, minHeight: 70 }} placeholder="Prérequis" /></div> : <><p style={{ color: 'var(--text-2)', whiteSpace: 'pre-wrap' }}>{formation.description || 'Ajoutez une description à ce programme.'}</p><h3>Objectifs pédagogiques</h3>{parse(formation.objectives).length ? <ul>{parse(formation.objectives).map((x, i) => <li key={i}>{x}</li>)}</ul> : <p style={{ color: 'var(--text-3)' }}>Aucun objectif renseigné.</p>}<h3>Prérequis</h3><p style={{ color: 'var(--text-2)' }}>{formation.prerequisites || 'Aucun prérequis renseigné.'}</p></>}</div><div style={panel}><h2 style={{ marginTop: 0 }}>Blocs pédagogiques associés</h2>{blocks.map(b => <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderTop: '1px solid var(--border)' }}><span><strong>{b.title}</strong><small style={{ display: 'block', color: 'var(--text-3)' }}>{b.category || 'Sans catégorie'}</small></span><button style={quiet} onClick={() => detach(b.id)}>Retirer</button></div>)}<select defaultValue="" onChange={e => { if (e.target.value) { attach(e.target.value); e.target.value = ''; } }} style={{ ...inputStyle, marginTop: 12 }}><option value="">Associer un bloc de la bibliothèque…</option>{allBlocks.filter(b => !attached.has(b.id)).map(b => <option key={b.id} value={b.id}>{b.title}</option>)}</select></div></div> }

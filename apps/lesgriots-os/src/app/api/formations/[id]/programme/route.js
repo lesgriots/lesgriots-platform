@@ -39,12 +39,13 @@ async function _GET(req, { params }) {
     const { id } = await params;
     const { searchParams } = new URL(req.url);
 
-    const { valeurs, manques, formation } = construireProgramme(db, id);
+    const { valeurs, manques, formation, completude } = construireProgramme(db, id);
 
     if (searchParams.get('controle')) {
       return NextResponse.json({
         formation: formation.title,
         complet: manques.length === 0,
+        ...completude,
         manques,
       });
     }

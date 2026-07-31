@@ -81,6 +81,65 @@ export const MENTIONS = [
   { cle: 'tarif', libelle: 'Tarif', ou: ['price_ht'], ou_remplir: 'Bibliothèque · le programme · Prix' },
 ];
 
+/**
+ * Une mention est remplie, ou elle ne l'est pas. Cette fonction est le seul
+ * juge : la génération d'un PDF et l'indicateur de la bibliothèque doivent
+ * répondre la même chose, sinon l'un des deux ment.
+ */
+export function evaluerMentions(formation, nbModules = 0) {
+  const rempli = (champ) => {
+    if (champ === '__modules') return nbModules > 0;
+    const v = formation[champ];
+    if (v === null || v === undefined) return false;
+    if (typeof v === 'number') return v > 0;
+    return liste(v).length > 0 || texte(v).length > 0;
+  };
+
+  const detail = MENTIONS.map((m) => ({
+    libelle: m.libelle,
+    ou_remplir: m.ou_remplir,
+    rempli: m.ou.some(rempli),
+  }));
+
+  const remplies = detail.filter((d) => d.rempli).length;
+  return {
+    detail,
+    remplies,
+    total: detail.length,
+    pourcentage: Math.round((remplies / detail.length) * 100),
+    manques: detail.filter((d) => !d.rempli).map(({ libelle, ou_remplir }) => ({ libelle, ou_remplir })),
+  };
+}
+
+/**
+ * La complétude de tous les programmes, en une seule requête.
+ *
+ * Un pourcentage n'est pas un jugement de qualité : il ne dit pas si le
+ * texte est bon, seulement s'il existe. C'est déjà ce qui manquait le plus.
+ */
+export function completudeFormations(db, { inclureArchives = false } = {}) {
+  const formations = db.prepare(`
+    SELECT f.*, (SELECT COUNT(*) FROM modules m WHERE m.formation_id = f.id) AS nb_modules
+    FROM formations f
+    ${inclureArchives ? '' : "WHERE COALESCE(f.status, '') <> 'archived'"}
+    ORDER BY f.title COLLATE NOCASE ASC
+  `).all();
+
+  return formations.map((f) => {
+    const bilan = evaluerMentions(f, f.nb_modules);
+    return {
+      id: f.id,
+      titre: texte(f.title),
+      code: texte(f.code),
+      pourcentage: bilan.pourcentage,
+      remplies: bilan.remplies,
+      total: bilan.total,
+      manques: bilan.manques,
+      publiable: bilan.manques.length === 0,
+    };
+  });
+}
+
 /* ── Construire le programme ──────────────────────────────────────────── */
 
 /**
@@ -127,17 +186,8 @@ export function construireProgramme(db, formationId) {
 
   /* ── Les manques, avant toute mise en forme ─────────────────────────── */
 
-  const rempli = (champ) => {
-    if (champ === '__modules') return modules.length > 0;
-    const v = f[champ];
-    if (v === null || v === undefined) return false;
-    if (typeof v === 'number') return v > 0;
-    return liste(v).length > 0 || texte(v).length > 0;
-  };
-
-  const manques = MENTIONS
-    .filter((m) => !m.ou.some(rempli))
-    .map((m) => ({ libelle: m.libelle, ou_remplir: m.ou_remplir }));
+  const bilan = evaluerMentions(f, modules.length);
+  const manques = bilan.manques;
 
   /* ── La mise en forme ───────────────────────────────────────────────── */
 
@@ -184,6 +234,7 @@ export function construireProgramme(db, formationId) {
   return {
     formation: f,
     manques,
+    completude: { pourcentage: bilan.pourcentage, remplies: bilan.remplies, total: bilan.total },
     valeurs: {
       kicker: texte(f.type_formation) || 'Formation',
       category: texte(f.categorie) || texte(f.thematique) || 'Formation',
