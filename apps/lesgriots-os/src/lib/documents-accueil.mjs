@@ -77,7 +77,18 @@ export function construireConvocation(db, sessionId, apprenantId = null) {
     apprenantEmail: texte(apprenant.email),
     titre: texte(s.formation_titre),
     dates: datesLisibles(s),
-    horaires: texte(s.horaire) || '9h30 - 12h30 / 13h30 - 17h30',
+    // Les horaires détaillés jour par jour se compactent : chaque bloc
+    // séparé par une ligne vide devient une seule ligne « Jour · créneaux »,
+    // pour que cinq journées tiennent dans leur case sans pousser la lettre.
+    horaires: (() => {
+      const brut = texte(s.horaire);
+      if (!brut) return '9h30 - 12h30 / 13h30 - 17h30';
+      return brut
+        .split(/\n\s*\n/)
+        .map((bloc) => bloc.split(/\n/).map((l) => l.trim()).filter(Boolean).join(' · '))
+        .filter(Boolean)
+        .join('\n');
+    })(),
     duree: heures ? `${heures} h` : '',
     lieu: texte(s.adresse) || texte(s.location) || 'Lieu communiqué prochainement',
     modalite: MODALITES[s.modality] || MODALITES[s.formation_modalite] || 'Présentiel',
