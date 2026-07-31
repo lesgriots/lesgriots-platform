@@ -213,7 +213,7 @@ export function construireProgramme(db, formationId) {
     ['Raison sociale', texte(reglages.company_name)],
     ['SIRET', texte(reglages.siret)],
     ['N° de déclaration d’activité', texte(reglages.nda)],
-    ['Adresse', [reglages.address, reglages.postal_code, reglages.city].filter(Boolean).join(', ')],
+    ['Adresse', [texte(reglages.address), [reglages.postal_code, reglages.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')],
     ['Contact', texte(reglages.email)],
     ['Représentant', [reglages.representant_name, reglages.representant_title].filter(Boolean).join(' · ')],
   ].filter(([, v]) => v).map(([label, value]) => ({ label, value }));
