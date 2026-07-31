@@ -94,6 +94,7 @@ const ICONES = {
   telecharger: 'M8 2v8 M4.5 7 8 10.5 11.5 7 M2.5 13.5h11',
   enveloppe: 'M1.8 4.2h12.4v7.6H1.8z M1.8 4.6 8 9l6.2-4.4',
   rafraichir: 'M13.2 8a5.2 5.2 0 1 1-1.6-3.8 M13.6 2.4v3.2h-3.2',
+  corbeille: 'M2.8 4.4h10.4 M6.4 4.4V2.9h3.2v1.5 M4.2 4.4l.7 9a.7.7 0 0 0 .7.7h4.8a.7.7 0 0 0 .7-.7l.7-9 M6.7 7v4.6 M9.3 7v4.6',
 };
 
 /** Un geste réduit à son icône, avec son nom en infobulle. */
@@ -448,9 +449,20 @@ export default function SessionCockpit({ sessionId }) {
   const convocationsProduites = inscriptions.filter((item) => convocationDe(item.apprenant_id)).length;
   const conventionsSignees = inscriptions.filter((item) => item.convention_signed).length;
   const pieceConvention = pieceDe('convention', sessionId);
-  const feuillesSignees = documents
-    .filter((doc) => doc.categorie === 'emargement' && doc.signe && String(doc.contexte_id) === String(sessionId))
+  /** Les pièces revenues signées, par catégorie, la plus récente d'abord. */
+  const signeesDe = (categorie) => documents
+    .filter((doc) => doc.categorie === categorie && doc.signe && String(doc.contexte_id) === String(sessionId))
     .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+
+  const retirerDuRegistre = (doc) => {
+    setDocuments((current) => current.filter((x) => x.id !== doc.id));
+    setNotice('Pièce retirée et fichier effacé.');
+  };
+
+  const ajouterAuRegistre = (doc) => {
+    setDocuments((current) => [doc, ...current]);
+    setNotice('Pièce signée archivée dans cette session.');
+  };
 
   /**
    * Produire toutes les convocations d'un coup. En série et sans ouvrir de
@@ -801,6 +813,19 @@ export default function SessionCockpit({ sessionId }) {
             </div>)}
           </div>
         </div> : <Empty>Ajoute un client et au moins un apprenant pour générer la convention.</Empty>}
+        <PiecesSignees
+          compact
+          sessionId={sessionId}
+          categorie="convention"
+          titre="Convention revenue signée"
+          explication="Tant que la signature électronique n’est pas en place, dépose ici le scan de la convention signée par le client. Elle rejoint le registre de la session."
+          libelleBouton="Ajouter la convention signée"
+          feuilles={signeesDe('convention')}
+          onDepot={ajouterAuRegistre}
+          onRetrait={retirerDuRegistre}
+          onErreur={setNotice}
+          onVoir={(doc) => setApercu({ url: doc.fichier, titre: doc.libelle || 'Convention signée' })}
+        />
       </section>
       <section style={card}>
         <h2 style={title}>Autres documents contractuels</h2>
@@ -823,6 +848,19 @@ export default function SessionCockpit({ sessionId }) {
           })}
         </div>
         <p style={{ ...muted, marginTop: 14 }}>CGV et politique de confidentialité : à gérer depuis les modèles de documents.</p>
+        <PiecesSignees
+          compact
+          sessionId={sessionId}
+          categorie="devis"
+          titre="Devis retourné signé"
+          explication="Le « bon pour accord » du client, scanné. C’est lui qui vaut commande, et ce que réclame un financeur avant la prise en charge."
+          libelleBouton="Ajouter le devis signé"
+          feuilles={signeesDe('devis')}
+          onDepot={ajouterAuRegistre}
+          onRetrait={retirerDuRegistre}
+          onErreur={setNotice}
+          onVoir={(doc) => setApercu({ url: doc.fichier, titre: doc.libelle || 'Devis signé' })}
+        />
       </section>
     </>;
   };
@@ -882,10 +920,15 @@ export default function SessionCockpit({ sessionId }) {
     if (currentSub === 'qualite') return <section style={card}><h2 style={title}>Suivi qualité</h2><p style={muted}>Centralise les évaluations à chaud et à froid pour produire le bilan qualité de la session.</p><Metric label="Satisfaction moyenne" value={evaluations.length ? `${(evaluations.reduce((sum, item) => sum + Number(item.score || 0), 0) / evaluations.length).toFixed(1)}/10` : '—'} note={`${evaluations.length} réponse(s)`} /></section>;
     return <>
       <section style={card}><h2 style={title}>Suivi des émargements</h2><div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', margin: '10px 0 16px' }}><p style={muted}>Signe ou contrôle les présences par demi-journée. Chaque modification est sauvegardée immédiatement.</p><Action secondary onClick={() => openDocument('emargement')}>Générer / mettre à jour la feuille</Action></div><AttendanceTable rows={emargements} onUpdate={updateAttendance} /></section>
-      <ArchiveEmargements
+      <PiecesSignees
         sessionId={sessionId}
-        feuilles={feuillesSignees}
-        onDepot={(doc) => { setDocuments((current) => [doc, ...current]); setNotice('Feuille signée archivée dans cette session.'); }}
+        categorie="emargement"
+        titre="Archivage des feuilles signées"
+        explication="Une fois la feuille signée, dépose son scan ici pour en garder une archive numérique. PDF ou photo, 25 Mo maximum. Les feuilles archivées ne sont visibles que depuis l’OS."
+        libelleBouton="Ajouter une feuille signée"
+        feuilles={signeesDe('emargement')}
+        onDepot={ajouterAuRegistre}
+        onRetrait={retirerDuRegistre}
         onErreur={setNotice}
         onVoir={(doc) => setApercu({ url: doc.fichier, titre: doc.libelle || 'Feuille signée' })}
       />
@@ -1212,15 +1255,23 @@ function EditableLearner({ item, onReload, onNotice }) {
 }
 
 /**
- * L'archivage des feuilles signées.
+ * Les pièces revenues signées.
  *
- * En présentiel, la preuve de réalisation reste une feuille de papier signée
- * au stylo. Elle ne vaut que si on peut la ressortir un an plus tard : c'est
- * ici qu'on la range. Le scan rejoint le registre de la session, daté, à côté
- * des documents produits par l'OS.
+ * Tant qu'on ne fait pas signer électroniquement, la convention, le devis et
+ * la feuille d'émargement reviennent en papier. Le même geste vaut pour les
+ * trois : on dépose le scan, il rejoint le registre de la session, daté.
+ *
+ * La suppression est offerte sans détour, mais en deux temps. Un scan flou,
+ * incomplet ou déposé au mauvais endroit ne prouve rien : le garder ne
+ * protège personne et brouille le dossier. Un clic de confirmation suffit à
+ * éviter le geste involontaire.
  */
-function ArchiveEmargements({ sessionId, feuilles, onDepot, onErreur, onVoir }) {
+function PiecesSignees({
+  sessionId, categorie, titre, explication, feuilles, libelleBouton,
+  onDepot, onRetrait, onErreur, onVoir, compact = false,
+}) {
   const [envoi, setEnvoi] = useState(false);
+  const [aRetirer, setARetirer] = useState(null);
 
   const deposer = async (fichier) => {
     if (!fichier) return;
@@ -1228,58 +1279,87 @@ function ArchiveEmargements({ sessionId, feuilles, onDepot, onErreur, onVoir }) 
     try {
       const corps = new FormData();
       corps.append('fichier', fichier);
-      const reponse = await fetch(`/api/sessions/${sessionId}/emargement-signe`, { method: 'POST', body: corps });
+      corps.append('categorie', categorie);
+      const reponse = await fetch(`/api/sessions/${sessionId}/pieces-signees`, { method: 'POST', body: corps });
       const cree = await reponse.json();
       if (!reponse.ok) throw new Error(cree.error || 'Dépôt refusé');
       onDepot?.(cree);
     } catch (err) {
-      onErreur?.(`La feuille n’a pas pu être archivée : ${err.message}`);
+      onErreur?.(`La pièce n’a pas pu être archivée : ${err.message}`);
     } finally {
       setEnvoi(false);
     }
   };
 
+  const retirer = async (doc) => {
+    try {
+      const reponse = await fetch(`/api/documents/${doc.id}`, { method: 'DELETE' });
+      if (!reponse.ok) {
+        const erreur = await reponse.json().catch(() => ({}));
+        throw new Error(erreur.error || 'Suppression refusée');
+      }
+      setARetirer(null);
+      onRetrait?.(doc);
+    } catch (err) {
+      onErreur?.(`La pièce n’a pas pu être retirée : ${err.message}`);
+    }
+  };
+
+  const depot = <label style={{
+    display: 'inline-flex', alignItems: 'center', gap: 9, padding: compact ? '9px 13px' : '11px 16px',
+    borderRadius: 10, border: '1px dashed var(--border)', background: 'var(--surface-2)', color: 'var(--text)',
+    fontSize: compact ? 12 : 13, fontWeight: 800, cursor: envoi ? 'progress' : 'pointer', opacity: envoi ? 0.6 : 1,
+  }}>
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M8 11V3 M4.5 6.5 8 3l3.5 3.5 M2.5 13.5h11" />
+    </svg>
+    {envoi ? 'Dépôt en cours…' : libelleBouton}
+    <input
+      type="file"
+      accept="application/pdf,image/png,image/jpeg,image/heic,image/webp"
+      disabled={envoi}
+      style={{ display: 'none' }}
+      onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; deposer(f); }}
+    />
+  </label>;
+
+  const liste = <div style={{ marginTop: 12 }}>
+    {feuilles.length ? <div style={{ display: 'grid', gap: 8 }}>
+      {feuilles.map((doc) => <div key={doc.id} style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap',
+        padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 10,
+        background: aRetirer === doc.id ? 'rgba(220,60,50,0.06)' : 'var(--surface-2)',
+      }}>
+        <Piece libelle={doc.libelle || 'Pièce signée'} document={doc} verbe="Déposée" onVoir={() => onVoir?.(doc)} />
+        {aRetirer === doc.id ? <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ ...muted, color: 'var(--text-2)' }}>Retirer cette pièce et effacer le fichier ?</span>
+          <Action small onClick={() => retirer(doc)}>Oui, retirer</Action>
+          <Action small secondary onClick={() => setARetirer(null)}>Annuler</Action>
+        </div> : <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <Etat actif oui="Signée" non="" />
+          <Geste nom="Voir la pièce" icone="oeil" onClick={() => onVoir?.(doc)} />
+          <Geste nom="Télécharger" icone="telecharger" href={doc.fichier} />
+          <Geste nom="Retirer cette pièce" icone="corbeille" onClick={() => setARetirer(doc.id)} />
+        </div>}
+      </div>)}
+    </div> : <Empty>{`Aucune pièce signée n’a encore été déposée${compact ? '' : ' pour cette session'}.`}</Empty>}
+  </div>;
+
+  if (compact) {
+    return <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+      <div style={{ ...muted, textTransform: 'uppercase', letterSpacing: '.07em', fontSize: 10, fontWeight: 700, marginBottom: 4 }}>{titre}</div>
+      <p style={{ ...muted, margin: '0 0 10px' }}>{explication}</p>
+      {depot}
+      {liste}
+    </div>;
+  }
+
   return <section style={{ ...card, marginTop: 14 }}>
-    <h2 style={title}>Archivage des feuilles signées</h2>
-    <p style={{ ...muted, margin: '5px 0 14px' }}>
-      Une fois la feuille signée, dépose son scan ici pour en garder une archive numérique.
-      PDF ou photo, 25 Mo maximum. Les feuilles archivées ne sont visibles que depuis l’OS.
-    </p>
-
-    <label style={{
-      display: 'inline-flex', alignItems: 'center', gap: 9, padding: '11px 16px', borderRadius: 10,
-      border: '1px dashed var(--border)', background: 'var(--surface-2)', color: 'var(--text)',
-      fontSize: 13, fontWeight: 800, cursor: envoi ? 'progress' : 'pointer', opacity: envoi ? 0.6 : 1,
-    }}>
-      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4"
-        strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M8 11V3 M4.5 6.5 8 3l3.5 3.5 M2.5 13.5h11" />
-      </svg>
-      {envoi ? 'Dépôt en cours…' : 'Ajouter une feuille signée'}
-      <input
-        type="file"
-        accept="application/pdf,image/png,image/jpeg,image/heic,image/webp"
-        disabled={envoi}
-        style={{ display: 'none' }}
-        onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; deposer(f); }}
-      />
-    </label>
-
-    <div style={{ marginTop: 14 }}>
-      {feuilles.length ? <div style={{ display: 'grid', gap: 8 }}>
-        {feuilles.map((doc) => <div key={doc.id} style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap',
-          padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-2)',
-        }}>
-          <Piece libelle={doc.libelle || 'Feuille signée'} document={doc} verbe="Déposée" onVoir={() => onVoir?.(doc)} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <Etat actif oui="Signée" non="" />
-            <Geste nom="Voir la feuille" icone="oeil" onClick={() => onVoir?.(doc)} />
-            <Geste nom="Télécharger" icone="telecharger" href={doc.fichier} />
-          </div>
-        </div>)}
-      </div> : <Empty>Aucune feuille signée n’a encore été archivée pour cette session.</Empty>}
-    </div>
+    <h2 style={title}>{titre}</h2>
+    <p style={{ ...muted, margin: '5px 0 14px' }}>{explication}</p>
+    {depot}
+    {liste}
   </section>;
 }
 

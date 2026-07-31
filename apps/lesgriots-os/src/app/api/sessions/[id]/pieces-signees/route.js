@@ -1,18 +1,17 @@
 /**
- * /api/sessions/:id/emargement-signe — archiver la feuille signée.
+ * /api/sessions/:id/pieces-signees — déposer une pièce signée à la main.
  *
- * Une feuille d'émargement signée au stylo n'existe, pour un contrôle, que si
- * on peut la ressortir. Le cycle en présentiel est donc : on imprime, on fait
- * signer, on scanne, et on dépose le scan ici. Le fichier est rangé sur le
- * disque hors dépôt Git, dans data/archives, qui est le seul endroit que le
- * service a le droit d'écrire et que la sauvegarde nocturne emporte.
+ * Tant qu'on ne fait pas signer électroniquement, la convention, le devis et
+ * la feuille d'émargement reviennent en papier. Cette route est l'endroit où
+ * ils rentrent : le scan rejoint le registre de la session, daté et
+ * versionné, à côté des documents que l'OS produit lui-même.
  *
- *   POST …/emargement-signe   multipart, champ « fichier »
- *   GET  …/emargement-signe   la liste de ce qui est archivé
+ *   POST …/pieces-signees   multipart : « fichier », « categorie »
+ *   GET  …/pieces-signees   la liste, filtrable par ?categorie=
  *
- * Le fichier lui-même se relit par /api/documents/:id/fichier, derrière la
- * même authentification : rien de ce qui porte une signature d'apprenant ne
- * doit être servi en clair sur une URL devinable.
+ * La suppression passe par DELETE /api/documents/:id, qui efface aussi le
+ * fichier : un scan illisible ou déposé au mauvais endroit n'a aucune valeur
+ * de preuve, il n'y a rien à conserver.
  */
 
 import { NextResponse } from 'next/server';
@@ -21,19 +20,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { getDb } from '@/lib/db.mjs';
 import { withGuard } from '@/lib/api-guard';
-
-const RACINE = path.join(process.cwd(), 'data', 'archives');
-
-/** Ce qu'un scan peut être, et rien d'autre. */
-const TYPES = {
-  'application/pdf': '.pdf',
-  'image/png': '.png',
-  'image/jpeg': '.jpg',
-  'image/heic': '.heic',
-  'image/webp': '.webp',
-};
-
-const TAILLE_MAX = 25 * 1024 * 1024;
+import { CATEGORIES, TYPES, TAILLE_MAX, dossier } from '@/lib/archives.mjs';
 
 const jourFr = () => new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -42,10 +29,19 @@ async function _POST(req, { params }) {
     const db = getDb();
     const { id } = await params;
 
-    const session = db.prepare('SELECT id, code_interne FROM sessions WHERE id = ?').get(id);
-    if (!session) return NextResponse.json({ error: 'Session introuvable.' }, { status: 404 });
+    if (!db.prepare('SELECT id FROM sessions WHERE id = ?').get(id)) {
+      return NextResponse.json({ error: 'Session introuvable.' }, { status: 404 });
+    }
 
     const formulaire = await req.formData();
+
+    const categorie = String(formulaire.get('categorie') || 'emargement');
+    if (!CATEGORIES[categorie]) {
+      return NextResponse.json({
+        error: `Catégorie inconnue (${categorie}). Attendu : ${Object.keys(CATEGORIES).join(', ')}.`,
+      }, { status: 400 });
+    }
+
     const fichier = formulaire.get('fichier');
     if (!fichier || typeof fichier.arrayBuffer !== 'function') {
       return NextResponse.json({ error: 'Aucun fichier reçu.' }, { status: 400 });
@@ -66,27 +62,26 @@ async function _POST(req, { params }) {
       }, { status: 413 });
     }
 
-    // Le nom sur le disque ne vient jamais du client : il est tiré au sort.
-    // Le nom d'origine est conservé dans les notes, pour l'humain.
     const documentId = crypto.randomUUID();
-    const dossier = path.join(RACINE, id);
-    await fs.mkdir(dossier, { recursive: true });
-    await fs.writeFile(path.join(dossier, `${documentId}${extension}`), octets);
+    const cible = dossier(id);
+    await fs.mkdir(cible, { recursive: true });
+    await fs.writeFile(path.join(cible, `${documentId}${extension}`), octets);
 
     const libelle = String(formulaire.get('libelle') || '').trim()
-      || `Feuille d’émargement signée · ${jourFr()}`;
+      || `${CATEGORIES[categorie]} · ${jourFr()}`;
 
     const rang = db.prepare(`
       SELECT COUNT(*) AS n FROM documents
-      WHERE categorie = 'emargement' AND signe = 1 AND contexte_id = ?
-    `).get(id)?.n || 0;
+      WHERE categorie = ? AND signe = 1 AND contexte_id = ?
+    `).get(categorie, id)?.n || 0;
 
     db.prepare(`
       INSERT INTO documents (id, categorie, libelle, fichier, contexte_type, contexte_id,
                              version, signe, notes)
-      VALUES (?, 'emargement', ?, ?, 'session', ?, ?, 1, ?)
+      VALUES (?, ?, ?, ?, 'session', ?, ?, 1, ?)
     `).run(
       documentId,
+      categorie,
       libelle,
       `/api/documents/${documentId}/fichier`,
       id,
@@ -94,8 +89,7 @@ async function _POST(req, { params }) {
       `Scan déposé · ${String(fichier.name || 'sans nom').slice(0, 120)} · ${Math.round(octets.length / 1024)} Ko`,
     );
 
-    const cree = db.prepare('SELECT * FROM documents WHERE id = ?').get(documentId);
-    return NextResponse.json(cree, { status: 201 });
+    return NextResponse.json(db.prepare('SELECT * FROM documents WHERE id = ?').get(documentId), { status: 201 });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
@@ -105,11 +99,12 @@ async function _GET(req, { params }) {
   try {
     const db = getDb();
     const { id } = await params;
-    const items = db.prepare(`
-      SELECT * FROM documents
-      WHERE categorie = 'emargement' AND signe = 1 AND contexte_id = ? AND archived = 0
-      ORDER BY created_at DESC
-    `).all(id);
+    const categorie = new URL(req.url).searchParams.get('categorie');
+    const items = categorie
+      ? db.prepare(`SELECT * FROM documents WHERE signe = 1 AND archived = 0 AND contexte_id = ? AND categorie = ?
+                    ORDER BY created_at DESC`).all(id, categorie)
+      : db.prepare(`SELECT * FROM documents WHERE signe = 1 AND archived = 0 AND contexte_id = ?
+                    ORDER BY created_at DESC`).all(id);
     return NextResponse.json(items);
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });

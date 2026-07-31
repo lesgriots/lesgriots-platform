@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db.mjs';
 import { withGuard } from '@/lib/api-guard';
+import { effacerFichier } from '@/lib/archives.mjs';
 
 const CHAMPS = ['categorie', 'libelle', 'fichier', 'contexte_type', 'contexte_id',
   'version', 'expire_le', 'signe', 'notes', 'archived'];
@@ -37,9 +38,16 @@ async function _DELETE(req, { params }) {
   try {
     const db = getDb();
     const { id } = await params;
-    const r = db.prepare('DELETE FROM documents WHERE id = ?').run(id);
-    if (!r.changes) return NextResponse.json({ error: 'introuvable' }, { status: 404 });
-    return NextResponse.json({ ok: true });
+    const doc = db.prepare('SELECT * FROM documents WHERE id = ?').get(id);
+    if (!doc) return NextResponse.json({ error: 'introuvable' }, { status: 404 });
+
+    // Un scan déposé par erreur n'a aucune valeur de preuve : on ne garde pas
+    // le fichier orphelin sur le disque. Les documents produits par l'OS, eux,
+    // n'ont rien sur disque à effacer : ils se régénèrent depuis la base.
+    const efface = await effacerFichier(doc);
+
+    db.prepare('DELETE FROM documents WHERE id = ?').run(id);
+    return NextResponse.json({ ok: true, fichier_efface: efface });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
