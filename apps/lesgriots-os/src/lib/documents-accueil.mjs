@@ -104,8 +104,18 @@ export function construireLivret(db, sessionId = null) {
 
   const contactEmail = texte(reglages.email) || 'contact@lesgriots.com';
 
+  const societe = [
+    ['Raison sociale', texte(reglages.company_name)],
+    ['SIRET', texte(reglages.siret)],
+    ["N° de déclaration d'activité", texte(reglages.nda)],
+    ['Adresse', [texte(reglages.address), [reglages.postal_code, reglages.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')],
+    ['Contact', texte(reglages.email)],
+    ['Représentant', [reglages.representant_name, reglages.representant_title].filter(Boolean).join(' · ')],
+  ].filter(([, v]) => v).map(([label, value]) => ({ label, value }));
+
   return {
     piedDePage: piedDePage(reglages),
+    societe,
     contactEmail,
     contactAccessibilite: contactEmail,
     promo: String(new Date(s?.start_date || Date.now()).getFullYear()),

@@ -51,7 +51,8 @@
     </div>
     <div style="position:absolute; left:18mm; right:18mm; top:44%; transform:translateY(-50%);">
       <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:11pt; letter-spacing:0.16em; text-transform:uppercase; color:#f6f5f3; margin-bottom:14px;">Promotion {{ promo }}</div>
-      <h1 style="font-family:'Geist',sans-serif; font-weight:700; font-size:46pt; line-height:0.96; letter-spacing:-0.03em; margin:0; color:#f6f5f3; text-wrap:balance; max-width:15ch;">Bienvenue à La&nbsp;Griothèque.</h1>
+      <h1 style="font-family:'Geist',sans-serif; font-weight:700; font-size:46pt; line-height:0.96; letter-spacing:-0.03em; margin:0; color:#f6f5f3;">Bienvenue à</h1>
+      <img src="logo-wordmark.svg" alt="LA GRIOTHÈQUE" style="display:block; width:128mm; margin-top:9mm; filter:invert(1);">
     </div>
     <div style="position:absolute; left:18mm; bottom:18mm; display:flex; flex-direction:column; gap:4px;">
       <span style="font-family:'Geist',sans-serif; font-weight:600; font-size:11pt; letter-spacing:-0.01em; color:#f6f5f3;">Avant, pendant et après votre formation</span>
@@ -64,7 +65,7 @@
     <!-- QUI SOMMES-NOUS -->
     <div class="gp-sec">
       <div class="gp-h" style="margin-top:0;">Qui sommes-nous</div>
-      <p class="gp-body" style="font-size:12pt; line-height:1.55;">La Griothèque est une école de transmission au croisement de la direction artistique, du récit de marque et de la production. Nous formons celles et ceux qui veulent bâtir leurs propres récits et créer de nouveaux imaginaires.</p>
+      <p class="gp-body" style="font-size:12pt; line-height:1.55;"><img src="logo-wordmark.svg" alt="LA GRIOTHÈQUE" style="height:0.78em; vertical-align:baseline;"> est une école de transmission au croisement de la direction artistique, du récit de marque et de la production. Nous formons celles et ceux qui veulent bâtir leurs propres récits et créer de nouveaux imaginaires.</p>
       <p class="gp-body">Ce livret rassemble tout ce qu'il faut savoir avant, pendant et après votre formation : déroulé, infos pratiques, règles de vie, accessibilité et contacts. Gardez-le sous la main.</p>
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8mm; margin-top:8mm;">
         <sc-for list="{{ valeurs }}" as="v" hint-placeholder-count="3">
@@ -145,6 +146,18 @@
       <img src="logo-wordmark.svg" alt="LA GRIOTHÈQUE" style="height:15px; display:block; filter:invert(1); margin-bottom:16mm;">
       <div style="font-family:'Geist',sans-serif; font-weight:700; font-size:30pt; line-height:1.05; letter-spacing:-0.02em; color:#f6f5f3; max-width:16ch;">Bâtis ton récit. Vis de ta passion.</div>
       <div style="margin-top:12mm; font-family:'Geist',sans-serif; font-size:10pt; color:rgba(246,245,243,0.75);">{{ contactEmail }} · lagriotheque.com</div>
+
+      <div style="margin-top:22mm; font-family:'Geist',sans-serif;">
+        <div class="gp-h" style="color:#f6f5f3;">L'organisme de formation</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px 20px; border-top:1px solid rgba(246,245,243,0.25); padding-top:14px;">
+          <sc-for list="{{ societe }}" as="s" hint-placeholder-count="6">
+            <div>
+              <div style="font-weight:600; font-size:7.5pt; letter-spacing:0.18em; text-transform:uppercase; color:rgba(246,245,243,0.65); margin-bottom:3px;">{{ s.label }}</div>
+              <div style="font-weight:500; font-size:10pt; color:#f6f5f3;">{{ s.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -161,6 +174,14 @@ class Component extends DCLogic {
       piedDePage: "LES GRIOTS · SIRET [à compléter] · Déclaration d'activité [à compléter]",
       contactEmail: "contact@lesgriots.com",
       contactAccessibilite: "contact@lesgriots.com",
+      societe: [
+        { label: "Raison sociale", value: "LES GRIOTS" },
+        { label: "SIRET", value: "[à compléter]" },
+        { label: "N° de déclaration d'activité", value: "[à compléter]" },
+        { label: "Adresse", value: "[à compléter]" },
+        { label: "Contact", value: "contact@lesgriots.com" },
+        { label: "Représentant", value: "[à compléter]" },
+      ],
       valeurs: [
         { titre: "Transmettre", texte: "Des savoir-faire concrets, transmis par celles et ceux qui les pratiquent." },
         { titre: "Pratiquer", texte: "Chaque session avance sur votre projet réel, pas sur un cas fictif." },
