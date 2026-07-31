@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db.mjs';
 import { execFileSync } from 'child_process';
+import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'path';
 import { withGuard } from '@/lib/api-guard';
+import { rendre } from '@/lib/rendre-modele.mjs';
+import { construireProgramme } from '@/lib/programme-donnees.mjs';
+import { construireConvocation } from '@/lib/documents-accueil.mjs';
+import { construireConvention } from '@/lib/convention-donnees.mjs';
 
 /**
  * GET /api/sessions/:id/documents?type=programme|convention|convocation|emargement|attestation|certificat
@@ -174,23 +180,59 @@ async function _GET(req, { params }) {
       }
     }
 
-    // Call Python script
-    const scriptPath = path.join(process.cwd(), 'src', 'lib', 'generate_documents.py');
-    console.log('[documents] Generating:', docType, 'for session:', id, 'script:', scriptPath);
+    /*
+     * Trois documents ont maintenant leur maquette maison, dessinée au
+     * Template Studio et imprimée par Chromium. Cette route reste leur porte
+     * d'entrée historique : c'est elle que visent les liens archivés au
+     * registre de session, les envois par courriel et l'outil MCP. On la fait
+     * donc pointer vers le nouveau rendu, sinon deux mises en page du même
+     * document vivent en parallèle et c'est l'ancienne qu'on voit en
+     * cliquant. Émargement, attestation et certificat gardent le générateur
+     * Python : ils n'ont pas encore de modèle équivalent.
+     */
+    const MAQUETTES = {
+      programme: 'Programme de Formation.dc.html',
+      convention: 'Convention.dc.html',
+      convocation: 'Convocation.dc.html',
+    };
+
     let pdfBuffer;
-    try {
-      pdfBuffer = execFileSync('python3', [scriptPath, docType], {
-        input: JSON.stringify(payload),
-        maxBuffer: 10 * 1024 * 1024,
-        timeout: 15000,
-      });
-    } catch (pyErr) {
-      console.error('[documents] Python error:', pyErr.stderr?.toString() || pyErr.message);
-      return NextResponse.json({
-        error: 'Erreur génération PDF',
-        detail: pyErr.stderr?.toString() || pyErr.message,
-        hint: 'Vérifiez que python3 et reportlab sont installés: pip3 install reportlab'
-      }, { status: 500 });
+
+    if (MAQUETTES[docType]) {
+      if (docType === 'programme' && !session.formation_id) {
+        return NextResponse.json({ error: 'Cette session n’est rattachée à aucune formation.' }, { status: 400 });
+      }
+      const modele = path.join(process.cwd(), 'resources/template-studio/geist-mono/source', MAQUETTES[docType]);
+      const valeurs = docType === 'convention' ? construireConvention(db, id)
+        : docType === 'convocation' ? construireConvocation(db, id, apprenantId)
+        : construireProgramme(db, session.formation_id).valeurs;
+
+      const dossier = await fs.mkdtemp(path.join(os.tmpdir(), 'doc-session-'));
+      try {
+        const sortie = path.join(dossier, 'document.pdf');
+        await rendre(modele, valeurs, sortie);
+        pdfBuffer = await fs.readFile(sortie);
+      } finally {
+        await fs.rm(dossier, { recursive: true, force: true });
+      }
+    } else {
+      // Call Python script
+      const scriptPath = path.join(process.cwd(), 'src', 'lib', 'generate_documents.py');
+      console.log('[documents] Generating:', docType, 'for session:', id, 'script:', scriptPath);
+      try {
+        pdfBuffer = execFileSync('python3', [scriptPath, docType], {
+          input: JSON.stringify(payload),
+          maxBuffer: 10 * 1024 * 1024,
+          timeout: 15000,
+        });
+      } catch (pyErr) {
+        console.error('[documents] Python error:', pyErr.stderr?.toString() || pyErr.message);
+        return NextResponse.json({
+          error: 'Erreur génération PDF',
+          detail: pyErr.stderr?.toString() || pyErr.message,
+          hint: 'Vérifiez que python3 et reportlab sont installés: pip3 install reportlab'
+        }, { status: 500 });
+      }
     }
     console.log('[documents] PDF generated:', pdfBuffer.length, 'bytes');
 
@@ -257,6 +299,9 @@ async function _GET(req, { params }) {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="${fileName}"`,
         'Content-Length': pdfBuffer.length.toString(),
+        // Un document régénéré doit se voir tout de suite : sans cela le
+        // navigateur ressert l'exemplaire précédent dans la fenêtre d'aperçu.
+        'Cache-Control': 'no-store',
       },
     });
   } catch (e) {
