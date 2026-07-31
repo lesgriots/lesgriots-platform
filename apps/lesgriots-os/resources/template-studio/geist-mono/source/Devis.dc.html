@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  doc-page:not(:defined) { visibility: hidden; }
+  body { margin: 0; background:#E6E4DD; }
+  .dv-h { font-family:'Geist',sans-serif; font-weight:700; font-size:9.5pt; color:#0B0B0A; margin-bottom:2mm; break-after:avoid; }
+  .dv-p { font-family:'Geist',sans-serif; font-weight:400; font-size:9.5pt; line-height:1.5; color:#1a1a18; margin:0 0 2mm; }
+  .dv-l { font-family:'Geist',sans-serif; font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b; }
+</style>
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="a4" margin="16mm" hint-size="100%,100%">
+
+  <div slot="footer" data-si="piedDePage" style="padding:0 12mm 5mm; font-family:'Geist',sans-serif; letter-spacing:0.02em; color:#0B0B0A; text-align:center;">
+    <div style="font-size:6.5pt; white-space:nowrap; overflow:hidden;">{{ piedDePage }}</div>
+    <div style="font-size:6pt; margin-top:1mm; line-height:1.4; opacity:0.8;">L'enregistrement de la déclaration d'activité ne vaut pas agrément de l'État (art. L.6352-12 du Code du travail) · Certification Qualiopi délivrée au titre de la catégorie : actions de formation</div>
+  </div>
+
+  <div style="padding:0 2mm; font-family:'Geist',sans-serif;">
+
+    <!-- ENTETE : émetteur à gauche, client à droite -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:14mm;">
+      <div>
+        <img src="logo-lesgriots-ink.png" alt="LES GRIOTS" style="height:18px; display:block; margin-bottom:3mm;">
+        <div style="font-size:9pt; line-height:1.5; color:#1a1a18;">{{ organismeAdresse }}<br>{{ contactEmail }}</div>
+      </div>
+      <div style="text-align:right; max-width:70mm;">
+        <div class="dv-l">Destinataire</div>
+        <div style="font-weight:600; font-size:10.5pt; color:#0B0B0A; margin-top:1.5mm;">{{ clientNom }}</div>
+        <div data-si="clientAdresse" style="font-size:9pt; line-height:1.5; color:#1a1a18; margin-top:1mm;">{{ clientAdresse }}</div>
+        <div data-si="clientSiret" style="font-size:9pt; color:#6b6b6b;">{{ clientSiret }}</div>
+        <div data-si="clientContact" style="font-size:9pt; color:#6b6b6b;">{{ clientContact }}</div>
+      </div>
+    </div>
+
+    <!-- TITRE -->
+    <div style="margin-top:10mm; padding-bottom:3mm; border-bottom:2px solid #0B0B0A;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10mm;">
+        <div style="font-weight:700; font-size:15pt; color:#0B0B0A;">Devis n° {{ numero }}</div>
+        <div style="font-size:9pt; color:#6b6b6b;">Émis le {{ emisLe }} · valable jusqu'au <strong style="color:#0B0B0A;">{{ valideJusquau }}</strong></div>
+      </div>
+    </div>
+
+    <!-- OBJET -->
+    <div style="margin-top:5mm;">
+      <div class="dv-h">Objet</div>
+      <p class="dv-p"><strong>{{ titre }}</strong></p>
+      <p class="dv-p" data-si="dates">{{ dates }}</p>
+      <p class="dv-p" data-si="lieu">{{ lieu }}</p>
+    </div>
+
+    <!-- LIGNES -->
+    <div style="margin-top:6mm;">
+      <div style="display:flex; justify-content:space-between; gap:8mm; border-bottom:1px solid #0B0B0A; padding-bottom:1.5mm;">
+        <span class="dv-l">Désignation</span>
+        <span class="dv-l">Montant HT</span>
+      </div>
+      <sc-for list="{{ lignes }}" as="l">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8mm; padding:3mm 0; border-bottom:1px solid rgba(11,11,10,0.12); break-inside:avoid;">
+          <span style="font-size:9.5pt; color:#1a1a18;"><strong style="color:#0B0B0A;">{{ l.designation }}</strong><br><span style="color:#6b6b6b;">{{ l.detail }}</span></span>
+          <span style="font-weight:600; font-size:10pt; color:#0B0B0A; white-space:nowrap;">{{ l.prix }}</span>
+        </div>
+      </sc-for>
+
+      <!-- TOTAUX -->
+      <div style="display:flex; justify-content:flex-end; margin-top:4mm;">
+        <div style="min-width:70mm;">
+          <div style="display:flex; justify-content:space-between; gap:8mm; padding:1.5mm 0;">
+            <span style="font-size:9.5pt; color:#1a1a18;">Total HT</span>
+            <span style="font-weight:700; font-size:11pt; color:#0B0B0A;">{{ totalHT }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; gap:8mm; padding:1.5mm 0; border-top:1px solid rgba(11,11,10,0.12);">
+            <span style="font-size:9pt; color:#6b6b6b;">{{ ligneTva }}</span>
+          </div>
+          <div data-si="afficherTTC" style="display:flex; justify-content:space-between; gap:8mm; padding:1.5mm 0; border-top:2px solid #0B0B0A;">
+            <span style="font-weight:600; font-size:9.5pt; color:#0B0B0A;">Total TTC</span>
+            <span style="font-weight:700; font-size:11pt; color:#0B0B0A;">{{ totalTTC }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONDITIONS -->
+    <div style="margin-top:6mm; break-inside:avoid;">
+      <div class="dv-h">Conditions</div>
+      <p class="dv-p">Devis valable <strong>{{ validiteJours }} jours</strong> à compter de son émission, soit jusqu'au {{ valideJusquau }}. Au-delà, les prix et les disponibilités sont susceptibles d'évoluer.</p>
+      <p class="dv-p">Règlement : {{ modalitesReglement }}. <span data-si="coordonneesBancaires">{{ coordonneesBancaires }}</span></p>
+      <p class="dv-p">En cas de prise en charge par un organisme financeur (OPCO, FAF, etc.), l'accord de prise en charge doit nous parvenir avant le début de la formation. À défaut, la prestation est facturée directement au Client.</p>
+      <p class="dv-p">L'acceptation de ce devis vaut commande. Une convention de formation professionnelle sera établie et devra être signée avant le début de l'action.</p>
+    </div>
+
+    <!-- ACCORD -->
+    <div style="margin-top:6mm; break-inside:avoid;">
+      <div class="dv-h">Bon pour accord</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12mm; margin-top:3mm;">
+        <div>
+          <p class="dv-p"><strong>Pour {{ organisme }}</strong><br>{{ representant }}</p>
+        </div>
+        <div>
+          <p class="dv-p"><strong>Pour {{ clientNom }}</strong></p>
+          <p class="dv-p" style="color:#6b6b6b; font-size:8.5pt;">Date, signature et cachet,<br>précédés de la mention « Bon pour accord »</p>
+          <div style="border:1px solid rgba(11,11,10,0.25); height:30mm; margin-top:2mm;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</x-import>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      numero: "DV-2026-001",
+      emisLe: "31/07/2026",
+      valideJusquau: "30/08/2026",
+      validiteJours: "30",
+      titre: "Introduction à l'étalonnage vidéo avec DaVinci Resolve",
+      dates: "Du 18 au 19 mai 2026",
+      lieu: "15 rue de la Beaune, 93100 Montreuil",
+      clientNom: "[Société cliente]",
+      clientAdresse: "[Adresse du client]",
+      clientSiret: "SIRET [à compléter]",
+      clientContact: "contact@client.com",
+      lignes: [
+        { designation: "Introduction à l'étalonnage vidéo", detail: "14 heures (2 jours) · Présentiel · 5 participants", quantite: "1", prix: "1 500,00 €" },
+      ],
+      totalHT: "1 500,00 €",
+      ligneTva: "TVA non applicable, art. 261-4-4°a du CGI",
+      totalTTC: "1 500,00 €",
+      afficherTTC: false,
+      modalitesReglement: "30 jours à réception de facture",
+      coordonneesBancaires: "",
+      organisme: "LES GRIOTS",
+      organismeAdresse: "[adresse], [code postal] [ville]",
+      representant: "[représentant]",
+      contactEmail: "contact@lesgriots.com",
+      piedDePage: "LES GRIOTS · SIRET [à compléter] · Déclaration d'activité [à compléter]",
+    };
+  }
+}
+</script>
+</body>
+</html>

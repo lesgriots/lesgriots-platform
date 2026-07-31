@@ -70,6 +70,9 @@ const TYPES = {
 export function retirerBlocsVides(html, valeurs) {
   const vide = (x) => {
     if (x === null || x === undefined) return true;
+    // Un faux booléen vaut absence : data-si="afficherTTC" retire le bloc
+    // quand la TVA ne s'applique pas.
+    if (typeof x === 'boolean') return !x;
     if (Array.isArray(x)) return x.length === 0;
     if (typeof x === 'object') return false;
     return String(x).trim() === '';
