@@ -1,0 +1,150 @@
+/**
+ * documents-accueil.mjs — la convocation et le livret d'accueil.
+ *
+ * Même philosophie que le programme : le layout sait dessiner, ce fichier
+ * sait ce que le document doit dire, et il va le chercher dans la base.
+ * La convocation est nominative (une session, un apprenant) ; le livret
+ * est de session (le même pour tous les participants d'une session).
+ */
+
+const texte = (v) => String(v ?? '').trim();
+
+const jourFr = (v, options = { day: 'numeric', month: 'long', year: 'numeric' }) => {
+  if (!v) return '';
+  const d = new Date(String(v).length <= 10 ? `${v}T12:00:00` : v);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('fr-FR', options);
+};
+
+function reglagesDe(db) {
+  return Object.fromEntries(db.prepare('SELECT key, value FROM settings').all().map((r) => [r.key, r.value]));
+}
+
+function piedDePage(reglages) {
+  return [
+    texte(reglages.company_name) || 'LES GRIOTS',
+    reglages.siret ? `SIRET ${reglages.siret}` : '',
+    reglages.nda ? `Déclaration d'activité n° ${reglages.nda}` : '',
+    [texte(reglages.address), [reglages.postal_code, reglages.city].filter(Boolean).join(' ')].filter(Boolean).join(', '),
+    texte(reglages.email),
+  ].filter(Boolean).join(' · ');
+}
+
+function chargerSession(db, sessionId) {
+  const s = db.prepare(`
+    SELECT s.*, f.title AS formation_titre, f.duration_hours, f.duration_days, f.modality AS formation_modalite
+    FROM sessions s JOIN formations f ON f.id = s.formation_id WHERE s.id = ?
+  `).get(sessionId);
+  if (!s) throw new Error('Session introuvable.');
+  return s;
+}
+
+function datesLisibles(s) {
+  const debut = jourFr(s.start_date);
+  const fin = jourFr(s.end_date);
+  if (!fin || fin === debut) return `Le ${debut}`;
+  const memeMois = String(s.start_date).slice(0, 7) === String(s.end_date).slice(0, 7);
+  return memeMois
+    ? `Du ${jourFr(s.start_date, { day: 'numeric' })} au ${fin}`
+    : `Du ${debut} au ${fin}`;
+}
+
+const MODALITES = { presentiel: 'Présentiel', distanciel: 'À distance', hybride: 'Mixte' };
+
+/* ── La convocation ───────────────────────────────────────────────────── */
+
+/**
+ * `apprenantId` optionnel : sans lui, la convocation est générée pour le
+ * premier inscrit de la session (utile pour un aperçu).
+ */
+export function construireConvocation(db, sessionId, apprenantId = null) {
+  const s = chargerSession(db, sessionId);
+  const reglages = reglagesDe(db);
+
+  const apprenant = apprenantId
+    ? db.prepare('SELECT * FROM apprenants WHERE id = ?').get(apprenantId)
+    : db.prepare(`
+        SELECT a.* FROM apprenants a
+        JOIN inscriptions i ON i.apprenant_id = a.id
+        WHERE i.session_id = ? ORDER BY a.last_name LIMIT 1
+      `).get(sessionId);
+  if (!apprenant) throw new Error('Aucun apprenant inscrit sur cette session.');
+
+  const heures = Number(s.duration_hours) || 0;
+
+  return {
+    apprenant: [apprenant.first_name, apprenant.last_name].filter(Boolean).join(' ').trim() || 'Participant',
+    entreprise: texte(apprenant.company),
+    apprenantEmail: texte(apprenant.email),
+    titre: texte(s.formation_titre),
+    dates: datesLisibles(s),
+    horaires: texte(s.horaire) || '9h30 - 12h30 / 13h30 - 17h30',
+    duree: heures ? `${heures} h` : '',
+    lieu: texte(s.adresse) || texte(s.location) || 'Lieu communiqué prochainement',
+    modalite: MODALITES[s.modality] || MODALITES[s.formation_modalite] || 'Présentiel',
+    formateur: texte(s.formateur_name),
+    representant: [reglages.representant_name, reglages.representant_title].filter(Boolean).join(' · '),
+    organisme: texte(reglages.company_name) || 'LES GRIOTS',
+    contactEmail: texte(reglages.email),
+    piedDePage: piedDePage(reglages),
+    maj: new Date().toLocaleDateString('fr-FR'),
+    _apprenant: apprenant, // pour l'appelant (envoi d'email, nommage)
+  };
+}
+
+/* ── Le livret d'accueil ──────────────────────────────────────────────── */
+
+/**
+ * Le livret garde son contenu éditorial (valeurs de la maison, règles de
+ * vie, déroulé type) : c'est un texte de marque, pas une donnée. Seuls le
+ * pratique, les contacts et le millésime viennent de la base.
+ */
+export function construireLivret(db, sessionId = null) {
+  const reglages = reglagesDe(db);
+  const s = sessionId ? chargerSession(db, sessionId) : null;
+
+  const contactEmail = texte(reglages.email) || 'contact@lesgriots.com';
+
+  return {
+    promo: String(new Date(s?.start_date || Date.now()).getFullYear()),
+    maj: new Date().toLocaleDateString('fr-FR'),
+    sommaire: [
+      { n: '01', label: 'Qui sommes-nous', href: '#qui' },
+      { n: '02', label: 'Le déroulé', href: '#deroule' },
+      { n: '03', label: 'Infos pratiques', href: '#pratique' },
+      { n: '04', label: 'Règles de vie', href: '#regles' },
+      { n: '05', label: 'Accessibilité', href: '#acces' },
+      { n: '06', label: 'Vos contacts', href: '#contacts' },
+    ],
+    valeurs: [
+      { titre: 'Transmettre', texte: 'Des savoir-faire concrets, transmis par celles et ceux qui les pratiquent.' },
+      { titre: 'Pratiquer', texte: 'Chaque session avance sur votre projet réel, pas sur un cas fictif.' },
+      { titre: 'Relier', texte: "Une communauté qui continue d'échanger après la formation." },
+    ],
+    etapes: [
+      { quand: 'J-14', titre: 'Confirmation et auto-positionnement', texte: 'Vous recevez votre convocation, le programme détaillé et un court questionnaire pour situer votre niveau et vos attentes.' },
+      { quand: 'J-2', titre: 'Rappel et checklist', texte: "Lieu, horaires, accès et matériel à prévoir. C'est le moment de nous signaler tout besoin d'adaptation." },
+      { quand: 'Jour J', titre: 'La formation', texte: "Accueil 15 minutes avant. Alternance d'apports et d'ateliers, avec des retours individualisés sur votre projet." },
+      { quand: 'J+7', titre: 'Après la formation', texte: 'Évaluation à chaud, certificat de réalisation, supports et ressources partagés. Un point de suivi est proposé à 30 jours.' },
+    ],
+    pratique: [
+      { label: 'Lieu', value: texte(s?.adresse) || texte(s?.location) || 'Communiqué avec votre convocation' },
+      { label: 'Horaires', value: texte(s?.horaire) || '9 h 30 – 17 h 30 · accueil dès 9 h 15' },
+      { label: 'Pauses', value: 'Deux pauses · 1 h de déjeuner' },
+      { label: 'Matériel', value: 'Ordinateur ou smartphone selon la formation · précisé dans votre convocation' },
+      { label: 'Effectif', value: `${s?.max_participants || 12} participants maximum` },
+      { label: 'Restauration', value: 'Café et thé sur place · restaurants à proximité' },
+    ],
+    regles: [
+      { titre: 'Ponctualité', texte: "Les sessions commencent à l'heure. En cas de retard ou d'absence, prévenez-nous au plus vite — l'émargement conditionne votre certificat." },
+      { titre: 'Bienveillance', texte: "Aucune remarque discriminatoire ou dévalorisante n'est tolérée. On critique le travail, jamais la personne." },
+      { titre: 'Confidentialité', texte: "Les projets partagés en salle restent dans la salle. Rien n'est diffusé sans l'accord de son auteur." },
+      { titre: 'Téléphones', texte: 'Le smartphone est un outil de travail ici. En dehors des exercices, on le met en silencieux.' },
+      { titre: "Droit à l'image", texte: 'Des photos peuvent être prises pendant la session. Vous pouvez refuser à tout moment, sans justification.' },
+    ],
+    contacts: [
+      { role: 'Coordination pédagogique', nom: texte(reglages.representant_name) || 'Moos Coulibaly', email: contactEmail },
+      { role: 'Référent handicap', nom: 'Référent accessibilité', email: contactEmail },
+      { role: 'Administratif & financement', nom: 'Service formation', email: contactEmail },
+    ],
+  };
+}
