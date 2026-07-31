@@ -14,156 +14,113 @@
 <style>
   doc-page:not(:defined) { visibility: hidden; }
   body { margin: 0; background:#E6E4DD; }
-  .gp-h { font-family:'Geist',sans-serif; font-weight:600; font-size:9pt; letter-spacing:0.18em; text-transform:uppercase; color:#0B0B0A; break-after:avoid; }
-  .gp-sec { break-inside:avoid; }
-  .cv-p { font-family:'Geist',sans-serif; font-weight:400; font-size:9.5pt; line-height:1.55; color:#2a2a26; margin:0 0 2.5mm; }
-  .avec-bandes {
-    --bande-haute: calc(var(--doc-hdr-h, 0px) + var(--doc-hdr-pad, 0px));
-    --bande-basse: calc(var(--doc-ftr-h, 0px) + var(--doc-ftr-pad, 0px));
-  }
+  .ct-h { font-family:'Geist',sans-serif; font-weight:700; font-size:10pt; color:#0B0B0A; margin-bottom:2mm; break-after:avoid; }
+  .ct-p { font-family:'Geist',sans-serif; font-weight:400; font-size:9.5pt; line-height:1.5; color:#1a1a18; margin:0 0 2mm; text-align:justify; }
 </style>
 </helmet>
 <x-import component-from-global-scope="doc-page" from="./doc-page.js" size="a4" margin="0" hint-size="100%,100%">
 
   <div slot="header" style="padding:6mm 18mm 0; font-family:'Geist',sans-serif; color:#0B0B0A;">
-    <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:2.4mm; border-bottom:1px solid rgba(11,11,10,0.18);">
-      <div>
-        <div style="font-weight:700; font-size:11pt; letter-spacing:0.06em; color:#0B0B0A;">LES GRIOTS</div>
-        <div style="margin-top:1.2mm; font-size:6.5pt; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; white-space:nowrap; overflow:hidden;">Convention n° {{ numero }} · {{ titre }}</div>
-      </div>
-      <span style="font-size:8pt; letter-spacing:0.12em; text-transform:uppercase; color:#9a9a90;">Convention de formation</span>
+    <div style="display:flex; align-items:baseline; justify-content:space-between; padding-bottom:2mm; border-bottom:1px solid rgba(11,11,10,0.25);">
+      <span style="font-weight:700; font-size:10pt; letter-spacing:0.05em;">LES GRIOTS</span>
+      <span style="font-size:7.5pt; color:#6b6b6b;">Convention n° {{ numero }}</span>
     </div>
   </div>
 
-  <div slot="footer" data-si="piedDePage" style="padding:0 12mm 5mm; font-family:'Geist',sans-serif; letter-spacing:0.03em; color:#0B0B0A; text-align:center;">
+  <div slot="footer" data-si="piedDePage" style="padding:0 12mm 5mm; font-family:'Geist',sans-serif; letter-spacing:0.02em; color:#0B0B0A; text-align:center;">
     <div style="font-size:6.5pt; white-space:nowrap; overflow:hidden;">{{ piedDePage }}</div>
-    <div style="font-size:6pt; margin-top:1.2mm; line-height:1.45; opacity:0.8;">L'enregistrement de la déclaration d'activité ne vaut pas agrément de l'État (art. L.6352-12 du Code du travail) · Certification Qualiopi délivrée au titre de la catégorie : actions de formation · Convention établie le {{ etablieLe }}</div>
+    <div style="font-size:6pt; margin-top:1mm; line-height:1.4; opacity:0.8;">L'enregistrement de la déclaration d'activité ne vaut pas agrément de l'État (art. L.6352-12 du Code du travail) · Certification Qualiopi délivrée au titre de la catégorie : actions de formation</div>
   </div>
 
-  <!-- COUVERTURE, encre pleine -->
-  <div class="avec-bandes" style="position:relative; z-index:1; width:100%; height:calc(297mm - var(--bande-haute) - var(--bande-basse) - 2mm); background:#0B0B0A; break-after:page;">
-    <div style="position:absolute; left:0; right:0; bottom:calc(100% - 1mm); height:calc(var(--bande-haute) + 6mm); background:#0B0B0A;"></div>
-    <div style="position:absolute; left:0; right:0; top:calc(100% - 1mm); height:calc(var(--bande-basse) + 2.6mm); background:#0B0B0A;"></div>
-    <div style="position:absolute; top:-8mm; left:18mm; right:18mm; display:flex; align-items:flex-start; justify-content:space-between;">
-      <div style="font-family:'Geist',sans-serif; font-weight:700; font-size:14pt; letter-spacing:0.06em; color:#f6f5f3;">LES GRIOTS</div>
-      <span style="font-family:'Geist',sans-serif; font-weight:600; font-size:9pt; letter-spacing:0.14em; text-transform:uppercase; color:#f6f5f3; text-align:right;">Convention<br>de formation</span>
-    </div>
-    <div style="position:absolute; left:18mm; right:18mm; top:44%; transform:translateY(-50%);">
-      <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:11pt; letter-spacing:0.16em; text-transform:uppercase; color:#f6f5f3; margin-bottom:14px;">Convention n° {{ numero }}</div>
-      <h1 style="font-family:'Geist',sans-serif; font-weight:700; font-size:38pt; line-height:1.02; letter-spacing:-0.03em; margin:0; color:#f6f5f3; text-wrap:balance; max-width:17ch;">Convention de formation professionnelle.</h1>
-      <div style="font-family:'Geist',sans-serif; font-weight:500; font-size:13pt; color:rgba(246,245,243,0.85); margin-top:9mm; max-width:30ch;">{{ titre }}</div>
-    </div>
-    <div style="position:absolute; left:18mm; bottom:18mm; display:flex; flex-direction:column; gap:4px;">
-      <span style="font-family:'Geist',sans-serif; font-weight:600; font-size:11pt; letter-spacing:-0.01em; color:#f6f5f3;">Établie le {{ etablieLe }}</span>
-      <span style="font-family:'Geist',sans-serif; font-weight:400; font-size:9pt; letter-spacing:0.02em; color:rgba(246,245,243,0.7);">Articles L.6353-1 et suivants du Code du travail</span>
-    </div>
-  </div>
+  <div style="padding:12mm 18mm; font-family:'Geist',sans-serif;">
 
-  <div style="padding:14mm 18mm; font-family:'Geist',sans-serif;">
+    <!-- TITRE -->
+    <div style="text-align:center; margin-bottom:8mm;">
+      <div style="font-weight:700; font-size:15pt; letter-spacing:0.01em; color:#0B0B0A;">Convention de formation professionnelle</div>
+      <div style="font-size:9.5pt; color:#2a2a26; margin-top:2mm;">Convention n° {{ numero }} · établie le {{ etablieLe }}</div>
+      <div style="font-size:8.5pt; color:#6b6b6b; margin-top:1mm;">En application des articles L.6353-1 et suivants du Code du travail</div>
+    </div>
 
     <!-- LES PARTIES -->
-    <div class="gp-sec">
-      <div class="gp-h" style="margin-bottom:4mm;">Entre les soussignés</div>
-      <p class="cv-p">{{ organismeTexte }}</p>
-      <p class="cv-p" style="color:#6b6b6b;">Ci-après dénommé « L'Organisme de formation »,</p>
-      <p class="cv-p" style="font-weight:600; margin:3mm 0;">et</p>
-      <p class="cv-p">{{ clientTexte }}</p>
-      <p class="cv-p" style="color:#6b6b6b;">Ci-après dénommé « Le Client »,</p>
-      <p class="cv-p" style="margin-top:3mm;">il est conclu la convention de formation professionnelle suivante, en application des articles L.6353-1 et suivants du Code du travail.</p>
+    <div>
+      <div class="ct-h">Entre les soussignés</div>
+      <p class="ct-p">{{ organismeTexte }}<br>Ci-après dénommé « L'Organisme de formation »,</p>
+      <p class="ct-p" style="margin:2mm 0;"><strong>et</strong></p>
+      <p class="ct-p">{{ clientTexte }}<br>Ci-après dénommé « Le Client »,</p>
+      <p class="ct-p">il est conclu la convention suivante :</p>
     </div>
 
-    <div class="gp-sec" style="margin-top:8mm;">
-      <div style="font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b;">Article 1</div>
-      <div class="gp-h" style="margin:1.5mm 0 3mm;">Objet de la convention</div>
-      <p class="cv-p">En exécution de la présente convention, l'Organisme de formation s'engage à organiser l'action de formation intitulée <strong>{{ titre }}</strong>, dont le programme détaillé est annexé à la présente convention.</p>
+    <div style="margin-top:5mm; break-inside:avoid-page;">
+      <div class="ct-h">Article 1 — Objet de la convention</div>
+      <p class="ct-p">En exécution de la présente convention, l'Organisme de formation s'engage à organiser l'action de formation intitulée <strong>{{ titre }}</strong>, dont le programme détaillé est annexé à la présente convention.</p>
     </div>
-    <div class="gp-sec" style="margin-top:8mm;">
-      <div style="font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b;">Article 2</div>
-      <div class="gp-h" style="margin:1.5mm 0 3mm;">Nature et caractéristiques de l'action</div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4mm 8mm; border-top:2px solid #0B0B0A; padding-top:4mm; margin-bottom:4mm;">
-        <sc-for list="{{ caracteristiques }}" as="c">
-          <div style="break-inside:avoid;"><div style="font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b;">{{ c.label }}</div><div style="font-weight:500; font-size:9.5pt; color:#0B0B0A; margin-top:0.8mm; white-space:pre-line;">{{ c.value }}</div></div>
-        </sc-for>
-      </div>
-      <ul style="margin:0; padding-left:0; list-style:none;">
-        <sc-for list="{{ objectifs }}" as="o">
-          <li style="display:flex; gap:10px; padding:1.5mm 0; font-size:9.5pt; line-height:1.5; color:#2a2a26;"><span style="color:#FFCA00;">●</span><span>{{ o }}</span></li>
-        </sc-for>
-      </ul>
+    <div style="margin-top:5mm; break-inside:avoid-page;">
+      <div class="ct-h">Article 2 — Nature et caractéristiques de l'action</div>
+      <sc-for list="{{ caracteristiques }}" as="c">
+        <p class="ct-p" style="margin-bottom:1mm;"><strong>{{ c.label }} :</strong> <span style="white-space:pre-line;">{{ c.value }}</span></p>
+      </sc-for>
+      <sc-for list="{{ objectifs }}" as="o">
+        <p class="ct-p" style="margin:0.5mm 0 0.5mm 5mm;">– {{ o }}</p>
+      </sc-for>
     </div>
-    <div class="gp-sec" style="margin-top:8mm;">
-      <div style="font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b;">Article 3</div>
-      <div class="gp-h" style="margin:1.5mm 0 3mm;">Stagiaires</div>
-      <p class="cv-p">La présente convention concerne <strong>{{ nbStagiaires }} stagiaire(s)</strong> :</p>
-      <ul style="margin:0 0 3mm; padding-left:0; list-style:none;">
-        <sc-for list="{{ stagiaires }}" as="st">
-          <li style="display:flex; gap:10px; padding:1.2mm 0; font-weight:600; font-size:9.5pt; color:#0B0B0A;"><span style="color:#FFCA00;">●</span><span>{{ st }}</span></li>
-        </sc-for>
-      </ul>
-      <p class="cv-p">L'Organisme de formation remettra à chaque stagiaire, avant le début de l'action, un livret d'accueil comprenant le règlement intérieur, le programme de formation et les informations pratiques.</p>
+    <div style="margin-top:5mm; break-inside:avoid-page;">
+      <div class="ct-h">Article 3 — Stagiaires</div>
+      <p class="ct-p">La présente convention concerne {{ nbStagiaires }} stagiaire(s) :</p>
+      <sc-for list="{{ stagiaires }}" as="st">
+        <p class="ct-p" style="margin:0.5mm 0 0.5mm 5mm;">– {{ st }}</p>
+      </sc-for>
+      <p class="ct-p" style="margin-top:2mm;">L'Organisme de formation remettra à chaque stagiaire, avant le début de l'action, un livret d'accueil comprenant le règlement intérieur, le programme de formation et les informations pratiques.</p>
     </div>
-    <div class="gp-sec" style="margin-top:8mm;">
-      <div style="font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b;">Article 4</div>
-      <div class="gp-h" style="margin:1.5mm 0 3mm;">Dispositions financières</div>
-      <p class="cv-p">Le prix de la formation est fixé à <strong>{{ prixHT }} HT</strong> ({{ mentionTva }}). {{ parStagiaire }}</p>
-      <p class="cv-p">En cas de cessation anticipée de la formation du fait de l'Organisme de formation ou de l'abandon du stagiaire pour un motif non lié à un cas de force majeure, le prix sera calculé au prorata de la durée effectivement réalisée.</p>
+    <div style="margin-top:5mm; break-inside:avoid-page;">
+      <div class="ct-h">Article 4 — Dispositions financières</div>
+      <p class="ct-p">Le prix de la formation est fixé à <strong>{{ prixHT }} HT</strong> ({{ mentionTva }}). {{ parStagiaire }}</p>
+      <p class="ct-p">En cas de cessation anticipée de la formation du fait de l'Organisme de formation ou de l'abandon du stagiaire pour un motif non lié à un cas de force majeure, le prix sera calculé au prorata de la durée effectivement réalisée.</p>
     </div>
-    <div class="gp-sec" style="margin-top:8mm;">
-      <div style="font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b;">Article 5</div>
-      <div class="gp-h" style="margin:1.5mm 0 3mm;">Modalités de règlement</div>
-      <p class="cv-p">Le règlement sera effectué selon les modalités suivantes : <strong>{{ modalitesReglement }}</strong>.</p>
-      <p class="cv-p">En cas de prise en charge par un organisme financeur (OPCO, FAF, etc.), le Client s'engage à fournir l'accord de prise en charge avant le début de la formation. À défaut, le coût de la formation sera facturé directement au Client.</p>
+    <div style="margin-top:5mm; break-inside:avoid-page;">
+      <div class="ct-h">Article 5 — Modalités de règlement</div>
+      <p class="ct-p">Le règlement sera effectué selon les modalités suivantes : {{ modalitesReglement }}.</p>
+      <p class="ct-p">En cas de prise en charge par un organisme financeur (OPCO, FAF, etc.), le Client s'engage à fournir l'accord de prise en charge avant le début de la formation. À défaut, le coût de la formation sera facturé directement au Client.</p>
     </div>
-    <div class="gp-sec" style="margin-top:8mm;">
-      <div style="font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b;">Article 6</div>
-      <div class="gp-h" style="margin:1.5mm 0 3mm;">Obligations de l'organisme</div>
-      <p class="cv-p">L'Organisme de formation s'engage à : dispenser la formation conformément au programme annexé ; mettre à disposition les moyens pédagogiques et techniques nécessaires ; assurer l'encadrement par un formateur qualifié ; remettre une attestation de fin de formation à chaque stagiaire ; fournir les feuilles d'émargement signées.</p>
+    <div style="margin-top:5mm; break-inside:avoid-page;">
+      <div class="ct-h">Article 6 — Obligations de l'Organisme de formation</div>
+      <p class="ct-p">L'Organisme de formation s'engage à : dispenser la formation conformément au programme annexé ; mettre à disposition les moyens pédagogiques et techniques nécessaires ; assurer l'encadrement par un formateur qualifié ; remettre une attestation de fin de formation à chaque stagiaire ; fournir les feuilles d'émargement signées.</p>
     </div>
-    <div class="gp-sec" style="margin-top:8mm;">
-      <div style="font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b;">Article 7</div>
-      <div class="gp-h" style="margin:1.5mm 0 3mm;">Obligations du client</div>
-      <p class="cv-p">Le Client s'engage à : informer les stagiaires des dates, horaires et lieu de formation ; veiller à la présence et à l'assiduité des stagiaires ; régler le prix de la formation selon les modalités convenues ; fournir les informations nécessaires à l'inscription.</p>
+    <div style="margin-top:5mm; break-inside:avoid-page;">
+      <div class="ct-h">Article 7 — Obligations du Client</div>
+      <p class="ct-p">Le Client s'engage à : informer les stagiaires des dates, horaires et lieu de formation ; veiller à la présence et à l'assiduité des stagiaires ; régler le prix de la formation selon les modalités convenues ; fournir les informations nécessaires à l'inscription.</p>
     </div>
-    <div class="gp-sec" style="margin-top:8mm;">
-      <div style="font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b;">Article 8</div>
-      <div class="gp-h" style="margin:1.5mm 0 3mm;">Annulation et report</div>
-      <p class="cv-p">En cas d'annulation par le Client à moins de <strong>10 jours ouvrés</strong> avant le début de la formation, une indemnité forfaitaire de <strong>30 %</strong> du prix total sera due.</p>
-      <p class="cv-p">En cas de report, l'Organisme de formation proposera de nouvelles dates dans un délai raisonnable. En cas d'impossibilité de reporter, les conditions d'annulation ci-dessus s'appliquent. Si l'annulation est du fait de l'Organisme de formation, le Client sera intégralement remboursé des sommes versées.</p>
+    <div style="margin-top:5mm; break-inside:avoid-page;">
+      <div class="ct-h">Article 8 — Annulation et report</div>
+      <p class="ct-p">En cas d'annulation par le Client à moins de 10 jours ouvrés avant le début de la formation, une indemnité forfaitaire de 30 % du prix total sera due.</p>
+      <p class="ct-p">En cas de report, l'Organisme de formation proposera de nouvelles dates dans un délai raisonnable. En cas d'impossibilité de reporter, les conditions d'annulation ci-dessus s'appliquent. Si l'annulation est du fait de l'Organisme de formation, le Client sera intégralement remboursé des sommes versées.</p>
     </div>
-    <div class="gp-sec" style="margin-top:8mm;">
-      <div style="font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b;">Article 9</div>
-      <div class="gp-h" style="margin:1.5mm 0 3mm;">Propriété intellectuelle</div>
-      <p class="cv-p">Les supports pédagogiques remis aux stagiaires sont protégés par le droit d'auteur et restent la propriété exclusive de l'Organisme de formation. Toute reproduction, diffusion ou utilisation en dehors du cadre de la formation est strictement interdite sans autorisation préalable écrite.</p>
+    <div style="margin-top:5mm; break-inside:avoid-page;">
+      <div class="ct-h">Article 9 — Propriété intellectuelle</div>
+      <p class="ct-p">Les supports pédagogiques remis aux stagiaires sont protégés par le droit d'auteur et restent la propriété exclusive de l'Organisme de formation. Toute reproduction, diffusion ou utilisation en dehors du cadre de la formation est strictement interdite sans autorisation préalable écrite.</p>
     </div>
-    <div class="gp-sec" style="margin-top:8mm;">
-      <div style="font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b;">Article 10</div>
-      <div class="gp-h" style="margin:1.5mm 0 3mm;">Confidentialité et RGPD</div>
-      <p class="cv-p">Les parties s'engagent à traiter de manière confidentielle toute information échangée dans le cadre de la présente convention. Les données personnelles collectées sont traitées conformément au Règlement Général sur la Protection des Données (RGPD) et ne sont utilisées que dans le cadre de l'exécution de la formation et des obligations légales de l'Organisme de formation.</p>
+    <div style="margin-top:5mm; break-inside:avoid-page;">
+      <div class="ct-h">Article 10 — Confidentialité et protection des données</div>
+      <p class="ct-p">Les parties s'engagent à traiter de manière confidentielle toute information échangée dans le cadre de la présente convention. Les données personnelles collectées sont traitées conformément au Règlement Général sur la Protection des Données (RGPD) et ne sont utilisées que dans le cadre de l'exécution de la formation et des obligations légales de l'Organisme de formation.</p>
     </div>
-    <div class="gp-sec" style="margin-top:8mm;">
-      <div style="font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b;">Article 11</div>
-      <div class="gp-h" style="margin:1.5mm 0 3mm;">Litiges</div>
-      <p class="cv-p">En cas de litige relatif à l'exécution de la présente convention, les parties s'efforceront de trouver une solution amiable. À défaut, le litige sera porté devant le tribunal compétent du siège social de l'Organisme de formation.</p>
+    <div style="margin-top:5mm; break-inside:avoid-page;">
+      <div class="ct-h">Article 11 — Litiges</div>
+      <p class="ct-p">En cas de litige relatif à l'exécution de la présente convention, les parties s'efforceront de trouver une solution amiable. À défaut, le litige sera porté devant le tribunal compétent du siège social de l'Organisme de formation.</p>
     </div>
 
     <!-- SIGNATURES -->
-    <div class="gp-sec" style="break-before:page;">
-      <div class="gp-h" style="margin-bottom:4mm;">Accord des parties</div>
-      <p class="cv-p">Fait en deux exemplaires originaux, dont un pour chacune des parties.</p>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10mm; margin-top:8mm;">
-        <div style="border-top:2px solid #0B0B0A; padding-top:4mm;">
-          <div style="font-weight:600; font-size:7.5pt; letter-spacing:0.18em; text-transform:uppercase; color:#0B0B0A;">Pour l'organisme de formation</div>
-          <div style="font-weight:600; font-size:10.5pt; color:#0B0B0A; margin-top:2mm;">{{ organisme }}</div>
-          <div style="font-size:9.5pt; color:#6b6b6b; margin-top:1mm;">{{ representant }}</div>
-          <div style="font-size:8.5pt; color:#9a9a90; margin-top:14mm;">Date, signature et cachet<br>précédés de la mention « Lu et approuvé »</div>
-          <div style="border-bottom:1px solid rgba(11,11,10,0.3); margin-top:22mm;"></div>
+    <div style="margin-top:8mm; break-inside:avoid;">
+      <div class="ct-h">Accord des parties</div>
+      <p class="ct-p">Fait en deux exemplaires originaux, dont un pour chacune des parties.</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12mm; margin-top:5mm;">
+        <div>
+          <p class="ct-p"><strong>Pour l'Organisme de formation</strong><br>{{ organisme }}<br>{{ representant }}</p>
+          <p class="ct-p" style="color:#6b6b6b; font-size:8.5pt;">Date, signature et cachet,<br>précédés de la mention « Lu et approuvé »</p>
+          <div style="border:1px solid rgba(11,11,10,0.25); height:32mm; margin-top:2mm;"></div>
         </div>
-        <div style="border-top:2px solid #0B0B0A; padding-top:4mm;">
-          <div style="font-weight:600; font-size:7.5pt; letter-spacing:0.18em; text-transform:uppercase; color:#0B0B0A;">Pour le client</div>
-          <div style="font-weight:600; font-size:10.5pt; color:#0B0B0A; margin-top:2mm;">{{ clientNom }}</div>
-          <div data-si="clientRepresentant" style="font-size:9.5pt; color:#6b6b6b; margin-top:1mm;">{{ clientRepresentant }}</div>
-          <div style="font-size:8.5pt; color:#9a9a90; margin-top:14mm;">Date, signature et cachet<br>précédés de la mention « Lu et approuvé »</div>
-          <div style="border-bottom:1px solid rgba(11,11,10,0.3); margin-top:22mm;"></div>
+        <div>
+          <p class="ct-p"><strong>Pour le Client</strong><br>{{ clientNom }}<br>{{ clientRepresentant }}</p>
+          <p class="ct-p" style="color:#6b6b6b; font-size:8.5pt;">Date, signature et cachet,<br>précédés de la mention « Lu et approuvé »</p>
+          <div style="border:1px solid rgba(11,11,10,0.25); height:32mm; margin-top:2mm;"></div>
         </div>
       </div>
     </div>
