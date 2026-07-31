@@ -145,7 +145,7 @@ export function construireLivret(db, sessionId = null) {
       { label: 'Lieu', value: texte(s?.adresse) || texte(s?.location) || 'Communiqué avec votre convocation' },
       { label: 'Horaires', value: texte(s?.horaire) || '9 h 30 – 17 h 30 · accueil dès 9 h 15' },
       { label: 'Pauses', value: 'Deux pauses · 1 h de déjeuner' },
-      { label: 'Matériel', value: 'Ordinateur ou smartphone selon la formation · précisé dans votre convocation' },
+      { label: 'Matériel', value: '', items: ['Ordinateur ou smartphone selon la formation', 'Précisé dans votre convocation'] },
       { label: 'Effectif', value: `${s?.max_participants || 12} participants maximum` },
       { label: 'Restauration', value: 'Café et thé sur place · restaurants à proximité' },
     ],

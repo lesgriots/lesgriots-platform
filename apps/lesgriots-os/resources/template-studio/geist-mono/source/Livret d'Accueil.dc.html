@@ -109,6 +109,11 @@
           <div style="border-top:1px solid rgba(11,11,10,0.16); padding:10px 0;">
             <div style="font-weight:600; font-size:7.5pt; letter-spacing:0.18em; text-transform:uppercase; color:#0B0B0A; margin-bottom:3px;">{{ p.label }}</div>
             <div style="font-weight:500; font-size:10pt; color:#0B0B0A; white-space:pre-line;">{{ p.value }}</div>
+            <ul style="margin:0; padding-left:0; list-style:none;">
+              <sc-for list="{{ p.items }}" as="it">
+                <li style="display:flex; gap:8px; padding:2px 0; font-weight:500; font-size:10pt; color:#0B0B0A;"><span style="color:#FFCA00;">●</span><span>{{ it }}</span></li>
+              </sc-for>
+            </ul>
           </div>
         </sc-for>
       </div>
@@ -218,7 +223,7 @@ class Component extends DCLogic {
         { label: "Lieu", value: "[Adresse à compléter]" },
         { label: "Horaires", value: "9 h 30 – 17 h 30 · accueil dès 9 h 15" },
         { label: "Pauses", value: "Deux pauses · 1 h de déjeuner" },
-        { label: "Matériel", value: "Précisé dans votre convocation" },
+        { label: "Matériel", value: "", items: ["Ordinateur ou smartphone", "Précisé dans votre convocation"] },
         { label: "Effectif", value: "12 participants maximum" },
         { label: "Restauration", value: "Café et thé sur place" },
       ],
