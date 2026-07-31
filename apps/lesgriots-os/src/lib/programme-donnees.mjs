@@ -249,6 +249,13 @@ export function construireProgramme(db, formationId) {
       infos,
       societe,
       maj: new Date().toLocaleDateString('fr-FR'),
+      piedDePage: [
+        texte(reglages.company_name) || 'LES GRIOTS',
+        reglages.siret ? `SIRET ${reglages.siret}` : '',
+        reglages.nda ? `Déclaration d'activité n° ${reglages.nda}` : '',
+        [texte(reglages.address), [reglages.postal_code, reglages.city].filter(Boolean).join(' ')].filter(Boolean).join(', '),
+        texte(reglages.email),
+      ].filter(Boolean).join(' · '),
 
       // ── Les six blocs qui manquaient ────────────────────────────────
       methodes: texte(f.modalites_pedagogiques),
