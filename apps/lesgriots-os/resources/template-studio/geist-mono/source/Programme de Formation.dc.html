@@ -111,12 +111,17 @@
         <sc-for list="{{ modules }}" as="m" hint-placeholder-count="5">
           <div style="display:flex; gap:16px; align-items:baseline; padding:12px 0; border-top:1px solid rgba(11,11,10,0.12); break-inside:avoid;">
             <span style="font-family:'Geist',sans-serif; font-size:9.5pt; color:#9a9a90; flex-shrink:0; width:26px;">{{ m.n }}</span>
-            <div>
+            <div style="flex:1;">
               <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:11.5pt; letter-spacing:-0.01em; color:#0B0B0A;">{{ m.label }}</div>
               <div style="font-family:'Geist',sans-serif; font-weight:400; font-size:10pt; line-height:1.5; color:#5a5a52; margin-top:3px;">{{ m.detail }}</div>
             </div>
+            <span style="font-family:'Geist',sans-serif; font-weight:500; font-size:9.5pt; color:#0B0B0A; flex-shrink:0; white-space:nowrap;">{{ m.heures }}</span>
           </div>
         </sc-for>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; padding:10px 0 0; border-top:2px solid #0B0B0A; margin-top:2px;">
+        <span style="font-family:'Geist',sans-serif; font-size:8pt; letter-spacing:0.1em; text-transform:uppercase; color:#9a9a90;">Durée totale</span>
+        <span style="font-family:'Geist',sans-serif; font-weight:600; font-size:11pt; color:#0B0B0A;">{{ totalHeures }}</span>
       </div>
     </div>
 
@@ -124,18 +129,47 @@
     <div class="gp-sec" style="display:grid; grid-template-columns:1fr 1fr; gap:28px;">
       <div>
         <div class="gp-h">Méthodes pédagogiques</div>
-        <p class="gp-body">Alternance d'apports théoriques et d'ateliers pratiques. Chaque participant travaille sur son propre projet, avec des mises en situation, des retours individualisés et des ressources partagées en fin de session.</p>
+        <p class="gp-body">{{ methodes }}</p>
       </div>
       <div>
         <div class="gp-h">Modalités d'évaluation</div>
-        <p class="gp-body">Évaluation continue par mises en situation et livrables produits pendant la formation. Auto-positionnement en amont et en aval. Attestation de fin de formation et certificat de réalisation remis à l'issue.</p>
+        <p class="gp-body">{{ evaluation }}</p>
+      </div>
+    </div>
+
+    <!-- MOYENS TECHNIQUES -->
+    <div class="gp-sec">
+      <div class="gp-h">Moyens techniques et d'encadrement</div>
+      <p class="gp-body">{{ moyens }}</p>
+    </div>
+
+    <!-- INTERVENANTS -->
+    <div class="gp-sec">
+      <div class="gp-h">Intervenants</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px 28px;">
+        <sc-for list="{{ intervenants }}" as="p" hint-placeholder-count="2">
+          <div style="break-inside:avoid;">
+            <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:11.5pt; letter-spacing:-0.01em; color:#0B0B0A;">{{ p.nom }}</div>
+            <div style="font-family:'Geist',sans-serif; font-weight:400; font-size:9.5pt; line-height:1.5; color:#5a5a52; margin-top:4px;">{{ p.bio }}</div>
+            <div style="font-family:'Geist',sans-serif; font-weight:500; font-size:8.5pt; letter-spacing:0.04em; color:#8a8a80; margin-top:5px;">{{ p.qualifications }}</div>
+          </div>
+        </sc-for>
       </div>
     </div>
 
     <!-- ACCESSIBILITE -->
     <div class="gp-sec">
       <div class="gp-h">Accessibilité & handicap</div>
-      <p class="gp-body">Nos formations sont accessibles aux personnes en situation de handicap. Un référent handicap étudie chaque demande pour adapter les modalités d'accueil et pédagogiques. Contact : accessibilite@lagriotheque.com.</p>
+      <p class="gp-body">{{ accessibilite }}</p>
+    </div>
+
+    <!-- APPRECIATIONS -->
+    <div class="gp-sec" style="margin-top:22px;">
+      <div class="gp-h" style="margin-top:0;">Appréciations des participants</div>
+      <div style="display:flex; align-items:baseline; gap:12px;">
+        <span style="font-family:'Geist',sans-serif; font-weight:700; font-size:22pt; letter-spacing:-0.02em; color:#0B0B0A;">{{ satisfaction.moyenne }}</span>
+        <span style="font-family:'Geist',sans-serif; font-size:10pt; color:#5a5a52;">sur 5, sur {{ satisfaction.repondants }} réponse(s) recueillie(s).</span>
+      </div>
     </div>
 
     <!-- CONTACT STRIP -->
