@@ -70,7 +70,7 @@ export function construireConvention(db, sessionId) {
       modules: valeurs.modules || [],
       totalHeures: valeurs.totalHeures || '',
       methodes: valeurs.methodes || '',
-      evaluation: Array.isArray(valeurs.evaluation) ? valeurs.evaluation.join(' ') : (valeurs.evaluation || ''),
+      evaluation: Array.isArray(valeurs.evaluation) ? valeurs.evaluation : (valeurs.evaluation ? [valeurs.evaluation] : []),
       moyens: valeurs.moyens || '',
       accessibilite: valeurs.accessibilite || '',
     };

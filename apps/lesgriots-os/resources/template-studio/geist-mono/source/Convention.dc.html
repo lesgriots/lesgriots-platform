@@ -14,8 +14,13 @@
 <style>
   doc-page:not(:defined) { visibility: hidden; }
   body { margin: 0; background:#E6E4DD; }
-  .ct-h { font-family:'Geist',sans-serif; font-weight:700; font-size:10pt; color:#0B0B0A; margin-bottom:2mm; break-after:avoid; }
-  .ct-p { font-family:'Geist',sans-serif; font-weight:400; font-size:9.5pt; line-height:1.5; color:#1a1a18; margin:0 0 2mm; text-align:justify; }
+  .ct-h { font-family:'Geist',sans-serif; font-weight:700; font-size:10pt; color:#0B0B0A; margin-bottom:2mm; break-after:avoid; break-inside:avoid; }
+  /* L'annexe est un document de référence, pas un texte contractuel : elle
+     accepte une composition plus serrée pour tenir sur une page. */
+  .ct-annexe .ct-p { font-size:9pt; line-height:1.42; margin:0 0 1.5mm; }
+  .ct-annexe .ct-h { font-size:9.5pt; margin-bottom:1.5mm; }
+  .ct-annexe > div { margin-top:3mm !important; }
+  .ct-p { font-family:'Geist',sans-serif; font-weight:400; font-size:9.5pt; line-height:1.5; color:#1a1a18; margin:0 0 2mm; text-align:justify; orphans:2; widows:2; }
 </style>
 </helmet>
 <x-import component-from-global-scope="doc-page" from="./doc-page.js" size="a4" margin="16mm" hint-size="100%,100%">
@@ -120,7 +125,7 @@
 
 
     <!-- ANNEXE : le programme, promis par l'article 1 -->
-    <div data-si="annexe" style="break-before:page;">
+    <div class="ct-annexe" data-si="annexe" style="break-before:page;">
       <div style="text-align:center; margin-bottom:6mm;">
         <div style="font-weight:700; font-size:12pt; color:#0B0B0A;">Annexe — Programme de formation</div>
         <div style="font-size:9pt; color:#6b6b6b; margin-top:1.5mm;">{{ titre }}</div>
@@ -170,8 +175,10 @@
 
       <div data-si="annexe.evaluation" style="margin-top:4mm;">
         <div class="ct-h">Modalités de suivi et d'évaluation</div>
-        <p class="ct-p">{{ annexe.evaluation }}</p>
-        <p class="ct-p">L'exécution de l'action est attestée par des feuilles d'émargement signées par demi-journée. À l'issue de la formation, un certificat de réalisation est remis à chaque stagiaire.</p>
+        <sc-for list="{{ annexe.evaluation }}" as="ev">
+          <p class="ct-p" style="margin:0.5mm 0 0.5mm 5mm;">– {{ ev }}</p>
+        </sc-for>
+        <p class="ct-p" style="margin-top:2mm; break-inside:avoid;">L'exécution de l'action est attestée par des feuilles d'émargement signées par demi-journée. À l'issue de la formation, un certificat de réalisation est remis à chaque stagiaire.</p>
       </div>
 
       <div data-si="annexe.accessibilite" style="margin-top:4mm;">
