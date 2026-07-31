@@ -36,7 +36,7 @@ const executer = promisify(execFile);
 const CHROMIUM = process.env.CHROMIUM_BIN || '/usr/bin/chromium';
 
 /** Les fichiers dont un modèle a besoin à côté de lui. */
-const VOISINS = ['support.js', 'doc-page.js', 'logo-wordmark.svg'];
+const VOISINS = ['support.js', 'doc-page.js', 'logo-wordmark.svg', 'logo-lesgriots-ink.png'];
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
