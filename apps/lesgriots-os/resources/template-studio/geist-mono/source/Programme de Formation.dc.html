@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  doc-page:not(:defined) { visibility: hidden; }
+  body { margin: 0; background:#E6E4DD; }
+  .gp-h { font-family:'Geist',sans-serif; font-size:9.5pt; letter-spacing:0.14em; text-transform:uppercase; color:#8a8a80; margin:26px 0 10px; break-after:avoid; }
+  .gp-sec { break-inside:avoid; }
+  .gp-body { font-family:'Geist',sans-serif; font-weight:400; font-size:10.5pt; line-height:1.55; color:#2a2a26; margin:0 0 9px; }
+  .gp-li { font-family:'Geist',sans-serif; font-weight:400; font-size:10.5pt; line-height:1.5; color:#2a2a26; }
+</style>
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="a4" margin="0" hint-size="100%,100%">
+
+  <!-- COVER -->
+  <div style="position:relative; width:100%; height:297mm; background:#F5CE16; overflow:hidden; break-after:page;">
+    <div style="position:absolute; top:18mm; left:18mm; right:18mm; display:flex; align-items:flex-start; justify-content:space-between;">
+      <img src="logo-wordmark.svg" alt="LA GRIOTHÈQUE" style="height:18px; display:block;">
+      <span style="font-family:'Geist',sans-serif; font-weight:600; font-size:9pt; letter-spacing:0.14em; text-transform:uppercase; color:#0B0B0A; text-align:right;">Programme<br>de formation</span>
+    </div>
+
+    <!-- full-height subject photo, bottom-right -->
+    <div style="position:absolute; right:0; bottom:0; width:54%; height:62%; background:repeating-linear-gradient(135deg,#e2bd0d 0 26px,#eac60f 26px 52px); display:flex; align-items:flex-end; justify-content:center; padding-bottom:26mm;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:10px; opacity:0.6;">
+        <div style="width:56px; height:56px; border:2px solid #0B0B0A; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+          <div style="width:0; height:0; border-style:solid; border-width:9px 0 9px 15px; border-color:transparent transparent transparent #0B0B0A; margin-left:4px;"></div>
+        </div>
+        <span style="font-family:'Geist',sans-serif; font-weight:500; font-size:8pt; letter-spacing:0.12em; text-transform:uppercase; color:#0B0B0A;">Photo / vidéo</span>
+      </div>
+    </div>
+
+    <!-- giant title -->
+    <div style="position:absolute; left:18mm; right:18mm; top:44%; transform:translateY(-50%);">
+      <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:11pt; letter-spacing:0.16em; text-transform:uppercase; color:#0B0B0A; margin-bottom:14px;">{{ kicker }} · {{ category }}</div>
+      <h1 style="font-family:'Geist',sans-serif; font-weight:700; font-size:46pt; line-height:0.96; letter-spacing:-0.03em; margin:0; color:#0B0B0A; text-wrap:balance; max-width:15ch;">{{ title }}</h1>
+    </div>
+
+    <!-- credit + meta, bottom-left -->
+    <div style="position:absolute; left:18mm; bottom:18mm; display:flex; flex-direction:column; gap:4px;">
+      <span style="font-family:'Geist',sans-serif; font-weight:600; font-size:11pt; letter-spacing:-0.01em; color:#0B0B0A;">{{ heroMeta }}</span>
+      <span style="font-family:'Geist',sans-serif; font-weight:400; font-size:9pt; letter-spacing:0.02em; color:rgba(11,11,10,0.7);">Présentiel · Certifié Qualiopi · lagriotheque.com</span>
+    </div>
+  </div>
+
+  <div style="padding:14mm 18mm; font-family:'Geist',sans-serif;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8mm; padding-bottom:14px; border-bottom:1px solid rgba(11,11,10,0.18);">
+      <img src="logo-wordmark.svg" alt="LA GRIOTHÈQUE" style="height:13px; display:block;">
+      <span style="font-family:'Geist',sans-serif; font-size:8pt; letter-spacing:0.12em; text-transform:uppercase; color:#9a9a90;">Programme de formation</span>
+    </div>
+
+    <!-- QUICK META GRID -->
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0 14px; break-inside:avoid; border-top:2px solid #0B0B0A;">
+      <sc-for list="{{ infos }}" as="i" hint-placeholder-count="6">
+        <div style="border-top:1px solid rgba(11,11,10,0.16); padding:10px 0;">
+          <div style="font-family:'Geist',sans-serif; font-size:7.5pt; letter-spacing:0.1em; text-transform:uppercase; color:#9a9a90; margin-bottom:3px;">{{ i.label }}</div>
+          <div style="font-family:'Geist',sans-serif; font-weight:500; font-size:10.5pt; color:#0B0B0A;">{{ i.value }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- PRESENTATION -->
+    <div class="gp-sec">
+      <div class="gp-h">Présentation</div>
+      <p class="gp-body">{{ constat }}</p>
+    </div>
+
+    <!-- OBJECTIFS -->
+    <div class="gp-sec">
+      <div class="gp-h">Objectifs pédagogiques</div>
+      <ul style="margin:0; padding-left:0; list-style:none;">
+        <sc-for list="{{ objectifs }}" as="o" hint-placeholder-count="4">
+          <li class="gp-li" style="display:flex; gap:12px; padding:5px 0;">
+            <span style="font-family:'Geist',sans-serif; color:#8a8a80;">—</span><span>{{ o }}</span>
+          </li>
+        </sc-for>
+      </ul>
+    </div>
+
+    <!-- PUBLIC & PREREQUIS -->
+    <div class="gp-sec" style="display:grid; grid-template-columns:1fr 1fr; gap:28px;">
+      <div>
+        <div class="gp-h">Public visé</div>
+        <ul style="margin:0; padding-left:0; list-style:none;">
+          <sc-for list="{{ audience }}" as="a" hint-placeholder-count="3">
+            <li class="gp-li" style="display:flex; gap:12px; padding:5px 0;"><span style="color:#F5CE16;">●</span><span>{{ a }}</span></li>
+          </sc-for>
+        </ul>
+      </div>
+      <div>
+        <div class="gp-h">Prérequis</div>
+        <p class="gp-body">{{ prerequis }}</p>
+        <div class="gp-h">Effectif</div>
+        <p class="gp-body">{{ effectif }}</p>
+      </div>
+    </div>
+
+    <!-- PROGRAMME DETAILLE -->
+    <div class="gp-sec">
+      <div class="gp-h">Programme détaillé</div>
+      <div>
+        <sc-for list="{{ modules }}" as="m" hint-placeholder-count="5">
+          <div style="display:flex; gap:16px; align-items:baseline; padding:12px 0; border-top:1px solid rgba(11,11,10,0.12); break-inside:avoid;">
+            <span style="font-family:'Geist',sans-serif; font-size:9.5pt; color:#9a9a90; flex-shrink:0; width:26px;">{{ m.n }}</span>
+            <div>
+              <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:11.5pt; letter-spacing:-0.01em; color:#0B0B0A;">{{ m.label }}</div>
+              <div style="font-family:'Geist',sans-serif; font-weight:400; font-size:10pt; line-height:1.5; color:#5a5a52; margin-top:3px;">{{ m.detail }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- MODALITES -->
+    <div class="gp-sec" style="display:grid; grid-template-columns:1fr 1fr; gap:28px;">
+      <div>
+        <div class="gp-h">Méthodes pédagogiques</div>
+        <p class="gp-body">Alternance d'apports théoriques et d'ateliers pratiques. Chaque participant travaille sur son propre projet, avec des mises en situation, des retours individualisés et des ressources partagées en fin de session.</p>
+      </div>
+      <div>
+        <div class="gp-h">Modalités d'évaluation</div>
+        <p class="gp-body">Évaluation continue par mises en situation et livrables produits pendant la formation. Auto-positionnement en amont et en aval. Attestation de fin de formation et certificat de réalisation remis à l'issue.</p>
+      </div>
+    </div>
+
+    <!-- ACCESSIBILITE -->
+    <div class="gp-sec">
+      <div class="gp-h">Accessibilité & handicap</div>
+      <p class="gp-body">Nos formations sont accessibles aux personnes en situation de handicap. Un référent handicap étudie chaque demande pour adapter les modalités d'accueil et pédagogiques. Contact : accessibilite@lagriotheque.com.</p>
+    </div>
+
+    <!-- CONTACT STRIP -->
+    <div style="margin-top:22px; background:#0B0B0A; color:#F1EFE8; border-radius:5px; padding:18px 22px; display:flex; justify-content:space-between; align-items:center; gap:20px; break-inside:avoid;">
+      <div>
+        <div style="font-family:'Geist',sans-serif; font-size:8pt; letter-spacing:0.12em; text-transform:uppercase; color:#F5CE16; margin-bottom:5px;">Inscription & devis</div>
+        <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:13pt; letter-spacing:-0.01em;">bonjour@lagriotheque.com · lagriotheque.com</div>
+      </div>
+      <div style="width:52px; height:52px; flex-shrink:0;">
+        <svg viewBox="0 0 200 200" style="width:100%; height:100%; display:block;">
+          <defs><path id="seal" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"></path></defs>
+          <circle cx="100" cy="100" r="100" fill="#F5CE16"></circle>
+          <text font-family="'Geist',sans-serif" font-size="15.5" letter-spacing="1.5" font-weight="500" fill="#0B0B0A"><textPath href="#seal" startOffset="0">LA GRIOTHÈQUE · LA GRIOTHÈQUE · </textPath></text>
+          <line x1="66" y1="78" x2="134" y2="122" stroke="#0B0B0A" stroke-width="4"></line>
+        </svg>
+      </div>
+    </div>
+
+    <!-- ORGANISME -->
+    <div class="gp-sec" style="margin-top:24px; border-top:2px solid #0B0B0A; padding-top:16px;">
+      <div class="gp-h" style="margin-top:0;">L'organisme de formation</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px 20px;">
+        <sc-for list="{{ societe }}" as="s" hint-placeholder-count="6">
+          <div>
+            <div style="font-family:'Geist',sans-serif; font-size:7.5pt; letter-spacing:0.1em; text-transform:uppercase; color:#9a9a90; margin-bottom:3px;">{{ s.label }}</div>
+            <div style="font-family:'Geist',sans-serif; font-weight:500; font-size:10pt; color:#0B0B0A;">{{ s.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="margin-top:16px; font-family:'Geist',sans-serif; font-size:7pt; letter-spacing:0.04em; color:#a8a89e; line-height:1.6;">
+      L'enregistrement de la déclaration d'activité ne vaut pas agrément de l'État (art. L.6352-12 du Code du travail). Certification Qualiopi délivrée au titre de la catégorie : Actions de formation. Programme mis à jour le {{ maj }} · Version 1.
+    </div>
+
+  </div>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900,&quot;height&quot;:1273},&quot;formationIndex&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Vidéo au téléphone (2 j)&quot;,&quot;Réseaux sociaux TPE (4 j)&quot;,&quot;Stratégie &amp; storytelling (1 j)&quot;],&quot;default&quot;:&quot;Vidéo au téléphone (2 j)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;}}">
+class Component extends DCLogic {
+  data() {
+    return [
+      {
+        category: "Stratégie", kicker: "Formation",
+        title: "Stratégie de contenu et création vidéo au téléphone",
+        constat: "Trop de talents avancent sans cadre. En deux jours, les participants repartent avec une ligne éditoriale claire et la capacité de tourner, monter et publier leurs vidéos en autonomie, avec leur seul smartphone.",
+        prerequis: "Aucune compétence technique requise. Disposer d'un smartphone récent.",
+        effectif: "8 participants maximum.",
+        objectifs: [
+          "Définir une ligne éditoriale et des formats adaptés à ses objectifs",
+          "Écrire des accroches et des scripts pensés pour le scroll",
+          "Tourner des vidéos de qualité au smartphone (lumière, cadrage, son)",
+          "Monter et publier en autonomie sur les réseaux sociaux",
+        ],
+        audience: [
+          "Créatifs, artistes et porteurs de projet",
+          "Entrepreneurs et TPE souhaitant produire en autonomie",
+          "Toute personne voulant structurer sa présence vidéo",
+        ],
+        modules: [
+          { n: "01", label: "Cadrer sa ligne éditoriale et ses formats", detail: "Objectifs, cibles, piliers de contenu et choix des formats par plateforme." },
+          { n: "02", label: "Écrire pour le scroll", detail: "Accroches, structure narrative, rythme et appel à l'action." },
+          { n: "03", label: "Tourner au smartphone", detail: "Lumière naturelle, cadrage, stabilisation, captation du son." },
+          { n: "04", label: "Monter vite sur mobile", detail: "Prise en main de CapCut / InShot : coupes, sous-titres, exports." },
+          { n: "05", label: "Publier, analyser, tenir le rythme", detail: "Calendrier, indicateurs clés et itération dans la durée." },
+        ],
+        infos: [
+          { label: "Durée", value: "2 journées · 14 heures" },
+          { label: "Modalité", value: "Présentiel" },
+          { label: "Effectif", value: "8 personnes max." },
+          { label: "Tarif", value: "Sur devis · éligible OPCO" },
+          { label: "Délai d'accès", value: "2 à 4 semaines" },
+          { label: "Certification", value: "Qualiopi" },
+        ],
+      },
+      {
+        category: "Stratégie", kicker: "Formation",
+        title: "Communiquer sur les réseaux sociaux pour promouvoir sa TPE",
+        constat: "Votre TPE mérite d'être vue. En quatre jours, les participants construisent une présence qui attire leurs clients : stratégie, contenus et canaux maîtrisés de bout en bout.",
+        prerequis: "Avoir une activité professionnelle en cours.",
+        effectif: "8 participants maximum.",
+        objectifs: [
+          "Diagnostiquer sa présence et définir son positionnement",
+          "Construire une stratégie et un calendrier éditorial",
+          "Créer des contenus qui convertissent",
+          "Piloter sa performance et ajuster sa communication",
+        ],
+        audience: [
+          "Dirigeants de TPE, indépendants et artisans",
+          "Personnes partant de zéro sur les réseaux sociaux",
+          "Porteurs de projet en phase de lancement",
+        ],
+        modules: [
+          { n: "01", label: "Diagnostic et positionnement", detail: "Audit de présence, analyse concurrentielle et proposition de valeur." },
+          { n: "02", label: "Stratégie et calendrier éditorial", detail: "Objectifs, cibles, piliers de contenu et planification." },
+          { n: "03", label: "Créer des contenus qui convertissent", detail: "Formats, copywriting, visuels et appels à l'action." },
+          { n: "04", label: "Maîtriser Instagram et LinkedIn", detail: "Bonnes pratiques, formats natifs et régularité." },
+          { n: "05", label: "Se mettre en avant à petit budget", detail: "Publicité simple, partenariats et bouche-à-oreille." },
+          { n: "06", label: "Mesurer et ajuster", detail: "Indicateurs clés, lecture des statistiques et itération." },
+        ],
+        infos: [
+          { label: "Durée", value: "4 journées · 28 heures" },
+          { label: "Modalité", value: "Présentiel" },
+          { label: "Effectif", value: "8 personnes max." },
+          { label: "Tarif", value: "Sur devis · éligible OPCO" },
+          { label: "Délai d'accès", value: "2 à 4 semaines" },
+          { label: "Certification", value: "Qualiopi" },
+        ],
+      },
+      {
+        category: "Workshop", kicker: "Workshop",
+        title: "Stratégie et storytelling de marque",
+        constat: "Un récit flou ne marque personne. En une journée intensive, les participants clarifient leur positionnement et structurent le storytelling qui rend leur marque mémorable.",
+        prerequis: "Aucun prérequis. Venir avec son projet ou sa marque.",
+        effectif: "8 participants maximum.",
+        objectifs: [
+          "Clarifier sa raison d'être et son territoire de marque",
+          "Définir son positionnement et sa cible",
+          "Construire un grand récit de marque cohérent",
+          "Décliner son histoire en messages clés activables",
+        ],
+        audience: [
+          "Fondateurs, marques et porteurs de projet",
+          "Créatifs et communicants en quête d'un récit clair",
+          "Équipes souhaitant aligner leur discours",
+        ],
+        modules: [
+          { n: "01", label: "Clarifier sa raison d'être", detail: "Mission, valeurs et territoire d'expression." },
+          { n: "02", label: "Positionnement et cible", detail: "Différenciation, promesse et audience prioritaire." },
+          { n: "03", label: "Construire son grand récit", detail: "Structure narrative, archétypes et fil conducteur." },
+          { n: "04", label: "Décliner en messages clés", detail: "Manifeste, accroches et preuves de marque." },
+          { n: "05", label: "Activer son storytelling", detail: "Déclinaison par canal et plan d'activation." },
+        ],
+        infos: [
+          { label: "Durée", value: "1 journée · 7 heures" },
+          { label: "Modalité", value: "Présentiel" },
+          { label: "Effectif", value: "8 personnes max." },
+          { label: "Tarif", value: "Sur devis · éligible OPCO" },
+          { label: "Délai d'accès", value: "2 à 4 semaines" },
+          { label: "Certification", value: "Qualiopi" },
+        ],
+      },
+    ];
+  }
+
+  renderVals() {
+    const labels = ["Vidéo au téléphone (2 j)", "Réseaux sociaux TPE (4 j)", "Stratégie & storytelling (1 j)"];
+    let fi = labels.indexOf(this.props.formationIndex);
+    if (fi < 0) fi = 0;
+    const f = this.data()[fi];
+    return {
+      category: f.category, kicker: f.kicker, title: f.title, constat: f.constat,
+      prerequis: f.prerequis, effectif: f.effectif, objectifs: f.objectifs,
+      audience: f.audience, modules: f.modules, infos: f.infos,
+      heroMeta: f.infos[0].value,
+      societe: [
+        { label: "Raison sociale", value: "LES GRIOTHÈQUE SASU" },
+        { label: "SIRET", value: "[à compléter]" },
+        { label: "N° de déclaration d'activité", value: "[à compléter]" },
+        { label: "Adresse", value: "[à compléter]" },
+        { label: "Contact", value: "bonjour@lagriotheque.com" },
+        { label: "Référent handicap", value: "accessibilite@lagriotheque.com" },
+      ],
+      maj: "16/07/2026",
+    };
+  }
+}
+</script>
+</body>
+</html>

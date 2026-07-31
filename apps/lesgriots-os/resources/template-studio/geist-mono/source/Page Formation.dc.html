@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  @keyframes gr-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+</style>
+</helmet>
+<div style="background:#F1EFE8; color:#0B0B0A; min-height:100%; font-family:'Geist',sans-serif; -webkit-font-smoothing:antialiased;">
+
+  <!-- HEADER -->
+  <header style="position:sticky; top:0; z-index:50; background:rgba(241,239,232,0.86); backdrop-filter:blur(10px); border-bottom:1px solid rgba(11,11,10,0.1);">
+    <div style="max-width:1240px; margin:0 auto; padding:24px 40px; display:flex; align-items:center; justify-content:space-between;">
+      <img src="logo-wordmark.svg" alt="LA GRIOTHÈQUE" style="height:20px; display:block;">
+      <div style="display:flex; align-items:center; gap:14px; font-family:'Geist',sans-serif; font-weight:600; font-size:19px; cursor:pointer;">
+        Menu
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <span style="width:24px; height:2px; background:#0B0B0A; display:block;"></span>
+          <span style="width:24px; height:2px; background:#0B0B0A; display:block;"></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section style="max-width:1240px; margin:0 auto; padding:56px 40px 0;">
+    <div style="display:flex; align-items:center; gap:10px; font-family:'Geist Mono',monospace; font-size:13px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(11,11,10,0.5); margin-bottom:54px;">
+      <span style="cursor:pointer;">Formations</span><span>/</span><span style="color:#0B0B0A;">{{ category }}</span>
+    </div>
+
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:48px; flex-wrap:wrap;">
+      <div style="flex:1 1 560px; min-width:300px;">
+        <div style="font-family:'Geist Mono',monospace; font-size:15px; letter-spacing:0.16em; text-transform:uppercase; color:rgba(11,11,10,0.55); margin-bottom:26px;">{{ kicker }} · {{ category }}</div>
+        <h1 style="font-family:'Geist',sans-serif; font-weight:600; font-size:clamp(40px, 6vw, 76px); line-height:1.0; letter-spacing:-0.03em; margin:0; text-wrap:balance;">{{ title }}</h1>
+        <p style="font-family:'Geist',sans-serif; font-weight:400; font-size:clamp(18px,2.2vw,23px); line-height:1.5; letter-spacing:-0.01em; color:rgba(11,11,10,0.78); margin:32px 0 0; max-width:620px; text-wrap:pretty;">{{ constat }}</p>
+        <div style="display:flex; align-items:center; gap:16px; margin-top:40px; flex-wrap:wrap;">
+          <a href="#inscription" style="text-decoration:none; background:#0B0B0A; color:#F1EFE8; font-family:'Geist',sans-serif; font-weight:600; font-size:17px; padding:17px 32px; border-radius:100px; display:inline-flex; align-items:center; gap:12px;">
+            S'inscrire <span style="font-family:'Geist Mono',monospace; font-size:15px;">→</span>
+          </a>
+          <a href="#programme" style="text-decoration:none; color:#0B0B0A; font-family:'Geist',sans-serif; font-weight:600; font-size:17px; padding:17px 30px; border-radius:100px; border:1.5px solid rgba(11,11,10,0.25);">Voir le programme</a>
+        </div>
+      </div>
+
+      <!-- META CARD -->
+      <aside style="flex:0 1 360px; min-width:280px; background:#0B0B0A; color:#F1EFE8; border-radius:6px; padding:36px; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:24px; right:24px; width:72px; height:72px;">
+          <svg viewBox="0 0 200 200" style="width:100%; height:100%; display:block;">
+            <defs><path id="seal" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"></path></defs>
+            <circle cx="100" cy="100" r="100" fill="#F5CE16"></circle>
+            <text font-family="'Geist Mono',monospace" font-size="15.5" letter-spacing="1.5" font-weight="500" fill="#0B0B0A"><textPath href="#seal" startOffset="0">LA GRIOTHÈQUE · LA GRIOTHÈQUE · </textPath></text>
+            <line x1="66" y1="78" x2="134" y2="122" stroke="#0B0B0A" stroke-width="4"></line>
+          </svg>
+        </div>
+        <div style="font-family:'Geist Mono',monospace; font-size:13px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(241,239,232,0.5); margin-bottom:28px;">En bref</div>
+        <div style="display:flex; flex-direction:column;">
+          <sc-for list="{{ infos }}" as="i" hint-placeholder-count="6">
+            <div style="display:flex; justify-content:space-between; gap:20px; align-items:baseline; padding:15px 0; border-top:1px solid rgba(241,239,232,0.14);">
+              <span style="font-family:'Geist Mono',monospace; font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:rgba(241,239,232,0.55); white-space:nowrap;">{{ i.label }}</span>
+              <span style="font-family:'Geist',sans-serif; font-weight:500; font-size:16px; text-align:right;">{{ i.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </aside>
+    </div>
+
+    <!-- VIDEO -->
+    <div style="margin-top:64px; position:relative; width:100%; aspect-ratio:16/9; border-radius:6px; overflow:hidden; background:repeating-linear-gradient(135deg,#161616 0 30px,#101010 30px 60px); display:flex; align-items:center; justify-content:center;">
+      <div style="position:absolute; top:24px; left:28px; font-family:'Geist Mono',monospace; font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(241,239,232,0.45);">Vidéo de présentation · 16:9</div>
+      <div style="width:104px; height:104px; border-radius:50%; background:#F1EFE8; display:flex; align-items:center; justify-content:center;">
+        <div style="width:0; height:0; border-style:solid; border-width:19px 0 19px 31px; border-color:transparent transparent transparent #0B0B0A; margin-left:7px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AU PROGRAMME -->
+  <section id="programme" style="max-width:1240px; margin:0 auto; padding:104px 40px 0;">
+    <div style="display:flex; gap:64px; flex-wrap:wrap;">
+      <div style="flex:0 0 240px;">
+        <div style="font-family:'Geist Mono',monospace; font-size:14px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(11,11,10,0.5); margin-bottom:14px;">01 — Programme</div>
+        <h2 style="font-family:'Geist',sans-serif; font-weight:600; font-size:34px; line-height:1.0; letter-spacing:-0.02em; margin:0;">Au programme</h2>
+      </div>
+      <div style="flex:1 1 540px; min-width:300px;">
+        <sc-for list="{{ modules }}" as="m" hint-placeholder-count="5">
+          <div style="display:flex; gap:34px; align-items:baseline; padding:28px 0; border-top:1px solid rgba(11,11,10,0.14);">
+            <span style="font-family:'Geist Mono',monospace; font-size:18px; color:rgba(11,11,10,0.45); flex-shrink:0;">{{ m.n }}</span>
+            <span style="font-family:'Geist',sans-serif; font-weight:500; font-size:clamp(22px,2.6vw,30px); line-height:1.16; letter-spacing:-0.015em;">{{ m.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- POUR QUI -->
+  <section style="max-width:1240px; margin:0 auto; padding:104px 40px 0;">
+    <div style="display:flex; gap:64px; flex-wrap:wrap;">
+      <div style="flex:0 0 240px;">
+        <div style="font-family:'Geist Mono',monospace; font-size:14px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(11,11,10,0.5); margin-bottom:14px;">02 — Public</div>
+        <h2 style="font-family:'Geist',sans-serif; font-weight:600; font-size:34px; line-height:1.0; letter-spacing:-0.02em; margin:0;">Pour qui ?</h2>
+      </div>
+      <div style="flex:1 1 540px; min-width:300px; display:flex; flex-direction:column; gap:30px;">
+        <sc-for list="{{ audience }}" as="a" hint-placeholder-count="3">
+          <div style="display:flex; gap:24px; align-items:flex-start;">
+            <span style="width:14px; height:14px; background:#F5CE16; flex-shrink:0; margin-top:14px;"></span>
+            <span style="font-family:'Geist',sans-serif; font-weight:500; font-size:clamp(22px,2.6vw,30px); line-height:1.22; letter-spacing:-0.015em;">{{ a }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <section id="inscription" style="max-width:1240px; margin:104px auto 0; padding:0 40px;">
+    <div style="background:#0B0B0A; color:#F1EFE8; border-radius:8px; padding:clamp(40px,6vw,80px); display:flex; align-items:flex-end; justify-content:space-between; gap:40px; flex-wrap:wrap;">
+      <div>
+        <div style="font-family:'Geist Mono',monospace; font-size:14px; letter-spacing:0.14em; text-transform:uppercase; color:#F5CE16; margin-bottom:24px;">{{ duration }} · Présentiel · 8 max.</div>
+        <h2 style="font-family:'Geist',sans-serif; font-weight:600; font-size:clamp(34px,5vw,64px); line-height:0.98; letter-spacing:-0.03em; margin:0; max-width:14ch;">Réservez votre place.</h2>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <a href="mailto:bonjour@lagriotheque.com" style="text-decoration:none; background:#F5CE16; color:#0B0B0A; font-family:'Geist',sans-serif; font-weight:600; font-size:18px; padding:18px 34px; border-radius:100px; text-align:center;">Demander un devis</a>
+        <span style="font-family:'Geist Mono',monospace; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:rgba(241,239,232,0.5); text-align:center;">Éligible OPCO · Certifié Qualiopi</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background:#0B0B0A; color:#F1EFE8; margin-top:104px; padding:80px 40px 0;">
+    <div style="max-width:1240px; margin:0 auto; display:flex; justify-content:space-between; gap:48px; flex-wrap:wrap;">
+      <div style="flex:1 1 300px;">
+        <img src="logo-wordmark.svg" alt="LA GRIOTHÈQUE" style="height:22px; display:block; filter:invert(1); margin-bottom:24px;">
+        <p style="font-family:'Geist',sans-serif; font-weight:400; font-size:17px; line-height:1.5; color:rgba(241,239,232,0.6); max-width:340px; margin:0;">École de transmission au croisement de la direction artistique, du récit de marque et de la production.</p>
+      </div>
+      <div style="display:flex; gap:64px; flex-wrap:wrap;">
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <span style="font-family:'Geist Mono',monospace; font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(241,239,232,0.4); margin-bottom:4px;">Suivre</span>
+          <a href="#" style="text-decoration:none; color:#F1EFE8; font-family:'Geist',sans-serif; font-weight:500; font-size:17px;">Instagram</a>
+          <a href="#" style="text-decoration:none; color:#F1EFE8; font-family:'Geist',sans-serif; font-weight:500; font-size:17px;">LinkedIn</a>
+          <a href="#" style="text-decoration:none; color:#F1EFE8; font-family:'Geist',sans-serif; font-weight:500; font-size:17px;">Newsletter</a>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <span style="font-family:'Geist Mono',monospace; font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(241,239,232,0.4); margin-bottom:4px;">Légal</span>
+          <a href="#" style="text-decoration:none; color:rgba(241,239,232,0.7); font-family:'Geist',sans-serif; font-weight:400; font-size:15px;">Mentions légales</a>
+          <a href="#" style="text-decoration:none; color:rgba(241,239,232,0.7); font-family:'Geist',sans-serif; font-weight:400; font-size:15px;">Politique de confidentialité</a>
+          <a href="#" style="text-decoration:none; color:rgba(241,239,232,0.7); font-family:'Geist',sans-serif; font-weight:400; font-size:15px;">Conditions générales de vente</a>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <span style="font-family:'Geist Mono',monospace; font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(241,239,232,0.4);">Certification</span>
+          <div style="background:#F1EFE8; color:#0B0B0A; border-radius:4px; padding:14px 16px; width:fit-content;">
+            <div style="font-family:'Geist',sans-serif; font-weight:700; font-size:20px; letter-spacing:-0.01em;">Qualiopi</div>
+            <div style="font-family:'Geist Mono',monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:rgba(11,11,10,0.6); margin-top:2px;">Processus certifié</div>
+          </div>
+          <span style="font-family:'Geist',sans-serif; font-size:12px; line-height:1.4; color:rgba(241,239,232,0.45); max-width:200px;">Délivrée au titre de la catégorie : Actions de formation.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARQUEE -->
+    <div style="margin-top:72px; border-top:1px solid rgba(241,239,232,0.14); overflow:hidden; white-space:nowrap; padding:22px 0;">
+      <div style="display:inline-flex; will-change:transform; animation:gr-marquee 28s linear infinite;">
+        <span style="font-family:'Geist',sans-serif; font-weight:600; font-size:30px; letter-spacing:-0.01em; padding-right:40px;">DONNER À LA PROCHAINE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DE NOUVEAUX IMAGINAIRES · &nbsp;</span>
+        <span style="font-family:'Geist',sans-serif; font-weight:600; font-size:30px; letter-spacing:-0.01em; padding-right:40px;">DONNER À LA PROCHAINE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DE NOUVEAUX IMAGINAIRES · &nbsp;</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900},&quot;formationIndex&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Vidéo au téléphone (2 j)&quot;,&quot;Réseaux sociaux TPE (4 j)&quot;,&quot;Stratégie &amp; storytelling (1 j)&quot;],&quot;default&quot;:&quot;Vidéo au téléphone (2 j)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;}}">
+class Component extends DCLogic {
+  data() {
+    return [
+      {
+        category: "Stratégie",
+        title: "Stratégie de contenu et création vidéo au téléphone",
+        duration: "2 journées",
+        constat: "Trop de talents avancent sans cadre. En deux jours, repartez avec une ligne éditoriale claire et la capacité de tourner, monter et publier vos vidéos — seul·e, avec votre téléphone.",
+        modules: [
+          { n: "01", label: "Cadrer sa ligne éditoriale et ses formats" },
+          { n: "02", label: "Écrire pour le scroll : accroches, structure, appel à l'action" },
+          { n: "03", label: "Tourner au smartphone : lumière, cadrage, son" },
+          { n: "04", label: "Monter vite sur mobile (CapCut, InShot)" },
+          { n: "05", label: "Publier, analyser, tenir le rythme" },
+        ],
+        audience: [
+          "Créatifs, artistes et porteurs de projet",
+          "Entrepreneurs et TPE qui veulent produire en autonomie",
+          "Aucune compétence technique requise — un smartphone suffit",
+        ],
+        infos: [
+          { label: "Durée", value: "2 journées · 14 h" },
+          { label: "Format", value: "Présentiel" },
+          { label: "Groupe", value: "8 personnes max." },
+          { label: "Session", value: "À venir — 2026" },
+          { label: "Tarif", value: "Sur devis · OPCO" },
+          { label: "Certification", value: "Qualiopi" },
+        ],
+      },
+      {
+        category: "Stratégie",
+        title: "Communiquer sur les réseaux sociaux pour promouvoir sa TPE",
+        duration: "4 journées",
+        constat: "Votre TPE mérite d'être vue. En quatre jours, construisez une présence qui attire vos clients : stratégie, contenus et canaux maîtrisés de bout en bout.",
+        modules: [
+          { n: "01", label: "Diagnostic de présence et positionnement" },
+          { n: "02", label: "Définir sa stratégie et son calendrier éditorial" },
+          { n: "03", label: "Créer des contenus qui convertissent" },
+          { n: "04", label: "Maîtriser Instagram et LinkedIn" },
+          { n: "05", label: "Se mettre en avant à petit budget" },
+          { n: "06", label: "Mesurer sa performance et ajuster" },
+        ],
+        audience: [
+          "Dirigeants de TPE, indépendants et artisans",
+          "Celles et ceux qui partent de zéro sur les réseaux",
+          "Prérequis : avoir une activité en cours",
+        ],
+        infos: [
+          { label: "Durée", value: "4 journées · 28 h" },
+          { label: "Format", value: "Présentiel" },
+          { label: "Groupe", value: "8 personnes max." },
+          { label: "Session", value: "À venir — 2026" },
+          { label: "Tarif", value: "Sur devis · OPCO" },
+          { label: "Certification", value: "Qualiopi" },
+        ],
+      },
+      {
+        category: "Workshop",
+        title: "Stratégie et storytelling de marque",
+        duration: "1 journée",
+        constat: "Un récit flou ne marque personne. En une journée intensive, clarifiez votre positionnement et structurez le storytelling qui rend votre marque mémorable.",
+        modules: [
+          { n: "01", label: "Clarifier sa raison d'être et son territoire" },
+          { n: "02", label: "Définir son positionnement et sa cible" },
+          { n: "03", label: "Construire son grand récit de marque" },
+          { n: "04", label: "Décliner son histoire en messages clés" },
+          { n: "05", label: "Activer son storytelling sur ses canaux" },
+        ],
+        audience: [
+          "Fondateurs, marques et porteurs de projet",
+          "Créatifs et communicants en quête d'un récit clair",
+          "Aucun prérequis — venez avec votre projet",
+        ],
+        infos: [
+          { label: "Durée", value: "1 journée · 7 h" },
+          { label: "Format", value: "Présentiel" },
+          { label: "Groupe", value: "8 personnes max." },
+          { label: "Session", value: "À venir — 2026" },
+          { label: "Tarif", value: "Sur devis · OPCO" },
+          { label: "Certification", value: "Qualiopi" },
+        ],
+      },
+    ];
+  }
+
+  renderVals() {
+    const labels = ["Vidéo au téléphone (2 j)", "Réseaux sociaux TPE (4 j)", "Stratégie & storytelling (1 j)"];
+    let fi = labels.indexOf(this.props.formationIndex);
+    if (fi < 0) fi = 0;
+    const f = this.data()[fi];
+    return {
+      category: f.category,
+      kicker: f.category === "Workshop" ? "Workshop" : "Formation",
+      title: f.title,
+      duration: f.duration,
+      constat: f.constat,
+      modules: f.modules,
+      audience: f.audience,
+      infos: f.infos,
+    };
+  }
+}
+</script>
+</body>
+</html>

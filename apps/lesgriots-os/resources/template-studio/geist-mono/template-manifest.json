@@ -1,0 +1,56 @@
+{
+  "pack": "geist-mono",
+  "sourceArchive": "Créer des posts avec Geis Mono.zip",
+  "retrievedAt": "2026-07-29",
+  "format": "dc.html",
+  "status": "source-library",
+  "templates": [
+    {
+      "id": "programme-de-formation",
+      "name": "Programme de Formation",
+      "file": "source/Programme de Formation.dc.html",
+      "purpose": "Document organisme de formation"
+    },
+    {
+      "id": "livret-accueil",
+      "name": "Livret d’Accueil",
+      "file": "source/Livret d’Accueil.dc.html",
+      "purpose": "Accueil apprenant"
+    },
+    {
+      "id": "workbook",
+      "name": "Workbook",
+      "file": "source/Workbook.dc.html",
+      "purpose": "Support pédagogique"
+    },
+    {
+      "id": "page-formation",
+      "name": "Page Formation",
+      "file": "source/Page Formation.dc.html",
+      "purpose": "Présentation de formation"
+    },
+    {
+      "id": "dashboard-of",
+      "name": "Dashboard OF",
+      "file": "source/Dashboard OF.dc.html",
+      "purpose": "Tableau de bord organisme de formation"
+    },
+    {
+      "id": "carrousel-formation",
+      "name": "Carrousel Formation",
+      "file": "source/Carrousel Formation.dc.html",
+      "purpose": "Communication réseaux sociaux"
+    },
+    {
+      "id": "photo-profil",
+      "name": "Photo de profil",
+      "file": "source/Photo de profil.dc.html",
+      "purpose": "Visuel de profil"
+    }
+  ],
+  "rendererResources": [
+    "source/doc-page.js",
+    "source/support.js",
+    "source/logo-wordmark.svg"
+  ]
+}

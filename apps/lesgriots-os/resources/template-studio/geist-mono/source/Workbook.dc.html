@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  doc-page:not(:defined) { visibility: hidden; }
+  body { margin: 0; background:#E6E4DD; }
+  .wb-kick { font-family:'Geist',sans-serif; font-size:9pt; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:#8a8a80; }
+  .wb-h2 { font-family:'Geist',sans-serif; font-weight:600; font-size:20pt; line-height:1.02; letter-spacing:-0.02em; margin:0; color:#0B0B0A; }
+  .wb-body { font-family:'Geist',sans-serif; font-weight:400; font-size:10.5pt; line-height:1.55; color:#2a2a26; }
+  .wb-lines { background-image:repeating-linear-gradient(transparent 0 27px, rgba(11,11,10,0.16) 27px 28px); }
+  .wb-sec { break-inside:avoid; }
+</style>
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="a4" margin="0" hint-size="100%,100%">
+
+  <!-- COVER -->
+  <div style="position:relative; width:100%; height:297mm; background:#0B0B0A; color:#F1EFE8; overflow:hidden; break-after:page;">
+    <div style="position:absolute; top:18mm; left:18mm; right:18mm; display:flex; align-items:flex-start; justify-content:space-between;">
+      <img src="logo-wordmark.svg" alt="LA GRIOTHÈQUE" style="height:18px; display:block; filter:invert(1);">
+      <span style="font-family:'Geist',sans-serif; font-weight:600; font-size:9pt; letter-spacing:0.14em; text-transform:uppercase; color:#F5CE16; text-align:right;">Cahier<br>de l'apprenant</span>
+    </div>
+
+    <div style="position:absolute; left:18mm; right:18mm; top:42%; transform:translateY(-50%);">
+      <div class="wb-kick" style="color:#F5CE16; margin-bottom:16px;">{{ kicker }} · {{ category }}</div>
+      <h1 style="font-family:'Geist',sans-serif; font-weight:700; font-size:44pt; line-height:0.96; letter-spacing:-0.03em; margin:0; color:#F1EFE8; text-wrap:balance; max-width:15ch;">{{ title }}</h1>
+      <div style="font-family:'Geist',sans-serif; font-weight:400; font-size:12pt; color:rgba(241,239,232,0.6); margin-top:22px;">Workbook · {{ heroMeta }} · Présentiel</div>
+    </div>
+
+    <!-- name field -->
+    <div style="position:absolute; left:18mm; bottom:18mm; right:18mm; display:flex; gap:40px; align-items:flex-end;">
+      <div style="flex:1;">
+        <div class="wb-kick" style="color:rgba(241,239,232,0.5); margin-bottom:14px;">Ce cahier appartient à</div>
+        <div style="border-bottom:1.5px solid rgba(241,239,232,0.4); height:26px;"></div>
+      </div>
+      <div style="width:180px;">
+        <div class="wb-kick" style="color:rgba(241,239,232,0.5); margin-bottom:14px;">Session</div>
+        <div style="border-bottom:1.5px solid rgba(241,239,232,0.4); height:26px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMENT UTILISER -->
+  <div style="padding:14mm 18mm; font-family:'Geist',sans-serif; break-after:page;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10mm; padding-bottom:14px; border-bottom:1px solid rgba(11,11,10,0.18);">
+      <img src="logo-wordmark.svg" alt="LA GRIOTHÈQUE" style="height:13px; display:block;">
+      <span class="wb-kick" style="color:#9a9a90;">Cahier de l'apprenant</span>
+    </div>
+
+    <div class="wb-kick">Mode d'emploi</div>
+    <h2 class="wb-h2" style="margin-top:10px; font-size:26pt;">Comment utiliser ce cahier</h2>
+    <p class="wb-body" style="max-width:60ch; margin-top:18px;">Ce cahier vous accompagne tout au long de la formation. Chaque module comprend ses objectifs, un espace de prise de notes, un exercice à réaliser et un temps de réflexion. Gardez-le près de vous : c'est là que votre projet prend forme.</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-top:28px;">
+      <div class="wb-sec" style="border-top:2px solid #0B0B0A; padding-top:14px;">
+        <div style="font-family:'Geist',sans-serif; font-weight:700; font-size:22pt; color:#F5CE16; line-height:1;">1</div>
+        <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:12pt; margin-top:8px; color:#0B0B0A;">Je note</div>
+        <div class="wb-body" style="margin-top:4px;">Les idées, les mots-clés et ce que je veux retenir.</div>
+      </div>
+      <div class="wb-sec" style="border-top:2px solid #0B0B0A; padding-top:14px;">
+        <div style="font-family:'Geist',sans-serif; font-weight:700; font-size:22pt; color:#F5CE16; line-height:1;">2</div>
+        <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:12pt; margin-top:8px; color:#0B0B0A;">Je pratique</div>
+        <div class="wb-body" style="margin-top:4px;">Je réalise l'exercice sur mon propre projet.</div>
+      </div>
+      <div class="wb-sec" style="border-top:2px solid #0B0B0A; padding-top:14px;">
+        <div style="font-family:'Geist',sans-serif; font-weight:700; font-size:22pt; color:#F5CE16; line-height:1;">3</div>
+        <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:12pt; margin-top:8px; color:#0B0B0A;">Je réfléchis</div>
+        <div class="wb-body" style="margin-top:4px;">Je fais le point sur ce que j'applique dès demain.</div>
+      </div>
+    </div>
+
+    <!-- objectifs recap -->
+    <div style="margin-top:34px;">
+      <div class="wb-kick">Mes objectifs pour cette formation</div>
+      <div class="wb-lines" style="height:112px; margin-top:12px; border-top:1px solid rgba(11,11,10,0.16);"></div>
+    </div>
+  </div>
+
+  <!-- MODULE WORKSHEETS -->
+  <sc-for list="{{ modules }}" as="m" hint-placeholder-count="5">
+    <div style="padding:14mm 18mm; font-family:'Geist',sans-serif; break-after:page;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:9mm; padding-bottom:14px; border-bottom:1px solid rgba(11,11,10,0.18);">
+        <span class="wb-kick" style="color:#9a9a90;">Module {{ m.n }}</span>
+        <span class="wb-kick" style="color:#9a9a90;">Cahier de l'apprenant</span>
+      </div>
+
+      <div style="display:flex; gap:18px; align-items:flex-start;">
+        <span style="font-family:'Geist',sans-serif; font-weight:700; font-size:30pt; color:#F5CE16; line-height:0.9;">{{ m.n }}</span>
+        <div style="padding-top:4px;">
+          <h2 class="wb-h2">{{ m.label }}</h2>
+          <div class="wb-body" style="color:#5a5a52; margin-top:6px; max-width:56ch;">{{ m.detail }}</div>
+        </div>
+      </div>
+
+      <!-- notes -->
+      <div style="margin-top:26px;">
+        <div class="wb-kick">Mes notes</div>
+        <div class="wb-lines" style="height:224px; margin-top:12px; border-top:1px solid rgba(11,11,10,0.16);"></div>
+      </div>
+
+      <!-- exercise -->
+      <div class="wb-sec" style="margin-top:24px; background:#0B0B0A; color:#F1EFE8; border-radius:6px; padding:22px 24px;">
+        <div class="wb-kick" style="color:#F5CE16;">Exercice</div>
+        <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:13pt; letter-spacing:-0.01em; margin-top:8px;">{{ m.label }} — appliquez-le à votre projet.</div>
+        <div style="background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,239,232,0.22) 27px 28px); height:84px; margin-top:16px;"></div>
+      </div>
+
+      <!-- reflection -->
+      <div class="wb-sec" style="margin-top:22px; display:flex; gap:24px;">
+        <div style="flex:1;">
+          <div class="wb-kick">Ce que je retiens</div>
+          <div class="wb-lines" style="height:84px; margin-top:12px; border-top:1px solid rgba(11,11,10,0.16);"></div>
+        </div>
+        <div style="flex:1;">
+          <div class="wb-kick">Ce que j'applique demain</div>
+          <div class="wb-lines" style="height:84px; margin-top:12px; border-top:1px solid rgba(11,11,10,0.16);"></div>
+        </div>
+      </div>
+    </div>
+  </sc-for>
+
+  <!-- PLAN D'ACTION -->
+  <div style="padding:14mm 18mm; font-family:'Geist',sans-serif; break-after:page;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:9mm; padding-bottom:14px; border-bottom:1px solid rgba(11,11,10,0.18);">
+      <span class="wb-kick" style="color:#9a9a90;">Synthèse</span>
+      <span class="wb-kick" style="color:#9a9a90;">Cahier de l'apprenant</span>
+    </div>
+    <div class="wb-kick">Après la formation</div>
+    <h2 class="wb-h2" style="margin-top:10px; font-size:26pt;">Mon plan d'action</h2>
+    <p class="wb-body" style="max-width:58ch; margin-top:16px;">Trois actions concrètes à mettre en œuvre dans les 30 jours. Une échéance pour chacune.</p>
+
+    <div style="margin-top:22px; display:flex; flex-direction:column; gap:0;">
+      <sc-for list="{{ actions }}" as="a" hint-placeholder-count="3">
+        <div class="wb-sec" style="display:flex; gap:18px; align-items:center; border-top:1px solid rgba(11,11,10,0.16); padding:18px 0;">
+          <span style="width:24px; height:24px; border:1.5px solid #0B0B0A; border-radius:4px; flex-shrink:0;"></span>
+          <div style="flex:1; border-bottom:1px solid rgba(11,11,10,0.22); height:26px;"></div>
+          <div style="width:120px;">
+            <span class="wb-kick" style="color:#9a9a90;">Échéance</span>
+            <div style="border-bottom:1px solid rgba(11,11,10,0.22); height:22px; margin-top:6px;"></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- support -->
+    <div class="wb-sec" style="margin-top:34px; background:#F5CE16; color:#0B0B0A; border-radius:6px; padding:22px 24px; display:flex; align-items:center; justify-content:space-between; gap:20px;">
+      <div>
+        <div class="wb-kick">Besoin d'aller plus loin ?</div>
+        <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:13pt; margin-top:6px;">bonjour@lagriotheque.com · lagriotheque.com</div>
+      </div>
+      <div style="width:52px; height:52px; flex-shrink:0;">
+        <svg viewBox="0 0 200 200" style="width:100%; height:100%; display:block;">
+          <defs><path id="seal" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"></path></defs>
+          <circle cx="100" cy="100" r="100" fill="#0B0B0A"></circle>
+          <text font-family="'Geist',sans-serif" font-size="15.5" letter-spacing="1.5" font-weight="500" fill="#F5CE16"><textPath href="#seal" startOffset="0">LA GRIOTHÈQUE · LA GRIOTHÈQUE · </textPath></text>
+          <line x1="66" y1="78" x2="134" y2="122" stroke="#F5CE16" stroke-width="4"></line>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES LIBRES -->
+  <div style="padding:14mm 18mm; font-family:'Geist',sans-serif;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:9mm; padding-bottom:14px; border-bottom:1px solid rgba(11,11,10,0.18);">
+      <span class="wb-kick" style="color:#9a9a90;">Notes libres</span>
+      <span class="wb-kick" style="color:#9a9a90;">Cahier de l'apprenant</span>
+    </div>
+    <div class="wb-lines" style="height:230mm; border-top:1px solid rgba(11,11,10,0.16);"></div>
+  </div>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900,&quot;height&quot;:1273},&quot;formationIndex&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Vidéo au téléphone (2 j)&quot;,&quot;Réseaux sociaux TPE (4 j)&quot;,&quot;Stratégie &amp; storytelling (1 j)&quot;],&quot;default&quot;:&quot;Vidéo au téléphone (2 j)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;}}">
+class Component extends DCLogic {
+  data() {
+    return [
+      {
+        category: "Stratégie", kicker: "Formation",
+        title: "Stratégie de contenu et création vidéo au téléphone",
+        heroMeta: "2 journées · 14 h",
+        modules: [
+          { n: "01", label: "Cadrer sa ligne éditoriale et ses formats", detail: "Objectifs, cibles, piliers de contenu et choix des formats par plateforme." },
+          { n: "02", label: "Écrire pour le scroll", detail: "Accroches, structure narrative, rythme et appel à l'action." },
+          { n: "03", label: "Tourner au smartphone", detail: "Lumière naturelle, cadrage, stabilisation, captation du son." },
+          { n: "04", label: "Monter vite sur mobile", detail: "Prise en main de CapCut / InShot : coupes, sous-titres, exports." },
+          { n: "05", label: "Publier, analyser, tenir le rythme", detail: "Calendrier, indicateurs clés et itération dans la durée." },
+        ],
+      },
+      {
+        category: "Stratégie", kicker: "Formation",
+        title: "Communiquer sur les réseaux sociaux pour promouvoir sa TPE",
+        heroMeta: "4 journées · 28 h",
+        modules: [
+          { n: "01", label: "Diagnostic et positionnement", detail: "Audit de présence, analyse concurrentielle et proposition de valeur." },
+          { n: "02", label: "Stratégie et calendrier éditorial", detail: "Objectifs, cibles, piliers de contenu et planification." },
+          { n: "03", label: "Créer des contenus qui convertissent", detail: "Formats, copywriting, visuels et appels à l'action." },
+          { n: "04", label: "Maîtriser Instagram et LinkedIn", detail: "Bonnes pratiques, formats natifs et régularité." },
+          { n: "05", label: "Se mettre en avant à petit budget", detail: "Publicité simple, partenariats et bouche-à-oreille." },
+          { n: "06", label: "Mesurer et ajuster", detail: "Indicateurs clés, lecture des statistiques et itération." },
+        ],
+      },
+      {
+        category: "Workshop", kicker: "Workshop",
+        title: "Stratégie et storytelling de marque",
+        heroMeta: "1 journée · 7 h",
+        modules: [
+          { n: "01", label: "Clarifier sa raison d'être", detail: "Mission, valeurs et territoire d'expression." },
+          { n: "02", label: "Positionnement et cible", detail: "Différenciation, promesse et audience prioritaire." },
+          { n: "03", label: "Construire son grand récit", detail: "Structure narrative, archétypes et fil conducteur." },
+          { n: "04", label: "Décliner en messages clés", detail: "Manifeste, accroches et preuves de marque." },
+          { n: "05", label: "Activer son storytelling", detail: "Déclinaison par canal et plan d'activation." },
+        ],
+      },
+    ];
+  }
+
+  renderVals() {
+    const labels = ["Vidéo au téléphone (2 j)", "Réseaux sociaux TPE (4 j)", "Stratégie & storytelling (1 j)"];
+    let fi = labels.indexOf(this.props.formationIndex);
+    if (fi < 0) fi = 0;
+    const f = this.data()[fi];
+    return {
+      category: f.category, kicker: f.kicker, title: f.title,
+      heroMeta: f.heroMeta, modules: f.modules,
+      actions: [1, 2, 3],
+    };
+  }
+}
+</script>
+</body>
+</html>
