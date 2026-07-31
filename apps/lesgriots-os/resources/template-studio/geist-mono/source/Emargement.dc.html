@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  doc-page:not(:defined) { visibility: hidden; }
+  body { margin: 0; background:#E6E4DD; }
+  .em-lab { font-family:'Geist',sans-serif; font-weight:600; font-size:7pt; letter-spacing:0.16em;
+            text-transform:uppercase; color:#6b6b6b; }
+  .em-val { font-family:'Geist',sans-serif; font-weight:500; font-size:9pt; color:#0B0B0A; margin-top:0.8mm; }
+  .em-th  { font-family:'Geist',sans-serif; font-weight:600; font-size:7.5pt; letter-spacing:0.12em;
+            text-transform:uppercase; color:#0B0B0A; padding:2.5mm 3mm; text-align:left;
+            border-bottom:1.5px solid #0B0B0A; }
+  .em-td  { border-bottom:1px solid rgba(11,11,10,0.16); border-right:1px solid rgba(11,11,10,0.16);
+            padding:0; height:16mm; }
+  .em-nom { font-family:'Geist',sans-serif; font-weight:600; font-size:9pt; color:#0B0B0A;
+            padding:3mm; border-bottom:1px solid rgba(11,11,10,0.16); vertical-align:middle; }
+  .em-ent { font-family:'Geist',sans-serif; font-weight:400; font-size:7.5pt; color:#6b6b6b; margin-top:0.6mm; }
+</style>
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="a4" margin="15mm" hint-size="100%,100%">
+
+  <div slot="footer" data-si="piedDePage" style="padding:0 12mm 5mm; font-family:'Geist',sans-serif; letter-spacing:0.02em; color:#0B0B0A; text-align:center;">
+    <div style="font-size:6.5pt; white-space:nowrap; overflow:hidden;">{{ piedDePage }}</div>
+    <div style="font-size:6pt; margin-top:1mm; line-height:1.4; opacity:0.8;">L'enregistrement de la déclaration d'activité ne vaut pas agrément de l'État (art. L.6352-12 du Code du travail) · Certification Qualiopi délivrée au titre de la catégorie : actions de formation</div>
+  </div>
+
+  <div style="padding:0 2mm; font-family:'Geist',sans-serif;">
+
+    <sc-for list="{{ pages }}" as="p">
+      <div style="break-after:page;">
+
+        <!-- IDENTITÉ DE L'ORGANISME -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10mm; padding-bottom:3mm; border-bottom:2px solid #0B0B0A;">
+          <img src="./logo-lesgriots-ink.png" alt="LES GRIOTS" style="height:26px; display:block;">
+          <div style="text-align:right;">
+            <div class="em-lab">Feuille d’émargement</div>
+            <div style="font-size:7pt; color:#6b6b6b; margin-top:1mm;">{{ organisme }}</div>
+          </div>
+        </div>
+
+        <!-- L'ACTION -->
+        <div style="margin-top:6mm;">
+          <div class="em-lab">Action de formation</div>
+          <div style="font-family:'Geist',sans-serif; font-weight:700; font-size:13pt; line-height:1.25; color:#0B0B0A; margin-top:1.5mm;">{{ formation }}</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:5mm; margin-top:5mm; padding-bottom:5mm; border-bottom:1px solid rgba(11,11,10,0.16);">
+          <div><div class="em-lab">Période</div><div class="em-val">{{ periode }}</div></div>
+          <div data-si="lieu"><div class="em-lab">Lieu</div><div class="em-val">{{ lieu }}</div></div>
+          <div data-si="duree"><div class="em-lab">Durée</div><div class="em-val">{{ duree }}</div></div>
+          <div data-si="intervenant"><div class="em-lab">Intervenant</div><div class="em-val">{{ intervenant }}</div></div>
+        </div>
+
+        <!-- LA JOURNÉE -->
+        <div style="margin-top:6mm;">
+          <div class="em-lab">Journée du</div>
+          <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:11pt; color:#0B0B0A; margin-top:1mm; text-transform:capitalize;">{{ p.jour }}</div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; margin-top:4mm; table-layout:fixed;">
+          <thead>
+            <tr>
+              <th class="em-th" style="width:34%;">Nom et prénom</th>
+              <th class="em-th" style="width:33%;">Matin<span style="font-weight:400; letter-spacing:0; text-transform:none; color:#6b6b6b;"> · {{ matin }}</span></th>
+              <th class="em-th" style="width:33%;">Après-midi<span style="font-weight:400; letter-spacing:0; text-transform:none; color:#6b6b6b;"> · {{ apresMidi }}</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ p.stagiaires }}" as="s">
+              <tr>
+                <td class="em-nom" style="border-right:1px solid rgba(11,11,10,0.16);">
+                  {{ s.nom }}
+                  <div class="em-ent" data-si="s.entreprise">{{ s.entreprise }}</div>
+                </td>
+                <td class="em-td"></td>
+                <td class="em-td" style="border-right:none;"></td>
+              </tr>
+            </sc-for>
+            <tr>
+              <td class="em-nom" style="border-right:1px solid rgba(11,11,10,0.16); border-top:1.5px solid #0B0B0A; background:rgba(11,11,10,0.03);">
+                {{ intervenant }}
+                <div class="em-ent">Intervenant</div>
+              </td>
+              <td class="em-td" style="border-top:1.5px solid #0B0B0A;"></td>
+              <td class="em-td" style="border-right:none; border-top:1.5px solid #0B0B0A;"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:10mm; margin-top:7mm;">
+          <div style="font-family:'Geist',sans-serif; font-size:8pt; color:#6b6b6b; max-width:95mm; line-height:1.45;">
+            Chaque stagiaire signe la case correspondant à la demi-journée effectivement suivie. Une case laissée vide vaut absence.
+          </div>
+          <div style="text-align:right;">
+            <div class="em-lab">Cachet de l’organisme</div>
+            <div style="width:52mm; height:22mm; border:1px solid rgba(11,11,10,0.3); margin-top:2mm;"></div>
+            <div style="font-family:'Geist',sans-serif; font-size:8pt; color:#6b6b6b; margin-top:2mm;">Fait à {{ faitA }}, le</div>
+          </div>
+        </div>
+
+      </div>
+    </sc-for>
+
+  </div>
+
+</x-import>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      titre: "Feuille d’émargement",
+      formation: "Introduction à l'étalonnage vidéo avec DaVinci Resolve",
+      periode: "Du 18 mai 2026 au 19 mai 2026",
+      lieu: "15 rue de la Beaune, 93100 Montreuil",
+      duree: "4 heures",
+      modalite: "Présentiel",
+      intervenant: "Moustapha Coulibaly",
+      organisme: "LES GRIOTS · SIRET 90262868400018 · Déclaration d’activité n° 28760747176",
+      matin: "9h00 - 13h00",
+      apresMidi: "14h00 - 17h00",
+      faitA: "Le Havre",
+      piedDePage: "LES GRIOTS · SIRET 90262868400018 · 80 avenue du 8 mai 1945, 76610 Le Havre · contact@lesgriots.com",
+      pages: [
+        { jour: "lundi 18 mai 2026", stagiaires: [
+          { nom: "ASANTE Koffi", entreprise: "AFROSTREAM MEDIA" },
+          { nom: "BAH Mamadou", entreprise: "AFRICULTURES 76" },
+        ] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -9,6 +9,7 @@ import { rendre } from '@/lib/rendre-modele.mjs';
 import { construireProgramme } from '@/lib/programme-donnees.mjs';
 import { construireConvocation } from '@/lib/documents-accueil.mjs';
 import { construireConvention } from '@/lib/convention-donnees.mjs';
+import { construireEmargement } from '@/lib/emargement-donnees.mjs';
 
 /**
  * GET /api/sessions/:id/documents?type=programme|convention|convocation|emargement|attestation|certificat
@@ -194,6 +195,7 @@ async function _GET(req, { params }) {
       programme: 'Programme de Formation.dc.html',
       convention: 'Convention.dc.html',
       convocation: 'Convocation.dc.html',
+      emargement: 'Emargement.dc.html',
     };
 
     let pdfBuffer;
@@ -205,6 +207,7 @@ async function _GET(req, { params }) {
       const modele = path.join(process.cwd(), 'resources/template-studio/geist-mono/source', MAQUETTES[docType]);
       const valeurs = docType === 'convention' ? construireConvention(db, id)
         : docType === 'convocation' ? construireConvocation(db, id, apprenantId)
+        : docType === 'emargement' ? construireEmargement(db, id)
         : construireProgramme(db, session.formation_id).valeurs;
 
       const dossier = await fs.mkdtemp(path.join(os.tmpdir(), 'doc-session-'));
