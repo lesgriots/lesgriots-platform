@@ -126,25 +126,25 @@
     </div>
 
     <!-- MODALITES -->
-    <div class="gp-sec" style="display:grid; grid-template-columns:1fr 1fr; gap:28px;">
-      <div>
+    <div class="gp-sec" data-si="methodes evaluation" style="display:grid; grid-template-columns:1fr 1fr; gap:28px;">
+      <div data-si="methodes">
         <div class="gp-h">Méthodes pédagogiques</div>
         <p class="gp-body">{{ methodes }}</p>
       </div>
-      <div>
+      <div data-si="evaluation">
         <div class="gp-h">Modalités d'évaluation</div>
         <p class="gp-body">{{ evaluation }}</p>
       </div>
     </div>
 
     <!-- MOYENS TECHNIQUES -->
-    <div class="gp-sec">
+    <div class="gp-sec" data-si="moyens">
       <div class="gp-h">Moyens techniques et d'encadrement</div>
       <p class="gp-body">{{ moyens }}</p>
     </div>
 
     <!-- INTERVENANTS -->
-    <div class="gp-sec">
+    <div class="gp-sec" data-si="intervenants">
       <div class="gp-h">Intervenants</div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px 28px;">
         <sc-for list="{{ intervenants }}" as="p" hint-placeholder-count="2">
@@ -158,13 +158,13 @@
     </div>
 
     <!-- ACCESSIBILITE -->
-    <div class="gp-sec">
+    <div class="gp-sec" data-si="accessibilite">
       <div class="gp-h">Accessibilité & handicap</div>
       <p class="gp-body">{{ accessibilite }}</p>
     </div>
 
     <!-- APPRECIATIONS -->
-    <div class="gp-sec" style="margin-top:22px;">
+    <div class="gp-sec" data-si="satisfaction" style="margin-top:22px;">
       <div class="gp-h" style="margin-top:0;">Appréciations des participants</div>
       <div style="display:flex; align-items:baseline; gap:12px;">
         <span style="font-family:'Geist',sans-serif; font-weight:700; font-size:22pt; letter-spacing:-0.02em; color:#0B0B0A;">{{ satisfaction.moyenne }}</span>
@@ -209,6 +209,27 @@
 
 </x-import>
 </x-dc>
+
+  <!-- Un bloc sans contenu disparaît du document : il n'imprime pas son titre
+       au-dessus du vide. Ce script s'exécute avant le composant de pagination
+       (les modules sont différés), donc les blocs retirés ne sont jamais
+       mesurés. Ouvert sans valeurs injectées, le modèle garde sa démo. -->
+  <script>
+    (function () {
+      var v = globalThis.__VALEURS;
+      if (!v) return;
+      var vide = function (x) {
+        if (x == null) return true;
+        if (Array.isArray(x)) return x.length === 0;
+        if (typeof x === 'object') return false;
+        return String(x).trim() === '';
+      };
+      document.querySelectorAll('[data-si]').forEach(function (el) {
+        var cles = el.getAttribute('data-si').split(' ');
+        if (cles.every(function (c) { return vide(v[c]); })) el.remove();
+      });
+    })();
+  </script>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900,&quot;height&quot;:1273},&quot;formationIndex&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Vidéo au téléphone (2 j)&quot;,&quot;Réseaux sociaux TPE (4 j)&quot;,&quot;Stratégie &amp; storytelling (1 j)&quot;],&quot;default&quot;:&quot;Vidéo au téléphone (2 j)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;}}">
 class Component extends DCLogic {
   data() {
