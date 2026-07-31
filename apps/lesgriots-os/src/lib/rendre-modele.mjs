@@ -168,6 +168,15 @@ export async function rendre(cheminModele, valeurs, cheminSortie) {
     const site = await servir(atelier);
     serveur = site.serveur;
 
+    // Un foyer à nous, dans l'atelier. Le service systemd tourne avec
+    // ProtectHome=true : /home/deployment n'existe pas pour lui, et Chromium
+    // qui cherche à poser son profil, son cache et sa base crashpad dans
+    // $HOME s'arrête sur « --database is required ». On lui désigne donc
+    // explicitement des dossiers dans le répertoire temporaire, qui reste
+    // écrivable même sous PrivateTmp.
+    const foyer = path.join(atelier, '.chromium');
+    await fs.mkdir(foyer, { recursive: true });
+
     // `--virtual-time-budget` laisse au composant le temps de se définir et
     // aux polices d'arriver. Sans lui, Chromium imprime avant que la page
     // n'existe.
@@ -178,10 +187,34 @@ export async function rendre(cheminModele, valeurs, cheminSortie) {
       '--hide-scrollbars',
       '--no-pdf-header-footer',
       '--run-all-compositor-stages-before-draw',
+      '--disable-crash-reporter',
+      '--no-first-run',
+      '--no-default-browser-check',
+      '--disable-dev-shm-usage',
+      `--user-data-dir=${path.join(foyer, 'profil')}`,
+      `--crash-dumps-dir=${path.join(foyer, 'crash')}`,
+      `--disk-cache-dir=${path.join(foyer, 'cache')}`,
       '--virtual-time-budget=15000',
       `--print-to-pdf=${cheminSortie}`,
       `http://127.0.0.1:${site.port}/document.html`,
-    ], { timeout: 90000, maxBuffer: 8 * 1024 * 1024 });
+    ], {
+      timeout: 90000,
+      maxBuffer: 8 * 1024 * 1024,
+      env: {
+        ...process.env,
+        HOME: foyer,
+        XDG_CONFIG_HOME: path.join(foyer, 'config'),
+        XDG_CACHE_HOME: path.join(foyer, 'cache'),
+        XDG_DATA_HOME: path.join(foyer, 'data'),
+      },
+    }).catch((e) => {
+      // Le message brut d'execFile s'arrête à la ligne de commande, qui est
+      // longue et ne dit rien. La cause utile est dans stderr.
+      const bruit = /dbus|NameHasOwner|GLES|Fontconfig|libva/i;
+      const utile = String(e.stderr || '')
+        .split('\n').filter((l) => l.trim() && !bruit.test(l)).slice(-4).join(' · ');
+      throw new Error(`Chromium n’a pas pu imprimer${utile ? ` : ${utile}` : ` (code ${e.code})`}`);
+    });
 
     const { size } = await fs.stat(cheminSortie);
     if (size < 4000) {
