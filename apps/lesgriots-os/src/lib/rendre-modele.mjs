@@ -84,19 +84,21 @@ export function retirerBlocsVides(html, valeurs) {
   let sortie = html;
   let curseur = 0;
   for (;;) {
-    const attr = sortie.slice(curseur).match(/<div\b[^>]*\bdata-si="([^"]+)"[^>]*>/);
+    // N'importe quelle balise peut porter le marqueur : un span dans une
+    // phrase disparaît avec sa ponctuation, un div emporte sa section.
+    const attr = sortie.slice(curseur).match(/<(div|span|p|li|section)\b[^>]*\bdata-si="([^"]+)"[^>]*>/);
     if (!attr) break;
     const debut = curseur + attr.index;
-    const cles = attr[1].split(' ');
+    const tag = attr[1];
+    const cles = attr[2].split(' ');
 
-    // Trouver la fin du bloc en comptant les <div> imbriqués.
+    // Trouver la fin du bloc en comptant les balises de même nom imbriquées.
     let profondeur = 0;
-    let i = debut;
     let fin = -1;
-    const balise = /<div\b|<\/div>/g;
+    const balise = new RegExp(`<${tag}\\b|</${tag}>`, 'g');
     balise.lastIndex = debut;
     for (let m; (m = balise.exec(sortie));) {
-      profondeur += m[0] === '</div>' ? -1 : 1;
+      profondeur += m[0].startsWith('</') ? -1 : 1;
       if (profondeur === 0) { fin = m.index + m[0].length; break; }
     }
     if (fin === -1) break; // balises déséquilibrées : on ne touche à rien

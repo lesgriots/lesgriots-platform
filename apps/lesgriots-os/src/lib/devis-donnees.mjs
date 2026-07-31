@@ -110,6 +110,18 @@ export function construireDevis(db, sessionId, { numero = '', validiteJours = 30
     modalitesReglement: texte(reglages.payment_terms) || '30 jours à réception de facture',
     coordonneesBancaires: [reglages.iban ? `IBAN ${texte(reglages.iban)}` : '', reglages.bic ? `BIC ${texte(reglages.bic)}` : ''].filter(Boolean).join(' · '),
 
+    // Les identifiants de l'émetteur : ce qu'un service comptable saisit
+    // dans son logiciel avant de payer.
+    siret: reglages.siret ? `SIRET ${texte(reglages.siret)}` : '',
+    nda: reglages.nda ? `Déclaration d'activité n° ${texte(reglages.nda)}` : '',
+    tvaIntra: reglages.tva_number ? `TVA intracom. ${texte(reglages.tva_number)}` : '',
+    telephone: texte(reglages.phone),
+
+    // Mentions exigées entre professionnels : pénalités de retard et
+    // indemnité forfaitaire de recouvrement (art. L.441-10 et D.441-5 du
+    // code de commerce).
+    penalites: "En cas de retard de paiement, des pénalités au taux de trois fois le taux d'intérêt légal sont exigibles, ainsi qu'une indemnité forfaitaire pour frais de recouvrement de 40 € (art. L.441-10 et D.441-5 du code de commerce). Aucun escompte n'est accordé pour paiement anticipé.",
+
     organisme: texte(reglages.company_name) || 'LES GRIOTS',
     organismeAdresse: [texte(reglages.address), [reglages.postal_code, reglages.city].filter(Boolean).join(' ')].filter(Boolean).join(', '),
     representant: [reglages.representant_name, reglages.representant_title].filter(Boolean).join(' · '),
