@@ -235,6 +235,32 @@ export default function SessionCockpit({ sessionId }) {
     } catch (err) { setNotice(`Document ouvert, mais son archivage a échoué : ${err.message}`); }
   };
 
+  /**
+   * Les documents de session qui ont leur propre route : on les regarde
+   * dans l'app, et on les archive au registre comme les autres.
+   */
+  const apercuDocument = async (type, learner) => {
+    const LIBELLES = { convocation: 'Convocation', livret: "Livret d'accueil", devis: 'Devis', convention: 'Convention' };
+    const qs = type === 'convocation' && learner?.apprenant_id ? `?apprenant_id=${encodeURIComponent(learner.apprenant_id)}` : '';
+    const fichier = `/api/sessions/${sessionId}/${type}${qs}`;
+    const libelle = `${LIBELLES[type] || 'Document'}${learner ? ` · ${learner.first_name} ${learner.last_name}` : ''}`;
+    setApercu({ url: fichier, titre: libelle });
+    try {
+      const response = await fetch('/api/documents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        categorie: ['convention', 'convocation'].includes(type) ? type : 'autre',
+        libelle,
+        fichier,
+        contexte_type: learner?.apprenant_id ? 'apprenant' : 'session',
+        contexte_id: learner?.apprenant_id || sessionId,
+        notes: 'Généré depuis la fiche de session',
+      }) });
+      const created = await response.json();
+      if (!response.ok) throw new Error(created.error || 'Document non archivé');
+      setDocuments((current) => [created, ...current]);
+      setNotice(`${libelle} généré et archivé dans cette session.`);
+    } catch (err) { setNotice(`Document affiché, mais son archivage a échoué : ${err.message}`); }
+  };
+
   const openConvention = async (learner) => {
     const fichier = `/api/sessions/${sessionId}/convention`;
     setApercu({ url: fichier, titre: `Convention${learner ? ` · ${learner.first_name} ${learner.last_name}` : ''}` });
@@ -615,12 +641,12 @@ export default function SessionCockpit({ sessionId }) {
       <section style={card}><h2 style={title}>Conventions et contrats par client</h2><p style={{ ...muted, margin: '5px 0 15px' }}>Chaque génération est archivée, datée et versionnée dans cette session.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}><Action onClick={() => openConvention()}>Générer / mettre à jour les conventions</Action><Action secondary onClick={() => prepareEmail('convention')} disabled={!inscriptions.length}>✉ Envoyer la convention</Action></div>
         {inscriptions.length ? <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}><div style={{ padding: '12px 14px', background: 'var(--surface-2)' }}><b>{clientName || 'Client à associer'}</b><div style={muted}>{inscriptions.length} apprenant{inscriptions.length > 1 ? 's' : ''} : {inscriptions.map((item) => `${item.first_name} ${item.last_name}`).join(', ')}</div></div><div style={{ display: 'grid', gap: 8, padding: 12 }}>{inscriptions.map((item) => <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}><div><b>Convention entreprise · {item.first_name} {item.last_name}</b><div style={muted}>{item.convention_signed ? 'Convention signée' : 'Signature en attente'}</div></div><div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}><Action secondary onClick={() => openConvention(item)}>Générer / mettre à jour</Action><Toggle checked={Boolean(item.convention_signed)} onChange={(value) => updateInscription(item.id, { convention_signed: value ? 1 : 0 })} label={item.convention_signed ? 'Signée' : 'Marquer signée'} /></div></div>)}</div></div> : <Empty>Ajoute un client et au moins un apprenant pour générer la convention.</Empty>}
       </section>
-      <section style={card}><h2 style={title}>Autres documents contractuels</h2><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}><Action secondary onClick={() => openDocument('programme')}>Programme</Action><span style={{ ...muted, alignSelf: 'center' }}>CGV et politique de confidentialité : à gérer depuis les modèles de documents.</span></div></section>
+      <section style={card}><h2 style={title}>Autres documents contractuels</h2><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}><Action secondary onClick={() => openDocument('programme')}>Programme</Action><Action secondary onClick={() => apercuDocument('devis')}>Devis</Action><Action secondary onClick={() => apercuDocument('livret')}>Livret d’accueil</Action><Action secondary onClick={() => apercuDocument('convocation')} disabled={!inscriptions.length}>Convocation</Action><span style={{ ...muted, alignSelf: 'center' }}>CGV et politique de confidentialité : à gérer depuis les modèles de documents.</span></div></section>
     </>;
   };
 
   const renderApprenant = () => {
-    if (currentSub === 'documents') return <section style={card}><h2 style={title}>Documents partagés</h2><p style={muted}>Chaque document généré est ajouté au registre de cette session avec sa date et sa version. « Mettre à jour » crée une nouvelle version, sans effacer l’ancienne.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '16px 0' }}><Action onClick={() => openDocument('programme')}>Générer le programme</Action><Action secondary onClick={() => openDocument('emargement')}>Générer la feuille d’émargement</Action>{inscriptions.map((item) => <Action key={item.id} secondary onClick={() => openDocument('attestation', item.apprenant_id)}>Attestation · {item.first_name}</Action>)}</div><DocumentRegister documents={documents} onRegenerate={(doc) => { try { const url = new URL(doc.fichier, window.location.origin); openDocument(url.searchParams.get('type') || 'programme', url.searchParams.get('apprenant_id')); } catch { setApercu({ url: doc.fichier, titre: doc.libelle || 'Document' }); } }} /></section>;
+    if (currentSub === 'documents') return <section style={card}><h2 style={title}>Documents partagés</h2><p style={muted}>Chaque document généré est ajouté au registre de cette session avec sa date et sa version. « Mettre à jour » crée une nouvelle version, sans effacer l’ancienne.</p><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '16px 0' }}><Action onClick={() => openDocument('programme')}>Générer le programme</Action><Action secondary onClick={() => openDocument('emargement')}>Générer la feuille d’émargement</Action><Action secondary onClick={() => apercuDocument('livret')}>Livret d’accueil</Action>{inscriptions.map((item) => <Action key={`cv-${item.id}`} secondary onClick={() => apercuDocument('convocation', item)}>Convocation · {item.first_name}</Action>)}{inscriptions.map((item) => <Action key={item.id} secondary onClick={() => openDocument('attestation', item.apprenant_id)}>Attestation · {item.first_name}</Action>)}</div><DocumentRegister documents={documents} onRegenerate={(doc) => { try { const url = new URL(doc.fichier, window.location.origin); openDocument(url.searchParams.get('type') || 'programme', url.searchParams.get('apprenant_id')); } catch { setApercu({ url: doc.fichier, titre: doc.libelle || 'Document' }); } }} /></section>;
     if (currentSub === 'elearning') return <section style={card}><h2 style={title}>Séquences e-learning</h2><p style={muted}>Crée ou associe un parcours e-learning à cette session, puis suis la progression par apprenant.</p><Empty>Aucune séquence n’est encore associée à ce parcours.</Empty></section>;
     if (currentSub === 'affichage') return <EspaceApprenantConfig sessionId={sessionId} session={session} onNotice={setNotice} onRecharger={load} />;
     const accessLink = links.find((item) => item.kind === 'questionnaire') || links.find((item) => item.kind === 'emargement');

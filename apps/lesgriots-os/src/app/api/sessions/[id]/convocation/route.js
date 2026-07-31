@@ -1,8 +1,8 @@
 /**
- * /api/sessions/:id/devis — le devis de la session, en PDF.
+ * /api/sessions/:id/convocation — la convocation nominative, en PDF.
  *
- * `validite` en jours, trente par défaut. Le numéro se déduit du nombre de
- * devis déjà émis dans l'année, sauf s'il est passé explicitement.
+ * `apprenant_id` optionnel : sans lui, la convocation part pour le premier
+ * inscrit, ce qui sert d'aperçu depuis la fiche de session.
  */
 
 import { NextResponse } from 'next/server';
@@ -12,9 +12,9 @@ import os from 'node:os';
 import { getDb } from '@/lib/db.mjs';
 import { withGuard } from '@/lib/api-guard';
 import { rendre } from '@/lib/rendre-modele.mjs';
-import { construireDevis } from '@/lib/devis-donnees.mjs';
+import { construireConvocation } from '@/lib/documents-accueil.mjs';
 
-const MODELE = path.join(process.cwd(), 'resources/template-studio/geist-mono/source/Devis.dc.html');
+const MODELE = path.join(process.cwd(), 'resources/template-studio/geist-mono/source/Convocation.dc.html');
 
 const nomFichier = (t) => `${String(t || 'document')
   .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -26,12 +26,11 @@ async function _GET(req, { params }) {
     const db = getDb();
     const { id } = await params;
     const { searchParams } = new URL(req.url);
-    const valeurs = construireDevis(db, id, {
-      numero: searchParams.get('numero') || '',
-      validiteJours: Number(searchParams.get('validite')) || 30,
-    });
+    const valeurs = construireConvocation(db, id, searchParams.get('apprenant_id'));
+    const qui = valeurs._apprenant;
+    delete valeurs._apprenant;
 
-    const sortie = path.join(await fs.mkdtemp(path.join(os.tmpdir(), 'devis-')), 'devis.pdf');
+    const sortie = path.join(await fs.mkdtemp(path.join(os.tmpdir(), 'convocation-')), 'convocation.pdf');
     await rendre(MODELE, valeurs, sortie);
     const pdf = await fs.readFile(sortie);
     await fs.rm(path.dirname(sortie), { recursive: true, force: true });
@@ -39,7 +38,7 @@ async function _GET(req, { params }) {
     return new NextResponse(pdf, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="${nomFichier(`Devis ${valeurs.numero}`)}"`,
+        'Content-Disposition': `inline; filename="${nomFichier(`Convocation ${valeurs.titre} ${qui ? `${qui.first_name} ${qui.last_name}` : ''}`)}"`,
         'Cache-Control': 'no-store',
       },
     });
