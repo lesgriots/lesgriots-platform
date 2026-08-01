@@ -4,7 +4,6 @@ import { getDb } from '@/lib/db.mjs';
 import { enrollLearnerInSession } from '@/lib/inscription-flow';
 import { formulaireDeSession, verifierReponses, resumePositionnement } from '@/lib/formulaire-inscription.mjs';
 import { accuserInscription, prevenirOrganisme } from '@/lib/email-inscription.mjs';
-import { rendreDocumentSession } from '@/lib/documents-session.mjs';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -176,19 +175,20 @@ export async function POST(request, { params }) {
       };
 
       /*
-       * Le programme part avec l'accusé de réception, comme dans le message
-       * que Moos envoyait à la main. C'est la pièce qui répond à la seule
-       * question du candidat à cet instant : est-ce bien ce que je crois ?
-       * Un rendu qui échoue ne doit pas retenir le message : on part sans.
+       * Pas de programme en pièce jointe ici, et c'est délibéré.
+       *
+       * Le programme envoyé avant l'entretien est forcément le programme
+       * générique. Or c'est l'appel de positionnement qui dit à quoi la
+       * session ressemblera pour cette personne-là. Envoyer le générique
+       * maintenant oblige à en renvoyer un second après, et c'est ainsi
+       * qu'on se retrouve avec deux versions en circulation.
+       *
+       * Le programme part donc avec la confirmation d'inscription, après
+       * l'entretien. accuserInscription accepte des pièces jointes : le jour
+       * où un programme personnalisé existe, il se branche ici.
        */
-      let pieces = [];
       try {
-        const { pdf, nom: nomPdf } = await rendreDocumentSession(db, 'programme', context.session.id);
-        pieces = [{ filename: nomPdf, content: pdf }];
-      } catch (e) { console.warn('[inscription] programme non joint :', e.message); }
-
-      try {
-        await accuserInscription({ ...infos, suite, financement, pieces });
+        await accuserInscription({ ...infos, suite, financement });
       } catch (e) { console.warn('[inscription] accusé non envoyé :', e.message); }
 
       try {
