@@ -62,7 +62,7 @@ export async function accuserInscription({
   const bloc = [
     `Bonjour${prenom ? ` ${prenom}` : ''},`,
     '',
-    `Nous avons bien reçu votre demande d'inscription à la formation « ${titre} ».`,
+    `Nous avons bien reçu votre demande d’inscription à la formation « ${titre} ».`,
     '',
     'VOTRE DEMANDE',
     ...[nom, texte(apprenant.email), fin ? `Financement envisagé : ${fin}` : ''].filter(Boolean),
@@ -70,12 +70,12 @@ export async function accuserInscription({
     'LA SESSION VISÉE',
     recapitulatif(session),
     '',
-    "Si l'une de ces informations est inexacte, répondez à ce message : nous la corrigeons.",
+    "Si l’une de ces informations est inexacte, répondez à ce message : nous la corrigeons.",
     '',
     'LA SUITE',
     texte(suite.message)
       || 'Nous examinons votre demande et revenons vers vous sous 3 jours ouvrés.',
-    "Dès que votre place est confirmée, vous recevez votre convocation, le programme détaillé et l'accès à votre espace apprenant.",
+    "Dès que votre place est confirmée, vous recevez votre convocation, le programme détaillé et l’accès à votre espace apprenant.",
   ];
 
   if (texte(suite.lienRdv)) {
@@ -87,7 +87,10 @@ export async function accuserInscription({
     );
   }
 
-  bloc.push('', 'Bien à vous,', `L'équipe ${texte(reglages.company_name) || 'LES GRIOTS'}`);
+  // Règle de marque : ce qui accueille est signé La Griothèque, ce qui
+  // engage est signé LES GRIOTS. Un accusé de réception accueille. La raison
+  // sociale, le NDA et le SIRET restent au pied du message.
+  bloc.push('', 'Bien à vous,', `L’équipe ${texte(reglages.marque_formation) || 'La Griothèque'}`);
 
   const corps = bloc.join('\n');
   const pied = [
@@ -100,10 +103,10 @@ export async function accuserInscription({
   return envoyerEmail({
     destinataire: texte(apprenant.email),
     destinataire_nom: nom,
-    objet: `Votre demande d'inscription · ${titre}`,
+    objet: `Votre demande d’inscription · ${titre}`,
     corps,
     html: emailHtml({
-      titre: `Votre demande d'inscription · ${titre}`,
+      titre: `Votre demande d’inscription · ${titre}`,
       corps,
       lien: texte(suite.lienRdv),
       pied,
