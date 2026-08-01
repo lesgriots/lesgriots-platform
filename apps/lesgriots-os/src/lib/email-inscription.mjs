@@ -40,11 +40,15 @@ function recapitulatif(s) {
 }
 
 /**
- * Le message au candidat. Il dit trois choses et s'arrête : ce à quoi il
- * s'est inscrit, ce qu'il doit prévoir, ce qui se passe ensuite.
+ * Le message au candidat. Il dit deux choses et s'arrête : ce à quoi il vient
+ * de postuler, et ce qui se passe ensuite.
+ *
+ * Rien sur le matériel à prévoir : à ce stade la place n'est pas confirmée,
+ * et demander à quelqu'un de s'équiper pour une session qu'il n'a peut-être
+ * pas n'a aucun sens. Le matériel appartient à la convocation.
  */
 export async function accuserInscription({
-  apprenant, session, materiel = [], suite = {}, reglages = {},
+  apprenant, session, suite = {}, reglages = {},
 }) {
   const titre = texte(session.formation_titre) || 'votre formation';
   const prenom = texte(apprenant.first_name);
@@ -54,12 +58,9 @@ export async function accuserInscription({
     '',
     `Nous avons bien reçu votre demande d'inscription à la formation « ${titre} ».`,
     '',
+    'LA SESSION DEMANDÉE',
     recapitulatif(session),
   ];
-
-  if (materiel.length) {
-    bloc.push('', 'MATÉRIEL REQUIS', ...materiel.map((m) => `• ${m}`));
-  }
 
   bloc.push(
     '',

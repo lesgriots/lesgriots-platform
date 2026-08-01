@@ -4,7 +4,6 @@ import { getDb } from '@/lib/db.mjs';
 import { enrollLearnerInSession } from '@/lib/inscription-flow';
 import { formulaireDeSession, verifierReponses, resumePositionnement } from '@/lib/formulaire-inscription.mjs';
 import { accuserInscription, prevenirOrganisme } from '@/lib/email-inscription.mjs';
-import { liste } from '@/lib/programme-donnees.mjs';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -176,13 +175,7 @@ export async function POST(request, { params }) {
       };
 
       try {
-        await accuserInscription({
-          ...infos,
-          // Le matériel vient des prérequis du programme, comme sur la
-          // convocation et son e-mail : une seule source, trois messages.
-          materiel: liste(context.session.prerequisites),
-          suite,
-        });
+        await accuserInscription({ ...infos, suite });
       } catch (e) { console.warn('[inscription] accusé non envoyé :', e.message); }
 
       try {
