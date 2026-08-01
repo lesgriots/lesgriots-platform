@@ -18,6 +18,8 @@
  * techniques et les taux de satisfaction. Six choses que nous n'avions pas.
  */
 
+import { mention } from './mentions-organisme.mjs';
+
 /* ── Lire ce que la base contient vraiment ────────────────────────────── */
 
 /**
