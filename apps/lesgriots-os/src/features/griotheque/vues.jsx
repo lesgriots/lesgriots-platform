@@ -10630,6 +10630,48 @@ export function ParametresView() {
         </div>
       </div>
 
+      {/*
+        Les quatre mentions que le référentiel exige sur chaque programme.
+        Elles décrivent l'organisme et non le programme : les faire saisir sur
+        chaque fiche, c'est garantir qu'au bout d'un an quinze versions
+        circulent et qu'un auditeur tombe sur celle qu'on a oublié de
+        corriger. Elles s'écrivent donc ici, une fois, et tous les programmes
+        en héritent.
+      */}
+      <div style={{ marginTop: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
+          <span style={{ opacity: 0.5 }}>◈</span> Mentions obligatoires des programmes
+        </div>
+        <div style={{ fontSize: 11.5, color: T.textMuted, lineHeight: 1.6, marginBottom: 14, maxWidth: 720 }}>
+          Écrites une seule fois ici, elles s’impriment sur tous vos programmes et dans l’annexe de
+          vos conventions. Sans elles, un programme ne peut pas être publié. Un programme peut écrire
+          la sienne quand elle diffère vraiment, depuis sa fiche.
+        </div>
+        <div style={{ display: 'grid', gap: 16 }}>
+          {[
+            ['mention_methodes', 'Méthodes pédagogiques', 'Comment vous enseignez : alternance, taille du groupe, travail sur le projet du participant.'],
+            ['mention_moyens', 'Moyens techniques et pédagogiques', 'La salle, le matériel, ce que le participant apporte, le support remis à la fin.'],
+            ['mention_accessibilite', 'Accessibilité et situation de handicap', 'La marche à suivre pour être accueilli, et le nom de votre référent handicap.'],
+            ['mention_delais', 'Délais d’accès', 'Le temps entre la demande et l’entrée en formation, et ce qu’il devient avec un OPCO ou le CPF.'],
+          ].map(([champ, titre, aide]) => (
+            <div key={champ} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{titre}</label>
+              <span style={{ fontSize: 11, color: T.textDim, lineHeight: 1.5 }}>{aide}</span>
+              <textarea
+                rows={6}
+                value={settings[champ] || ''}
+                onChange={e => setSettings(prev => ({ ...prev, [champ]: e.target.value }))}
+                style={{
+                  width: '100%', boxSizing: 'border-box', marginTop: 4, padding: '10px 12px',
+                  borderRadius: 8, border: `1px solid ${T.border}`, background: T.surface2 || T.surface,
+                  color: T.text, font: 'inherit', fontSize: 13, lineHeight: 1.55, resize: 'vertical',
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div style={{ fontSize: 11, color: T.textDim, marginTop: 12, textAlign: 'center' }}>
         Ces informations sont injectées automatiquement dans les conventions, attestations et autres documents générés.
       </div>

@@ -205,7 +205,7 @@ export function construireProgramme(db, formationId) {
     ['Modalité', MODALITES[f.modality] || 'Présentiel'],
     ['Effectif', f.max_participants ? `${f.max_participants} personnes max.` : ''],
     ['Tarif', Number(f.price_ht) > 0 ? `${euros(f.price_ht)} HT` : ''],
-    ['Délai d’accès', texte(f.delais_acces)],
+    ['Délai d’accès', mention(f, reglages, 'delais_acces').valeur],
     ['Certification', texte(f.certification)],
   ].filter(([, v]) => v).map(([label, value]) => ({ label, value }));
 
@@ -258,7 +258,7 @@ export function construireProgramme(db, formationId) {
       ].filter(Boolean).join(' · '),
 
       // ── Les six blocs qui manquaient ────────────────────────────────
-      methodes: texte(f.modalites_pedagogiques),
+      methodes: mention(f, reglages, 'modalites_pedagogiques').valeur,
       // Les modalités d'évaluation : si le texte porte de vraies puces « • »,
       // chacune devient un point, retours à la ligne internes ravalés. Sinon,
       // découpage ligne à ligne classique.
@@ -268,8 +268,8 @@ export function construireProgramme(db, formationId) {
           ? brut.split('•').map((x) => x.replace(/\s+/g, ' ').trim()).filter(Boolean)
           : liste(brut);
       })(),
-      moyens: texte(f.moyens_materiels),
-      accessibilite: texte(f.accessibility),
+      moyens: mention(f, reglages, 'moyens_materiels').valeur,
+      accessibilite: mention(f, reglages, 'accessibility').valeur,
       intervenants: intervenantsRendus,
       satisfaction,
       totalHeures: heures(totalHeures),
