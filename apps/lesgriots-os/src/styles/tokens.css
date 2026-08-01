@@ -199,6 +199,23 @@
   /* Courbe unique de la maquette. --ease reste en place pour l'existant. */
   --ease-da:       cubic-bezier(0.2, 0.7, 0.3, 1);
 
+  /* Variantes claires des statuts, pour les dégradés de segments.
+     La maquette éclaircit chaque statut de quelques points pour le haut
+     du dégradé : sans ces trois valeurs, un segment coloré doit inventer
+     sa propre nuance, et deux segments voisins ne s'éclaircissent plus
+     de la même façon. */
+  --success-clair: #2B9E5B;
+  --info-clair:    #2C86D4;
+  --warning-clair: #E09B32;
+  --neutre-clair:  #87826f;
+
+  /* Erreur posée sur l'encre. Le #B83328 du thème papier devient illisible
+     sur fond sombre : la maquette le remonte en corail. */
+  --danger-on-ink:      #FF9A90;
+  --danger-on-ink-2:    #F0857C;
+  --danger-on-ink-bg:   rgba(184, 51, 40, 0.20);
+
+
   /* Rayons de la maquette qui manquaient à l'échelle sm/md/lg/xl */
   --radius-section: 18px;
   --radius-carte:  14px;
@@ -224,7 +241,7 @@ html[data-theme="light"] {
   --bg:          #f6f5f3;
   --surface:     #ffffff;
   --surface-2:   #eeebe6;
-  --surface-3:   #e6e3dd;
+  --surface-3:   #e0ddd6;  /* valeur exacte du dossier de passation */
   --border:      rgba(0, 0, 0, 0.14);
   --border-2:    rgba(0, 0, 0, 0.30);
   --hover:       rgba(0, 0, 0, 0.05);
@@ -331,6 +348,23 @@ html[data-theme="light"] {
 
   /* Courbe unique de la maquette. --ease reste en place pour l'existant. */
   --ease-da:       cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* Variantes claires des statuts, pour les dégradés de segments.
+     La maquette éclaircit chaque statut de quelques points pour le haut
+     du dégradé : sans ces trois valeurs, un segment coloré doit inventer
+     sa propre nuance, et deux segments voisins ne s'éclaircissent plus
+     de la même façon. */
+  --success-clair: #2B9E5B;
+  --info-clair:    #2C86D4;
+  --warning-clair: #E09B32;
+  --neutre-clair:  #87826f;
+
+  /* Erreur posée sur l'encre. Le #B83328 du thème papier devient illisible
+     sur fond sombre : la maquette le remonte en corail. */
+  --danger-on-ink:      #FF9A90;
+  --danger-on-ink-2:    #F0857C;
+  --danger-on-ink-bg:   rgba(184, 51, 40, 0.20);
+
 
   /* Rayons de la maquette qui manquaient à l'échelle sm/md/lg/xl */
   --radius-section: 18px;
