@@ -129,18 +129,31 @@ export async function GET(request, { params }) {
       WHERE formation_id = ? ORDER BY sort_order
     `).all(s.formation_id);
 
-    // Documents de l'apprenant, et documents de session à l'exception des
-    // pièces commerciales. Une facture ou une convention de session porte le
-    // prix payé par l'employeur : elle ne regarde pas l'apprenant. Ses
-    // propres pièces nominatives, elles, lui appartiennent.
-    const CATEGORIES_PRIVEES = ['facture', 'devis', 'convention'];
+    /*
+     * Ce que l'apprenant voit, et ce qu'il ne doit pas voir.
+     *
+     * Ses pièces nominatives lui appartiennent : convocation, attestation,
+     * certificat. Elles sortent sans discussion.
+     *
+     * Les pièces de session, elles, se trient. Une facture, un devis ou une
+     * convention portent le prix payé par l'employeur : cela ne le regarde
+     * pas. Une feuille d'émargement porte pire encore, les noms, les
+     * employeurs et les signatures manuscrites de TOUS les participants :
+     * la remettre à l'un d'eux serait communiquer les données personnelles
+     * des autres, sans base légale et sans qu'ils l'aient jamais su.
+     *
+     * Restent visibles à tous les inscrits de la session : le programme, le
+     * livret d'accueil, les supports pédagogiques. Ce qui a été conçu pour
+     * être lu par eux.
+     */
+    const CATEGORIES_PRIVEES = ['facture', 'devis', 'convention', 'contrat', 'emargement'];
     const documents = db.prepare(`
       SELECT id, categorie, libelle, created_at FROM documents
       WHERE (contexte_type = 'apprenant' AND contexte_id = ?)
          OR (contexte_type = 'session' AND contexte_id = ?
-             AND COALESCE(categorie, '') NOT IN ('facture', 'devis', 'convention'))
+             AND COALESCE(categorie, '') NOT IN (${CATEGORIES_PRIVEES.map(() => '?').join(', ')}))
       ORDER BY created_at DESC
-    `).all(lien.apprenant_id, lien.session_id);
+    `).all(lien.apprenant_id, lien.session_id, ...CATEGORIES_PRIVEES);
 
     const jours = joursDeSession(s);
     const signees = db.prepare(`
