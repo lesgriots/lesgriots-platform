@@ -5,6 +5,17 @@ import { useEffect, useMemo, useState } from 'react';
 import EditeurQuestionnaires from './EditeurQuestionnaires';
 import EditeurFormulaireInscription from './EditeurFormulaireInscription';
 import MentionsObligatoires from './MentionsObligatoires';
+import { BandeauEncre, BarreOnglets, SousOnglets } from '@/components/da/BandeauDa';
+
+/* Les trois espaces du programme, aux couleurs d'étape du dossier de
+   passation. La maquette en montre quatre, dont « Accueil » : cet espace
+   n'existe pas ici, et en fabriquer un vide pour respecter un dessin
+   serait ajouter un onglet qui ne mène nulle part. */
+const ESPACES = [
+  { cle: 'content',   label: 'Contenu',   base: '#6B4FD8', clair: '#8368EE' },
+  { cle: 'quality',   label: 'Qualité',   base: '#1E8449', clair: '#2B9E5B' },
+  { cle: 'diffusion', label: 'Diffusion', base: '#E0A400', clair: '#FFC22E', texte: '#171407' },
+];
 
 const inputStyle = { width: '100%', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', padding: '10px 11px', boxSizing: 'border-box', font: 'inherit' };
 const panel = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 };
@@ -45,12 +56,54 @@ export default function ProgramWorkspace({ formationId }) {
   function chooseArea(nextArea) { setArea(nextArea); setSection(navigation[nextArea][0][0]); }
   return <div style={{ maxWidth: 1420, margin: '0 auto', padding: '28px 28px 56px' }}>
     <Link href="/catalogue" style={{ color: 'var(--gold)', fontSize: 13, textDecoration: 'none' }}>← Bibliothèque</Link>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 18, marginTop: 10 }}><div><p style={{ color: 'var(--text-3)', margin: 0, fontSize: 13 }}>{formation.code}</p><h1 style={{ margin: '4px 0 8px', fontSize: 30 }}>{formation.title}</h1><p style={{ margin: 0, color: 'var(--text-2)' }}>{formation.duration_hours || 0} heures · {formation.modality || 'Présentiel'} · {formation.sessions?.length || 0} session{formation.sessions?.length !== 1 ? 's' : ''}</p></div><div style={{ display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}><a href={`/api/formations/${formationId}/programme${controle && !controle.complet ? '?force=1' : ''}`} target="_blank" rel="noreferrer" style={{ ...(controle?.complet ? primary : quiet), textDecoration: 'none', display: 'inline-block' }}>{controle?.complet ? 'Télécharger le programme' : 'Document de travail'}</a><button style={quiet} onClick={() => save({ status: formation.status === 'archived' ? 'active' : 'archived' })}>{formation.status === 'archived' ? 'Restaurer' : 'Archiver'}</button></div></div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 12 }}>
+      <BandeauEncre
+        surTitre="Bibliothèque · programme d’origine"
+        titre={formation.title}
+        phrase="Le contenu de référence : les sessions en héritent à leur création, les modifications ultérieures ne redescendent pas."
+        chiffres={[
+          { label: 'Sessions', valeur: String(formation.sessions?.length || 0), couleur: 'var(--gold)' },
+          { label: 'Durée', valeur: `${formation.duration_hours || 0} h` },
+          { label: 'Mentions', valeur: controle ? `${controle.remplies ?? 0} / ${controle.total || 11}` : '—',
+            couleur: controle && controle.manques?.length ? 'var(--warning-clair)' : 'var(--on-ink)' },
+        ]}
+      />
+
+      {/* La rangée d'actions, sous le bandeau : elle agit sur le programme,
+          elle n'est pas une information sur lui. */}
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--text-3)' }}>
+          {formation.code || 'sans code'}
+        </span>
+        <a href={`/api/formations/${formationId}/programme${controle && !controle.complet ? '?force=1' : ''}`}
+          target="_blank" rel="noreferrer"
+          style={{ ...(controle?.complet ? primary : quiet), textDecoration: 'none', display: 'inline-block', marginLeft: 'auto' }}>
+          {controle?.complet ? 'Télécharger le programme' : 'Document de travail'}
+        </a>
+        <button style={quiet} onClick={() => save({ status: formation.status === 'archived' ? 'active' : 'archived' })}>
+          {formation.status === 'archived' ? 'Restaurer' : 'Archiver'}
+        </button>
+      </div>
+    </div>
     <Controle controle={controle} />
-    <nav aria-label="Espaces du programme" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', margin: '22px 0 18px' }}>
-      <div style={{ display: 'flex' }}>{[['content', 'Contenu'], ['quality', 'Qualité'], ['diffusion', 'Diffusion']].map(([key, title]) => <button key={key} onClick={() => chooseArea(key)} style={{ flex: 1, border: 0, cursor: 'pointer', padding: '13px 10px', fontWeight: 750, background: area === key ? 'var(--gold-soft)' : 'transparent', color: area === key ? 'var(--gold)' : 'var(--text-2)', borderBottom: area === key ? '3px solid var(--gold)' : '3px solid transparent' }}>{title}</button>)}</div>
-      <div style={{ display: 'flex', background: 'var(--surface-2)' }}>{navigation[area].map(([key, title]) => <button key={key} onClick={() => setSection(key)} style={{ flex: 1, border: 0, cursor: 'pointer', padding: '10px', fontWeight: 700, background: section === key ? 'var(--surface)' : 'transparent', color: section === key ? 'var(--text)' : 'var(--text-2)', boxShadow: section === key ? 'inset 0 -3px 0 var(--gold)' : 'none' }}>{title}</button>)}</div>
-    </nav>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, margin: '20px 0 18px' }}>
+      <BarreOnglets
+        onglets={ESPACES.map((e) => ({
+          ...e,
+          detail: e.cle === 'content' ? `${blocks.length} bloc(s)`
+            : e.cle === 'quality' ? `${parse(formation.evaluations_associees).length} évaluation(s)`
+            : `${resources.length} document(s)`,
+        }))}
+        actif={area}
+        onChoisir={chooseArea}
+      />
+      <SousOnglets
+        sous={navigation[area]}
+        actif={section}
+        onChoisir={setSection}
+        couleur={ESPACES.find((e) => e.cle === area)?.base}
+      />
+    </div>
     {notice && <p role="status" style={{ background: 'var(--surface-2)', padding: 12, borderRadius: 8, color: 'var(--text-2)' }}>{notice}</p>}
     {section === 'detail' && <Detail formation={formation} editing={editing} setEditing={setEditing} save={save} blocks={blocks} allBlocks={allBlocks} attach={attachBlock} detach={detachBlock} />}
     {section === 'mentions' && <MentionsObligatoires formationId={formationId} formation={formation} onEnregistre={() => load()} />}

@@ -62,10 +62,10 @@ fumee() {
     local code
     code=$(frapper "$r")
     if [ "$code" -ge 500 ] 2>/dev/null || [ -z "$code" ] || [ "$code" = "000" ]; then
-      echo "   ✗ $r → $code" | tee -a "$LOG"
+      echo "   ✗ $r → $code"
       echecs=$((echecs + 1))
     else
-      echo "   · $r → $code" | tee -a "$LOG"
+      echo "   · $r → $code"
     fi
   done
   return "$echecs"
@@ -78,31 +78,31 @@ restaurer() {
     mv "$PRECEDENT" "$APP/.next"
     systemctl restart lesgriots-os
     sleep 5
-    echo "↩ build précédent restauré (le build fautif est dans .next.casse)" | tee -a "$LOG"
+    echo "↩ build précédent restauré (le build fautif est dans .next.casse)"
     return 0
   fi
-  echo "↩ aucun build précédent à restaurer" | tee -a "$LOG"
+  echo "↩ aucun build précédent à restaurer"
   return 1
 }
 
 # ── Retour arrière à la demande ────────────────────────────────────────
 if [ "$REVENIR" = "1" ]; then
   : > "$LOG"
-  echo "→ retour au build précédent" | tee -a "$LOG"
+  echo "→ retour au build précédent"
   restaurer || exit 1
   fumee || true
-  echo "✓ service=$(systemctl is-active lesgriots-os)" | tee -a "$LOG"
+  echo "✓ service=$(systemctl is-active lesgriots-os)"
   exit 0
 fi
 
 : > "$LOG"
-echo "→ git pull" | tee -a "$LOG"
+echo "→ git pull"
 sudo -u deployment git -C "$REPO" pull --ff-only >> "$LOG" 2>&1 || { echo "✗ pull"; tail -3 "$LOG"; exit 1; }
 
 # Réinstalle si demandé, si node_modules manque, ou si le verrou a bougé.
 if [ "$DEPS" = "1" ] || [ ! -d "$APP/node_modules" ] || \
    [ "$APP/package-lock.json" -nt "$APP/node_modules" ]; then
-  echo "→ npm ci" | tee -a "$LOG"
+  echo "→ npm ci"
   ( cd "$APP" && sudo -u deployment npm ci >> "$LOG" 2>&1 ) || { echo "✗ npm ci"; tail -5 "$LOG"; exit 1; }
 fi
 
@@ -114,28 +114,28 @@ if [ -d "$APP/.next" ]; then
   cp -al "$APP/.next" "$PRECEDENT" 2>/dev/null || cp -a "$APP/.next" "$PRECEDENT"
 fi
 
-echo "→ build" | tee -a "$LOG"
+echo "→ build"
 ( cd "$APP" && sudo -u deployment npm run build >> "$LOG" 2>&1 ) || {
-  echo "✗ BUILD ÉCHOUÉ — service inchangé, ancien build toujours servi" | tee -a "$LOG"
+  echo "✗ BUILD ÉCHOUÉ — service inchangé, ancien build toujours servi"
   grep -iE "error|ReferenceError|Failed to compile" "$LOG" | head -5
   rm -rf "$PRECEDENT"
   exit 1
 }
 
-echo "→ restart" | tee -a "$LOG"
+echo "→ restart"
 systemctl restart lesgriots-os
 sleep 5
 
 ETAT=$(systemctl is-active lesgriots-os)
 if [ "$ETAT" != "active" ]; then
-  echo "✗ le service ne démarre pas" | tee -a "$LOG"
+  echo "✗ le service ne démarre pas"
   restaurer
   exit 1
 fi
 
-echo "→ fumée" | tee -a "$LOG"
+echo "→ fumée"
 if ! fumee; then
-  echo "✗ FUMÉE ÉCHOUÉE — au moins une route rend un 500" | tee -a "$LOG"
+  echo "✗ FUMÉE ÉCHOUÉE — au moins une route rend un 500"
   restaurer
   exit 1
 fi
@@ -143,5 +143,5 @@ fi
 # Tout va bien : le filet d'hier ne sert plus à rien, il devient celui d'aujourd'hui.
 rm -rf "$PRECEDENT"
 CODE=$(frapper /login)
-echo "✓ service=$ETAT  /login=$CODE  fumée=${#ROUTES[@]} routes OK" | tee -a "$LOG"
+echo "✓ service=$ETAT  /login=$CODE  fumée=${#ROUTES[@]} routes OK"
 exit 0

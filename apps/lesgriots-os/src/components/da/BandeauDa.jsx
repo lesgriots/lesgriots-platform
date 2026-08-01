@@ -98,3 +98,80 @@ export function BarreSegmentee({ segments = [] }) {
     </div>
   );
 }
+
+/**
+ * La barre segmentée cliquable, qui pilote un onglet.
+ *
+ * Même grammaire que la barre d'information, mais elle décide de ce qu'on
+ * regarde. Le segment actif porte le liseré blanc interne décrit par le
+ * dossier de passation : c'est ce trait, et non la couleur, qui dit « vous
+ * êtes ici », parce que chaque segment a déjà sa propre couleur.
+ *
+ * `onglets` : [{ cle, label, detail, base, clair, texte }]
+ */
+export function BarreOnglets({ onglets = [], actif, onChoisir }) {
+  const dernier = onglets.length - 1;
+  return (
+    <div role="tablist" style={{ display: 'flex', gap: 3, overflowX: 'auto', paddingBottom: 2 }}>
+      {onglets.map((o, i) => {
+        const ici = o.cle === actif;
+        return (
+          <button
+            key={o.cle} type="button" role="tab" aria-selected={ici}
+            onClick={() => onChoisir?.(o.cle)}
+            style={{
+              flex: '1 1 0', minWidth: 150, border: 0, cursor: 'pointer',
+              fontFamily: 'inherit', textAlign: 'left',
+              background: `linear-gradient(140deg, ${o.clair} 0%, ${o.base} 100%)`,
+              color: o.texte || '#ffffff', padding: '13px 15px',
+              borderRadius: i === 0 ? '11px 3px 3px 11px' : i === dernier ? '3px 11px 11px 3px' : 3,
+              boxShadow: ici ? 'inset 0 -4px 0 rgba(255,255,255,.85)' : 'none',
+              opacity: ici ? 1 : 0.82,
+              transition: 'opacity .2s var(--ease-da), box-shadow .2s var(--ease-da)',
+            }}
+          >
+            <div style={{
+              fontSize: 13, fontWeight: 800, whiteSpace: 'nowrap',
+              overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>{o.label}</div>
+            {o.detail && (
+              <div style={{ fontSize: 11.5, opacity: 0.78, marginTop: 2 }}>{o.detail}</div>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * Le bandeau de sous-onglets, teinté par l'onglet actif.
+ *
+ * Le fond reprend la couleur de l'étape à douze pour cent : la parenté se lit
+ * sans qu'on ait à répéter la couleur pleine, qui écraserait le contenu.
+ */
+export function SousOnglets({ sous = [], actif, onChoisir, couleur = 'var(--ink)' }) {
+  return (
+    <div style={{
+      display: 'flex', gap: 4, borderRadius: 12, padding: 5, overflowX: 'auto',
+      background: `color-mix(in srgb, ${couleur} 12%, transparent)`,
+    }}>
+      {sous.map(([cle, label]) => {
+        const ici = cle === actif;
+        return (
+          <button
+            key={cle} type="button" onClick={() => onChoisir?.(cle)}
+            style={{
+              flex: '1 0 auto', border: 0, cursor: 'pointer', fontFamily: 'inherit',
+              borderRadius: 9, padding: '11px 18px', fontSize: 12.5, fontWeight: 800,
+              whiteSpace: 'nowrap',
+              background: ici ? couleur : 'transparent',
+              color: ici ? '#ffffff' : 'var(--text-2)',
+              transition: 'background .2s var(--ease-da), color .2s var(--ease-da)',
+            }}
+          >{label}</button>
+        );
+      })}
+    </div>
+  );
+}
