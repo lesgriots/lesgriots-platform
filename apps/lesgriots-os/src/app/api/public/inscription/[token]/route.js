@@ -128,8 +128,8 @@ export async function POST(request, { params }) {
      * pour savoir ce que la personne a déclaré. Le financement déclaré
      * alimente le champ prévu pour lui.
      */
+    const financement = controle.reponses.find((r) => r.cle === 'financement')?.valeur || '';
     if (controle.reponses.length) {
-      const financement = controle.reponses.find((r) => r.cle === 'financement')?.valeur || '';
       db.prepare(`
         UPDATE inscriptions
         SET reponses_inscription = ?,
@@ -175,7 +175,7 @@ export async function POST(request, { params }) {
       };
 
       try {
-        await accuserInscription({ ...infos, suite });
+        await accuserInscription({ ...infos, suite, financement });
       } catch (e) { console.warn('[inscription] accusé non envoyé :', e.message); }
 
       try {

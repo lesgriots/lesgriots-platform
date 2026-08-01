@@ -83,7 +83,7 @@ export function assainir(champs) {
  * proposé juste après l'envoi, au moment où la personne est encore là.
  */
 export const SUITE_DEFAUT = {
-  message: 'Nous avons bien reçu votre demande. Nous revenons vers vous sous 3 jours ouvrés pour valider votre inscription.',
+  message: 'Nous examinons chaque candidature une par une : le parcours, les attentes, l’adéquation avec le niveau du groupe. Vous aurez notre réponse sous 3 jours ouvrés.',
   lienRdv: '',
   libelleRdv: 'Réserver un créneau d’échange',
   texteRdv: 'Vous préférez en parler de vive voix ? Choisissez un créneau, nous ferons le point sur votre projet et votre niveau de départ.',

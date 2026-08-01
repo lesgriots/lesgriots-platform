@@ -27,60 +27,67 @@ const jourFr = (v) => {
   });
 };
 
-/** Le bloc « votre session », le même dans les deux messages. */
+/** Les trois lignes de la session, sans sous-titres : elles vivent déjà sous un intitulé. */
 function recapitulatif(s) {
   const debut = jourFr(s.start_date);
   const fin = jourFr(s.end_date);
   const quand = fin && fin !== debut ? `Du ${debut}\nau ${fin}` : `Le ${debut}`;
-  return [
-    ['DATES', quand],
-    ['HORAIRES', texte(s.horaire)],
-    ['LIEU', texte(s.adresse) || texte(s.location)],
-  ].filter(([, v]) => v).map(([t, v]) => `${t}\n${v}`).join('\n\n');
+  return [quand, texte(s.horaire), texte(s.adresse) || texte(s.location)].filter(Boolean).join('\n');
 }
 
 /**
- * Le message au candidat. Il dit deux choses et s'arrête : ce à quoi il vient
- * de postuler, et ce qui se passe ensuite.
+ * Le message au candidat.
  *
- * Rien sur le matériel à prévoir : à ce stade la place n'est pas confirmée,
- * et demander à quelqu'un de s'équiper pour une session qu'il n'a peut-être
- * pas n'a aucun sens. Le matériel appartient à la convocation.
+ * Il répond à trois questions, dans cet ordre, et s'arrête : qu'est-ce que
+ * vous avez enregistré de moi, à quoi je viens de postuler, et quand aurai-je
+ * une réponse.
+ *
+ * Deux pièges évités ici. Le premier : dire deux fois la même chose. Le texte
+ * de suite configurable commençait par « nous avons bien reçu votre demande »,
+ * juste après une phrase qui disait déjà exactement cela. Le second : écrire
+ * « si une information est inexacte, corrigez-nous » sans montrer aucune des
+ * informations saisies. On ne repère pas une erreur dans ce qu'on ne voit pas.
+ *
+ * Rien sur le matériel à prévoir : à ce stade la place n'est pas confirmée.
+ * Le matériel appartient à la convocation.
  */
 export async function accuserInscription({
-  apprenant, session, suite = {}, reglages = {},
+  apprenant, session, suite = {}, financement = '', reglages = {},
 }) {
   const titre = texte(session.formation_titre) || 'votre formation';
   const prenom = texte(apprenant.first_name);
+  const nom = [apprenant.first_name, apprenant.last_name].filter(Boolean).join(' ');
+  const fin = texte(financement);
 
   const bloc = [
     `Bonjour${prenom ? ` ${prenom}` : ''},`,
     '',
     `Nous avons bien reçu votre demande d'inscription à la formation « ${titre} ».`,
     '',
-    'LA SESSION DEMANDÉE',
+    'VOTRE DEMANDE',
+    ...[nom, texte(apprenant.email), fin ? `Financement envisagé : ${fin}` : ''].filter(Boolean),
+    '',
+    'LA SESSION VISÉE',
     recapitulatif(session),
-  ];
-
-  bloc.push(
+    '',
+    "Si l'une de ces informations est inexacte, répondez à ce message : nous la corrigeons.",
     '',
     'LA SUITE',
-    texte(suite.message) || 'Nous revenons vers vous pour valider votre inscription.',
-    '',
-    "Une fois votre place confirmée, vous recevrez votre convocation, le programme détaillé et l'accès à votre espace apprenant.",
-  );
+    texte(suite.message)
+      || 'Nous examinons votre demande et revenons vers vous sous 3 jours ouvrés.',
+    "Dès que votre place est confirmée, vous recevez votre convocation, le programme détaillé et l'accès à votre espace apprenant.",
+  ];
 
   if (texte(suite.lienRdv)) {
-    bloc.push('', texte(suite.texteRdv) || 'Vous préférez en parler de vive voix ?', texte(suite.lienRdv));
+    bloc.push(
+      '',
+      'EN PARLER AVANT',
+      texte(suite.texteRdv) || 'Vous préférez en parler de vive voix ? Choisissez un créneau.',
+      texte(suite.lienRdv),
+    );
   }
 
-  bloc.push(
-    '',
-    "Si une information est inexacte, répondez simplement à ce message.",
-    '',
-    'Bien à vous,',
-    `L'équipe ${texte(reglages.company_name) || 'LES GRIOTS'}`,
-  );
+  bloc.push('', 'Bien à vous,', `L'équipe ${texte(reglages.company_name) || 'LES GRIOTS'}`);
 
   const corps = bloc.join('\n');
   const pied = [
@@ -92,11 +99,11 @@ export async function accuserInscription({
 
   return envoyerEmail({
     destinataire: texte(apprenant.email),
-    destinataire_nom: [apprenant.first_name, apprenant.last_name].filter(Boolean).join(' '),
-    objet: `Votre demande d'inscription — ${titre}`,
+    destinataire_nom: nom,
+    objet: `Votre demande d'inscription · ${titre}`,
     corps,
     html: emailHtml({
-      titre: `Votre demande d'inscription — ${titre}`,
+      titre: `Votre demande d'inscription · ${titre}`,
       corps,
       lien: texte(suite.lienRdv),
       pied,
