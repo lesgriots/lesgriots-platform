@@ -45,12 +45,12 @@ const PAR_CLE = Object.fromEntries(ETAPES.map((e) => [e.cle, e]));
 
    Le clair est le haut du dégradé de segment, la base le bas. */
 const COULEUR_ETAPE = {
-  prospect:           { base: '#6f6b60', clair: '#87826f', texte: '#ffffff' },
-  besoin:             { base: '#1B6FB8', clair: '#2C86D4', texte: '#ffffff' },
-  devis_envoye:       { base: '#C9821C', clair: '#E09B32', texte: '#ffffff' },
-  convention_signee:  { base: '#1E8449', clair: '#2B9E5B', texte: '#ffffff' },
-  financement_valide: { base: '#1B9FC4', clair: '#31B8DC', texte: '#ffffff' },
-  session_planifiee:  { base: '#E0A400', clair: '#FFC22E', texte: '#171407' },
+  prospect:           { base: '#6f6b60', clair: '#87826f', texte: '#ffffff', icone: 'apprenants' },
+  besoin:             { base: '#1B6FB8', clair: '#2C86D4', texte: '#ffffff', icone: 'tunnel' },
+  devis_envoye:       { base: '#C9821C', clair: '#E09B32', texte: '#ffffff', icone: 'fichier' },
+  convention_signee:  { base: '#1E8449', clair: '#2B9E5B', texte: '#ffffff', icone: 'valide' },
+  financement_valide: { base: '#1B9FC4', clair: '#31B8DC', texte: '#ffffff', icone: 'immeuble' },
+  session_planifiee:  { base: '#E0A400', clair: '#FFC22E', texte: '#171407', icone: 'sessions' },
 };
 
 // Une affaire reprise depuis une session conserve sa référence source.

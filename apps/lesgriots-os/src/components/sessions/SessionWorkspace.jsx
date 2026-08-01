@@ -41,10 +41,10 @@ export default function SessionWorkspace({ initialSessionId, vue = 'actives' }) 
 
   const apprenants = sessions.reduce((t, x) => t + (Number(x.inscriptions_count) || 0), 0);
   const SEGMENTS = [
-    { cle: 'projets', label: 'Projets', base: '#6f6b60', clair: '#87826f' },
-    { cle: 'planification', label: 'Planification en cours', base: '#C9821C', clair: '#E09B32' },
-    { cle: 'planifiees', label: 'Planifiées', base: '#1B6FB8', clair: '#2C86D4' },
-    { cle: 'terminees', label: 'Terminées', base: '#1E8449', clair: '#2B9E5B' },
+    { cle: 'projets', label: 'Projets', base: '#6f6b60', clair: '#87826f', icone: 'documents' },
+    { cle: 'planification', label: 'Planification en cours', base: '#C9821C', clair: '#E09B32', icone: 'configuration' },
+    { cle: 'planifiees', label: 'Planifiées', base: '#1B6FB8', clair: '#2C86D4', icone: 'sessions' },
+    { cle: 'terminees', label: 'Terminées', base: '#1E8449', clair: '#2B9E5B', icone: 'valide' },
   ].map((g) => {
     const lot = groupes[g.cle];
     return {

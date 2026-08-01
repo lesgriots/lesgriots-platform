@@ -7,7 +7,7 @@ import EnvoisAutomatiques from './EnvoisAutomatiques';
 import ApercuDocument from '@/components/ui/ApercuDocument';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { Interrupteur } from '@/components/ui';
-import { BandeauEncre, BarreOnglets, SousOnglets } from '@/components/da/BandeauDa';
+import { BandeauEncre, BarreOnglets, SousOnglets, Icone } from '@/components/da/BandeauDa';
 
 const STEPS = [
   { id: 'avancement', label: 'Avancement', mark: '↗' },
@@ -23,11 +23,11 @@ const STEPS = [
    source, sinon l'ordre des couleurs finit par diverger d'un endroit à
    l'autre de la même page. */
 const COULEUR_ETAPE = {
-  avancement:    { base: '#4B2FBF', clair: '#6242D8' },
-  configuration: { base: '#6B4FD8', clair: '#8368EE' },
-  gestion:       { base: '#1E8449', clair: '#2B9E5B' },
-  apprenant:     { base: '#1B9FC4', clair: '#31B8DC' },
-  suivi:         { base: '#E0A400', clair: '#FFC22E', texte: '#171407' },
+  avancement:    { base: '#4B2FBF', clair: '#6242D8', icone: 'avancement' },
+  configuration: { base: '#6B4FD8', clair: '#8368EE', icone: 'configuration' },
+  gestion:       { base: '#1E8449', clair: '#2B9E5B', icone: 'gestion' },
+  apprenant:     { base: '#1B9FC4', clair: '#31B8DC', icone: 'espace' },
+  suivi:         { base: '#E0A400', clair: '#FFC22E', texte: '#171407', icone: 'suivi' },
 };
 
 const SUBNAV = {
@@ -1003,7 +1003,9 @@ export default function SessionCockpit({ sessionId }) {
 
   return <div style={{ maxWidth: 1500, margin: '0 auto', padding: '0 0 48px' }}>
     <ApercuDocument url={apercu?.url} titre={apercu?.titre} onFermer={() => setApercu(null)} />
-    <Link href="/sessions-list" style={{ color: 'var(--gold-text)', fontSize: 12.5, fontWeight: 700, textDecoration: 'none', display: 'inline-block', marginBottom: 14 }}>← Toutes les sessions</Link>
+    <Link href="/sessions-list" style={{ color: 'var(--gold-text)', fontSize: 12.5, fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 7, marginBottom: 14 }}>
+      <Icone nom="retour" taille={15} /> Toutes les sessions
+    </Link>
 
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
       <BandeauEncre

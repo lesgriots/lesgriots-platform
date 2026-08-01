@@ -5,16 +5,16 @@ import { useEffect, useMemo, useState } from 'react';
 import EditeurQuestionnaires from './EditeurQuestionnaires';
 import EditeurFormulaireInscription from './EditeurFormulaireInscription';
 import MentionsObligatoires from './MentionsObligatoires';
-import { BandeauEncre, BarreOnglets, SousOnglets } from '@/components/da/BandeauDa';
+import { BandeauEncre, BarreOnglets, SousOnglets, Icone } from '@/components/da/BandeauDa';
 
 /* Les trois espaces du programme, aux couleurs d'étape du dossier de
    passation. La maquette en montre quatre, dont « Accueil » : cet espace
    n'existe pas ici, et en fabriquer un vide pour respecter un dessin
    serait ajouter un onglet qui ne mène nulle part. */
 const ESPACES = [
-  { cle: 'content',   label: 'Contenu',   base: '#6B4FD8', clair: '#8368EE' },
-  { cle: 'quality',   label: 'Qualité',   base: '#1E8449', clair: '#2B9E5B' },
-  { cle: 'diffusion', label: 'Diffusion', base: '#E0A400', clair: '#FFC22E', texte: '#171407' },
+  { cle: 'content',   label: 'Contenu',   base: '#6B4FD8', clair: '#8368EE', icone: 'livre' },
+  { cle: 'quality',   label: 'Qualité',   base: '#1E8449', clair: '#2B9E5B', icone: 'etoile' },
+  { cle: 'diffusion', label: 'Diffusion', base: '#E0A400', clair: '#FFC22E', texte: '#171407', icone: 'oeil' },
 ];
 
 const inputStyle = { width: '100%', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', padding: '10px 11px', boxSizing: 'border-box', font: 'inherit' };
@@ -55,7 +55,9 @@ export default function ProgramWorkspace({ formationId }) {
   };
   function chooseArea(nextArea) { setArea(nextArea); setSection(navigation[nextArea][0][0]); }
   return <div style={{ maxWidth: 1420, margin: '0 auto', padding: '28px 28px 56px' }}>
-    <Link href="/catalogue" style={{ color: 'var(--gold)', fontSize: 13, textDecoration: 'none' }}>← Bibliothèque</Link>
+    <Link href="/catalogue" style={{ color: 'var(--gold-text)', fontSize: 12.5, fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+      <Icone nom="retour" taille={15} /> Bibliothèque
+    </Link>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 12 }}>
       <BandeauEncre
         surTitre="Bibliothèque · programme d’origine"
