@@ -20,6 +20,23 @@ const STATUTS = { planned: 'Planifiée', ongoing: 'En cours', completed: 'Termin
 const MODALITES = { presentiel: 'Présentiel', distanciel: 'À distance', hybride: 'Hybride' };
 
 const iso = (value) => value.toISOString().slice(0, 10);
+
+/*
+ * Cal.com stocke les créneaux en UTC. Un entretien de 00 h 30 à Paris tombe
+ * la veille en UTC : sans conversion explicite, il s'afficherait dans la
+ * mauvaise case du calendrier, ce qui est pire que de ne pas l'afficher.
+ */
+const jourParis = (isoUtc) => {
+  const d = new Date(isoUtc);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' });
+};
+const heureParis = (isoUtc) => {
+  const d = new Date(isoUtc);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleTimeString('fr-FR', {
+    timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit',
+  });
+};
+const ENTRETIEN_ETAT = { reserve: 'Réservé', honore: 'Fait', annule: 'Annulé', absent: 'Absent' };
 const dateFr = (value) => value ? new Date(`${value}T00:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
 const token = { fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '.09em', textTransform: 'uppercase', color: 'var(--text-3)' };
 
@@ -30,6 +47,8 @@ const button = {
 
 export default function AgendaPage() {
   const [sessions, setSessions] = useState(null);
+  const [entretiens, setEntretiens] = useState([]);
+  const [voirEntretiens, setVoirEntretiens] = useState(true);
   const [curseur, setCurseur] = useState(() => { const d = new Date(); d.setDate(1); return d; });
   const [vue, setVue] = useState('calendar');
   const [recherche, setRecherche] = useState('');
@@ -48,6 +67,19 @@ export default function AgendaPage() {
   });
 
   useEffect(() => { charger(); }, []);
+
+  /*
+   * Les entretiens préalables viennent de leur propre route : ce ne sont pas
+   * des sessions, ils n'ont ni durée de plusieurs jours, ni lieu, ni inscrits.
+   * On ne garde que ceux qui ont un créneau daté, les autres n'ont rien à
+   * faire dans un calendrier.
+   */
+  useEffect(() => {
+    fetch('/api/griotheque/rendez-vous')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setEntretiens((d?.entretiens || []).filter((e) => e.entretien_le)))
+      .catch(() => setEntretiens([]));
+  }, []);
 
   const lieux = useMemo(() => [...new Set((sessions || []).map((item) => item.location || item.adresse).filter(Boolean))].sort(), [sessions]);
   const visibles = useMemo(() => (sessions || []).filter((item) => {
@@ -72,21 +104,22 @@ export default function AgendaPage() {
       return {
         key, day: date.getDate(), outside: date.getMonth() !== mois, today: key === aujourdhui,
         sessions: visibles.filter((item) => item.start_date && key >= item.start_date && key <= (item.end_date || item.start_date)),
+        entretiens: voirEntretiens ? entretiens.filter((e) => jourParis(e.entretien_le) === key) : [],
       };
     });
-  }, [curseur, visibles, aujourdhui]);
+  }, [curseur, visibles, aujourdhui, entretiens, voirEntretiens]);
 
   const dated = useMemo(() => [...visibles].filter((item) => item.start_date).sort((a, b) => a.start_date.localeCompare(b.start_date)), [visibles]);
   const detail = selection?.sessionId ? visibles.find((item) => item.id === selection.sessionId) : null;
 
   return (
     <>
-      <TopBar title="Agenda" subtitle={sessions ? `${visibles.length} session(s) affichée(s)` : ''} />
+      <TopBar title="Agenda" subtitle={sessions ? `${visibles.length} session(s) · ${entretiens.length} entretien(s)` : ''} />
       <div style={{ padding: '18px 24px 48px', maxWidth: 1900, margin: '0 auto' }}>
         {!sessions ? <Skeleton /> : <>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
             <Link href="/sessions/nouvelle" style={{ ...button, background: 'var(--gold)', color: 'var(--gold-ink)', borderColor: 'var(--gold)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>＋ Créer une session</Link>
-            <span style={{ ...token, marginLeft: 2 }}>Planning des formations</span>
+            <span style={{ ...token, marginLeft: 2 }}>Planning des formations</span><label style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginLeft: 'auto', fontSize: 12, color: 'var(--text-2)' }}><input type="checkbox" checked={voirEntretiens} onChange={(event) => setVoirEntretiens(event.target.checked)} /><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 2, background: 'var(--text)' }} /> Entretiens préalables</label>
           </div>
 
           <section aria-label="Filtres de l'agenda" style={{ display: 'flex', gap: 8, padding: '10px 0 14px', flexWrap: 'wrap', borderBottom: '1px solid var(--border)' }}>
@@ -114,7 +147,7 @@ export default function AgendaPage() {
                 </div>
               </div>
 
-              {vue === 'calendar' && <CalendarGrid cells={grille} onSelectDay={(key, daySessions) => setSelection(daySessions.length ? { sessionId: daySessions[0].id } : { date: key })} onSelectSession={(sessionId) => setSelection({ sessionId })} />}
+              {vue === 'calendar' && <CalendarGrid cells={grille} onSelectDay={(key, daySessions, dayEntretiens) => setSelection(daySessions.length ? { sessionId: daySessions[0].id } : { date: key, entretiens: dayEntretiens })} onSelectSession={(sessionId) => setSelection({ sessionId })} />}
               {vue === 'planning' && <Planning sessions={dated} onSelect={(sessionId) => setSelection({ sessionId })} />}
               {vue === 'timeline' && <Timeline sessions={dated} onSelect={(sessionId) => setSelection({ sessionId })} />}
             </div>
@@ -134,17 +167,18 @@ const visuallyHidden = { position: 'absolute', width: 1, height: 1, padding: 0, 
 function CalendarGrid({ cells, onSelectDay, onSelectSession }) {
   return <Card padding="none"><div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(92px, 1fr))', overflowX: 'auto' }}>
     {JOURS.map((day) => <div key={day} style={{ ...token, padding: '10px 9px', borderBottom: '1px solid var(--border-2)' }}>{day}</div>)}
-    {cells.map((cell) => <div key={cell.key} onClick={() => onSelectDay(cell.key, cell.sessions)} style={{ minHeight: 112, padding: 7, cursor: 'pointer', borderRight: '1px solid var(--border)', borderBottom: '1px solid var(--border)', background: cell.outside ? 'var(--surface-2)' : 'transparent', opacity: cell.outside ? .52 : 1 }}>
+    {cells.map((cell) => <div key={cell.key} onClick={() => onSelectDay(cell.key, cell.sessions, cell.entretiens)} style={{ minHeight: 112, padding: 7, cursor: 'pointer', borderRight: '1px solid var(--border)', borderBottom: '1px solid var(--border)', background: cell.outside ? 'var(--surface-2)' : 'transparent', opacity: cell.outside ? .52 : 1 }}>
       <span style={{ display: 'inline-grid', placeItems: 'center', width: 22, height: 22, borderRadius: '50%', background: cell.today ? 'var(--gold)' : 'transparent', color: cell.today ? 'var(--gold-ink)' : 'var(--text-3)', fontSize: 11, fontWeight: cell.today ? 700 : 500 }}>{cell.day}</span>
       {cell.sessions.slice(0, 3).map((item) => <button key={item.id} type="button" onClick={(event) => { event.stopPropagation(); onSelectSession(item.id); }} style={{ display: 'block', width: '100%', marginTop: 4, padding: '3px 5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left', cursor: 'pointer', border: 0, borderLeft: '3px solid var(--gold)', borderRadius: 3, background: 'var(--gold-soft)', color: 'var(--text)', fontFamily: 'inherit', fontSize: 10.5, fontWeight: 600 }}>{item.session_name || item.formation_titre || 'Session'}</button>)}
       {cell.sessions.length > 3 && <div style={{ color: 'var(--text-3)', fontSize: 10, padding: '3px 5px' }}>+ {cell.sessions.length - 3} autres</div>}
+      {cell.entretiens.map((e) => <div key={e.id} title={`Entretien préalable — ${ENTRETIEN_ETAT[e.entretien_statut] || ''}`} style={{ marginTop: 4, padding: '3px 5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', borderLeft: '3px solid var(--text)', borderRadius: 3, background: 'var(--surface-2)', color: 'var(--text-2)', fontSize: 10.5, fontWeight: 600, textDecoration: e.entretien_statut === 'annule' ? 'line-through' : 'none', opacity: e.entretien_statut === 'annule' ? .55 : 1 }}>{heureParis(e.entretien_le)} · {[e.first_name, e.last_name].filter(Boolean).join(' ') || 'Entretien'}</div>)}
     </div>)}
   </div></Card>;
 }
 
 function AgendaDetail({ selection, session }) {
   if (session) return <aside style={side}><div style={token}>Détails de la session</div><h2 style={{ fontSize: 16, margin: '8px 0 4px' }}>{session.session_name || session.formation_titre || 'Session'}</h2><p style={{ margin: '0 0 14px', color: 'var(--text-3)', fontSize: 12 }}>{session.code_interne || 'Sans code'}</p><Detail label="Dates" value={`${dateFr(session.start_date)} → ${dateFr(session.end_date || session.start_date)}`} /><Detail label="Statut" value={STATUTS[String(session.status || '').toLowerCase()] || session.status || '—'} /><Detail label="Formateur" value={session.formateur_name || 'Non attribué'} /><Detail label="Lieu" value={session.location || session.adresse || 'À préciser'} /><Detail label="Inscrits" value={`${session.inscriptions_count || 0} apprenant(s)`} /><Link href={sessionHref(session.id)} style={{ display: 'block', marginTop: 16, padding: '8px 10px', borderRadius: 'var(--radius-md)', background: 'var(--gold)', color: 'var(--gold-ink)', textAlign: 'center', textDecoration: 'none', fontSize: 12, fontWeight: 700 }}>Ouvrir la session</Link></aside>;
-  if (selection?.date) return <aside style={side}><div style={token}>Journée sélectionnée</div><h2 style={{ fontSize: 16, margin: '8px 0' }}>{dateFr(selection.date)}</h2><p style={{ color: 'var(--text-3)', fontSize: 12, lineHeight: 1.5 }}>Aucune session ne correspond à cette journée avec les filtres actuels.</p><Link href={`/sessions/nouvelle?date=${selection.date}`} style={{ ...button, width: '100%', marginTop: 12, background: 'var(--gold)', color: 'var(--gold-ink)', borderColor: 'var(--gold)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>＋ Créer une session</Link></aside>;
+  if (selection?.date) return <aside style={side}><div style={token}>Journée sélectionnée</div><h2 style={{ fontSize: 16, margin: '8px 0' }}>{dateFr(selection.date)}</h2>{selection.entretiens?.length ? <div style={{ marginBottom: 12 }}><div style={token}>Entretiens préalables</div>{selection.entretiens.map((e) => <div key={e.id} style={{ marginTop: 7, paddingLeft: 9, borderLeft: '3px solid var(--text)' }}><div style={{ fontSize: 12.5, fontWeight: 600 }}>{heureParis(e.entretien_le)} · {[e.first_name, e.last_name].filter(Boolean).join(' ') || 'Candidat'}</div><div style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{ENTRETIEN_ETAT[e.entretien_statut] || '—'}{e.entretien_lien ? <> · <a href={e.entretien_lien} target="_blank" rel="noreferrer" style={{ color: 'var(--text-2)' }}>rejoindre</a></> : null}</div></div>)}</div> : null}<p style={{ color: 'var(--text-3)', fontSize: 12, lineHeight: 1.5 }}>Aucune session ne correspond à cette journée avec les filtres actuels.</p><Link href={`/sessions/nouvelle?date=${selection.date}`} style={{ ...button, width: '100%', marginTop: 12, background: 'var(--gold)', color: 'var(--gold-ink)', borderColor: 'var(--gold)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>＋ Créer une session</Link></aside>;
   return <aside style={side}><div style={token}>Détails</div><p style={{ color: 'var(--text-2)', fontSize: 13, lineHeight: 1.55 }}>Sélectionne un jour ou une session pour consulter ses informations et l’ouvrir directement.</p><div style={{ borderTop: '1px solid var(--border)', marginTop: 16, paddingTop: 14 }}><div style={token}>Guide</div><p style={{ color: 'var(--text-3)', fontSize: 12, lineHeight: 1.5 }}>Utilise Calendrier pour le mois, Planning pour la liste chronologique et Frise pour situer les sessions dans le temps.</p></div></aside>;
 }
 const side = { alignSelf: 'start', position: 'sticky', top: 104, padding: 16, border: '1px solid var(--border)', background: 'var(--surface)', borderRadius: 'var(--radius-lg)' };
