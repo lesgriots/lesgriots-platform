@@ -1,15 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db.mjs';
 import { execFileSync } from 'child_process';
-import fs from 'node:fs/promises';
-import os from 'node:os';
 import path from 'path';
 import { withGuard } from '@/lib/api-guard';
-import { rendre } from '@/lib/rendre-modele.mjs';
-import { construireProgramme } from '@/lib/programme-donnees.mjs';
-import { construireConvocation } from '@/lib/documents-accueil.mjs';
-import { construireConvention } from '@/lib/convention-donnees.mjs';
-import { construireEmargement } from '@/lib/emargement-donnees.mjs';
+import { aUneMaquette, rendreDocumentSession } from '@/lib/documents-session.mjs';
 
 /**
  * GET /api/sessions/:id/documents?type=programme|convention|convocation|emargement|attestation|certificat
@@ -182,42 +176,20 @@ async function _GET(req, { params }) {
     }
 
     /*
-     * Trois documents ont maintenant leur maquette maison, dessinée au
-     * Template Studio et imprimée par Chromium. Cette route reste leur porte
-     * d'entrée historique : c'est elle que visent les liens archivés au
-     * registre de session, les envois par courriel et l'outil MCP. On la fait
-     * donc pointer vers le nouveau rendu, sinon deux mises en page du même
-     * document vivent en parallèle et c'est l'ancienne qu'on voit en
-     * cliquant. Émargement, attestation et certificat gardent le générateur
-     * Python : ils n'ont pas encore de modèle équivalent.
+     * Une seule fabrique.
+     *
+     * Les documents qui ont une maquette maison passent tous par
+     * rendreDocumentSession, comme les routes dédiées : c'est ce qui garantit
+     * qu'une convocation, un programme ou un émargement soient identiques
+     * quelle que soit la porte empruntée. Ceux qui n'en ont pas encore —
+     * attestation, certificat — gardent le générateur Python, et c'est un
+     * choix explicite, pas un reste.
      */
-    const MAQUETTES = {
-      programme: 'Programme de Formation.dc.html',
-      convention: 'Convention.dc.html',
-      convocation: 'Convocation.dc.html',
-      emargement: 'Emargement.dc.html',
-    };
-
     let pdfBuffer;
 
-    if (MAQUETTES[docType]) {
-      if (docType === 'programme' && !session.formation_id) {
-        return NextResponse.json({ error: 'Cette session n’est rattachée à aucune formation.' }, { status: 400 });
-      }
-      const modele = path.join(process.cwd(), 'resources/template-studio/geist-mono/source', MAQUETTES[docType]);
-      const valeurs = docType === 'convention' ? construireConvention(db, id)
-        : docType === 'convocation' ? construireConvocation(db, id, apprenantId)
-        : docType === 'emargement' ? construireEmargement(db, id)
-        : construireProgramme(db, session.formation_id).valeurs;
-
-      const dossier = await fs.mkdtemp(path.join(os.tmpdir(), 'doc-session-'));
-      try {
-        const sortie = path.join(dossier, 'document.pdf');
-        await rendre(modele, valeurs, sortie);
-        pdfBuffer = await fs.readFile(sortie);
-      } finally {
-        await fs.rm(dossier, { recursive: true, force: true });
-      }
+    if (aUneMaquette(docType)) {
+      const rendu = await rendreDocumentSession(db, docType, id, { apprenantId });
+      pdfBuffer = rendu.pdf;
     } else {
       // Call Python script
       const scriptPath = path.join(process.cwd(), 'src', 'lib', 'generate_documents.py');
