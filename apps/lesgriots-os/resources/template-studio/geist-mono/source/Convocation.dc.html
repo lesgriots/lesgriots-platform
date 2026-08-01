@@ -66,9 +66,16 @@
 
       <div style="margin-top:6mm;">
         <p class="cv-p">Bonjour,</p>
-        <p class="cv-p">Nous avons le plaisir de vous confirmer votre inscription à la formation citée ci-dessus, et vous prions de bien vouloir vous présenter sur le lieu de formation <strong>quinze minutes avant le début de la première journée</strong>, muni(e) d'une pièce d'identité.</p>
+        <p class="cv-p">Nous avons le plaisir de vous confirmer votre inscription à la formation citée ci-dessus, et vous prions de bien vouloir vous présenter sur le lieu de formation <strong>quinze minutes avant le début de la première journée</strong>.</p>
         <p class="cv-p">L'émargement est réalisé par demi-journée : il conditionne la délivrance de votre certificat de réalisation. En cas de retard ou d'empêchement, merci de nous prévenir au plus vite à l'adresse ci-dessous.</p>
         <p class="cv-p">Si vous êtes en situation de handicap ou avez besoin d'une adaptation, contactez-nous en amont : nous mettrons en place les aménagements nécessaires.</p>
+        <div data-si="materiel" style="margin-top:5mm; padding:4mm 5mm; background:rgba(11,11,10,0.035); border-left:2px solid #0B0B0A;">
+          <div style="font-family:'Geist',sans-serif; font-weight:600; font-size:7pt; letter-spacing:0.16em; text-transform:uppercase; color:#6b6b6b; margin-bottom:2mm;">Matériel requis</div>
+          <sc-for list="{{ materiel }}" as="m">
+            <p class="cv-p" style="margin:0 0 1.2mm; padding-left:4mm; position:relative;"><span style="position:absolute; left:0; color:#0B0B0A;">–</span>{{ m }}</p>
+          </sc-for>
+        </div>
+
         <p class="cv-p" style="margin-top:5mm;">Nous nous réjouissons de vous accueillir,</p>
         <div style="margin-top:6mm;">
           <div style="font-weight:600; font-size:10.5pt; color:#0B0B0A;">{{ representant }}</div>
@@ -105,6 +112,7 @@ class Component extends DCLogic {
         { jour: "Mardi 19 mai", creneaux: "9h00 - 13h00 · 14h00 - 17h00" },
       ],
       duree: "14 h",
+      materiel: ["Disposer d'un ordinateur capable de faire fonctionner DaVinci Resolve.", "Avoir DaVinci Resolve installé (version gratuite ou Studio)."],
       lieu: "15 rue de la Beaune, 93100 Montreuil",
       modalite: "Présentiel",
       formateur: "Moustapha Coulibaly",

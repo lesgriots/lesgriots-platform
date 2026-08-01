@@ -433,7 +433,7 @@ export const GRIOTHEQUE_EMAIL_TEMPLATES = [
       // Ce qu'il faut apporter vient des prérequis du programme. Aucun
       // prérequis, aucune rubrique : une généralité vaut moins que rien.
       const aPrevoir = (materiel || []).length
-        ? `\n\n🎒 À PRÉVOIR\n${materiel.map((x) => `• ${x}`).join('\n')}`
+        ? `\n\n🎒 MATÉRIEL REQUIS\n${materiel.map((x) => `• ${x}`).join('\n')}`
         : '';
 
       return `Bonjour,
@@ -472,7 +472,7 @@ ${SIGNATURE_GRIOTHEQUE}`;
       const lieuStr = lieu || session?.adresse || session?.location || '[lieu à confirmer]';
       const horaireStr = horaire || session?.horaire || '09h00 - 12h30 / 14h00 - 17h30';
       const aPrevoir = (materiel || []).length
-        ? `\n\n🎒 À PRÉVOIR\n${materiel.map((x) => `• ${x}`).join('\n')}`
+        ? `\n\n🎒 MATÉRIEL REQUIS\n${materiel.map((x) => `• ${x}`).join('\n')}`
         : '';
 
       return `Bonjour,

@@ -31,7 +31,8 @@ function piedDePage(reglages) {
 
 function chargerSession(db, sessionId) {
   const s = db.prepare(`
-    SELECT s.*, f.title AS formation_titre, f.duration_hours, f.duration_days, f.modality AS formation_modalite
+    SELECT s.*, f.title AS formation_titre, f.duration_hours, f.duration_days,
+           f.modality AS formation_modalite, f.prerequisites
     FROM sessions s JOIN formations f ON f.id = s.formation_id WHERE s.id = ?
   `).get(sessionId);
   if (!s) throw new Error('Session introuvable.');
@@ -93,6 +94,29 @@ export function construireConvocation(db, sessionId, apprenantId = null) {
       };
     })(),
     duree: heures ? `${heures} h` : '',
+
+    /*
+     * Le matériel requis, lu sur le programme.
+     *
+     * Il était écrit en dur dans le modèle d'e-mail — pièce d'identité, de
+     * quoi prendre des notes — ce qui alourdissait le message et oubliait la
+     * seule chose sans laquelle la journée ne peut pas avoir lieu. Les
+     * prérequis de la fiche formation le disent : tel logiciel installé, tel
+     * matériel. Le document et l'e-mail lisent désormais la même source, donc
+     * ils ne peuvent plus se contredire.
+     *
+     * Rien sur la fiche : pas de rubrique. Une généralité vaut moins que rien.
+     */
+    materiel: (() => {
+      const brut = s.prerequisites;
+      if (!brut) return [];
+      const t = String(brut).trim();
+      if (t.startsWith('[')) {
+        try { const j = JSON.parse(t); if (Array.isArray(j)) return j.map(String).map((x) => x.trim()).filter(Boolean); }
+        catch { /* ce n'était pas du JSON */ }
+      }
+      return t.split(/\r?\n|·|;/).map((x) => x.replace(/^\s*[-—•*]\s*/, '').trim()).filter(Boolean);
+    })(),
     lieu: texte(s.adresse) || texte(s.location) || 'Lieu communiqué prochainement',
     modalite: MODALITES[s.modality] || MODALITES[s.formation_modalite] || 'Présentiel',
     formateur: texte(s.formateur_name),
