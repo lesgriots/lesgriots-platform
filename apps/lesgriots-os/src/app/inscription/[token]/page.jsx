@@ -3,7 +3,12 @@
 import { useEffect, useState } from 'react';
 
 const colors = {
-  ink: '#171411', paper: '#f6f5f3', surface: '#ffffff', line: '#ddd9d2', gold: '#f5ce16', goldInk: '#262006', muted: '#6e6a63', success: '#18854b', error: '#b5322c',
+  // Les jetons de la maison, thème papier. L'or est le #FFCA00 de la marque,
+  // pas le #F5CE16 d'une ancienne itération qui traînait sur les pages
+  // publiques : c'est la première chose qu'un candidat voit de vous.
+  ink: '#141310', paper: '#f6f5f3', surface: '#ffffff', line: 'rgba(0,0,0,.14)',
+  surface2: '#eeebe6', gold: '#FFCA00', goldInk: '#171407', muted: '#6f6b60',
+  texte2: '#3a3831', success: '#1E8449', error: '#B83328',
 };
 
 function dateFr(value) {
@@ -60,21 +65,38 @@ export default function InscriptionSessionPage({ params }) {
   };
 
   const input = { width: '100%', boxSizing: 'border-box', padding: '12px 13px', border: `1px solid ${colors.line}`, borderRadius: 9, color: colors.ink, background: colors.surface, font: 'inherit' };
-  return <main style={{ minHeight: '100vh', background: colors.paper, color: colors.ink, fontFamily: 'Arial, Helvetica, sans-serif', padding: '28px 16px 56px' }}>
+  return <><link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <main style={{ minHeight: '100vh', background: colors.paper, color: colors.ink, fontFamily: "'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", padding: '28px 16px 56px' }}>
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <header style={{ paddingBottom: 22, borderBottom: `1px solid ${colors.line}`, marginBottom: 24 }}>
-        <div style={{ fontSize: 12, letterSpacing: '.12em', fontWeight: 800, color: colors.muted }}>LA GRIOTHÈQUE · ORGANISME DE FORMATION</div>
-        <h1 style={{ fontSize: 'clamp(27px, 5vw, 42px)', letterSpacing: '-.05em', margin: '12px 0 6px' }}>Inscription à une session</h1>
-        <p style={{ margin: 0, color: colors.muted, lineHeight: 1.5 }}>Complétez vos coordonnées pour demander votre inscription.</p>
+      <header style={{ paddingBottom: 24, borderBottom: `1px solid ${colors.line}`, marginBottom: 26 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/branding/griotheque-wordmark-ink.svg" alt="LA GRIOTHÈQUE"
+          style={{ display: 'block', width: 176, maxWidth: '58%', height: 'auto' }} />
+        <div style={{
+          marginTop: 10, fontFamily: "'Geist Mono', ui-monospace, monospace", fontSize: 10,
+          letterSpacing: '.16em', textTransform: 'uppercase', color: colors.muted, fontWeight: 600,
+        }}>Organisme de formation</div>
+        <h1 style={{
+          fontSize: 'clamp(28px, 5vw, 40px)', letterSpacing: '-.035em', fontWeight: 600,
+          lineHeight: 1.08, margin: '20px 0 8px',
+        }}>Demande d’inscription</h1>
+        <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6, maxWidth: '58ch' }}>
+          Quelques minutes pour nous dire d’où vous partez. Nous revenons vers vous pour valider
+          votre place.
+        </p>
       </header>
       {loading && <div style={{ color: colors.muted }}>Chargement du formulaire…</div>}
       {!loading && error && !session && <div role="alert" style={{ padding: 16, background: '#fff0ee', border: '1px solid #edb1ab', color: colors.error, borderRadius: 12 }}>{error}</div>}
       {!loading && session && <>
-        <section style={{ background: '#fff9df', border: `1px solid ${colors.gold}`, borderRadius: 13, padding: 18, marginBottom: 18 }}>
-          <div style={{ color: colors.muted, fontSize: 12, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase' }}>Session concernée</div>
-          <h2 style={{ margin: '7px 0', fontSize: 22, letterSpacing: '-.03em' }}>{session.title}</h2>
-          <div style={{ color: colors.muted, fontSize: 14, lineHeight: 1.55 }}>{dateFr(session.startDate)}{session.endDate && session.endDate !== session.startDate ? ` — ${dateFr(session.endDate)}` : ''}{session.location ? ` · ${session.location}` : ''}{session.modality ? ` · ${session.modality}` : ''}</div>
-          {session.seatsRemaining !== null && <div style={{ marginTop: 9, color: colors.ink, fontSize: 13, fontWeight: 700 }}>{session.seatsRemaining > 0 ? `${session.seatsRemaining} place${session.seatsRemaining > 1 ? 's' : ''} restante${session.seatsRemaining > 1 ? 's' : ''}` : 'Session complète'}</div>}
+        <section style={{ background: colors.ink, color: colors.paper, borderRadius: 13, padding: '20px 22px', marginBottom: 18 }}>
+          <div style={{
+            fontFamily: "'Geist Mono', ui-monospace, monospace", fontSize: 10, fontWeight: 600,
+            letterSpacing: '.16em', textTransform: 'uppercase', opacity: .62,
+          }}>Session concernée</div>
+          <h2 style={{ margin: '9px 0 7px', fontSize: 21, letterSpacing: '-.03em', fontWeight: 600, lineHeight: 1.25 }}>{session.title}</h2>
+          <div style={{ color: 'rgba(246,245,243,.72)', fontSize: 14, lineHeight: 1.55 }}>{dateFr(session.startDate)}{session.endDate && session.endDate !== session.startDate ? ` — ${dateFr(session.endDate)}` : ''}{session.location ? ` · ${session.location}` : ''}{session.modality ? ` · ${session.modality}` : ''}</div>
+          {session.seatsRemaining !== null && <div style={{ marginTop: 11, color: colors.gold, fontSize: 13, fontWeight: 700 }}>{session.seatsRemaining > 0 ? `${session.seatsRemaining} place${session.seatsRemaining > 1 ? 's' : ''} restante${session.seatsRemaining > 1 ? 's' : ''}` : 'Session complète'}</div>}
         </section>
         {confirmation ? <section style={{ background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: 13, padding: 24 }}>
           <div style={{ color: colors.success, fontWeight: 800, fontSize: 18 }}>✓ {confirmation.alreadyRegistered ? 'Inscription déjà enregistrée' : 'Inscription enregistrée'}</div>
@@ -120,9 +142,9 @@ export default function InscriptionSessionPage({ params }) {
           })}
           <label style={{ display: 'flex', gap: 10, alignItems: 'start', color: colors.muted, fontSize: 13, lineHeight: 1.45 }}><input required type="checkbox" checked={form.consent} onChange={(event) => update('consent', event.target.checked)} style={{ marginTop: 3 }} />J’accepte que La Griothèque utilise ces informations pour traiter ma demande d’inscription.</label>
           {error && <div role="alert" style={{ color: colors.error, fontSize: 14 }}>{error}</div>}
-          <button disabled={submitting} type="submit" style={{ border: 0, borderRadius: 9, padding: '13px 16px', background: colors.gold, color: colors.goldInk, fontWeight: 800, fontSize: 15, cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? .65 : 1 }}>{submitting ? 'Inscription en cours…' : 'Envoyer mon inscription'}</button>
+          <button disabled={submitting} type="submit" style={{ border: 0, borderRadius: 9, padding: '13px 16px', background: colors.ink, color: colors.paper, fontWeight: 700, fontSize: 15, cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? .65 : 1 }}>{submitting ? 'Inscription en cours…' : 'Envoyer mon inscription'}</button>
         </form>}
       </>}
     </div>
-  </main>;
+  </main></>;
 }

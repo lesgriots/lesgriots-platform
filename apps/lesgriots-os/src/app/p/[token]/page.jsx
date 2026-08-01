@@ -25,7 +25,7 @@ const dateCourte = (d) => d
 
 const P = {
   papier: '#f6f5f3', surface: '#fff', encre: '#141210',
-  texte2: '#4a4744', texte3: '#8a857f', ligne: 'rgba(0,0,0,.11)', or: '#F5CE16',
+  texte2: '#4a4744', texte3: '#8a857f', ligne: 'rgba(0,0,0,.11)', or: '#FFCA00',
 };
 const mono = {
   fontFamily: "'Geist Mono', ui-monospace, monospace", fontSize: 10,

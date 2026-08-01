@@ -15,7 +15,7 @@ import { useState } from 'react';
 
 const P = {
   papier: '#f6f5f3', encre: '#141210', texte2: '#4a4640', texte3: '#8a8478',
-  or: '#F5CE16', ligne: 'rgba(20,18,16,.12)',
+  or: '#FFCA00', ligne: 'rgba(20,18,16,.12)',
 };
 
 export default function PorteEspacePage() {
