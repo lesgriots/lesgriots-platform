@@ -3,6 +3,8 @@ import { randomUUID } from 'crypto';
 import { getDb } from '@/lib/db.mjs';
 import { enrollLearnerInSession } from '@/lib/inscription-flow';
 import { formulaireDeSession, verifierReponses, resumePositionnement } from '@/lib/formulaire-inscription.mjs';
+import { accuserInscription, prevenirOrganisme } from '@/lib/email-inscription.mjs';
+import { liste } from '@/lib/programme-donnees.mjs';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -21,7 +23,7 @@ function registrationContext(db, token) {
   }
   const session = db.prepare(`
     SELECT s.id, s.start_date, s.end_date, s.location, s.modality, s.max_participants, s.status,
-      f.title AS formation_title
+      f.title AS formation_title, f.prerequisites, s.horaire, s.adresse
     FROM sessions s
     LEFT JOIN formations f ON f.id = s.formation_id
     WHERE s.id = ?
@@ -143,6 +145,53 @@ export async function POST(request, { params }) {
         financement, financement,
         context.session.id, learner.id,
       );
+    }
+
+    /*
+     * L'accusé de réception part maintenant, pas plus tard.
+     *
+     * Jusqu'ici la personne voyait un écran et rien d'autre : si elle fermait
+     * l'onglet, il ne lui restait aucune trace de sa démarche, et l'organisme
+     * ne savait pas qu'une demande était arrivée tant qu'il n'allait pas
+     * regarder.
+     *
+     * Un envoi qui échoue ne doit pas faire échouer l'inscription : elle est
+     * enregistrée, c'est le principal. On avale donc l'erreur après l'avoir
+     * consignée, plutôt que de renvoyer un 500 à quelqu'un dont la demande
+     * est bel et bien passée.
+     */
+    if (!enrollment.alreadyEnrolled) {
+      const reglages = Object.fromEntries(
+        db.prepare('SELECT key, value FROM settings').all().map((r) => [r.key, r.value]),
+      );
+      const capacite = Number(context.session.max_participants || 0);
+      const inscrits = db.prepare(
+        "SELECT COUNT(*) AS n FROM inscriptions WHERE session_id = ? AND status != 'annule'",
+      ).get(context.session.id)?.n || 0;
+
+      const infos = {
+        apprenant: { ...learner, email },
+        session: { ...context.session, formation_titre: context.session.formation_title },
+        reglages,
+      };
+
+      try {
+        await accuserInscription({
+          ...infos,
+          // Le matériel vient des prérequis du programme, comme sur la
+          // convocation et son e-mail : une seule source, trois messages.
+          materiel: liste(context.session.prerequisites),
+          suite,
+        });
+      } catch (e) { console.warn('[inscription] accusé non envoyé :', e.message); }
+
+      try {
+        await prevenirOrganisme({
+          ...infos,
+          reponses: controle.reponses,
+          placesRestantes: capacite > 0 ? Math.max(0, capacite - inscrits) : null,
+        });
+      } catch (e) { console.warn('[inscription] notification non envoyée :', e.message); }
     }
 
     return NextResponse.json({
