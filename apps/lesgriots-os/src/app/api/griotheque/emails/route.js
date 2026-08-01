@@ -134,20 +134,48 @@ async function _GET(request) {
  * jamais l'envoi : un email sans pièce jointe vaut mieux qu'un email jamais
  * parti.
  */
+/**
+ * Ce qui part avec le message.
+ *
+ * Un e-mail qui annonce une convention sans la joindre oblige le client à
+ * aller la chercher, et la plupart ne le font pas. Chaque modèle emporte donc
+ * la pièce dont il parle, et le programme avec quand la loi veut qu'il soit
+ * communiqué avant l'engagement.
+ *
+ * Le programme est demandé en `force` : ces envois sont déclenchés à la main
+ * pour une session réelle, et un refus silencieux vaudrait pire qu'un
+ * programme incomplet, il vaudrait un e-mail sans pièce jointe.
+ */
+const PIECES_PAR_MODELE = {
+  convocation:  [['programme', 'Programme-de-formation.pdf']],
+  rappel_j7:    [['programme', 'Programme-de-formation.pdf']],
+  convention:   [['convention', 'Convention-de-formation.pdf'], ['programme', 'Programme-de-formation.pdf']],
+  devis:        [['devis', 'Devis.pdf'], ['programme', 'Programme-de-formation.pdf']],
+};
+
+const CHEMIN_PIECE = {
+  programme:  (id) => `${BASE}/api/sessions/${id}/programme`,
+  convention: (id) => `${BASE}/api/sessions/${id}/convention`,
+  devis:      (id) => `${BASE}/api/sessions/${id}/devis`,
+};
+
 async function piecesDocuments(session_id, template_key) {
-  if (!['convocation', 'rappel_j7'].includes(template_key)) return [];
-  try {
-    const r = await fetch(`${BASE}/api/sessions/${session_id}/programme`, {
-      headers: { 'x-api-key': process.env.OS_API_KEY || '' },
-    });
-    if (!r.ok) return [];
-    const contenu = Buffer.from(await r.arrayBuffer());
-    if (!contenu.length) return [];
-    return [{ filename: 'Programme-de-formation.pdf', content: contenu, contentType: 'application/pdf' }];
-  } catch (e) {
-    console.warn('[emails] programme non joint :', e.message);
-    return [];
+  const voulues = PIECES_PAR_MODELE[template_key];
+  if (!voulues) return [];
+  const jointes = [];
+  for (const [quoi, nom] of voulues) {
+    try {
+      const r = await fetch(`${CHEMIN_PIECE[quoi](session_id)}?force=1`, {
+        headers: { 'x-api-key': process.env.OS_API_KEY || '' },
+      });
+      if (!r.ok) { console.warn(`[emails] ${quoi} non joint : HTTP ${r.status}`); continue; }
+      const contenu = Buffer.from(await r.arrayBuffer());
+      if (contenu.length) jointes.push({ filename: nom, content: contenu, contentType: 'application/pdf' });
+    } catch (e) {
+      console.warn(`[emails] ${quoi} non joint :`, e.message);
+    }
   }
+  return jointes;
 }
 
 async function _POST(request) {

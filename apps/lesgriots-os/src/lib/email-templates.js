@@ -580,11 +580,28 @@ ${SIGNATURE_GRIOTHEQUE}`;
     subject: ({ formation }) => `Votre convention — ${formation?.title || 'La Griothèque'}`,
     body: ({ formation }) => `Bonjour,
 
-Votre convention de formation pour « ${formation?.title || 'votre formation'} » est prête.
+Votre convention de formation pour « ${formation?.title || 'votre formation'} » est prête. Vous la trouverez en pièce jointe, accompagnée du programme détaillé.
 
-Vous pouvez la consulter depuis votre Espace Apprenant, accessible depuis le lien ci-dessous.
+Merci de nous la retourner signée avant le début de la formation. Elle reste également consultable depuis votre Espace Apprenant.
 
 Si une information doit être corrigée, répondez directement à cet e-mail afin que nous puissions la mettre à jour.
+
+${SIGNATURE_GRIOTHEQUE}`,
+  },
+
+  {
+    key: 'devis',
+    label: 'Devis',
+    description: 'Envoi du devis au client, avec le programme de formation en pièce jointe.',
+    icon: '🧾',
+    subject: ({ formation }) => `Votre devis — ${formation?.title || 'La Griothèque'}`,
+    body: ({ formation }) => `Bonjour,
+
+Vous trouverez en pièce jointe le devis pour la formation « ${formation?.title || 'votre formation'} », accompagné du programme détaillé.
+
+Pour l'accepter, retournez-le signé avec la mention « Bon pour accord ». L'acceptation vaut commande : une convention de formation sera alors établie.
+
+En cas de prise en charge par un organisme financeur, merci de nous transmettre l'accord de prise en charge avant le début de l'action.
 
 ${SIGNATURE_GRIOTHEQUE}`,
   },

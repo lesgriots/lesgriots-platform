@@ -38,6 +38,7 @@ const MODELES_EMAIL = [
   ['enquete_froid', 'Enquête à froid'],
   ['envoi_attestation', 'Envoi attestation'],
   ['convention', 'Convention de formation'],
+  ['devis', 'Devis'],
   ['document_session', 'Document de session'],
 ];
 const LIBELLE_MODELE = Object.fromEntries(MODELES_EMAIL);
