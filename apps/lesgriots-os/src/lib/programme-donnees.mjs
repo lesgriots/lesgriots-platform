@@ -86,9 +86,18 @@ export const MENTIONS = [
  * juge : la génération d'un PDF et l'indicateur de la bibliothèque doivent
  * répondre la même chose, sinon l'un des deux ment.
  */
-export function evaluerMentions(formation, nbModules = 0) {
+export function evaluerMentions(formation, nbModules = 0, reglages = {}) {
+  /*
+   * Quatre mentions décrivent l'organisme et non le programme : elles sont
+   * écrites une fois dans les réglages. Une mention héritée compte comme
+   * remplie, sinon un programme resterait refusé à la publication pour ne pas
+   * avoir répété un texte qui existe ailleurs.
+   */
+  const HERITEES = ['modalites_pedagogiques', 'moyens_materiels', 'accessibility', 'delais_acces'];
+
   const rempli = (champ) => {
     if (champ === '__modules') return nbModules > 0;
+    if (HERITEES.includes(champ)) return Boolean(mention(formation, reglages, champ).valeur);
     const v = formation[champ];
     if (v === null || v === undefined) return false;
     if (typeof v === 'number') return v > 0;
@@ -118,6 +127,9 @@ export function evaluerMentions(formation, nbModules = 0) {
  * texte est bon, seulement s'il existe. C'est déjà ce qui manquait le plus.
  */
 export function completudeFormations(db, { inclureArchives = false } = {}) {
+  const reglages = Object.fromEntries(
+    db.prepare('SELECT key, value FROM settings').all().map((r) => [r.key, r.value]),
+  );
   const formations = db.prepare(`
     SELECT f.*, (SELECT COUNT(*) FROM modules m WHERE m.formation_id = f.id) AS nb_modules
     FROM formations f
@@ -126,7 +138,7 @@ export function completudeFormations(db, { inclureArchives = false } = {}) {
   `).all();
 
   return formations.map((f) => {
-    const bilan = evaluerMentions(f, f.nb_modules);
+    const bilan = evaluerMentions(f, f.nb_modules, reglages);
     return {
       id: f.id,
       titre: texte(f.title),
@@ -186,7 +198,7 @@ export function construireProgramme(db, formationId) {
 
   /* ── Les manques, avant toute mise en forme ─────────────────────────── */
 
-  const bilan = evaluerMentions(f, modules.length);
+  const bilan = evaluerMentions(f, modules.length, reglages);
   const manques = bilan.manques;
 
   /* ── La mise en forme ───────────────────────────────────────────────── */
