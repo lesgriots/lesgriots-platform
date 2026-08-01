@@ -17,6 +17,7 @@ import Link from 'next/link';
 import TopBar from '@/components/layout/TopBar';
 import { Card, Badge, Skeleton } from '@/components/ui';
 import CourbeCa from '@/components/charts/CourbeCa';
+import { CarteIndicateur, LigneGeste, LigneSession, Pilules, Reperes } from '@/components/apercu/CartesApercu';
 import { sessionHref } from '@/lib/navigation';
 
 const euros = (n) => new Intl.NumberFormat('fr-FR', {
@@ -68,52 +69,62 @@ export default function ApercuPage() {
 
   const i = d?.indicateurs;
 
+  // Une couleur par famille : l'or aux sessions, le bleu aux personnes, le
+  // violet au temps, le vert à ce qui est jugé. Rien n'est décoratif, c'est
+  // la couleur qu'on reconnaît de loin avant de lire le libellé.
   const kpis = [
-    { label: 'Sessions planifiées', valeur: i?.sessions_planifiees ?? '—', unite: '90 prochains jours',
-      note: d ? `${d.conformite.sessions_terminees} session(s) déjà terminée(s)` : '' },
-    { label: 'Apprenants inscrits', valeur: i?.apprenants_inscrits ?? '—', unite: 'personnes',
-      note: i?.apprenants_en_attente_financement ? `${i.apprenants_en_attente_financement} en attente de financement` : '' },
-    { label: 'Satisfaction', valeur: i?.satisfaction ?? '—', unite: i?.satisfaction ? '/ 5' : 'aucune évaluation',
-      note: i?.satisfaction_nb ? `sur ${i.satisfaction_nb} évaluation(s) à chaud` : 'à collecter en fin de session' },
-    { label: 'Heures dispensées', valeur: i?.heures_dispensees ?? '—', unite: 'heures',
-      note: 'sessions terminées' },
+    { label: 'Sessions', valeur: i?.sessions_planifiees ?? '—', unite: '',
+      note: d ? `${d.conformite.sessions_terminees} déjà terminée(s) · 90 prochains jours` : '90 prochains jours',
+      ton: 'or', icone: 'cible' },
+    { label: 'Apprenants', valeur: i?.apprenants_inscrits ?? '—', unite: '',
+      note: i?.apprenants_en_attente_financement
+        ? `${i.apprenants_en_attente_financement} en attente de financement`
+        : 'inscrits sur la période',
+      ton: 'bleu', icone: 'toque' },
+    { label: 'Heures dispensées', valeur: i?.heures_dispensees ?? '—', unite: 'h',
+      note: 'sessions terminées, déclarables au BPF', ton: 'violet', icone: 'horloge' },
+    { label: 'Satisfaction', valeur: i?.satisfaction ?? '—', unite: i?.satisfaction ? '/ 5' : '',
+      note: i?.satisfaction_nb ? `${i.satisfaction_nb} réponse(s) à chaud` : 'aucune évaluation collectée',
+      ton: 'vert', icone: 'etoile' },
+  ];
+
+  // Ce que l'écran dit, en une phrase chacun, lu sur les mêmes chiffres.
+  const reperes = d ? [
+    { titre: 'Sessions', texte: `${i?.sessions_planifiees ?? 0} à venir sur 90 jours, ${d.conformite.sessions_terminees} déjà terminée(s).` },
+    { titre: 'Apprenants', texte: `${i?.apprenants_inscrits ?? 0} personne(s) inscrite(s) sur la période choisie.` },
+    { titre: 'Conformité', texte: `${d.conformite.pieces_ok}/${d.conformite.pieces_attendues} pièce(s) du dossier organisme à jour.` },
+  ] : [];
+
+  const astuces = [
+    { titre: 'Priorités', texte: 'Une pastille rouge signale ce qui bloque une facturation ou un audit.' },
+    { titre: 'Période', texte: 'Changez la période en haut : tous les chiffres se recalculent.' },
   ];
 
   return (
     <>
-      <TopBar
-        title="Vue d’ensemble"
-        subtitle="L’organisme de formation en un coup d’œil"
-        right={
-          <div style={{
-            display: 'inline-flex', background: 'var(--surface-2)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)', padding: 2, gap: 1,
-          }} role="tablist" aria-label="Durée">
-            {PERIODES.map(([cle, label]) => {
-              const actif = periode === cle;
-              return (
-                <button
-                  key={cle}
-                  role="tab"
-                  aria-selected={actif}
-                  onClick={() => changerPeriode(cle)}
-                  style={{
-                    padding: '4px 10px', borderRadius: 'var(--radius-sm)',
-                    background: actif ? 'var(--surface)' : 'transparent',
-                    border: '1px solid ' + (actif ? 'var(--border)' : 'transparent'),
-                    color: actif ? 'var(--text)' : 'var(--text-3)',
-                    fontSize: 11, fontWeight: actif ? 500 : 400,
-                    fontFamily: 'var(--font-sans)', cursor: 'pointer',
-                    boxShadow: actif ? 'var(--shadow-sm)' : 'none',
-                  }}
-                >{label}</button>
-              );
-            })}
-          </div>
-        }
-      />
+      <TopBar title="Vue d’ensemble" subtitle="L’organisme de formation en un coup d’œil" />
 
-      <div style={{ padding: '0 24px 48px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ padding: '4px 24px 48px', display: 'flex', gap: 26, alignItems: 'flex-start' }} className="apercu-page">
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+        {/* Un titre qui parle plutôt qu'un intitulé de menu : c'est le premier
+            écran de la journée, il doit dire où on en est, pas où on est. */}
+        <div>
+          <h1 style={{ fontSize: 34, fontWeight: 600, letterSpacing: '-.035em', margin: '10px 0 8px' }}>
+            Bonjour Moos, voici où en est La Griothèque
+          </h1>
+          <p style={{ color: 'var(--text-3)', fontSize: 14, lineHeight: 1.55, margin: 0, maxWidth: '62ch' }}>
+            Tout ce qui se joue en ce moment : vos sessions, vos apprenants et les pièces qui vous
+            attendent. Cliquez sur une carte pour ouvrir le détail.
+          </p>
+        </div>
+
+        <Pilules
+          options={PERIODES.map(([cle, libelle]) => [cle, libelle])}
+          valeur={periode}
+          sur={changerPeriode}
+        />
+
 
         {erreur && <Card><p style={{ color: 'var(--danger)', margin: 0 }}>{erreur}</p></Card>}
         {!d && !erreur && <Skeleton />}
@@ -121,20 +132,43 @@ export default function ApercuPage() {
         {d && (
           <>
             {/* ── Indicateurs ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 14 }}>
               {kpis.map((k) => (
-                <Card key={k.label}>
-                  <div style={{ fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-3)' }}>
-                    {k.label}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 10 }}>
-                    <span style={{ fontWeight: 600, fontSize: 34, letterSpacing: '-0.03em', lineHeight: 1 }}>{k.valeur}</span>
-                    <span style={{ fontSize: 13, color: 'var(--text-3)' }}>{k.unite}</span>
-                  </div>
-                  {k.note && <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 8 }}>{k.note}</div>}
-                </Card>
+                <CarteIndicateur
+                  key={k.label}
+                  titre={k.label}
+                  note={k.note}
+                  valeur={k.valeur}
+                  unite={k.unite}
+                  ton={k.ton}
+                  icone={k.icone}
+                />
               ))}
             </div>
+
+            {/* ── Ce qui vous attend ── */}
+            <Card>
+              <strong style={{ fontSize: 16, letterSpacing: '-0.015em' }}>Ce qui vous attend</strong>
+              <div style={{ fontSize: 12, color: 'var(--text-3)', margin: '3px 0 14px' }}>
+                Les gestes à poser pour rester conforme et dans les temps.
+              </div>
+              {d.a_traiter?.length ? (
+                <div style={{ display: 'grid', gap: 9 }}>
+                  {d.a_traiter.slice(0, 5).map((x, k) => (
+                    <LigneGeste
+                      key={k}
+                      ton={x.ton === 'danger' ? 'rouge' : x.ton === 'gold' ? 'or' : 'bleu'}
+                      texte={x.texte}
+                      meta={x.meta}
+                      action={x.ton === 'danger' ? 'Traiter' : 'Ouvrir'}
+                      href={x.meta === 'Dossier organisme' ? '/organisme' : '/sessions-list'}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <LigneGeste ton="vert" texte="Rien ne vous attend." meta="Aucune pièce manquante, aucune session incomplète." />
+              )}
+            </Card>
 
             {/* ── Chiffre d'affaires ── */}
             <Card>
@@ -280,6 +314,8 @@ export default function ApercuPage() {
             </Card>
           </>
         )}
+      </div>
+      <Reperes reperes={reperes} astuces={astuces} />
       </div>
     </>
   );
