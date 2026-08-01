@@ -1166,6 +1166,26 @@ function initSchema(db) {
     db.exec("ALTER TABLE inscriptions ADD COLUMN positionnement_notes TEXT DEFAULT ''");
   }
 
+  /*
+   * -- Inscriptions : l'entretien préalable --
+   *
+   * Le formulaire ne conclut rien : il ouvre un appel de positionnement de
+   * vingt minutes, et c'est cet appel qui décide. Tant que l'OS ignorait si
+   * le créneau avait été réservé, il ne pouvait ni relancer au bon moment ni
+   * dire où en était un dossier. Ces quatre colonnes sont remplies par le
+   * webhook de l'agenda (Cal.com ou Calendly), pas à la main.
+   *
+   * entretien_statut : '' | 'reserve' | 'honore' | 'annule' | 'absent'
+   */
+  for (const [col, decl] of [
+    ['entretien_statut', "TEXT DEFAULT ''"],
+    ['entretien_le', "TEXT DEFAULT ''"],
+    ['entretien_ref', "TEXT DEFAULT ''"],
+    ['entretien_lien', "TEXT DEFAULT ''"],
+  ]) {
+    if (!iCols.includes(col)) db.exec(`ALTER TABLE inscriptions ADD COLUMN ${col} ${decl}`);
+  }
+
   // -- Sessions : lien projet + champs financiers (unification business) --
   const sCols3 = db.prepare("PRAGMA table_info(sessions)").all().map(c => c.name);
   if (!sCols3.includes('project_id')) {
