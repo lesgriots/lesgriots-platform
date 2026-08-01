@@ -7,6 +7,7 @@ import EnvoisAutomatiques from './EnvoisAutomatiques';
 import ApercuDocument from '@/components/ui/ApercuDocument';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { Interrupteur } from '@/components/ui';
+import { BandeauEncre, BarreOnglets, SousOnglets } from '@/components/da/BandeauDa';
 
 const STEPS = [
   { id: 'avancement', label: 'Avancement', mark: '↗' },
@@ -15,6 +16,19 @@ const STEPS = [
   { id: 'apprenant', label: 'Espace apprenant', mark: '◉' },
   { id: 'suivi', label: 'Suivi', mark: '✓' },
 ];
+
+/* Les cinq étapes du parcours, aux couleurs du dossier de passation.
+   L'ordre est fixe : il sert à la fois la barre segmentée, la teinte du
+   bandeau de sous-onglets et, plus tard, les cartes d'étape. Une seule
+   source, sinon l'ordre des couleurs finit par diverger d'un endroit à
+   l'autre de la même page. */
+const COULEUR_ETAPE = {
+  avancement:    { base: '#4B2FBF', clair: '#6242D8' },
+  configuration: { base: '#6B4FD8', clair: '#8368EE' },
+  gestion:       { base: '#1E8449', clair: '#2B9E5B' },
+  apprenant:     { base: '#1B9FC4', clair: '#31B8DC' },
+  suivi:         { base: '#E0A400', clair: '#FFC22E', texte: '#171407' },
+};
 
 const SUBNAV = {
   configuration: [
@@ -51,6 +65,9 @@ const EVALUATION_TYPES = [
   { id: 'froid', questionnaireType: 'froid', title: 'Évaluation à froid pour les apprenants', description: 'Mesurez l’impact professionnel de la formation après sa réalisation.', model: 'Modèle d’évaluation à froid', automated: true },
 ];
 
+/* Ces deux styles ne servent plus au parcours de la session, qui passe
+   désormais par la barre segmentée. Ils restent pour la fenêtre d'envoi,
+   où le choix du modèle d'e-mail est bien une série d'onglets ordinaires. */
 const tabsWrap = {
   display: 'inline-flex', gap: 4, padding: 4, background: 'var(--surface-2)',
   border: '1px solid var(--border)', borderRadius: 12, maxWidth: '100%',
@@ -986,21 +1003,42 @@ export default function SessionCockpit({ sessionId }) {
 
   return <div style={{ maxWidth: 1500, margin: '0 auto', padding: '0 0 48px' }}>
     <ApercuDocument url={apercu?.url} titre={apercu?.titre} onFermer={() => setApercu(null)} />
-    <Link href="/sessions-list" style={{ ...muted, textDecoration: 'none', display: 'inline-block', marginBottom: 12 }}>← Toutes les sessions</Link>
-    <h1 style={{ margin: 0, fontSize: 'clamp(23px, 3vw, 34px)', letterSpacing: '-.04em' }}>{session.formation_title || 'Session de formation'}</h1>
-    <p style={{ ...muted, margin: '5px 0 22px' }}>{dateFr(session.start_date)} → {dateFr(session.end_date)} · {session.code_interne || 'Sans code interne'}</p>
-    <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(5, minmax(112px, 1fr))', gap: 8, borderBottom: '1px solid var(--border)', paddingBottom: 14, marginBottom: 12, overflowX: 'auto' }}>
-      <span aria-hidden="true" style={{ position: 'absolute', top: 25, left: '10%', right: '10%', height: 2, background: 'var(--border)', borderRadius: 2 }} />
-      {STEPS.map((item) => {
-        const actif = step === item.id;
-        return <button key={item.id} type="button" aria-current={actif ? 'step' : undefined} onClick={() => setStep(item.id)} style={{ position: 'relative', border: 0, background: 'transparent', color: actif ? 'var(--text)' : 'var(--text-3)', cursor: 'pointer', textAlign: 'center', fontFamily: 'inherit', fontWeight: 800, fontSize: 12, padding: '0 4px 10px' }}>
-          <span style={{ width: 46, height: 46, margin: '0 auto 8px', borderRadius: '50%', display: 'grid', placeItems: 'center', background: actif ? 'var(--gold)' : 'var(--surface-2)', color: actif ? 'var(--gold-ink)' : 'var(--text-3)', border: `1.5px solid ${actif ? 'var(--gold)' : 'var(--border-2)'}`, boxShadow: actif ? '0 2px 12px rgba(255, 202, 0, .26)' : 'none', fontSize: 20 }}>{item.mark}</span>
-          {item.label}
-          {actif && <span aria-hidden="true" style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 34, height: 3, borderRadius: 3, background: 'var(--gold)' }} />}
-        </button>;
-      })}
+    <Link href="/sessions-list" style={{ color: 'var(--gold-text)', fontSize: 12.5, fontWeight: 700, textDecoration: 'none', display: 'inline-block', marginBottom: 14 }}>← Toutes les sessions</Link>
+
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+      <BandeauEncre
+        surTitre={`Session · ${session.code_interne || 'sans code'}`}
+        titre={session.formation_title || 'Session de formation'}
+        phrase={[
+          `${dateFr(session.start_date)} → ${dateFr(session.end_date)}`,
+          session.adresse || session.location,
+          `${inscriptions.length} apprenant(s)`,
+        ].filter(Boolean).join(' · ')}
+        chiffres={[
+          { label: 'Chiffre d’affaires', valeur: session.ca_confirmed ? `${Number(session.ca_confirmed).toLocaleString('fr-FR')} €` : '—', couleur: 'var(--gold)' },
+          { label: 'Intervenant', valeur: session.formateur_name || 'Non attribué' },
+          { label: 'Modalité', valeur: session.modality || 'Présentiel' },
+        ]}
+      />
+
+      <BarreOnglets
+        onglets={STEPS.map((e) => ({
+          cle: e.id, label: e.label, ...COULEUR_ETAPE[e.id],
+        }))}
+        actif={step}
+        onChoisir={setStep}
+      />
+
+      {SUBNAV[step] && (
+        <SousOnglets
+          sous={SUBNAV[step]}
+          actif={currentSub}
+          onChoisir={setCurrentSub}
+          couleur={COULEUR_ETAPE[step]?.base}
+        />
+      )}
     </div>
-    {SUBNAV[step] && <div style={{ overflowX: 'auto', padding: '7px 0 16px', marginBottom: 4 }}><div role="tablist" style={tabsWrap}>{SUBNAV[step].map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={currentSub === key} onClick={() => setCurrentSub(key)} style={tab(currentSub === key)}>{label}</button>)}</div></div>}
+
     {notice && <div role="status" style={{ marginBottom: 14, padding: '10px 12px', background: 'var(--gold-soft)', color: 'var(--text)', borderRadius: 9, fontSize: 12 }}>{notice}</div>}
     <div style={{ display: 'grid', gap: 14 }}>{content}</div>
     {envoi && <FenetreEnvoi
