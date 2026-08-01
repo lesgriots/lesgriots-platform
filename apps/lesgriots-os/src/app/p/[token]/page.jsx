@@ -181,9 +181,20 @@ export default function EspaceApprenant({ params }) {
       {/* ── Mes documents ─────────────────────────────────────────── */}
       <section style={carte}>
         <div style={{ ...mono, marginBottom: 10 }}>Mes documents</div>
-        {!d.ressources_ouvertes && (
+        {d.ressources_etat === 'a_venir' && (
           <p style={{ fontSize: 13.5, color: P.texte3, margin: '0 0 10px' }}>
             Les supports de travail s’ouvriront le premier jour de la formation.
+          </p>
+        )}
+        {d.ressources_etat === 'retirees' && (
+          <p style={{ fontSize: 13.5, color: P.texte3, margin: '0 0 10px' }}>
+            Les supports de travail ont été retirés, trente jours après la fin de la formation.
+            Écrivez-nous si vous en avez encore besoin.
+          </p>
+        )}
+        {d.ressources_etat === 'ouvertes' && d.ressources_jusqu_au && (
+          <p style={{ fontSize: 12.5, color: P.texte3, margin: '0 0 10px' }}>
+            Supports accessibles jusqu’au {dateCourte(d.ressources_jusqu_au)}.
           </p>
         )}
         {(d.ressources || []).map((r) => (

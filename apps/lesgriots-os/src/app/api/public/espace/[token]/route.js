@@ -150,16 +150,35 @@ export async function GET(request, { params }) {
     const RESSOURCES_SESSION = ['support'];
 
     /*
-     * Le workbook s'ouvre le jour de la formation, pas avant.
+     * Le workbook s'ouvre le matin du premier jour, et se referme trente
+     * jours après la fin.
      *
-     * Un support de travail distribué trois semaines à l'avance est lu en
-     * diagonale, oublié, et il enlève à la séance l'effet de découverte sur
-     * lequel repose l'exercice. On garde donc la ressource fermée jusqu'au
-     * matin du premier jour. Elle reste ouverte après, indéfiniment : ce que
-     * l'apprenant a travaillé lui appartient.
+     * Pas avant, parce qu'un support distribué trois semaines à l'avance est
+     * lu en diagonale, oublié, et qu'il enlève à la séance l'effet de
+     * découverte sur lequel repose l'exercice.
+     *
+     * Pas indéfiniment non plus. Les supports restent la propriété de
+     * l'organisme et l'article 9 de la convention l'écrit noir sur blanc :
+     * un lien qui reste ouvert des années finit par circuler. Trente jours
+     * laissent le temps de reprendre ses notes et de finir ses exercices,
+     * ce qui est l'usage légitime.
      */
+    const RETRAIT_JOURS = 30;
     const aujourdhui = new Date().toISOString().slice(0, 10);
-    const formationCommencee = !s.start_date || String(s.start_date).slice(0, 10) <= aujourdhui;
+
+    const debut = s.start_date ? String(s.start_date).slice(0, 10) : '';
+    const finFormation = String(s.end_date || s.start_date || '').slice(0, 10);
+    const limite = (() => {
+      if (!finFormation) return '';
+      const d = new Date(`${finFormation}T12:00:00`);
+      if (Number.isNaN(d.getTime())) return '';
+      d.setDate(d.getDate() + RETRAIT_JOURS);
+      return d.toISOString().slice(0, 10);
+    })();
+
+    const commencee = !debut || debut <= aujourdhui;
+    const retiree = Boolean(limite) && aujourdhui > limite;
+    const formationCommencee = commencee && !retiree;
 
     const documents = db.prepare(`
       SELECT id, categorie, libelle, created_at FROM documents
@@ -254,6 +273,10 @@ export async function GET(request, { params }) {
       documents: options.documents === false ? [] : documents,
       ressources: options.documents === false ? [] : ressources,
       ressources_ouvertes: formationCommencee,
+      // Deux fermetures, deux raisons : l'écran ne doit pas dire « pas encore »
+      // à quelqu'un dont le délai est passé.
+      ressources_etat: formationCommencee ? 'ouvertes' : (retiree ? 'retirees' : 'a_venir'),
+      ressources_jusqu_au: limite,
       emargement: options.emargement === false ? { jours: [], signees } : { jours, signees },
       a_faire: options.questionnaires === false ? [] : aFaire,
       rendues,
