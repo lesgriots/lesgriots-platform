@@ -19,7 +19,11 @@ export default function InscriptionSessionPage({ params }) {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', company: '', consent: false });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', consent: false });
+  // Les questions propres au programme, et les réponses qu'on y apporte.
+  const [champs, setChamps] = useState([]);
+  const [suite, setSuite] = useState(null);
+  const [reponses, setReponses] = useState({});
 
   useEffect(() => {
     let cancelled = false;
@@ -32,7 +36,11 @@ export default function InscriptionSessionPage({ params }) {
       const payload = await response.json();
       if (cancelled) return;
       if (!response.ok) setError(payload.error || 'Ce formulaire est indisponible.');
-      else setSession(payload.session);
+      else {
+        setSession(payload.session);
+        setChamps((payload.champs || []).filter((c) => !c.socle));
+        setSuite(payload.suite || null);
+      }
       setLoading(false);
     })().catch(() => { if (!cancelled) { setError('Impossible de charger ce formulaire.'); setLoading(false); } });
     return () => { cancelled = true; };
@@ -43,7 +51,7 @@ export default function InscriptionSessionPage({ params }) {
     event.preventDefault();
     setSubmitting(true); setError('');
     try {
-      const response = await fetch(`/api/public/inscription/${encodeURIComponent(token)}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      const response = await fetch(`/api/public/inscription/${encodeURIComponent(token)}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, reponses }) });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || 'Inscription impossible.');
       setConfirmation(payload);
@@ -70,17 +78,46 @@ export default function InscriptionSessionPage({ params }) {
         </section>
         {confirmation ? <section style={{ background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: 13, padding: 24 }}>
           <div style={{ color: colors.success, fontWeight: 800, fontSize: 18 }}>✓ {confirmation.alreadyRegistered ? 'Inscription déjà enregistrée' : 'Inscription enregistrée'}</div>
-          <p style={{ lineHeight: 1.6, marginBottom: 0 }}>Merci {confirmation.learner.firstName}. L’organisme vous transmettra les informations et questionnaires utiles à votre parcours. Aucun e-mail n’est envoyé automatiquement depuis ce formulaire.</p>
+          <p style={{ lineHeight: 1.6 }}>Merci {confirmation.learner.firstName}. {(confirmation.suite || suite)?.message}</p>
+          {(confirmation.suite || suite)?.lienRdv && <div style={{ marginTop: 18, paddingTop: 18, borderTop: `1px solid ${colors.line}` }}>
+            <p style={{ margin: '0 0 12px', color: colors.muted, lineHeight: 1.55 }}>{(confirmation.suite || suite).texteRdv}</p>
+            <a href={(confirmation.suite || suite).lienRdv} target="_blank" rel="noreferrer" style={{ display: 'inline-block', border: 0, borderRadius: 9, padding: '13px 18px', background: colors.ink, color: colors.paper, fontWeight: 800, fontSize: 15, textDecoration: 'none' }}>{(confirmation.suite || suite).libelleRdv}</a>
+          </div>}
         </section> : <form onSubmit={submit} style={{ background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: 13, padding: 22, display: 'grid', gap: 16 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
             <label>Prénom *<input required autoComplete="given-name" value={form.firstName} onChange={(event) => update('firstName', event.target.value)} style={{ ...input, marginTop: 6 }} /></label>
             <label>Nom *<input required autoComplete="family-name" value={form.lastName} onChange={(event) => update('lastName', event.target.value)} style={{ ...input, marginTop: 6 }} /></label>
           </div>
           <label>E-mail *<input required type="email" autoComplete="email" value={form.email} onChange={(event) => update('email', event.target.value)} style={{ ...input, marginTop: 6 }} /></label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
-            <label>Téléphone<input autoComplete="tel" value={form.phone} onChange={(event) => update('phone', event.target.value)} style={{ ...input, marginTop: 6 }} /></label>
-            <label>Entreprise<input autoComplete="organization" value={form.company} onChange={(event) => update('company', event.target.value)} style={{ ...input, marginTop: 6 }} /></label>
-          </div>
+          {champs.map((champ) => {
+            const valeur = reponses[champ.cle] ?? (champ.type === 'case' ? false : '');
+            const poser = (v) => setReponses((c) => ({ ...c, [champ.cle]: v }));
+            const etiquette = `${champ.libelle}${champ.obligatoire ? ' *' : ''}`;
+            if (champ.type === 'case') {
+              return <label key={champ.cle} style={{ display: 'flex', gap: 10, alignItems: 'start', fontSize: 14, lineHeight: 1.45 }}>
+                <input type="checkbox" required={champ.obligatoire} checked={Boolean(valeur)} onChange={(e) => poser(e.target.checked)} style={{ marginTop: 4 }} />
+                <span>{etiquette}{champ.aide && <span style={{ display: 'block', color: colors.muted, fontSize: 13 }}>{champ.aide}</span>}</span>
+              </label>;
+            }
+            return <label key={champ.cle}>{etiquette}
+              {champ.aide && <span style={{ display: 'block', color: colors.muted, fontSize: 13, fontWeight: 400, marginTop: 3 }}>{champ.aide}</span>}
+              {champ.type === 'liste'
+                ? <select required={champ.obligatoire} value={valeur} onChange={(e) => poser(e.target.value)} style={{ ...input, marginTop: 6 }}>
+                    <option value="">Choisir…</option>
+                    {(champ.options || []).map((o) => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                : champ.type === 'zone'
+                  ? <textarea required={champ.obligatoire} rows={3} value={valeur} onChange={(e) => poser(e.target.value)} style={{ ...input, marginTop: 6, resize: 'vertical' }} />
+                  : <input
+                      required={champ.obligatoire}
+                      type={champ.type === 'email' ? 'email' : champ.type === 'tel' ? 'tel' : 'text'}
+                      autoComplete={champ.cle === 'phone' ? 'tel' : champ.cle === 'company' ? 'organization' : 'off'}
+                      value={valeur}
+                      onChange={(e) => poser(e.target.value)}
+                      style={{ ...input, marginTop: 6 }}
+                    />}
+            </label>;
+          })}
           <label style={{ display: 'flex', gap: 10, alignItems: 'start', color: colors.muted, fontSize: 13, lineHeight: 1.45 }}><input required type="checkbox" checked={form.consent} onChange={(event) => update('consent', event.target.checked)} style={{ marginTop: 3 }} />J’accepte que La Griothèque utilise ces informations pour traiter ma demande d’inscription.</label>
           {error && <div role="alert" style={{ color: colors.error, fontSize: 14 }}>{error}</div>}
           <button disabled={submitting} type="submit" style={{ border: 0, borderRadius: 9, padding: '13px 16px', background: colors.gold, color: colors.goldInk, fontWeight: 800, fontSize: 15, cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? .65 : 1 }}>{submitting ? 'Inscription en cours…' : 'Envoyer mon inscription'}</button>

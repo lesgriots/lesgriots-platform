@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { getDb } from '@/lib/db.mjs';
 import { enrollLearnerInSession } from '@/lib/inscription-flow';
+import { formulaireDeSession, verifierReponses, resumePositionnement } from '@/lib/formulaire-inscription.mjs';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -54,7 +55,8 @@ export async function GET(request, { params }) {
     const db = getDb();
     const context = registrationContext(db, token);
     if (context.error) return NextResponse.json({ error: context.error }, { status: context.status });
-    return NextResponse.json({ session: sessionPayload(db, context.session) });
+    const { champs, suite } = formulaireDeSession(db, context.session.id);
+    return NextResponse.json({ session: sessionPayload(db, context.session), champs, suite });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Impossible de charger ce formulaire.' }, { status: 500 });
   }
@@ -79,6 +81,12 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Prénom, nom et une adresse e-mail valide sont requis.' }, { status: 400 });
     }
     if (!body?.consent) return NextResponse.json({ error: 'Votre accord pour traiter cette inscription est requis.' }, { status: 400 });
+
+    // Les questions propres à ce programme, contrôlées côté serveur : le
+    // formulaire du navigateur peut être contourné, pas celui-ci.
+    const { champs, suite } = formulaireDeSession(db, context.session.id);
+    const controle = verifierReponses(champs, body?.reponses || {});
+    if (controle.erreur) return NextResponse.json({ error: controle.erreur }, { status: 400 });
 
     let learner = db.prepare(`
       SELECT id, first_name, last_name, email, phone, company FROM apprenants
@@ -111,11 +119,38 @@ export async function POST(request, { params }) {
     }
 
     const enrollment = enrollLearnerInSession(db, { sessionId: context.session.id, apprenantId: learner.id, session: context.session });
+
+    /*
+     * Le formulaire tient lieu d'entretien préalable : ses réponses sont la
+     * trace de positionnement à l'entrée. On les range sur l'inscription, en
+     * clair à côté du brut, pour qu'un auditeur n'ait pas à ouvrir du JSON
+     * pour savoir ce que la personne a déclaré. Le financement déclaré
+     * alimente le champ prévu pour lui.
+     */
+    if (controle.reponses.length) {
+      const financement = controle.reponses.find((r) => r.cle === 'financement')?.valeur || '';
+      db.prepare(`
+        UPDATE inscriptions
+        SET reponses_inscription = ?,
+            positionnement_notes = CASE WHEN COALESCE(positionnement_notes, '') = ''
+                                        THEN ? ELSE positionnement_notes END,
+            financement = CASE WHEN COALESCE(financement, '') = '' AND ? <> ''
+                               THEN ? ELSE financement END
+        WHERE session_id = ? AND apprenant_id = ?
+      `).run(
+        JSON.stringify(controle.reponses),
+        resumePositionnement(controle.reponses),
+        financement, financement,
+        context.session.id, learner.id,
+      );
+    }
+
     return NextResponse.json({
       ok: true,
       alreadyRegistered: enrollment.alreadyEnrolled,
       learner: { firstName: learner.first_name, lastName: learner.last_name },
       questionnairesPrepared: enrollment.questionnaireLinks.map((item) => item.questionnaire_type),
+      suite,
     }, { status: enrollment.alreadyEnrolled ? 200 : 201 });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Impossible de finaliser l’inscription.' }, { status: 500 });

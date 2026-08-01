@@ -18,7 +18,7 @@ const STEPS = [
 
 const SUBNAV = {
   configuration: [
-    ['initialisation', 'Initialisation'], ['programme', 'Programme'], ['intervenants', 'Intervenants'], ['dates', 'Dates et prix'], ['clients', 'Clients et prix'], ['apprenants', 'Apprenants'],
+    ['initialisation', 'Initialisation'], ['programme', 'Programme'], ['intervenants', 'Intervenants'], ['dates', 'Dates et prix'], ['clients', 'Clients et prix'], ['apprenants', 'Apprenants'], ['positionnement', 'Positionnement'],
   ],
   gestion: [
     ['conventions', 'Conventions'], ['convocations', 'Convocations'], ['evaluations', 'Évaluations'], ['automatisations', 'Envois automatiques'], ['finances', 'Finances'], ['entreprise', 'Espace entreprise'],
@@ -649,6 +649,10 @@ export default function SessionCockpit({ sessionId }) {
   </>;
 
   const renderConfiguration = () => {
+    if (currentSub === 'positionnement') return <Positionnement
+      inscriptions={inscriptions}
+      onEnregistrer={updateInscription}
+    />;
     if (currentSub === 'clients') return renderClients();
     if (currentSub === 'programme') return <section style={card}><h2 style={title}>Programme de la session</h2><p style={muted}>Le programme catalogue reste indépendant ; ici, tu ajustes les modules réellement délivrés dans cette session.</p>{modules.length ? <div style={{ display: 'grid', gap: 10, marginTop: 16 }}>{modules.map((item, index) => <ModuleEditor key={item.id} item={item} index={index} onSave={saveModule} />)}</div> : <Empty>Aucun module n’est encore associé à cette session.</Empty>}</section>;
     if (currentSub === 'intervenants') return <section style={card}><h2 style={title}>Intervenant principal</h2><p style={muted}>Son nom est utilisé dans les documents générés et dans le suivi de la session.</p><label style={{ display: 'grid', gap: 6, marginTop: 16, maxWidth: 540, fontSize: 12, fontWeight: 700, color: 'var(--text-3)' }}>Nom de l’intervenant<input value={generalConfig.formateurName} onChange={(event) => setGeneralConfig((current) => ({ ...current, formateurName: event.target.value }))} placeholder="Nom et prénom" style={inputStyle} /></label><div style={{ marginTop: 16 }}><Action onClick={saveGeneralConfig}>Enregistrer l’intervenant</Action></div></section>;
@@ -1294,6 +1298,129 @@ function EditableLearner({ item, onReload, onNotice }) {
     finally { setSaving(false); }
   };
   return <div style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-2)' }}><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}><label style={{ display: 'grid', gap: 5, fontSize: 11, color: 'var(--text-3)', fontWeight: 700 }}>PRÉNOM<input value={draft.first_name} onChange={(event) => setDraft((current) => ({ ...current, first_name: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 5, fontSize: 11, color: 'var(--text-3)', fontWeight: 700 }}>NOM<input value={draft.last_name} onChange={(event) => setDraft((current) => ({ ...current, last_name: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 5, fontSize: 11, color: 'var(--text-3)', fontWeight: 700 }}>E-MAIL<input type="email" value={draft.email} onChange={(event) => setDraft((current) => ({ ...current, email: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 5, fontSize: 11, color: 'var(--text-3)', fontWeight: 700 }}>TÉLÉPHONE<input value={draft.phone} onChange={(event) => setDraft((current) => ({ ...current, phone: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 5, fontSize: 11, color: 'var(--text-3)', fontWeight: 700 }}>ENTREPRISE<input value={draft.company} onChange={(event) => setDraft((current) => ({ ...current, company: event.target.value }))} style={inputStyle} /></label><label style={{ display: 'grid', gap: 5, fontSize: 11, color: 'var(--text-3)', fontWeight: 700 }}>STATUT<select value={draft.status} onChange={(event) => setDraft((current) => ({ ...current, status: event.target.value }))} style={{ ...selectStyle, width: '100%' }}><option value="">À définir</option><option>Prospect</option><option>Confirmé</option><option>Annulé</option><option>Terminé</option></select></label></div><div style={{ marginTop: 12 }}><Action secondary onClick={save} disabled={saving}>{saving ? 'Enregistrement…' : 'Enregistrer cet apprenant'}</Action></div></div>;
+}
+
+/**
+ * Le positionnement à l'entrée.
+ *
+ * Deux colonnes, et la séparation entre elles est tout l'intérêt de l'écran.
+ * À gauche, ce que la personne a DÉCLARÉ en s'inscrivant : ses réponses, mot
+ * pour mot, datées, qu'on ne réécrit pas. À droite, ce que l'organisme a
+ * DÉCIDÉ : entrée en formation, aménagement, réorientation, et pourquoi.
+ *
+ * Un auditeur ne cherche pas un questionnaire rempli, il cherche la preuve
+ * que le positionnement a eu un effet. Un formulaire classé qui n'a rien
+ * changé au déroulé ne vaut rien ; c'est la colonne de droite qui fait la
+ * conformité, et c'est la seule qui se saisisse à la main.
+ */
+function Positionnement({ inscriptions, onEnregistrer }) {
+  const [brouillons, setBrouillons] = useState({});
+  const [enCours, setEnCours] = useState(null);
+
+  const lire = (item, champ) => brouillons[item.id]?.[champ] ?? item[champ] ?? '';
+  const poser = (item, champ, valeur) => setBrouillons((c) => ({
+    ...c, [item.id]: { ...(c[item.id] || {}), [champ]: valeur },
+  }));
+
+  const enregistrer = async (item) => {
+    const patch = brouillons[item.id];
+    if (!patch) return;
+    setEnCours(item.id);
+    await onEnregistrer(item.id, patch);
+    setBrouillons((c) => { const s = { ...c }; delete s[item.id]; return s; });
+    setEnCours(null);
+  };
+
+  const reponses = (item) => {
+    try {
+      const r = JSON.parse(item.reponses_inscription || '[]');
+      return Array.isArray(r) ? r : [];
+    } catch { return []; }
+  };
+
+  const DECISIONS = [
+    ['', 'À statuer'],
+    ['admis', 'Entrée en formation validée'],
+    ['admis_amenagement', 'Validée, avec aménagement'],
+    ['reoriente', 'Réorienté vers une autre session ou un autre organisme'],
+    ['refuse', 'Prérequis non atteints'],
+  ];
+
+  const statues = inscriptions.filter((i) => i.positionnement_decision).length;
+
+  return <section style={card}>
+    <h2 style={title}>Positionnement à l’entrée</h2>
+    <p style={{ ...muted, margin: '5px 0 4px', maxWidth: 760 }}>
+      À gauche, ce que la personne a déclaré en s’inscrivant : on ne le réécrit pas. À droite, ce que
+      vous en avez décidé. C’est la décision qui compte en audit, pas le questionnaire : un
+      positionnement qui n’a rien changé au déroulé ne prouve rien.
+    </p>
+    <p style={{ ...muted, margin: '0 0 16px' }}>{statues}/{inscriptions.length} apprenant(s) statué(s).</p>
+
+    {inscriptions.length ? <div style={{ display: 'grid', gap: 12 }}>
+      {inscriptions.map((item) => {
+        const dits = reponses(item);
+        const modifie = Boolean(brouillons[item.id]);
+        return <div key={item.id} style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', padding: '11px 14px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
+            <div>
+              <b style={{ fontSize: 13 }}>{item.last_name?.toUpperCase()} {item.first_name}</b>
+              <div style={muted}>{item.email || 'E-mail à renseigner'}{item.financement ? ` · ${item.financement}` : ''}</div>
+            </div>
+            <Etat
+              actif={Boolean(item.positionnement_decision)}
+              oui={DECISIONS.find(([v]) => v === item.positionnement_decision)?.[1] || 'Statué'}
+              non="À statuer"
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, padding: 14 }}>
+            <div>
+              <div style={{ ...muted, textTransform: 'uppercase', letterSpacing: '.07em', fontSize: 10, fontWeight: 700, marginBottom: 8 }}>Déclaré à l’inscription</div>
+              {dits.length ? <div style={{ display: 'grid', gap: 7 }}>
+                {dits.map((r) => <div key={r.cle}>
+                  <div style={{ ...muted, fontSize: 11 }}>{r.libelle}</div>
+                  <div style={{ fontSize: 12.5, color: 'var(--text)' }}>{r.valeur === true ? 'Oui' : String(r.valeur)}</div>
+                </div>)}
+              </div> : <div style={{ ...muted, fontStyle: 'italic' }}>
+                Rien de déclaré : cet apprenant a été inscrit à la main, sans passer par le formulaire.
+              </div>}
+            </div>
+
+            <div style={{ display: 'grid', gap: 9, alignContent: 'start' }}>
+              <div style={{ ...muted, textTransform: 'uppercase', letterSpacing: '.07em', fontSize: 10, fontWeight: 700 }}>Décidé par l’organisme</div>
+              <select
+                value={lire(item, 'positionnement_decision')}
+                onChange={(e) => poser(item, 'positionnement_decision', e.target.value)}
+                style={{ ...selectStyle, width: '100%', minWidth: 0 }}
+              >
+                {DECISIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+              <textarea
+                rows={2}
+                placeholder="Aménagement retenu, s’il y en a un"
+                value={lire(item, 'positionnement_amenagement')}
+                onChange={(e) => poser(item, 'positionnement_amenagement', e.target.value)}
+                style={{ ...inputStyle, resize: 'vertical' }}
+              />
+              <textarea
+                rows={3}
+                placeholder="Ce que vous en retenez, et ce que ça change au déroulé"
+                value={lire(item, 'positionnement_notes')}
+                onChange={(e) => poser(item, 'positionnement_notes', e.target.value)}
+                style={{ ...inputStyle, resize: 'vertical' }}
+              />
+              {modifie && <div>
+                <Action small onClick={() => enregistrer(item)} disabled={enCours === item.id}>
+                  {enCours === item.id ? 'Enregistrement…' : 'Enregistrer'}
+                </Action>
+              </div>}
+            </div>
+          </div>
+        </div>;
+      })}
+    </div> : <Empty>Ajoute au moins un apprenant pour renseigner son positionnement.</Empty>}
+  </section>;
 }
 
 /**

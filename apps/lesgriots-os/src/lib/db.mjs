@@ -241,7 +241,29 @@ function initSchema(db) {
     );
     CREATE UNIQUE INDEX IF NOT EXISTS idx_formation_questionnaires
       ON formation_questionnaires(formation_id, moment);
+
+    -- ── Formulaire d'inscription, par programme ──────────────────────────
+    -- Le formulaire se définit sur le programme et non sur la session : un
+    -- programme tourne plusieurs fois, et refaire le formulaire à chaque date
+    -- est l'endroit exact où les versions divergent.
+    CREATE TABLE IF NOT EXISTS formulaires_inscription (
+      formation_id TEXT PRIMARY KEY REFERENCES formations(id) ON DELETE CASCADE,
+      champs TEXT NOT NULL DEFAULT '[]',
+      -- Ce qui se passe une fois le formulaire envoyé : le message affiché et,
+      -- s'il y en a un, le lien de prise de rendez-vous. Le formulaire tient
+      -- lieu d'entretien préalable, l'appel le complète quand il le faut.
+      suite TEXT NOT NULL DEFAULT '{}',
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
+
+  // Les réponses au formulaire vivent sur l'inscription, pas sur l'apprenant :
+  // la même personne peut répondre différemment d'une session à l'autre, et
+  // c'est la réponse d'alors qui compte pour le dossier de cette session.
+  const colsInscriptions = db.prepare('PRAGMA table_info(inscriptions)').all().map((c) => c.name);
+  if (!colsInscriptions.includes('reponses_inscription')) {
+    db.exec("ALTER TABLE inscriptions ADD COLUMN reponses_inscription TEXT NOT NULL DEFAULT '[]'");
+  }
 
   // ── Questionnaires associés à un programme ──
   // Le lien existait déjà, mais il écrivait dans `evaluation_methods`, la

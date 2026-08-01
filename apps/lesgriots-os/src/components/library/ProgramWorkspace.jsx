@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import EditeurQuestionnaires from './EditeurQuestionnaires';
+import EditeurFormulaireInscription from './EditeurFormulaireInscription';
 
 const inputStyle = { width: '100%', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', padding: '10px 11px', boxSizing: 'border-box', font: 'inherit' };
 const panel = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 };
@@ -38,7 +39,7 @@ export default function ProgramWorkspace({ formationId }) {
   const navigation = {
     content: [['detail', 'Détail du programme']],
     quality: [['quality', 'Synthèse'], ['evaluations', 'Évaluations']],
-    diffusion: [['learner', 'Ressources apprenant'], ['internal', 'Documents internes']],
+    diffusion: [['inscription', 'Formulaire d’inscription'], ['learner', 'Ressources apprenant'], ['internal', 'Documents internes']],
   };
   function chooseArea(nextArea) { setArea(nextArea); setSection(navigation[nextArea][0][0]); }
   return <div style={{ maxWidth: 1420, margin: '0 auto', padding: '28px 28px 56px' }}>
@@ -51,6 +52,7 @@ export default function ProgramWorkspace({ formationId }) {
     </nav>
     {notice && <p role="status" style={{ background: 'var(--surface-2)', padding: 12, borderRadius: 8, color: 'var(--text-2)' }}>{notice}</p>}
     {section === 'detail' && <Detail formation={formation} editing={editing} setEditing={setEditing} save={save} blocks={blocks} allBlocks={allBlocks} attach={attachBlock} detach={detachBlock} />}
+    {section === 'inscription' && <EditeurFormulaireInscription formationId={formationId} />}
     {section === 'learner' && <Resources scope="learner" resources={resources} draft={resourceDraft} setDraft={setResourceDraft} add={addResource} />}
     {section === 'internal' && <Resources scope="internal" resources={resources} draft={resourceDraft} setDraft={setResourceDraft} add={addResource} />}
     {section === 'quality' && <Quality formation={formation} />}
