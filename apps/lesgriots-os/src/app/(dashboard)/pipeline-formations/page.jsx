@@ -21,8 +21,8 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import TopBar from '@/components/layout/TopBar';
 import {
-  Card, EmptyState, Skeleton, ViewSwitcher, useViewMode, useConfirm,
-  Bouton, Champ, Saisie, Zone, Choix, Grille, Tableau, Sous,
+  Card, EmptyState, Skeleton, useViewMode, useConfirm,
+  Bouton, Champ, Saisie, Zone, Choix, Grille,
 } from '@/components/ui';
 import { sessionHref } from '@/lib/navigation';
 
@@ -35,6 +35,22 @@ const ETAPES = [
   { cle: 'session_planifiee',  label: 'Session planifiée',  proba: 1.00 },
 ];
 const PAR_CLE = Object.fromEntries(ETAPES.map((e) => [e.cle, e]));
+
+/* ── La couleur de chaque étape ───────────────────────────────────────
+   La maquette colore la carte par pilier d'activité. Une opportunité de
+   formation n'en porte pas : elle est griothèque par définition. On colore
+   donc par étape, ce qui dit quelque chose de vrai, plutôt que d'inventer
+   une donnée pour justifier une couleur.
+
+   Le clair est le haut du dégradé de segment, la base le bas. */
+const COULEUR_ETAPE = {
+  prospect:           { base: '#6f6b60', clair: '#87826f', texte: '#ffffff' },
+  besoin:             { base: '#1B6FB8', clair: '#2C86D4', texte: '#ffffff' },
+  devis_envoye:       { base: '#C9821C', clair: '#E09B32', texte: '#ffffff' },
+  convention_signee:  { base: '#1E8449', clair: '#2B9E5B', texte: '#ffffff' },
+  financement_valide: { base: '#1B9FC4', clair: '#31B8DC', texte: '#ffffff' },
+  session_planifiee:  { base: '#E0A400', clair: '#FFC22E', texte: '#171407' },
+};
 
 // Une affaire reprise depuis une session conserve sa référence source.
 // Elle doit rester navigable : le pipeline n'est pas une impasse après
@@ -62,7 +78,10 @@ export default function PipelineFormationsPage() {
   const [opps, setOpps] = useState(null);
   const [formations, setFormations] = useState([]);
   const [reprise, setReprise] = useState(null);
-  const [vue, setVue] = useViewMode('pipeline-of', 'timeline');
+  const [vue, setVue] = useViewMode('pipeline-of', 'colonnes');
+  const [tri, setTri] = useState('montant');
+  const [recherche, setRecherche] = useState('');
+  const [seuil, setSeuil] = useState(0);
   const [survol, setSurvol] = useState(null);
   const [formulaire, setFormulaire] = useState(null);
   const confirmer = useConfirm();
@@ -128,54 +147,166 @@ export default function PipelineFormationsPage() {
   const maxMontant = Math.max(...ETAPES.map((e) =>
     parEtape[e.cle].reduce((t, o) => t + (o.revenue || 0), 0)), 1);
 
-  const triees = [...actives].sort((a, b) => (b.revenue || 0) - (a.revenue || 0));
+  /* Les filtres agissent sur ce qui est affiché, jamais sur les totaux du
+     bandeau ni sur la barre segmentée : un chiffre d'affaires qui change
+     parce qu'on tape trois lettres dans une recherche n'est plus un chiffre
+     d'affaires. */
+  const visibles = useMemo(() => {
+    const q = recherche.trim().toLowerCase();
+    const liste = actives.filter((o) => (
+      (!q || `${o.client_name || ''} ${o.company || ''} ${o.formation_title || ''}`.toLowerCase().includes(q))
+      && (!seuil || (o.revenue || 0) >= seuil)
+    ));
+    return liste.sort((x, y) => (tri === 'montant'
+      ? (y.revenue || 0) - (x.revenue || 0)
+      : String(y.created_at || '').localeCompare(String(x.created_at || ''))));
+  }, [actives, recherche, seuil, tri]);
+
+  const visiblesParEtape = useMemo(() => Object.fromEntries(
+    ETAPES.map((e) => [e.cle, visibles.filter((o) => o.stage === e.cle)]),
+  ), [visibles]);
+
+  /* ── La maquette ne choisit pas entre deux mises en page : elle met la
+     bascule dans l'écran. On construit donc les deux. Une valeur héritée
+     de l'ancien sélecteur (« timeline », « list ») retombe sur les colonnes
+     plutôt que d'afficher une page vide. ─────────────────────────────── */
+  const disposition = vue === 'couloirs' ? 'couloirs' : 'colonnes';
 
   return (
     <>
       <TopBar
-        title="Pipeline"
+        title="Tunnel de vente"
         subtitle={opps ? `${actives.length} affaire(s) en cours` : ''}
-        right={
-          <ViewSwitcher
-            value={vue} onChange={setVue}
-            options={['timeline', 'kanban', 'list']}
-            labels={{ timeline: { glyph: '▤', label: 'Tunnel' }, list: { glyph: '☰', label: 'Liste' } }}
-          />
-        }
       />
 
-      <div style={{ padding: '0 24px 48px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ padding: '18px 24px 64px', display: 'flex', flexDirection: 'column', gap: 18 }}>
 
         {!opps && <Skeleton />}
 
         {opps && (
           <>
-            {/* ── Les chiffres, en tête, sans carte ni couleur ── */}
+            {/* ── Bandeau encre ──
+               Le seul élément commun aux cinq écrans de la maquette. Il reste
+               encre en thème clair : c'est une surface, pas un fond de thème. */}
             <div style={{
-              display: 'flex', gap: 34, flexWrap: 'wrap', alignItems: 'flex-end',
-              paddingBottom: 16, borderBottom: '1px solid var(--border)',
+              background: 'var(--grad-ink)', color: 'var(--on-ink)',
+              borderRadius: 'var(--radius-section)', padding: '26px 28px',
+              boxShadow: 'var(--shadow-ink)',
             }}>
-              {[
-                ['Engagé', euros(engage)],
-                ['Pondéré', euros(pondere)],
-                ['À relancer', String(aRelancer)],
-                ['Perdues', String(perdues.length)],
-              ].map(([l, v]) => (
-                <div key={l}>
-                  <div style={mono}>{l}</div>
-                  <div style={{
-                    fontSize: 22, fontWeight: 600, letterSpacing: '-0.02em',
-                    fontVariantNumeric: 'tabular-nums', marginTop: 2,
-                    color: l === 'À relancer' && aRelancer ? 'var(--gold-deep)' : 'inherit',
-                  }}>{v}</div>
-                </div>
-              ))}
-              <Bouton
-                style={{ marginLeft: 'auto' }}
-                onClick={() => setFormulaire({ client_name: '', company: '', client_email: '', client_phone: '', formation_id: '', revenue: '', financement: '', source: '', notes: '', stage: 'prospect' })}
-              >
-                Nouvelle affaire
+              <div style={{
+                fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800,
+                letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--on-ink-3)',
+              }}>Commercial · pipeline</div>
+              <h1 style={{
+                margin: '8px 0', fontSize: 30, fontWeight: 600,
+                letterSpacing: '-0.035em', lineHeight: 1.12,
+              }}>Tunnel de vente</h1>
+              <p style={{
+                margin: '0 0 22px', fontSize: 14, color: 'var(--on-ink-3)',
+                maxWidth: '72ch', textWrap: 'pretty',
+              }}>
+                Suivez chaque opportunité du premier contact à la facture payée.
+                Faites glisser une carte pour la faire avancer.
+              </p>
+              <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
+                {[
+                  ['Pipeline', euros(engage), 'var(--gold)'],
+                  ['Pondéré', euros(pondere), 'var(--on-ink)'],
+                  ['À relancer', `${aRelancer} devis`, aRelancer ? 'var(--warning-clair)' : 'var(--on-ink-2)'],
+                ].map(([l, v, c]) => (
+                  <div key={l}>
+                    <div style={{
+                      fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800,
+                      letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--on-ink-3)',
+                    }}>{l}</div>
+                    <div style={{
+                      marginTop: 4, fontSize: 20, fontWeight: 700, letterSpacing: '-0.03em',
+                      fontVariantNumeric: 'tabular-nums', color: c,
+                    }}>{v}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Barre segmentée ──
+               Elle remplace l'ancienne vue « Tunnel » : la même information,
+               où dort l'argent étape par étape, mais présente en permanence
+               au-dessus des deux mises en page au lieu d'être une vue à part. */}
+            <div style={{ display: 'flex', gap: 3, overflowX: 'auto', paddingBottom: 2 }}>
+              {ETAPES.map((e) => {
+                const cartes = parEtape[e.cle];
+                const somme = cartes.reduce((t, o) => t + (o.revenue || 0), 0);
+                const c = COULEUR_ETAPE[e.cle];
+                return (
+                  <div key={e.cle} style={{
+                    flex: `1 1 ${Math.max(14, Math.round((somme / (engage || 1)) * 100))}%`,
+                    minWidth: 150,
+                    background: `linear-gradient(140deg, ${c.clair} 0%, ${c.base} 100%)`,
+                    color: c.texte, padding: '13px 15px',
+                    borderRadius: e.cle === ETAPES[0].cle ? '11px 3px 3px 11px'
+                      : e.cle === ETAPES[ETAPES.length - 1].cle ? '3px 11px 11px 3px' : 3,
+                  }}>
+                    <div style={{
+                      fontSize: 13, fontWeight: 800, whiteSpace: 'nowrap',
+                      overflow: 'hidden', textOverflow: 'ellipsis',
+                    }}>{e.label}</div>
+                    <div style={{
+                      fontSize: 11.5, opacity: 0.78, marginTop: 2,
+                      fontVariantNumeric: 'tabular-nums',
+                    }}>{cartes.length} · {somme ? euros(somme) : '—'}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ── Filtres ──
+               Trois pastilles, et seulement celles qui filtrent vraiment
+               quelque chose. La maquette en montre cinq, dont « Pilier » :
+               une opportunité de formation n'en porte pas, l'afficher serait
+               un bouton mort. */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              <button type="button" onClick={() => setTri(tri === 'montant' ? 'recent' : 'montant')}
+                style={pastille(true)}>
+                Trier · {tri === 'montant' ? 'montant' : 'récent'}
+              </button>
+              <input value={recherche} onChange={(ev) => setRecherche(ev.target.value)}
+                placeholder="Client"
+                style={{ ...pastille(Boolean(recherche)), fontWeight: 400, minWidth: 170 }} />
+              <button type="button" onClick={() => setSeuil(seuil ? 0 : 5000)} style={pastille(Boolean(seuil))}>
+                Montant {seuil ? `≥ ${euros(seuil)}` : '· tous'}
+              </button>
+              {(recherche || seuil || tri !== 'montant') && (
+                <button type="button" onClick={() => { setRecherche(''); setSeuil(0); setTri('montant'); }}
+                  style={{ ...pastille(false), border: 0, color: 'var(--text-3)' }}>réinitialiser</button>
+              )}
+            </div>
+
+            {/* ── Barre d'action ── */}
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+              <Bouton onClick={() => setFormulaire({ client_name: '', company: '', client_email: '', client_phone: '', formation_id: '', revenue: '', financement: '', source: '', notes: '', stage: 'prospect' })}>
+                Nouvelle opportunité
               </Bouton>
+              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{
+                  fontSize: 12, fontWeight: 700, letterSpacing: '0.08em',
+                  textTransform: 'uppercase', color: 'var(--text-3)',
+                }}>Mise en page</span>
+                <div style={{
+                  display: 'flex', background: 'var(--surface-2)',
+                  borderRadius: 'var(--radius-pill)', padding: 4, gap: 2,
+                }}>
+                  {[['colonnes', 'A · Colonnes'], ['couloirs', 'B · Couloirs']].map(([id, label]) => (
+                    <button key={id} type="button" onClick={() => setVue(id)} style={{
+                      border: 0, cursor: 'pointer', fontFamily: 'inherit',
+                      borderRadius: 'var(--radius-pill)', padding: '7px 15px',
+                      fontSize: 12.5, fontWeight: 800,
+                      background: disposition === id ? 'var(--ink)' : 'transparent',
+                      color: disposition === id ? 'var(--gold)' : 'var(--text-3)',
+                      transition: 'background .2s var(--ease-da), color .2s var(--ease-da)',
+                    }}>{label}</button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {reprise?.a_creer > 0 && (
@@ -197,138 +328,151 @@ export default function PipelineFormationsPage() {
             {actives.length === 0 ? (
               <EmptyState
                 title="Pipeline vide"
-                message="Aucune affaire en cours. Ajoute une affaire, ou reprends celles qui existent déjà en session."
+                message="Aucune affaire en cours. Ajoute une opportunité, ou reprends celles qui existent déjà en session."
               />
-            ) : (
-              <>
-                {vue === 'timeline' && (
-                  <Card>
-                    {ETAPES.map((e) => {
-                      const cartes = parEtape[e.cle];
-                      const somme = cartes.reduce((t, o) => t + (o.revenue || 0), 0);
-                      const aLOr = e.cle === 'session_planifiee';
-                      return (
-                        <div key={e.cle} style={{
-                          display: 'grid', gridTemplateColumns: '160px 1fr 92px',
-                          gap: 14, alignItems: 'center', padding: '6px 0',
-                        }}>
-                          <div style={{ fontSize: 12.5, color: 'var(--text-2)', textAlign: 'right' }}>{e.label}</div>
-                          <div style={{ height: 26, background: 'var(--surface-2)', borderRadius: 4, position: 'relative', overflow: 'hidden' }}>
-                            <div style={{
-                              height: '100%', borderRadius: 4,
-                              width: `${Math.round((somme / maxMontant) * 100)}%`,
-                              background: aLOr ? 'var(--gold)' : 'var(--text)',
-                              transition: 'width 240ms var(--ease)',
-                            }} />
-                            <div style={{
-                              position: 'absolute', top: 0, left: 9, height: 26, display: 'flex', alignItems: 'center',
-                              fontFamily: 'var(--font-mono)', fontSize: 10.5, letterSpacing: '0.06em',
-                              color: somme && !aLOr ? 'var(--surface)' : 'var(--text-2)',
-                            }}>{cartes.length}</div>
-                          </div>
-                          <div style={{ fontSize: 12.5, fontVariantNumeric: 'tabular-nums', color: 'var(--text-2)' }}>
-                            {somme ? euros(somme) : '—'}
-                          </div>
-                        </div>
-                      );
-                    })}
-                    <Liste opps={triees} onEtape={majEtape} onSupprimer={supprimer} onOuvrirSession={ouvrirSession} compact />
-                  </Card>
-                )}
+            ) : disposition === 'colonnes' ? (
 
-                {vue === 'kanban' && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(170px, 1fr))', gap: 8, overflowX: 'auto' }}>
-                    {ETAPES.map((e) => {
-                      const cartes = parEtape[e.cle];
-                      const somme = cartes.reduce((t, o) => t + (o.revenue || 0), 0);
-                      const cible = survol === e.cle;
-                      return (
-                        <div
-                          key={e.cle}
-                          onDragOver={(ev) => { ev.preventDefault(); setSurvol(e.cle); }}
-                          onDragLeave={() => setSurvol((s) => (s === e.cle ? null : s))}
-                          onDrop={(ev) => { ev.preventDefault(); majEtape(ev.dataTransfer.getData('text/plain'), e.cle); }}
-                          style={{
-                            background: cible ? 'var(--gold-soft)' : 'var(--surface-2)',
-                            border: `1px solid ${cible ? 'var(--gold)' : 'var(--border)'}`,
-                            borderRadius: 10, padding: 9, minHeight: 210,
-                            transition: 'background 120ms var(--ease), border-color 120ms var(--ease)',
-                          }}
-                        >
-                          <div style={{ fontSize: 10.5, fontWeight: 600 }}>{e.label}</div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, color: 'var(--text-3)', marginTop: 1 }}>
-                            {cartes.length} · {somme ? euros(somme) : '—'}
-                          </div>
-                          <div style={{
-                            height: 2, margin: '8px 0 9px', borderRadius: 1,
-                            background: e.cle === ETAPE_A_RELANCER && cartes.length ? 'var(--gold)' : 'var(--border-2)',
-                          }} />
-                          {cartes.length === 0 && (
-                            <div style={{ fontSize: 10.5, color: 'var(--text-3)', fontStyle: 'italic' }}>vide</div>
-                          )}
+              /* ── A · Colonnes ── */
+              <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(265px, 1fr))',
+                gap: 16, alignItems: 'start',
+              }}>
+                {ETAPES.map((e) => {
+                  const cartes = visiblesParEtape[e.cle];
+                  const somme = cartes.reduce((t, o) => t + (o.revenue || 0), 0);
+                  const cible = survol === e.cle;
+                  const c = COULEUR_ETAPE[e.cle];
+                  return (
+                    <div key={e.cle}
+                      onDragOver={(ev) => { ev.preventDefault(); setSurvol(e.cle); }}
+                      onDragLeave={() => setSurvol((s) => (s === e.cle ? null : s))}
+                      onDrop={(ev) => { ev.preventDefault(); majEtape(ev.dataTransfer.getData('text/plain'), e.cle); }}
+                    >
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        flexWrap: 'wrap', marginBottom: 12,
+                      }}>
+                        <span style={{ width: 9, height: 9, borderRadius: '50%', background: c.base, flex: '0 0 9px' }} />
+                        <span style={{ fontSize: 13.5, fontWeight: 800 }}>{e.label}</span>
+                        <span style={{
+                          background: 'var(--surface-2)', borderRadius: 'var(--radius-pill)',
+                          padding: '1px 8px', fontSize: 11.5, fontWeight: 700, color: 'var(--text-3)',
+                        }}>{cartes.length}</span>
+                        <span style={{
+                          marginLeft: 'auto', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap',
+                          fontVariantNumeric: 'tabular-nums', color: 'var(--text-2)',
+                        }}>{somme ? euros(somme) : '—'}</span>
+                      </div>
+
+                      {cartes.length === 0 ? (
+                        <div style={{
+                          border: `1px dashed ${cible ? 'var(--gold)' : 'rgba(0,0,0,.18)'}`,
+                          background: cible ? 'var(--gold-tint-soft)' : 'transparent',
+                          borderRadius: 13, padding: '26px 16px', textAlign: 'center',
+                          fontSize: 12, color: 'var(--text-3)',
+                          transition: 'background .2s var(--ease-da), border-color .2s var(--ease-da)',
+                        }}>Déposez une carte ici</div>
+                      ) : (
+                        <div style={{
+                          display: 'flex', flexDirection: 'column', gap: 10,
+                          borderRadius: 13, outline: cible ? '2px solid var(--gold)' : 'none',
+                          outlineOffset: 6,
+                        }}>
                           {cartes.map((o) => (
-                            <div
-                              key={o.id}
-                              draggable
-                              onDragStart={(ev) => ev.dataTransfer.setData('text/plain', o.id)}
-                              style={{
-                                background: 'var(--surface)', border: '1px solid var(--border)',
-                                borderRadius: 7, padding: '8px 9px', marginBottom: 6, cursor: 'grab',
-                              }}
-                            >
-                              <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-                                <div style={{ fontSize: 11.5, fontWeight: 500, lineHeight: 1.3, flex: 1 }}>{o.client_name}</div>
-                                {sessionIdDepuisSource(o) && (
-                                  <Bouton
-                                    fantome
-                                    petit
-                                    onClick={(ev) => { ev.stopPropagation(); ouvrirSession(o); }}
-                                    onMouseDown={(ev) => ev.stopPropagation()}
-                                    draggable={false}
-                                    title="Ouvrir la session"
-                                    aria-label={`Ouvrir la session de ${o.client_name}`}
-                                    style={{ padding: 2, minHeight: 0 }}
-                                  >↗</Bouton>
-                                )}
-                                <Bouton
-                                  fantome
-                                  petit
-                                  onClick={() => supprimer(o)}
-                                  title="Retirer"
-                                  aria-label={`Retirer ${o.client_name} du pipeline`}
-                                  style={{ padding: 2, minHeight: 0 }}
-                                >×</Bouton>
-                              </div>
-                              <Bouton
-                                discret
-                                petit
-                                pleineLargeur
-                                href={`/opportunites/${o.id}`}
-                                onClick={(ev) => ev.stopPropagation()}
-                                onMouseDown={(ev) => ev.stopPropagation()}
-                                draggable={false}
-                                style={{ marginTop: 6 }}
-                              >Ouvrir l’affaire →</Bouton>
-                              {o.formation_title && (
-                                <div style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 2, lineHeight: 1.3 }}>{o.formation_title}</div>
-                              )}
-                              {o.revenue > 0 && (
-                                <div style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums', marginTop: 4 }}>{euros(o.revenue)}</div>
-                              )}
-                            </div>
+                            <CarteOpportunite
+                              key={o.id} o={o} couleur={c.base}
+                              relance={e.cle === ETAPE_A_RELANCER}
+                              signee={PAR_CLE[e.cle]?.proba >= 0.75}
+                              onOuvrirSession={ouvrirSession}
+                              onSupprimer={supprimer}
+                            />
                           ))}
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
 
-                {vue === 'list' && (
-                  <Card padding="none">
-                    <Liste opps={triees} onEtape={majEtape} onSupprimer={supprimer} onOuvrirSession={ouvrirSession} />
-                  </Card>
-                )}
-              </>
+            ) : (
+
+              /* ── B · Couloirs ── */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {ETAPES.map((e) => {
+                  const cartes = visiblesParEtape[e.cle];
+                  if (!cartes.length) return null;
+                  const somme = cartes.reduce((t, o) => t + (o.revenue || 0), 0);
+                  const c = COULEUR_ETAPE[e.cle];
+                  const suivante = ETAPES[ETAPES.findIndex((x) => x.cle === e.cle) + 1];
+                  return (
+                    <Card key={e.cle} padding="none">
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+                        background: 'var(--bg)', borderBottom: '1px solid var(--border-soft)',
+                        padding: '16px 22px',
+                      }}>
+                        <span style={{ width: 9, height: 9, borderRadius: '50%', background: c.base }} />
+                        <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.02em' }}>{e.label}</span>
+                        <span style={{
+                          background: 'var(--surface-2)', borderRadius: 'var(--radius-pill)',
+                          padding: '1px 8px', fontSize: 11.5, fontWeight: 700, color: 'var(--text-3)',
+                        }}>{cartes.length}</span>
+                        <span style={{
+                          marginLeft: 'auto', fontSize: 15, fontWeight: 700,
+                          fontVariantNumeric: 'tabular-nums',
+                        }}>{somme ? euros(somme) : '—'}</span>
+                      </div>
+                      <div style={{ overflowX: 'auto' }}>
+                        {cartes.map((o) => (
+                          <div key={o.id} style={{
+                            display: 'grid', minWidth: 820, gap: 18, alignItems: 'center',
+                            gridTemplateColumns: 'minmax(240px, 2.2fr) 1fr minmax(120px, 1fr) minmax(90px, 1fr) auto',
+                            padding: '16px 22px', borderBottom: '1px solid var(--border-row)',
+                          }}>
+                            <div style={{ fontSize: 13.5, fontWeight: 700 }}>{o.client_name}</div>
+                            <div>
+                              <span style={{
+                                background: 'var(--surface-2)', color: 'var(--text-3)',
+                                borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 800,
+                              }}>{o.formation_code || o.formation_title || '—'}</span>
+                            </div>
+                            <div style={{
+                              fontSize: 12.5,
+                              color: e.cle === ETAPE_A_RELANCER ? 'var(--warning)'
+                                : PAR_CLE[e.cle]?.proba >= 0.75 ? 'var(--success)' : 'var(--text-3)',
+                            }}>
+                              {e.cle === ETAPE_A_RELANCER ? 'Relance conseillée'
+                                : PAR_CLE[e.cle]?.proba >= 0.75 ? 'Engagement signé' : '—'}
+                            </div>
+                            <div style={{ fontSize: 13.5, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+                              {o.revenue ? euros(o.revenue) : '—'}
+                            </div>
+                            {/* L'ancienne vue Liste portait un sélecteur d'étape,
+                               seul endroit d'où l'on pouvait marquer une affaire
+                               perdue. La maquette ne prévoit qu'un bouton
+                               « Faire avancer » : on garde les deux, sinon on
+                               supprime une capacité en refaisant la peinture. */}
+                            <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+                              {suivante && (
+                                <Bouton discret petit onClick={() => majEtape(o.id, suivante.cle)}>Faire avancer</Bouton>
+                              )}
+                              {sessionIdDepuisSource(o) && (
+                                <Bouton discret petit onClick={() => ouvrirSession(o)}>Session ↗</Bouton>
+                              )}
+                              <Choix
+                                compact
+                                value={o.stage}
+                                onChange={(ev) => majEtape(o.id, ev.target.value)}
+                                options={[...ETAPES.map((x) => [x.cle, x.label]), ['perdu', 'Perdue']]}
+                              />
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
             )}
 
             {perdues.length > 0 && (
@@ -353,69 +497,92 @@ export default function PipelineFormationsPage() {
   );
 }
 
-/* ── La liste, partagée par la vue Tunnel et la vue Liste ─────────────── */
-function Liste({ opps, onEtape, onSupprimer, onOuvrirSession, compact = false }) {
+/* ── La pastille de filtre, une seule définition ─────────────────────── */
+function pastille(actif) {
+  return {
+    minHeight: 34, padding: '6px 14px', borderRadius: 'var(--radius-pill)',
+    border: `1px solid ${actif ? 'var(--ink)' : 'var(--border)'}`,
+    background: actif ? 'var(--ink)' : 'var(--surface)',
+    color: actif ? 'var(--on-ink)' : 'var(--text-2)',
+    cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700,
+  };
+}
+
+/* ── La carte du kanban ───────────────────────────────────────────────
+   Elle se saisit et se dépose : c'est son premier métier. Les boutons
+   internes coupent la propagation, sinon un clic sur « ouvrir » démarre
+   un glissement au lieu d'ouvrir. */
+function CarteOpportunite({ o, couleur, relance, signee, onOuvrirSession, onSupprimer }) {
   return (
-    <Tableau
-      style={{ marginTop: compact ? 22 : 0 }}
-      lignes={opps}
-      colonnes={[
-        {
-          titre: 'Affaire',
-          fort: true,
-          rendu: (o) => (
-            <>
-              <a
-                href={`/opportunites/${o.id}`}
-                title="Ouvrir l’affaire"
-                style={{ color: 'inherit', textDecoration: 'underline', textUnderlineOffset: 3 }}
-              >
-                {o.client_name}
-              </a>
-              {o.stage === ETAPE_A_RELANCER && <Sous>devis envoyé, en attente de réponse</Sous>}
-            </>
-          ),
-        },
-        { titre: 'Formation', attenue: true, rendu: (o) => o.formation_title },
-        {
-          titre: 'Étape',
-          rendu: (o) => (
-            <Choix
-              compact
-              value={o.stage}
-              onChange={(e) => onEtape(o.id, e.target.value)}
-              options={[...ETAPES.map((e) => [e.cle, e.label]), ['perdu', 'Perdue']]}
-            />
-          ),
-        },
-        { titre: 'Montant', nombre: true, rendu: (o) => (o.revenue ? euros(o.revenue) : null) },
-        {
-          titre: 'Ouvrir',
-          nombre: true,
-          rendu: (o) => (
-            <span style={{ display: 'inline-flex', gap: 6, justifyContent: 'flex-end' }}>
-              <Bouton discret petit href={`/opportunites/${o.id}`}>L’affaire →</Bouton>
-              {sessionIdDepuisSource(o) && (
-                <Bouton discret petit onClick={() => onOuvrirSession(o)} title="Ouvrir la session">Session ↗</Bouton>
-              )}
-            </span>
-          ),
-        },
-        {
-          titre: '',
-          largeur: 44,
-          rendu: (o) => (
-            <Bouton
-              fantome
-              petit
-              onClick={() => onSupprimer(o)}
-              title="Retirer du pipeline"
-              aria-label={`Retirer ${o.client_name} du pipeline`}
-            >×</Bouton>
-          ),
-        },
-      ]}
-    />
+    <article
+      draggable
+      onDragStart={(ev) => ev.dataTransfer.setData('text/plain', o.id)}
+      style={{
+        background: 'var(--surface)', border: '1px solid var(--border)',
+        borderLeft: `4px solid ${couleur}`, borderRadius: 13, padding: 16,
+        cursor: 'grab', transition: 'box-shadow .2s var(--ease-da), transform .2s var(--ease-da)',
+      }}
+      onMouseEnter={(ev) => { ev.currentTarget.style.boxShadow = 'var(--shadow-carte)'; }}
+      onMouseLeave={(ev) => { ev.currentTarget.style.boxShadow = 'none'; }}
+    >
+      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+        <h3 style={{
+          margin: 0, flex: 1, fontSize: 14, fontWeight: 700,
+          letterSpacing: '-0.01em', lineHeight: 1.3,
+        }}>{o.client_name}</h3>
+        {sessionIdDepuisSource(o) && (
+          <Bouton fantome petit draggable={false}
+            onClick={(ev) => { ev.stopPropagation(); onOuvrirSession(o); }}
+            onMouseDown={(ev) => ev.stopPropagation()}
+            title="Ouvrir la session" aria-label={`Ouvrir la session de ${o.client_name}`}
+            style={{ padding: 2, minHeight: 0 }}>↗</Bouton>
+        )}
+        <Bouton fantome petit draggable={false}
+          onClick={(ev) => { ev.stopPropagation(); onSupprimer(o); }}
+          onMouseDown={(ev) => ev.stopPropagation()}
+          title="Retirer" aria-label={`Retirer ${o.client_name} du pipeline`}
+          style={{ padding: 2, minHeight: 0 }}>×</Bouton>
+      </div>
+
+      <div style={{
+        marginTop: 8, fontFamily: 'var(--font-mono)', fontSize: 11.5, color: 'var(--text-3)',
+      }}>{o.formation_code || String(o.id).slice(0, 8).toUpperCase()}</div>
+
+      {relance && (
+        <div style={{ marginTop: 8, fontSize: 11.5, fontWeight: 700, color: 'var(--warning)' }}>
+          Relance conseillée
+        </div>
+      )}
+      {signee && (
+        <div style={{
+          marginTop: 8, fontSize: 11.5, fontWeight: 700, color: 'var(--success)',
+          display: 'flex', alignItems: 'center', gap: 6,
+        }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }} />
+          Engagement signé
+        </div>
+      )}
+
+      <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+        {o.formation_title && (
+          <span style={{
+            background: 'var(--gold-tint)', color: 'var(--gold-text-2)',
+            borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 800,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 150,
+          }}>{o.formation_title}</span>
+        )}
+        <span style={{
+          marginLeft: 'auto', fontSize: 12.5, fontWeight: 700,
+          fontVariantNumeric: 'tabular-nums',
+        }}>{o.revenue ? euros(o.revenue) : '—'}</span>
+      </div>
+
+      <Bouton discret petit pleineLargeur draggable={false}
+        href={`/opportunites/${o.id}`}
+        onClick={(ev) => ev.stopPropagation()}
+        onMouseDown={(ev) => ev.stopPropagation()}
+        style={{ marginTop: 12 }}>Ouvrir l’affaire →</Bouton>
+    </article>
   );
 }
 
