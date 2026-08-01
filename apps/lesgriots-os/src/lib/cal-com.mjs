@@ -21,6 +21,17 @@
 const BASE = process.env.CAL_API_BASE || 'https://api.cal.com/v2';
 const VERSION = process.env.CAL_API_VERSION || '2026-05-01';
 
+/*
+ * Le type d'événement qui vaut « entretien préalable ».
+ *
+ * Sans ce filtre, n'importe quel rendez-vous pris avec toi par une personne
+ * déjà inscrite passerait pour son appel de positionnement : un point projet,
+ * un café, une réunion client. Seul « appel-de-positionnement-la-griotheque »
+ * compte. Vide, on accepte tout, ce qui reste le comportement raisonnable
+ * pour un agenda qui n'a qu'un seul usage.
+ */
+const TYPE = process.env.CAL_EVENT_TYPE_ID || '';
+
 const texte = (v) => String(v ?? '').trim();
 
 export function calConfigure() {
@@ -28,6 +39,7 @@ export function calConfigure() {
     pret: Boolean(process.env.CAL_API_KEY),
     base: BASE,
     version: VERSION,
+    typeEvenement: TYPE || null,
   };
 }
 
@@ -71,6 +83,7 @@ export async function calReservations({ apres = '', email = '', maxPages = 10 } 
     const rep = await appeler('/bookings', {
       afterUpdatedAt: apres,
       attendeeEmail: email,
+      eventTypeId: TYPE,
       take: 100,
       cursor: curseur,
     });
@@ -130,6 +143,7 @@ export function synchroniserEntretiens(db, reservations) {
     const email = adresseDe(r);
     const etat = etatDepuis(r);
     if (!email || !etat) continue;
+    if (TYPE && String(r.eventTypeId || '') !== TYPE) continue;
 
     const ligne = trouver.get(email);
     if (!ligne) { bilan.orphelines += 1; continue; }
