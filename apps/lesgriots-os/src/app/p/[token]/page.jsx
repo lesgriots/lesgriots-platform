@@ -181,9 +181,29 @@ export default function EspaceApprenant({ params }) {
       {/* ── Mes documents ─────────────────────────────────────────── */}
       <section style={carte}>
         <div style={{ ...mono, marginBottom: 10 }}>Mes documents</div>
-        {d.documents.length === 0 ? (
+        {!d.ressources_ouvertes && (
+          <p style={{ fontSize: 13.5, color: P.texte3, margin: '0 0 10px' }}>
+            Les supports de travail s’ouvriront le premier jour de la formation.
+          </p>
+        )}
+        {(d.ressources || []).map((r) => (
+          <div key={r.id} style={{
+            display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center',
+            padding: '10px 0', borderBottom: `1px solid ${P.ligne}`,
+          }}>
+            <div>
+              <div style={{ fontSize: 13.5 }}>{r.title}</div>
+              <div style={{ ...mono, fontSize: 9.5 }}>{r.resource_type || 'ressource'}</div>
+            </div>
+            {r.url && <a href={r.url} target="_blank" rel="noreferrer"
+               style={{ fontSize: 13, color: P.encre, textDecoration: 'underline', textUnderlineOffset: 3 }}>
+              Ouvrir
+            </a>}
+          </div>
+        ))}
+        {d.documents.length === 0 && !(d.ressources || []).length ? (
           <p style={{ fontSize: 13.5, color: P.texte3, margin: 0 }}>
-            Vos documents (convention, convocation, attestation) apparaîtront ici dès qu’ils seront émis.
+            Votre convocation, vos supports de travail et votre attestation apparaîtront ici au fil de la formation.
           </p>
         ) : d.documents.map((doc) => (
           <div key={doc.id} style={{

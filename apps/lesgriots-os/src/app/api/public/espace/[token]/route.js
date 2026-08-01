@@ -132,28 +132,59 @@ export async function GET(request, { params }) {
     /*
      * Ce que l'apprenant voit, et ce qu'il ne doit pas voir.
      *
+     * Le tri se fait par liste blanche, et c'est délibéré. Une liste
+     * d'exclusions échoue en s'ouvrant : toute catégorie nouvelle devient
+     * visible par défaut, et c'est exactement ainsi que la feuille
+     * d'émargement s'est retrouvée dans cet écran, avec les signatures
+     * manuscrites de tous les participants. Une liste blanche échoue en se
+     * fermant : au pire un document manque, et cela se voit.
+     *
      * Ses pièces nominatives lui appartiennent : convocation, attestation,
      * certificat. Elles sortent sans discussion.
      *
-     * Les pièces de session, elles, se trient. Une facture, un devis ou une
-     * convention portent le prix payé par l'employeur : cela ne le regarde
-     * pas. Une feuille d'émargement porte pire encore, les noms, les
-     * employeurs et les signatures manuscrites de TOUS les participants :
-     * la remettre à l'un d'eux serait communiquer les données personnelles
-     * des autres, sans base légale et sans qu'ils l'aient jamais su.
-     *
-     * Restent visibles à tous les inscrits de la session : le programme, le
-     * livret d'accueil, les supports pédagogiques. Ce qui a été conçu pour
-     * être lu par eux.
+     * Des pièces de session, il ne reste que les ressources pédagogiques :
+     * le workbook, les supports. Le reste ne le concerne pas, ou concerne
+     * les autres.
      */
-    const CATEGORIES_PRIVEES = ['facture', 'devis', 'convention', 'contrat', 'emargement'];
+    const CATEGORIES_APPRENANT = ['convocation', 'attestation', 'certificat', 'support'];
+    const RESSOURCES_SESSION = ['support'];
+
+    /*
+     * Le workbook s'ouvre le jour de la formation, pas avant.
+     *
+     * Un support de travail distribué trois semaines à l'avance est lu en
+     * diagonale, oublié, et il enlève à la séance l'effet de découverte sur
+     * lequel repose l'exercice. On garde donc la ressource fermée jusqu'au
+     * matin du premier jour. Elle reste ouverte après, indéfiniment : ce que
+     * l'apprenant a travaillé lui appartient.
+     */
+    const aujourdhui = new Date().toISOString().slice(0, 10);
+    const formationCommencee = !s.start_date || String(s.start_date).slice(0, 10) <= aujourdhui;
+
     const documents = db.prepare(`
       SELECT id, categorie, libelle, created_at FROM documents
-      WHERE (contexte_type = 'apprenant' AND contexte_id = ?)
-         OR (contexte_type = 'session' AND contexte_id = ?
-             AND COALESCE(categorie, '') NOT IN (${CATEGORIES_PRIVEES.map(() => '?').join(', ')}))
+      WHERE COALESCE(archived, 0) = 0
+        AND (
+          (contexte_type = 'apprenant' AND contexte_id = ?
+           AND COALESCE(categorie, '') IN (${CATEGORIES_APPRENANT.map(() => '?').join(', ')}))
+          OR
+          (contexte_type = 'session' AND contexte_id = ?
+           AND COALESCE(categorie, '') IN (${RESSOURCES_SESSION.map(() => '?').join(', ')}))
+        )
       ORDER BY created_at DESC
-    `).all(lien.apprenant_id, lien.session_id, ...CATEGORIES_PRIVEES);
+    `).all(lien.apprenant_id, ...CATEGORIES_APPRENANT, lien.session_id, ...RESSOURCES_SESSION)
+      // Une ressource de session est un support de travail : elle attend le
+      // jour J. Les pièces nominatives, elles, ne sont jamais retenues.
+      .filter((doc) => formationCommencee || doc.categorie !== 'support');
+
+    /* Les ressources rattachées au programme, choisies pour l'apprenant sur
+       sa fiche catalogue. Même règle d'ouverture que le workbook. */
+    const ressources = formationCommencee && s.formation_id
+      ? db.prepare(`
+          SELECT id, title, resource_type, url FROM formation_resources
+          WHERE formation_id = ? AND scope = 'learner' ORDER BY created_at ASC
+        `).all(s.formation_id)
+      : [];
 
     const jours = joursDeSession(s);
     const signees = db.prepare(`
@@ -221,6 +252,8 @@ export async function GET(request, { params }) {
         objectifs: enListe(m.objectives), heures: m.duration_hours || 0,
       })),
       documents: options.documents === false ? [] : documents,
+      ressources: options.documents === false ? [] : ressources,
+      ressources_ouvertes: formationCommencee,
       emargement: options.emargement === false ? { jours: [], signees } : { jours, signees },
       a_faire: options.questionnaires === false ? [] : aFaire,
       rendues,
