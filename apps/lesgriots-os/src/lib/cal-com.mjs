@@ -18,6 +18,8 @@
  * ressort dans une sauvegarde, un export, une capture d'écran.
  */
 
+import crypto from 'crypto';
+
 const BASE = process.env.CAL_API_BASE || 'https://api.cal.com/v2';
 const VERSION = process.env.CAL_API_VERSION || '2026-05-01';
 
@@ -33,6 +35,40 @@ const VERSION = process.env.CAL_API_VERSION || '2026-05-01';
 const TYPE = process.env.CAL_EVENT_TYPE_ID || '';
 
 const texte = (v) => String(v ?? '').trim();
+
+const DIT = {
+  reserve: 'a réservé son entretien',
+  annule: 'a annulé son entretien',
+  honore: 'a fait son entretien',
+  absent: 'ne s’est pas présenté à l’entretien',
+};
+
+/**
+ * La trace lisible d'un mouvement d'entretien.
+ *
+ * Le webhook l'écrivait, le rattrapage par l'API ne l'écrivait pas : deux
+ * chemins vers le même fait, un seul laissait une trace. Le journal de session
+ * doit dire la même chose quelle que soit la porte par laquelle l'information
+ * est entrée, sinon il ment par omission.
+ */
+export function journaliserEntretien(db, { sessionId, email, nom, etat, debut = '', lien = '', source = 'agenda' }) {
+  const dit = DIT[etat];
+  if (!dit) return;
+  db.prepare(`
+    INSERT INTO emails (id, template_key, destinataire, destinataire_nom, objet, corps,
+                        statut, contexte_type, contexte_id)
+    VALUES (?, 'rendez_vous', ?, ?, ?, ?, 'envoye', 'session', ?)
+  `).run(
+    crypto.randomUUID(), texte(email), texte(nom) || texte(email),
+    `${texte(nom) || texte(email)} ${dit}`,
+    [`${texte(nom) || texte(email)} ${dit}.`,
+     debut ? `Créneau : ${debut}` : '',
+     lien || '',
+     source === 'rattrapage' ? '(vu au rattrapage par l’API, pas par le webhook)' : '',
+    ].filter(Boolean).join('\n'),
+    sessionId,
+  );
+}
 
 export function calConfigure() {
   return {
@@ -154,13 +190,15 @@ export function synchroniserEntretiens(db, reservations) {
       continue;
     }
 
-    majour.run(
-      etat,
-      etat === 'annule' ? '' : texte(r.start || r.startTime),
-      ref,
-      texte(r.meetingUrl || r.location || ''),
-      ligne.id,
-    );
+    const debut = etat === 'annule' ? '' : texte(r.start || r.startTime);
+    const lien = texte(r.meetingUrl || r.location || '');
+    majour.run(etat, debut, ref, lien, ligne.id);
+    journaliserEntretien(db, {
+      sessionId: ligne.session_id,
+      email,
+      nom: [ligne.first_name, ligne.last_name].filter(Boolean).join(' '),
+      etat, debut, lien, source: 'rattrapage',
+    });
     bilan.rattachees += 1;
   }
   return bilan;

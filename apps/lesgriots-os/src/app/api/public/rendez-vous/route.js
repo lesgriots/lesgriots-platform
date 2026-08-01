@@ -21,6 +21,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { getDb } from '@/lib/db.mjs';
+import { journaliserEntretien } from '@/lib/cal-com.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -160,25 +161,15 @@ export async function POST(req) {
     ligne.id,
   );
 
-  /*
-   * La trace lisible. Le tableau des e-mails d'une session est l'endroit où
-   * l'on regarde ce qui s'est passé : un rendez-vous pris y a sa place autant
-   * qu'un message envoyé.
-   */
-  const nom = [ligne.first_name, ligne.last_name].filter(Boolean).join(' ') || ev.email;
-  const dit = { reserve: 'a réservé son entretien', annule: 'a annulé son entretien',
-                honore: 'a fait son entretien', absent: 'ne s’est pas présenté à l’entretien' }[ev.quoi];
-  db.prepare(`
-    INSERT INTO emails (id, template_key, destinataire, destinataire_nom, objet, corps,
-                        statut, contexte_type, contexte_id)
-    VALUES (?, 'rendez_vous', ?, ?, ?, ?, 'envoye', 'session', ?)
-  `).run(
-    crypto.randomUUID(), ev.email, nom,
-    `${nom} ${dit}`,
-    [`${nom} ${dit}.`, ev.debut ? `Créneau : ${ev.debut}` : '', ev.lien || '']
-      .filter(Boolean).join('\n'),
-    ligne.session_id,
-  );
+  journaliserEntretien(db, {
+    sessionId: ligne.session_id,
+    email: ev.email,
+    nom: [ligne.first_name, ligne.last_name].filter(Boolean).join(' '),
+    etat: ev.quoi,
+    debut: ev.quoi === 'annule' ? '' : ev.debut,
+    lien: ev.lien,
+    source: 'webhook',
+  });
 
   return NextResponse.json({ ok: true, inscription: ligne.id, statut: ev.quoi });
 }
