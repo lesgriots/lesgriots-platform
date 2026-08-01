@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import EditeurQuestionnaires from './EditeurQuestionnaires';
 import EditeurFormulaireInscription from './EditeurFormulaireInscription';
+import MentionsObligatoires from './MentionsObligatoires';
 
 const inputStyle = { width: '100%', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', padding: '10px 11px', boxSizing: 'border-box', font: 'inherit' };
 const panel = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 };
@@ -37,7 +38,7 @@ export default function ProgramWorkspace({ formationId }) {
   async function attachBlock(blockId) { await fetch(`/api/formations/${formationId}/blocks`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ block_id: blockId }) }); load(); }
   async function detachBlock(blockId) { await fetch(`/api/formations/${formationId}/blocks?block_id=${blockId}`, { method: 'DELETE' }); load(); }
   const navigation = {
-    content: [['detail', 'Détail du programme']],
+    content: [['detail', 'Détail du programme'], ['mentions', 'Mentions obligatoires']],
     quality: [['quality', 'Synthèse'], ['evaluations', 'Évaluations']],
     diffusion: [['inscription', 'Formulaire d’inscription'], ['learner', 'Ressources apprenant'], ['internal', 'Documents internes']],
   };
@@ -52,6 +53,7 @@ export default function ProgramWorkspace({ formationId }) {
     </nav>
     {notice && <p role="status" style={{ background: 'var(--surface-2)', padding: 12, borderRadius: 8, color: 'var(--text-2)' }}>{notice}</p>}
     {section === 'detail' && <Detail formation={formation} editing={editing} setEditing={setEditing} save={save} blocks={blocks} allBlocks={allBlocks} attach={attachBlock} detach={detachBlock} />}
+    {section === 'mentions' && <MentionsObligatoires formationId={formationId} formation={formation} onEnregistre={() => load()} />}
     {section === 'inscription' && <EditeurFormulaireInscription formationId={formationId} />}
     {section === 'learner' && <Resources scope="learner" resources={resources} draft={resourceDraft} setDraft={setResourceDraft} add={addResource} />}
     {section === 'internal' && <Resources scope="internal" resources={resources} draft={resourceDraft} setDraft={setResourceDraft} add={addResource} />}
