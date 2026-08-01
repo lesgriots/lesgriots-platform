@@ -2,6 +2,7 @@
 
 import TopBar from '@/components/layout/TopBar';
 import { SessionsView, useDonneesFormation } from '@/features/griotheque/vues';
+import { BandeauEncre, BarreSegmentee } from '@/components/da/BandeauDa';
 import { useState } from 'react';
 
 /**
@@ -23,6 +24,38 @@ export default function SessionWorkspace({ initialSessionId, vue = 'actives' }) 
   const session = initialSessionId ? sessions.find((item) => item.id === initialSessionId) : null;
   const title = session ? (session.formation_title || 'Session') : 'Sessions';
   const [seeding, setSeeding] = useState(false);
+
+  /* ── Ce que la maquette met en tête de l'écran ──────────────────────
+     Quatre états, dans l'ordre du parcours. Ils se déduisent du statut
+     réel des sessions, pas d'une liste écrite à la main : une session
+     sans date n'est pas planifiée, quoi qu'en dise son statut. */
+  const etat = (x) => {
+    const st = String(x.status || '').toLowerCase();
+    if (['completed', 'termine', 'terminee', 'terminée'].includes(st)) return 'terminees';
+    if (['cancelled', 'annulee', 'annulée', 'archivee'].includes(st)) return 'terminees';
+    if (!x.start_date) return st === 'draft' || st === 'brouillon' ? 'projets' : 'planification';
+    return 'planifiees';
+  };
+  const groupes = { projets: [], planification: [], planifiees: [], terminees: [] };
+  for (const x of sessions) groupes[etat(x)].push(x);
+
+  const apprenants = sessions.reduce((t, x) => t + (Number(x.inscriptions_count) || 0), 0);
+  const SEGMENTS = [
+    { cle: 'projets', label: 'Projets', base: '#6f6b60', clair: '#87826f' },
+    { cle: 'planification', label: 'Planification en cours', base: '#C9821C', clair: '#E09B32' },
+    { cle: 'planifiees', label: 'Planifiées', base: '#1B6FB8', clair: '#2C86D4' },
+    { cle: 'terminees', label: 'Terminées', base: '#1E8449', clair: '#2B9E5B' },
+  ].map((g) => {
+    const lot = groupes[g.cle];
+    return {
+      ...g,
+      poids: lot.length,
+      detail: lot.length
+        ? `${lot.length} session${lot.length > 1 ? 's' : ''} · ${lot.reduce((t, x) => t + (Number(x.inscriptions_count) || 0), 0)} apprenant(s)`
+        : 'aucune session',
+      point: g.cle === 'planification' && lot.length > 0,
+    };
+  });
 
   const loadDemo = async () => {
     setSeeding(true);
@@ -55,7 +88,22 @@ export default function SessionWorkspace({ initialSessionId, vue = 'actives' }) 
           </a>
         )}
       />
-      <div style={{ padding: '0 24px 48px' }}>
+      <div style={{ padding: '18px 24px 48px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+        {!chargement && sessions.length > 0 && vue !== 'archivees' && (
+          <>
+            <BandeauEncre
+              surTitre="Catalogue · toutes mes sessions"
+              titre="Toutes mes sessions"
+              phrase="Cliquez sur une session pour voir son avancement et accéder à ses pièces."
+              chiffres={[
+                { label: 'Sessions', valeur: String(sessions.length), couleur: 'var(--gold)' },
+                { label: 'Apprenants', valeur: String(apprenants) },
+                { label: 'Terminées', valeur: String(groupes.terminees.length) },
+              ]}
+            />
+            <BarreSegmentee segments={SEGMENTS} />
+          </>
+        )}
         {vue === 'archivees' && (
           <div style={{ margin: '0 0 16px', padding: '12px 14px', borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--border)', fontSize: 12.5, lineHeight: 1.6, color: 'var(--text-2)' }}>
             Les sessions terminées et annulées. Elles restent consultables et comptent toujours dans le BPF.{' '}

@@ -25,6 +25,7 @@ import {
   Bouton, Champ, Saisie, Zone, Choix, Grille,
 } from '@/components/ui';
 import { sessionHref } from '@/lib/navigation';
+import { BandeauEncre, BarreSegmentee } from '@/components/da/BandeauDa';
 
 const ETAPES = [
   { cle: 'prospect',           label: 'Prospect',           proba: 0.10 },
@@ -185,79 +186,27 @@ export default function PipelineFormationsPage() {
 
         {opps && (
           <>
-            {/* ── Bandeau encre ──
-               Le seul élément commun aux cinq écrans de la maquette. Il reste
-               encre en thème clair : c'est une surface, pas un fond de thème. */}
-            <div style={{
-              background: 'var(--grad-ink)', color: 'var(--on-ink)',
-              borderRadius: 'var(--radius-section)', padding: '26px 28px',
-              boxShadow: 'var(--shadow-ink)',
-            }}>
-              <div style={{
-                fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800,
-                letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--on-ink-3)',
-              }}>Commercial · pipeline</div>
-              <h1 style={{
-                margin: '8px 0', fontSize: 30, fontWeight: 600,
-                letterSpacing: '-0.035em', lineHeight: 1.12,
-              }}>Tunnel de vente</h1>
-              <p style={{
-                margin: '0 0 22px', fontSize: 14, color: 'var(--on-ink-3)',
-                maxWidth: '72ch', textWrap: 'pretty',
-              }}>
-                Suivez chaque opportunité du premier contact à la facture payée.
-                Faites glisser une carte pour la faire avancer.
-              </p>
-              <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
-                {[
-                  ['Pipeline', euros(engage), 'var(--gold)'],
-                  ['Pondéré', euros(pondere), 'var(--on-ink)'],
-                  ['À relancer', `${aRelancer} devis`, aRelancer ? 'var(--warning-clair)' : 'var(--on-ink-2)'],
-                ].map(([l, v, c]) => (
-                  <div key={l}>
-                    <div style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800,
-                      letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--on-ink-3)',
-                    }}>{l}</div>
-                    <div style={{
-                      marginTop: 4, fontSize: 20, fontWeight: 700, letterSpacing: '-0.03em',
-                      fontVariantNumeric: 'tabular-nums', color: c,
-                    }}>{v}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <BandeauEncre
+              surTitre="Commercial · pipeline"
+              titre="Tunnel de vente"
+              phrase="Suivez chaque opportunité du premier contact à la facture payée. Faites glisser une carte pour la faire avancer."
+              chiffres={[
+                { label: 'Pipeline', valeur: euros(engage), couleur: 'var(--gold)' },
+                { label: 'Pondéré', valeur: euros(pondere) },
+                { label: 'À relancer', valeur: `${aRelancer} devis`, couleur: aRelancer ? 'var(--warning-clair)' : 'var(--on-ink-2)' },
+              ]}
+            />
 
-            {/* ── Barre segmentée ──
-               Elle remplace l'ancienne vue « Tunnel » : la même information,
-               où dort l'argent étape par étape, mais présente en permanence
-               au-dessus des deux mises en page au lieu d'être une vue à part. */}
-            <div style={{ display: 'flex', gap: 3, overflowX: 'auto', paddingBottom: 2 }}>
-              {ETAPES.map((e) => {
-                const cartes = parEtape[e.cle];
-                const somme = cartes.reduce((t, o) => t + (o.revenue || 0), 0);
-                const c = COULEUR_ETAPE[e.cle];
-                return (
-                  <div key={e.cle} style={{
-                    flex: `1 1 ${Math.max(14, Math.round((somme / (engage || 1)) * 100))}%`,
-                    minWidth: 150,
-                    background: `linear-gradient(140deg, ${c.clair} 0%, ${c.base} 100%)`,
-                    color: c.texte, padding: '13px 15px',
-                    borderRadius: e.cle === ETAPES[0].cle ? '11px 3px 3px 11px'
-                      : e.cle === ETAPES[ETAPES.length - 1].cle ? '3px 11px 11px 3px' : 3,
-                  }}>
-                    <div style={{
-                      fontSize: 13, fontWeight: 800, whiteSpace: 'nowrap',
-                      overflow: 'hidden', textOverflow: 'ellipsis',
-                    }}>{e.label}</div>
-                    <div style={{
-                      fontSize: 11.5, opacity: 0.78, marginTop: 2,
-                      fontVariantNumeric: 'tabular-nums',
-                    }}>{cartes.length} · {somme ? euros(somme) : '—'}</div>
-                  </div>
-                );
-              })}
-            </div>
+            <BarreSegmentee segments={ETAPES.map((e) => {
+              const cartes = parEtape[e.cle];
+              const somme = cartes.reduce((t, o) => t + (o.revenue || 0), 0);
+              return {
+                cle: e.cle, label: e.label, poids: somme,
+                detail: `${cartes.length} · ${somme ? euros(somme) : '—'}`,
+                point: e.cle === ETAPE_A_RELANCER && cartes.length > 0,
+                ...COULEUR_ETAPE[e.cle],
+              };
+            })} />
 
             {/* ── Filtres ──
                Trois pastilles, et seulement celles qui filtrent vraiment
