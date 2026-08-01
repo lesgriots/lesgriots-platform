@@ -426,10 +426,15 @@ export const GRIOTHEQUE_EMAIL_TEMPLATES = [
     description: 'Convocation officielle à la session : dates, lieu, horaires, accès.',
     icon: '📅',
     subject: ({ formation }) => `Convocation — ${formation?.title || 'Votre formation'} · La Griothèque`,
-    body: ({ session, formation, lieu, horaire, formateurName }) => {
+    body: ({ session, formation, lieu, horaire, formateurName, materiel }) => {
       const titre = formation?.title || 'votre formation';
       const lieuStr = lieu || session?.adresse || session?.location || '[lieu à confirmer]';
       const horaireStr = horaire || session?.horaire || '09h00 - 12h30 / 14h00 - 17h30';
+      // Ce qu'il faut apporter vient des prérequis du programme. Aucun
+      // prérequis, aucune rubrique : une généralité vaut moins que rien.
+      const aPrevoir = (materiel || []).length
+        ? `\n\n🎒 À PRÉVOIR\n${materiel.map((x) => `• ${x}`).join('\n')}`
+        : '';
 
       return `Bonjour,
 
@@ -445,12 +450,7 @@ ${lieuStr}
 ${horaireStr}
 
 👤 FORMATION ANIMÉE PAR
-${formateurName || 'L\'équipe pédagogique La Griothèque'}
-
-🎒 À PRÉVOIR
-• Une pièce d'identité
-• De quoi prendre des notes (ordinateur ou carnet)
-• Vos questions et vos projets : cette formation est faite pour y répondre
+${formateurName || 'L\'équipe pédagogique La Griothèque'}${aPrevoir}
 
 ♿ ACCESSIBILITÉ
 Si vous êtes en situation de handicap ou avez besoin d'un aménagement particulier, signalez-le-nous dès maintenant : nous adapterons l'accueil et la pédagogie.
@@ -467,10 +467,13 @@ ${SIGNATURE_GRIOTHEQUE}`;
     description: 'Rappel une semaine avant la session avec les infos pratiques.',
     icon: '⏰',
     subject: ({ formation }) => `Votre formation approche — ${formation?.title || 'La Griothèque'}`,
-    body: ({ session, formation, lieu, horaire }) => {
+    body: ({ session, formation, lieu, horaire, materiel }) => {
       const titre = formation?.title || 'votre formation';
       const lieuStr = lieu || session?.adresse || session?.location || '[lieu à confirmer]';
       const horaireStr = horaire || session?.horaire || '09h00 - 12h30 / 14h00 - 17h30';
+      const aPrevoir = (materiel || []).length
+        ? `\n\n🎒 À PRÉVOIR\n${materiel.map((x) => `• ${x}`).join('\n')}`
+        : '';
 
       return `Bonjour,
 
@@ -486,7 +489,7 @@ Nous vous accueillons dès 15 minutes avant le début de la première journée.
 ✅ AVANT LA FORMATION
 • Si vous ne l'avez pas encore fait, merci de compléter le questionnaire de positionnement qui vous a été transmis
 • Vérifiez votre trajet et vos accès
-• En cas d'empêchement, prévenez-nous au plus vite pour que nous trouvions une solution ensemble
+• En cas d'empêchement, prévenez-nous au plus vite pour que nous trouvions une solution ensemble${aPrevoir}
 
 Nous nous réjouissons de vous accueillir.
 

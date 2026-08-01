@@ -52,13 +52,40 @@ function lienEspace(db, session_id, apprenant_id) {
 
 function contexte(db, session_id) {
   const s = db.prepare(`
-    SELECT s.*, f.title, f.duration_hours FROM sessions s
+    SELECT s.*, f.title, f.duration_hours, f.prerequisites, f.moyens_materiels
+    FROM sessions s
     LEFT JOIN formations f ON f.id = s.formation_id WHERE s.id = ?
   `).get(session_id);
   if (!s) return null;
   const lieu = s.lieu_formation_id
     ? db.prepare('SELECT nom, adresse, postal_code, ville FROM lieux_formation WHERE id = ?').get(s.lieu_formation_id)
     : null;
+
+  /*
+   * Ce que l'apprenant doit apporter vient du programme, pas d'une liste
+   * écrite une fois pour toutes dans le modèle d'e-mail.
+   *
+   * Une convocation qui réclame « une pièce d'identité et de quoi prendre
+   * des notes » à quelqu'un qui vient apprendre à filmer au téléphone se
+   * trompe deux fois : elle alourdit le message, et elle oublie la seule
+   * chose sans laquelle la journée ne peut pas avoir lieu. Les prérequis de
+   * la fiche formation disent exactement cela — avoir tel logiciel installé,
+   * disposer de tel matériel — et c'est eux qu'on relaie.
+   *
+   * Rien dans la fiche, rien dans la convocation : mieux vaut ne rien dire
+   * que dire une généralité.
+   */
+  const materiel = (() => {
+    const brut = s.prerequisites;
+    if (!brut) return [];
+    const t = String(brut).trim();
+    if (t.startsWith('[')) {
+      try { const j = JSON.parse(t); if (Array.isArray(j)) return j.map(String).map((x) => x.trim()).filter(Boolean); }
+      catch { /* ce n'était pas du JSON */ }
+    }
+    return t.split(/\r?\n|·|;/).map((x) => x.replace(/^\s*[-—•*]\s*/, '').trim()).filter(Boolean);
+  })();
+
   return {
     session: s,
     formation: { title: s.title, duration_hours: s.duration_hours },
@@ -66,6 +93,7 @@ function contexte(db, session_id) {
                : (s.adresse || s.location || ''),
     horaire: s.horaire || '',
     formateurName: s.formateur_name || '',
+    materiel,
   };
 }
 
