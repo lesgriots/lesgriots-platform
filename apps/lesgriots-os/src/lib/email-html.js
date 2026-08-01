@@ -12,11 +12,11 @@
  */
 
 const PAPIER = '#f6f5f3';
-const ENCRE = '#141210';
+const ENCRE = '#141310';
 const TEXTE2 = '#4a4744';
 const TEXTE3 = '#8a857f';
 const LIGNE = '#e2ded7';
-const OR = '#F5CE16';
+const OR = '#FFCA00';
 
 /** Le corps texte devient du HTML lisible : titres en capitales, listes, liens. */
 function enParagraphes(texte) {

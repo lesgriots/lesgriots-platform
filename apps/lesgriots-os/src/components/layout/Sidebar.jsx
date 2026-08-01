@@ -87,7 +87,7 @@ function ClassicSidebar() {
   // La Griothèque conserve une navigation sombre, indépendamment du thème clair
   // utilisé pour la surface de travail. Les variables restent ainsi confinées au menu.
   const griothequeSidebarTokens = monde === 'griotheque' ? {
-    '--surface': '#0D0D0C',
+    '--surface': '#0F0E0C',
     '--surface-2': '#171613',
     '--surface-3': '#24221E',
     '--border': 'rgba(246,245,243,0.10)',
@@ -96,7 +96,7 @@ function ClassicSidebar() {
     '--text': '#F6F5F3',
     '--text-2': '#D4D0C8',
     '--text-3': '#918C82',
-    '--gold': '#FFCC00',
+    '--gold': '#FFCA00',
     '--gold-soft': 'rgba(255,204,0,0.13)',
   } : {};
 
@@ -107,7 +107,7 @@ function ClassicSidebar() {
         width: 'min(86vw, 320px)',
         minWidth: 0,
         height: '100dvh',
-        background: monde === 'griotheque' ? '#0D0D0C' : 'var(--surface)',
+        background: monde === 'griotheque' ? '#0F0E0C' : 'var(--surface)',
         borderRight: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column',
@@ -127,7 +127,7 @@ function ClassicSidebar() {
         width: w,
         minWidth: w,
         height: '100vh',
-        background: monde === 'griotheque' ? '#0D0D0C' : 'var(--surface)',
+        background: monde === 'griotheque' ? '#0F0E0C' : 'var(--surface)',
         borderRight: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column',
@@ -191,7 +191,7 @@ function ClassicSidebar() {
             lineHeight: 1.6,
             textAlign: 'center',
             background: item.ton === 'alerte' ? 'var(--gold)' : 'rgba(255,255,255,0.10)',
-            color: item.ton === 'alerte' ? '#141210' : 'var(--text-2)',
+            color: item.ton === 'alerte' ? '#141310' : 'var(--text-2)',
           }}>
             {compteurs[item.compteur]}
           </span>
@@ -289,12 +289,12 @@ function ClassicSidebar() {
           }} aria-label={monde === 'griotheque' ? 'la griothèque' : 'les griots'}>
             {monde === 'griotheque' ? (
               // Replié : le mot-marque ne tient pas, on garde l'initiale de la maison.
-              <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 15, color: '#141210', lineHeight: 1 }}>G</span>
+              <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 15, color: '#141310', lineHeight: 1 }}>G</span>
             ) : (
               <>
-                <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#141210', display: 'block' }} />
-                <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#141210', display: 'block' }} />
-                <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#141210', display: 'block' }} />
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#141310', display: 'block' }} />
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#141310', display: 'block' }} />
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#141310', display: 'block' }} />
               </>
             )}
           </div>
@@ -385,7 +385,7 @@ function ClassicSidebar() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-              background: 'var(--gold)', color: '#141210',
+              background: 'var(--gold)', color: '#141310',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 11.5, fontWeight: 700, letterSpacing: '0.02em',
             }}>
@@ -531,14 +531,14 @@ function GriothequeSidebar() {
                   aria-expanded={selected}
                   onClick={() => setOuvert((current) => current === item.id ? null : item.id)}
                   style={{
-                    width: '100%', minHeight: 43, padding: '0 12px', border: 'none', borderLeft: active || selected ? '3px solid #FFCC00' : '3px solid transparent',
-                    cursor: 'pointer', color: active || selected ? '#FFCC00' : '#E4E0D8', background: active || selected ? 'rgba(255,204,0,.11)' : 'transparent',
+                    width: '100%', minHeight: 43, padding: '0 12px', border: 'none', borderLeft: active || selected ? '3px solid #FFCA00' : '3px solid transparent',
+                    cursor: 'pointer', color: active || selected ? '#FFCA00' : '#E4E0D8', background: active || selected ? 'rgba(255,204,0,.11)' : 'transparent',
                     borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left',
                     fontSize: 14, fontWeight: 650, transition: 'all .18s ease',
                   }}
                 >
                   <span>{item.label}</span>
-                  <span aria-hidden="true" style={{ color: active || selected ? '#FFCC00' : '#89857B', fontSize: 18, fontWeight: 400 }}>{selected ? '−' : '›'}</span>
+                  <span aria-hidden="true" style={{ color: active || selected ? '#FFCA00' : '#89857B', fontSize: 18, fontWeight: 400 }}>{selected ? '−' : '›'}</span>
                 </button>
               );
             })}

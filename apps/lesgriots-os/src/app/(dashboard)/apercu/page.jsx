@@ -243,7 +243,7 @@ export default function ApercuPage() {
 
                 {/* ── Conformité Qualiopi ── */}
                 <div style={{ background: '#0B0B0A', color: '#F1EFE8', borderRadius: 'var(--radius-md, 8px)', padding: '20px 22px' }}>
-                  <div style={{ fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#F5CE16' }}>
+                  <div style={{ fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#FFCA00' }}>
                     Conformité Qualiopi
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, margin: '10px 0 12px' }}>
@@ -253,15 +253,15 @@ export default function ApercuPage() {
                     <span style={{ fontSize: 15, opacity: 0.6 }}>%</span>
                   </div>
                   <div style={{ height: 5, background: 'rgba(241,239,232,0.18)', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: d.conformite.pourcentage + '%', height: '100%', background: '#F5CE16' }} />
+                    <div style={{ width: d.conformite.pourcentage + '%', height: '100%', background: '#FFCA00' }} />
                   </div>
                   <div style={{ fontSize: 12, opacity: 0.65, marginTop: 12, lineHeight: 1.45 }}>
                     {d.conformite.pieces_ok} pièce(s) valides sur {d.conformite.pieces_attendues} ·{' '}
                     {d.conformite.sessions_incompletes} session(s) sans preuve complète
                   </div>
                   <a href="/api/qualite/dossier?format=html" target="_blank" rel="noopener"
-                     style={{ display: 'inline-block', marginTop: 14, fontSize: 12.5, color: '#F5CE16',
-                              borderBottom: '1px solid #F5CE16', paddingBottom: 2 }}>
+                     style={{ display: 'inline-block', marginTop: 14, fontSize: 12.5, color: '#FFCA00',
+                              borderBottom: '1px solid #FFCA00', paddingBottom: 2 }}>
                     Ouvrir le dossier d’audit ↗
                   </a>
                 </div>
@@ -278,7 +278,7 @@ export default function ApercuPage() {
                       <div key={n} style={{ display: 'flex', gap: 10, padding: '9px 0',
                         borderTop: n ? '1px solid var(--border)' : 'none' }}>
                         <span style={{ width: 7, height: 7, borderRadius: '50%', flex: 'none', marginTop: 6,
-                          background: a.ton === 'danger' ? 'var(--danger)' : '#F5CE16' }} />
+                          background: a.ton === 'danger' ? 'var(--danger)' : '#FFCA00' }} />
                         <div style={{ minWidth: 0 }}>
                           <div style={{ fontSize: 13.5 }}>{a.texte}</div>
                           <div style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{a.meta}</div>

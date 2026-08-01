@@ -227,7 +227,7 @@ function LigneSession({ s, type, ouverte, setOuverte, brouillon, setBrouillon, o
                       onClick={() => onEnregistrer(s.id, a.id)}
                       style={{
                         padding: '5px 10px', borderRadius: 'var(--radius-sm)', border: 'none',
-                        background: 'var(--gold)', color: '#141210', fontFamily: 'inherit',
+                        background: 'var(--gold)', color: '#141310', fontFamily: 'inherit',
                         fontSize: 11.5, fontWeight: 600, cursor: 'pointer',
                       }}
                     >Noter</button>

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 const colors = {
   // Les jetons de la maison, thème papier. L'or est le #FFCA00 de la marque,
-  // pas le #F5CE16 d'une ancienne itération qui traînait sur les pages
+  // pas le #FFCA00 d'une ancienne itération qui traînait sur les pages
   // publiques : c'est la première chose qu'un candidat voit de vous.
   ink: '#141310', paper: '#f6f5f3', surface: '#ffffff', line: 'rgba(0,0,0,.14)',
   surface2: '#eeebe6', gold: '#FFCA00', goldInk: '#171407', muted: '#6f6b60',

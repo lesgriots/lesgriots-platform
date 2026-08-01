@@ -164,7 +164,7 @@ export default function FacturationPage() {
                 })}
                 style={{
                   marginLeft: 'auto', padding: '9px 16px', borderRadius: 'var(--radius-md)',
-                  border: 'none', cursor: 'pointer', background: 'var(--gold)', color: '#141210',
+                  border: 'none', cursor: 'pointer', background: 'var(--gold)', color: '#141310',
                   fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600,
                 }}
               >{onglet === 'devis' ? 'Nouveau devis' : 'Nouvelle facture'}</button>
@@ -336,7 +336,7 @@ function Formulaire({ type, valeurs, clients, sessions, onChange, onValider, onF
             disabled={!valeurs.objet.trim()}
             style={{
               padding: '9px 16px', borderRadius: 'var(--radius-md)', border: 'none',
-              background: 'var(--gold)', color: '#141210', fontFamily: 'inherit',
+              background: 'var(--gold)', color: '#141310', fontFamily: 'inherit',
               fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
               opacity: valeurs.objet.trim() ? 1 : 0.45,
             }}

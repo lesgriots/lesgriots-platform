@@ -85,7 +85,7 @@ function MotDePasse() {
           disabled={valeur.length < 12 || !confirmation}
           style={{
             padding: '9px 16px', borderRadius: 'var(--radius-md)', border: 'none',
-            background: 'var(--gold)', color: '#141210', fontFamily: 'inherit',
+            background: 'var(--gold)', color: '#141310', fontFamily: 'inherit',
             fontSize: 13, fontWeight: 600, cursor: 'pointer',
             opacity: valeur.length < 12 || !confirmation ? 0.45 : 1,
           }}
@@ -149,7 +149,7 @@ export default function AppareilPage() {
               </p>
               <button onClick={emettre} style={{
                 padding: '10px 18px', borderRadius: 'var(--radius-md)', border: 'none',
-                background: 'var(--gold)', color: '#141210', fontFamily: 'inherit',
+                background: 'var(--gold)', color: '#141310', fontFamily: 'inherit',
                 fontSize: 13, fontWeight: 600, cursor: 'pointer',
               }}>Générer un code</button>
               {erreur && <p style={{ color: 'var(--danger)', fontSize: 13, marginTop: 12 }}>{erreur}</p>}
@@ -181,7 +181,7 @@ export default function AppareilPage() {
                 >{copie ? 'Copié' : 'Copier'}</button>
                 <button onClick={emettre} style={{
                   padding: '8px 15px', borderRadius: 'var(--radius-md)', border: 'none',
-                  background: 'var(--gold)', color: '#141210', fontFamily: 'inherit',
+                  background: 'var(--gold)', color: '#141310', fontFamily: 'inherit',
                   fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
                 }}>Nouveau code</button>
               </div>

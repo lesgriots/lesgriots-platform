@@ -135,7 +135,7 @@ export default function BpfPage() {
             }}>Imprimer</button>
             <button onClick={enregistrer} style={{
               padding: '5px 12px', borderRadius: 'var(--radius-md)', fontSize: 11.5, fontWeight: 600,
-              border: 'none', background: 'var(--gold)', color: '#141210',
+              border: 'none', background: 'var(--gold)', color: '#141310',
               fontFamily: 'inherit', cursor: 'pointer',
             }}>{etat || 'Enregistrer'}</button>
           </div>

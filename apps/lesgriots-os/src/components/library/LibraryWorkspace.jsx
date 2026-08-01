@@ -13,7 +13,7 @@ const VIEWS = {
 };
 
 const button = { border: 0, borderRadius: 8, padding: '10px 13px', fontWeight: 700, cursor: 'pointer', fontSize: 13 };
-const primary = { ...button, background: 'var(--gold)', color: '#171713' };
+const primary = { ...button, background: 'var(--gold)', color: '#171613' };
 const quiet = { ...button, background: 'var(--surface-2)', color: 'var(--text)', border: '1px solid var(--border)' };
 const card = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' };
 

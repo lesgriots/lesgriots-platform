@@ -193,7 +193,7 @@ export default function LoginPage() {
               disabled={envoi || !email.trim() || !motdepasse}
               style={{
                 width: '100%', marginTop: 14, padding: '14px 24px',
-                background: GOLD, color: '#141210', border: 'none', borderRadius: 10,
+                background: GOLD, color: '#141310', border: 'none', borderRadius: 10,
                 fontSize: 15, fontWeight: 600, fontFamily: "'Geist Sans', 'DM Sans', sans-serif",
                 cursor: envoi ? 'default' : 'pointer',
                 opacity: envoi || !email.trim() || !motdepasse ? 0.5 : 1,
@@ -228,7 +228,7 @@ export default function LoginPage() {
               disabled={envoi || !code.trim()}
               style={{
                 width: '100%', marginTop: 12, padding: '14px 24px',
-                background: GOLD, color: '#141210', border: 'none', borderRadius: 10,
+                background: GOLD, color: '#141310', border: 'none', borderRadius: 10,
                 fontSize: 15, fontWeight: 600, fontFamily: "'Geist Sans', 'DM Sans', sans-serif",
                 cursor: envoi || !code.trim() ? 'default' : 'pointer',
                 opacity: envoi || !code.trim() ? 0.5 : 1,

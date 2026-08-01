@@ -95,7 +95,7 @@ export default function EspaceApprenantPage() {
               {d.total > d.avec_lien && (
                 <button onClick={emettreTout} style={{
                   marginTop: 12, padding: '9px 16px', borderRadius: 'var(--radius-md)',
-                  border: 'none', background: 'var(--gold)', color: '#141210',
+                  border: 'none', background: 'var(--gold)', color: '#141310',
                   fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
                 }}>
                   Créer les {d.total - d.avec_lien} lien(s) manquant(s)
@@ -150,7 +150,7 @@ export default function EspaceApprenantPage() {
                           ) : (
                             <button onClick={() => emettre(i.session_id, i.apprenant_id)} style={{
                               padding: '5px 11px', borderRadius: 'var(--radius-sm)', border: 'none',
-                              background: 'var(--gold)', color: '#141210',
+                              background: 'var(--gold)', color: '#141310',
                               fontFamily: 'inherit', fontSize: 11.5, fontWeight: 600, cursor: 'pointer',
                             }}>Créer</button>
                           )}

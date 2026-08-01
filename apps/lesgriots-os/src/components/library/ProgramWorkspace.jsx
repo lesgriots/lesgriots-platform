@@ -8,7 +8,7 @@ import MentionsObligatoires from './MentionsObligatoires';
 
 const inputStyle = { width: '100%', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', padding: '10px 11px', boxSizing: 'border-box', font: 'inherit' };
 const panel = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 };
-const primary = { border: 0, borderRadius: 8, padding: '10px 13px', background: 'var(--gold)', color: '#171713', fontWeight: 750, cursor: 'pointer' };
+const primary = { border: 0, borderRadius: 8, padding: '10px 13px', background: 'var(--gold)', color: '#171613', fontWeight: 750, cursor: 'pointer' };
 const quiet = { border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', background: 'var(--surface-2)', color: 'var(--text)', fontWeight: 650, cursor: 'pointer' };
 const typeLabels = { positionnement: 'Évaluation préformation pour les apprenants', chaud: 'Évaluation à chaud pour les apprenants', froid: 'Évaluation à froid pour les apprenants', manager: 'Questionnaire pour les managers', formateur: 'Questionnaire pour les intervenants', financeur: 'Questionnaire pour les financeurs et commanditaires' };
 function parse(value) { try { return Array.isArray(value) ? value : JSON.parse(value || '[]'); } catch { return []; } }

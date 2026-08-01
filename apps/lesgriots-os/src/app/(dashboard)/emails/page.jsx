@@ -194,7 +194,7 @@ export default function EmailsPage() {
                     disabled={envoi || !joignables}
                     style={{
                       padding: '10px 18px', borderRadius: 'var(--radius-md)', border: 'none',
-                      background: 'var(--gold)', color: '#141210', fontFamily: 'inherit',
+                      background: 'var(--gold)', color: '#141310', fontFamily: 'inherit',
                       fontSize: 13, fontWeight: 600, cursor: 'pointer',
                       opacity: envoi || !joignables ? 0.45 : 1,
                     }}

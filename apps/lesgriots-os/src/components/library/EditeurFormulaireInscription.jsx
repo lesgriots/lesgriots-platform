@@ -25,7 +25,7 @@ const champ = {
   width: '100%', boxSizing: 'border-box', borderRadius: 8, border: '1px solid var(--border)',
   background: 'var(--surface-2)', color: 'var(--text)', padding: '9px 11px', font: 'inherit', fontSize: 13,
 };
-const primaire = { border: 0, borderRadius: 8, padding: '10px 14px', background: 'var(--gold)', color: '#171713', fontWeight: 750, cursor: 'pointer' };
+const primaire = { border: 0, borderRadius: 8, padding: '10px 14px', background: 'var(--gold)', color: '#171613', fontWeight: 750, cursor: 'pointer' };
 const discret = { border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', background: 'var(--surface-2)', color: 'var(--text)', fontWeight: 650, cursor: 'pointer' };
 
 const TYPES = [

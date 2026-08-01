@@ -24,7 +24,7 @@ const zone = {
   background: 'var(--surface-2)', color: 'var(--text)', padding: '10px 11px', font: 'inherit',
   fontSize: 13, lineHeight: 1.55, resize: 'vertical',
 };
-const primaire = { border: 0, borderRadius: 8, padding: '10px 14px', background: 'var(--gold)', color: '#171713', fontWeight: 750, cursor: 'pointer' };
+const primaire = { border: 0, borderRadius: 8, padding: '10px 14px', background: 'var(--gold)', color: '#171613', fontWeight: 750, cursor: 'pointer' };
 const discret = { border: '1px solid var(--border)', borderRadius: 8, padding: '8px 11px', background: 'var(--surface-2)', color: 'var(--text)', fontWeight: 650, cursor: 'pointer', fontSize: 12.5 };
 
 const MENTIONS = [

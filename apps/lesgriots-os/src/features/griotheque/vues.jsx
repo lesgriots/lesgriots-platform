@@ -10812,7 +10812,7 @@ export default function AncienneApplicationFormations() {
 
       {/* SIDEBAR */}
       <aside className="grio-sidebar" style={{
-        '--surface': '#0D0D0C',
+        '--surface': '#0F0E0C',
         '--surface-2': '#171613',
         '--surface-3': '#24221E',
         '--border': 'rgba(246,245,243,0.10)',
@@ -10821,8 +10821,8 @@ export default function AncienneApplicationFormations() {
         '--text': '#F6F5F3',
         '--text-2': '#D4D0C8',
         '--text-3': '#918C82',
-        '--gold-deep': '#FFCC00',
-        width: 220, minWidth: 220, height: '100vh', background: '#0D0D0C',
+        '--gold-deep': '#FFCA00',
+        width: 220, minWidth: 220, height: '100vh', background: '#0F0E0C',
         borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column',
         position: 'sticky', top: 0, overflow: 'hidden', flexShrink: 0,
       }}>

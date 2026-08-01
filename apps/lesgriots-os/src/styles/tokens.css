@@ -544,5 +544,5 @@ html[data-monde="griotheque"] .os-sidebar div {
 html[data-monde="griotheque"] .os-sidebar a[style*="var(--gold-soft)"],
 html[data-monde="griotheque"] .os-sidebar a[aria-current="page"] {
   background: rgba(245, 206, 22, 0.16) !important;
-  color: #F5CE16 !important;
+  color: #FFCA00 !important;
 }
