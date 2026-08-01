@@ -4,6 +4,7 @@ import { getDb } from '@/lib/db.mjs';
 import { enrollLearnerInSession } from '@/lib/inscription-flow';
 import { formulaireDeSession, verifierReponses, resumePositionnement } from '@/lib/formulaire-inscription.mjs';
 import { accuserInscription, prevenirOrganisme } from '@/lib/email-inscription.mjs';
+import { rendreDocumentSession } from '@/lib/documents-session.mjs';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -174,8 +175,20 @@ export async function POST(request, { params }) {
         reglages,
       };
 
+      /*
+       * Le programme part avec l'accusé de réception, comme dans le message
+       * que Moos envoyait à la main. C'est la pièce qui répond à la seule
+       * question du candidat à cet instant : est-ce bien ce que je crois ?
+       * Un rendu qui échoue ne doit pas retenir le message : on part sans.
+       */
+      let pieces = [];
       try {
-        await accuserInscription({ ...infos, suite, financement });
+        const { pdf, nom: nomPdf } = await rendreDocumentSession(db, 'programme', context.session.id);
+        pieces = [{ filename: nomPdf, content: pdf }];
+      } catch (e) { console.warn('[inscription] programme non joint :', e.message); }
+
+      try {
+        await accuserInscription({ ...infos, suite, financement, pieces });
       } catch (e) { console.warn('[inscription] accusé non envoyé :', e.message); }
 
       try {

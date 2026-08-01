@@ -52,7 +52,7 @@ function recapitulatif(s) {
  * Le matériel appartient à la convocation.
  */
 export async function accuserInscription({
-  apprenant, session, suite = {}, financement = '', reglages = {},
+  apprenant, session, suite = {}, financement = '', reglages = {}, pieces = [],
 }) {
   const titre = texte(session.formation_titre) || 'votre formation';
   const prenom = texte(apprenant.first_name);
@@ -73,18 +73,45 @@ export async function accuserInscription({
     "Si l’une de ces informations est inexacte, répondez à ce message : nous la corrigeons.",
     '',
     'LA SUITE',
-    texte(suite.message)
-      || 'Nous examinons votre demande et revenons vers vous sous 3 jours ouvrés.',
-    "Dès que votre place est confirmée, vous recevez votre convocation, le programme détaillé et l’accès à votre espace apprenant.",
   ];
 
-  if (texte(suite.lienRdv)) {
+  /*
+   * L'entretien préalable n'est pas une option, c'est l'étape suivante.
+   *
+   * Tant qu'un lien de rendez-vous est réglé sur le programme, le message ne
+   * doit pas promettre « une réponse sous trois jours » : il doit demander de
+   * réserver le créneau, sans quoi le candidat attend un e-mail qui attend un
+   * appel qui n'a pas été pris. Sans lien de rendez-vous, on retombe sur le
+   * délai de réponse annoncé.
+   */
+  const rdv = texte(suite.lienRdv);
+
+  if (rdv) {
     bloc.push(
+      texte(suite.message)
+        || 'Nous prenons vingt minutes avec chaque candidat avant de valider son inscription : votre projet, votre niveau de départ, ce que vous attendez de ces journées.',
       '',
-      'EN PARLER AVANT',
-      texte(suite.texteRdv) || 'Vous préférez en parler de vive voix ? Choisissez un créneau.',
-      texte(suite.lienRdv),
+      'PROCHAINE ÉTAPE',
+      texte(suite.texteRdv) || 'Réservez votre entretien de 20 minutes :',
+      rdv,
+      '',
+      'À l’issue de cet échange, nous validons votre inscription et vous recevez votre convocation, le programme à jour et l’accès à votre espace apprenant.',
     );
+  } else {
+    bloc.push(
+      texte(suite.message)
+        || 'Nous examinons votre demande et revenons vers vous sous 3 jours ouvrés.',
+      'Dès que votre place est confirmée, vous recevez votre convocation, le programme détaillé et l’accès à votre espace apprenant.',
+    );
+  }
+
+  if (pieces.length) {
+    bloc.push('', 'Le programme détaillé de la formation est joint à ce message.');
+  }
+
+  const tel = texte(reglages.phone);
+  if (tel && !/^0[6X]\s?X/i.test(tel)) {
+    bloc.push('', `Une question d’ici là ? Répondez à ce message ou appelez le ${tel}.`);
   }
 
   // Règle de marque : ce qui accueille est signé La Griothèque, ce qui
@@ -103,12 +130,13 @@ export async function accuserInscription({
   return envoyerEmail({
     destinataire: texte(apprenant.email),
     destinataire_nom: nom,
+    pieces,
     objet: `Votre demande d’inscription · ${titre}`,
     corps,
     html: emailHtml({
       titre: `Votre demande d’inscription · ${titre}`,
       corps,
-      lien: texte(suite.lienRdv),
+      lien: rdv,
       pied,
     }),
     template_key: 'inscription_recue',
