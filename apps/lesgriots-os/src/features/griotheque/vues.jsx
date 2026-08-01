@@ -5385,6 +5385,15 @@ export function SessionsView(param) {
         let advTotal = 0, advDone = 0;
         phases.forEach(ph => { ph.items.forEach(it => { advTotal++; if (it.done) advDone++; }); });
         const advScore = advTotal > 0 ? Math.round(advDone / advTotal * 100) : 0;
+        /* Le liseré gauche de la maquette. Il ne décore pas : il dit où en est
+           la session, du projet sans date à la session terminée. Même palette
+           que la barre segmentée en haut de l'écran, pour qu'un regard suffise
+           à faire le lien entre la barre et la carte. */
+        const _st = String(s.status || '').toLowerCase();
+        const _lisere = ['completed', 'termine', 'terminee', 'terminée'].includes(_st) ? '#1E8449'
+            : ['cancelled', 'annulee', 'annulée', 'archivee'].includes(_st) ? '#6f6b60'
+            : !s.start_date ? '#C9821C'
+            : '#1B6FB8';
         return /*#__PURE__*/ _jsx("div", {
             draggable: true,
             onDragStart: (e) => {
@@ -5402,35 +5411,42 @@ export function SessionsView(param) {
             style: {
                 background: isSelected ? T.goldDim : T.card,
                 border: "1px solid ".concat(isSelected ? alpha(T.gold, 33) : T.border2),
-                borderRadius: 10,
-                padding: '14px 16px',
+                borderLeft: "4px solid ".concat(_lisere),
+                borderRadius: 13,
+                padding: 18,
                 cursor: 'grab',
-                transition: 'all 0.15s',
+                transition: 'box-shadow .2s cubic-bezier(.2,.7,.3,1), border-color .2s cubic-bezier(.2,.7,.3,1)',
                 position: 'relative'
             },
             onMouseEnter: (e)=>{
+                e.currentTarget.style.boxShadow = '0 10px 26px rgba(0,0,0,.10)';
                 if (!isSelected) e.currentTarget.style.borderColor = T.border3;
             },
             onMouseLeave: (e)=>{
+                e.currentTarget.style.boxShadow = 'none';
                 if (!isSelected) e.currentTarget.style.borderColor = T.border2;
             },
             children: [
                 /*#__PURE__*/ _jsx("div", {
                     style: {
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: 700,
                         color: T.gold,
                         marginBottom: 4,
-                        lineHeight: 1.3
+                        lineHeight: 1.35,
+                        textDecoration: 'underline',
+                        textUnderlineOffset: 3,
+                        textDecorationThickness: 1
                     },
                     children: [s.client_company ? `${s.client_company} - ` : '', s.formation_title].join('')
                 }, void 0, false),
                 /*#__PURE__*/ _jsx("div", {
                     style: {
-                        fontSize: 10,
+                        fontSize: 12.5,
                         color: T.textDim,
                         fontFamily: T.mono,
-                        fontWeight: 700,
+                        fontWeight: 600,
+                        marginTop: 10,
                         marginBottom: 8
                     },
                     children: s.code_interne || s.formation_code
