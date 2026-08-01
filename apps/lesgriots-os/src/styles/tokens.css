@@ -139,6 +139,74 @@
   /* ── Focus (a11y) ── */
   --focus-ring: 0 0 0 2px rgba(255, 202, 0, 0.55);
 
+  /* ══ Maquette Digiforma — jetons ajoutés au dossier de passation ══
+     Ces valeurs viennent du handoff Claude Design. Elles ne remplacent
+     rien : elles comblent ce qui manquait pour construire les écrans
+     sans réécrire une couleur en dur dans un composant.
+
+     Deux familles y sont apparues. L'ENCRE, qui n'était qu'un fond de
+     thème sombre, devient une surface à part entière : le bandeau en
+     haut de chaque écran et le rail de navigation sont encre même en
+     thème clair. Il faut donc des couleurs de texte « sur encre » qui
+     ne dépendent pas du thème. Et l'OR de texte, distinct de l'or
+     d'aplat : #ffca00 sur blanc est illisible, les gros chiffres et les
+     liens dorés demandent une version assombrie. */
+
+  /* Filets fins — deux graduations sous --border */
+  --border-soft:   rgba(244, 241, 234, 0.08);
+  --border-row:    rgba(244, 241, 234, 0.06);
+
+  /* Encre : surface, pas seulement fond de thème */
+  --ink:           #141310;
+  --ink-light:     #1E1B15;
+  --ink-dark:      #0F0E0C;
+  --on-ink:        #F4F1EA;
+  --on-ink-2:      #C9C4B8;
+  --on-ink-3:      #8E897C;
+
+  /* Or de texte, distinct de l'or d'aplat */
+  --gold-text:     #FFD84D;  /* sur fond sombre, l'or de texte s'éclaircit */
+  --gold-text-2:   #E0B400;
+  --on-gold:       #171407;
+  --gold-tint:     rgba(255, 202, 0, 0.18);
+  --gold-tint-soft: rgba(255, 202, 0, 0.14);
+  --gold-focus:    rgba(255, 202, 0, 0.22);
+
+  /* Dégradés nommés — jamais réécrits à la main dans un composant */
+  --grad-ink:      linear-gradient(118deg, #1E1B15 0%, #141310 48%, #0F0E0C 100%);
+  --grad-rail:     linear-gradient(180deg, #1E1B15 0%, #141310 60%, #0F0E0C 100%);
+  --grad-jauge-or: linear-gradient(90deg, #E0A400, #ffca00);
+  --grad-jauge-ink: linear-gradient(90deg, #2A2721, #141310);
+  --grad-panneau:  linear-gradient(180deg, #1A1815 0%, #171613 100%);
+
+  /* Les cinq étapes du parcours de session, dans l'ordre.
+     Barre segmentée, cartes d'étape, bandeau de sous-onglets : une seule
+     source, sinon l'ordre des couleurs diverge d'un écran à l'autre. */
+  --etape-0:       #4B2FBF;  --etape-0-clair: #6242D8;  /* Avancement */
+  --etape-1:       #6B4FD8;  --etape-1-clair: #8368EE;  /* Configuration */
+  --etape-2:       #1E8449;  --etape-2-clair: #2B9E5B;  /* Gestion */
+  --etape-3:       #1B9FC4;  --etape-3-clair: #31B8DC;  /* Espace apprenant */
+  --etape-4:       #E0A400;  --etape-4-clair: #FFC22E;  /* Suivi */
+  --on-etape:      #ffffff;
+  --on-etape-4:    #171407;  /* le jaune du Suivi demande du texte encre */
+
+  /* Ombres de la maquette, en plus des trois génériques */
+  --shadow-ink:    0 14px 34px rgba(15, 14, 12, 0.16);
+  --shadow-carte:  0 10px 26px rgba(0, 0, 0, 0.10);
+  --shadow-etape:  0 14px 32px rgba(0, 0, 0, 0.10);
+  --shadow-or:     0 8px 20px rgba(212, 168, 0, 0.34);
+
+  /* Courbe unique de la maquette. --ease reste en place pour l'existant. */
+  --ease-da:       cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* Rayons de la maquette qui manquaient à l'échelle sm/md/lg/xl */
+  --radius-section: 18px;
+  --radius-carte:  14px;
+  --radius-etape:  16px;
+  --radius-liste:  13px;
+  --radius-pill:   999px;
+
+
   /* ── Layout ── */
   --sidebar-width: 240px;
   --sidebar-collapsed: 64px;
@@ -203,6 +271,74 @@ html[data-theme="light"] {
   --shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.10);
 
   --focus-ring: 0 0 0 2px rgba(212, 168, 0, 0.55);
+
+  /* ══ Maquette Digiforma — jetons ajoutés au dossier de passation ══
+     Ces valeurs viennent du handoff Claude Design. Elles ne remplacent
+     rien : elles comblent ce qui manquait pour construire les écrans
+     sans réécrire une couleur en dur dans un composant.
+
+     Deux familles y sont apparues. L'ENCRE, qui n'était qu'un fond de
+     thème sombre, devient une surface à part entière : le bandeau en
+     haut de chaque écran et le rail de navigation sont encre même en
+     thème clair. Il faut donc des couleurs de texte « sur encre » qui
+     ne dépendent pas du thème. Et l'OR de texte, distinct de l'or
+     d'aplat : #ffca00 sur blanc est illisible, les gros chiffres et les
+     liens dorés demandent une version assombrie. */
+
+  /* Filets fins — deux graduations sous --border */
+  --border-soft:   rgba(0, 0, 0, 0.10);
+  --border-row:    rgba(0, 0, 0, 0.08);
+
+  /* Encre : surface, pas seulement fond de thème */
+  --ink:           #141310;
+  --ink-light:     #1E1B15;
+  --ink-dark:      #0F0E0C;
+  --on-ink:        #F4F1EA;
+  --on-ink-2:      #C9C4B8;
+  --on-ink-3:      #8E897C;
+
+  /* Or de texte, distinct de l'or d'aplat */
+  --gold-text:     #a88800;
+  --gold-text-2:   #B07A0E;
+  --on-gold:       #171407;
+  --gold-tint:     rgba(255, 202, 0, 0.18);
+  --gold-tint-soft: rgba(255, 202, 0, 0.14);
+  --gold-focus:    rgba(255, 202, 0, 0.22);
+
+  /* Dégradés nommés — jamais réécrits à la main dans un composant */
+  --grad-ink:      linear-gradient(118deg, #1E1B15 0%, #141310 48%, #0F0E0C 100%);
+  --grad-rail:     linear-gradient(180deg, #1E1B15 0%, #141310 60%, #0F0E0C 100%);
+  --grad-jauge-or: linear-gradient(90deg, #E0A400, #ffca00);
+  --grad-jauge-ink: linear-gradient(90deg, #2A2721, #141310);
+  --grad-panneau:  linear-gradient(180deg, #ffffff 0%, #fbfaf8 100%);
+
+  /* Les cinq étapes du parcours de session, dans l'ordre.
+     Barre segmentée, cartes d'étape, bandeau de sous-onglets : une seule
+     source, sinon l'ordre des couleurs diverge d'un écran à l'autre. */
+  --etape-0:       #4B2FBF;  --etape-0-clair: #6242D8;  /* Avancement */
+  --etape-1:       #6B4FD8;  --etape-1-clair: #8368EE;  /* Configuration */
+  --etape-2:       #1E8449;  --etape-2-clair: #2B9E5B;  /* Gestion */
+  --etape-3:       #1B9FC4;  --etape-3-clair: #31B8DC;  /* Espace apprenant */
+  --etape-4:       #E0A400;  --etape-4-clair: #FFC22E;  /* Suivi */
+  --on-etape:      #ffffff;
+  --on-etape-4:    #171407;  /* le jaune du Suivi demande du texte encre */
+
+  /* Ombres de la maquette, en plus des trois génériques */
+  --shadow-ink:    0 14px 34px rgba(15, 14, 12, 0.16);
+  --shadow-carte:  0 10px 26px rgba(0, 0, 0, 0.10);
+  --shadow-etape:  0 14px 32px rgba(0, 0, 0, 0.10);
+  --shadow-or:     0 8px 20px rgba(212, 168, 0, 0.34);
+
+  /* Courbe unique de la maquette. --ease reste en place pour l'existant. */
+  --ease-da:       cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* Rayons de la maquette qui manquaient à l'échelle sm/md/lg/xl */
+  --radius-section: 18px;
+  --radius-carte:  14px;
+  --radius-etape:  16px;
+  --radius-liste:  13px;
+  --radius-pill:   999px;
+
 }
 
 /* ══════════════════════════════════════════════════════════════
