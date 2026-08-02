@@ -124,6 +124,7 @@ export async function GET(request, { params }) {
       sessions: sortie,
       documents: documentsClient.map((d) => ({ id: d.id, categorie: d.categorie, libelle: d.libelle, signe: d.signe })),
       organisme: {
+        marque: reglage(db, 'marque_formation', 'LA GRIOTHÈQUE'),
         nom: reglage(db, 'company_name', 'LA GRIOTHÈQUE'),
         email: reglage(db, 'email', 'formation@lesgriots.com'),
         telephone: reglage(db, 'phone'),

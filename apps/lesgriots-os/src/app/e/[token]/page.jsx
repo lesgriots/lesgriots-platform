@@ -75,7 +75,7 @@ export default function EspaceEntreprise({ params }) {
   ).size;
 
   return (
-    <Page organisme={d.organisme} entreprise={d.entreprise.nom}>
+    <Page organisme={d.organisme}>
       <h1 style={{
         fontSize: 'clamp(23px, 5.8vw, 31px)', fontWeight: 600,
         letterSpacing: '-0.03em', lineHeight: 1.12, margin: '0 0 8px',
@@ -237,7 +237,7 @@ function LigneDocument({ doc, token }) {
   );
 }
 
-function Page({ children, organisme, entreprise }) {
+function Page({ children, organisme }) {
   return (
     <div style={{
       minHeight: '100vh', background: P.papier, color: P.encre,
@@ -262,23 +262,20 @@ function Page({ children, organisme, entreprise }) {
             <span style={{
               display: 'block', fontSize: 12.5, fontWeight: 600, letterSpacing: '-.01em',
               whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-            }}>{organisme?.nom || 'LA GRIOTHÈQUE'}</span>
+            }}>{organisme?.marque || 'LA GRIOTHÈQUE'}</span>
             <span style={{ ...mono, fontSize: 9, color: 'rgba(244,241,234,.55)' }}>Espace entreprise</span>
           </span>
-          {entreprise && (
-            <span style={{
-              ...mono, fontSize: 9.5, color: 'rgba(244,241,234,.75)', maxWidth: 180,
-              border: '1px solid rgba(244,241,234,.22)', borderRadius: 999, padding: '5px 11px',
-              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-            }}>{entreprise}</span>
-          )}
         </div>
       </header>
 
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 16px 64px' }}>
         {children}
-        <div style={{ ...mono, textAlign: 'center', marginTop: 32 }}>
-          {organisme?.nom || 'LA GRIOTHÈQUE'} · Organisme de formation
+        <div style={{ ...mono, textAlign: 'center', marginTop: 32, lineHeight: 1.8 }}>
+          {organisme?.marque || 'LA GRIOTHÈQUE'}
+          <span style={{ display: 'block', textTransform: 'none', letterSpacing: 0, fontSize: 10.5 }}>
+            {organisme?.nom || 'LES GRIOTS'}, organisme de formation
+            {organisme?.nda ? ` · déclaration d’activité n° ${organisme.nda}` : ''}
+          </span>
         </div>
       </div>
     </div>

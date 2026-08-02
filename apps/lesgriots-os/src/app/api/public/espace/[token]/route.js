@@ -281,7 +281,13 @@ export async function GET(request, { params }) {
       a_faire: options.questionnaires === false ? [] : aFaire,
       rendues,
       organisme: {
+        // Deux noms, et ce n'est pas une coquetterie : l'apprenant est reçu
+        // par LA GRIOTHÈQUE, la personne morale qui l'engage et déclare son
+        // activité est LES GRIOTS. La marque en tête, la raison sociale au
+        // pied, comme sur les documents d'accueil.
+        marque: reglage(db, 'marque_formation', 'LA GRIOTHÈQUE'),
         nom: reglage(db, 'company_name', 'LA GRIOTHÈQUE'),
+        nda: reglage(db, 'nda') || reglage(db, 'numero_declaration'),
         email: reglage(db, 'email', 'formation@lesgriots.com'),
         telephone: reglage(db, 'phone'),
         referent_handicap: reglage(db, 'referent_handicap', reglage(db, 'representant_name')),
