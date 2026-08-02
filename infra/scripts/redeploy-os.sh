@@ -142,6 +142,15 @@ fi
 
 # Tout va bien : le filet d'hier ne sert plus à rien, il devient celui d'aujourd'hui.
 rm -rf "$PRECEDENT"
+
+# Le cache de compilation de Next n'est jamais élagué tout seul : il avait
+# atteint 514 Mo pour 16 Mo de build utile. On le borne à 200 Mo, ce qui laisse
+# de quoi accélérer une compilation sans laisser le dossier enfler sans fin.
+CACHE_KO=$(du -sk "$APP/.next/cache" 2>/dev/null | cut -f1)
+if [ -n "${CACHE_KO:-}" ] && [ "$CACHE_KO" -gt 204800 ]; then
+  rm -rf "$APP/.next/cache"
+  echo "· cache de build élagué (${CACHE_KO} Ko)"
+fi
 CODE=$(frapper /login)
 echo "✓ service=$ETAT  /login=$CODE  fumée=${#ROUTES[@]} routes OK"
 exit 0

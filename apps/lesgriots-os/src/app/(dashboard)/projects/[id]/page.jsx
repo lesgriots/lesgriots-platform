@@ -676,14 +676,6 @@ export default function ProjectDetailPage({ params }) {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <PinButton projectId={id} size="sm" />
-            <Link href="/legacy" style={{
-              ...breadcrumbLink,
-              color: 'var(--text-3)',
-              fontSize: 11,
-              fontFamily: 'var(--font-mono)',
-            }} title="Ouvrir l'ancienne interface complète">
-              Vue legacy ↗
-            </Link>
           </div>
         </div>
 

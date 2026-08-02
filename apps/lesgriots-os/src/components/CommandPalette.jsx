@@ -53,7 +53,6 @@ const ACTIONS = [
   { id: 'act-sessions',   label: 'Voir les Sessions',     href: '/sessions-list', icon: '📅' },
   { id: 'act-apprenants', label: 'Voir les Apprenants',   href: '/apprenants',   icon: '🎓' },
   { id: 'act-settings',   label: 'Réglages',              href: '/settings',     icon: '⚙' },
-  { id: 'act-legacy',     label: 'Vue legacy',            href: '/legacy',       icon: '🗃' },
 ];
 
 function fuzzyScore(haystack, needle) {
