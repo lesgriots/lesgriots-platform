@@ -19,9 +19,10 @@ export const metadata = {
   // ce doublon qui faisait afficher un fragment d'image dans l'onglet pendant
   // que le vrai symbole dormait dans /branding.
   //
-  // Le signe choisi est le G du mot-marque LA GRIOTHÈQUE, encre sur or : le
-  // sceau du griot est trop fin pour tenir dans 16 pixels, il reste le
-  // symbole des grands formats (connexion, sidebar, documents).
+  // Le signe est celui de lagriotheque.com, couleurs inversées : le mot-marque
+  // en encre sur un carré or, là où le site le porte en papier sur encre. Même
+  // dessin, même famille, et deux onglets qu’on distingue au premier coup d’œil.
+  // La source vit dans /branding/griotheque-app.svg.
 };
 
 export default function RootLayout({ children }) {
