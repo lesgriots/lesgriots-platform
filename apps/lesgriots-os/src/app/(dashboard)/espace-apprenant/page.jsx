@@ -31,6 +31,7 @@ export default function EspaceApprenantPage() {
   const [copie, setCopie] = useState(null);
   const [q, setQ] = useState('');
   const [base, setBase] = useState('');
+  const [notice, setNotice] = useState('');
 
   useEffect(() => { setBase(window.location.origin); }, []);
 
@@ -41,23 +42,42 @@ export default function EspaceApprenantPage() {
 
   useEffect(() => { charger(); }, [charger]);
 
-  const emettre = async (session_id, apprenant_id) => {
-    await fetch('/api/griotheque/espace', {
+  /*
+   * Émettre un lien pouvait échouer sans rien dire : on cliquait, la page se
+   * rechargeait à l'identique, la colonne restait vide, et on recliquait. Le
+   * refus du serveur est maintenant affiché, et l'émission en lot compte ce
+   * qui est réellement passé.
+   */
+  const poster = async (corps) => {
+    const r = await fetch('/api/griotheque/espace', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_id, apprenant_id }),
+      body: JSON.stringify(corps),
     });
-    charger();
+    if (!r.ok) {
+      const d2 = await r.json().catch(() => ({}));
+      throw new Error(d2.error || `erreur ${r.status}`);
+    }
+  };
+
+  const emettre = async (session_id, apprenant_id) => {
+    setNotice('');
+    try { await poster({ session_id, apprenant_id }); charger(); }
+    catch (e) { setNotice(`Lien non émis : ${e.message}`); }
   };
 
   const emettreTout = async () => {
     const sessions = [...new Set((d?.inscriptions || []).filter((i) => !i.token).map((i) => i.session_id))];
+    setNotice('');
+    let faits = 0;
+    const rates = [];
     for (const s of sessions) {
-      await fetch('/api/griotheque/espace', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: s }),
-      });
+      try { await poster({ session_id: s }); faits += 1; }
+      catch (e) { rates.push(e.message); }
     }
     charger();
+    if (rates.length) {
+      setNotice(`${faits} session(s) servie(s), ${rates.length} en échec : ${rates[0]}`);
+    }
   };
 
   const copier = (i) => {
@@ -81,6 +101,14 @@ export default function EspaceApprenantPage() {
       />
 
       <div style={{ padding: '0 24px 48px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {notice && (
+          <div role="alert" style={{
+            margin: '0 0 14px', padding: '11px 14px', borderRadius: 'var(--radius-md)',
+            background: 'var(--danger-soft)', color: 'var(--text)',
+            border: '1px solid color-mix(in srgb, var(--danger) 40%, transparent)',
+            fontSize: 12.5, fontWeight: 600,
+          }}>{notice}</div>
+        )}
 
         {!d && <Skeleton />}
 

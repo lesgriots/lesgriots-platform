@@ -91,14 +91,33 @@ export default function BpfPage() {
 
   useEffect(() => { charger(); }, [charger]);
 
+  /*
+   * Le bouton annonçait « Enregistré » sans jamais regarder la réponse.
+   *
+   * C'est la déclaration annuelle à la DREETS. Si la session a expiré pendant
+   * la saisie, le serveur répond 401, le bouton dit quand même que c'est
+   * enregistré, et le travail est perdu au premier rafraîchissement. Sur ce
+   * formulaire-là, un faux positif coûte une déclaration.
+   */
   const enregistrer = async () => {
     setEtat('Enregistrement…');
-    await fetch('/api/griotheque/bpf', {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ annee, saisi }),
-    });
-    setEtat('Enregistré');
-    setTimeout(() => setEtat(''), 2200);
+    try {
+      const r = await fetch('/api/griotheque/bpf', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ annee, saisi }),
+      });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        setEtat(r.status === 401
+          ? 'Session expirée : reconnecte-toi dans un autre onglet, puis réessaie. Rien n’est perdu tant que tu ne fermes pas cette page.'
+          : `Enregistrement refusé (${d.error || r.status}). Rien n’a été écrit.`);
+        return;
+      }
+      setEtat('Enregistré');
+      setTimeout(() => setEtat(''), 2200);
+    } catch {
+      setEtat('Le serveur n’a pas répondu. Rien n’a été écrit : garde cette page ouverte et réessaie.');
+    }
   };
 
   // La valeur retenue : la correction saisie si elle existe, sinon le calcul.

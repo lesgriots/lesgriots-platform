@@ -35,6 +35,7 @@ export default function EvaluationsPage() {
   const [ouverte, setOuverte] = useState(null);
   const [type, setType] = useState('satisfaction');
   const [brouillon, setBrouillon] = useState({});
+  const [notice, setNotice] = useState('');
 
   const charger = useCallback(async () => {
     const r = await fetch('/api/griotheque/evaluations').then((x) => x.json()).catch(() => null);
@@ -43,22 +44,46 @@ export default function EvaluationsPage() {
 
   useEffect(() => { charger(); }, [charger]);
 
+  /*
+   * Le brouillon n'est effacé que si le serveur a confirmé.
+   *
+   * Avant, il était effacé dans tous les cas : une note de satisfaction saisie
+   * à la main disparaissait de l'écran sans être arrivée en base, et sans un
+   * mot. C'est l'indicateur 30 du référentiel, celui qu'un auditeur ouvre en
+   * premier. Une saisie perdue en silence est pire qu'une saisie refusée.
+   */
   const enregistrer = async (sessionId, apprenantId) => {
     const cle = apprenantId + ':' + type;
     const v = brouillon[cle] || {};
     if (v.score === undefined && !v.comments) return;
-    await fetch('/api/griotheque/evaluations', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_id: sessionId, apprenant_id: apprenantId, type, score: v.score, comments: v.comments }),
-    });
-    setBrouillon((b) => { const n = { ...b }; delete n[cle]; return n; });
-    charger();
+    setNotice('');
+    try {
+      const r = await fetch('/api/griotheque/evaluations', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, apprenant_id: apprenantId, type, score: v.score, comments: v.comments }),
+      });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        setNotice(`Réponse non enregistrée : ${d.error || 'erreur ' + r.status}. Ta saisie est conservée à l’écran.`);
+        return;
+      }
+      setBrouillon((b) => { const n = { ...b }; delete n[cle]; return n; });
+      charger();
+    } catch {
+      setNotice('Le serveur n’a pas répondu. Ta saisie est conservée à l’écran.');
+    }
   };
 
   const retirer = async (sessionId, apprenantId) => {
-    await fetch(`/api/griotheque/evaluations?session_id=${sessionId}&apprenant_id=${apprenantId}&type=${type}`,
-      { method: 'DELETE' });
-    charger();
+    setNotice('');
+    try {
+      const r = await fetch(`/api/griotheque/evaluations?session_id=${sessionId}&apprenant_id=${apprenantId}&type=${type}`,
+        { method: 'DELETE' });
+      if (!r.ok) { setNotice('Suppression refusée. La réponse est toujours en base.'); return; }
+      charger();
+    } catch {
+      setNotice('Le serveur n’a pas répondu. Rien n’a été supprimé.');
+    }
   };
 
   const sessions = d?.sessions || [];
@@ -75,6 +100,15 @@ export default function EvaluationsPage() {
       />
 
       <div style={{ padding: '0 24px 48px', display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 1000 }}>
+
+        {notice && (
+          <div role="alert" style={{
+            padding: '11px 14px', borderRadius: 'var(--radius-md)',
+            background: 'var(--danger-soft)', color: 'var(--text)',
+            border: '1px solid color-mix(in srgb, var(--danger) 40%, transparent)',
+            fontSize: 12.5, fontWeight: 600,
+          }}>{notice}</div>
+        )}
 
         {!d && <Skeleton />}
 
