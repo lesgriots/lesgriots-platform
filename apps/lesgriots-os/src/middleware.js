@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { estHoteGriotheque, ACCUEIL_GRIOTHEQUE } from '@/lib/hotes.mjs';
 
 // ⚠️ Le middleware tourne en edge runtime : il ne peut PAS lire SQLite,
 // donc il ne fait qu'un tri rapide. La VRAIE validation (session en DB,
@@ -46,6 +47,15 @@ export function middleware(request) {
   }
 
   const { pathname } = request.nextUrl;
+
+  // ── La racine, selon le domaine ────────────────────────────────────────
+  // Decision du 26/07/2026 : app.lagriotheque.com est l'OS de l'organisme de
+  // formation. Or « / » rend Mission Control, le cockpit des trois piliers,
+  // avec le TJM de l'agence et les projets du studio. Ce n'est pas la maison
+  // de ce domaine-la : on entre par la vue d'ensemble de la Griotheque.
+  if (pathname === '/' && estHoteGriotheque(request.headers.get('host'))) {
+    return NextResponse.redirect(new URL(ACCUEIL_GRIOTHEQUE, request.url));
+  }
 
   // Skip public paths
   if (PUBLIC_PATHS.some(p => pathname.startsWith(p))) {

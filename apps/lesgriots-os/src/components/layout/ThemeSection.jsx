@@ -22,9 +22,11 @@
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { HOTES_GRIOTHEQUE, estHoteGriotheque } from '@/lib/hotes.mjs';
 
-// Domaines servant exclusivement l'organisme de formation.
-export const HOTES_GRIOTHEQUE = ['app.lagriotheque.com'];
+// La liste des domaines vit dans src/lib/hotes.mjs : le middleware en a besoin
+// aussi, et il tourne en edge runtime, où ce fichier-ci ne peut pas le suivre.
+export { HOTES_GRIOTHEQUE, estHoteGriotheque };
 
 // Routes de formation — servent au sein de l'OS complet (monde Studio),
 // pour que ces écrans gardent le papier même hors du domaine Griothèque.
@@ -67,10 +69,6 @@ const ROUTES_GRIOTHEQUE = [
   '/workflows',
   '/settings',
 ];
-
-export function estHoteGriotheque(hostname) {
-  return HOTES_GRIOTHEQUE.includes(String(hostname || '').toLowerCase());
-}
 
 export function estRouteGriotheque(pathname) {
   const p = String(pathname || '');
