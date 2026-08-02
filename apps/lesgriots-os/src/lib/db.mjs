@@ -192,7 +192,10 @@ function initSchema(db) {
     INSERT OR IGNORE INTO settings (key, value) VALUES ('city', 'Montreuil');
     INSERT OR IGNORE INTO settings (key, value) VALUES ('email', 'contact@lesgriots.com');
     INSERT OR IGNORE INTO settings (key, value) VALUES ('phone', '06 XX XX XX XX');
-    INSERT OR IGNORE INTO settings (key, value) VALUES ('tribunal_ville', 'Bobigny');
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('tribunal_ville', 'Le Havre');
+    -- Le siege social est au Havre, et le RCS le confirme : Le Havre B 902 628
+    -- 684. La graine posait Bobigny, heritee d'un modele. Une valeur par defaut
+    -- fausse est pire qu'une valeur vide : personne ne va la verifier.
 
     -- MLE / TJM plancher SASU (Chris Do · Painless Pricing, adapté SASU FR)
     -- Tout est mensuel en € sauf indication contraire
