@@ -7,6 +7,7 @@
  */
 
 import { construireProgramme } from './programme-donnees.mjs';
+import { lireObjectifs } from './objectifs.mjs';
 
 const texte = (v) => String(v ?? '').trim();
 
@@ -60,12 +61,7 @@ export function construireConvention(db, sessionId) {
    * liste, précédée d'un tiret : une phrase d'introduction déguisée en item.
    * On la sépare donc du reste, et on lui garde sa place de phrase.
    */
-  const objectifsBruts = (() => {
-    const brut = s.objectives;
-    if (!brut) return [];
-    try { const j = JSON.parse(brut); if (Array.isArray(j)) return j.map(String).map((x) => x.trim()).filter(Boolean); } catch { /* texte */ }
-    return String(brut).split(/\r?\n/).map((x) => x.replace(/^\s*[-—•*]\s*/, '').trim()).filter(Boolean);
-  })();
+  const objectifsBruts = lireObjectifs(s.objectives);
 
   const estAmorce = (ligne) => /\u00e0\s+l.issue\s+de\s+la\s+formation/i.test(ligne) || /\bsera\s+capable\s+de\s*:?\s*$/i.test(ligne);
 

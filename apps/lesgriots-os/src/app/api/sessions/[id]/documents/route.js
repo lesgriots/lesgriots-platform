@@ -188,8 +188,22 @@ async function _GET(req, { params }) {
     let pdfBuffer;
 
     if (aUneMaquette(docType)) {
-      const rendu = await rendreDocumentSession(db, docType, id, { apprenantId });
-      pdfBuffer = rendu.pdf;
+      try {
+        const rendu = await rendreDocumentSession(db, docType, id, {
+          apprenantId,
+          force: searchParams.get('force') === '1',
+        });
+        pdfBuffer = rendu.pdf;
+      } catch (e) {
+        // Un refus motivé n'est pas une panne : on le dit, et on dit comment passer outre.
+        if (e.code === 'TARIF_ABSENT') {
+          return NextResponse.json({
+            error: e.message,
+            astuce: 'Ajoute ?force=1 pour produire un document de travail, non destiné à être envoyé.',
+          }, { status: 409 });
+        }
+        throw e;
+      }
     } else {
       // Call Python script
       const scriptPath = path.join(process.cwd(), 'src', 'lib', 'generate_documents.py');

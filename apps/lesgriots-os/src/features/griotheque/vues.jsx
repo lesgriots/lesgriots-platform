@@ -9635,30 +9635,43 @@ export function GrioPipelineView({ formations }) {
 
   useEffect(() => { load(); }, [load]);
 
+  /*
+   * Ces trois gestes passaient par `fetch` nu, sans regarder la réponse.
+   *
+   * Une opportunité à huit mille euros : le formulaire se fermait, les champs
+   * se vidaient, rien n'était créé. Une carte glissée d'une colonne à l'autre :
+   * elle bougeait à l'écran, la base ne changeait pas, et elle revenait en
+   * arrière au rechargement suivant sans explication. Un `fetch` ne rejette
+   * pas sur un 500, donc le `catch` ne servait à rien.
+   *
+   * Le helper `api` de ce fichier vérifie la réponse et affiche une alerte.
+   * Il existait déjà, à quinze lignes d'ici : ces trois appels lui échappaient.
+   */
   const handleCreate = async () => {
-    await fetch('/api/formation-opportunities', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, revenue: parseFloat(form.revenue) || 0 }),
+    const r = await api.post('/api/formation-opportunities', {
+      ...form, revenue: parseFloat(form.revenue) || 0,
     });
+    if (r?.__failed) return;   // l'alerte est déjà affichée, le formulaire reste rempli
     setForm({ client_name: '', company: '', client_email: '', client_phone: '', formation_id: '', revenue: '', financement: '', notes: '', source: '' });
     setShowForm(false);
     load();
   };
 
   const handleDrop = async (oppId, newStage) => {
+    const avant = opps;
     setOpps(prev => prev.map(o => o.id === oppId ? { ...o, stage: newStage } : o));
     setDragOverStage(null);
-    try {
-      await fetch(`/api/formation-opportunities/${oppId}`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stage: newStage }),
-      });
-    } catch (e) { console.error(e); load(); }
+    const r = await api.patch(`/api/formation-opportunities/${oppId}`, { stage: newStage });
+    // Le déplacement est optimiste : s'il est refusé, la carte revient d'où
+    // elle vient tout de suite, pas au prochain rechargement.
+    if (r?.__failed) { setOpps(avant); return; }
+    load();
   };
 
   const handleDelete = async (opp) => {
     if (!(await confirm({ title: `Supprimer l'opportunité "${opp.client_name}" ?`, confirmLabel: 'Supprimer' }))) return;
-    await fetch(`/api/formation-opportunities/${opp.id}`, { method: 'DELETE' });
+    const r = await api.del(`/api/formation-opportunities/${opp.id}`);
+    if (r?.__failed) return;
     load();
   };
 

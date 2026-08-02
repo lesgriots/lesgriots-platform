@@ -87,6 +87,28 @@ export async function rendreDocumentSession(db, type, sessionId, options = {}) {
   `).get(sessionId);
   if (!s) throw new Error('Session introuvable.');
 
+  /*
+   * Un acte chiffré à zéro ne part pas tout seul.
+   *
+   * Convention, devis et facture lisent `tarif` avec un `|| 0` qui transforme
+   * une donnée absente en montant nul. Le document sortait « 0,00 € », avec
+   * son numéro officiel, et partait chez le client ou chez l'OPCO sans que
+   * rien ne l'ait signalé. Un prix manquant et un prix nul ne sont pas la
+   * même chose : le premier est un oubli, le second une décision.
+   *
+   * On refuse donc, en disant où corriger. `options.force` produit quand même
+   * un document de travail, exactement comme le programme incomplet.
+   */
+  const CHIFFRES = new Set(['convention', 'devis', 'facture']);
+  if (CHIFFRES.has(type) && !options.force && !(Number(s.tarif) > 0)) {
+    const e = new Error(
+      `Le tarif de cette session n'est pas renseigné : le document sortirait à 0,00 €. `
+      + `Saisis le prix dans Configuration puis Dates et prix, ou demande un document de travail.`,
+    );
+    e.code = 'TARIF_ABSENT';
+    throw e;
+  }
+
   const valeurs = fabrique.valeurs(db, s, options);
   const dossier = await fs.mkdtemp(path.join(os.tmpdir(), 'doc-'));
   try {

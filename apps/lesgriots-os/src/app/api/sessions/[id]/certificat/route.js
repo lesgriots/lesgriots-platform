@@ -3,6 +3,7 @@ import { execFileSync } from 'child_process';
 import path from 'path';
 import { getDb } from '@/lib/db.mjs';
 import { withGuard } from '@/lib/api-guard';
+import { lireObjectifs } from '@/lib/objectifs.mjs';
 
 /**
  * GET /api/sessions/:id/certificat?apprenant_id=xxx
@@ -47,8 +48,25 @@ async function _GET(request, { params }) {
     const settings = {};
     settingsRows.forEach(r => { settings[r.key] = r.value; });
 
-    let objectives = [];
-    try { objectives = JSON.parse(session.objectives || '[]'); } catch { objectives = []; }
+    // Le champ accepte du JSON comme du texte tapé à la main. Ne lire que le
+    // JSON produisait un document sans un seul objectif, sans le dire.
+    const objectives = lireObjectifs(session.objectives);
+
+    /*
+     * Un document à « 0 heure » ne vaut rien, et coûte cher.
+     *
+     * C'est la pièce que l'OPCO lit pour payer et que l'auditeur regarde pour
+     * vérifier la réalisation. Sortie avec une durée nulle, elle est refusée
+     * en aval, mais rien ici ne l'avait signalé. Mieux vaut un refus net,
+     * qui dit où corriger, qu'un PDF officiel qui se fera retoquer.
+     */
+    const heures = Number(session.duration_hours) || 0;
+    if (!heures) {
+      return NextResponse.json({
+        error: 'Durée de la formation absente : le document sortirait à 0 heure. '
+             + 'Renseigne la durée sur la fiche programme, puis relance.',
+      }, { status: 422 });
+    }
 
     const payload = {
       logoPath: path.join(process.cwd(), 'public/branding/griotheque-logo-ink.png'),
@@ -59,7 +77,7 @@ async function _GET(request, { params }) {
       formationObjectives: objectives,
       startDate: session.start_date || '',
       endDate: session.end_date || '',
-      durationHours: session.duration_hours || 0,
+      durationHours: heures,
       location: session.adresse || session.location || '',
       formationModality: (session.modality || session.formation_modality || 'presentiel')
         .replace('presentiel', 'Presentiel').replace('distanciel', 'Distanciel').replace('hybride', 'Hybride'),
