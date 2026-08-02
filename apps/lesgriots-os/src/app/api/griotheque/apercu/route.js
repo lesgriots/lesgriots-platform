@@ -88,7 +88,10 @@ async function _GET(request) {
 
     const terminees = db.prepare(`
       SELECT s.id, s.session_name, s.start_date, f.title AS formation_titre,
-             (SELECT COUNT(*) FROM emargements e WHERE e.session_id = s.id) AS nb_emarg,
+             -- Signé, pas préparé : la ligne existe dès l'inscription, la
+             -- coche n'existe que si quelqu'un l'a posée.
+             (SELECT COUNT(*) FROM emargements e
+              WHERE e.session_id = s.id AND (e.matin = 1 OR e.apres_midi = 1)) AS nb_emarg,
              (SELECT COUNT(*) FROM evaluations v WHERE v.session_id = s.id AND v.type='satisfaction') AS nb_satis
       FROM sessions s LEFT JOIN formations f ON f.id = s.formation_id
       WHERE s.end_date <> '' AND s.end_date < ?

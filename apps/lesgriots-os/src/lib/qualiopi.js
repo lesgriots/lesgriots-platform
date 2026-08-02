@@ -85,10 +85,24 @@ export function computeQualiopiStatus(db) {
     JOIN evaluations e ON e.session_id = s.id AND e.type = 'acquis'
     WHERE s.status = 'completed'
   `).get().c;
+  /*
+   * Une ligne d'émargement n'est pas une présence.
+   *
+   * À chaque inscription, l'OS pré-crée une ligne par apprenant et par journée,
+   * matin et après-midi à zéro : le tableau est prêt à être rempli. Le contrôle
+   * vérifiait l'existence de ces lignes, donc il était vrai dès le premier
+   * inscrit. Une session terminée sans une seule signature comptait comme
+   * conforme, et le tableau de bord affichait un indicateur 9 au vert devant
+   * un dossier vide.
+   *
+   * On compte désormais ce qui a été signé : une demi-journée cochée dans le
+   * tableau, ou une signature déposée par un apprenant depuis son espace.
+   */
   const sessAvecEmargement = db.prepare(`
     SELECT COUNT(DISTINCT s.id) as c FROM sessions s
     WHERE s.status = 'completed'
-      AND (EXISTS (SELECT 1 FROM emargements em WHERE em.session_id = s.id)
+      AND (EXISTS (SELECT 1 FROM emargements em
+                   WHERE em.session_id = s.id AND (em.matin = 1 OR em.apres_midi = 1))
         OR EXISTS (SELECT 1 FROM signatures sg WHERE sg.session_id = s.id))
   `).get().c;
   const sessAvecSatisfaction = db.prepare(`

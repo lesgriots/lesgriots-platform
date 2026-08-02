@@ -143,8 +143,11 @@ function _GET() {
         SELECT COUNT(*) as cnt FROM inscriptions WHERE session_id = ? AND status != 'annule'
       `).get(s.id)?.cnt || 0;
       if (!inscritsCount) continue;
+      // Signées, pas préparées : sinon l'alerte « émargements manquants »
+      // est éteinte le jour même où elle devrait sonner.
       const emargsToday = db.prepare(`
-        SELECT COUNT(*) as cnt FROM emargements WHERE session_id = ? AND date = ?
+        SELECT COUNT(*) as cnt FROM emargements
+        WHERE session_id = ? AND date = ? AND (matin = 1 OR apres_midi = 1)
       `).get(s.id, today)?.cnt || 0;
       if (emargsToday < inscritsCount) emargementMissing += (inscritsCount - emargsToday);
     }

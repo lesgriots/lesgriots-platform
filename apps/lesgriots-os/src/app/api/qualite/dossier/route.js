@@ -51,7 +51,10 @@ function assembler(db) {
     SELECT s.id, s.session_name, s.start_date, s.end_date, s.status,
            s.formateur_name, f.title AS formation_titre,
            (SELECT COUNT(*) FROM inscriptions i WHERE i.session_id = s.id)  AS nb_inscrits,
-           (SELECT COUNT(*) FROM emargements e WHERE e.session_id = s.id)   AS nb_emargements,
+           -- Le dossier d'audit compte des présences signées, pas des lignes
+           -- préparées : elles existent dès l'inscription.
+           (SELECT COUNT(*) FROM emargements e
+            WHERE e.session_id = s.id AND (e.matin = 1 OR e.apres_midi = 1)) AS nb_emargements,
            (SELECT COUNT(*) FROM evaluations v WHERE v.session_id = s.id)   AS nb_evaluations,
            (SELECT COUNT(*) FROM evaluations v WHERE v.session_id = s.id AND v.type = 'satisfaction') AS nb_satisfaction,
            (SELECT ROUND(AVG(v.score), 2) FROM evaluations v WHERE v.session_id = s.id AND v.type = 'satisfaction' AND v.score IS NOT NULL) AS note_satisfaction

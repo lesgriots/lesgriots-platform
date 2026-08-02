@@ -40,7 +40,9 @@ async function _GET() {
       SELECT COUNT(*) AS n FROM sessions s
       WHERE s.end_date <> '' AND s.end_date < ?
         AND (
-          (SELECT COUNT(*) FROM emargements e WHERE e.session_id = s.id) = 0
+          -- Signé, pas seulement préparé : la ligne existe dès l'inscription.
+          (SELECT COUNT(*) FROM emargements e
+           WHERE e.session_id = s.id AND (e.matin = 1 OR e.apres_midi = 1)) = 0
           OR (SELECT COUNT(*) FROM evaluations v WHERE v.session_id = s.id AND v.type='satisfaction') = 0
         )
     `).get(auj).n;
