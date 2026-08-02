@@ -199,6 +199,19 @@
   /* Courbe unique de la maquette. --ease reste en place pour l'existant. */
   --ease-da:       cubic-bezier(0.2, 0.7, 0.3, 1);
 
+  /* Le rail de navigation.
+     La maquette du menu introduit un corail que la maison n'avait pas. Il ne
+     remplace pas l'or : il le libère. L'or dit « ici, une décision à prendre »
+     partout dans l'application ; s'il disait aussi « vous êtes ici » dans le
+     menu, il ne dirait plus rien nulle part. Le corail ne sert qu'au rail. */
+  --rail-actif:        #F2542D;
+  --rail-actif-clair:  #FA6D48;
+  --rail-survol:       #FA8A6B;
+  --rail-survol-fond:  rgba(242, 84, 45, 0.16);
+  --rail-lueur:        0 8px 20px rgba(242, 84, 45, 0.34), 0 0 0 5px rgba(242, 84, 45, 0.22);
+  --rail-fond:         #16140F;
+
+
   /* Variantes claires des statuts, pour les dégradés de segments.
      La maquette éclaircit chaque statut de quelques points pour le haut
      du dégradé : sans ces trois valeurs, un segment coloré doit inventer
@@ -348,6 +361,19 @@ html[data-theme="light"] {
 
   /* Courbe unique de la maquette. --ease reste en place pour l'existant. */
   --ease-da:       cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* Le rail de navigation.
+     La maquette du menu introduit un corail que la maison n'avait pas. Il ne
+     remplace pas l'or : il le libère. L'or dit « ici, une décision à prendre »
+     partout dans l'application ; s'il disait aussi « vous êtes ici » dans le
+     menu, il ne dirait plus rien nulle part. Le corail ne sert qu'au rail. */
+  --rail-actif:        #F2542D;
+  --rail-actif-clair:  #FA6D48;
+  --rail-survol:       #FA8A6B;
+  --rail-survol-fond:  rgba(242, 84, 45, 0.16);
+  --rail-lueur:        0 8px 20px rgba(242, 84, 45, 0.34), 0 0 0 5px rgba(242, 84, 45, 0.22);
+  --rail-fond:         #16140F;
+
 
   /* Variantes claires des statuts, pour les dégradés de segments.
      La maquette éclaircit chaque statut de quelques points pour le haut

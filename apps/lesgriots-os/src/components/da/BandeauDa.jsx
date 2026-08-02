@@ -244,3 +244,35 @@ export function Icone({ nom, taille = 15, style }) {
     </svg>
   );
 }
+
+/**
+ * Les icônes du rail, reprises de la maquette du menu.
+ *
+ * Deux tracés chacune, là où les icônes d'écran n'en ont qu'un : à 26 et 29
+ * pixels elles peuvent porter un détail que les icônes de 15 ne supportent
+ * pas. C'est pour cela qu'elles ont leur propre jeu plutôt que d'agrandir
+ * les autres, qui deviendraient maigres.
+ */
+export const CHEMINS_RAIL = {
+  pilotage: ['M2.6 12.2a5.4 5.4 0 1 1 10.8 0', 'M8.6 11.4 11.2 6.6M4.5 6.4l.7.7M8 4.4v1M11.5 6.4l-.7.7M9.1 12.2a1.1 1.1 0 1 1-2.2 0 1.1 1.1 0 0 1 2.2 0Z'],
+  commercial: ['M11.6 4.2a4.6 4.6 0 1 0 0 7.6', 'M3 6.6h6.4M3 9.4h5.4M13.8 3.4a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0ZM13.8 12.6a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0Z'],
+  sessions: ['M2.2 2.9h11.6a.9.9 0 0 1 .9.9v6.1a.9.9 0 0 1-.9.9H2.2a.9.9 0 0 1-.9-.9V3.8a.9.9 0 0 1 .9-.9Z', 'M8 5.1 11 6.4 8 7.7 5 6.4 8 5.1ZM6.3 7v1.1c0 .5.8.9 1.7.9s1.7-.4 1.7-.9V7M4 13.4h8'],
+  bibliotheque: ['M4.4 4.2a.95.95 0 1 1-1.9 0 .95.95 0 0 1 1.9 0ZM8.95 4.2a.95.95 0 1 1-1.9 0 .95.95 0 0 1 1.9 0ZM13.5 4.2a.95.95 0 1 1-1.9 0 .95.95 0 0 1 1.9 0ZM4.4 8a.95.95 0 1 1-1.9 0 .95.95 0 0 1 1.9 0ZM8.95 8a.95.95 0 1 1-1.9 0 .95.95 0 0 1 1.9 0Z', 'M13.5 8a.95.95 0 1 1-1.9 0 .95.95 0 0 1 1.9 0ZM4.4 11.8a.95.95 0 1 1-1.9 0 .95.95 0 0 1 1.9 0ZM8.95 11.8a.95.95 0 1 1-1.9 0 .95.95 0 0 1 1.9 0ZM13.5 11.8a.95.95 0 1 1-1.9 0 .95.95 0 0 1 1.9 0Z'],
+  rapports: ['M3.4 3v10.4h10.8', 'M5.4 10.6 7.9 8.6l2.3 1.3 3.1-3.9M8.9 8.4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM11.3 9.9a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM14.3 5.9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z'],
+  donnees: ['M5.2 6.7a1.9 1.9 0 1 0 0-3.8 1.9 1.9 0 0 0 0 3.8ZM1.8 12.9c0-2.1 1.5-3.4 3.4-3.4', 'M9.2 4.6h1.5M12.4 4.6h1.6M9.2 8.4h4.8M9.2 11.6h3.4'],
+  configuration: ['M8 10.1a2.1 2.1 0 1 0 0-4.2 2.1 2.1 0 0 0 0 4.2Z', 'M12.9 9.4a5.1 5.1 0 0 0 0-2.8l1.3-1L13 3.4l-1.5.5a5.1 5.1 0 0 0-2.4-1.4L8.8 1H7.2l-.3 1.5a5.1 5.1 0 0 0-2.4 1.4L3 3.4 1.8 5.6l1.3 1a5.1 5.1 0 0 0 0 2.8l-1.3 1L3 12.6l1.5-.5a5.1 5.1 0 0 0 2.4 1.4l.3 1.5h1.6l.3-1.5a5.1 5.1 0 0 0 2.4-1.4l1.5.5 1.2-2.2z'],
+  aide: ['M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12Z', 'M6.4 6.2a1.7 1.7 0 1 1 2.3 1.6c-.5.2-.7.6-.7 1.1M8 11.3h.01'],
+};
+
+export function IconeRail({ nom, taille = 26, trait = 1.1 }) {
+  const paire = CHEMINS_RAIL[nom];
+  if (!paire) return null;
+  return (
+    <svg aria-hidden="true" focusable="false" width={taille} height={taille} viewBox="0 0 16 16"
+      fill="none" stroke="currentColor" strokeWidth={trait}
+      strokeLinecap="round" strokeLinejoin="round">
+      <path d={paire[0]} />
+      <path d={paire[1]} />
+    </svg>
+  );
+}

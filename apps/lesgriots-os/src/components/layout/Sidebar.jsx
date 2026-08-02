@@ -1,10 +1,11 @@
 'use client';
 import { usePathname } from 'next/navigation';
 import { estGriotheque } from './ThemeSection';
-import { NAV, RAIL_SECTIONS } from '@/lib/menu';
+import { NAV } from '@/lib/menu';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useMediaQuery } from '@/components/ui';
+import RailGriotheque from './RailGriotheque';
 
 // ── Logo LES GRIOTS (inline, hérite de currentColor → s'adapte encre/papier) ──
 const Wordmark = ({ height = 22 }) => (
@@ -435,180 +436,7 @@ function ClassicSidebar() {
  * contextuel, puis lien direct vers l'écran concerné.
  */
 
-function GriothequeSidebar() {
-  const pathname = usePathname() || '/apercu';
-  const [ouvert, setOuvert] = useState(null);
-  const [compact, setCompact] = useState(false);
-  const isMobile = useMediaQuery('(max-width: 767px)');
-  const isCondensed = compact || isMobile;
-  const railWidth = isCondensed ? (isMobile ? 60 : 76) : 248;
-  const isActiveLink = (href) => {
-    const [targetPath] = href.split('?');
-    return pathname === targetPath || pathname.startsWith(`${targetPath}/`);
-  };
-  const sectionActive = RAIL_SECTIONS.find((section) => section.links.some(
-    (link) => link.href && isActiveLink(link.href),
-  ));
-
-  useEffect(() => {
-    const fermer = (event) => { if (event.key === 'Escape') setOuvert(null); };
-    window.addEventListener('keydown', fermer);
-    return () => window.removeEventListener('keydown', fermer);
-  }, []);
-
-  const section = RAIL_SECTIONS.find((item) => item.id === ouvert);
-  const railStyle = {
-    width: railWidth,
-    minWidth: railWidth,
-    height: '100vh',
-    position: 'sticky', top: 0, zIndex: 80,
-    // Le rail reprend le socle visuel de l'OS : encre chaude + signature
-    // jaune. Les panneaux conservent, eux, les couleurs de la page courante.
-    background: '#171613',
-    display: 'flex', flexDirection: 'column', alignItems: isCondensed ? 'center' : 'stretch',
-    overflowY: 'auto',
-    boxShadow: 'inset -1px 0 0 rgba(255,255,255,.18)',
-  };
-
-  return (
-    <aside aria-label="Navigation principale de La Griothèque" style={railStyle}>
-      {isCondensed ? (
-        <>
-          <Link
-            href="/apercu"
-            aria-label="La Griothèque — vue d'ensemble"
-            onClick={() => setOuvert(null)}
-            style={{ width: 52, minHeight: 44, margin: '14px 0 20px', padding: '0 3px', display: 'grid', placeItems: 'center', textDecoration: 'none' }}
-          >
-            <img src="/branding/griotheque-wordmark-paper.svg" alt="LA GRIOTHÈQUE" style={{ width: '100%', height: 'auto', display: 'block' }} />
-          </Link>
-
-          <nav aria-label="Rubriques" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7, width: '100%' }}>
-            {RAIL_SECTIONS.map((item) => {
-              const selected = ouvert === item.id;
-              const active = sectionActive?.id === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  aria-label={item.label}
-                  aria-expanded={selected}
-                  title={item.label}
-                  onClick={() => setOuvert((current) => current === item.id ? null : item.id)}
-                  style={{
-                    width: isMobile ? 52 : 62, height: isMobile ? 52 : 62,
-                    border: 'none', cursor: 'pointer', color: selected || active ? 'var(--gold-ink)' : '#CBC7BC',
-                    display: 'grid', placeItems: 'center', position: 'relative',
-                    background: selected || active ? 'var(--gold)' : 'transparent',
-                    borderRadius: selected || active ? '50%' : 14,
-                    boxShadow: selected ? '0 0 0 8px var(--gold-soft)' : 'none',
-                    transition: 'background 150ms var(--ease), box-shadow 150ms var(--ease)',
-                  }}
-                >
-                  <span style={{ transform: 'scale(1.28)', display: 'grid', placeItems: 'center' }}>{icons[item.icon]}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </>
-      ) : (
-        <>
-          <div style={{ padding: '25px 20px 18px', borderBottom: '1px solid rgba(255,255,255,.09)' }}>
-            <Link href="/apercu" aria-label="La Griothèque — vue d'ensemble" onClick={() => setOuvert(null)} style={{ display: 'block', textDecoration: 'none' }}>
-              <img src="/branding/griotheque-wordmark-paper.svg" alt="LA GRIOTHÈQUE" style={{ width: '100%', maxWidth: 174, height: 'auto', display: 'block' }} />
-            </Link>
-            <p style={{ margin: '11px 0 0', color: '#89857B', fontSize: 10, fontWeight: 700, letterSpacing: '.18em', lineHeight: 1.55 }}>OS · ORGANISME DE FORMATION</p>
-          </div>
-
-          <nav aria-label="Rubriques" style={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%', padding: '14px 11px 18px' }}>
-            {RAIL_SECTIONS.map((item) => {
-              const selected = ouvert === item.id;
-              const active = sectionActive?.id === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  aria-expanded={selected}
-                  onClick={() => setOuvert((current) => current === item.id ? null : item.id)}
-                  style={{
-                    width: '100%', minHeight: 43, padding: '0 12px', border: 'none', borderLeft: active || selected ? '3px solid #FFCA00' : '3px solid transparent',
-                    cursor: 'pointer', color: active || selected ? '#FFCA00' : '#E4E0D8', background: active || selected ? 'rgba(255,204,0,.11)' : 'transparent',
-                    borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left',
-                    fontSize: 14, fontWeight: 650, transition: 'all .18s ease',
-                  }}
-                >
-                  <span>{item.label}</span>
-                  <span aria-hidden="true" style={{ color: active || selected ? '#FFCA00' : '#89857B', fontSize: 18, fontWeight: 400 }}>{selected ? '−' : '›'}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </>
-      )}
-
-      {!isMobile && (
-        <button type="button" onClick={() => { setCompact((current) => !current); setOuvert(null); }}
-          aria-label={isCondensed ? 'Développer le menu' : 'Réduire le menu'} title={isCondensed ? 'Développer le menu' : 'Réduire le menu'}
-          style={{ margin: 'auto 11px 8px', minHeight: 40, padding: isCondensed ? 0 : '0 12px', border: '1px solid rgba(255,255,255,.14)', borderRadius: 8, cursor: 'pointer', color: '#CBC7BC', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 650 }}>
-          {isCondensed ? 'Développer' : 'Réduire le menu'}
-        </button>
-      )}
-
-      <Link href="/appareil" title="Aide, accès et appareils" aria-label="Aide, accès et appareils"
-        style={{ margin: isCondensed ? '0 0 16px' : '0 11px 16px', color: '#CBC7BC', display: 'flex', alignItems: 'center', justifyContent: 'center', width: isCondensed ? 48 : 'auto', minHeight: 40, padding: isCondensed ? 0 : '0 12px', textDecoration: 'none', borderRadius: 8, fontSize: 13, fontWeight: 650 }}>
-        {isCondensed ? <span style={{ fontSize: 25, fontWeight: 700 }}>?</span> : 'Aide & ressources'}
-      </Link>
-
-      {section && (
-        <div
-          role="dialog"
-          aria-label={section.label}
-          style={{
-            position: 'fixed', top: isMobile ? 12 : 18, left: isMobile ? 70 : railWidth + 16,
-            zIndex: 100, width: isMobile ? 'min(390px, calc(100vw - 82px))' : `min(390px, calc(100vw - ${railWidth + 30}px))`, maxHeight: 'calc(100dvh - 36px)',
-            overflowY: 'auto', background: 'var(--surface)', color: 'var(--text)', borderRadius: 22,
-            boxShadow: 'var(--shadow-lg)', border: '1px solid var(--border)',
-          }}
-        >
-          <div style={{
-            padding: '20px 24px', borderRadius: '21px 21px 0 0', color: 'var(--gold-ink)',
-            background: 'var(--gold)', fontSize: 16,
-            fontWeight: 800, letterSpacing: '.015em', textTransform: 'uppercase',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          }}>
-            {section.label}
-            <button type="button" onClick={() => setOuvert(null)} aria-label="Fermer le menu" style={{ border: 0, background: 'transparent', color: 'var(--gold-ink)', fontSize: 24, lineHeight: 1, cursor: 'pointer', padding: 0 }}>×</button>
-          </div>
-          <div style={{ padding: '13px 16px 18px' }}>
-            {section.links.map((link, index) => {
-              if (link.divider) {
-                return <div key={`divider-${index}`} style={{ height: 1, background: 'var(--border)', margin: '9px 2px' }} />;
-              }
-              const active = isActiveLink(link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setOuvert(null)}
-                  style={{
-                    display: 'block', padding: '13px 14px', borderRadius: 12,
-                    color: 'var(--text)', textDecoration: 'none', fontSize: 16, fontWeight: 650,
-                    background: active ? 'var(--gold-soft)' : 'transparent',
-                  }}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-            {section.footer && <p style={{ margin: '12px 14px 4px', color: 'var(--text-3)', fontSize: 12.5, lineHeight: 1.5 }}>{section.footer}</p>}
-          </div>
-        </div>
-      )}
-    </aside>
-  );
-}
-
 export default function Sidebar() {
   const pathname = usePathname();
-  return estGriotheque(pathname || '') ? <GriothequeSidebar /> : <ClassicSidebar />;
+  return estGriotheque(pathname || '') ? <RailGriotheque /> : <ClassicSidebar />;
 }
