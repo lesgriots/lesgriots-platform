@@ -31,20 +31,44 @@ tels quels dans un nouveau projet Next.
     src/components/layout/Sidebar.jsx   l'ancien menu, celui des deux mondes
     src/lib/constants.js                disciplines, catégories de dépenses, phases
 
-## Ce qui est resté dans l'OS de la Griothèque
+## Une seule base, et c'est voulu
 
-Les routes d'API et la base de données. `/api/projects`, `/api/tasks`,
+Les écrans sont partis, les données restent. `/api/projects`, `/api/tasks`,
 `/api/providers`, `/api/cockpit`, `/api/treasury` et leurs voisines répondent
-encore, et les tables sont intactes : rien n'a été effacé, seuls les écrans
-sont partis. C'est volontaire. Séparer les données demande de décider ce qui
-appartient à qui, et la table `clients` par exemple sert aux deux métiers :
-c'est elle que la Griothèque affiche sous le nom d'« entreprises ».
+encore, et les tables sont intactes.
+
+Ce n'est pas un reste à nettoyer, c'est la décision du 2 août 2026 : **on ne
+sépare pas les données.** Le Studio OS ne sera pas un troisième silo, ce sera
+le poste de pilotage de la maison entière. Les chiffres de la Griothèque
+doivent y remonter, au même titre que ceux de l'agence et de la production :
+un seul chiffre d'affaires, une seule trésorerie, une seule vue de ce que vaut
+l'année.
+
+D'où l'architecture visée :
+
+    lesgriots.db          une base, celle d'aujourd'hui
+      ├── app.lagriotheque.com   l'outil de l'organisme de formation : on y
+      │                          travaille, on y produit les documents, on y
+      │                          suit les apprenants
+      └── le Studio OS           le poste de pilotage : il lit, il agrège, il
+                                 compare les trois piliers
+
+La table `clients` illustre pourquoi cela tient debout : c'est la même que la
+Griothèque affiche sous le nom d'« entreprises ». Une entreprise qui fait
+former ses équipes aujourd'hui peut devenir un client d'agence demain, et
+personne n'a envie de la saisir deux fois.
 
 ## Pour relancer le projet
 
 1. `npx create-next-app` à côté, même version de Next que l'OS.
-2. Copier `src/` par-dessus, plus `src/components/ui`, `src/lib/menu.js` et
-   `src/styles/` récupérés depuis `apps/lesgriots-os`.
-3. Décider du sort des données : soit le nouveau projet interroge l'API de
-   l'OS, soit on sépare les tables. Le premier chemin est plus rapide, le
-   second plus propre.
+2. Copier `src/` par-dessus, plus `src/components/ui` et `src/styles/`
+   récupérés depuis `apps/lesgriots-os`.
+3. Pointer sur la même base : `src/lib/db.mjs` de l'OS, même fichier SQLite.
+   Attention, SQLite en WAL supporte plusieurs lecteurs mais un seul
+   écrivain à la fois ; le Studio OS lira beaucoup et écrira peu, ça passe.
+   Si un jour les deux écrivent fort, c'est le moment de passer à Postgres,
+   pas de couper la base en deux.
+4. Ce que le Studio OS devra demander à la Griothèque : le chiffre d'affaires
+   par session et par mois, les encaissements, le prévisionnel des sessions
+   signées mais non démarrées. Ces chiffres existent déjà en base ; c'est la
+   vue qui manque, pas la donnée.
