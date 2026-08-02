@@ -189,6 +189,30 @@ export async function POST(request, { params }) {
       `).run(randomUUID(), link.session_id, finalApprenantId, signerRole, day, period, signaturePng, safeName, ip);
     }
 
+    /*
+     * La signature fait foi, la feuille de présence suit.
+     *
+     * Cette route n'écrivait que dans `signatures`. L'espace apprenant, lui,
+     * écrit dans les deux tables. Deux chemins pour le même geste, deux
+     * résultats : une session pouvait afficher douze signatures dans la table
+     * des preuves et zéro présence dans le tableau du cockpit, celui qu'on
+     * imprime pour l'auditeur.
+     *
+     * Un intervenant qui signe ne coche rien : la feuille compte les
+     * présences des apprenants, sa signature à lui est une preuve distincte.
+     */
+    if (finalApprenantId && signerRole !== 'formateur' && signerRole !== 'intervenant') {
+      const colonne = period === 'matin' ? 'matin' : 'apres_midi';
+      const ligne = db.prepare('SELECT id FROM emargements WHERE session_id = ? AND apprenant_id = ? AND date = ?')
+        .get(link.session_id, finalApprenantId, day);
+      if (ligne) {
+        db.prepare(`UPDATE emargements SET ${colonne} = 1 WHERE id = ?`).run(ligne.id);
+      } else {
+        db.prepare(`INSERT INTO emargements (id, session_id, apprenant_id, date, ${colonne}) VALUES (?, ?, ?, ?, 1)`)
+          .run(randomUUID(), link.session_id, finalApprenantId, day);
+      }
+    }
+
     return NextResponse.json({ ok: true, date: day, period, signerRole }, { status: 201 });
   } catch (err) {
     console.error('[public/emargement] POST', err);
