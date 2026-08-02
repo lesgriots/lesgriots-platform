@@ -18,9 +18,20 @@ import { QUESTIONNAIRE_TYPES } from '@/lib/questionnaires';
  * GET /api/sessions/:id/links — liste les liens de la session.
  */
 
+/*
+ * Une seule page publique, /p/<jeton>, et elle sert les deux usages : elle
+ * lit le jeton, découvre ce qu'il ouvre, et affiche l'émargement ou le
+ * questionnaire.
+ *
+ * Cette table promettait /p/emargement/<jeton> et /p/questionnaire/<jeton>.
+ * Ces routes n'ont jamais existé : les deux rendaient un 404. Le bouton
+ * disait « lien créé et copié », l'apprenant tombait sur une page d'erreur,
+ * et rien nulle part ne le signalait. Quatre liens de questionnaire avaient
+ * déjà été émis dans le vide.
+ */
 const PUBLIC_PATH = {
-  emargement: (token) => `/p/emargement/${token}`,
-  questionnaire: (token) => `/p/questionnaire/${token}`,
+  emargement: (token) => `/p/${token}`,
+  questionnaire: (token) => `/p/${token}`,
 };
 
 function withUrl(link) {

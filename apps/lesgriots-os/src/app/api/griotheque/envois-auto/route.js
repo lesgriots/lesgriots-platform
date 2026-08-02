@@ -116,7 +116,11 @@ function aRelancer(db, session_id, template_key) {
         WHERE e.template_key = ?
           AND e.contexte_id = i.session_id
           AND e.destinataire = a.email
-          AND e.statut IN ('envoye', 'simule')
+          -- Seul un envoi réel compte. Une simulation, journalisée tant que
+          -- le SMTP n'est pas configuré, marquait le destinataire comme servi :
+          -- le jour où l'envoi devenait réel, la convocation ne partait plus
+          -- jamais. Elle était brûlée sans avoir été lue par personne.
+          AND e.statut = 'envoye'
           -- Un e-mail de test envoyé à soi-même ne vaut pas envoi réel.
           AND COALESCE(e.contexte_type, '') <> 'test'
       )
@@ -185,11 +189,13 @@ async function _POST(request) {
             body: JSON.stringify({ session_id: s.id, template_key: c.template, apprenant_ids: cibles.map((x) => x.id) }),
           });
           const d = await r.json().catch(() => ({}));
-          trace.envoyes = Number(d.envoyes || 0) + Number(d.simules || 0);
+          trace.envoyes = Number(d.envoyes || 0);
+          trace.simules = Number(d.simules || 0);
           trace.echecs = Number(d.echecs || 0);
           rapport.envoyes += trace.envoyes;
           rapport.campagnes[c.cle].envoyes += trace.envoyes;
 
+          // Le drapeau « convocation envoyée » ne se lève que sur un envoi réel.
           if (c.cle === 'convocation' && trace.envoyes) {
             const marquer = db.prepare('UPDATE inscriptions SET convocation_sent = 1 WHERE session_id = ? AND apprenant_id = ?');
             for (const x of cibles) { try { marquer.run(s.id, x.id); } catch (e) { console.error('[envois-auto]', e.message); } }
