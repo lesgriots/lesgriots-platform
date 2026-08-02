@@ -159,9 +159,7 @@ export default function TopBar({ title, subtitle, right = null }) {
         fetch('/api/apprenants').then(r => r.json()),
       ]).then(([data, formations, sessions, apprenants]) => {
         setSearchData({
-          projects: data.projects || [],
           clients: data.clients || [],
-          providers: data.providers || [],
           formations: Array.isArray(formations) ? formations : [],
           sessions: Array.isArray(sessions) ? sessions : [],
           apprenants: Array.isArray(apprenants) ? apprenants : [],
@@ -176,21 +174,10 @@ export default function TopBar({ title, subtitle, right = null }) {
     const q = searchQuery.toLowerCase();
     const r = [];
 
-    for (const p of searchData.projects) {
-      if ((p.name || '').toLowerCase().includes(q) || (p.code || '').toLowerCase().includes(q) || (p.client || '').toLowerCase().includes(q)) {
-        r.push({ type: 'project', id: p.id, title: p.name, sub: p.code, href: '/projects' });
-      }
-    }
     for (const c of searchData.clients) {
       const name = c.company || `${c.first_name} ${c.last_name}`;
       if (name.toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q)) {
         r.push({ type: 'client', id: c.id, title: name, sub: c.email, href: `/entreprises/${c.id}` });
-      }
-    }
-    for (const p of searchData.providers) {
-      const name = `${p.first_name || ''} ${p.last_name || p.name || ''}`.trim();
-      if (name.toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q)) {
-        r.push({ type: 'provider', id: p.id, title: name, sub: p.category, href: '/providers' });
       }
     }
     for (const f of searchData.formations) {

@@ -1,17 +1,22 @@
 'use client';
 import '@/styles/tokens.css';
-import Sidebar from '@/components/layout/Sidebar';
+import RailGriotheque from '@/components/layout/RailGriotheque';
 import { ToastProvider, ConfirmProvider } from '@/components/ui';
-import QuickAddJournal from '@/components/QuickAddJournal';
 import CommandPalette from '@/components/CommandPalette';
-import { PinnedProvider, default as PinnedBar } from '@/components/PinnedBar';
 import ThemeSection from '@/components/layout/ThemeSection';
 
+/**
+ * Le cadre commun de tous les écrans de l’organisme de formation.
+ *
+ * Il portait aussi la barre des projets épinglés et le journal rapide ⌘J :
+ * deux outils d’agence, partis avec le Studio. Sidebar.jsx aiguillait entre le
+ * rail de la Griothèque et le menu du Studio ; il n’y a plus qu’un monde, donc
+ * plus d’aiguillage.
+ */
 export default function DashboardLayout({ children }) {
   return (
     <ToastProvider>
       <ConfirmProvider>
-      <PinnedProvider>
         <div style={{
           display: 'flex',
           minHeight: '100vh',
@@ -20,20 +25,17 @@ export default function DashboardLayout({ children }) {
           color: 'var(--text)',
         }}>
           <ThemeSection />
-          <Sidebar />
+          <RailGriotheque />
           <main style={{
             flex: 1,
             minWidth: 0,
             display: 'flex',
             flexDirection: 'column',
           }}>
-            <PinnedBar />
             {children}
           </main>
-          <QuickAddJournal />
           <CommandPalette />
         </div>
-      </PinnedProvider>
       </ConfirmProvider>
     </ToastProvider>
   );

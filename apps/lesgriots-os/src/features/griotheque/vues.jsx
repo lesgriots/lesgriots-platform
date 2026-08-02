@@ -10900,7 +10900,7 @@ export default function AncienneApplicationFormations() {
           })}
         </nav>
 
-        {/* Back to OS link at bottom */}
+        {/* Retour à la vue d'ensemble (la racine y mène désormais) */}
         <div style={{ padding: '12px 14px', borderTop: '1px solid var(--border)' }}>
           <a href="/" style={{
             display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
@@ -10909,7 +10909,7 @@ export default function AncienneApplicationFormations() {
           }}
             onMouseEnter={e => { e.currentTarget.style.color = 'var(--gold-deep)'; e.currentTarget.style.background = 'var(--hover)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-3)'; e.currentTarget.style.background = 'transparent'; }}>
-            <span>←</span> Retour à l'OS
+            <span>←</span> Retour à la vue d’ensemble
           </a>
         </div>
       </aside>

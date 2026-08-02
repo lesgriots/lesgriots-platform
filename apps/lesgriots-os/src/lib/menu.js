@@ -5,73 +5,10 @@
  * qui s'en sert pour dire où l'on se trouve. Tant que les deux lisaient des
  * tables séparées, l'un pouvait mentir sans que l'autre le sache.
  *
- * `RAIL_SECTIONS` est le menu de l'organisme de formation (app.lagriotheque.com).
- * `NAV` est celui du Studio, conservé pour l'autre monde.
+ * `RAIL_SECTIONS` est le menu de l'organisme de formation, et le seul depuis
+ * que le Studio est parti dans apps/studio-os : `NAV`, son menu à lui, est
+ * parti avec. Un menu sans écran derrière ne rend service à personne.
  */
-
-export const NAV = [
-  { type: 'item', href: '/', icon: 'home', label: 'Accueil', monde: 'studio' },
-  // Sur le domaine Griothèque, l'accueil est la vue d'ensemble de l'OF.
-  { type: 'item', href: '/apercu', icon: 'home', label: 'Vue d’ensemble', monde: 'griotheque' },
-
-  // ── Monde Griothèque : le découpage de l'ancienne interface, conservé ──
-  { href: '/agenda', icon: 'sessions', label: 'Agenda', monde: 'griotheque' },
-  { type: 'divider', label: 'COMMERCIAL', monde: 'griotheque' },
-  { href: '/pipeline-formations', icon: 'pipeline', label: 'Pipeline', monde: 'griotheque', compteur: 'pipeline' },
-  { href: '/facturation', icon: 'pricing', label: 'Facturation', monde: 'griotheque' },
-  { type: 'divider', label: 'CATALOGUE', monde: 'griotheque' },
-  {
-    type: 'groupe', label: 'Bibliothèque', icon: 'formations', monde: 'griotheque',
-    enfants: [
-      { href: '/catalogue', icon: 'formations', label: 'Programmes' },
-      { href: '/catalogue?vue=blocs', icon: 'projects', label: 'Blocs pédagogiques' },
-      { href: '/catalogue?vue=evaluations', icon: 'formations', label: 'Évaluations' },
-      { href: '/catalogue?vue=programmes-archives', icon: 'projects', label: 'Programmes archivés' },
-      { href: '/catalogue?vue=blocs-archives', icon: 'projects', label: 'Blocs archivés' },
-    ],
-  },
-  { href: '/sessions-list', icon: 'sessions', label: 'Sessions', monde: 'griotheque', compteur: 'sessions' },
-  { href: '/evaluations', icon: 'formations', label: 'Résultats évaluations', monde: 'griotheque' },
-  { href: '/espace-apprenant', icon: 'apprenants', label: 'Espace apprenant', monde: 'griotheque' },
-  { href: '/emails', icon: 'clients', label: 'Emails', monde: 'griotheque' },
-  // Une seule entrée « Données », qui se déplie sur les six répertoires.
-  {
-    type: 'groupe', label: 'Données', icon: 'donnees', monde: 'griotheque',
-    enfants: [
-      { href: '/apprenants', icon: 'apprenants', label: 'Apprenants', compteur: 'apprenants' },
-      { href: '/entreprises', icon: 'clients', label: 'Entreprises' },
-      { href: '/financeurs', icon: 'finances', label: 'Financeurs' },
-      { href: '/intervenants', icon: 'team', label: 'Intervenants' },
-      // « Clients » vivait ici en double d'« Entreprises » : deux écrans sur
-      // la même table, l'un hérité de l'agence, l'autre avec les fiches de
-      // l'organisme. Entreprises fait foi. L'écran agence reste accessible
-      // depuis le monde Studio, où il a son propre usage.
-      { href: '/lieux', icon: 'projects', label: 'Lieux' },
-    ],
-  },
-  { type: 'divider', label: 'QUALITÉ', monde: 'griotheque' },
-  { href: '/bpf', icon: 'finances', label: 'Bilan (BPF)', monde: 'griotheque' },
-  { href: '/qualite', icon: 'settings', label: 'Qualité', monde: 'griotheque' },
-  { href: '/organisme', icon: 'organisme', label: 'Organisme', monde: 'griotheque', compteur: 'conformite', ton: 'alerte' },
-
-  // ── Monde Studio : inchangé ──
-  { type: 'divider', label: 'GRIOTHÈQUE', monde: 'studio' },
-  { href: '/formations', icon: 'formations', label: 'Formations', monde: 'studio' },
-  { type: 'divider', label: 'STUDIO', monde: 'studio' },
-  { href: '/projects', icon: 'projects', label: 'Projets', monde: 'studio' },
-  { href: '/pipeline', icon: 'pipeline', label: 'Pipeline', monde: 'studio' },
-  { type: 'divider', label: 'ARGENT', monde: 'studio' },
-  { href: '/finances', icon: 'finances', label: 'Finances', monde: 'studio' },
-  { href: '/pricing', icon: 'pricing', label: 'TJM', monde: 'studio' },
-
-  { type: 'divider', label: 'RÉPERTOIRE', monde: 'studio' },
-  { href: '/clients', icon: 'clients', label: 'Clients', monde: 'studio' },
-  { href: '/providers', icon: 'providers', label: 'Prestataires', monde: 'studio' },
-  { href: '/team', icon: 'team', label: 'Équipe', monde: 'studio' },
-  { type: 'spacer' },
-  { href: '/parametres-formation', icon: 'settings', label: 'Paramètres', monde: 'griotheque' },
-  { href: '/settings', icon: 'settings', label: 'Réglages' },
-];
 
 export const RAIL_SECTIONS = [
   {

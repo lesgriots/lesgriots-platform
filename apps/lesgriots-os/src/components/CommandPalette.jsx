@@ -4,8 +4,13 @@
  *
  * - Ouverture : ⌘K ou Ctrl+K
  * - Navigation : ↑ ↓ Enter Esc
- * - Recherche cross-entités : projets, clients, prestataires, formations, sessions, apprenants
- * - Actions rapides : Nouveau projet, Nouveau client, Nouvelle session
+ * - Recherche : entreprises, formations, sessions, apprenants
+ * - Actions rapides : les écrans de l'organisme de formation
+ *
+ * Les projets, les prestataires et le pipeline de l'agence ont quitté cet OS
+ * avec le Studio (apps/studio-os). Les entreprises, elles, restent : c'est la
+ * même table que les « clients » d'hier, vue depuis la formation, et la fiche
+ * s'ouvre désormais sur /entreprises.
  */
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -13,9 +18,7 @@ import { Badge } from '@/components/ui';
 import { sessionHref } from '@/lib/navigation';
 
 const ENTITY_ICON = {
-  project: '📁',
   client: '🏢',
-  provider: '👤',
   formation: '📚',
   session: '📅',
   apprenant: '🎓',
@@ -23,36 +26,25 @@ const ENTITY_ICON = {
 };
 
 const ENTITY_LABEL = {
-  project: 'Projet',
-  client: 'Client',
-  provider: 'Prestataire',
+  client: 'Entreprise',
   formation: 'Formation',
   session: 'Session',
   apprenant: 'Apprenant',
   action: 'Action',
 };
 
-const STAGE_LABEL = {
-  lead: 'Lead', need: 'Besoin', qualify: 'Qualif', quoted: 'Devis',
-  negotiation: 'Négo', signed: 'Signé', active: 'Actif',
-  delivered: 'Livré', paid: 'Payé', lost: 'Perdu',
-};
-
-const PILLAR_LABEL = {
-  STUDIO: 'Studio', PROD: 'Production', GRIOTHEQUE: 'Griothèque',
-};
-
 // Actions disponibles partout
 const ACTIONS = [
-  { id: 'act-pipeline',   label: 'Aller au Pipeline',     href: '/pipeline',     icon: '⊞' },
-  { id: 'act-projects',   label: 'Voir les Projets',      href: '/projects',     icon: '📁' },
-  { id: 'act-entreprises', label: 'Voir les Entreprises', href: '/entreprises',  icon: '🏢' },
-  { id: 'act-clients',    label: 'Voir les Clients (agence)', href: '/clients', icon: '🏢' },
-  { id: 'act-providers',  label: 'Voir les Prestataires', href: '/providers',    icon: '👤' },
-  { id: 'act-tasks',      label: 'Voir les Tâches',       href: '/tasks',        icon: '✓' },
-  { id: 'act-sessions',   label: 'Voir les Sessions',     href: '/sessions-list', icon: '📅' },
-  { id: 'act-apprenants', label: 'Voir les Apprenants',   href: '/apprenants',   icon: '🎓' },
-  { id: 'act-settings',   label: 'Réglages',              href: '/settings',     icon: '⚙' },
+  { id: 'act-apercu',      label: "Vue d'ensemble",        href: '/apercu',           icon: '◎' },
+  { id: 'act-tunnel',      label: 'Tunnel de vente',       href: '/pipeline-formations', icon: '⊞' },
+  { id: 'act-inscriptions', label: 'Inscriptions à suivre', href: '/inscriptions',    icon: '✎' },
+  { id: 'act-sessions',    label: 'Voir les sessions',     href: '/sessions-list',    icon: '📅' },
+  { id: 'act-agenda',      label: 'Agenda',                href: '/agenda',           icon: '🕑' },
+  { id: 'act-apprenants',  label: 'Voir les apprenants',   href: '/apprenants',       icon: '🎓' },
+  { id: 'act-entreprises', label: 'Voir les entreprises',  href: '/entreprises',      icon: '🏢' },
+  { id: 'act-catalogue',   label: 'Catalogue de formations', href: '/catalogue',      icon: '📚' },
+  { id: 'act-qualite',     label: 'Qualiopi',              href: '/qualite',          icon: '✓' },
+  { id: 'act-settings',    label: 'Réglages',              href: '/settings',         icon: '⚙' },
 ];
 
 function fuzzyScore(haystack, needle) {
@@ -76,7 +68,7 @@ function fuzzyScore(haystack, needle) {
 export default function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [data, setData] = useState({ projects: [], clients: [], providers: [], formations: [], sessions: [], apprenants: [] });
+  const [data, setData] = useState({ clients: [], formations: [], sessions: [], apprenants: [] });
   const [loading, setLoading] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState(0);
   const inputRef = useRef(null);
@@ -101,7 +93,7 @@ export default function CommandPalette() {
 
   // Charger la data à la 1ère ouverture
   useEffect(() => {
-    if (!open || (data.projects.length > 0)) return;
+    if (!open || (data.formations.length > 0)) return;
     setLoading(true);
     Promise.all([
       fetch('/api/data').then(r => r.json()).catch((e) => { console.warn('[CommandPalette] /api/data échoué :', e); return {}; }),
@@ -110,16 +102,14 @@ export default function CommandPalette() {
       fetch('/api/apprenants').then(r => r.json()).catch((e) => { console.warn('[CommandPalette] /api/apprenants échoué :', e); return []; }),
     ]).then(([all, formations, sessions, apprenants]) => {
       setData({
-        projects: all.projects || [],
         clients: all.clients || [],
-        providers: all.providers || [],
         formations: Array.isArray(formations) ? formations : [],
         sessions: Array.isArray(sessions) ? sessions : [],
         apprenants: Array.isArray(apprenants) ? apprenants : [],
       });
       setLoading(false);
     }).catch((e) => { console.warn('[CommandPalette] Chargement échoué :', e); setLoading(false); });
-  }, [open, data.projects.length]);
+  }, [open, data.formations.length]);
 
   // Focus input à l'ouverture
   useEffect(() => {
@@ -135,23 +125,6 @@ export default function CommandPalette() {
     const q = query.trim();
     const out = [];
 
-    // Projects
-    for (const p of data.projects) {
-      const s = Math.max(
-        fuzzyScore(p.code, q) * 1.5,
-        fuzzyScore(p.name, q),
-        fuzzyScore(p.client_company || p.client, q) * 0.5,
-      );
-      if (s > 0) out.push({
-        id: 'p_' + p.id,
-        type: 'project',
-        title: p.name || '—',
-        subtitle: `${p.code || ''} · ${PILLAR_LABEL[p.pillar] || p.pillar} · ${STAGE_LABEL[p.stage] || p.stage}`,
-        href: `/projects/${p.id}`,
-        meta: p.pillar,
-        score: s,
-      });
-    }
     // Clients
     for (const c of data.clients) {
       const name = c.company || `${c.firstName || ''} ${c.lastName || ''}`.trim();
@@ -164,23 +137,7 @@ export default function CommandPalette() {
         type: 'client',
         title: name || '—',
         subtitle: c.email || c.phone || '',
-        href: `/clients/${c.id}`,
-        score: s,
-      });
-    }
-    // Providers
-    for (const p of data.providers) {
-      const name = p.name || `${p.firstName || ''} ${p.lastName || ''}`.trim();
-      const s = Math.max(
-        fuzzyScore(name, q),
-        fuzzyScore(p.category, q) * 0.5,
-      );
-      if (s > 0) out.push({
-        id: 'pr_' + p.id,
-        type: 'provider',
-        title: name || '—',
-        subtitle: p.category || '',
-        href: `/providers`, // pas encore de page detail
+        href: `/entreprises/${c.id}`,
         score: s,
       });
     }

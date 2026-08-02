@@ -41,6 +41,7 @@ PRECEDENT="$APP/.next.precedent"
 # Les routes de fumée. Sans session, l'OS répond 307 vers /login : c'est un
 # succès, cela prouve que la route s'est exécutée. Ce qu'on traque, c'est le 500.
 ROUTES=(
+  /
   /login
   /apercu
   /pipeline-formations
