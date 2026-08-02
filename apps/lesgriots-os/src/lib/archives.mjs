@@ -30,13 +30,25 @@ export const MIMES = Object.fromEntries(Object.entries(TYPES).map(([m, e]) => [e
 
 export const TAILLE_MAX = 25 * 1024 * 1024;
 
-/** Les pièces qu'on accepte de recevoir signées, et comment on les nomme. */
+/**
+ * Les pièces qu'on accepte de recevoir, et comment on les nomme.
+ *
+ * La facture est arrivée dans cette liste sans être une pièce « signée » :
+ * elle n'est pas produite ici. Les factures sortent de Henrri, et c'est très
+ * bien ainsi, parce que la facturation électronique obligatoire demandera une
+ * plateforme agréée, pas un générateur de PDF maison.
+ *
+ * Mais le dossier d'une session doit contenir sa facture : l'OPCO la réclame,
+ * l'auditeur la cherche, et le BPF la compte. On l'accueille donc, sans
+ * prétendre l'avoir émise.
+ */
 export const CATEGORIES = {
   emargement: 'Feuille d’émargement signée',
   convention: 'Convention signée',
   devis: 'Devis signé',
   contrat: 'Contrat signé',
   attestation: 'Attestation signée',
+  facture: 'Facture',
 };
 
 export const dossier = (sessionId) => path.join(RACINE, String(sessionId || ''));

@@ -803,7 +803,20 @@ export default function SessionCockpit({ sessionId }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginTop: 14, flexWrap: 'wrap' }}><div style={{ color: 'var(--text-2)', fontSize: 13, fontWeight: 700 }}>{answers.length}/{inscriptions.length} réponse(s) · {definition.model}</div><div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>{definition.automated && <span style={{ ...muted, color: questionnaireLinks.length ? 'var(--success)' : 'var(--text-3)' }}>{questionnaireLinks.filter((item) => item.apprenant_id).length}/{inscriptions.length} lien(s) individuel(s) prêt(s)</span>}<Action secondary onClick={() => { const collective = questionnaireLinks.find((item) => !item.apprenant_id); return collective ? copyLink(collective) : createLink('questionnaire', definition.questionnaireType); }}>{questionnaireLinks.some((item) => !item.apprenant_id) ? 'Copier le lien collectif' : 'Créer le lien collectif'}</Action></div></div>
       </section>;
     })}</div>;
-    if (currentSub === 'finances') return <section style={card}><h2 style={title}>Finances</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 16 }}><Metric label="Coût formation" value={`${Number(session.tarif || 0).toLocaleString('fr-FR')} €`} note="HT" /><Metric label="Total facturé" value={`${Number(session.ca_confirmed || 0).toLocaleString('fr-FR')} €`} note="HT" /><Metric label="Marge" value={`${Number(session.taux_marge || 0)} %`} note="estimation" /></div><div style={{ marginTop: 16 }}><Action onClick={() => openDocument('facture')}>Générer / mettre à jour la facture</Action></div></section>;
+    if (currentSub === 'finances') return <section style={card}><h2 style={title}>Finances</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 16 }}><Metric label="Coût formation" value={`${Number(session.tarif || 0).toLocaleString('fr-FR')} €`} note="HT" /><Metric label="Total facturé" value={`${Number(session.ca_confirmed || 0).toLocaleString('fr-FR')} €`} note="HT" /><Metric label="Marge" value={`${Number(session.taux_marge || 0)} %`} note="estimation" /></div><div style={{ marginTop: 16 }}>
+      <PiecesSignees
+        sessionId={sessionId}
+        categorie="facture"
+        titre="Factures de la session"
+        explication="Les factures sont émises depuis Henrri, pas depuis l’OS : la facturation électronique obligatoire passera par une plateforme agréée, pas par un générateur de PDF maison. Dépose ici le PDF émis, il rejoint le dossier de la session, celui que l’OPCO réclame et que l’auditeur ouvre. PDF ou photo, 25 Mo maximum."
+        libelleBouton="Déposer une facture"
+        feuilles={signeesDe('facture')}
+        onDepot={ajouterAuRegistre}
+        onRetrait={retirerDuRegistre}
+        onErreur={setNotice}
+        onVoir={(doc) => setApercu({ url: doc.fichier, titre: doc.libelle || 'Facture' })}
+      />
+    </div></section>;
     if (currentSub === 'entreprise') return <section style={card}><h2 style={title}>Espace entreprise</h2><p style={muted}>Le client entreprise pourra suivre les informations et documents de sa session depuis un espace dédié.</p><Empty>L’espace entreprise sera activé lorsque le client et ses contacts auront été renseignés pour cette session.</Empty></section>;
     return <>
       <section style={card}>

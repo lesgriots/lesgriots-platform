@@ -1,6 +1,11 @@
 /**
  * /api/sessions/:id/pieces-signees — déposer une pièce signée à la main.
  *
+ * On y dépose aussi les factures, qui ne sont pas signées mais émises
+ * ailleurs : elles sortent de Henrri, et la facturation électronique
+ * obligatoire passera par une plateforme agréée, pas par cet outil. Le dossier
+ * de session doit néanmoins les contenir.
+ *
  * Tant qu'on ne fait pas signer électroniquement, la convention, le devis et
  * la feuille d'émargement reviennent en papier. Cette route est l'endroit où
  * ils rentrent : le scan rejoint le registre de la session, daté et
@@ -86,7 +91,9 @@ async function _POST(req, { params }) {
       `/api/documents/${documentId}/fichier`,
       id,
       rang + 1,
-      `Scan déposé · ${String(fichier.name || 'sans nom').slice(0, 120)} · ${Math.round(octets.length / 1024)} Ko`,
+      // Une facture n'est pas « signée », elle est émise ailleurs. Le mot
+      // compte : c'est ce que lira l'auditeur dans le dossier.
+      `${categorie === 'facture' ? 'Facture déposée' : 'Scan déposé'} · ${String(fichier.name || 'sans nom').slice(0, 120)} · ${Math.round(octets.length / 1024)} Ko`,
     );
 
     return NextResponse.json(db.prepare('SELECT * FROM documents WHERE id = ?').get(documentId), { status: 201 });
