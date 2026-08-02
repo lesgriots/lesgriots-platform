@@ -105,13 +105,24 @@ function destinataires(db, session_id) {
   `).all(session_id);
 }
 
-function composer(db, modele, ctx, session_id, apprenant) {
-  const objet = typeof modele.subject === 'function' ? modele.subject(ctx) : String(modele.subject || '');
-  const corpsBase = typeof modele.body === 'function' ? modele.body(ctx) : String(modele.body || '');
-  const lien = lienEspace(db, session_id, apprenant.id);
+function composer(db, modele, ctx, session_id, apprenant, vars = null) {
+  const ctxPlus = vars ? { ...ctx, vars } : ctx;
+  const objet = typeof modele.subject === 'function' ? modele.subject(ctxPlus) : String(modele.subject || '');
+  const corpsBase = typeof modele.body === 'function' ? modele.body(ctxPlus) : String(modele.body || '');
+  /*
+   * Pas d'apprenant, pas de lien d'espace.
+   *
+   * `lienEspace` crée le lien s'il n'existe pas. Appelée avec un identifiant
+   * nul, elle insérait une ligne orpheline et renvoyait un lien qui ne mène
+   * à personne. Le signataire d'une convention n'est pas un apprenant : il
+   * n'a pas d'espace, et lui en promettre un serait mentir.
+   */
+  const lien = apprenant.id ? lienEspace(db, session_id, apprenant.id) : '';
   const prenom = apprenant.first_name || '';
-  const corps = corpsBase.replace(/^Bonjour,/, prenom ? `Bonjour ${prenom},` : 'Bonjour,')
-    + `\n\n———\nVOTRE ESPACE APPRENANT\nTout s'y trouve : votre programme, vos documents, l'émargement et les questionnaires.\n${lien}\n\nLien perdu ou expiré ? Demandez-en un nouveau avec votre adresse e-mail sur ${BASE}/espace\n`;
+  const pied = lien
+    ? `\n\n———\nVOTRE ESPACE APPRENANT\nTout s'y trouve : votre programme, vos documents, l'émargement et les questionnaires.\n${lien}\n\nLien perdu ou expiré ? Demandez-en un nouveau avec votre adresse e-mail sur ${BASE}/espace\n`
+    : '';
+  const corps = corpsBase.replace(/^Bonjour,/, prenom ? `Bonjour ${prenom},` : 'Bonjour,') + pied;
   // La version HTML porte la marque ; le texte reste envoyé en parallèle pour
   // les clients qui ne rendent pas le HTML.
   const html = habiller({ objet, corps: corpsBase.replace(/^Bonjour,/, prenom ? `Bonjour ${prenom},` : 'Bonjour,'), lien, organisme: organisme(db) });
@@ -212,7 +223,15 @@ async function _POST(request) {
     // `test_emails` : envoyer le message exact à soi-même avant la vraie
     // salve. C'est la seule façon de vérifier la mise en forme chez le
     // destinataire plutôt que dans un aperçu.
-    const { session_id, template_key, apprenant_ids, test_emails } = await request.json();
+    /*
+     * `destinataires_libres` : écrire à quelqu'un qui n'est pas inscrit.
+     *
+     * Une relance de signature s'adresse au signataire, pas aux apprenants.
+     * Le client d'une session INTRA n'a pas de fiche apprenant, et il ne doit
+     * surtout pas en avoir une : il ne suit pas la formation.
+     */
+    const { session_id, template_key, apprenant_ids, test_emails,
+            destinataires_libres, vars } = await request.json();
     const modele = GRIOTHEQUE_EMAIL_TEMPLATES_MAP[template_key];
     const ctx = contexte(db, session_id);
     if (!modele || !ctx) return NextResponse.json({ error: 'Session ou modèle inconnu' }, { status: 400 });
@@ -246,6 +265,31 @@ async function _POST(request) {
       }
       return NextResponse.json({
         test: true, envoyes: partis, pieces: documents.length,
+        mode: smtpConfigure() ? 'reel' : 'simulation',
+      }, { status: 201 });
+    }
+
+    if (Array.isArray(destinataires_libres) && destinataires_libres.length) {
+      let partis = 0, rates = 0;
+      for (const d of destinataires_libres) {
+        const adresse = String(d?.email || '').trim();
+        if (!adresse) { continue; }
+        // Pas de lien d'espace apprenant ici : le signataire n'en a pas, et
+        // lui en proposer un l'enverrait sur une page qui ne le concerne pas.
+        const { objet, corps, html } = composer(db, modele, ctx, session_id, { id: null, first_name: '' }, vars);
+        const r = await envoyerEmail({
+          destinataire: adresse,
+          destinataire_nom: String(d?.nom || ''),
+          objet, corps, html,
+          pieces: pieceLogo(),
+          template_key,
+          contexte_type: 'session',
+          contexte_id: session_id,
+        });
+        if (r.statut === 'envoye') partis += 1; else rates += 1;
+      }
+      return NextResponse.json({
+        envoyes: partis, simules: 0, echecs: rates, ignores: 0,
         mode: smtpConfigure() ? 'reel' : 'simulation',
       }, { status: 201 });
     }

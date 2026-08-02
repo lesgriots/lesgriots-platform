@@ -627,6 +627,59 @@ ${SIGNATURE_GRIOTHEQUE}`,
   },
 ];
 
+/*
+ * La relance de signature.
+ *
+ * Un seul modèle, deux tons. Le premier rappel suppose l'oubli et facilite le
+ * geste. Le second dit ce qui se passe si rien n'arrive, sans menacer : la
+ * place est tenue pour quelqu'un, et ce quelqu'un peut être un autre. C'est
+ * de l'organisation, pas du chantage, et ça se dit comme tel.
+ *
+ * Pas de relance de paiement dans cette liste : les factures ne sortent pas
+ * de cet outil.
+ */
+GRIOTHEQUE_EMAIL_TEMPLATES.push({
+  key: 'relance_signature',
+  label: 'Relance de signature',
+  description: 'Rappelle une pièce envoyée et non retournée signée.',
+  icon: '✍️',
+  subject: ({ formation, vars }) => (vars?.dernier
+    ? `Dernier rappel : ${vars?.piece || 'document'} — ${formation?.title || 'La Griothèque'}`
+    : `${vars?.piece || 'Document'} en attente de signature — ${formation?.title || 'La Griothèque'}`),
+  body: ({ session, formation, vars }) => {
+    const titre = formation?.title || 'votre formation';
+    const piece = vars?.piece || 'le document';
+    const debut = session?.start_date
+      ? new Date(`${String(session.start_date).slice(0, 10)}T12:00:00`).toLocaleDateString('fr-FR',
+        { day: 'numeric', month: 'long', year: 'numeric' })
+      : '';
+
+    const corps = vars?.dernier
+      ? `Bonjour,
+
+${piece.charAt(0).toUpperCase()}${piece.slice(1)} pour « ${titre} » ne nous est pas revenu signé.
+
+${debut ? `La session commence le ${debut}. ` : ''}Sans document signé, nous ne pouvons pas tenir la place plus longtemps : nous refusons des candidatures pour ces places, et il serait injuste de les garder bloquées.
+
+Ce n'est pas une menace, c'est de l'organisation. Deux façons de faire : signer, scanner et répondre à ce message, ou déposer le document depuis votre espace.
+
+Et si quelque chose bloque, un point à corriger, un accord de financement en attente, dites-le-nous : on trouve une solution.`
+      : `Bonjour,
+
+Nous vous avons transmis ${piece} pour la formation « ${titre} », et nous ne l'avons pas encore reçu signé.
+
+${debut ? `La session débute le ${debut}. ` : ''}Il s'agit probablement d'un oubli.
+
+Deux façons de faire : signer, scanner et répondre à ce message, ou déposer le document depuis votre espace.
+
+Si un point doit être corrigé avant signature, répondez-nous, nous le reprenons.`;
+
+    return `${corps}
+
+${SIGNATURE_GRIOTHEQUE}`;
+  },
+});
+
 export const GRIOTHEQUE_EMAIL_TEMPLATES_MAP = Object.fromEntries(
   GRIOTHEQUE_EMAIL_TEMPLATES.map(t => [t.key, t])
 );

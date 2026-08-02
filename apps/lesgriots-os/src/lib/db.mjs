@@ -1311,6 +1311,11 @@ function initSchema(db) {
     ["convocation_lead_days", "INTEGER DEFAULT 4"],
     ["convocation_document_template", "TEXT DEFAULT 'Modèle par défaut'"],
     ["convocation_email_template", "TEXT DEFAULT 'Modèle par défaut'"],
+    // Relance de signature : deux rappels, puis on s'arrête. Une pièce qu'on
+    // réclame trois fois n'arrivera pas à la quatrième, elle demande un appel.
+    ["signature_auto_enabled", "INTEGER DEFAULT 0"],
+    ["signature_relance_1_jours", "INTEGER DEFAULT 7"],
+    ["signature_relance_2_jours", "INTEGER DEFAULT 14"],
   ];
   for (const [col, def] of sessMigrations) {
     if (!sCols5.includes(col)) {

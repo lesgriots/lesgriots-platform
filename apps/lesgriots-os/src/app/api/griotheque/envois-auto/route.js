@@ -206,6 +206,99 @@ async function _POST(request) {
       }
     }
 
+    /*
+     * ── La relance de signature ────────────────────────────────────────
+     *
+     * Elle ne se range pas dans la boucle précédente, et c'est logique : les
+     * quatre campagnes s'adressent aux apprenants d'une session, celle-ci
+     * s'adresse à celui qui doit signer. Le destinataire n'est pas dans la
+     * liste des inscrits, il est dans le journal des e-mails.
+     *
+     * Le journal sert donc de mémoire : à qui la pièce est partie, et quand.
+     * Aucune table nouvelle, aucun état à tenir à jour, donc rien à
+     * désynchroniser.
+     *
+     * On s'arrête après deux rappels. Une pièce réclamée trois fois
+     * n'arrivera pas à la quatrième : elle demande un appel, pas un e-mail.
+     */
+    rapport.campagnes.signature = { libelle: 'Relance de signature', sessions_armees: 0, envoyes: 0 };
+
+    const PIECES = { devis: 'le devis', convention: 'la convention', contrat: 'le contrat de formation' };
+
+    for (const s of sessions) {
+      if (Number(s.signature_auto_enabled) !== 1) continue;
+      rapport.campagnes.signature.sessions_armees += 1;
+
+      const paliers = [
+        { rang: 1, jours: Number(s.signature_relance_1_jours ?? 7), dernier: false },
+        { rang: 2, jours: Number(s.signature_relance_2_jours ?? 14), dernier: true },
+      ];
+
+      for (const [categorie, libelle] of Object.entries(PIECES)) {
+        // La pièce est-elle déjà revenue signée ? Un scan archivé fait foi.
+        const signee = db.prepare(`
+          SELECT 1 FROM documents
+          WHERE contexte_type = 'session' AND contexte_id = ?
+            AND categorie = ? AND COALESCE(fichier, '') <> ''
+          LIMIT 1
+        `).get(s.id, categorie);
+        if (signee) continue;
+
+        // Quand, et à qui, la pièce est-elle partie ?
+        const envoi = db.prepare(`
+          SELECT destinataire, destinataire_nom, date(created_at) AS jour
+          FROM emails
+          WHERE template_key = ? AND contexte_type = 'session' AND contexte_id = ?
+            AND statut = 'envoye'
+          ORDER BY created_at DESC LIMIT 1
+        `).get(categorie, s.id);
+        if (!envoi?.destinataire) continue;
+
+        const depuis = -ecart(envoi.jour, aujourdhui);
+
+        for (const p of paliers) {
+          // Fenêtre d'un jour : on relance le jour dit, pas tous les jours
+          // suivants. Sans elle, un devis oublié produirait un rappel
+          // quotidien jusqu'à la fin des temps.
+          if (depuis !== p.jours) continue;
+
+          const dejaRelance = db.prepare(`
+            SELECT 1 FROM emails
+            WHERE template_key = 'relance_signature' AND contexte_id = ?
+              AND destinataire = ? AND statut = 'envoye'
+              AND COALESCE(corps, '') LIKE ?
+            LIMIT 1
+          `).get(s.id, envoi.destinataire, `%${libelle}%`);
+          if (dejaRelance) continue;
+
+          const trace = {
+            campagne: 'signature', libelle: `Relance ${p.rang} · ${libelle}`,
+            session_id: s.id, titre: s.titre, delai_configure: p.jours,
+            a_convoquer: [envoi.destinataire_nom || envoi.destinataire], envoyes: 0,
+          };
+
+          if (!simulation) {
+            const r = await fetch(`${BASE}/api/griotheque/emails`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.OS_API_KEY || '' },
+              body: JSON.stringify({
+                session_id: s.id,
+                template_key: 'relance_signature',
+                destinataires_libres: [{ email: envoi.destinataire, nom: envoi.destinataire_nom || '' }],
+                vars: { piece: libelle, dernier: p.dernier },
+              }),
+            });
+            const d = await r.json().catch(() => ({}));
+            trace.envoyes = Number(d.envoyes || 0);
+            trace.echecs = Number(d.echecs || 0);
+            rapport.envoyes += trace.envoyes;
+            rapport.campagnes.signature.envoyes += trace.envoyes;
+          }
+          rapport.traces.push(trace);
+        }
+      }
+    }
+
     console.info(`[envois-auto] ${aujourdhui} · ${rapport.envoyes} envoi(s)${simulation ? ' (simulation)' : ''}`);
     return NextResponse.json(rapport);
   } catch (e) {
