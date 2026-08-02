@@ -9,12 +9,17 @@ set -uo pipefail
 ENV_FILE=/etc/lesgriots-os.env
 BASE=${NEXTAUTH_URL:-https://app.lagriotheque.com}
 
-if [ -r "$ENV_FILE" ]; then
+# La clé vient d'abord de l'environnement : systemd la fournit via
+# EnvironmentFile, qu'il lit en root. La lecture directe du fichier reste en
+# secours, pour un lancement à la main depuis un compte qui y a accès.
+if [ -z "${OS_API_KEY:-}" ] && [ -r "$ENV_FILE" ]; then
   OS_API_KEY=$(grep -E '^OS_API_KEY=' "$ENV_FILE" | cut -d= -f2- | tr -d '"')
 fi
 
 if [ -z "${OS_API_KEY:-}" ]; then
-  echo "$(date -Is) ✗ OS_API_KEY introuvable dans $ENV_FILE — rien envoyé"
+  echo "$(date -Is) ✗ OS_API_KEY absente de l'environnement et de $ENV_FILE — rien envoyé"
+  echo "   (le service doit porter EnvironmentFile=$ENV_FILE : il tourne sous un compte"
+  echo "    qui n'a pas le droit de lire ce fichier, et c'est volontaire)"
   exit 1
 fi
 

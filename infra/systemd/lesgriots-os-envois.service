@@ -18,6 +18,12 @@ Wants=network-online.target
 Type=oneshot
 User=deployment
 WorkingDirectory=/var/www/ecosystem/production/lesgriots-platform/apps/lesgriots-os
+# Le service tourne en « deployment », qui ne peut pas lire /etc/lesgriots-os.env
+# (600 root, et c'est très bien ainsi : il contient le mot de passe SMTP).
+# systemd, lui, le lit en root avant de descendre en droits, puis passe les
+# variables au processus. Sans cette ligne, le script ne trouvait pas la clé
+# d'API et sortait en erreur — chaque matin, en silence, depuis des semaines.
+EnvironmentFile=/etc/lesgriots-os.env
 ExecStart=/var/www/ecosystem/production/lesgriots-platform/infra/scripts/envois-auto.sh
 StandardOutput=append:/var/log/lesgriots-os-envois.log
 StandardError=append:/var/log/lesgriots-os-envois.log
