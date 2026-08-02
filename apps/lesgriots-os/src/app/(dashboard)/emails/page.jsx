@@ -74,10 +74,32 @@ export default function EmailsPage() {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ session_id: session, template_key: modele, apprenant_ids: cibles }),
     });
-    const j = await r.json();
-    setResultat(r.ok
-      ? `${j.envoyes} message(s) ${j.mode === 'reel' ? 'envoyé(s)' : 'simulé(s)'}${j.ignores ? `, ${j.ignores} sans adresse` : ''}.`
-      : (j.error || 'Envoi impossible.'));
+    const j = await r.json().catch(() => ({}));
+
+    /*
+     * Le compte rendu disait « 0 message(s) simulé(s) ».
+     *
+     * L'API renvoie quatre nombres : envoyés, simulés, échecs, ignorés. L'écran
+     * n'en lisait qu'un, `envoyes`, qui vaut toujours zéro en mode simulation :
+     * le message annonçait donc zéro alors que douze messages venaient d'être
+     * composés. Et en envoi réel, dix échecs sur douze s'affichaient comme
+     * « 2 message(s) envoyé(s) », sans un mot sur les dix autres.
+     *
+     * On dit maintenant les quatre, et on nomme l'échec en premier : c'est la
+     * seule ligne qui demande une action.
+     */
+    if (!r.ok) {
+      setResultat(j.error || `Envoi impossible (erreur ${r.status}).`);
+    } else {
+      const parts = [];
+      if (j.echecs) parts.push(`${j.echecs} en échec`);
+      if (j.envoyes) parts.push(`${j.envoyes} envoyé(s)`);
+      if (j.simules) parts.push(`${j.simules} simulé(s), rien n’est parti`);
+      if (j.ignores) parts.push(`${j.ignores} sans adresse`);
+      setResultat(parts.length
+        ? `${parts.join(' · ')}.${j.echecs ? ' Le détail est dans le journal ci-dessous.' : ''}`
+        : 'Aucun destinataire à servir.');
+    }
     setEnvoi(false);
     chargerJournal();
   };
