@@ -31,11 +31,27 @@ const PUBLIC_PATHS = [
   // Pages publiques apprenants (émargement / questionnaires) — accès par token uniquement.
   // NB : '/p/' avec slash final pour ne PAS ouvrir /projects, /providers, etc.
   '/p/',
+  // L'espace entreprise, même principe : '/e/' avec slash final.
+  '/e/',
   '/api/public',
-  // La porte de l'espace apprenant : l'apprenant n'a pas de compte, il demande
-  // son lien avec son adresse. Sans cette ligne, la page renvoyait vers /login.
-  '/espace',
 ];
+
+/**
+ * Chemins publics EXACTS, et pourquoi la distinction n'est pas un détail.
+ *
+ * La liste ci-dessus se compare avec startsWith. '/espace' y figurait pour
+ * ouvrir la porte de l'espace apprenant, et ouvrait du même coup
+ * '/espace-apprenant', qui est l'écran de RÉGLAGES de cet espace, réservé à
+ * l'organisme. Le préfixe avait avalé un voisin.
+ *
+ * Les portes sont des pages précises : on les compare donc à l'identique.
+ * Même piège évité côté entreprise, où '/entreprise' aurait ouvert
+ * '/entreprises', l'annuaire interne des clients.
+ */
+const PUBLIC_EXACTS = new Set([
+  '/espace',
+  '/entreprise',
+]);
 
 const API_PREFIX = '/api/';
 
@@ -58,7 +74,7 @@ export function middleware(request) {
   }
 
   // Skip public paths
-  if (PUBLIC_PATHS.some(p => pathname.startsWith(p))) {
+  if (PUBLIC_EXACTS.has(pathname) || PUBLIC_PATHS.some(p => pathname.startsWith(p))) {
     return NextResponse.next();
   }
 

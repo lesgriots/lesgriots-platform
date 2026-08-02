@@ -49,6 +49,8 @@ ROUTES=(
   /inscriptions
   /agenda
   /catalogue
+  /espace
+  /entreprise
   /api/public/rendez-vous
 )
 

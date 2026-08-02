@@ -246,8 +246,86 @@ export default function FicheEntreprisePage() {
           </table>
         </div> : <p style={{ ...attenue, margin: 0 }}>Aucune session rattachée à cette entreprise pour le moment.</p>}
       </section>
+
+      <AccesEspace id={id} />
     </div>
   </>;
+}
+
+/**
+ * Le lien de l'espace entreprise.
+ *
+ * Ce que le client vient chercher par mail, trois fois par dossier : qui est
+ * inscrit, qui est venu, où sont les papiers. Lui donner l'adresse une fois
+ * coûte moins cher que d'y répondre trois fois, et il y trouve la présence
+ * réelle, celle qui décide du remboursement de son OPCO.
+ *
+ * Le lien est permanent : c'est ce qui le rend utilisable six mois plus tard,
+ * et c'est aussi ce qui impose de pouvoir le révoquer d'un bouton.
+ */
+function AccesEspace({ id }) {
+  const [url, setUrl] = useState('');
+  const [occupe, setOccupe] = useState(false);
+  const [copie, setCopie] = useState(false);
+
+  useEffect(() => {
+    let vivant = true;
+    fetch(`/api/clients/${id}/espace`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (vivant && d?.url) setUrl(d.url); })
+      .catch(() => {});
+    return () => { vivant = false; };
+  }, [id]);
+
+  const renouveler = async () => {
+    setOccupe(true);
+    try {
+      const r = await fetch(`/api/clients/${id}/espace`, { method: 'POST' });
+      const d = await r.json();
+      if (d?.url) { setUrl(d.url); setCopie(false); }
+    } finally { setOccupe(false); }
+  };
+
+  const copier = async () => {
+    try { await navigator.clipboard.writeText(url); setCopie(true); } catch { /* refus du navigateur */ }
+  };
+
+  return (
+    <section style={{ ...carte, marginTop: 16 }}>
+      <h2 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 800 }}>Espace entreprise</h2>
+      <p style={{ ...attenue, margin: '0 0 12px' }}>
+        L’adresse où cette entreprise retrouve seule ses salariés inscrits, leur présence
+        émargée et ses documents. Elle peut aussi la demander depuis <code>/entreprise</code>
+        {' '}avec l’e-mail de la fiche ou d’un contact.
+      </p>
+      {url ? (
+        <>
+          <div style={{
+            padding: '10px 12px', borderRadius: 8, background: 'var(--surface-2)',
+            border: '1px solid var(--border-2)', fontSize: 12.5, wordBreak: 'break-all',
+            fontFamily: 'var(--font-mono, ui-monospace), monospace', marginBottom: 10,
+          }}>{url}</div>
+          <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
+            <button type="button" onClick={copier} style={bouton(false)}>
+              {copie ? 'Copié' : 'Copier le lien'}
+            </button>
+            <a href={url} target="_blank" rel="noreferrer" style={{ ...bouton(true), textDecoration: 'none' }}>
+              Ouvrir
+            </a>
+            <button type="button" onClick={renouveler} disabled={occupe} style={bouton(true, occupe)}>
+              {occupe ? 'Renouvellement…' : 'Renouveler'}
+            </button>
+          </div>
+          <p style={{ ...attenue, margin: '10px 0 0' }}>
+            Renouveler crée une nouvelle adresse et rend l’ancienne inutilisable :
+            à faire si le lien a circulé plus loin que prévu.
+          </p>
+        </>
+      ) : (
+        <p style={{ ...attenue, margin: 0 }}>Chargement du lien…</p>
+      )}
+    </section>
+  );
 }
 
 function bouton(secondaire, desactive = false) {

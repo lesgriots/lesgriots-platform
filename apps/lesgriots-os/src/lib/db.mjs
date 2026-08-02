@@ -1806,6 +1806,40 @@ function initSchema(db) {
     CREATE UNIQUE INDEX IF NOT EXISTS idx_espace_liens_couple
       ON espace_liens(session_id, apprenant_id);
 
+    -- ── L'espace entreprise ────────────────────────────────────────────
+    --
+    -- Même mécanique que l'espace apprenant, et pour la même raison : un
+    -- service RH vient trois fois par an, il ne retiendra pas un mot de
+    -- passe. Un lien permanent qu'on lui adresse, et un lien court qu'il
+    -- se fait envoyer lui-même quand il a perdu le premier.
+    --
+    -- Le lien est attaché à l'entreprise, pas à une session : elle voit
+    -- tous ses dossiers d'un coup, ce qui est précisément ce qu'elle
+    -- demande au moment de solder un financement.
+    CREATE TABLE IF NOT EXISTS espace_entreprise_liens (
+      id TEXT PRIMARY KEY,
+      token TEXT UNIQUE NOT NULL,
+      client_id TEXT NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+      expires_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_espace_ent_liens_token ON espace_entreprise_liens(token);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_espace_ent_liens_client
+      ON espace_entreprise_liens(client_id);
+
+    CREATE TABLE IF NOT EXISTS espace_entreprise_acces (
+      id TEXT PRIMARY KEY,
+      token TEXT UNIQUE NOT NULL,
+      client_id TEXT NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+      email TEXT NOT NULL DEFAULT '',
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      ip TEXT DEFAULT ''
+    );
+    CREATE INDEX IF NOT EXISTS idx_espace_ent_acces_token ON espace_entreprise_acces(token);
+    CREATE INDEX IF NOT EXISTS idx_espace_ent_acces_email
+      ON espace_entreprise_acces(email, created_at);
+
     -- Lien public d'inscription, séparé des liens de présence/questionnaire
     -- afin de conserver la contrainte CHECK historique de public_links.
     CREATE TABLE IF NOT EXISTS session_registration_links (
