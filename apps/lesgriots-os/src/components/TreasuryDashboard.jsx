@@ -28,14 +28,27 @@ export default function TreasuryDashboard({ monthlyRecurringCosts = 0 }) {
   const [adding, setAdding] = useState(false);
   const [forecastModalOpen, setForecastModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [seuil, setSeuil] = useState(() => {
-    if (typeof window === 'undefined') return 5000;
-    return parseFloat(localStorage.getItem('treasury_seuil') || '5000');
-  });
-  const [draft, setDraft] = useState({
-    account_name: '', balance: 0,
-    snapshot_date: new Date().toISOString().slice(0, 10),
-  });
+  /*
+   * Le seuil est lu APRÈS le montage, pas dans l'initialisation de l'état.
+   *
+   * Lu à l'initialisation, le serveur rendait 5 000 et le navigateur la valeur
+   * mémorisée : deux arbres différents pour le même composant, c'est
+   * exactement l'écart d'hydratation que React signale sous le numéro 418.
+   * Le garde `typeof window` ne suffit pas, il crée le désaccord au lieu de
+   * l'éviter. useViewMode, ailleurs dans l'application, procède déjà ainsi.
+   */
+  const [seuil, setSeuil] = useState(5000);
+  useEffect(() => {
+    const garde = localStorage.getItem('treasury_seuil');
+    if (garde) setSeuil(parseFloat(garde));
+  }, []);
+  /* Même raison pour la date du jour : calculée au rendu serveur puis au rendu
+     client, elle peut tomber de part et d'autre de minuit, ou simplement d'un
+     fuseau à l'autre. On la pose après le montage. */
+  const [draft, setDraft] = useState({ account_name: '', balance: 0, snapshot_date: '' });
+  useEffect(() => {
+    setDraft((d) => (d.snapshot_date ? d : { ...d, snapshot_date: new Date().toISOString().slice(0, 10) }));
+  }, []);
 
   const load = useCallback(async () => {
     try {
