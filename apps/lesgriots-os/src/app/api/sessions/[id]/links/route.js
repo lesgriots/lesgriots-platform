@@ -19,19 +19,20 @@ import { QUESTIONNAIRE_TYPES } from '@/lib/questionnaires';
  */
 
 /*
- * Une seule page publique, /p/<jeton>, et elle sert les deux usages : elle
- * lit le jeton, découvre ce qu'il ouvre, et affiche l'émargement ou le
- * questionnaire.
+ * Chaque type de lien a sa page publique.
  *
- * Cette table promettait /p/emargement/<jeton> et /p/questionnaire/<jeton>.
- * Ces routes n'ont jamais existé : les deux rendaient un 404. Le bouton
- * disait « lien créé et copié », l'apprenant tombait sur une page d'erreur,
- * et rien nulle part ne le signalait. Quatre liens de questionnaire avaient
- * déjà été émis dans le vide.
+ * Ces deux pages n'existaient pas : les liens rendaient un 404 alors que
+ * l'API, elle, répondait depuis des semaines. Le bouton disait « lien créé
+ * et copié », l'apprenant tombait sur une erreur, et rien ne le signalait.
+ * Quatre liens de questionnaire avaient déjà été émis dans le vide.
+ *
+ * Les pages existent maintenant. Ne pas les confondre avec /p/<jeton>, qui
+ * est l'espace apprenant : il résout un jeton d'une autre table et rendrait
+ * « lien invalide » sur ceux-ci.
  */
 const PUBLIC_PATH = {
-  emargement: (token) => `/p/${token}`,
-  questionnaire: (token) => `/p/${token}`,
+  emargement: (token) => `/p/emargement/${token}`,
+  questionnaire: (token) => `/p/questionnaire/${token}`,
 };
 
 function withUrl(link) {
