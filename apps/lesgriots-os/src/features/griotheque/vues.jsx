@@ -6639,6 +6639,12 @@ export function SessionsView(param) {
                                                             children: [
                                                                 _jsx(EditableField, { label: 'Code interne', field: 'code_interne', value: sessionDetail.code_interne, placeholder: 'AF26001', mono: true }, 'cfg-code', false),
                                                                 _jsx(EditableField, { label: 'Type de session', field: 'type_session', value: sessionDetail.type_session, type: 'select', options: ['INTER', 'INTRA'] }, 'cfg-type', false),
+                                                                                        /* Le formulaire d'inscription demande-t-il qui paie ?
+                                                                                           Automatique veut dire : oui en inter, non en intra,
+                                                                                           puisqu'en intra la convention est déjà signée avec
+                                                                                           l'entreprise. On ne touche à ce réglage que pour les
+                                                                                           cas qui débordent de la règle. */
+                                                                                        _jsx(EditableField, { label: 'Demander le financement au formulaire', field: 'demander_financement', value: sessionDetail.demander_financement || 'Automatique (selon le type)', type: 'select', options: ['Automatique (selon le type)', 'Oui', 'Non'] }, 'cfg-financement', false),
                                                                 _jsx(EditableField, { label: 'Gestionnaire n°1', field: 'gestionnaire_1', value: sessionDetail.gestionnaire_1, placeholder: 'COULIBALY Moustapha' }, 'cfg-gest1', false),
                                                                 _jsx(EditableField, { label: 'Gestionnaire n°2', field: 'gestionnaire_2', value: sessionDetail.gestionnaire_2, placeholder: 'Ajouter un gestionnaire' }, 'cfg-gest2', false),
                                                                 _jsx(EditableField, { label: 'Fuseau horaire', field: 'fuseau_horaire', value: sessionDetail.fuseau_horaire, type: 'select', options: ['Europe/Paris', 'Europe/London', 'America/New_York', 'Africa/Dakar', 'Africa/Abidjan'] }, 'cfg-tz', false),

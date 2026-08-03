@@ -1,6 +1,33 @@
 'use client';
 
+/**
+ * /inscription/[token] — le formulaire public d'inscription à une session.
+ *
+ * La page ne décide de rien : elle affiche ce que le serveur compose. Trois
+ * couches lui arrivent dans l'ordre, chacune portant son `bloc` : l'identité,
+ * le financement quand la session le demande, puis les questions du
+ * programme. C'est le serveur qui sait si la session est en inter ou en
+ * intra, et c'est lui qui contrôle à nouveau les réponses à l'envoi : un
+ * formulaire de navigateur se contourne, pas une vérification côté serveur.
+ *
+ * Un champ peut porter une condition `si` : il n'apparaît que si une autre
+ * réponse l'appelle. Un champ masqué n'est jamais exigé, et sa valeur n'est
+ * pas transmise : demander son SIRET à quelqu'un qui paie de sa poche
+ * bloquerait l'inscription sur une question qu'il n'a jamais vue.
+ */
+
 import { useEffect, useState } from 'react';
+
+/** Les intertitres, dans l'ordre où les blocs arrivent. */
+const TITRES = {
+  financement: ['Qui finance cette formation', 'Ce que nous demandons ici sert à établir votre convention ou votre contrat. Rien de plus.'],
+  '': ['D’où vous partez', 'Le formateur lit ces réponses avant la session et ajuste son déroulé.'],
+};
+
+const conditionRemplie = (champ, reponses) => {
+  if (!champ?.si) return true;
+  return Array.isArray(champ.si.valeurs) && champ.si.valeurs.includes(reponses?.[champ.si.cle]);
+};
 
 const colors = {
   // Les jetons de la maison, thème papier. L'or est le #FFCA00 de la marque,
@@ -111,17 +138,51 @@ export default function InscriptionSessionPage({ params }) {
             <label>Nom *<input required autoComplete="family-name" value={form.lastName} onChange={(event) => update('lastName', event.target.value)} style={{ ...input, marginTop: 6 }} /></label>
           </div>
           <label>E-mail *<input required type="email" autoComplete="email" value={form.email} onChange={(event) => update('email', event.target.value)} style={{ ...input, marginTop: 6 }} /></label>
-          {champs.map((champ) => {
+          {champs.map((champ, index) => {
+            if (!conditionRemplie(champ, reponses)) return null;
             const valeur = reponses[champ.cle] ?? (champ.type === 'case' ? false : '');
             const poser = (v) => setReponses((c) => ({ ...c, [champ.cle]: v }));
             const etiquette = `${champ.libelle}${champ.obligatoire ? ' *' : ''}`;
+
+            // Le premier champ d'un bloc ouvre son intertitre. On le calcule
+            // ici plutôt qu'en regroupant en amont : les conditions font
+            // apparaître et disparaître des champs à chaque frappe, et un
+            // regroupement figé se désynchroniserait.
+            const bloc = champ.bloc || '';
+            const precedent = champs.slice(0, index).filter((c) => conditionRemplie(c, reponses)).pop();
+            const ouvre = TITRES[bloc] && (!precedent || (precedent.bloc || '') !== bloc);
+            const intertitre = ouvre ? (
+              <div key={`t-${bloc}`} style={{ marginTop: index ? 10 : 0 }}>
+                <div style={{
+                  fontFamily: "'Geist Mono', ui-monospace, monospace", fontSize: 10, fontWeight: 600,
+                  letterSpacing: '.16em', textTransform: 'uppercase', color: colors.muted,
+                }}>{TITRES[bloc][0]}</div>
+                <div style={{ fontSize: 13, color: colors.muted, marginTop: 4, lineHeight: 1.5 }}>{TITRES[bloc][1]}</div>
+              </div>
+            ) : null;
+
+            // Un encart n'attend rien : il prévient. Le délai de rétractation
+            // du particulier, par exemple, se dit avant la signature ou ne se
+            // dit jamais.
+            if (champ.type === 'encart') {
+              return <div key={champ.cle}>{intertitre}
+                <div style={{
+                  marginTop: 10, padding: '14px 16px', borderRadius: 11,
+                  background: '#fffdf5', border: '1px solid rgba(255,202,0,.55)',
+                }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 5 }}>{champ.libelle}</div>
+                  <div style={{ fontSize: 13, color: colors.texte2, lineHeight: 1.6 }}>{champ.aide}</div>
+                </div>
+              </div>;
+            }
+            const enrober = (contenu) => <div key={champ.cle}>{intertitre}{contenu}</div>;
             if (champ.type === 'case') {
-              return <label key={champ.cle} style={{ display: 'flex', gap: 10, alignItems: 'start', fontSize: 14, lineHeight: 1.45 }}>
+              return enrober(<label style={{ display: 'flex', gap: 10, alignItems: 'start', fontSize: 14, lineHeight: 1.45, marginTop: 10 }}>
                 <input type="checkbox" required={champ.obligatoire} checked={Boolean(valeur)} onChange={(e) => poser(e.target.checked)} style={{ marginTop: 4 }} />
                 <span>{etiquette}{champ.aide && <span style={{ display: 'block', color: colors.muted, fontSize: 13 }}>{champ.aide}</span>}</span>
-              </label>;
+              </label>);
             }
-            return <label key={champ.cle}>{etiquette}
+            return enrober(<label style={{ display: 'block', marginTop: 10 }}>{etiquette}
               {champ.aide && <span style={{ display: 'block', color: colors.muted, fontSize: 13, fontWeight: 400, marginTop: 3 }}>{champ.aide}</span>}
               {champ.type === 'liste'
                 ? <select required={champ.obligatoire} value={valeur} onChange={(e) => poser(e.target.value)} style={{ ...input, marginTop: 6 }}>
@@ -138,7 +199,7 @@ export default function InscriptionSessionPage({ params }) {
                       onChange={(e) => poser(e.target.value)}
                       style={{ ...input, marginTop: 6 }}
                     />}
-            </label>;
+            </label>);
           })}
           <label style={{ display: 'flex', gap: 10, alignItems: 'start', color: colors.muted, fontSize: 13, lineHeight: 1.45 }}><input required type="checkbox" checked={form.consent} onChange={(event) => update('consent', event.target.checked)} style={{ marginTop: 3 }} />J’accepte que La Griothèque utilise ces informations pour traiter ma demande d’inscription.</label>
           {error && <div role="alert" style={{ color: colors.error, fontSize: 14 }}>{error}</div>}

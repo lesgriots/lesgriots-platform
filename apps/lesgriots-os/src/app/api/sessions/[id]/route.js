@@ -66,6 +66,7 @@ async function _PATCH(req, { params }) {
       'diplome_vise','nom_titre_vise','formation_a_distance','lieu_formation_id'];
     allowed.push('convocation_auto_enabled','convocation_lead_days','convocation_document_template','convocation_email_template');
     allowed.push('espace_nom_public','espace_description','espace_options');
+    allowed.push('demander_financement');
     allowed.push('rappel_auto_enabled','rappel_lead_days','chaud_auto_enabled','chaud_delai_jours','froid_auto_enabled','froid_delai_jours');
 
     const updates = [];

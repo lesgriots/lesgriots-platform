@@ -1,15 +1,31 @@
 /**
  * formulaire-inscription.mjs — ce qu'on demande à quelqu'un qui s'inscrit.
  *
- * Le formulaire se définit sur le PROGRAMME, pas sur la session. Un programme
- * tourne plusieurs fois, et refaire le formulaire à chaque date est l'endroit
- * exact où les versions divergent : c'est déjà arrivé au catalogue, avec cinq
- * copies de la même formation qui ont fini par ne plus rien dire de pareil.
+ * Le formulaire se compose de trois couches, et le partage entre elles n'est
+ * pas cosmétique : c'est lui qui évite de dupliquer une fiche formation le
+ * jour où le même programme tourne en inter et en intra.
  *
- * Trois champs ne se retirent jamais : le prénom, le nom et l'adresse
- * e-mail. Ce ne sont pas des questions, c'est l'identité de la personne, et
- * l'e-mail est la clé qui rattache l'inscription à une fiche apprenant
- * existante. Tout le reste se choisit.
+ *   1. LE SOCLE. Prénom, nom, e-mail. Ce ne sont pas des questions, c'est
+ *      l'identité de la personne, et l'e-mail est la clé qui rattache
+ *      l'inscription à une fiche apprenant existante. Jamais modifiable.
+ *
+ *   2. LE FINANCEMENT. Une mécanique administrative, identique pour toutes
+ *      les formations, et c'est pourquoi elle ne se configure nulle part.
+ *      L'OS l'affiche en inter, la masque en intra : là, l'entreprise a déjà
+ *      signé la convention, et redemander le SIRET à chacun des huit
+ *      salariés revient à récolter huit réponses contradictoires sur une
+ *      question déjà tranchée.
+ *
+ *   3. LE PÉDAGOGIQUE. Le niveau de départ, l'objectif, les prérequis, les
+ *      aménagements. Là, oui, c'est propre à chaque programme : les
+ *      prérequis de DaVinci ne sont pas ceux du récit de marque. On le règle
+ *      une fois sur la fiche formation, et cela vaut pour toutes ses
+ *      sessions, inter comme intra.
+ *
+ * Un champ peut porter une condition `si` : il n'apparaît, et n'est exigé,
+ * que si une autre réponse le demande. La condition est évaluée deux fois,
+ * dans le navigateur pour l'affichage et sur le serveur pour le contrôle.
+ * Une seule des deux, et le formulaire se contourne ou se bloque à tort.
  */
 
 const texte = (v) => String(v ?? '').trim();
@@ -21,33 +37,150 @@ export const SOCLE = [
   { cle: 'email', libelle: 'Adresse e-mail', type: 'email', obligatoire: true, socle: true },
 ];
 
+export const TYPES = ['texte', 'email', 'tel', 'zone', 'liste', 'case', 'encart'];
+
+/** Les types qui n'attendent pas de réponse : ils informent, ils ne demandent rien. */
+const MUETS = new Set(['encart']);
+
+export const OPTIONS_FINANCEMENT = [
+  'Mon employeur',
+  'Un OPCO',
+  'À titre personnel',
+  'Mon Compte Formation (CPF)',
+  'France Travail',
+  'Je ne sais pas encore',
+];
+
+const PAR_ENTREPRISE = ['Mon employeur', 'Un OPCO'];
+
 /**
- * Ce qu'un formulaire propose quand personne n'a rien réglé. Ces quatre
- * questions couvrent le minimum d'une inscription en inter : joindre la
- * personne, savoir qui paie, et savoir s'il faut aménager quelque chose.
- * L'aménagement n'est pas une politesse : c'est l'indicateur 26 du
- * référentiel, et le moment de la poser est celui de l'inscription.
+ * Le bloc financement. Il n'est pas configurable, et c'est voulu : la
+ * question « qui paie » ne dépend pas du programme mais du droit. Selon la
+ * réponse, ce n'est d'ailleurs pas le même contrat qui suit, ni le même
+ * calendrier d'encaissement.
  */
-export const DEFAUT = [
-  { cle: 'phone', libelle: 'Téléphone', type: 'tel', obligatoire: false },
-  { cle: 'company', libelle: 'Entreprise ou structure', type: 'texte', obligatoire: false },
+export const BLOC_FINANCEMENT = [
   {
-    cle: 'financement',
+    cle: 'financement', bloc: 'financement',
     libelle: 'Comment cette formation sera-t-elle financée ?',
-    type: 'liste',
-    obligatoire: true,
-    options: ['À titre personnel', 'Mon employeur', 'Un OPCO', 'Mon Compte Formation (CPF)', 'France Travail', 'Je ne sais pas encore'],
+    type: 'liste', obligatoire: true, options: OPTIONS_FINANCEMENT,
+  },
+
+  // ── Employeur ou OPCO : de quoi éditer la convention et la facture ──
+  {
+    cle: 'siret', bloc: 'financement', libelle: 'SIRET de l’entreprise',
+    type: 'texte', obligatoire: true, si: { cle: 'financement', valeurs: PAR_ENTREPRISE },
+    aide: 'Quatorze chiffres. Il nous sert à rattacher votre inscription au dossier de votre entreprise.',
   },
   {
-    cle: 'amenagement',
-    libelle: 'Avez-vous besoin d’un aménagement particulier ?',
-    type: 'zone',
-    obligatoire: false,
-    aide: 'Situation de handicap, contrainte de santé, besoin matériel : dites-le-nous, nous étudions ce qui est possible.',
+    cle: 'raisonSociale', bloc: 'financement', libelle: 'Raison sociale',
+    type: 'texte', obligatoire: true, si: { cle: 'financement', valeurs: PAR_ENTREPRISE },
+  },
+  {
+    cle: 'adresseFacturation', bloc: 'financement', libelle: 'Adresse de facturation',
+    type: 'zone', obligatoire: true, si: { cle: 'financement', valeurs: PAR_ENTREPRISE },
+  },
+  {
+    cle: 'signataireNom', bloc: 'financement', libelle: 'Qui signe la convention ?',
+    type: 'texte', obligatoire: true, si: { cle: 'financement', valeurs: PAR_ENTREPRISE },
+    aide: 'La personne qui peut engager l’entreprise. Sans sa signature, la formation ne peut pas démarrer.',
+  },
+  {
+    cle: 'signataireEmail', bloc: 'financement', libelle: 'Son adresse e-mail',
+    type: 'email', obligatoire: true, si: { cle: 'financement', valeurs: PAR_ENTREPRISE },
+  },
+  {
+    cle: 'factureEmail', bloc: 'financement', libelle: 'Adresse pour la facture',
+    type: 'email', obligatoire: false, si: { cle: 'financement', valeurs: PAR_ENTREPRISE },
+    aide: 'Laissez vide si c’est la même personne.',
+  },
+  {
+    cle: 'bonCommande', bloc: 'financement', libelle: 'Numéro de bon de commande',
+    type: 'texte', obligatoire: false, si: { cle: 'financement', valeurs: PAR_ENTREPRISE },
+    aide: 'Si votre entreprise en exige un sur ses factures, nous l’y ferons figurer.',
+  },
+  {
+    cle: 'dossierOpco', bloc: 'financement', libelle: 'Numéro de dossier OPCO',
+    type: 'texte', obligatoire: false, si: { cle: 'financement', valeurs: ['Un OPCO'] },
+    aide: 'Si la demande de prise en charge est déjà déposée.',
+  },
+
+  // ── À titre personnel : ce n'est plus une convention, c'est un contrat ──
+  {
+    cle: 'adressePostale', bloc: 'financement', libelle: 'Votre adresse postale',
+    type: 'zone', obligatoire: true, si: { cle: 'financement', valeurs: ['À titre personnel'] },
+    aide: 'Obligatoire : votre contrat de formation doit vous identifier précisément.',
+  },
+  {
+    cle: 'encartRetractation', bloc: 'financement', type: 'encart',
+    si: { cle: 'financement', valeurs: ['À titre personnel'] },
+    libelle: 'Vous financez vous-même cette formation',
+    aide: 'Vous recevrez donc un contrat de formation professionnelle, et non une convention. '
+      + 'Vous disposez de dix jours après signature pour vous rétracter, sans avoir à vous justifier. '
+      + 'Aucune somme ne vous sera demandée avant la fin de ce délai, et le premier versement ne '
+      + 'dépassera pas 30 % du prix.',
+  },
+
+  // ── CPF : le dossier ne se monte pas ici ──
+  {
+    cle: 'encartCpf', bloc: 'financement', type: 'encart',
+    si: { cle: 'financement', valeurs: ['Mon Compte Formation (CPF)'] },
+    libelle: 'Les inscriptions CPF se font sur moncompteformation.gouv.fr',
+    aide: 'Nous ne pouvons pas les enregistrer ici. Envoyez tout de même ce formulaire : nous vous '
+      + 'transmettons le lien direct vers la session et nous suivons votre dossier de notre côté.',
+  },
+
+  // ── France Travail ──
+  {
+    cle: 'conseillerFT', bloc: 'financement', libelle: 'Nom de votre conseiller France Travail',
+    type: 'texte', obligatoire: false, si: { cle: 'financement', valeurs: ['France Travail'] },
+    aide: 'Pour que nous puissions faire établir l’AIF.',
+  },
+  {
+    cle: 'identifiantFT', bloc: 'financement', libelle: 'Votre identifiant France Travail',
+    type: 'texte', obligatoire: false, si: { cle: 'financement', valeurs: ['France Travail'] },
   },
 ];
 
-export const TYPES = ['texte', 'email', 'tel', 'zone', 'liste', 'case'];
+/** Les clés du bloc financement, pour ne jamais les redemander ailleurs. */
+export const CLES_FINANCEMENT = new Set(BLOC_FINANCEMENT.map((c) => c.cle));
+
+/**
+ * Ce qu'un formulaire demande quand personne n'a rien réglé.
+ *
+ * Trois questions de positionnement, et ce n'est pas du confort : en inter
+ * personne ne cadre la demande à votre place, en intra la DRH dit ce dont
+ * elle a besoin, pas où en est chacun. C'est l'analyse du besoin de
+ * l'indicateur 4, et c'est le seul moment où on peut la poser. L'aménagement,
+ * lui, est l'indicateur 26.
+ */
+export const DEFAUT = [
+  { cle: 'phone', libelle: 'Téléphone', type: 'tel', obligatoire: true,
+    aide: 'Uniquement pour vous joindre en cas d’imprévu sur la session.' },
+  {
+    cle: 'niveau', libelle: 'Où en êtes-vous sur ce sujet ?',
+    type: 'liste', obligatoire: true,
+    options: ['Je débute complètement', 'J’ai déjà pratiqué un peu, seul',
+      'Je pratique régulièrement', 'Je suis à l’aise, je viens me perfectionner'],
+  },
+  {
+    cle: 'objectif', libelle: 'Qu’est-ce que vous voulez pouvoir faire à la fin de cette formation ?',
+    type: 'zone', obligatoire: true,
+    aide: 'Deux ou trois lignes suffisent. Le formateur les lit avant la session et ajuste.',
+  },
+  { cle: 'metier', libelle: 'Quel est votre métier ou votre activité aujourd’hui ?', type: 'texte', obligatoire: false },
+  {
+    cle: 'amenagement', libelle: 'Avez-vous besoin d’un aménagement particulier ?',
+    type: 'zone', obligatoire: false,
+    aide: 'Situation de handicap, contrainte de santé, besoin matériel : dites-le-nous, nous étudions ce qui est possible.',
+  },
+  {
+    cle: 'connu_comment', libelle: 'Comment nous avez-vous connus ?',
+    type: 'liste', obligatoire: false,
+    options: ['Instagram', 'LinkedIn', 'Bouche-à-oreille', 'Recherche Google',
+      'Mon employeur', 'Un ancien stagiaire', 'Autre'],
+  },
+];
 
 /** Nettoie une définition venue du client avant de l'écrire en base. */
 export function assainir(champs) {
@@ -123,11 +256,49 @@ export function formulaireDeFormation(db, formationId) {
   }
 }
 
-/** Le formulaire complet d'une session : socle d'identité puis questions. */
+/**
+ * Demande-t-on le financement sur cette session ?
+ *
+ * Par défaut on le déduit du type : en inter oui, en intra non. Le réglage de
+ * la session tranche quand le cas déborde de la règle, et il déborde dans les
+ * deux sens : un intra dont chaque salarié monte son propre dossier, un inter
+ * entièrement préfinancé par France Travail où la question n'a plus d'objet.
+ */
+export function financementDemande(session) {
+  const choix = texte(session?.demander_financement).toLowerCase();
+  if (choix === 'oui') return true;
+  if (choix === 'non') return false;
+  return !String(session?.type_session || 'INTER').toLowerCase().includes('intra');
+}
+
+/**
+ * Le formulaire complet d'une session : identité, financement, pédagogie.
+ *
+ * Les champs du programme qui porteraient une clé du bloc financement sont
+ * écartés quand le bloc est monté. Une définition d'avant la séparation
+ * pouvait contenir sa propre question « financement » : deux questions
+ * identiques dans le même écran, et la seconde écrase la première.
+ */
 export function formulaireDeSession(db, sessionId) {
-  const s = db.prepare('SELECT formation_id FROM sessions WHERE id = ?').get(sessionId);
+  const s = db.prepare(
+    'SELECT formation_id, type_session, demander_financement FROM sessions WHERE id = ?',
+  ).get(sessionId);
   const { champs, suite, personnalise } = formulaireDeFormation(db, s?.formation_id);
-  return { champs: [...SOCLE, ...champs], suite, personnalise };
+  const financement = financementDemande(s);
+  const pedagogie = financement ? champs.filter((c) => !CLES_FINANCEMENT.has(c.cle)) : champs;
+  return {
+    champs: [...SOCLE, ...(financement ? BLOC_FINANCEMENT : []), ...pedagogie],
+    suite,
+    personnalise,
+    financement,
+  };
+}
+
+/** Une condition `si` est-elle remplie par les réponses déjà données ? */
+export function conditionRemplie(champ, reponses) {
+  if (!champ?.si) return true;
+  const valeur = reponses?.[champ.si.cle];
+  return Array.isArray(champ.si.valeurs) && champ.si.valeurs.includes(valeur);
 }
 
 /**
@@ -148,11 +319,17 @@ export function resumePositionnement(reponses) {
  * retenues et, le cas échéant, le premier manque, en toutes lettres : un
  * formulaire qui refuse sans dire quoi corriger est un formulaire qu'on
  * abandonne.
+ *
+ * Un champ dont la condition n'est pas remplie est ignoré, y compris s'il est
+ * obligatoire : exiger le SIRET de quelqu'un qui paie de sa poche bloquerait
+ * l'inscription sur une question qu'il n'a jamais vue.
  */
 export function verifierReponses(champs, brut) {
   const reponses = [];
   for (const champ of champs) {
-    if (champ.socle) continue;
+    if (champ.socle || MUETS.has(champ.type)) continue;
+    if (!conditionRemplie(champ, brut)) continue;
+
     const valeur = champ.type === 'case'
       ? Boolean(brut?.[champ.cle])
       : texte(brut?.[champ.cle]).slice(0, 2000);
@@ -164,7 +341,7 @@ export function verifierReponses(champs, brut) {
       return { erreur: `« ${champ.libelle} » : réponse inattendue.` };
     }
     if (champ.type === 'case' ? valeur : texte(valeur)) {
-      reponses.push({ cle: champ.cle, libelle: champ.libelle, valeur });
+      reponses.push({ cle: champ.cle, libelle: champ.libelle, valeur, bloc: champ.bloc || '' });
     }
   }
   return { reponses };

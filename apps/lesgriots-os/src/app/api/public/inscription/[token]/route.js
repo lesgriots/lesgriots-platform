@@ -11,6 +11,59 @@ function text(value, max = 160) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
+/**
+ * Rattacher l'inscription à une fiche entreprise, depuis le SIRET déclaré.
+ *
+ * C'est le chaînon qui manquait. Jusqu'ici le formulaire enregistrait le nom
+ * de l'entreprise en texte libre dans une colonne de la fiche apprenant, et
+ * rien ne reliait cette chaîne de caractères à la table des entreprises :
+ * l'espace entreprise ne pouvait donc jamais se remplir, et il fallait
+ * rattacher chaque apprenant à la main.
+ *
+ * Le SIRET est la bonne clé, parce que c'est la seule qui ne change pas
+ * quand quelqu'un écrit « Flag Training » un jour et « FLAG TRAINING SAS »
+ * le lendemain.
+ *
+ * Les contacts déclarés deviennent des contacts de la fiche. Ce n'est pas du
+ * zèle : c'est leur adresse qui leur ouvrira l'espace entreprise, et c'est
+ * au signataire que partira la convention.
+ */
+function rattacherEntreprise(db, { siret, raisonSociale, adresse, signataireNom, signataireEmail, factureEmail }) {
+  const chiffres = String(siret || '').replace(/\D/g, '');
+  if (chiffres.length !== 14) return null;
+
+  let client = db.prepare("SELECT id FROM clients WHERE replace(replace(siret, ' ', ''), '-', '') = ?").get(chiffres);
+  if (!client) {
+    const id = randomUUID();
+    db.prepare(`
+      INSERT INTO clients (id, company, siret, address, email)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(id, raisonSociale || 'Entreprise', chiffres, adresse || '', signataireEmail || '');
+    client = { id };
+  } else if (raisonSociale) {
+    // Une fiche créée à la volée porte parfois un nom provisoire : on le
+    // complète, on n'écrase jamais un nom déjà saisi à la main.
+    db.prepare("UPDATE clients SET company = CASE WHEN COALESCE(company, '') IN ('', 'Entreprise') THEN ? ELSE company END WHERE id = ?")
+      .run(raisonSociale, client.id);
+  }
+
+  const ajouterContact = (email, nom, role) => {
+    if (!email || !EMAIL_RE.test(email)) return;
+    const deja = db.prepare('SELECT id FROM client_contacts WHERE client_id = ? AND lower(email) = ?')
+      .get(client.id, email.toLowerCase());
+    if (deja) return;
+    const [prenom = '', ...reste] = String(nom || '').split(/\s+/);
+    db.prepare(`
+      INSERT INTO client_contacts (id, client_id, first_name, last_name, role, email)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(randomUUID(), client.id, prenom, reste.join(' '), role, email);
+  };
+  ajouterContact(signataireEmail, signataireNom, 'Signataire de la convention');
+  ajouterContact(factureEmail, '', 'Facturation');
+
+  return client.id;
+}
+
 function registrationContext(db, token) {
   const link = db.prepare(`
     SELECT * FROM session_registration_links
@@ -75,8 +128,11 @@ export async function POST(request, { params }) {
     const firstName = text(body?.firstName, 100);
     const lastName = text(body?.lastName, 100);
     const email = text(body?.email, 160).toLowerCase();
-    const phone = text(body?.phone, 40);
-    const company = text(body?.company, 160);
+    const phone = text(body?.phone, 40) || text(body?.reponses?.phone, 40);
+    // La raison sociale du bloc financement fait foi ; l'ancien champ libre
+    // « Entreprise ou structure » reste accepté, le temps que les
+    // formulaires personnalisés d'avant la séparation s'éteignent.
+    const company = text(body?.reponses?.raisonSociale, 160) || text(body?.company, 160);
 
     if (!firstName || !lastName || !EMAIL_RE.test(email)) {
       return NextResponse.json({ error: 'Prénom, nom et une adresse e-mail valide sont requis.' }, { status: 400 });
@@ -117,6 +173,33 @@ export async function POST(request, { params }) {
         VALUES (?, ?, ?, ?, ?, ?)
       `).run(learnerId, firstName, lastName, email, phone, company);
       learner = { id: learnerId, first_name: firstName, last_name: lastName, email };
+    }
+
+    /*
+     * Le rattachement à l'entreprise, avant l'inscription : si la fiche
+     * entreprise doit être créée, autant qu'elle le soit avant que quoi que
+     * ce soit d'autre ne s'écrive.
+     */
+    const rep = body?.reponses || {};
+    if (['Mon employeur', 'Un OPCO'].includes(text(rep.financement, 60))) {
+      try {
+        const clientId = rattacherEntreprise(db, {
+          siret: rep.siret,
+          raisonSociale: text(rep.raisonSociale, 160),
+          adresse: text(rep.adresseFacturation, 400),
+          signataireNom: text(rep.signataireNom, 120),
+          signataireEmail: text(rep.signataireEmail, 160).toLowerCase(),
+          factureEmail: text(rep.factureEmail, 160).toLowerCase(),
+        });
+        if (clientId) {
+          db.prepare("UPDATE apprenants SET client_id = ? WHERE id = ? AND COALESCE(client_id, '') = ''")
+            .run(clientId, learner.id);
+        }
+      } catch (e) {
+        // Une inscription ne se perd pas pour un SIRET mal saisi : on la
+        // garde, et le rattachement se fera à la main depuis la fiche.
+        console.warn('[inscription] rattachement entreprise impossible :', e.message);
+      }
     }
 
     const enrollment = enrollLearnerInSession(db, { sessionId: context.session.id, apprenantId: learner.id, session: context.session });

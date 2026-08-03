@@ -367,6 +367,12 @@ function initSchema(db) {
     ['espace_nom_public', "TEXT DEFAULT ''"],
     ['espace_description', "TEXT DEFAULT ''"],
     ['espace_options', "TEXT DEFAULT ''"],   // JSON, vide = on prend les réglages par défaut
+    // Demande-t-on le financement au formulaire d'inscription ?
+    // Vide = on déduit du type : oui en inter, non en intra. « oui » ou
+    // « non » tranchent, pour les cas qui débordent de la règle dans les
+    // deux sens : un intra dont chaque salarié monte son propre dossier, un
+    // inter entièrement préfinancé où la question n'a plus d'objet.
+    ['demander_financement', "TEXT DEFAULT ''"],
   ]) {
     if (!colsSessionsEspace.includes(nom)) db.exec(`ALTER TABLE sessions ADD COLUMN ${nom} ${type}`);
   }
