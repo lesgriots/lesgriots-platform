@@ -59,7 +59,10 @@ function urlToState(pathname) {
   if (pathname === "/about" || pathname === "/about/") {
     return { view: "about", projectId: null };
   }
-  if (pathname === "/talent" || pathname === "/talent/") {
+  // /fondateur = URL canonique (renommage 08/2026) ; /talent conservé en
+  // legacy (vieux liens) — normalisé vers /fondateur par le replaceState du mount.
+  if (pathname === "/fondateur" || pathname === "/fondateur/" ||
+      pathname === "/talent" || pathname === "/talent/") {
     return { view: "talent", projectId: null };
   }
   if (pathname === "/eco" || pathname === "/eco/") {
@@ -74,7 +77,7 @@ function urlToState(pathname) {
 function stateToUrl(view, projectId) {
   if (view === "viewer" && projectId) return `/work/${encodeURIComponent(projectId)}`;
   if (view === "about")  return "/about";
-  if (view === "talent") return "/talent";
+  if (view === "talent") return "/fondateur";
   if (view === "eco")    return "/eco";
   return "/";
 }

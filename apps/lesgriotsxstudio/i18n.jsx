@@ -34,7 +34,7 @@ const DICT = {
   // plus d'entrée HOME, le sticker assume seul ce rôle).
   "sticker.home":  { en: "HOME",      fr: "ACCUEIL" },
   "menu.work":     { en: "WORK",      fr: "PROJETS" },
-  "menu.talent":   { en: "TALENT",    fr: "TALENT" },
+  "menu.talent":   { en: "FOUNDER",   fr: "FONDATEUR" },
   "menu.about":    { en: "ABOUT",     fr: "À PROPOS" },
   "menu.eco":      { en: "ECOSYSTEM", fr: "ÉCOSYSTÈME" },
   "menu.formation":{ en: "TRAINING",  fr: "FORMATION" },
@@ -116,7 +116,7 @@ const DICT = {
   // Bio = prose narrative à la 3e personne, 2 paragraphes (background +
   // structure / reconnaissances). Sentence case pour confort de lecture
   // longue. Surchargeable via SITE_CONTENT.talent.bio dans data.jsx.
-  "talent.kicker": { en: "(02) — TALENT",            fr: "(02) — TALENT" },
+  "talent.kicker": { en: "(02) — FOUNDER",           fr: "(02) — FONDATEUR" },
   "talent.role":   { en: "CREATIVE DIRECTOR · STORYTELLER",
                      fr: "DIRECTEUR CRÉATIF · STORYTELLER" },
   "talent.bio": {
