@@ -15,7 +15,9 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import { emailHtml } from './email-html';
 
-const CID = 'logogriotheque';
+/* Exporté : c'est le mailer qui vérifie qu'un HTML réclamant ce logo part
+   bien avec lui. */
+export const CID = 'logogriotheque';
 
 let cacheLogo = null;
 

@@ -21,6 +21,7 @@
  */
 
 import { getDb } from './db.mjs';
+import { pieceLogo, CID as CID_LOGO } from './email-marque';
 import { randomUUID } from 'crypto';
 
 export function smtpConfigure() {
@@ -43,6 +44,26 @@ function emailValide(adresse) {
  *
  * @returns {{id, statut, erreur}} statut ∈ 'envoye' | 'simule' | 'echec'
  */
+/**
+ * Le logo, joint d'office quand le HTML le réclame.
+ *
+ * Le gabarit d'email porte un `<img src="cid:logogriotheque">` en tête, et
+ * l'image ne s'affiche que si la pièce jointe correspondante voyage avec le
+ * message. Or c'était à chaque appelant d'y penser : deux l'avaient fait,
+ * l'accusé de réception d'inscription et la notification à l'organisme ne
+ * l'avaient pas fait. Ces deux-là, les plus envoyés, partaient donc avec un
+ * cadre d'image vide en haut du message.
+ *
+ * On ne le laisse plus à la mémoire de personne : si le HTML appelle le
+ * logo et qu'aucune pièce ne le porte, le mailer l'ajoute. Le fichier est lu
+ * une fois et gardé en mémoire, et s'il manque, l'envoi part quand même.
+ */
+function avecLogo(html, pieces) {
+  if (!html || !html.includes(`cid:${CID_LOGO}`)) return pieces;
+  if (pieces.some((p) => p?.cid === CID_LOGO)) return pieces;
+  return [...pieceLogo(), ...pieces];
+}
+
 export async function envoyerEmail({
   destinataire,
   destinataire_nom = '',
@@ -99,7 +120,7 @@ export async function envoyerEmail({
       subject: objet,
       text: corps,
       ...(html ? { html } : {}),
-      ...(pieces.length ? { attachments: pieces } : {}),
+      ...((() => { const jointes = avecLogo(html, pieces); return jointes.length ? { attachments: jointes } : {}; })()),
     });
 
     return journaliser('envoye', '', info?.messageId || '');
