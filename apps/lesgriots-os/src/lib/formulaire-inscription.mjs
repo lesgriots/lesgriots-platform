@@ -30,14 +30,39 @@
 
 const texte = (v) => String(v ?? '').trim();
 
-/** Les champs d'identité, toujours présents, jamais modifiables. */
+/**
+ * Les champs d'identité, toujours présents, jamais modifiables.
+ *
+ * La date de naissance en fait partie, et c'est un choix. Elle sépare deux
+ * homonymes sur une feuille d'émargement, ce qui arrive plus vite qu'on ne
+ * croit ; surtout, un certificateur l'exige pour établir un parchemin. La
+ * demander partout plutôt qu'aux seules sessions certifiantes évite de
+ * courir après une date six mois plus tard, quand la personne ne répond
+ * plus aux mails.
+ */
 export const SOCLE = [
   { cle: 'firstName', libelle: 'Prénom', type: 'texte', obligatoire: true, socle: true },
   { cle: 'lastName', libelle: 'Nom', type: 'texte', obligatoire: true, socle: true },
   { cle: 'email', libelle: 'Adresse e-mail', type: 'email', obligatoire: true, socle: true },
+  { cle: 'dateNaissance', libelle: 'Date de naissance', type: 'date', obligatoire: true, socle: true },
 ];
 
-export const TYPES = ['texte', 'email', 'tel', 'zone', 'liste', 'case', 'encart'];
+export const TYPES = ['texte', 'email', 'tel', 'date', 'zone', 'liste', 'case', 'encart'];
+
+/**
+ * Une date de naissance plausible. On ne vérifie pas l'âge : un mineur en
+ * apprentissage a le droit de se former, et refuser sur un seuil arbitraire
+ * bloquerait une inscription légitime. On écarte seulement l'impossible,
+ * c'est-à-dire la faute de frappe.
+ */
+export function dateNaissancePlausible(valeur) {
+  const v = texte(valeur);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
+  const d = new Date(`${v}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return false;
+  const annee = d.getFullYear();
+  return annee >= 1900 && d <= new Date();
+}
 
 /** Les types qui n'attendent pas de réponse : ils informent, ils ne demandent rien. */
 const MUETS = new Set(['encart']);

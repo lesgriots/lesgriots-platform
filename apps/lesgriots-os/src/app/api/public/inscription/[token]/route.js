@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { getDb } from '@/lib/db.mjs';
 import { enrollLearnerInSession } from '@/lib/inscription-flow';
-import { formulaireDeSession, verifierReponses, resumePositionnement } from '@/lib/formulaire-inscription.mjs';
+import { formulaireDeSession, verifierReponses, resumePositionnement, dateNaissancePlausible } from '@/lib/formulaire-inscription.mjs';
 import { accuserInscription, prevenirOrganisme } from '@/lib/email-inscription.mjs';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -129,6 +129,7 @@ export async function POST(request, { params }) {
     const firstName = text(body?.firstName, 100);
     const lastName = text(body?.lastName, 100);
     const email = text(body?.email, 160).toLowerCase();
+    const dateNaissance = text(body?.dateNaissance, 10);
     const phone = text(body?.phone, 40) || text(body?.reponses?.phone, 40);
     // La raison sociale du bloc financement fait foi ; l'ancien champ libre
     // « Entreprise ou structure » reste accepté, le temps que les
@@ -137,6 +138,9 @@ export async function POST(request, { params }) {
 
     if (!firstName || !lastName || !EMAIL_RE.test(email)) {
       return NextResponse.json({ error: 'Prénom, nom et une adresse e-mail valide sont requis.' }, { status: 400 });
+    }
+    if (!dateNaissancePlausible(dateNaissance)) {
+      return NextResponse.json({ error: 'Une date de naissance valide est requise.' }, { status: 400 });
     }
     if (!body?.consent) return NextResponse.json({ error: 'Votre accord pour traiter cette inscription est requis.' }, { status: 400 });
 
@@ -164,15 +168,18 @@ export async function POST(request, { params }) {
 
     if (learner) {
       db.prepare(`
-        UPDATE apprenants SET first_name = ?, last_name = ?, phone = ?, company = ? WHERE id = ?
-      `).run(firstName, lastName, phone || learner.phone || '', company || learner.company || '', learner.id);
+        UPDATE apprenants SET first_name = ?, last_name = ?, phone = ?, company = ?,
+          date_naissance = CASE WHEN COALESCE(date_naissance, '') = '' THEN ? ELSE date_naissance END
+        WHERE id = ?
+      `).run(firstName, lastName, phone || learner.phone || '', company || learner.company || '',
+             dateNaissance, learner.id);
       learner = db.prepare('SELECT id, first_name, last_name, email FROM apprenants WHERE id = ?').get(learner.id);
     } else {
       const learnerId = randomUUID();
       db.prepare(`
-        INSERT INTO apprenants (id, first_name, last_name, email, phone, company)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(learnerId, firstName, lastName, email, phone, company);
+        INSERT INTO apprenants (id, first_name, last_name, email, phone, company, date_naissance)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run(learnerId, firstName, lastName, email, phone, company, dateNaissance);
       learner = { id: learnerId, first_name: firstName, last_name: lastName, email };
     }
 

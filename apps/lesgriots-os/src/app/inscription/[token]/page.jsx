@@ -51,7 +51,7 @@ export default function InscriptionSessionPage({ params }) {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', consent: false });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', dateNaissance: '', consent: false });
   // Les questions propres au programme, et les réponses qu'on y apporte.
   const [champs, setChamps] = useState([]);
   const [suite, setSuite] = useState(null);
@@ -137,7 +137,17 @@ export default function InscriptionSessionPage({ params }) {
             <label>Prénom *<input required autoComplete="given-name" value={form.firstName} onChange={(event) => update('firstName', event.target.value)} style={{ ...input, marginTop: 6 }} /></label>
             <label>Nom *<input required autoComplete="family-name" value={form.lastName} onChange={(event) => update('lastName', event.target.value)} style={{ ...input, marginTop: 6 }} /></label>
           </div>
-          <label>E-mail *<input required type="email" autoComplete="email" value={form.email} onChange={(event) => update('email', event.target.value)} style={{ ...input, marginTop: 6 }} /></label>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+            <label>E-mail *<input required type="email" autoComplete="email" value={form.email} onChange={(event) => update('email', event.target.value)} style={{ ...input, marginTop: 6 }} /></label>
+            {/* Elle sépare deux homonymes sur une feuille d'émargement, et un
+                certificateur l'exige pour établir un parchemin. La demander
+                maintenant évite de courir après six mois plus tard. */}
+            <label>Date de naissance *
+              <input required type="date" autoComplete="bday" max={new Date().toISOString().slice(0, 10)} min="1900-01-01"
+                value={form.dateNaissance} onChange={(event) => update('dateNaissance', event.target.value)}
+                style={{ ...input, marginTop: 6 }} />
+            </label>
+          </div>
           {champs.map((champ, index) => {
             if (!conditionRemplie(champ, reponses)) return null;
             const valeur = reponses[champ.cle] ?? (champ.type === 'case' ? false : '');
@@ -193,7 +203,7 @@ export default function InscriptionSessionPage({ params }) {
                   ? <textarea required={champ.obligatoire} rows={3} value={valeur} onChange={(e) => poser(e.target.value)} style={{ ...input, marginTop: 6, resize: 'vertical' }} />
                   : <input
                       required={champ.obligatoire}
-                      type={champ.type === 'email' ? 'email' : champ.type === 'tel' ? 'tel' : 'text'}
+                      type={champ.type === 'email' ? 'email' : champ.type === 'tel' ? 'tel' : champ.type === 'date' ? 'date' : 'text'}
                       autoComplete={champ.cle === 'phone' ? 'tel' : champ.cle === 'company' ? 'organization' : 'off'}
                       value={valeur}
                       onChange={(e) => poser(e.target.value)}
