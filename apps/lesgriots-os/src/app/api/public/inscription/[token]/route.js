@@ -75,6 +75,7 @@ function registrationContext(db, token) {
   }
   const session = db.prepare(`
     SELECT s.id, s.start_date, s.end_date, s.location, s.modality, s.max_participants, s.status,
+      s.client_id,
       f.title AS formation_title, f.prerequisites, s.horaire, s.adresse
     FROM sessions s
     LEFT JOIN formations f ON f.id = s.formation_id
@@ -181,6 +182,29 @@ export async function POST(request, { params }) {
      * ce soit d'autre ne s'écrive.
      */
     const rep = body?.reponses || {};
+
+    /*
+     * En intra, l'entreprise est déjà connue : c'est celle de la session.
+     *
+     * Depuis que le bloc financement ne s'affiche plus en intra, personne ne
+     * saisit plus de SIRET sur ces formulaires, et le rattachement par SIRET
+     * ne se déclenche donc jamais : les salariés arrivaient sans employeur,
+     * et l'espace entreprise restait vide pour eux. Il n'y a rien à demander,
+     * il y a à recopier ce que la session sait déjà.
+     *
+     * Une seule entreprise, sinon on ne devine pas : une session à deux
+     * clients n'apprend pas de quel côté ranger un inscrit.
+     */
+    const clientsSession = [...new Set([
+      ...db.prepare("SELECT client_id FROM session_clients WHERE session_id = ? AND COALESCE(client_id, '') <> ''")
+        .all(context.session.id).map((r) => r.client_id),
+      ...(context.session.client_id ? [context.session.client_id] : []),
+    ])];
+    if (clientsSession.length === 1) {
+      db.prepare("UPDATE apprenants SET client_id = ? WHERE id = ? AND COALESCE(client_id, '') = ''")
+        .run(clientsSession[0], learner.id);
+    }
+
     if (['Mon employeur', 'Un OPCO'].includes(text(rep.financement, 60))) {
       try {
         const clientId = rattacherEntreprise(db, {
