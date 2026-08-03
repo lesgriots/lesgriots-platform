@@ -109,8 +109,8 @@ export async function GET(request, { params }) {
     const db = getDb();
     const context = registrationContext(db, token);
     if (context.error) return NextResponse.json({ error: context.error }, { status: context.status });
-    const { champs, suite } = formulaireDeSession(db, context.session.id);
-    return NextResponse.json({ session: sessionPayload(db, context.session), champs, suite });
+    const { champs, suite, financement } = formulaireDeSession(db, context.session.id);
+    return NextResponse.json({ session: sessionPayload(db, context.session), champs, suite, financement });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Impossible de charger ce formulaire.' }, { status: 500 });
   }

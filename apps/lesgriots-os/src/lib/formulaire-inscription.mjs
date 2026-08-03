@@ -272,12 +272,23 @@ export function financementDemande(session) {
 }
 
 /**
+ * Redondants avec le bloc financement quand il est monté. « Entreprise ou
+ * structure » en texte libre reste une question honnête sur un formulaire
+ * qui ne demande pas le SIRET ; à côté de « Raison sociale », c'est la même
+ * question posée deux fois, avec deux réponses possibles.
+ */
+const REDONDANTS = new Set(['company']);
+
+/**
  * Le formulaire complet d'une session : identité, financement, pédagogie.
  *
- * Les champs du programme qui porteraient une clé du bloc financement sont
- * écartés quand le bloc est monté. Une définition d'avant la séparation
- * pouvait contenir sa propre question « financement » : deux questions
- * identiques dans le même écran, et la seconde écrase la première.
+ * Les questions du programme portant une clé du bloc financement sont
+ * écartées, que le bloc soit monté ou non, et c'est le point important. Les
+ * définitions écrites avant la séparation contiennent leur propre question
+ * « financement » : la laisser vivre, c'est la poser deux fois en inter, et
+ * la poser quand même en intra, là où l'on a justement décidé de ne plus la
+ * poser. Le financement est une mécanique de l'OS ; il n'appartient plus à
+ * la fiche formation, y compris pour les fiches d'hier.
  */
 export function formulaireDeSession(db, sessionId) {
   const s = db.prepare(
@@ -285,7 +296,8 @@ export function formulaireDeSession(db, sessionId) {
   ).get(sessionId);
   const { champs, suite, personnalise } = formulaireDeFormation(db, s?.formation_id);
   const financement = financementDemande(s);
-  const pedagogie = financement ? champs.filter((c) => !CLES_FINANCEMENT.has(c.cle)) : champs;
+  const pedagogie = champs.filter((c) => !CLES_FINANCEMENT.has(c.cle)
+    && !(financement && REDONDANTS.has(c.cle)));
   return {
     champs: [...SOCLE, ...(financement ? BLOC_FINANCEMENT : []), ...pedagogie],
     suite,
