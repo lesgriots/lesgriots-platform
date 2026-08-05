@@ -246,7 +246,7 @@ function Header({ route }) {
     >La Griothèque</a>
   );
   const utilityLinks = [
-    <a key="news" href="mailto:formations@lesgriots.com?subject=Newsletter" className="lg__menu__link">Souscrire à notre newsletter</a>,
+    <a key="news" href="#/" onClick={ouvrirNewsletter} className="lg__menu__link">Souscrire à notre newsletter</a>,
     <a key="ig" href="https://instagram.com/lagriotheque" className="lg__menu__link" target="_blank" rel="noopener">Instagram</a>,
     <a key="li" href="https://linkedin.com" className="lg__menu__link" target="_blank" rel="noopener">Linkedin</a>,
   ];
@@ -3468,7 +3468,7 @@ function Workshops() {
             </p>
             {category !== "archives" && (
               <p className="lg__cat-empty__news">
-                <a href="mailto:formations@lesgriots.com?subject=Newsletter">
+                <a href="#/" onClick={ouvrirNewsletter}>
                   Inscris-toi à la newsletter
                 </a>{" "}
                 pour être prévenu des prochains workshops.
@@ -4743,6 +4743,143 @@ function InscriptionModal({ target, kind, onClose }) {
                 </button>
                 <button type="submit" disabled={submitting} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: submitting ? "var(--ink-dim)" : "var(--accent, #ffca00)", color: "var(--ink)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", fontWeight: 600, cursor: submitting ? "wait" : "pointer" }}>
                   {submitting ? "..." : "Envoyer ma demande"}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Formulaire newsletter — ouvert depuis n'importe quel lien « newsletter » du
+// site (menu, footer, listes vides). Poste sur /api/subscribe : le contact est
+// enregistré comme lead dans le back-office ET créé dans Systeme.io avec le
+// tag « Newsletter ». Le formulaire demande prénom et nom en plus de l'email :
+// sans eux, une campagne ne peut pas s'adresser à quelqu'un par son nom.
+//
+// Ouverture : n'importe quel composant peut appeler ouvrirNewsletter() sans
+// avoir à faire descendre un état. L'App écoute l'événement et rend la modale.
+const EVENEMENT_NEWSLETTER = "lg:newsletter";
+
+function ouvrirNewsletter(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(EVENEMENT_NEWSLETTER));
+  }
+}
+
+function NewsletterModal({ onClose }) {
+  const [prenom, setPrenom] = useState("");
+  const [nom, setNom] = useState("");
+  const [email, setEmail] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [envoi, setEnvoi] = useState(false);
+  const [err, setErr] = useState("");
+  const [etape, setEtape] = useState("form");
+
+  useEffect(() => {
+    const onKey = (ev) => { if (ev.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  async function submit(ev) {
+    ev.preventDefault();
+    if (!prenom.trim() || !nom.trim()) { setErr("Prénom et nom sont demandés."); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr("Email invalide"); return; }
+    if (!consent) { setErr("Tu dois accepter pour t'inscrire."); return; }
+    setEnvoi(true);
+    setErr("");
+    const endpoint =
+      (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.subscribeEndpoint)
+      || "https://admin.lagriotheque.com/api/subscribe";
+    try {
+      const r = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          name: [prenom, nom].filter(Boolean).join(" "),
+          first_name: prenom,
+          last_name: nom,
+          source: "newsletter",
+          consent: true,
+        }),
+      });
+      if (!r.ok) throw new Error("refus " + r.status);
+      setEtape("done");
+    } catch (e) {
+      setErr("L'inscription n'a pas abouti. Réessaie dans un instant.");
+      setEnvoi(false);
+    }
+  }
+
+  const labelStyle = { display: "block", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.6, marginBottom: 6 };
+  const inputStyle = { width: "100%", padding: "10px 12px", border: "1px solid var(--ink)", background: "transparent", color: "var(--ink)", fontFamily: "var(--font-mono)", fontSize: 14, marginBottom: 14, boxSizing: "border-box" };
+
+  return (
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+    >
+      <div style={{ position: "relative", background: "var(--paper)", color: "var(--ink)", maxWidth: 480, width: "100%", padding: "32px 28px", border: "1px solid var(--ink)", fontFamily: "var(--font-mono)" }}>
+        <button onClick={onClose} aria-label="Fermer" style={{ position: "absolute", top: 0, right: 0, background: "var(--ink)", border: 0, color: "var(--paper)", padding: "10px 16px", cursor: "pointer", fontSize: 18 }}>×</button>
+
+        <p style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", opacity: 0.6, marginBottom: 10 }}>
+          Newsletter
+        </p>
+        <h3 style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 24, lineHeight: 1.15, marginBottom: 18, letterSpacing: "-0.01em" }}>
+          Reçois nos formations, workshops et ressources
+        </h3>
+
+        {etape === "done" ? (
+          <div style={{ padding: "8px 0 12px" }}>
+            <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>
+              ✓ C'est fait{prenom ? `, ${prenom}` : ""}. Tu es inscrit·e.
+            </p>
+            <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 18, opacity: 0.75 }}>
+              On écrit quand on a quelque chose à transmettre, pas pour occuper ta boîte. Désinscription en un clic.
+            </p>
+            <button onClick={onClose} style={{ padding: "10px 18px", border: "1px solid var(--ink)", background: "var(--ink)", color: "var(--paper)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", cursor: "pointer" }}>
+              Fermer
+            </button>
+          </div>
+        ) : (
+          <>
+            <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 24, opacity: 0.75 }}>
+              Les nouvelles sessions, les ressources gratuites et les événements, avant tout le monde. Pas de bruit, pas de spam.
+            </p>
+            <form onSubmit={submit}>
+              <label style={labelStyle}>Prénom *</label>
+              <input type="text" required value={prenom} onChange={(e) => setPrenom(e.target.value)} style={inputStyle} />
+
+              <label style={labelStyle}>Nom *</label>
+              <input type="text" required value={nom} onChange={(e) => setNom(e.target.value)} style={inputStyle} />
+
+              <label style={labelStyle}>Email *</label>
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ton@email.com" style={{ ...inputStyle, marginBottom: 18 }} />
+
+              <label style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12, lineHeight: 1.5, cursor: "pointer", marginBottom: 22 }}>
+                <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ marginTop: 3 }} />
+                <span>
+                  J'accepte de recevoir la newsletter de LA GRIOTHÈQUE. Désinscription en 1 clic.
+                </span>
+              </label>
+
+              {err && <p style={{ color: "#d72d2d", fontSize: 12, marginBottom: 14 }}>✗ {err}</p>}
+
+              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                <button type="button" onClick={onClose} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: "transparent", color: "var(--ink)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", cursor: "pointer" }}>
+                  Annuler
+                </button>
+                <button type="submit" disabled={envoi} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: envoi ? "var(--ink-dim)" : "var(--accent, #ffca00)", color: "var(--ink)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", fontWeight: 600, cursor: envoi ? "wait" : "pointer" }}>
+                  {envoi ? "..." : "Je m'inscris"}
                 </button>
               </div>
             </form>
@@ -6258,6 +6395,14 @@ function App() {
   // désactivé dans le BO (activePages.home === false), ou via un toggle
   // explicite activePages.launch === true. Dans ce cas, tout le site affiche
   // la page "Bientôt". L'URL /#/bientot l'affiche toujours (preview).
+  // Modale newsletter : n'importe quel lien du site l'ouvre en émettant un
+  // événement, ce qui évite de faire descendre un état jusqu'au footer.
+  const [newsletterOuverte, setNewsletterOuverte] = useState(false);
+  useEffect(() => {
+    const onOuvrir = () => setNewsletterOuverte(true);
+    window.addEventListener(EVENEMENT_NEWSLETTER, onOuvrir);
+    return () => window.removeEventListener(EVENEMENT_NEWSLETTER, onOuvrir);
+  }, []);
   const _ap = (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.activePages) || {};
   const launchMode = _ap.launch === true || _ap.home === false;
   // Le menu du footer suit les mêmes pages actives que le header : une page
@@ -6268,6 +6413,7 @@ function App() {
   return (
     <>
       <Header route={route} />
+      {newsletterOuverte && <NewsletterModal onClose={() => setNewsletterOuverte(false)} />}
       <div className="lg">
         <main>{page}</main>
         <footer className="lg__footer">
