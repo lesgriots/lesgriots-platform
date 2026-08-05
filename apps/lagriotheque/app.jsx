@@ -3381,11 +3381,10 @@ function WorkshopRow({ w, onHover }) {
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
     >
-      {!w.available && (
-        <p className="lg__row__label">
-          <span className="lg__row__soon">PROCHAINEMENT</span>
-        </p>
-      )}
+      <p className="lg__row__label">
+        WORKSHOP
+        {!w.available && <span className="lg__row__soon"> · PROCHAINEMENT</span>}
+      </p>
       <h3 className="lg__row__title" ref={titleRef}>
         <span className="lg__marquee__inner">{w.title}</span>
       </h3>
