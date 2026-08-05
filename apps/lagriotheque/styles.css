@@ -5533,18 +5533,26 @@ body.is-scrolled .lg__pagehero__brand {
      conservée). La home (.lg__hero-yard) garde son plein écran, elle. */
   .lg__pagehero { transition: height 0.5s ease, max-height 0.5s ease; }
 }
-/* Desktop : une seule hauteur de bandeau pour tout le site.
-   Les pages liste étaient bridées à 44vh et les fiches à 50vh, contre 78vh
-   partout ailleurs : le média y était rogné de moitié, et l'on voyait une
-   bande de vidéo plutôt qu'une image. Même gabarit pour tout le monde. */
+/* Desktop : hauteurs d'origine conservées. Le bloc titre + accroche reste
+   donc exactement là où il était ; ce n'était pas la hauteur le problème,
+   c'était que le bandeau ne remontait pas sous le menu et laissait du blanc
+   au-dessus. */
 @media (min-width: 601px) {
   #catalogue .lg__pagehero,
   #workshops .lg__pagehero,
   #agenda .lg__pagehero,
   #events .lg__pagehero,
-  #ressources .lg__pagehero,
-  .lg__formation .lg__pagehero { max-height: 78vh; }
+  #ressources .lg__pagehero { max-height: 44vh; }
+  /* Fiche formation, workshop, événement : un peu plus grand que les listes. */
+  .lg__formation .lg__pagehero { max-height: 50vh; }
 }
+
+/* Le média est cadré par le haut. En « cover », un bandeau plus large que
+   le 16/9 de la vidéo rogne autant en haut qu'en bas : le sujet, qui est
+   toujours dans la moitié haute, se faisait couper. On garde le haut de
+   l'image et on rogne par le bas. */
+.lg__pagehero video,
+.lg__pagehero img { object-position: center top; }
 .lg__intro__text,
 .lg__intro__sub {
   font-family: var(--font-sans);
