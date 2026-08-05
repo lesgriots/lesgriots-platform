@@ -1635,66 +1635,6 @@ function ProgramPage({ item, kind }) {
   }, [item && item.id]);
 
 
-  // Onglets style SENZA — 10 onglets qui couvrent toute l'info nécessaire à
-  // la décision d'achat. Chaque onglet rend un sous-ensemble de sections
-  // empilées. Certains onglets sont masqués dynamiquement (ex : Certification
-  // si la formation n'est ni CPF ni certifiante).
-  // Onglets différents selon le KIND :
-  // - "workshop" → vue commerciale épurée (vente pure, pas de cadre Qualiopi).
-  // - "formation" → vue complète Qualiopi (présentation, certif, indicateurs,
-  //   financement OPCO/CPF, accessibilité, etc.).
-  const TAB_GROUPS = kind === "event"
-    ? [
-        // Un événement a peu de matière : trois onglets suffisent, sinon on
-        // afficherait des sections vides.
-        { id: "presentation", label: "L’événement", sections: ["description"] },
-        { id: "infos", label: "Infos pratiques", sections: ["quand", "lieu"] },
-        { id: "contact", label: "Contact", sections: ["contact"] },
-      ]
-    : kind === "workshop"
-    ? [
-        {
-          id: "presentation",
-          label: "Description",
-          sections: ["description", "public", "prerequis"],
-        },
-        {
-          id: "programme",
-          label: "Programme",
-          sections: ["programme", "objectifs"],
-        },
-        {
-          id: "sessions",
-          label: "Sessions / Lieu",
-          sections: ["lieu", "formateur"],
-        },
-        { id: "contact", label: "Contact", sections: ["contact"] },
-      ]
-    : [
-        {
-          id: "presentation",
-          label: "Description",
-          sections: ["description", "objectifs", "public", "prerequis"],
-        },
-        {
-          id: "programme",
-          label: "Programme",
-          sections: ["programme", "duree", "moyens"],
-        },
-        { id: "formateurs", label: "Formateurs", sections: ["formateur"] },
-        {
-          id: "financement",
-          label: "Financement",
-          sections: ["tarif", "delai"],
-        },
-        {
-          id: "sessions",
-          label: "Sessions / Lieu",
-          sections: ["lieu", "accessibilite", "evaluation"],
-        },
-        { id: "faq", label: "FAQ", sections: ["faq"] },
-        { id: "contact", label: "Contact", sections: ["contact"] },
-      ];
 
   if (!item) return null;
   // Sessions associées à ce programme : on tolère les deux schémas
@@ -1722,6 +1662,22 @@ function ProgramPage({ item, kind }) {
   const evDate = isEvent ? [formatEventDate(f.date), f.time].filter(Boolean).join(" · ") : "";
   const evLieu = isEvent ? [f.location, f.city].filter(Boolean).join(" · ") : "";
   const evExterne = isEvent && /^https?:\/\//i.test(f.link || "");
+  // Réservation d’un workshop : gratuit → modale maison (le lead atterrit
+  // dans le back-office), payant → lien de paiement Stripe.
+  const boutonWorkshop = (classe) =>
+    isFree(f) ? (
+      <button type="button" className={classe} onClick={() => setShowInscription(true)}>
+        {ctaLabel(f)}
+      </button>
+    ) : (
+      <a
+        className={classe}
+        href={ctaHref(item, nextSession)}
+        {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
+        {ctaLabel(item)}
+      </a>
+    );
   // Réservation d’un événement : lien direct si billetterie externe, sinon la
   // modale maison (le lead atterrit dans le back-office).
   const boutonEvent = (classe) => {
@@ -1736,254 +1692,10 @@ function ProgramPage({ item, kind }) {
       </button>
     );
   };
-  const scrollToId = (id) => (e) => {
-    e.preventDefault();
-    const el = document.getElementById(id);
-    if (el) {
-      const isMobile = window.matchMedia("(max-width: 600px)").matches;
-      // hauteur du header + de l'anchor nav sticky
-      const offset = isMobile ? 85 + 56 : 121 + 60;
-      const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  };
-
-  // Carte de réservation COMPLÈTE — rendue deux fois : colonne de droite
-  // (desktop) et bas de page après les Avis (mobile). Le CSS n'affiche
-  // que la bonne version selon le breakpoint.
-  // compact=true (panneau mobile) : informations NÉCESSAIRES seulement —
-  // prix, badges, prochaine session, boutons d'inscription.
-  const renderReservationCard = (compact) => (
-    <React.Fragment>
-        <div className="lg__cta-mini">
-          {/* Nom de la formation tout en haut de la carte — repère pour le
-              lecteur qui scrolle dans le contenu. */}
-          <p className="lg__cta-mini__title">{f.title}</p>
-          <div className="lg__cta-mini__head">
-            <strong className="lg__cta-mini__price">
-              {isEvent ? (evDate || "Date à venir") : (f.price || "—")}
-            </strong>
-            {(isFormation || (kind === "workshop" && !isFree(f))) && (
-              <span className="lg__cta-mini__hint">
-                {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
-              </span>
-            )}
-          </div>
-          {!compact && isFormation && (f.cpf || f.rs) && (
-            <p className="lg__cta-mini__cert">
-              <span aria-hidden="true">✓</span> Formation certifiante
-              {f.rs && <span className="lg__cta-mini__cert__code"> · RS {f.rs}</span>}
-            </p>
-          )}
-          {isFormation && (f.cpf || f.opco || f.faf || f.rs) && (
-            <div className="lg__cta-mini__badges">
-              {f.cpf && <span>CPF</span>}
-              {f.opco && <span>OPCO</span>}
-              {f.faf && <span>FAF</span>}
-              {f.rs && <span>RS {f.rs}</span>}
-            </div>
-          )}
-          {(!compact || isEvent) && (
-            <ul className="lg__cta-mini__meta">
-              {f.format && <li>{f.format}</li>}
-              {isEvent && evLieu && <li>{evLieu}</li>}
-              {isEvent && f.kind && <li>{f.kind}</li>}
-              {isEvent && (evPasse || f.status) && (
-                <li>{evPasse ? "Événement passé" : f.status}</li>
-              )}
-            </ul>
-          )}
-          {upcoming.length > 0 && (
-            <div className="lg__cta-mini__sessions">
-              <p className="lg__cta-mini__sessions__label">
-                {upcoming.length > 1 ? "Prochaines sessions" : "Prochaine session"}
-              </p>
-              <ul className="lg__cta-mini__sessions__list">
-                {upcoming.slice(0, 3).map((s) => {
-                  const st = normalizeStatus(s.status);
-                  return (
-                    <li key={s.id} className="lg__cta-mini__session">
-                      <span className="lg__cta-mini__session__date">{sessionDateLabel(s)}</span>
-                      {s.location && (
-                        <span className="lg__cta-mini__session__loc">{s.location}</span>
-                      )}
-                      <span className="lg__cta-mini__session__meta">
-                        <span className={"lg__cta-mini__session__status is-" + st.class}>{st.label}</span>
-                        {s.places && st.class === "open" && (
-                          <span className="lg__cta-mini__session__places">· {s.places} place{Number(s.places) > 1 ? "s" : ""}</span>
-                        )}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-          {!compact && f.duration && (
-            <div className="lg__cta-mini__sessions">
-              <p className="lg__cta-mini__sessions__label">Durée</p>
-              <p className="lg__cta-mini__session__date">
-                {f.duration.toLowerCase().replace(/\s*·\s*/g, " / ").replace(/journée/g, "jour")}
-              </p>
-            </div>
-          )}
-          {/* Public visé : remonté dans la carte (repère immédiat « c'est pour moi »). */}
-          {!compact && (Array.isArray(f.audience_points) && f.audience_points.length) ? (
-            <div className="lg__cta-mini__sessions lg__cta-mini__audience">
-              <p className="lg__cta-mini__sessions__label">Pour qui</p>
-              <ul className="lg__cta-mini__audience__list">
-                {f.audience_points.map((pt, i) => <li key={i}>{pt}</li>)}
-              </ul>
-            </div>
-          ) : (!compact && f.audience) ? (
-            <div className="lg__cta-mini__sessions lg__cta-mini__audience">
-              <p className="lg__cta-mini__sessions__label">Pour qui</p>
-              <p className="lg__cta-mini__audience__text">{f.audience}</p>
-            </div>
-          ) : null}
-          {isEvent ? (
-            /* Événement = billetterie externe ou modale d’inscription. */
-            boutonEvent("lg__cta-mini__btn")
-          ) : kind === "workshop" ? (
-            /* Workshop = achat direct (Stripe) → « Réserver / Payer ». */
-            <a
-              className="lg__cta-mini__btn"
-              href={ctaHref(item, nextSession)}
-              {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            >
-              {ctaLabel(item)}
-            </a>
-          ) : (
-            /* Formation = pas d'achat direct → demande d'inscription (modale). */
-            <button
-              type="button"
-              className="lg__cta-mini__btn"
-              onClick={() => setShowInscription(true)}
-            >
-              Demander une inscription →
-            </button>
-          )}
-          {isFormation && f.cpf && (
-            <button
-              type="button"
-              className="lg__cta-mini__btn"
-              onClick={() => setCpfOpen(true)}
-            >
-              S'inscrire via Mon Compte Formation
-            </button>
-          )}
-          {!compact && isFormation && (
-            <button
-              type="button"
-              className="lg__cta-mini__btn lg__cta-mini__btn--ghost"
-              onClick={() => setDownloadOpen(true)}
-            >
-              ↓ Télécharger le programme
-            </button>
-          )}
-          {!compact && !isEvent && (
-            <a
-              className="lg__cta-mini__sub"
-              href="mailto:formations@lesgriots.com?subject=Devis%20OPCO%20%2F%20FAF"
-            >
-              Étudier un financement
-            </a>
-          )}
-          {!compact && isFormation && f.cpf && (
-            <div className="lg__cta-mini__cpfbox">
-              <img
-                className="lg__cta-mini__cpfbox__logo"
-                src="img/moncompteformation.webp"
-                alt="Mon Compte Formation"
-              />
-              <span className="lg__cta-mini__cpfbox__text">Finançable avec ton Compte Personnel de Formation</span>
-            </div>
-          )}
-        </div>
-    </React.Fragment>
-  );
-
-  return (
-    <section className={"lg__formation" + (kind === "workshop" ? " is-workshop" : "")}>
-      <PageHero src={(f.media && /\.(mp4|webm|mov|m4v)$/i.test(f.media.src || "")) ? f.media.src : text("home.hero_video", "img/hero.mp4")} poster={(f.media && f.media.poster) ? f.media.poster : undefined} title={f.title}>
-        {(f.tagline || disciplineLabel || (isEvent && f.kind)) && (
-          <p className="lg__formation__herosub">{f.tagline || disciplineLabel || f.kind}</p>
-        )}
-      </PageHero>
-      <div className="lg__formation__head" ref={headerRef} aria-hidden="true" />
-      <div ref={titleSentinelRef} aria-hidden="true" style={{ height: 0, margin: 0, padding: 0 }} />
-      <h1 className="lg__formation__title" ref={titleRef}>{f.title}</h1>
-
-      {/* Barre d'onglets sticky — placée juste sous le titre. Sur desktop :
-          tous les onglets affichés avec points • entre eux (style menu).
-          Sur mobile : flèches ← → pour naviguer onglet par onglet (style SUPSI). */}
-      <div className="lg__tabs" role="tablist" aria-label="Sections de la formation">
-        <button
-          type="button"
-          className="lg__tabs__nav lg__tabs__nav--prev"
-          aria-label="Onglet précédent"
-          onClick={() => {
-            const idx = TAB_GROUPS.findIndex((g) => g.id === activeTab);
-            const prev = (idx - 1 + TAB_GROUPS.length) % TAB_GROUPS.length;
-            selectTab(TAB_GROUPS[prev].id);
-          }}
-        >
-          ←
-        </button>
-        <div className="lg__tabs__scroll">
-          {TAB_GROUPS.map((g, i) => (
-            <React.Fragment key={g.id}>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === g.id}
-                aria-controls="tab-content"
-                className={"lg__tabs__btn" + (activeTab === g.id ? " is-active" : "")}
-                onClick={() => selectTab(g.id)}
-              >
-                {g.label}
-              </button>
-              {i < TAB_GROUPS.length - 1 && (
-                <span className="lg__tabs__sep" aria-hidden="true">•</span>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-        {isEvent ? boutonEvent("lg__tabs__cta") : (
-          <a
-            className="lg__tabs__cta"
-            href={ctaHref(item, nextSession)}
-            {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          >
-            {isFree(item) ? "Réserver →" : (item.stripePaymentLink ? "Payer →" : "Réserver →")}
-          </a>
-        )}
-        <button
-          type="button"
-          className="lg__tabs__nav lg__tabs__nav--next"
-          aria-label="Onglet suivant"
-          onClick={() => {
-            const idx = TAB_GROUPS.findIndex((g) => g.id === activeTab);
-            const next = (idx + 1) % TAB_GROUPS.length;
-            selectTab(TAB_GROUPS[next].id);
-          }}
-        >
-          →
-        </button>
-      </div>
-
-      {/* Layout 2 colonnes style SENZA / Clearance Kit : contenu de l'onglet
-          à gauche, sidebar CTA sticky à droite. Sur mobile : 1 col + sidebar
-          en bas en barre fixe. */}
-      <div className="lg__formation__layout">
-      <div className="lg__formation__main">
-
-      {/* Zone de contenu des onglets — affiche les sections du groupe actif,
-          empilées les unes sous les autres (plus d'accordéon). Le filtrage se
-          fait via TAB_GROUPS plus haut. */}
-      <div className="lg__formation__sections" id="tab-content" ref={tabContentRef}>
-      {(() => {
-        const allSections = [
+  // Toutes les sections possibles de la fiche. Declarees ici (et non dans le
+  // rendu) parce que la barre d'onglets a besoin de savoir lesquelles ont
+  // reellement du contenu.
+  const allSections = [
         {
           id: "description",
           title: "Description",
@@ -2360,11 +2072,329 @@ function ProgramPage({ item, kind }) {
             </div>
           ),
         },
+  ];
+
+  // Onglets style SENZA — 10 onglets qui couvrent toute l'info nécessaire à
+  // la décision d'achat. Chaque onglet rend un sous-ensemble de sections
+  // empilées. Certains onglets sont masqués dynamiquement (ex : Certification
+  // si la formation n'est ni CPF ni certifiante).
+  // Onglets différents selon le KIND :
+  // - "workshop" → vue commerciale épurée (vente pure, pas de cadre Qualiopi).
+  // - "formation" → vue complète Qualiopi (présentation, certif, indicateurs,
+  //   financement OPCO/CPF, accessibilité, etc.).
+  const ONGLETS_BRUTS = kind === "event"
+    ? [
+        // Un événement a peu de matière : trois onglets suffisent, sinon on
+        // afficherait des sections vides.
+        { id: "presentation", label: "L’événement", sections: ["description"] },
+        { id: "infos", label: "Infos pratiques", sections: ["quand", "lieu"] },
+        { id: "contact", label: "Contact", sections: ["contact"] },
+      ]
+    : kind === "workshop"
+    ? [
+        {
+          id: "presentation",
+          label: "Description",
+          sections: ["description", "public", "prerequis"],
+        },
+        {
+          id: "programme",
+          label: "Programme",
+          sections: ["programme", "objectifs"],
+        },
+        {
+          id: "sessions",
+          label: "Sessions / Lieu",
+          sections: ["lieu", "formateur"],
+        },
+        { id: "contact", label: "Contact", sections: ["contact"] },
+      ]
+    : [
+        {
+          id: "presentation",
+          label: "Description",
+          sections: ["description", "objectifs", "public", "prerequis"],
+        },
+        {
+          id: "programme",
+          label: "Programme",
+          sections: ["programme", "duree", "moyens"],
+        },
+        { id: "formateurs", label: "Formateurs", sections: ["formateur"] },
+        {
+          id: "financement",
+          label: "Financement",
+          sections: ["tarif", "delai"],
+        },
+        {
+          id: "sessions",
+          label: "Sessions / Lieu",
+          sections: ["lieu", "accessibilite", "evaluation"],
+        },
+        { id: "faq", label: "FAQ", sections: ["faq"] },
+        { id: "contact", label: "Contact", sections: ["contact"] },
       ];
+  // Une section sans contenu ne doit pas laisser un titre orphelin, et un
+  // onglet dont toutes les sections sont vides ne doit pas s'afficher du tout :
+  // un workshop ou un evenement a beaucoup moins de matiere qu'une formation.
+  const ongletRempli = (g) =>
+    g.sections.some((id) => {
+      const s = allSections.find((x) => x.id === id);
+      return s && s.body;
+    });
+  const ongletsRemplis = ONGLETS_BRUTS.filter(ongletRempli);
+  const TAB_GROUPS = ongletsRemplis.length ? ongletsRemplis : ONGLETS_BRUTS.slice(0, 1);
+
+  const scrollToId = (id) => (e) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      const isMobile = window.matchMedia("(max-width: 600px)").matches;
+      // hauteur du header + de l'anchor nav sticky
+      const offset = isMobile ? 85 + 56 : 121 + 60;
+      const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
+  // Carte de réservation COMPLÈTE — rendue deux fois : colonne de droite
+  // (desktop) et bas de page après les Avis (mobile). Le CSS n'affiche
+  // que la bonne version selon le breakpoint.
+  // compact=true (panneau mobile) : informations NÉCESSAIRES seulement —
+  // prix, badges, prochaine session, boutons d'inscription.
+  const renderReservationCard = (compact) => (
+    <React.Fragment>
+        <div className="lg__cta-mini">
+          {/* Nom de la formation tout en haut de la carte — repère pour le
+              lecteur qui scrolle dans le contenu. */}
+          <p className="lg__cta-mini__title">{f.title}</p>
+          <div className="lg__cta-mini__head">
+            <strong className="lg__cta-mini__price">
+              {isEvent ? (evDate || "Date à venir") : (f.price || "—")}
+            </strong>
+            {(isFormation || (kind === "workshop" && !isFree(f))) && (
+              <span className="lg__cta-mini__hint">
+                {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
+              </span>
+            )}
+          </div>
+          {!compact && isFormation && (f.cpf || f.rs) && (
+            <p className="lg__cta-mini__cert">
+              <span aria-hidden="true">✓</span> Formation certifiante
+              {f.rs && <span className="lg__cta-mini__cert__code"> · RS {f.rs}</span>}
+            </p>
+          )}
+          {isFormation && (f.cpf || f.opco || f.faf || f.rs) && (
+            <div className="lg__cta-mini__badges">
+              {f.cpf && <span>CPF</span>}
+              {f.opco && <span>OPCO</span>}
+              {f.faf && <span>FAF</span>}
+              {f.rs && <span>RS {f.rs}</span>}
+            </div>
+          )}
+          {(!compact || isEvent) && (
+            <ul className="lg__cta-mini__meta">
+              {f.format && <li>{f.format}</li>}
+              {isEvent && evLieu && <li>{evLieu}</li>}
+              {isEvent && f.kind && <li>{f.kind}</li>}
+              {isEvent && (evPasse || f.status) && (
+                <li>{evPasse ? "Événement passé" : f.status}</li>
+              )}
+            </ul>
+          )}
+          {upcoming.length > 0 && (
+            <div className="lg__cta-mini__sessions">
+              <p className="lg__cta-mini__sessions__label">
+                {upcoming.length > 1 ? "Prochaines sessions" : "Prochaine session"}
+              </p>
+              <ul className="lg__cta-mini__sessions__list">
+                {upcoming.slice(0, 3).map((s) => {
+                  const st = normalizeStatus(s.status);
+                  return (
+                    <li key={s.id} className="lg__cta-mini__session">
+                      <span className="lg__cta-mini__session__date">{sessionDateLabel(s)}</span>
+                      {s.location && (
+                        <span className="lg__cta-mini__session__loc">{s.location}</span>
+                      )}
+                      <span className="lg__cta-mini__session__meta">
+                        <span className={"lg__cta-mini__session__status is-" + st.class}>{st.label}</span>
+                        {s.places && st.class === "open" && (
+                          <span className="lg__cta-mini__session__places">· {s.places} place{Number(s.places) > 1 ? "s" : ""}</span>
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+          {!compact && f.duration && (
+            <div className="lg__cta-mini__sessions">
+              <p className="lg__cta-mini__sessions__label">Durée</p>
+              <p className="lg__cta-mini__session__date">
+                {f.duration.toLowerCase().replace(/\s*·\s*/g, " / ").replace(/journée/g, "jour")}
+              </p>
+            </div>
+          )}
+          {/* Public visé : remonté dans la carte (repère immédiat « c'est pour moi »). */}
+          {!compact && (Array.isArray(f.audience_points) && f.audience_points.length) ? (
+            <div className="lg__cta-mini__sessions lg__cta-mini__audience">
+              <p className="lg__cta-mini__sessions__label">Pour qui</p>
+              <ul className="lg__cta-mini__audience__list">
+                {f.audience_points.map((pt, i) => <li key={i}>{pt}</li>)}
+              </ul>
+            </div>
+          ) : (!compact && f.audience) ? (
+            <div className="lg__cta-mini__sessions lg__cta-mini__audience">
+              <p className="lg__cta-mini__sessions__label">Pour qui</p>
+              <p className="lg__cta-mini__audience__text">{f.audience}</p>
+            </div>
+          ) : null}
+          {isEvent ? (
+            /* Événement = billetterie externe ou modale d’inscription. */
+            boutonEvent("lg__cta-mini__btn")
+          ) : kind === "workshop" ? (
+            /* Workshop = réservation directe (modale si gratuit, Stripe sinon). */
+            boutonWorkshop("lg__cta-mini__btn")
+          ) : (
+            /* Formation = pas d'achat direct → demande d'inscription (modale). */
+            <button
+              type="button"
+              className="lg__cta-mini__btn"
+              onClick={() => setShowInscription(true)}
+            >
+              Demander une inscription →
+            </button>
+          )}
+          {isFormation && f.cpf && (
+            <button
+              type="button"
+              className="lg__cta-mini__btn"
+              onClick={() => setCpfOpen(true)}
+            >
+              S'inscrire via Mon Compte Formation
+            </button>
+          )}
+          {!compact && isFormation && (
+            <button
+              type="button"
+              className="lg__cta-mini__btn lg__cta-mini__btn--ghost"
+              onClick={() => setDownloadOpen(true)}
+            >
+              ↓ Télécharger le programme
+            </button>
+          )}
+          {!compact && !isEvent && (
+            <a
+              className="lg__cta-mini__sub"
+              href="mailto:formations@lesgriots.com?subject=Devis%20OPCO%20%2F%20FAF"
+            >
+              Étudier un financement
+            </a>
+          )}
+          {!compact && isFormation && f.cpf && (
+            <div className="lg__cta-mini__cpfbox">
+              <img
+                className="lg__cta-mini__cpfbox__logo"
+                src="img/moncompteformation.webp"
+                alt="Mon Compte Formation"
+              />
+              <span className="lg__cta-mini__cpfbox__text">Finançable avec ton Compte Personnel de Formation</span>
+            </div>
+          )}
+        </div>
+    </React.Fragment>
+  );
+
+  return (
+    <section className={"lg__formation" + (kind === "workshop" ? " is-workshop" : "") + (isEvent ? " is-event" : "")}>
+      <PageHero src={(f.media && /\.(mp4|webm|mov|m4v)$/i.test(f.media.src || "")) ? f.media.src : text("home.hero_video", "img/hero.mp4")} poster={(f.media && f.media.poster) ? f.media.poster : undefined} title={f.title}>
+        {(f.tagline || disciplineLabel || (isEvent && f.kind)) && (
+          <p className="lg__formation__herosub">{f.tagline || disciplineLabel || f.kind}</p>
+        )}
+      </PageHero>
+      <div className="lg__formation__head" ref={headerRef} aria-hidden="true" />
+      <div ref={titleSentinelRef} aria-hidden="true" style={{ height: 0, margin: 0, padding: 0 }} />
+      <h1 className="lg__formation__title" ref={titleRef}>{f.title}</h1>
+
+      {/* Barre d'onglets sticky — placée juste sous le titre. Sur desktop :
+          tous les onglets affichés avec points • entre eux (style menu).
+          Sur mobile : flèches ← → pour naviguer onglet par onglet (style SUPSI). */}
+      <div className="lg__tabs" role="tablist" aria-label="Sections de la formation">
+        <button
+          type="button"
+          className="lg__tabs__nav lg__tabs__nav--prev"
+          aria-label="Onglet précédent"
+          onClick={() => {
+            const idx = TAB_GROUPS.findIndex((g) => g.id === activeTab);
+            const prev = (idx - 1 + TAB_GROUPS.length) % TAB_GROUPS.length;
+            selectTab(TAB_GROUPS[prev].id);
+          }}
+        >
+          ←
+        </button>
+        <div className="lg__tabs__scroll">
+          {TAB_GROUPS.map((g, i) => (
+            <React.Fragment key={g.id}>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === g.id}
+                aria-controls="tab-content"
+                className={"lg__tabs__btn" + (activeTab === g.id ? " is-active" : "")}
+                onClick={() => selectTab(g.id)}
+              >
+                {g.label}
+              </button>
+              {i < TAB_GROUPS.length - 1 && (
+                <span className="lg__tabs__sep" aria-hidden="true">•</span>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+        {isEvent ? (
+          boutonEvent("lg__tabs__cta")
+        ) : kind === "workshop" ? (
+          boutonWorkshop("lg__tabs__cta")
+        ) : (
+          <a
+            className="lg__tabs__cta"
+            href={ctaHref(item, nextSession)}
+            {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
+            {isFree(item) ? "Réserver →" : (item.stripePaymentLink ? "Payer →" : "Réserver →")}
+          </a>
+        )}
+        <button
+          type="button"
+          className="lg__tabs__nav lg__tabs__nav--next"
+          aria-label="Onglet suivant"
+          onClick={() => {
+            const idx = TAB_GROUPS.findIndex((g) => g.id === activeTab);
+            const next = (idx + 1) % TAB_GROUPS.length;
+            selectTab(TAB_GROUPS[next].id);
+          }}
+        >
+          →
+        </button>
+      </div>
+
+      {/* Layout 2 colonnes style SENZA / Clearance Kit : contenu de l'onglet
+          à gauche, sidebar CTA sticky à droite. Sur mobile : 1 col + sidebar
+          en bas en barre fixe. */}
+      <div className="lg__formation__layout">
+      <div className="lg__formation__main">
+
+      {/* Zone de contenu des onglets — affiche les sections du groupe actif,
+          empilées les unes sous les autres (plus d'accordéon). Le filtrage se
+          fait via TAB_GROUPS plus haut. */}
+      <div className="lg__formation__sections" id="tab-content" ref={tabContentRef}>
+      {(() => {
         const activeGroup = TAB_GROUPS.find((g) => g.id === activeTab) || TAB_GROUPS[0];
+        if (!activeGroup) return null;
         const visible = activeGroup.sections
           .map((id) => allSections.find((s) => s.id === id))
-          .filter(Boolean);
+          .filter((s) => s && s.body);
         return visible.map((s, i) => {
           // Première section : titre H2 principal (toujours visible).
           if (i === 0) {
@@ -2419,7 +2449,7 @@ function ProgramPage({ item, kind }) {
 
       {/* Avis — section dédiée (sortie de la barre d'onglets), juste avant le
           CTA final. Sans objet pour un événement. */}
-      {!isEvent && (
+      {isFormation && (
       <section className="lg__avis" aria-label="Avis">
         <h2 className="lg__avis__title">Avis</h2>
         <p className="lg__avis__text">
@@ -2483,13 +2513,7 @@ function ProgramPage({ item, kind }) {
           {isEvent ? (
             boutonEvent("lg__cta-final__btn")
           ) : kind === "workshop" ? (
-            <a
-              className="lg__cta-final__btn"
-              href={ctaHref(item, nextSession)}
-              {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            >
-              {ctaLabel(item)}
-            </a>
+            boutonWorkshop("lg__cta-final__btn")
           ) : (
             <button
               type="button"
@@ -2520,135 +2544,12 @@ function FormationPage({ f }) {
   return <ProgramPage item={f} kind="formation" />;
 }
 
-// Fiche WORKSHOP — layout ÉVÉNEMENT, volontairement distinct du gabarit
-// réglementaire des formations : pas d'onglets, pas de carte de réservation,
-// pas de cadre Qualiopi. Une page linéaire : hero, bandeau date/lieu/durée/
-// prix, CTA, contenu, formateur, CTA final.
+// Fiche WORKSHOP — même structure qu’une fiche formation : hero, titre
+// collant, barre d’onglets, colonne de réservation. Les différences (onglets
+// réduits, pas de cadre Qualiopi, réservation directe) sont portées par
+// ProgramPage via kind="workshop".
 function WorkshopPage({ w }) {
-  const upcoming = SESSIONS
-    .filter((s) => sessionMatchesItem(s, w, "workshop"))
-    .sort((a, b) => parseSessionDate(a.date || a.dateLabel).sortKey
-      .localeCompare(parseSessionDate(b.date || b.dateLabel).sortKey));
-  const nextSession =
-    upcoming.find((s) => normalizeStatus(s.status).class === "open") || upcoming[0];
-  const st = nextSession ? normalizeStatus(nextSession.status) : null;
-  const [showInscription, setShowInscription] = React.useState(false);
-  // Gratuit → formulaire d'inscription maison (lead trackable dans le BO).
-  // Payant → lien direct (Stripe Payment Link configuré dans le BO).
-  const cta = (extra) =>
-    isFree(w) ? (
-      <button
-        type="button"
-        className={"lg__ws__btn" + (extra ? " " + extra : "")}
-        onClick={() => setShowInscription(true)}
-      >
-        {ctaLabel(w)}
-      </button>
-    ) : (
-      <a
-        className={"lg__ws__btn" + (extra ? " " + extra : "")}
-        href={ctaHref(w, nextSession)}
-        {...(ctaIsExternal(w) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      >
-        {ctaLabel(w)}
-      </a>
-    );
-  return (
-    <section className="lg__formation lg__ws is-workshop">
-      <PageHero
-        src={(w.media && w.media.src) || ""}
-        poster={(w.media && w.media.poster) || undefined}
-        title={w.title}
-      >
-        {w.tagline && <p className="lg__formation__herosub">{w.tagline}</p>}
-      </PageHero>
-
-      {/* Bandeau méta — l'essentiel d'un événement, d'un coup d'œil. */}
-      <div className="lg__ws__meta">
-        {nextSession && (
-          <div className="lg__ws__meta__cell">
-            <span className="lg__ws__meta__label">Date</span>
-            <strong className="lg__ws__meta__value">{sessionDateLabel(nextSession)}</strong>
-            {st && (
-              <span className={"lg__ws__meta__status is-" + st.class}>
-                {st.label}
-                {nextSession.places && st.class === "open" && (
-                  <> · {nextSession.places} places</>
-                )}
-              </span>
-            )}
-          </div>
-        )}
-        <div className="lg__ws__meta__cell">
-          <span className="lg__ws__meta__label">Lieu</span>
-          <strong className="lg__ws__meta__value">{w.format || w.location || "—"}</strong>
-        </div>
-        <div className="lg__ws__meta__cell">
-          <span className="lg__ws__meta__label">Durée</span>
-          <strong className="lg__ws__meta__value">{formatDuration(w.duration) || "—"}</strong>
-        </div>
-        <div className="lg__ws__meta__cell">
-          <span className="lg__ws__meta__label">Prix</span>
-          <strong className="lg__ws__meta__value">{w.price || "—"}</strong>
-        </div>
-      </div>
-
-      <div className="lg__ws__ctarow">{cta()}</div>
-
-      <div className="lg__ws__body">
-        {w.description && (
-          <div className="lg__ws__block">
-            <h2 className="lg__ws__h2">Le workshop</h2>
-            <p className="lg__formation__prose lg__ws__prose">{w.description}</p>
-          </div>
-        )}
-        {Array.isArray(w.objectives) && w.objectives.length > 0 && (
-          <div className="lg__ws__block">
-            <h2 className="lg__ws__h2">Tu repars avec</h2>
-            <ul className="lg__ws__list">
-              {w.objectives.map((o, i) => <li key={i}>{o}</li>)}
-            </ul>
-          </div>
-        )}
-        {w.audience && (
-          <div className="lg__ws__block">
-            <h2 className="lg__ws__h2">Pour qui</h2>
-            <p className="lg__formation__prose lg__ws__prose">{w.audience}</p>
-            {w.prerequisites && (
-              <p className="lg__formation__prose lg__ws__prose lg__ws__prose--muted">{w.prerequisites}</p>
-            )}
-          </div>
-        )}
-        {w.location && (
-          <div className="lg__ws__block">
-            <h2 className="lg__ws__h2">Le lieu</h2>
-            <p className="lg__formation__prose lg__ws__prose">{w.location}</p>
-          </div>
-        )}
-        {w.trainer && (
-          <div className="lg__ws__block">
-            <h2 className="lg__ws__h2">Animé par</h2>
-            <TrainersInline trainers={w.trainer} />
-          </div>
-        )}
-      </div>
-
-      <div className="lg__cta-final">
-        <div className="lg__cta-final__inner">
-          <p className="lg__cta-final__kicker">On se voit là-bas ?</p>
-          <h2 className="lg__cta-final__title">{w.title}</h2>
-          {cta("lg__cta-final__btn--ws")}
-        </div>
-      </div>
-      {showInscription && (
-        <InscriptionModal
-          target={{ id: w.id, title: w.title }}
-          kind="workshop"
-          onClose={() => setShowInscription(false)}
-        />
-      )}
-    </section>
-  );
+  return <ProgramPage item={w} kind="workshop" />;
 }
 
 function FormationDetail({ id, onClose }) {

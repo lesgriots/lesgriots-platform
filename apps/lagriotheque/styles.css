@@ -200,7 +200,8 @@ button {
 
   /* Bandeau pied de page imprimé : mentions OF + Qualiopi */
   /* Workshops : vente directe, pas de mentions Qualiopi/NDA à l'impression. */
-  .lg__formation.is-workshop::after {
+  .lg__formation.is-workshop::after,
+  .lg__formation.is-event::after {
     content: "LA GRIOTHÈQUE™ — LES GRIOTS · formations@lesgriots.com" !important;
   }
   .lg__formation::after {
