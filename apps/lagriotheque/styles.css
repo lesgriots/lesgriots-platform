@@ -7892,3 +7892,48 @@ a.lg__partners__logo:hover {
   .lg__ws__meta { grid-template-columns: 1fr 1fr; gap: 18px 20px; padding: 16px 0; }
   .lg__ws__btn { display: block; text-align: center; }
 }
+
+/* ---- Signature « les griots » ------------------------------------------
+   Le sticker de la signature mail, posé en bas à droite de l’accueil comme
+   un autocollant. Desktop uniquement : sur mobile il recouvrirait le
+   contenu et la barre du navigateur. */
+.lg__signature {
+  position: fixed;
+  right: 26px;
+  bottom: 26px;
+  z-index: 49; /* au-dessus des sections empilees (46-48), sous le header (50) */
+  display: block;
+  width: 148px;
+  line-height: 0;
+  transform: rotate(-4deg);
+  transform-origin: bottom right;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.22));
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.3s ease;
+  animation: lg-signature-pose 0.5s cubic-bezier(0.2, 1.25, 0.5, 1) 0.6s both;
+}
+.lg__signature img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+.lg__signature:hover {
+  transform: rotate(0deg) scale(1.05);
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.3));
+}
+@keyframes lg-signature-pose {
+  0%   { transform: rotate(-16deg) scale(0.7); opacity: 0; }
+  70%  { transform: rotate(0deg) scale(1.04); opacity: 1; }
+  100% { transform: rotate(-4deg) scale(1); opacity: 1; }
+}
+/* Mobile et tablette : masqué, comme demandé. */
+@media (max-width: 900px) {
+  .lg__signature { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lg__signature { animation: none; }
+}
+@media print {
+  .lg__signature { display: none !important; }
+}

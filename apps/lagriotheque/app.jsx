@@ -6315,6 +6315,21 @@ function App() {
   return (
     <>
       <Header route={route} />
+      {/* Sticker « les griots » — la signature des mails, posée en bas à droite
+          de l’accueil. Desktop uniquement : sur mobile elle masquerait le
+          contenu. Rendue ici, hors des sections sticky, pour que le
+          position:fixed ne soit pas capté par un conteneur transformé. */}
+      {route === "" && (
+        <a
+          className="lg__signature"
+          href="https://lesgriotsxstudio.com"
+          target="_blank"
+          rel="noopener"
+          aria-label="Les Griots"
+        >
+          <img src="img/sticker-lesgriots.png" alt="Les Griots" />
+        </a>
+      )}
       <div className="lg">
         <main>{page}</main>
         <footer className="lg__footer">
