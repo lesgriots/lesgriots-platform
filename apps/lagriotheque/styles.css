@@ -5533,16 +5533,17 @@ body.is-scrolled .lg__pagehero__brand {
      conservée). La home (.lg__hero-yard) garde son plein écran, elle. */
   .lg__pagehero { transition: height 0.5s ease, max-height 0.5s ease; }
 }
-/* Desktop uniquement : média plus court, identique sur les 4 pages-listes
-   (Formations, Workshops, Agenda, Ressources).
-   (Mobile inchangé : plein écran comme les autres pages-listes.) */
+/* Desktop : une seule hauteur de bandeau pour tout le site.
+   Les pages liste étaient bridées à 44vh et les fiches à 50vh, contre 78vh
+   partout ailleurs : le média y était rogné de moitié, et l'on voyait une
+   bande de vidéo plutôt qu'une image. Même gabarit pour tout le monde. */
 @media (min-width: 601px) {
   #catalogue .lg__pagehero,
   #workshops .lg__pagehero,
   #agenda .lg__pagehero,
-  #ressources .lg__pagehero { max-height: 44vh; }
-  /* Fiche formation/workshop : un peu plus grand que les pages liste. */
-  .lg__formation .lg__pagehero { max-height: 50vh; }
+  #events .lg__pagehero,
+  #ressources .lg__pagehero,
+  .lg__formation .lg__pagehero { max-height: 78vh; }
 }
 .lg__intro__text,
 .lg__intro__sub {

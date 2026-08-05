@@ -6044,15 +6044,27 @@ function App() {
     // Pages avec média hero (home incluse) : menu visible en blanc sur le
     // média, puis barre solide une fois le média dépassé.
     // Les fiches (formations/<id>, workshops/<id>) ont aussi un hero banner.
-    const isDetailHero = route.startsWith("formations/") || route.startsWith("workshops/");
-    // Les pages liste n'activent le mode "hero" (média plein cadre + menu blanc
-    // transparent + superposition) que si un média est réellement défini côté
-    // BO. Sans média, elles s'affichent comme "Notre approche" (titre + intro,
-    // menu solide). Ajouter une vidéo dans le BO réactive l'effet tout seul.
-    const listMediaKey = { catalogue: "catalogue.media", workshops: "workshops_page.media", agenda: "agenda.media", ressources: "ressources.media" }[route];
-    const hasPageMedia = listMediaKey ? text(listMediaKey, "") !== "" : false;
+    const isDetailHero = /^(formations|workshops|events)\//.test(route);
+
+    /*
+     * Le mode « hero » : média plein cadre, menu blanc posé dessus, contenu
+     * qui remonte par-dessus au scroll.
+     *
+     * Il ne s'activait que sur la home, les fiches formation et workshop, et
+     * les pages liste dont un média était renseigné dans le back-office. Or
+     * aucun ne l'était, et les pages événements n'étaient dans aucune des
+     * deux listes. Résultat : ces pages affichaient bien un bandeau, mais le
+     * menu restait en mode clair au-dessus, blanc sur blanc, avec une bande
+     * vide entre lui et la vidéo.
+     *
+     * Depuis que PageHero garantit un média sur toutes les pages qui en
+     * ouvrent une, la condition se simplifie : si la page a un bandeau, elle
+     * a le mode hero. On liste donc les pages qui en ouvrent un, fiches
+     * comprises, événements compris.
+     */
+    const PAGES_HERO = new Set(["catalogue", "formations", "workshops", "agenda", "events", "ressources"]);
     document.body.classList.toggle("is-home", isHome);
-    document.body.classList.toggle("is-listhero", isHome || isDetailHero || hasPageMedia);
+    document.body.classList.toggle("is-listhero", isHome || isDetailHero || PAGES_HERO.has(route));
     // Fiche formation/workshop : la barre de réservation fixe (mobile) masque
     // le bas du footer → le footer se rehausse via body.is-fiche.
     document.body.classList.toggle("is-fiche", isDetailHero);
