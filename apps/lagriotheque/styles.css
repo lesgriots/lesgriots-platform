@@ -1,23 +1,8 @@
 /* ============================================================
    LA GRIOTHÈQUE — formations afro-diasporiques
-   Direction visuelle : Geist Mono partout, palette papier/encre.
+   Direction visuelle : Geist Sans partout, palette papier/encre.
    ============================================================ */
 
-@font-face {
-  font-family: "Geist Mono";
-  src: url("fonts/GeistMono-Regular.woff2") format("woff2");
-  font-weight: 400; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Geist Mono";
-  src: url("fonts/GeistMono-Medium.woff2") format("woff2");
-  font-weight: 500; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Geist Mono";
-  src: url("fonts/GeistMono-Bold.woff2") format("woff2");
-  font-weight: 700; font-style: normal; font-display: swap;
-}
 @font-face {
   font-family: "Geist";
   src: url("fonts/Geist-Regular.woff2") format("woff2");
@@ -41,7 +26,22 @@
   --accent: #ffca00;      /* jaune brand officiel */
   --accent-soft: #ffe071;
 
-  --font-mono: "Geist Mono", "JetBrains Mono", "Courier New", monospace;
+  /* ---- Une seule police ---------------------------------------------
+     La direction artistique du site tient sur Geist Sans, et rien d'autre.
+     Le site portait aussi Geist Mono sur ses libellés, ses kickers et ses
+     boutons : deux dessins de lettre pour un seul propos, et un second
+     fichier de police à charger.
+
+     `--font-mono` reste, et pointe sur la même famille. Soixante-dix
+     déclarations s'y réfèrent : les renommer une à une n'aurait rien changé
+     à l'écran et aurait fait un diff illisible. Le nom devient impropre, le
+     commentaire est là pour ça, et le jour où l'on voudrait vraiment une
+     chasse fixe quelque part, c'est ici qu'on la remet.
+
+     Ce qui faisait le caractère de ces libellés reste : les capitales,
+     l'interlettrage large, les petites tailles. C'est la lettre qui change,
+     pas le geste. */
+  --font-mono: "Geist", "Inter", system-ui, sans-serif;
   --font-sans: "Geist", "Inter", system-ui, sans-serif;
 
   /* ---- Échelle typographique canonique ----------------------------------
@@ -6747,7 +6747,7 @@ a.lg__partners__logo:hover {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;

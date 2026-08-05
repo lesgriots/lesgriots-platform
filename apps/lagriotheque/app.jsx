@@ -2795,7 +2795,7 @@ function CheckoutStripe({ item }) {
                 boxShadow: "none",
               },
               ".Label": {
-                fontFamily: '"Geist Mono", monospace',
+                fontFamily: "var(--font-sans)",
                 fontSize: "10px",
                 fontWeight: "500",
                 letterSpacing: "0.06em",
