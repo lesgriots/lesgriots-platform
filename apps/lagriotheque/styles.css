@@ -7950,3 +7950,214 @@ a.lg__partners__logo:hover {
   .lg__ws__btn { display: block; text-align: center; }
 }
 
+
+/* ---- Modale newsletter --------------------------------------------------
+   Deux colonnes au desktop : une bande jaune qui porte la marque, et le
+   formulaire. Champs soulignés plutôt qu'encadrés, comme le reste des
+   formulaires du site. Au mobile la bande passe en bandeau et le panneau
+   occupe tout l'écran. */
+.lg__nl {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: lg-nl-voile 0.25s ease both;
+}
+@keyframes lg-nl-voile { from { opacity: 0; } to { opacity: 1; } }
+
+.lg__nl__panel {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  display: grid;
+  grid-template-columns: 208px 1fr;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  animation: lg-nl-monte 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes lg-nl-monte {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.lg__nl__close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  background: var(--ink);
+  color: var(--paper);
+  border: 0;
+  padding: 8px 15px;
+  font-size: 18px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.lg__nl__close:hover { background: var(--accent); color: var(--ink); }
+
+/* Colonne de marque */
+.lg__nl__aside {
+  background: var(--accent);
+  color: var(--ink);
+  padding: 28px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  border-right: 1px solid var(--ink);
+}
+.lg__nl__brand {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+}
+.lg__nl__brand sup { font-size: 0.55em; vertical-align: super; }
+.lg__nl__slogan {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+/* Colonne formulaire */
+.lg__nl__body { padding: 30px 30px 28px; }
+.lg__nl__kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin: 0 0 12px;
+}
+.lg__nl__title {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  margin: 0 0 12px;
+  max-width: 20ch;
+}
+.lg__nl__lede {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  margin: 0 0 24px;
+  max-width: 42ch;
+}
+
+.lg__nl__row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.lg__nl__field { margin-bottom: 18px; }
+.lg__nl__field label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 5px;
+}
+.lg__nl__field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 0 8px;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.lg__nl__field input::placeholder { color: var(--ink-3); }
+.lg__nl__field input:focus {
+  border-bottom-color: var(--accent);
+  box-shadow: 0 1px 0 0 var(--accent);
+}
+
+.lg__nl__consent {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  cursor: pointer;
+  margin: 4px 0 20px;
+}
+.lg__nl__consent input { margin-top: 2px; accent-color: var(--ink); flex: 0 0 auto; }
+
+.lg__nl__err {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: #d72d2d;
+  margin: 0 0 14px;
+}
+
+.lg__nl__actions { display: flex; gap: 10px; align-items: center; justify-content: flex-end; }
+.lg__nl__btn,
+.lg__nl__ghost {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  padding: 11px 18px;
+  border: 1px solid var(--ink);
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.lg__nl__btn { background: var(--accent); color: var(--ink); font-weight: 600; }
+.lg__nl__btn:hover { background: var(--ink); color: var(--paper); }
+.lg__nl__btn:disabled { opacity: 0.6; cursor: wait; }
+.lg__nl__ghost { background: transparent; color: var(--ink-2); }
+.lg__nl__ghost:hover { color: var(--ink); }
+
+.lg__nl__done .lg__nl__btn { margin-top: 4px; }
+
+@media (max-width: 700px) {
+  .lg__nl { padding: 0; align-items: stretch; }
+  .lg__nl__panel {
+    grid-template-columns: 1fr;
+    /* La bande de marque prend la hauteur de son contenu, le formulaire
+       occupe le reste : sans ça la grille répartirait l'espace en deux. */
+    grid-template-rows: auto 1fr;
+    max-width: none;
+    max-height: none;
+    min-height: 100%;
+    border: 0;
+  }
+  .lg__nl__aside {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    /* Retrait à droite : le bouton de fermeture est posé dans ce coin. */
+    padding: 20px 64px 20px 24px;
+    border-right: 0;
+    border-bottom: 1px solid var(--ink);
+  }
+  .lg__nl__slogan { font-size: 15px; text-align: right; }
+  .lg__nl__body { padding: 26px 24px 32px; }
+  .lg__nl__row { grid-template-columns: 1fr; gap: 0; }
+  .lg__nl__actions { flex-direction: column-reverse; align-items: stretch; }
+  .lg__nl__btn, .lg__nl__ghost { width: 100%; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lg__nl, .lg__nl__panel { animation: none; }
+}

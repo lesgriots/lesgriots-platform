@@ -4778,12 +4778,17 @@ function NewsletterModal({ onClose }) {
   const [envoi, setEnvoi] = useState(false);
   const [err, setErr] = useState("");
   const [etape, setEtape] = useState("form");
+  const premierRef = useRef(null);
 
   useEffect(() => {
     const onKey = (ev) => { if (ev.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
+    // Le curseur est déjà dans le premier champ : une modale qui s'ouvre et
+    // qui attend un clic de plus, c'est un abandon de plus.
+    const t = setTimeout(() => { if (premierRef.current) premierRef.current.focus(); }, 60);
     return () => {
+      clearTimeout(t);
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
@@ -4792,8 +4797,8 @@ function NewsletterModal({ onClose }) {
   async function submit(ev) {
     ev.preventDefault();
     if (!prenom.trim() || !nom.trim()) { setErr("Prénom et nom sont demandés."); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr("Email invalide"); return; }
-    if (!consent) { setErr("Tu dois accepter pour t'inscrire."); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr("Cet email n'a pas l'air valide."); return; }
+    if (!consent) { setErr("Coche la case pour qu'on puisse t'écrire."); return; }
     setEnvoi(true);
     setErr("");
     const endpoint =
@@ -4820,71 +4825,104 @@ function NewsletterModal({ onClose }) {
     }
   }
 
-  const labelStyle = { display: "block", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.6, marginBottom: 6 };
-  const inputStyle = { width: "100%", padding: "10px 12px", border: "1px solid var(--ink)", background: "transparent", color: "var(--ink)", fontFamily: "var(--font-mono)", fontSize: 14, marginBottom: 14, boxSizing: "border-box" };
-
   return (
-    <div
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
-    >
-      <div style={{ position: "relative", background: "var(--paper)", color: "var(--ink)", maxWidth: 480, width: "100%", padding: "32px 28px", border: "1px solid var(--ink)", fontFamily: "var(--font-mono)" }}>
-        <button onClick={onClose} aria-label="Fermer" style={{ position: "absolute", top: 0, right: 0, background: "var(--ink)", border: 0, color: "var(--paper)", padding: "10px 16px", cursor: "pointer", fontSize: 18 }}>×</button>
+    <div className="lg__nl" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="lg__nl__panel" role="dialog" aria-modal="true" aria-label="Inscription à la newsletter">
+        <button type="button" className="lg__nl__close" onClick={onClose} aria-label="Fermer">×</button>
 
-        <p style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", opacity: 0.6, marginBottom: 10 }}>
-          Newsletter
-        </p>
-        <h3 style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 24, lineHeight: 1.15, marginBottom: 18, letterSpacing: "-0.01em" }}>
-          Reçois nos formations, workshops et ressources
-        </h3>
+        {/* Colonne de marque : elle tient la promesse pendant qu'on remplit. */}
+        <aside className="lg__nl__aside" aria-hidden="true">
+          <p className="lg__nl__brand">LA GRIOTHÈQUE<sup>™</sup></p>
+          <p className="lg__nl__slogan">Bâtis ton récit.<br />Vis de ta passion.</p>
+        </aside>
 
-        {etape === "done" ? (
-          <div style={{ padding: "8px 0 12px" }}>
-            <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>
-              ✓ C'est fait{prenom ? `, ${prenom}` : ""}. Tu es inscrit·e.
-            </p>
-            <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 18, opacity: 0.75 }}>
-              On écrit quand on a quelque chose à transmettre, pas pour occuper ta boîte. Désinscription en un clic.
-            </p>
-            <button onClick={onClose} style={{ padding: "10px 18px", border: "1px solid var(--ink)", background: "var(--ink)", color: "var(--paper)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", cursor: "pointer" }}>
-              Fermer
-            </button>
-          </div>
-        ) : (
-          <>
-            <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 24, opacity: 0.75 }}>
-              Les nouvelles sessions, les ressources gratuites et les événements, avant tout le monde. Pas de bruit, pas de spam.
-            </p>
-            <form onSubmit={submit}>
-              <label style={labelStyle}>Prénom *</label>
-              <input type="text" required value={prenom} onChange={(e) => setPrenom(e.target.value)} style={inputStyle} />
+        <div className="lg__nl__body">
+          <p className="lg__nl__kicker">Newsletter</p>
 
-              <label style={labelStyle}>Nom *</label>
-              <input type="text" required value={nom} onChange={(e) => setNom(e.target.value)} style={inputStyle} />
+          {etape === "done" ? (
+            <div className="lg__nl__done">
+              <h2 className="lg__nl__title">C'est fait{prenom ? ", " + prenom : ""}.</h2>
+              <p className="lg__nl__lede">
+                Tu reçois le prochain envoi. Une désinscription en un clic est
+                au bas de chaque mail, et on ne la prend jamais mal.
+              </p>
+              <button type="button" className="lg__nl__btn" onClick={onClose}>
+                Fermer
+              </button>
+            </div>
+          ) : (
+            <>
+              <h2 className="lg__nl__title">
+                Les prochaines dates, les ressources, les coulisses.
+              </h2>
+              <p className="lg__nl__lede">
+                Un mail quand on a quelque chose à transmettre. Jamais pour
+                occuper ta boîte.
+              </p>
 
-              <label style={labelStyle}>Email *</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ton@email.com" style={{ ...inputStyle, marginBottom: 18 }} />
+              <form className="lg__nl__form" onSubmit={submit} noValidate>
+                <div className="lg__nl__row">
+                  <div className="lg__nl__field">
+                    <label htmlFor="nl-prenom">Prénom</label>
+                    <input
+                      id="nl-prenom"
+                      ref={premierRef}
+                      type="text"
+                      autoComplete="given-name"
+                      value={prenom}
+                      onChange={(e) => { setPrenom(e.target.value); if (err) setErr(""); }}
+                    />
+                  </div>
+                  <div className="lg__nl__field">
+                    <label htmlFor="nl-nom">Nom</label>
+                    <input
+                      id="nl-nom"
+                      type="text"
+                      autoComplete="family-name"
+                      value={nom}
+                      onChange={(e) => { setNom(e.target.value); if (err) setErr(""); }}
+                    />
+                  </div>
+                </div>
 
-              <label style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12, lineHeight: 1.5, cursor: "pointer", marginBottom: 22 }}>
-                <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ marginTop: 3 }} />
-                <span>
-                  J'accepte de recevoir la newsletter de LA GRIOTHÈQUE. Désinscription en 1 clic.
-                </span>
-              </label>
+                <div className="lg__nl__field">
+                  <label htmlFor="nl-email">Email</label>
+                  <input
+                    id="nl-email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="ton@email.com"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); if (err) setErr(""); }}
+                  />
+                </div>
 
-              {err && <p style={{ color: "#d72d2d", fontSize: 12, marginBottom: 14 }}>✗ {err}</p>}
+                <label className="lg__nl__consent">
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => { setConsent(e.target.checked); if (err) setErr(""); }}
+                  />
+                  <span>
+                    J'accepte de recevoir la newsletter de LA GRIOTHÈQUE.
+                    Désinscription en un clic.
+                  </span>
+                </label>
 
-              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-                <button type="button" onClick={onClose} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: "transparent", color: "var(--ink)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", cursor: "pointer" }}>
-                  Annuler
-                </button>
-                <button type="submit" disabled={envoi} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: envoi ? "var(--ink-dim)" : "var(--accent, #ffca00)", color: "var(--ink)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", fontWeight: 600, cursor: envoi ? "wait" : "pointer" }}>
-                  {envoi ? "..." : "Je m'inscris"}
-                </button>
-              </div>
-            </form>
-          </>
-        )}
+                {err && <p className="lg__nl__err" role="alert">{err}</p>}
+
+                <div className="lg__nl__actions">
+                  <button type="button" className="lg__nl__ghost" onClick={onClose}>
+                    Plus tard
+                  </button>
+                  <button type="submit" className="lg__nl__btn" disabled={envoi}>
+                    {envoi ? "Envoi…" : "Je m'inscris →"}
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
