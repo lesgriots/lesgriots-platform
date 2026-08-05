@@ -61,13 +61,16 @@ export async function POST(req) {
     try { addLead({ email, name, first_name, last_name, source, consent: true }); } catch (e) { /* noop */ }
 
     // 2) Systeme.io — contact + champ "source" + tags (fire-and-forget).
+    // "Newsletter" est l'unique tag du plan gratuit (créé le 05/08/2026) :
+    // il existe déjà, donc il se pose même sans plan payant — c'est lui qui
+    // sert de cible aux campagnes. Les tags src-* attendront l'upgrade.
     const guessed = splitName(name);
     syncContactToSystemeIo({
       email,
       firstName: first_name || guessed.firstName,
       lastName: last_name || guessed.lastName,
       source,
-      tags: ["site-lagriotheque", "src-" + sioSlug(source)],
+      tags: ["Newsletter", "site-lagriotheque", "src-" + sioSlug(source)],
     }).catch((e) => console.warn("systeme.io sync:", e.message));
 
     return NextResponse.json({ ok: true }, { headers });

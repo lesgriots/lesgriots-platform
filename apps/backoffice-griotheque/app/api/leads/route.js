@@ -100,6 +100,9 @@ export async function POST(req) {
     // bloque jamais la capture, le lead est déjà enregistré dans le BO.
     const guessed = splitName(name);
     const tags = ["site-lagriotheque", "src-" + sioSlug(source)];
+    // "Newsletter" = l'unique tag du plan gratuit, déjà créé → se pose sans
+    // upgrade. Une inscription newsletter/launch vaut abonnement.
+    if (source === "newsletter" || source === "launch") tags.unshift("Newsletter");
     if (source === "contact" && subject) tags.push("sujet-" + sioSlug(subject));
     syncContactToSystemeIo({
       email,
