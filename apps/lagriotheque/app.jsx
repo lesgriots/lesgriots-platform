@@ -5697,15 +5697,6 @@ function Partners() {
           >
             <img src="img/les-revelations.svg" alt="Les Révélations — L'image de demain" />
           </a>
-          <a
-            className="lg__partners__logo lg__partners__logo--img"
-            href="https://lesdetermines.fr"
-            target="_blank"
-            rel="noopener"
-            aria-label="Les Déterminés"
-          >
-            <img src="img/les-determines.svg" alt="Les Déterminés" />
-          </a>
         </div>
       </div>
     </section>
