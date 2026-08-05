@@ -7099,16 +7099,18 @@ a.lg__partners__logo:hover {
    les petits écrans. */
 .lg__resource__title {
   font-family: var(--font-sans);
-  /* Une vraie tête de page, à l'échelle des titres de fiche formation
-     (clamp 36→80). Le titre EST la promesse de la ressource : à 64px il
-     ressemblait à une ligne de liste, pas à une entrée de page. */
-  font-size: clamp(36px, 6vw, 80px);
+  /* Une vraie tête de page, à l'échelle des titres de fiche formation.
+     La taille est calculée pour que le titre tienne sur UNE ligne quelle
+     que soit la largeur de l'écran : un titre coupé en deux perd son
+     souffle, et la coupure tombe rarement où on l'aurait choisie. Le clamp
+     sert de secours tant que la mesure n'a pas eu lieu. */
+  font-size: var(--fit-size, clamp(36px, 6vw, 80px));
   font-weight: 500;
   line-height: 1;
   letter-spacing: -0.035em;
   color: var(--ink);
   margin: 0 0 var(--space-5);
-  max-width: 18ch;
+  white-space: nowrap;
 }
 .lg__resource__subtitle {
   font-family: var(--font-sans);
@@ -7163,6 +7165,13 @@ a.lg__partners__logo:hover {
 
 @media (max-width: 900px) {
   .lg__resource { padding: var(--space-6) 16px var(--space-15); }
+  /* Sur téléphone, tenir sur une ligne voudrait dire écrire en 18px : on
+     laisse le titre se casser, et on reprend une taille lisible. */
+  .lg__resource__title {
+    white-space: normal;
+    font-size: clamp(30px, 7.5vw, 44px) !important;
+    line-height: 1.05;
+  }
   .lg__resource__barre { top: 85px; margin: 0 -16px; padding: 8px 16px 10px; font-size: clamp(16px, 4.5vw, 22px); }
   .lg__resource__grid { grid-template-columns: 1fr; gap: var(--space-8); }
   /* Sous 900px la grille passe à une colonne : coller la carte en haut

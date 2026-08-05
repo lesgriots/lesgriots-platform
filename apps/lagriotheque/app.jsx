@@ -4765,6 +4765,11 @@ function ResourcePage({ r }) {
   const [requested, setRequested] = useState(false);
   const barreRef = useRef(null);
   const temoinRef = useRef(null);
+  /* Le titre tient sur une seule ligne : la taille se calcule d'après la
+     largeur disponible plutôt que d'être fixée à l'avance. C'est le même
+     hook que celui des fiches formation, qui mesure au canvas et non par
+     reflow. Le clamp reste en secours si le calcul n'a pas encore eu lieu. */
+  const titreRef = useFitOne(80, [r.title]);
 
   /*
    * Le titre redevient une barre quand on descend, comme sur les fiches
@@ -4815,7 +4820,7 @@ function ResourcePage({ r }) {
           la colonne de droite, à hauteur de la couverture : il commençait au
           milieu de l'écran et se lisait après l'image qu'il annonce. */}
       <header className="lg__resource__head">
-        <h1 className="lg__resource__title">{r.title}</h1>
+        <h1 className="lg__resource__title" ref={titreRef}>{r.title}</h1>
         {r.subtitle && <p className="lg__resource__subtitle">{r.subtitle}</p>}
       </header>
 
