@@ -229,7 +229,7 @@ export function listLeads({ sort = true } = {}) {
 
 const MAX_LEADS = 10000; // garde-fou anti-spam : évite un JSON qui explose
 
-export function addLead({ email, name, phone, resource_id, consent, source, subject, message }) {
+export function addLead({ email, name, first_name, last_name, phone, resource_id, consent, source, subject, message }) {
   if (!email) throw new Error("addLead: email required");
   const store = load();
   const normalized = String(email).trim().toLowerCase();
@@ -252,6 +252,11 @@ export function addLead({ email, name, phone, resource_id, consent, source, subj
     id,
     email: String(email).trim().toLowerCase(),
     name: name ? String(name).trim().slice(0, 120) : "",
+    // Séparés en plus du nom complet : un outil d'emailing personnalise sur
+    // le prénom, et recouper un « Jean-Pierre Martin » après coup se fait
+    // toujours mal.
+    first_name: first_name ? String(first_name).trim().slice(0, 60) : "",
+    last_name: last_name ? String(last_name).trim().slice(0, 60) : "",
     phone: phone ? String(phone).trim().slice(0, 30) : "",
     resource_id: resource_id || "",
     consent: !!consent,

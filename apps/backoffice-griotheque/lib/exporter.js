@@ -150,11 +150,27 @@ export async function exportToDataJsx() {
     formatArray("EVENTS", events),
   ].join("\n");
 
-  // Configuration du site : pages actives + endpoint API pour les leads
+  /*
+   * Configuration du site : pages actives + adresse de collecte des contacts.
+   *
+   * Cette adresse partait en production avec sa valeur de développement,
+   * « http://localhost:3031 ». Deux échecs d'un coup : localhost désigne la
+   * machine du visiteur, où il n'y a rien ; et un appel en http depuis une
+   * page en https est refusé par tous les navigateurs. Le site avalait
+   * l'erreur pour ne pas gêner le téléchargement, donc personne ne l'a vu :
+   * chaque contact laissé sur le site était perdu en silence.
+   *
+   * En production on vise le back-office par son domaine. LEADS_ENDPOINT
+   * permet d'en changer sans toucher au code.
+   */
   const activePages = getActivePages();
+  const leadsEndpoint = process.env.LEADS_ENDPOINT
+    || (process.env.NODE_ENV === "production"
+      ? "https://admin.lagriotheque.com/api/leads"
+      : "http://localhost:3031/griotheque/api/leads");
   const configBlock = `\nconst SITE_CONFIG = ${JSON.stringify({
     activePages,
-    leadsEndpoint: "http://localhost:3031/api/leads",
+    leadsEndpoint,
   }, null, 2)};\n`;
 
   // Contenu marketing éditable (manifeste, approche, FAQ, headers de page).

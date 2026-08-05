@@ -4369,7 +4369,11 @@ function ResourceModal({ resource, onClose }) {
       const envoye = externe
         && typeof navigator !== "undefined"
         && typeof navigator.sendBeacon === "function"
-        && navigator.sendBeacon(endpoint, new Blob([charge], { type: "application/json" }));
+        // text/plain et non application/json : un envoi cross-origin en JSON
+        // declenche un controle prealable que sendBeacon ne sait pas faire,
+        // et le contact partirait a la poubelle sans un mot. Le serveur lit
+        // le corps comme du JSON de toute facon.
+        && navigator.sendBeacon(endpoint, new Blob([charge], { type: "text/plain;charset=UTF-8" }));
       if (!envoye) {
         await fetch(endpoint, {
           method: "POST",
