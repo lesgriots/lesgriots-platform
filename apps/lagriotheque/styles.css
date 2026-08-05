@@ -2323,6 +2323,11 @@ body.is-home .lg__latest--workshops {
    gauche (la section .lg__latest est centrée pour ses onglets). */
 .lg__latest__rows { text-align: left; margin-top: 8px; }
 .lg__latest__rows .lg__row:first-child { border-top: none; }
+/* Section workshops (fond papier) : la liste garde ses filets haut et bas,
+   comme sur la page Formations. Sans eux, une liste d’un seul workshop
+   n’aurait aucune ligne. */
+.lg__latest--workshops .lg__latest__rows .lg__row:first-child { border-top: 1px solid var(--ink); }
+.lg__latest--workshops .lg__latest__rows .lg__row:last-child { border-bottom: 1px solid var(--ink); }
 /* Pas de bordure basse sur la dernière formation : la section récits (vidéo)
    arrive juste après → le trait ferait doublon. */
 .lg__latest__rows .lg__row:last-child { border-bottom: none; }
