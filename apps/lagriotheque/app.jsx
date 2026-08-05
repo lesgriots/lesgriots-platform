@@ -433,6 +433,40 @@ function Manifesto() {
               f.available !== false &&
               (f.discipline || "").split(" · ")[0].trim() === homeCat
           );
+  // ---- Section « Nos workshops » de la home ----------------------------
+  // Même construction que « Nos formations ». Un workshop sort de la liste
+  // quand toutes ses sessions datées sont passées (même règle que la page
+  // Workshops).
+  const todayKeyWs = new Date().toISOString().slice(0, 10);
+  const homeWorkshopsCurrent = React.useMemo(() => {
+    const passe = (w) => {
+      const ss = (typeof SESSIONS !== "undefined" ? SESSIONS : []).filter(
+        (s) => s.workshop_id === w.id && s.date
+      );
+      if (!ss.length) return false;
+      return ss.every((s) => {
+        const k = parseSessionDate(s.date).sortKey;
+        return k !== "9999-00-00" && k.slice(0, 10) < todayKeyWs;
+      });
+    };
+    return WORKSHOPS.filter((w) => !passe(w));
+  }, [todayKeyWs]);
+  const homeWorkshopCategories = React.useMemo(() => {
+    const set = new Set();
+    homeWorkshopsCurrent.forEach((w) => {
+      const cat = (w.discipline || "").split(" · ")[0].trim();
+      if (cat) set.add(cat);
+    });
+    return Array.from(set);
+  }, [homeWorkshopsCurrent]);
+  const [homeWsCat, setHomeWsCat] = useState("all");
+  const homeVisibleWorkshops =
+    homeWsCat === "all"
+      ? homeWorkshopsCurrent
+      : homeWorkshopsCurrent.filter(
+          (w) => (w.discipline || "").split(" · ")[0].trim() === homeWsCat
+        );
+
   const heroVideoRef = useRef(null);
 
   // Bouton "plein écran" : passe la vidéo en fullscreen avec controls + son
@@ -630,6 +664,67 @@ function Manifesto() {
           )}
         </div>
       </section>
+
+      {/* WORKSHOPS — même construction que « Nos formations », mais sur fond
+          PAPIER (blanc). Placée entre les formations (noir) et la section
+          récits : elle remonte par-dessus les formations, puis les récits
+          remontent par-dessus elle (cf. z-index dans styles.css). Masquée
+          tant qu’aucun workshop n’est programmé. */}
+      {homeWorkshopsCurrent.length > 0 && (
+        <section className="lg__latest lg__latest--workshops">
+          <div className="lg__latest__intro">
+            <h2 className="lg__latest__heading">
+              {text("home.workshops_heading", "Nos workshops")}
+            </h2>
+            <p className="lg__latest__lede">
+              {text(
+                "home.workshops_lede",
+                "Des formats courts et intensifs, en groupe restreint, pour pratiquer sur ton projet réel. "
+              )}
+              <a className="lg__latest__lede__link" href="#/workshops">
+                {text("home.workshops_lede_link", "Découvre les prochains workshops.")}
+              </a>
+            </p>
+          </div>
+          {homeWorkshopCategories.length > 1 && (
+            <nav
+              className="lg__cat-filters lg__latest__filters"
+              aria-label="Filtrer les workshops par catégorie"
+            >
+              <button
+                type="button"
+                className={"lg__cat-filters__btn" + (homeWsCat === "all" ? " is-active" : "")}
+                onClick={() => setHomeWsCat("all")}
+              >
+                Tous <span className="lg__cat-filters__count">({homeWorkshopsCurrent.length})</span>
+              </button>
+              {homeWorkshopCategories.map((cat) => {
+                const count = homeWorkshopsCurrent.filter(
+                  (w) => (w.discipline || "").split(" · ")[0].trim() === cat
+                ).length;
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    className={"lg__cat-filters__btn" + (homeWsCat === cat ? " is-active" : "")}
+                    onClick={() => setHomeWsCat(cat)}
+                  >
+                    {cat.toLowerCase()} <span className="lg__cat-filters__count">({count})</span>
+                  </button>
+                );
+              })}
+            </nav>
+          )}
+          <div className="lg__rows lg__latest__rows">
+            {homeVisibleWorkshops.map((w) => (
+              <WorkshopRow key={w.id} w={w} />
+            ))}
+            {homeVisibleWorkshops.length === 0 && (
+              <p className="lg__cat-empty">Aucun workshop dans cette catégorie pour le moment.</p>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* VISION — bannière vidéo compacte et cinématique (façon VSCO « PURE
           PHOTOGRAPHY. SERIOUS BUSINESS »). Une seule vidéo, texte en bas à
@@ -5978,7 +6073,11 @@ function App() {
       // récits) se cale sous le header ou passe derrière lui, la barre de menu
       // devient noire (plaque noire + nav blanc), en continuité avec la section.
       let menuDark = false;
-      if (!menuTransparent && document.body.classList.contains("is-home")) {
+      // La section « Nos workshops » est sur fond PAPIER : quand c’est elle qui
+      // passe derrière le menu, la barre reste claire, même si la section noire
+      // des formations est encore figée dessous (sticky).
+      const surSectionClaire = !!(el && el.closest && el.closest(".lg__latest--workshops"));
+      if (!menuTransparent && !surSectionClaire && document.body.classList.contains("is-home")) {
         [".lg__latest", ".lg__vision"].forEach((sel) => {
           const dk = document.querySelector(sel);
           if (!dk) return;
@@ -5997,7 +6096,7 @@ function App() {
         let botPx = 0;  // inset bas
         if (menuTransparent || menuDark) {
           topPx = 0; botPx = 0; // média direct OU section noire derrière → tout blanc
-        } else {
+        } else if (!surSectionClaire) {
           // Sections SOMBRES de la home (formations noires + section récits) :
           // le texte du menu passe en blanc là où l'une d'elles est derrière le
           // header. On calcule l'union de leurs zones dans la bande du header.

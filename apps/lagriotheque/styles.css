@@ -2293,7 +2293,7 @@ body.is-home .lg__latest {
 }
 body.is-home .lg__vision-track {
   position: relative;
-  z-index: 47; /* final : la section récits remonte par-dessus les formations */
+  z-index: 48; /* final : la section récits remonte par-dessus formations + workshops */
 }
 /* Section « Nos formations » sur fond NOIR (home). Le fond est une couleur
    littérale (pas var(--ink)) car on redéfinit ci-dessous --ink/--ink-2/--ink-3
@@ -2305,6 +2305,19 @@ body.is-home .lg__latest {
   --ink: #f6f5f3;
   --ink-2: rgba(246, 245, 243, 0.72);
   --ink-3: rgba(246, 245, 243, 0.45);
+}
+/* Section « Nos workshops » (home) : même construction que les formations,
+   mais sur fond PAPIER. Elle est sticky comme la section noire et remonte
+   PAR-DESSUS elle (z-index supérieur) ; la section récits remonte ensuite
+   par-dessus les deux. On rétablit ici les tokens d’encre sombres, annulés
+   par la règle noire ci-dessus. */
+body.is-home .lg__latest--workshops {
+  background: var(--paper);
+  border-top-color: rgba(0, 0, 0, 0.14);
+  --ink: #000000;
+  --ink-2: #2a2a2a;
+  --ink-3: #6b6b6b;
+  z-index: 47;
 }
 /* Rows « à la page Formations » dans la section noire de la home : alignées à
    gauche (la section .lg__latest est centrée pour ses onglets). */
