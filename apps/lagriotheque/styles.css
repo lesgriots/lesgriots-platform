@@ -6994,14 +6994,19 @@ a.lg__partners__logo:hover {
 .lg__resource__inside { max-width: 72ch; }
 .lg__resource__head .lg__resource__subtitle { max-width: 60ch; margin-bottom: 0; }
 
-/* ---- Colonne média : elle suit le scroll ----
+/* ---- Colonne média : elle suit le scroll, et ne bouge pas ----
    Le visuel et la carte de téléchargement restent sous les yeux pendant
    toute la lecture, comme le bloc d'informations d'une fiche formation.
-   Elle se cale sous la barre de titre, dont la hauteur varie selon qu'elle
-   est collée ou non : d'où la variable plutôt qu'une valeur en dur. */
+
+   Le calage est une constante, et c'est le point important. Une première
+   version suivait la hauteur réelle de la barre de titre, qui passe de zéro
+   à sa taille pleine au moment où elle se colle : la colonne se décalait
+   d'un coup sous les yeux du lecteur, exactement pendant qu'il lisait. On
+   réserve donc la place de la barre collée une fois pour toutes. Rien ne
+   bouge, jamais. */
 .lg__resource__aside {
   position: sticky;
-  top: calc(121px + var(--lg-fiche-barre-h, 0px) + 16px);
+  top: 195px; /* 121 en-tête du site + 58 barre de titre collée + 16 d'air */
 }
 .lg__resource__cover {
   border: 1px solid var(--rule);

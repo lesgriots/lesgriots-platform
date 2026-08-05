@@ -4792,29 +4792,6 @@ function ResourcePage({ r }) {
     return () => obs.disconnect();
   }, [r.id]);
 
-  /*
-   * La colonne de gauche se cale sous la barre de titre, pas sous elle.
-   *
-   * La barre grandit en se collant et retombe à zéro en haut de page : une
-   * valeur écrite en dur laisserait soit un trou, soit un recouvrement. On
-   * publie donc sa hauteur réelle en variable CSS, comme le fait déjà la
-   * fiche formation pour son menu de sections.
-   */
-  useEffect(() => {
-    const barre = barreRef.current;
-    if (!barre || typeof ResizeObserver === "undefined") return;
-    const mesurer = () => {
-      const h = Math.round(barre.getBoundingClientRect().height);
-      document.documentElement.style.setProperty("--lg-fiche-barre-h", h + "px");
-    };
-    mesurer();
-    const ro = new ResizeObserver(mesurer);
-    ro.observe(barre);
-    return () => {
-      ro.disconnect();
-      document.documentElement.style.removeProperty("--lg-fiche-barre-h");
-    };
-  }, [r.id]);
   const typeLabel = resourceTypeLabel(r.type);
   // Une ressource peut vivre ailleurs : un outil qu'on recommande, par
   // exemple. On ne promet alors ni fichier ni envoi par e-mail.
