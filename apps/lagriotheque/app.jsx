@@ -4635,9 +4635,13 @@ function InscriptionModal({ target, kind, onClose }) {
     if (!consent) { setErr("Merci d'accepter pour envoyer ta demande."); return; }
     setSubmitting(true);
     setErr("");
-    // Endpoint prod du back-office (les autres formulaires du site postent
-    // aussi en dur ici ; SITE_CONFIG.leadsEndpoint reste sur localhost).
-    const endpoint = "https://admin.lagriotheque.com/api/leads";
+    // Une seule adresse de collecte pour tout le site, celle que l'exporteur
+    // écrit. Elle est restée longtemps sur localhost, et ce formulaire-ci
+    // avait contourné le problème en écrivant l'adresse en dur. Le contournement
+    // survivait à la correction et redevenait faux au prochain changement de
+    // domaine : deux sources de vérité, c'est une de trop.
+    const endpoint = (window.SITE_CONFIG && window.SITE_CONFIG.leadsEndpoint)
+      || "https://admin.lagriotheque.com/api/leads";
     try {
       await fetch(endpoint, {
         method: "POST",
