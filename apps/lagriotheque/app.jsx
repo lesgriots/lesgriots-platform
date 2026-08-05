@@ -6085,14 +6085,6 @@ function App() {
         });
       }
       document.body.classList.toggle("menu-dark", menuDark);
-      // Signature « les griots » : elle se retire quand le footer entre dans
-      // le champ, pour ne jamais recouvrir la mention Qualiopi ni le bandeau
-      // de bas de page.
-      const pied = document.querySelector(".lg__footer");
-      document.body.classList.toggle(
-        "signature-off",
-        !!(pied && pied.getBoundingClientRect().top < window.innerHeight)
-      );
       // Couche BLANCHE du menu : révélée pixel par pixel dans la zone où la vidéo
       // VISION est visible derrière le header (de son bord haut jusqu'au bas =
       // là où les formations la recouvrent). Pilote le clip-path de la couche
@@ -6323,21 +6315,6 @@ function App() {
   return (
     <>
       <Header route={route} />
-      {/* Sticker « les griots » — la signature des mails, posée en bas à droite
-          de l’accueil. Desktop uniquement : sur mobile elle masquerait le
-          contenu. Rendue ici, hors des sections sticky, pour que le
-          position:fixed ne soit pas capté par un conteneur transformé. */}
-      {route === "" && (
-        <a
-          className="lg__signature"
-          href="https://lesgriotsxstudio.com"
-          target="_blank"
-          rel="noopener"
-          aria-label="Les Griots"
-        >
-          <img src="img/sticker-lesgriots.png" alt="Les Griots" />
-        </a>
-      )}
       <div className="lg">
         <main>{page}</main>
         <footer className="lg__footer">
