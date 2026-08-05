@@ -7952,10 +7952,9 @@ a.lg__partners__logo:hover {
 
 
 /* ---- Modale newsletter --------------------------------------------------
-   Deux colonnes au desktop : une bande jaune qui porte la marque, et le
-   formulaire. Champs soulignés plutôt qu'encadrés, comme le reste des
-   formulaires du site. Au mobile la bande passe en bandeau et le panneau
-   occupe tout l'écran. */
+   Une colonne, rien que le formulaire. Champs soulignés plutôt qu'encadrés,
+   comme le reste des formulaires du site. Au mobile le panneau occupe tout
+   l'écran. */
 .lg__nl {
   position: fixed;
   inset: 0;
@@ -7972,11 +7971,9 @@ a.lg__partners__logo:hover {
 .lg__nl__panel {
   position: relative;
   width: 100%;
-  max-width: 720px;
+  max-width: 520px;
   max-height: calc(100vh - 48px);
   overflow: auto;
-  display: grid;
-  grid-template-columns: 208px 1fr;
   background: var(--paper);
   color: var(--ink);
   border: 1px solid var(--ink);
@@ -8002,37 +7999,7 @@ a.lg__partners__logo:hover {
 }
 .lg__nl__close:hover { background: var(--accent); color: var(--ink); }
 
-/* Colonne de marque */
-.lg__nl__aside {
-  background: var(--accent);
-  color: var(--ink);
-  padding: 28px 22px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 24px;
-  border-right: 1px solid var(--ink);
-}
-.lg__nl__brand {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  margin: 0;
-}
-.lg__nl__brand sup { font-size: 0.55em; vertical-align: super; }
-.lg__nl__slogan {
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 20px;
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-
-/* Colonne formulaire */
-.lg__nl__body { padding: 30px 30px 28px; }
+.lg__nl__body { padding: 34px 32px 30px; }
 .lg__nl__kicker {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -8133,27 +8100,14 @@ a.lg__partners__logo:hover {
 @media (max-width: 700px) {
   .lg__nl { padding: 0; align-items: stretch; }
   .lg__nl__panel {
-    grid-template-columns: 1fr;
-    /* La bande de marque prend la hauteur de son contenu, le formulaire
-       occupe le reste : sans ça la grille répartirait l'espace en deux. */
-    grid-template-rows: auto 1fr;
     max-width: none;
     max-height: none;
     min-height: 100%;
     border: 0;
   }
-  .lg__nl__aside {
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 16px;
-    /* Retrait à droite : le bouton de fermeture est posé dans ce coin. */
-    padding: 20px 64px 20px 24px;
-    border-right: 0;
-    border-bottom: 1px solid var(--ink);
-  }
-  .lg__nl__slogan { font-size: 15px; text-align: right; }
-  .lg__nl__body { padding: 26px 24px 32px; }
+  /* Retrait en haut à droite : le bouton de fermeture est posé dans ce coin. */
+  .lg__nl__body { padding: 30px 24px 32px; }
+  .lg__nl__kicker { padding-right: 52px; }
   .lg__nl__row { grid-template-columns: 1fr; gap: 0; }
   .lg__nl__actions { flex-direction: column-reverse; align-items: stretch; }
   .lg__nl__btn, .lg__nl__ghost { width: 100%; text-align: center; }

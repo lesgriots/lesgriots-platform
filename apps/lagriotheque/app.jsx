@@ -4830,12 +4830,6 @@ function NewsletterModal({ onClose }) {
       <div className="lg__nl__panel" role="dialog" aria-modal="true" aria-label="Inscription à la newsletter">
         <button type="button" className="lg__nl__close" onClick={onClose} aria-label="Fermer">×</button>
 
-        {/* Colonne de marque : elle tient la promesse pendant qu'on remplit. */}
-        <aside className="lg__nl__aside" aria-hidden="true">
-          <p className="lg__nl__brand">LA GRIOTHÈQUE<sup>™</sup></p>
-          <p className="lg__nl__slogan">Bâtis ton récit.<br />Vis de ta passion.</p>
-        </aside>
-
         <div className="lg__nl__body">
           <p className="lg__nl__kicker">Newsletter</p>
 
