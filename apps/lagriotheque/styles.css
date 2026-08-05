@@ -7033,6 +7033,42 @@ a.lg__partners__logo:hover {
 }
 
 /* ---- Colonne contenu ---- */
+/* ---- La barre de titre au scroll ----------------------------------
+   Même geste que sur les fiches formation : le titre se replie en une
+   barre collée sous l'en-tête du site dès qu'on descend. Elle n'existe pas
+   tant qu'on est en haut de page, où le vrai titre est déjà là. On la
+   masque par la hauteur et non par le font-size, sinon elle laisse un
+   trou au-dessus du contenu. */
+.lg__resource__temoin {
+  display: block;
+  height: 1px;
+  margin-bottom: -1px;
+}
+.lg__resource__barre {
+  position: sticky;
+  top: 121px;
+  z-index: 42;
+  margin: 0 -24px;
+  padding: 10px 24px 12px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(20px, 2.4vw, 32px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  transition: opacity 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.lg__resource__barre:not(.is-stuck) {
+  height: 0;
+  padding: 0;
+  border-bottom: 0;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: 0;
+}
+
 /* L'en-tête de la fiche : titre et sous-titre, pleine largeur, au bord
    gauche, au-dessus de la colonne média. Un filet le sépare du contenu,
    comme sur les pages de catalogue. */
@@ -7108,6 +7144,7 @@ a.lg__partners__logo:hover {
 
 @media (max-width: 900px) {
   .lg__resource { padding: var(--space-6) 16px var(--space-15); }
+  .lg__resource__barre { top: 85px; margin: 0 -16px; padding: 8px 16px 10px; font-size: clamp(16px, 4.5vw, 22px); }
   .lg__resource__grid { grid-template-columns: 1fr; gap: var(--space-8); }
   .lg__resource__aside { position: static; max-width: 360px; }
 

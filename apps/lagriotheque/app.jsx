@@ -4763,6 +4763,34 @@ function Ressources() {
 // un gros CTA de téléchargement qui ouvre la modal de capture email.
 function ResourcePage({ r }) {
   const [requested, setRequested] = useState(false);
+  const barreRef = useRef(null);
+  const temoinRef = useRef(null);
+
+  /*
+   * Le titre redevient une barre quand on descend, comme sur les fiches
+   * formation. Ce n'est pas un effet : sur une page longue, quelqu'un qui
+   * lit le troisième paragraphe a oublié de quoi parle la page, et rien ne
+   * le lui rappelle.
+   *
+   * Le témoin est un repère fixe posé au-dessus du titre. On observe lui,
+   * et non la barre : la barre change de taille en se collant, ce qui
+   * déplacerait le seuil et ferait trembler la bascule à chaque pixel.
+   */
+  useEffect(() => {
+    const barre = barreRef.current;
+    const temoin = temoinRef.current;
+    if (!barre || !temoin || typeof IntersectionObserver === "undefined") return;
+    const HAUT = window.matchMedia("(max-width: 600px)").matches ? 85 : 121;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        const colle = !e.isIntersecting && e.boundingClientRect.top < HAUT;
+        barre.classList.toggle("is-stuck", colle);
+      },
+      { rootMargin: `-${HAUT}px 0px 0px 0px`, threshold: [0, 1] }
+    );
+    obs.observe(temoin);
+    return () => obs.disconnect();
+  }, [r.id]);
   const typeLabel = resourceTypeLabel(r.type);
   // Une ressource peut vivre ailleurs : un outil qu'on recommande, par
   // exemple. On ne promet alors ni fichier ni envoi par e-mail.
@@ -4775,6 +4803,12 @@ function ResourcePage({ r }) {
 
   return (
     <section className="lg__resource" id="ressource">
+      <span ref={temoinRef} className="lg__resource__temoin" aria-hidden="true" />
+      {/* La barre de titre au scroll. Invisible tant qu'on est en haut : le
+          vrai titre est juste dessous, l'afficher deux fois n'aiderait
+          personne. */}
+      <div className="lg__resource__barre" ref={barreRef} aria-hidden="true">{r.title}</div>
+
       {/* Le titre passe au-dessus de la colonne média, pleine largeur et au
           bord gauche, comme les titres du reste du site. Il était logé dans
           la colonne de droite, à hauteur de la couverture : il commençait au
