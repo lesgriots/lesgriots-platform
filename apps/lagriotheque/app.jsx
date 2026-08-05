@@ -5516,6 +5516,54 @@ function Financement() {
   );
 }
 
+// Formulaire newsletter du footer : POST /api/subscribe (source "newsletter")
+// → lead sauvegardé dans le BO + contact créé/tagué dans Systeme.io.
+// Remplace l'ancien lien mailto (un mailto ne capture rien : l'email
+// n'arrivait que si le visiteur envoyait vraiment le message).
+function FooterNewsletter() {
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState("idle"); // idle | loading | ok | error
+  async function submit(e) {
+    e.preventDefault();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setState("error"); return; }
+    setState("loading");
+    const endpoint = (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.subscribeEndpoint)
+      || "https://admin.lagriotheque.com/api/subscribe";
+    try {
+      const r = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "newsletter", consent: true }),
+      });
+      setState(r.ok ? "ok" : "error");
+    } catch (err) {
+      setState("error");
+    }
+  }
+  if (state === "ok") {
+    return <p className="lg__footer__nl__done">✓ inscrit·e — à bientôt</p>;
+  }
+  return (
+    <form className="lg__footer__nl" onSubmit={submit}>
+      <label htmlFor="footer-nl">newsletter</label>
+      <div className="lg__footer__nl__row">
+        <input
+          id="footer-nl"
+          type="email"
+          placeholder="ton@email.com"
+          value={email}
+          autoComplete="email"
+          onChange={(e) => { setEmail(e.target.value); if (state === "error") setState("idle"); }}
+        />
+        <button type="submit" aria-label="S'inscrire à la newsletter" disabled={state === "loading"}>
+          {state === "loading" ? "…" : "→"}
+        </button>
+      </div>
+      {state === "error" && <p className="lg__footer__nl__err">email invalide — réessaie</p>}
+    </form>
+  );
+}
+
 // Petit formulaire de contact (page À propos) : sujet au choix + message.
 // Poste sur /api/leads (source "contact") → visible dans le BO, onglet Leads.
 function ContactForm() {
@@ -6241,7 +6289,7 @@ function App() {
             <div className="lg__footer__col">
               <a href="https://instagram.com/lagriotheque" target="_blank" rel="noopener">instagram</a>
               <a href="https://linkedin.com" target="_blank" rel="noopener">linkedin</a>
-              <a href="mailto:formations@lesgriots.com?subject=Newsletter">newsletter</a>
+              <FooterNewsletter />
             </div>
             <div className="lg__footer__col">
               {/* Les infos société (SIREN, RCS, NDA, DREETS, etc.) sont

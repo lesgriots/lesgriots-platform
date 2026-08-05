@@ -1,10 +1,15 @@
-// POST /api/subscribe → inscription depuis la page "Bientôt" du site.
+// POST /api/subscribe → inscription newsletter (footer du site + page "Bientôt").
 // 1. Enregistre l'email comme lead (backup local, toujours).
-// 2. Crée le contact dans Systeme.io si SYSTEME_API_KEY est configurée.
+// 2. Upsert le contact dans Systeme.io (champ "source" + tags) via lib/systeme.js.
+//    Bug historique corrigé : cette route lisait SYSTEME_API_KEY alors que
+//    /etc/lagriotheque-backoffice.env définit SYSTEMEIO_API_KEY — aucune
+//    inscription "launch" n'était donc jamais synchronisée. lib/systeme.js
+//    accepte désormais les deux noms.
 // CORS : autorise le site lagriotheque.com (cross-origin).
 import { NextResponse } from "next/server";
 import { addLead } from "../../../lib/db.js";
 import { rateLimit, clientIp, tooMany } from "../../../lib/rate-limit.js";
+import { syncContactToSystemeIo, sioSlug, splitName } from "../../../lib/systeme.js";
 
 // Empêche next build de figer le GET en statique (cf. bug 405 /api/pages).
 export const dynamic = "force-dynamic";
@@ -44,30 +49,26 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { email, name, source } = body || {};
+    const { email, name, first_name, last_name } = body || {};
     if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Email invalide" }, { status: 400, headers });
     }
 
-    // 1) Backup local — ne perd jamais un email, même si Systeme.io échoue.
-    try { addLead({ email, name, source: source || "launch", consent: true }); } catch (e) { /* noop */ }
+    // Deux entrées légitimes : "launch" (page Bientôt) et "newsletter" (footer).
+    const source = body.source === "launch" ? "launch" : "newsletter";
 
-    // 2) Systeme.io — création du contact si la clé est configurée.
-    const key = process.env.SYSTEME_API_KEY;
-    if (key) {
-      try {
-        const payload = { email };
-        // Prénom transmis à Systeme.io pour personnaliser les emails
-        if (name && typeof name === "string" && name.trim()) {
-          payload.fields = [{ slug: "first_name", value: name.trim().slice(0, 80) }];
-        }
-        await fetch("https://api.systeme.io/api/contacts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-API-Key": key },
-          body: JSON.stringify(payload),
-        });
-      } catch (e) { /* on garde quand même le lead local */ }
-    }
+    // 1) Backup local — ne perd jamais un email, même si Systeme.io échoue.
+    try { addLead({ email, name, first_name, last_name, source, consent: true }); } catch (e) { /* noop */ }
+
+    // 2) Systeme.io — contact + champ "source" + tags (fire-and-forget).
+    const guessed = splitName(name);
+    syncContactToSystemeIo({
+      email,
+      firstName: first_name || guessed.firstName,
+      lastName: last_name || guessed.lastName,
+      source,
+      tags: ["site-lagriotheque", "src-" + sioSlug(source)],
+    }).catch((e) => console.warn("systeme.io sync:", e.message));
 
     return NextResponse.json({ ok: true }, { headers });
   } catch (err) {

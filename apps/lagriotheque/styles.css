@@ -6643,6 +6643,62 @@ a.lg__partners__logo:hover {
 }
 .lg__footer__col a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
+/* Newsletter du footer — même registre typographique que les liens de colonne,
+   un simple champ souligné + flèche (pas de bloc rapporté). */
+.lg__footer__nl {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 2px;
+}
+.lg__footer__nl label {
+  color: var(--paper);
+  cursor: pointer;
+}
+.lg__footer__nl__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--paper) 45%, transparent);
+  max-width: 220px;
+}
+.lg__footer__nl__row input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: 0;
+  outline: none;
+  padding: 4px 0 6px;
+  color: var(--paper);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.lg__footer__nl__row input::placeholder {
+  color: color-mix(in srgb, var(--paper) 50%, transparent);
+  text-transform: uppercase;
+}
+.lg__footer__nl__row button {
+  background: none;
+  border: 0;
+  padding: 0 0 2px;
+  color: var(--paper);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+.lg__footer__nl__row button:disabled { opacity: 0.5; cursor: default; }
+.lg__footer__nl__err,
+.lg__footer__nl__done {
+  margin: 0;
+  color: var(--paper);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
 /* Badge Qualiopi — logo officiel + mention obligatoire (footer) */
 .lg__qualiopi {
   display: flex;
