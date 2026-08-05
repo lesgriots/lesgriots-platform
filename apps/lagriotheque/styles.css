@@ -7031,7 +7031,7 @@ a.lg__partners__logo:hover {
 .lg__resource__card__meta {
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.04em;
   color: var(--ink-3);
   margin: 0 0 var(--space-2);
 }
@@ -7052,15 +7052,19 @@ a.lg__partners__logo:hover {
 }
 
 /* ---- Colonne contenu ---- */
+/* Le libellé au-dessus du titre. Il était en jaune sur pavé noir, avec un
+   interlettrage de 0.18em : le seul badge inversé du site, et il attirait
+   l'œil avant le titre qu'il annonce. Partout ailleurs un kicker est une
+   petite ligne d'encre soulignée d'un filet, à 0.04em. Même geste ici. */
 .lg__resource__kicker {
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  letter-spacing: 0.18em;
-  color: var(--accent);
-  background: var(--ink);
-  display: inline-block;
-  padding: var(--space-1) var(--space-2);
-  margin: 0 0 var(--space-4);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  margin: 0 0 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ink);
 }
 /* Le titre d'une ressource se lit comme celui d'une formation ou d'un
    événement : même graisse, même échelle, même approche. Il était en 700 et
@@ -7086,7 +7090,7 @@ a.lg__partners__logo:hover {
 .lg__resource__author {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   color: var(--ink-3);
   margin: 0 0 var(--space-8);
 }
@@ -7100,8 +7104,9 @@ a.lg__partners__logo:hover {
 .lg__resource__desc p { margin: 0 0 var(--space-4); }
 .lg__resource__h2 {
   font-family: var(--font-mono);
-  font-size: var(--text-md);
-  letter-spacing: 0.14em;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ink);
   border-bottom: 1px solid var(--rule);
