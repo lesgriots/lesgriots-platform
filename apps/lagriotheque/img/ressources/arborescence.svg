@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" role="img"
+     aria-label="Arborescence de dossiers d’un projet">
+  <!--
+    Visuel d'attente de la ressource, aux couleurs de la maison : papier,
+    encre, et l'or sur le seul dossier qui compte, la racine. Il dit ce que
+    la ressource fait, au lieu d'occuper la place en gris.
+  -->
+  <rect width="600" height="800" fill="#f6f5f3"/>
+
+  <g fill="none" stroke="#000" stroke-width="2" stroke-linecap="square">
+    <path d="M100 218 V642"/>
+    <path d="M100 283 H150 M100 378 H150 M100 642 H150"/>
+    <path d="M200 416 V553"/>
+    <path d="M200 468 H250 M200 553 H250"/>
+  </g>
+
+  <path d="M65 100 h96.60000000000001 l18 22 h198 a9 9 0 0 1 9 9 v78 a9 9 0 0 1 -9 9 H65 a9 9 0 0 1 -9 -9 V109 a9 9 0 0 1 9 -9 z" fill="#ffca00" stroke="#000" stroke-width="2.5"/>
+
+  <g fill="#ffffff" stroke="#000" stroke-width="2">
+    <path d="M157 245 h76.84 l13 16 h158 a7 7 0 0 1 7 7 v46 a7 7 0 0 1 -7 7 H157 a7 7 0 0 1 -7 -7 V252 a7 7 0 0 1 7 -7 z"/>
+    <path d="M157 340 h76.84 l13 16 h158 a7 7 0 0 1 7 7 v46 a7 7 0 0 1 -7 7 H157 a7 7 0 0 1 -7 -7 V347 a7 7 0 0 1 7 -7 z"/>
+    <path d="M157 605 h76.84 l13 16 h158 a7 7 0 0 1 7 7 v46 a7 7 0 0 1 -7 7 H157 a7 7 0 0 1 -7 -7 V612 a7 7 0 0 1 7 -7 z"/>
+  </g>
+
+  <g fill="#f6f5f3" stroke="#000" stroke-width="1.8">
+    <path d="M256 435 h65.68 l10 13 h136 a6 6 0 0 1 6 6 v41 a6 6 0 0 1 -6 6 H256 a6 6 0 0 1 -6 -6 V441 a6 6 0 0 1 6 -6 z"/>
+    <path d="M256 520 h65.68 l10 13 h136 a6 6 0 0 1 6 6 v41 a6 6 0 0 1 -6 6 H256 a6 6 0 0 1 -6 -6 V526 a6 6 0 0 1 6 -6 z"/>
+  </g>
+</svg>
