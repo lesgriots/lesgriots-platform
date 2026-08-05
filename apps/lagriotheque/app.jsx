@@ -460,6 +460,12 @@ function Manifesto() {
     return Array.from(set);
   }, [homeWorkshopsCurrent]);
   const [homeWsCat, setHomeWsCat] = useState("all");
+  // La page Workshops peut être désactivée depuis le BO : dans ce cas la
+  // section de l’accueil disparaît aussi, sinon elle pointerait vers une page
+  // qui répond « cette page n’est plus disponible ».
+  const pageWorkshopsActive =
+    ((typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.activePages) || {})
+      .workshops !== false;
   const homeVisibleWorkshops =
     homeWsCat === "all"
       ? homeWorkshopsCurrent
@@ -670,7 +676,7 @@ function Manifesto() {
           récits : elle remonte par-dessus les formations, puis les récits
           remontent par-dessus elle (cf. z-index dans styles.css). Masquée
           tant qu’aucun workshop n’est programmé. */}
-      {homeWorkshopsCurrent.length > 0 && (
+      {pageWorkshopsActive && homeWorkshopsCurrent.length > 0 && (
         <section className="lg__latest lg__latest--workshops">
           <div className="lg__latest__intro">
             <h2 className="lg__latest__heading">
