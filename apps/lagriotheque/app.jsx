@@ -2688,25 +2688,41 @@ function MethodBand({ num, media, title, txt }) {
 // Bandeau média en haut d'une page-liste (catalogue, workshops).
 // src éditable depuis le back office (SITE_CONTENT) ; vidéo ou image selon
 // l'extension. Rien rendu si src vide.
+/**
+ * Le bandeau d'ouverture d'une page.
+ *
+ * Il ne sert pas qu'à décorer : c'est lui qui annule le padding du haut et
+ * colle le contenu sous le menu, si bien qu'une page sans bandeau s'ouvre
+ * sur une bande blanche et que rien ne passe en superposition au scroll.
+ * C'était le cas de toutes les pages sauf les fiches formation, seules à
+ * prévoir un média de repli.
+ *
+ * Le repli est donc remonté ici : sans média propre, une page reprend la
+ * vidéo de la maison. Chaque page peut toujours poser la sienne depuis le
+ * back-office, et c'est ce qu'il faut faire à terme ; en attendant, aucune
+ * ne s'ouvre sur du vide.
+ */
 function PageHero({ src, poster, title, children }) {
-  const isVideo = /\.(mp4|webm|mov|m4v)$/i.test(src || "");
+  const media = src || text("home.hero_video", "img/hero.mp4");
+  const isVideo = /\.(mp4|webm|mov|m4v)$/i.test(media || "");
   const overlay = (title || children) && (
     <div className="lg__pagehero__overlay">
       {title && <h1 className="lg__pagehero__title">{title}</h1>}
       {children}
     </div>
   );
-  if (!src) {
-    // Pas de média : on affiche quand même le titre + l'intro, sans bandeau.
+  if (!media) {
+    // Ceinture et bretelles : si même le repli est vide, on affiche au moins
+    // le titre plutôt qu'une page muette.
     return (title || children) ? <>{title && <h1 className="lg__pagehero__title lg__pagehero__title--plain">{title}</h1>}{children}</> : null;
   }
   return (
     <div className="lg__pagehero">
       {isVideo ? (
-        <video src={src} poster={poster || undefined} autoPlay loop muted playsInline />
+        <video src={media} poster={poster || undefined} autoPlay loop muted playsInline />
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" />
+        <img src={media} alt="" />
       )}
       {/* Mot-marque en haut à gauche, comme la home (se fond au scroll). */}
       <a className="lg__pagehero__brand" href="#/" aria-label="Accueil"><GriotRing /></a>
