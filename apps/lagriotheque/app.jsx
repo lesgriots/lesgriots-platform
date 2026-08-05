@@ -4775,18 +4775,27 @@ function ResourcePage({ r }) {
 
   return (
     <section className="lg__resource" id="ressource">
-      <a className="lg__resource__back" href="#/ressources">← toutes les ressources</a>
+      {/* Le titre passe au-dessus de la colonne média, pleine largeur et au
+          bord gauche, comme les titres du reste du site. Il était logé dans
+          la colonne de droite, à hauteur de la couverture : il commençait au
+          milieu de l'écran et se lisait après l'image qu'il annonce. */}
+      <header className="lg__resource__head">
+        <h1 className="lg__resource__title">{r.title}</h1>
+        {r.subtitle && <p className="lg__resource__subtitle">{r.subtitle}</p>}
+      </header>
 
       <div className="lg__resource__grid">
         {/* Colonne média : couverture + carte de téléchargement */}
         <aside className="lg__resource__aside">
-          <div className="lg__resource__cover">
-            {coverSrc
-              ? <img src={coverSrc} alt={r.title} loading="lazy" />
-              : <div className="lg__resource__cover--ph" aria-hidden="true">{typeLabel}</div>}
-          </div>
+          {/* Pas d'image, pas de cadre : un rectangle gris portant le mot
+              « OUTIL » ne dit rien à personne et occupe la moitié de l'écran. */}
+          {coverSrc && (
+            <div className="lg__resource__cover">
+              <img src={coverSrc} alt={r.title} loading="lazy" />
+            </div>
+          )}
           <div className="lg__resource__card">
-            <p className="lg__resource__card__meta">{typeLabel}{r.format ? " · " + r.format : ""}</p>
+            <p className="lg__resource__card__meta">{r.format || typeLabel}</p>
             <p className="lg__resource__card__price">GRATUIT</p>
             {r.available ? (
               <button className="lg__btn lg__btn--primary lg__resource__cta" onClick={() => setRequested(true)}>
@@ -4805,9 +4814,6 @@ function ResourcePage({ r }) {
 
         {/* Colonne contenu */}
         <div className="lg__resource__body">
-          <p className="lg__resource__kicker">{typeLabel}</p>
-          <h1 className="lg__resource__title">{r.title}</h1>
-          {r.subtitle && <p className="lg__resource__subtitle">{r.subtitle}</p>}
           {r.author && <p className="lg__resource__author">Par {r.author}</p>}
 
           {paras.length > 0 && (
