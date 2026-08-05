@@ -6994,8 +6994,15 @@ a.lg__partners__logo:hover {
 .lg__resource__inside { max-width: 72ch; }
 .lg__resource__head .lg__resource__subtitle { max-width: 60ch; margin-bottom: 0; }
 
-/* ---- Colonne média (sticky) ---- */
-.lg__resource__aside { position: sticky; top: var(--space-6); }
+/* ---- Colonne média : elle suit le scroll ----
+   Le visuel et la carte de téléchargement restent sous les yeux pendant
+   toute la lecture, comme le bloc d'informations d'une fiche formation.
+   Elle se cale sous la barre de titre, dont la hauteur varie selon qu'elle
+   est collée ou non : d'où la variable plutôt qu'une valeur en dur. */
+.lg__resource__aside {
+  position: sticky;
+  top: calc(121px + var(--lg-fiche-barre-h, 0px) + 16px);
+}
 .lg__resource__cover {
   border: 1px solid var(--rule);
   background: var(--paper-2);
@@ -7146,6 +7153,8 @@ a.lg__partners__logo:hover {
   .lg__resource { padding: var(--space-6) 16px var(--space-15); }
   .lg__resource__barre { top: 85px; margin: 0 -16px; padding: 8px 16px 10px; font-size: clamp(16px, 4.5vw, 22px); }
   .lg__resource__grid { grid-template-columns: 1fr; gap: var(--space-8); }
+  /* Sous 900px la grille passe à une colonne : coller la carte en haut
+     mangerait la moitié de l'écran d'un téléphone. */
   .lg__resource__aside { position: static; max-width: 360px; }
 
 }
