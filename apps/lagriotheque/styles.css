@@ -7050,11 +7050,16 @@ a.lg__partners__logo:hover {
   padding: var(--space-1) var(--space-2);
   margin: 0 0 var(--space-4);
 }
+/* Le titre d'une ressource se lit comme celui d'une formation ou d'un
+   événement : même graisse, même échelle, même approche. Il était en 700 et
+   en taille fixe, ce qui le faisait crier à côté des autres et déborder sur
+   les petits écrans. */
 .lg__resource__title {
   font-family: var(--font-sans);
-  font-size: var(--text-5xl);
-  font-weight: 700;
+  font-size: clamp(28px, 4vw, 56px);
+  font-weight: 500;
   line-height: 1.05;
+  letter-spacing: -0.025em;
   color: var(--ink);
   margin: 0 0 var(--space-4);
 }
