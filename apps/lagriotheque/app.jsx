@@ -1643,7 +1643,15 @@ function ProgramPage({ item, kind }) {
   // - "workshop" → vue commerciale épurée (vente pure, pas de cadre Qualiopi).
   // - "formation" → vue complète Qualiopi (présentation, certif, indicateurs,
   //   financement OPCO/CPF, accessibilité, etc.).
-  const TAB_GROUPS = kind === "workshop"
+  const TAB_GROUPS = kind === "event"
+    ? [
+        // Un événement a peu de matière : trois onglets suffisent, sinon on
+        // afficherait des sections vides.
+        { id: "presentation", label: "L’événement", sections: ["description"] },
+        { id: "infos", label: "Infos pratiques", sections: ["quand", "lieu"] },
+        { id: "contact", label: "Contact", sections: ["contact"] },
+      ]
+    : kind === "workshop"
     ? [
         {
           id: "presentation",
@@ -1699,10 +1707,35 @@ function ProgramPage({ item, kind }) {
   const nextSession =
     upcoming.find((s) => normalizeStatus(s.status).class === "open") || upcoming[0];
   const f = item; // alias pour minimiser le diff ci-dessous
-  const kindLabel = kind === "workshop" ? "workshop" : "formation";
-  const backHref = kind === "workshop" ? "#/workshops" : "#/catalogue";
-  const backLabel = kind === "workshop" ? "← Retour aux workshops" : "← Retour aux formations";
+  // Trois gabarits partagent cette page : formation (cadre Qualiopi complet),
+  // workshop (vente directe) et événement (date, lieu, réservation).
+  const isEvent = kind === "event";
+  const isFormation = kind === "formation";
+  const kindLabel = kind === "workshop" ? "workshop" : isEvent ? "événement" : "formation";
+  const backHref = kind === "workshop" ? "#/workshops" : isEvent ? "#/events" : "#/catalogue";
+  const backLabel = kind === "workshop"
+    ? "← Retour aux workshops"
+    : isEvent ? "← Retour aux événements" : "← Retour aux formations";
   const disciplineLabel = f.discipline ? f.discipline.toLowerCase() : "";
+  // Événement : tout vit sur l’objet lui-même, il n’y a pas de session liée.
+  const evPasse = isEvent ? eventIsPast(f) : false;
+  const evDate = isEvent ? [formatEventDate(f.date), f.time].filter(Boolean).join(" · ") : "";
+  const evLieu = isEvent ? [f.location, f.city].filter(Boolean).join(" · ") : "";
+  const evExterne = isEvent && /^https?:\/\//i.test(f.link || "");
+  // Réservation d’un événement : lien direct si billetterie externe, sinon la
+  // modale maison (le lead atterrit dans le back-office).
+  const boutonEvent = (classe) => {
+    if (evPasse) return null;
+    return evExterne ? (
+      <a className={classe} href={f.link} target="_blank" rel="noopener noreferrer">
+        {f.link_label || "Réserver"}
+      </a>
+    ) : (
+      <button type="button" className={classe} onClick={() => setShowInscription(true)}>
+        {f.link_label || "Réserver gratuitement"}
+      </button>
+    );
+  };
   const scrollToId = (id) => (e) => {
     e.preventDefault();
     const el = document.getElementById(id);
@@ -1728,21 +1761,21 @@ function ProgramPage({ item, kind }) {
           <p className="lg__cta-mini__title">{f.title}</p>
           <div className="lg__cta-mini__head">
             <strong className="lg__cta-mini__price">
-              {f.price || "—"}
+              {isEvent ? (evDate || "Date à venir") : (f.price || "—")}
             </strong>
-            {(kind !== "workshop" || !isFree(f)) && (
+            {(isFormation || (kind === "workshop" && !isFree(f))) && (
               <span className="lg__cta-mini__hint">
                 {kind === "workshop" ? "TVA 20 % incluse" : "Exonéré de TVA"}
               </span>
             )}
           </div>
-          {!compact && kind !== "workshop" && (f.cpf || f.rs) && (
+          {!compact && isFormation && (f.cpf || f.rs) && (
             <p className="lg__cta-mini__cert">
               <span aria-hidden="true">✓</span> Formation certifiante
               {f.rs && <span className="lg__cta-mini__cert__code"> · RS {f.rs}</span>}
             </p>
           )}
-          {kind !== "workshop" && (f.cpf || f.opco || f.faf || f.rs) && (
+          {isFormation && (f.cpf || f.opco || f.faf || f.rs) && (
             <div className="lg__cta-mini__badges">
               {f.cpf && <span>CPF</span>}
               {f.opco && <span>OPCO</span>}
@@ -1750,9 +1783,14 @@ function ProgramPage({ item, kind }) {
               {f.rs && <span>RS {f.rs}</span>}
             </div>
           )}
-          {!compact && (
+          {(!compact || isEvent) && (
             <ul className="lg__cta-mini__meta">
               {f.format && <li>{f.format}</li>}
+              {isEvent && evLieu && <li>{evLieu}</li>}
+              {isEvent && f.kind && <li>{f.kind}</li>}
+              {isEvent && (evPasse || f.status) && (
+                <li>{evPasse ? "Événement passé" : f.status}</li>
+              )}
             </ul>
           )}
           {upcoming.length > 0 && (
@@ -1803,7 +1841,10 @@ function ProgramPage({ item, kind }) {
               <p className="lg__cta-mini__audience__text">{f.audience}</p>
             </div>
           ) : null}
-          {kind === "workshop" ? (
+          {isEvent ? (
+            /* Événement = billetterie externe ou modale d’inscription. */
+            boutonEvent("lg__cta-mini__btn")
+          ) : kind === "workshop" ? (
             /* Workshop = achat direct (Stripe) → « Réserver / Payer ». */
             <a
               className="lg__cta-mini__btn"
@@ -1822,7 +1863,7 @@ function ProgramPage({ item, kind }) {
               Demander une inscription →
             </button>
           )}
-          {kind !== "workshop" && f.cpf && (
+          {isFormation && f.cpf && (
             <button
               type="button"
               className="lg__cta-mini__btn"
@@ -1831,7 +1872,7 @@ function ProgramPage({ item, kind }) {
               S'inscrire via Mon Compte Formation
             </button>
           )}
-          {!compact && kind !== "workshop" && (
+          {!compact && isFormation && (
             <button
               type="button"
               className="lg__cta-mini__btn lg__cta-mini__btn--ghost"
@@ -1840,7 +1881,7 @@ function ProgramPage({ item, kind }) {
               ↓ Télécharger le programme
             </button>
           )}
-          {!compact && (
+          {!compact && !isEvent && (
             <a
               className="lg__cta-mini__sub"
               href="mailto:formations@lesgriots.com?subject=Devis%20OPCO%20%2F%20FAF"
@@ -1848,7 +1889,7 @@ function ProgramPage({ item, kind }) {
               Étudier un financement
             </a>
           )}
-          {!compact && kind !== "workshop" && f.cpf && (
+          {!compact && isFormation && f.cpf && (
             <div className="lg__cta-mini__cpfbox">
               <img
                 className="lg__cta-mini__cpfbox__logo"
@@ -1865,8 +1906,8 @@ function ProgramPage({ item, kind }) {
   return (
     <section className={"lg__formation" + (kind === "workshop" ? " is-workshop" : "")}>
       <PageHero src={(f.media && /\.(mp4|webm|mov|m4v)$/i.test(f.media.src || "")) ? f.media.src : text("home.hero_video", "img/hero.mp4")} poster={(f.media && f.media.poster) ? f.media.poster : undefined} title={f.title}>
-        {(f.tagline || disciplineLabel) && (
-          <p className="lg__formation__herosub">{f.tagline || disciplineLabel}</p>
+        {(f.tagline || disciplineLabel || (isEvent && f.kind)) && (
+          <p className="lg__formation__herosub">{f.tagline || disciplineLabel || f.kind}</p>
         )}
       </PageHero>
       <div className="lg__formation__head" ref={headerRef} aria-hidden="true" />
@@ -1908,13 +1949,15 @@ function ProgramPage({ item, kind }) {
             </React.Fragment>
           ))}
         </div>
-        <a
-          className="lg__tabs__cta"
-          href={ctaHref(item, nextSession)}
-          {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-        >
-          {isFree(item) ? "Réserver →" : (item.stripePaymentLink ? "Payer →" : "Réserver →")}
-        </a>
+        {isEvent ? boutonEvent("lg__tabs__cta") : (
+          <a
+            className="lg__tabs__cta"
+            href={ctaHref(item, nextSession)}
+            {...(ctaIsExternal(item) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
+            {isFree(item) ? "Réserver →" : (item.stripePaymentLink ? "Payer →" : "Réserver →")}
+          </a>
+        )}
         <button
           type="button"
           className="lg__tabs__nav lg__tabs__nav--next"
@@ -2072,9 +2115,24 @@ function ProgramPage({ item, kind }) {
           ),
         },
         {
+          // Spécifique événement : la date, l’heure et l’état des inscriptions.
+          id: "quand",
+          title: "Quand",
+          body: isEvent && (evDate || f.status || evPasse) ? (
+            <p className="lg__formation__prose">
+              {evDate || "Date à venir"}
+              {evPasse
+                ? " · événement passé"
+                : f.status ? " · " + String(f.status).toLowerCase() : ""}
+            </p>
+          ) : null,
+        },
+        {
           id: "lieu",
           title: "Lieu",
-          body: f.location ? <p className="lg__formation__prose">{f.location}</p> : null,
+          body: (isEvent ? evLieu : f.location) ? (
+            <p className="lg__formation__prose">{isEvent ? evLieu : f.location}</p>
+          ) : null,
         },
         {
           id: "formateur",
@@ -2270,7 +2328,9 @@ function ProgramPage({ item, kind }) {
               <p>
                 {kind === "workshop"
                   ? "Une question sur ce workshop ou sur l'inscription ? Écris-nous."
-                  : "Une question sur cette formation, sur le financement, ou sur l'inscription ? Écris-nous."}
+                  : isEvent
+                    ? "Une question sur cet événement ou sur la réservation ? Écris-nous."
+                    : "Une question sur cette formation, sur le financement, ou sur l'inscription ? Écris-nous."}
               </p>
               <ul>
                 <li>
@@ -2358,7 +2418,8 @@ function ProgramPage({ item, kind }) {
       )}
 
       {/* Avis — section dédiée (sortie de la barre d'onglets), juste avant le
-          CTA final. */}
+          CTA final. Sans objet pour un événement. */}
+      {!isEvent && (
       <section className="lg__avis" aria-label="Avis">
         <h2 className="lg__avis__title">Avis</h2>
         <p className="lg__avis__text">
@@ -2368,6 +2429,7 @@ function ProgramPage({ item, kind }) {
           bilan de la promo.
         </p>
       </section>
+      )}
 
       {/* ÉCRAN SCINDÉ (mobile) : la carte complète occupe en permanence la
           moitié basse de l'écran, scrollable à l'intérieur ; la fiche se lit
@@ -2402,9 +2464,13 @@ function ProgramPage({ item, kind }) {
         )}
         <div className="lg__cta-final__veil" aria-hidden="true" />
         <div className="lg__cta-final__inner">
-          <p className="lg__cta-final__kicker">Prêt à commencer ?</p>
+          <p className="lg__cta-final__kicker">
+            {isEvent
+              ? (evPasse ? "C’était" : "On se voit là-bas ?")
+              : "Prêt à commencer ?"}
+          </p>
           <h2 className="lg__cta-final__title">{f.title}</h2>
-          {f.price && (
+          {!isEvent && f.price && (
             <p className="lg__cta-final__price">
               {f.price}
               {!isFree(f) && (
@@ -2414,7 +2480,9 @@ function ProgramPage({ item, kind }) {
               )}
             </p>
           )}
-          {kind === "workshop" ? (
+          {isEvent ? (
+            boutonEvent("lg__cta-final__btn")
+          ) : kind === "workshop" ? (
             <a
               className="lg__cta-final__btn"
               href={ctaHref(item, nextSession)}
@@ -2433,6 +2501,17 @@ function ProgramPage({ item, kind }) {
           )}
         </div>
       </div>
+
+      {/* La modale d’inscription : elle était pilotée par showInscription mais
+          n’était rendue nulle part, donc le bouton « Demander une inscription »
+          ne faisait rien. */}
+      {showInscription && (
+        <InscriptionModal
+          target={{ id: f.id, title: f.title }}
+          kind={kind}
+          onClose={() => setShowInscription(false)}
+        />
+      )}
     </section>
   );
 }
@@ -3555,93 +3634,12 @@ function EventCard({ e }) {
 // Fiche ÉVÉNEMENT — même gabarit linéaire que les workshops : hero, bandeau
 // date/lieu/type, CTA d'inscription (lien BO), description, CTA final.
 // Vente/inscription directe : aucun vocabulaire réglementaire.
+// Fiche ÉVÉNEMENT — même structure qu’une fiche formation : hero, titre
+// collant, barre d’onglets, colonne de réservation. Les différences (onglets
+// réduits, date au lieu du prix, pas de cadre Qualiopi) sont portées par
+// ProgramPage via kind="event".
 function EventPage({ e }) {
-  const isPast = eventIsPast(e);
-  const dateLabel = [formatEventDate(e.date), e.time].filter(Boolean).join(" · ");
-  const placeLabel = [e.location, e.city].filter(Boolean).join(" · ");
-  const [showInscription, setShowInscription] = React.useState(false);
-  // Lien externe (billetterie, Stripe…) → lien direct. Sinon (mailto ou rien)
-  // → formulaire d'inscription maison, comme les workshops gratuits.
-  const isExternal = /^https?:\/\//i.test(e.link || "");
-  const cta = (extra) => {
-    if (isPast) return null;
-    if (isExternal) {
-      return (
-        <a
-          className={"lg__ws__btn" + (extra ? " " + extra : "")}
-          href={e.link}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {e.link_label || "Réserver"}
-        </a>
-      );
-    }
-    return (
-      <button
-        type="button"
-        className={"lg__ws__btn" + (extra ? " " + extra : "")}
-        onClick={() => setShowInscription(true)}
-      >
-        {e.link_label || "Réserver gratuitement"}
-      </button>
-    );
-  };
-  return (
-    <section className="lg__formation lg__ws is-workshop">
-      <PageHero src={(e.media && e.media.src) || ""} title={e.title}>
-        {e.kind && <p className="lg__formation__herosub">{e.kind}</p>}
-      </PageHero>
-
-      <div className="lg__ws__meta">
-        <div className="lg__ws__meta__cell">
-          <span className="lg__ws__meta__label">Date</span>
-          <strong className="lg__ws__meta__value">{dateLabel || "À venir"}</strong>
-          {isPast ? (
-            <span className="lg__ws__meta__status is-closed">Passé</span>
-          ) : e.status ? (
-            <span className="lg__ws__meta__status is-open">{e.status}</span>
-          ) : null}
-        </div>
-        <div className="lg__ws__meta__cell">
-          <span className="lg__ws__meta__label">Lieu</span>
-          <strong className="lg__ws__meta__value">{placeLabel || "—"}</strong>
-        </div>
-        <div className="lg__ws__meta__cell">
-          <span className="lg__ws__meta__label">Type</span>
-          <strong className="lg__ws__meta__value">{e.kind || "Événement"}</strong>
-        </div>
-      </div>
-
-      {cta() && <div className="lg__ws__ctarow">{cta()}</div>}
-
-      {e.description && (
-        <div className="lg__ws__body">
-          <div className="lg__ws__block">
-            <h2 className="lg__ws__h2">L'événement</h2>
-            <p className="lg__formation__prose lg__ws__prose">{e.description}</p>
-          </div>
-        </div>
-      )}
-
-      {!isPast && (
-        <div className="lg__cta-final">
-          <div className="lg__cta-final__inner">
-            <p className="lg__cta-final__kicker">On se voit là-bas ?</p>
-            <h2 className="lg__cta-final__title">{e.title}</h2>
-            {cta("lg__cta-final__btn--ws")}
-          </div>
-        </div>
-      )}
-      {showInscription && (
-        <InscriptionModal
-          target={{ id: e.id, title: e.title }}
-          kind="event"
-          onClose={() => setShowInscription(false)}
-        />
-      )}
-    </section>
-  );
+  return <ProgramPage item={e} kind="event" />;
 }
 
 function Events() {
