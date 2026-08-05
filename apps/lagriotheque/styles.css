@@ -6992,7 +6992,11 @@ a.lg__partners__logo:hover {
    Le titre garde toute la largeur, la prose se borne. */
 .lg__resource__desc,
 .lg__resource__inside { max-width: 72ch; }
-.lg__resource__head .lg__resource__subtitle { max-width: 60ch; margin-bottom: 0; }
+.lg__resource__head .lg__resource__subtitle {
+  max-width: 52ch;
+  margin-bottom: 0;
+  font-size: clamp(16px, 1.5vw, 21px);
+}
 
 /* ---- Colonne média : elle suit le scroll, et ne bouge pas ----
    Le visuel et la carte de téléchargement restent sous les yeux pendant
@@ -7085,8 +7089,8 @@ a.lg__partners__logo:hover {
    gauche, au-dessus de la colonne média. Un filet le sépare du contenu,
    comme sur les pages de catalogue. */
 .lg__resource__head {
-  margin: 0 0 40px;
-  padding-bottom: 28px;
+  margin: 0 0 44px;
+  padding: 12px 0 32px;
   border-bottom: 1px solid var(--ink);
 }
 /* Le titre d'une ressource se lit comme celui d'une formation ou d'un
@@ -7095,13 +7099,16 @@ a.lg__partners__logo:hover {
    les petits écrans. */
 .lg__resource__title {
   font-family: var(--font-sans);
-  /* Exactement l'échelle des titres de formation et d'événement. */
-  font-size: clamp(28px, 4vw, 64px);
+  /* Une vraie tête de page, à l'échelle des titres de fiche formation
+     (clamp 36→80). Le titre EST la promesse de la ressource : à 64px il
+     ressemblait à une ligne de liste, pas à une entrée de page. */
+  font-size: clamp(36px, 6vw, 80px);
   font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: -0.025em;
+  line-height: 1;
+  letter-spacing: -0.035em;
   color: var(--ink);
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-5);
+  max-width: 18ch;
 }
 .lg__resource__subtitle {
   font-family: var(--font-sans);
