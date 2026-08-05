@@ -4279,9 +4279,24 @@ function ResourceRow({ r }) {
 // Si la soumission réussit, ouvre la ressource dans un nouvel onglet.
 // Si elle échoue (backoffice éteint, réseau down), on log mais on laisse quand
 // même télécharger pour pas frustrer l'utilisateur — l'email sera juste perdu.
+/**
+ * La porte : on laisse son nom, on obtient la ressource.
+ *
+ * Deux sorties selon la ressource. Un fichier hébergé chez nous se
+ * télécharge. Une ressource qui vit ailleurs, un outil qu'on recommande par
+ * exemple, emmène le visiteur sur place : là, le formulaire n'est pas un
+ * péage, c'est le seul moment où l'on peut se présenter.
+ *
+ * Prénom et nom sont séparés et demandés : un prénom seul ne permet pas
+ * d'écrire à quelqu'un correctement, et c'est le premier geste de relation.
+ */
 function ResourceModal({ resource, onClose }) {
+  // Une adresse qui commence par http mène ailleurs : on n'y télécharge pas,
+  // on s'y rend.
+  const externe = /^https?:\/\//i.test(String(resource.href || ""));
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  const [prenom, setPrenom] = useState("");
+  const [nom, setNom] = useState("");
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState("");
@@ -4317,6 +4332,10 @@ function ResourceModal({ resource, onClose }) {
 
   async function submit(e) {
     e.preventDefault();
+    if (!prenom.trim() || !nom.trim()) {
+      setErr("Prénom et nom sont demandés.");
+      return;
+    }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setErr("Email invalide");
       return;
@@ -4331,20 +4350,37 @@ function ResourceModal({ resource, onClose }) {
     const endpoint = (window.SITE_CONFIG && window.SITE_CONFIG.leadsEndpoint)
       || "http://localhost:3031/api/leads";
 
+    const charge = JSON.stringify({
+      email,
+      name: [prenom, nom].filter(Boolean).join(" "),
+      first_name: prenom,
+      last_name: nom,
+      resource_id: resource.id,
+      consent,
+    });
+
+    /*
+     * Quand la ressource est ailleurs, on quitte la page juste après. Un
+     * `fetch` ordinaire serait annulé en vol par la navigation et le contact
+     * serait perdu : `sendBeacon` est fait pour ça, le navigateur garantit
+     * l'envoi même si l'onglet change d'adresse dans la seconde.
+     */
     try {
-      await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          name,
-          resource_id: resource.id,
-          consent,
-        }),
-      });
+      const envoye = externe
+        && typeof navigator !== "undefined"
+        && typeof navigator.sendBeacon === "function"
+        && navigator.sendBeacon(endpoint, new Blob([charge], { type: "application/json" }));
+      if (!envoye) {
+        await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: charge,
+          keepalive: true,
+        });
+      }
     } catch (e) {
-      // Si le backoffice est éteint, on laisse quand même télécharger.
-      // Le lead sera perdu mais on n'embête pas l'utilisateur.
+      // Si le backoffice est éteint, on laisse quand même passer le visiteur.
+      // Le lead sera perdu mais on n'embête personne avec notre panne.
       console.warn("Lead capture failed:", e);
     }
 
@@ -4352,7 +4388,13 @@ function ResourceModal({ resource, onClose }) {
 
     // Déclenche le téléchargement + bascule sur l'écran de confirmation.
     // Auto-close après 2.5s pour que le visiteur voie bien le message.
-    if (resource.href && resource.href !== "#") {
+    if (externe) {
+      // Un court instant sur l'écran de confirmation, le temps de lire son
+      // prénom, puis on l'emmène. Une redirection franche plutôt qu'un
+      // nouvel onglet : un onglet ouvert après un `await` se fait bloquer.
+      setStep("done");
+      setTimeout(() => { window.location.href = resource.href; }, 1400);
+    } else if (resource.href && resource.href !== "#") {
       triggerDownload(resource.href);
       setStep("done");
       setTimeout(() => onClose(), 2500);
@@ -4417,17 +4459,16 @@ function ResourceModal({ resource, onClose }) {
              arrive direct dans son dossier Téléchargements sans aucune fanfare). */
           <div style={{ padding: "8px 0 12px" }}>
             <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>
-              ✓ Merci{name ? `, ${name}` : ""} — ton email est enregistré.
+              ✓ Merci{prenom ? `, ${prenom}` : ""} — ton email est enregistré.
             </p>
             <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 18, opacity: 0.75 }}>
-              Le téléchargement vient de démarrer (regarde ton dossier <em>Téléchargements</em>).
-              Si rien ne s'est lancé, clique ici :
+              {externe
+                ? "On t'emmène sur l'outil. Si rien ne se passe, clique ici :"
+                : <>Le téléchargement vient de démarrer (regarde ton dossier <em>Téléchargements</em>). Si rien ne s'est lancé, clique ici :</>}
             </p>
             <a
               href={resource.href}
-              download
-              target="_blank"
-              rel="noopener"
+              {...(externe ? { rel: "noopener nofollow" } : { download: true, target: "_blank", rel: "noopener" })}
               style={{
                 display: "inline-block",
                 padding: "10px 18px",
@@ -4441,7 +4482,7 @@ function ResourceModal({ resource, onClose }) {
                 textDecoration: "none",
               }}
             >
-              ↓ Télécharger à nouveau
+              {externe ? "→ Ouvrir l’outil" : "↓ Télécharger à nouveau"}
             </a>
             <p style={{ fontSize: 11, opacity: 0.5, marginTop: 18 }}>
               Cette fenêtre se fermera dans quelques secondes.
@@ -4450,18 +4491,35 @@ function ResourceModal({ resource, onClose }) {
         ) : (
         <>
         <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 24, opacity: 0.75 }}>
-          Laisse-nous ton email et le téléchargement démarre dans la foulée.
-          On t'enverra aussi occasionnellement nos prochaines ressources.
+          {externe
+            ? "Dis-nous qui tu es, et on t'ouvre l'outil dans la foulée. On t'enverra aussi occasionnellement nos prochaines ressources."
+            : "Laisse-nous ton email et le téléchargement démarre dans la foulée. On t'enverra aussi occasionnellement nos prochaines ressources."}
         </p>
 
         <form onSubmit={submit}>
           <label style={{ display: "block", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 6, opacity: 0.6 }}>
-            Prénom (optionnel)
+            Prénom *
           </label>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            required
+            value={prenom}
+            onChange={(e) => setPrenom(e.target.value)}
+            style={{
+              width: "100%", padding: "10px 12px", marginBottom: 14,
+              border: "1px solid var(--ink)", background: "transparent",
+              fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--ink)",
+            }}
+          />
+
+          <label style={{ display: "block", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 6, opacity: 0.6 }}>
+            Nom *
+          </label>
+          <input
+            type="text"
+            required
+            value={nom}
+            onChange={(e) => setNom(e.target.value)}
             style={{
               width: "100%", padding: "10px 12px", marginBottom: 14,
               border: "1px solid var(--ink)", background: "transparent",
@@ -4530,7 +4588,7 @@ function ResourceModal({ resource, onClose }) {
                 cursor: submitting ? "wait" : "pointer",
               }}
             >
-              {submitting ? "..." : "↓ Télécharger"}
+              {submitting ? "..." : externe ? "→ Accéder à l’outil" : "↓ Télécharger"}
             </button>
           </div>
         </form>
@@ -4698,6 +4756,9 @@ function Ressources() {
 function ResourcePage({ r }) {
   const [requested, setRequested] = useState(false);
   const typeLabel = resourceTypeLabel(r.type);
+  // Une ressource peut vivre ailleurs : un outil qu'on recommande, par
+  // exemple. On ne promet alors ni fichier ni envoi par e-mail.
+  const externe = /^https?:\/\//i.test(String(r.href || ""));
 
   // Description : un paragraphe par ligne vide. "Ce que tu obtiens" : une puce par ligne.
   const paras = (r.description || "").split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
@@ -4721,12 +4782,16 @@ function ResourcePage({ r }) {
             <p className="lg__resource__card__price">GRATUIT</p>
             {r.available ? (
               <button className="lg__btn lg__btn--primary lg__resource__cta" onClick={() => setRequested(true)}>
-                Télécharger ▶
+                {externe ? "Accéder à l’outil ▶" : "Télécharger ▶"}
               </button>
             ) : (
               <button className="lg__btn lg__resource__cta" disabled>Bientôt disponible</button>
             )}
-            <p className="lg__resource__card__note">Envoyé par email · sans spam · désinscription en 1 clic</p>
+            <p className="lg__resource__card__note">
+              {externe
+                ? "Outil gratuit, édité par un tiers · on te l’ouvre après le formulaire"
+                : "Envoyé par email · sans spam · désinscription en 1 clic"}
+            </p>
           </div>
         </aside>
 
