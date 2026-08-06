@@ -4831,6 +4831,11 @@ function NewsletterModal({ onClose }) {
         <button type="button" className="lg__nl__close" onClick={onClose} aria-label="Fermer">×</button>
 
         <div className="lg__nl__body">
+          {/* Mot-marque vectorisé : la modale s'ouvre par-dessus la page, elle
+              doit se présenter elle-même. */}
+          <p className="lg__nl__logo" role="img" aria-label="LA GRIOTHÈQUE">
+            <GriotRing />
+          </p>
           <p className="lg__nl__kicker">Newsletter</p>
 
           {etape === "done" ? (

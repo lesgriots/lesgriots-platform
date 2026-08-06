@@ -8000,6 +8000,22 @@ a.lg__partners__logo:hover {
 .lg__nl__close:hover { background: var(--accent); color: var(--ink); }
 
 .lg__nl__body { padding: 34px 32px 30px; }
+.lg__nl__logo {
+  display: block;
+  width: 150px;
+  margin: 0 0 20px;
+  line-height: 0;
+  color: var(--ink);
+}
+/* Le mot-marque partage son wrapper avec le hero, qui le fixe à 400px : on
+   le ramène ici à la largeur du bloc. */
+.lg__nl__logo .lg__hero__griot__wrap {
+  position: static;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.lg__nl__logo .lg__wordmark-svg { width: 100%; height: auto; display: block; }
 .lg__nl__kicker {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -8030,12 +8046,11 @@ a.lg__partners__logo:hover {
 .lg__nl__field { margin-bottom: 18px; }
 .lg__nl__field label {
   display: block;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  opacity: 0.55;
-  margin-bottom: 5px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0;
+  opacity: 0.6;
+  margin-bottom: 4px;
 }
 .lg__nl__field input {
   width: 100%;
@@ -8054,8 +8069,8 @@ a.lg__partners__logo:hover {
 }
 .lg__nl__field input::placeholder { color: var(--ink-3); }
 .lg__nl__field input:focus {
-  border-bottom-color: var(--accent);
-  box-shadow: 0 1px 0 0 var(--accent);
+  border-bottom-color: var(--ink);
+  box-shadow: 0 1px 0 0 var(--ink);
 }
 
 .lg__nl__consent {
