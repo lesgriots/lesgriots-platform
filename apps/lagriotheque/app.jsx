@@ -545,7 +545,7 @@ function Manifesto() {
           <div className="lg__hero-yard__media">
             <video
               ref={heroVideoRef}
-              src={text("home.hero_video", "img/hero.mp4")}
+              src={text("home.hero_video", "")}
               autoPlay
               loop
               muted
@@ -753,7 +753,7 @@ function Manifesto() {
               <video
                 className="lg__vision__face"
                 data-face={0}
-                src={text("home.vision_video", "img/hero.mp4")}
+                src={text("home.vision_video", "")}
                 autoPlay
                 loop
                 muted
@@ -821,7 +821,7 @@ function TrainerCard({ trainer }) {
 // priorité (16/9), sinon l'image, sinon un placeholder initiales.
 function rowCursorMedia(item) {
   const m = (item && item.media) || {};
-  const video = item.video || (m.type === "video" ? m.src : "") || text("home.hero_video", "img/hero.mp4");
+  const video = item.video || (m.type === "video" ? m.src : "") || text("home.hero_video", "");
   const img = (m.type === "image" && m.src) ? m.src : (m.poster || "");
   return { video, img };
 }
@@ -2326,7 +2326,7 @@ function ProgramPage({ item, kind }) {
 
   return (
     <section className={"lg__formation" + (kind === "workshop" ? " is-workshop" : "") + (isEvent ? " is-event" : "")}>
-      <PageHero src={(f.media && /\.(mp4|webm|mov|m4v)$/i.test(f.media.src || "")) ? f.media.src : text("home.hero_video", "img/hero.mp4")} poster={(f.media && f.media.poster) ? f.media.poster : undefined} title={f.title}>
+      <PageHero src={(f.media && f.media.src) || ""} poster={(f.media && f.media.poster) ? f.media.poster : undefined} title={f.title}>
         {(f.tagline || disciplineLabel || (isEvent && f.kind)) && (
           <p className="lg__formation__herosub">{f.tagline || disciplineLabel || f.kind}</p>
         )}
@@ -2796,7 +2796,10 @@ function MethodBand({ num, media, title, txt }) {
  * ne s'ouvre sur du vide.
  */
 function PageHero({ src, poster, title, children }) {
-  const media = src || text("home.hero_video", "img/hero.mp4");
+  // Pas de repli : un champ media vide dans le back-office veut dire « pas
+  // de media sur cette page », pas « mets la video de la maison ». Sans ça,
+  // toutes les pages non renseignees affichaient le meme film.
+  const media = src || "";
   const isVideo = /\.(mp4|webm|mov|m4v)$/i.test(media || "");
   const overlay = (title || children) && (
     <div className="lg__pagehero__overlay">
@@ -6236,7 +6239,15 @@ function App() {
      */
     const PAGES_HERO = new Set(["catalogue", "formations", "workshops", "agenda", "events", "ressources"]);
     document.body.classList.toggle("is-home", isHome);
-    document.body.classList.toggle("is-listhero", isHome || isDetailHero || PAGES_HERO.has(route));
+    // Le mode hero met la nav en blanc et fait passer le contenu sous le menu.
+    // Il ne vaut que si un bandeau est réellement rendu : depuis qu'un média
+    // vide ne déclenche plus de repli, une page peut très bien ne pas en avoir,
+    // et la nav blanche deviendrait invisible sur le papier.
+    const aUnBandeau = !!document.querySelector(".lg__hero-yard, .lg__pagehero");
+    document.body.classList.toggle(
+      "is-listhero",
+      aUnBandeau && (isHome || isDetailHero || PAGES_HERO.has(route))
+    );
     // Fiche formation/workshop : la barre de réservation fixe (mobile) masque
     // le bas du footer → le footer se rehausse via body.is-fiche.
     document.body.classList.toggle("is-fiche", isDetailHero);
