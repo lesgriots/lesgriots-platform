@@ -7807,15 +7807,22 @@ a.lg__partners__logo:hover {
   .lg__formation__side--desktop { display: none; }
   .lg__formation__side--mobile {
     display: block;
-    position: fixed;
+    /* sticky ; le panneau colle au bas de l'écran pendant la lecture, puis se
+       range à sa place (fin de fiche) quand on arrive en bas : le footer
+       vient APRÈS lui, jamais par-dessus. fixed l'arrachait du flux, et le
+       footer finissait affiché au-dessus du bloc d'achat. */
+    position: sticky;
+    position: -webkit-sticky;
     top: auto; /* neutralise le top: hérité de la règle sticky desktop */
-    left: 0;
-    right: 0;
     bottom: 0;
+    /* Pleine largeur : compense la gouttière de 24px de la fiche. Une règle
+       plus haut fige width: 100%, d'où le calc plutôt que des marges seules. */
+    margin: 0 -24px;
+    width: calc(100% + 48px);
+    box-sizing: border-box;
     /* SANS défilement : le panneau prend la hauteur de la carte entière. */
     height: auto;
     z-index: 48; /* au-dessus des onglets sticky (41), sous le header (55) */
-    margin: 0;
     background: var(--paper);
     border-top: 1px solid var(--ink);
     box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.12);
@@ -7862,8 +7869,10 @@ a.lg__partners__logo:hover {
      la page. La fiche elle-même n'en a plus besoin depuis que le bloc CTA de
      bas de page est masqué en mobile, sinon on verrait un grand trou blanc
      entre la dernière section et le footer. */
-  .lg__formation { padding-bottom: 24px; }
-  body.is-fiche .lg__footer { padding-bottom: calc(var(--lg-panel-h, 60svh) + 24px); }
+  /* Le panneau sticky est le dernier élément de la fiche : il la termine
+     lui-même, aucune réserve de hauteur à prévoir. */
+  .lg__formation { padding-bottom: 0; }
+
 }
 
 /* ===================================================================
