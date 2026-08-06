@@ -6027,6 +6027,7 @@ function Partners() {
 function LaunchPage() {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [telephone, setTelephone] = useState("");
   const [state, setState] = useState("idle"); // idle | loading | ok | invalid | error
   const [videoPlaying, setVideoPlaying] = useState(false);
   const bgVideoRef = useRef(null);
@@ -6046,6 +6047,9 @@ function LaunchPage() {
   async function submit(e) {
     e.preventDefault();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setState("invalid"); return; }
+    // Même souplesse que le formulaire newsletter : +33, espaces, points et
+    // tirets acceptés, on ne corrige pas la façon dont les gens écrivent.
+    if (!/^[+0-9][0-9 ().\/-]{5,19}$/.test(telephone.trim())) { setState("invalid"); return; }
     setState("loading");
     const endpoints = [
       (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.subscribeEndpoint),
@@ -6057,7 +6061,7 @@ function LaunchPage() {
         const r = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, name: firstName.trim(), source: "launch", consent: true }),
+          body: JSON.stringify({ email, name: firstName.trim(), first_name: firstName.trim(), phone: telephone.trim(), source: "launch", consent: true }),
         });
         if (r.ok) { setState("ok"); return; }
       } catch (err) { /* try next endpoint */ }
@@ -6139,6 +6143,16 @@ function LaunchPage() {
               className="lg__launch__input"
               aria-label="Email"
               autoComplete="email"
+            />
+            <input
+              type="tel"
+              required
+              placeholder={text("launch.tel_placeholder", "06 00 00 00 00")}
+              value={telephone}
+              onChange={(e) => setTelephone(e.target.value)}
+              className="lg__launch__input"
+              aria-label="Téléphone"
+              autoComplete="tel"
             />
             <button type="submit" className="lg__launch__btn" disabled={state === "loading"}>
               {state === "loading" ? "…" : text("launch.cta", "Me prévenir →")}

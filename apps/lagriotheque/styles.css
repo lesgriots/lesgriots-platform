@@ -7663,7 +7663,10 @@ a.lg__partners__logo:hover {
 }
 /* Vidéo (ou image) en fond plein écran */
 .lg__launch__bg {
-  position: absolute;
+  /* fixed : ancres a l'ecran, pas a la page. Le contenu descendu de 20vh
+     rend la page defilable ; en absolute, fond, voile et logo montaient
+     au scroll au lieu de rester en place. */
+  position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
@@ -7673,7 +7676,7 @@ a.lg__partners__logo:hover {
 }
 /* Voile sombre pour la lisibilité du texte */
 .lg__launch__scrim {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 1;
   background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 38%, rgba(0,0,0,0.7) 100%);
@@ -7681,7 +7684,7 @@ a.lg__partners__logo:hover {
 }
 /* Barre du haut : marque à gauche, réseaux à droite (comme le header) */
 .lg__launch__top {
-  position: absolute;
+  position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 3;
   display: flex;
