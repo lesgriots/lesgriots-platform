@@ -4727,6 +4727,7 @@ function FormulaireNewsletter({ onDone, autofocus = false, annuler = null }) {
   const [prenom, setPrenom] = useState("");
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
+  const [telephone, setTelephone] = useState("");
   const [consent, setConsent] = useState(false);
   const [envoi, setEnvoi] = useState(false);
   const [err, setErr] = useState("");
@@ -4744,6 +4745,9 @@ function FormulaireNewsletter({ onDone, autofocus = false, annuler = null }) {
     ev.preventDefault();
     if (!prenom.trim() || !nom.trim()) { setErr("Prénom et nom sont demandés."); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr("Cet email n'a pas l'air valide."); return; }
+    // Souple sur la forme (+33, espaces, points, tirets) : les gens tapent
+    // leur numéro comme ils l'écrivent, on ne les corrige pas.
+    if (!/^[+0-9][0-9 ().\/-]{5,19}$/.test(telephone.trim())) { setErr("Ce numéro de téléphone n'a pas l'air valide."); return; }
     if (!consent) { setErr("Coche la case pour qu'on puisse t'écrire."); return; }
     setEnvoi(true);
     setErr("");
@@ -4759,6 +4763,7 @@ function FormulaireNewsletter({ onDone, autofocus = false, annuler = null }) {
           name: [prenom, nom].filter(Boolean).join(" "),
           first_name: prenom,
           last_name: nom,
+          phone: telephone.trim(),
           source: "newsletter",
           consent: true,
         }),
@@ -4806,6 +4811,18 @@ function FormulaireNewsletter({ onDone, autofocus = false, annuler = null }) {
           placeholder="ton@email.com"
           value={email}
           onChange={(e) => { setEmail(e.target.value); if (err) setErr(""); }}
+        />
+      </div>
+
+      <div className="lg__nl__field">
+        <label htmlFor="nl-tel">Téléphone</label>
+        <input
+          id="nl-tel"
+          type="tel"
+          autoComplete="tel"
+          placeholder="06 00 00 00 00"
+          value={telephone}
+          onChange={(e) => { setTelephone(e.target.value); if (err) setErr(""); }}
         />
       </div>
 

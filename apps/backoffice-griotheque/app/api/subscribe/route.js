@@ -49,7 +49,7 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { email, name, first_name, last_name } = body || {};
+    const { email, name, first_name, last_name, phone } = body || {};
     if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Email invalide" }, { status: 400, headers });
     }
@@ -58,7 +58,7 @@ export async function POST(req) {
     const source = body.source === "launch" ? "launch" : "newsletter";
 
     // 1) Backup local — ne perd jamais un email, même si Systeme.io échoue.
-    try { addLead({ email, name, first_name, last_name, source, consent: true }); } catch (e) { /* noop */ }
+    try { addLead({ email, name, first_name, last_name, phone, source, consent: true }); } catch (e) { /* noop */ }
 
     // 2) Systeme.io — contact + champ "source" + tags (fire-and-forget).
     // "Newsletter" est l'unique tag du plan gratuit (créé le 05/08/2026) :
@@ -69,6 +69,7 @@ export async function POST(req) {
       email,
       firstName: first_name || guessed.firstName,
       lastName: last_name || guessed.lastName,
+      phone,
       source,
       tags: ["Newsletter", "site-lagriotheque", "src-" + sioSlug(source)],
     }).catch((e) => console.warn("systeme.io sync:", e.message));
