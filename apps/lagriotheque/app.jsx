@@ -248,7 +248,7 @@ function Header({ route }) {
   const utilityLinks = [
     <a key="news" href="/" onClick={ouvrirNewsletter} className="lg__menu__link">Souscrire à notre newsletter</a>,
     <a key="ig" href="https://instagram.com/lagriotheque" className="lg__menu__link" target="_blank" rel="noopener">Instagram</a>,
-    <a key="li" href="https://linkedin.com" className="lg__menu__link" target="_blank" rel="noopener">Linkedin</a>,
+    <a key="li" href="https://www.linkedin.com/company/lesgriots" className="lg__menu__link" target="_blank" rel="noopener">Linkedin</a>,
   ];
   // Filtre les liens de nav selon les pages actives configurées dans le backoffice.
   // window.SITE_CONFIG.activePages = { home: true, formations: false, ... }
@@ -1612,25 +1612,35 @@ function ProgramPage({ item, kind }) {
   // ce qui évite la boucle de feedback (tremblement au scroll).
   useEffect(() => {
     const title = titleRef.current;
-    const sentinel = titleSentinelRef.current;
-    if (!title || !sentinel || typeof IntersectionObserver === "undefined") return;
+    if (!title) return;
+    // La bascule suit le TITRE DU BANDEAU : dès qu'il touche le bas du menu,
+    // la barre-titre prend le relais et lui s'efface. L'ancien déclencheur
+    // (un sentinel posé APRÈS le bandeau) attendait la fin du bandeau : le
+    // titre disparaissait sous le menu et la barre n'arrivait qu'une centaine
+    // de pixels de scroll plus tard, sans titre visible entre les deux.
+    const heroTitle = document.querySelector(".lg__pagehero__title");
+    const repere = heroTitle || titleSentinelRef.current;
+    if (!repere) return;
     const isMobile = window.matchMedia("(max-width: 600px)").matches;
     const STUCK_TOP = isMobile ? 85 : 121;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        // Sentinel passé sous la ligne de stick → titre stuck
-        const stuck = !entry.isIntersecting && entry.boundingClientRect.top < STUCK_TOP;
-        if (stuck) {
-          title.classList.add("is-stuck");
-        } else {
-          title.classList.remove("is-stuck");
-        }
-        setTitleStuck(stuck);
-      },
-      { rootMargin: `-${STUCK_TOP}px 0px 0px 0px`, threshold: [0, 1] }
-    );
-    obs.observe(sentinel);
-    return () => obs.disconnect();
+    let prevu = false;
+    const mesurer = () => {
+      prevu = false;
+      const stuck = repere.getBoundingClientRect().top <= STUCK_TOP;
+      title.classList.toggle("is-stuck", stuck);
+      if (heroTitle) heroTitle.classList.toggle("is-cache", stuck);
+      setTitleStuck(stuck);
+    };
+    const onScroll = () => {
+      if (!prevu) { prevu = true; requestAnimationFrame(mesurer); }
+    };
+    mesurer();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, [item && item.id]);
 
   // Exposer la hauteur du titre comme variable CSS pour positionner le menu
@@ -5909,7 +5919,7 @@ function Contact() {
             {text("contact.instagram_label", "instagram")} ↗
           </a>
           {" · "}
-          <a href={text("contact.linkedin_url", "https://linkedin.com")} target="_blank" rel="noopener">
+          <a href={text("contact.linkedin_url", "https://www.linkedin.com/company/lesgriots")} target="_blank" rel="noopener">
             {text("contact.linkedin_label", "linkedin")} ↗
           </a>
         </p>
@@ -6113,7 +6123,7 @@ function LaunchPage() {
         <nav className="lg__launch__social" aria-label="Réseaux">
           <a href="https://instagram.com/lagriotheque" target="_blank" rel="noopener">Instagram</a>
           <span aria-hidden="true">·</span>
-          <a href="https://linkedin.com" target="_blank" rel="noopener">Linkedin</a>
+          <a href="https://www.linkedin.com/company/lesgriots" target="_blank" rel="noopener">Linkedin</a>
         </nav>
       </header>
 
@@ -6599,7 +6609,7 @@ function App() {
             </div>
             <div className="lg__footer__col">
               <a href="https://instagram.com/lagriotheque" target="_blank" rel="noopener">instagram</a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener">linkedin</a>
+              <a href="https://www.linkedin.com/company/lesgriots" target="_blank" rel="noopener">linkedin</a>
               <FooterNewsletter />
             </div>
             <div className="lg__footer__col">

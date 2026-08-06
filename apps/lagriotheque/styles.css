@@ -2123,13 +2123,26 @@ button {
 }
 /* En mode stuck : taille réduite fixe pour rester compact en sticky. */
 .lg__formation__title.is-stuck {
+  /* Fixée sous le menu : la barre apparaît à l'instant où le titre du bandeau
+     touche le menu, sans attendre que sa position naturelle (sous le bandeau)
+     arrive à cette hauteur. Le titre est hors flux dans les deux états
+     (height: 0 quand il n'est pas collé), donc aucun saut de mise en page. */
+  position: fixed;
+  top: 121px;
+  left: 0;
+  right: 0;
+  margin: 0;
   font-size: clamp(20px, 2.4vw, 32px);
   line-height: 1.1;
-  padding: 6px 16px 8px;
+  padding: 6px 24px 8px;
 }
+/* Le grand titre du bandeau s'efface quand la barre le remplace : les deux
+   visibles en même temps, ce serait le même texte à deux endroits. */
+.lg__pagehero__title { transition: opacity 0.18s ease; }
+.lg__pagehero__title.is-cache { opacity: 0; }
 @media (max-width: 600px) {
   .lg__formation__title { top: 85px; font-size: clamp(26px, 7vw, 40px); }
-  .lg__formation__title.is-stuck { font-size: clamp(16px, 4.5vw, 22px); }
+  .lg__formation__title.is-stuck { top: 85px; font-size: clamp(16px, 4.5vw, 22px); }
 }
 
 /* === Diviseur de section façon SUPSI / id-w =========================
