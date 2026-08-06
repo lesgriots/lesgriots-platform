@@ -131,9 +131,9 @@ function EcoView() {
       period: 60,
       size: 14,
       tiltX: 0, tiltZ: 0,     // planètes coplanaires (même plan d'orbite)
-      poster: "img/p-monument.jpg",
+      poster: "img/griots-home-poster.jpg",
       preview: "img/preview-lesgriots.jpg",  // screenshot homepage
-      videoSrc: "img/indigo-cristal-thumb.mp4",
+      videoSrc: "img/griots-home-thumb.mp4", // video d'accueil de lesgriots.com
       description: lang === "fr"
         ? "Plateforme éditoriale dédiée aux récits inattendus de l'Afrique et de ses diasporas. Une parole ancienne, une voix nouvelle."
         : "Editorial platform devoted to the untold stories of Africa and its diasporas. An ancient voice, a new century.",
@@ -151,7 +151,7 @@ function EcoView() {
       tiltX: 0, tiltZ: 0,
       poster: "img/atavisme-01.jpg",
       preview: "img/preview-lesgriotsxstudio.jpg",  // screenshot homepage
-      videoSrc: "img/nike-thumb.mp4",
+      videoSrc: "img/indigo-cristal-thumb.mp4",
       description: lang === "fr"
         ? "Studio créatif : stratégie narrative, direction artistique et production audiovisuelle pour artistes, marques et institutions."
         : "Creative studio: narrative strategy, art direction and audiovisual production for artists, brands and institutions.",
@@ -339,15 +339,13 @@ function EcoView() {
           besoin de hover (qui n'existe pas en touch).
           ============================================================ */}
       <div className="eco-mobile" aria-label="Ecosystem on mobile">
-        {/* Intro : griot ASCII + texte d'accroche */}
+        {/* Intro : l'accroche seule, calee sous le sticker (le griot
+            ASCII vit desormais en bas a droite, apres la liste). */}
         <div className="eco-mobile__hero">
-          <div className="eco-mobile__hero__griot" aria-hidden="true">
-            <MatrixGriot />
-          </div>
           <p className="eco-mobile__hero__lead">
             {lang === "fr"
-              ? "Trois univers, une même galaxie. Cliquez sur une planète pour entrer."
-              : "Three universes, one same galaxy. Tap a planet to enter."}
+              ? "La maison raconte ses propres histoires, amplifie les récits des artistes et des marques, et transmet à une nouvelle génération de créatifs de quoi créer de nouveaux imaginaires. Cliquez sur une planète pour entrer."
+              : "The house tells its own stories, amplifies those of artists and brands, and passes on to a new generation of creatives what it takes to create new imaginaries. Tap a planet to enter."}
           </p>
         </div>
 
@@ -424,6 +422,12 @@ function EcoView() {
             );
           })}
         </ul>
+
+        {/* Griot ASCII — cale en bas a droite de la page (margin-top:auto
+            le pousse au fond du conteneur 100dvh). Purement decoratif. */}
+        <div className="eco-mobile__griot" aria-hidden="true">
+          <MatrixGriot />
+        </div>
       </div>
 
       {/* ============================================================

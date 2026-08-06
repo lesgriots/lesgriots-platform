@@ -172,9 +172,9 @@ const SITE_CONTENT = {
       "url": "https://lesgriots.com",
       "descFr": "Plateforme éditoriale dédiée aux récits inattendus de l'Afrique et de ses diasporas. Une parole ancienne, une voix nouvelle.",
       "descEn": "Editorial platform devoted to the untold stories of Africa and its diasporas. An ancient voice, a new century.",
-      "poster": "img/p-monument.jpg",
+      "poster": "img/griots-home-poster.jpg",
       "preview": "img/preview-lesgriots.jpg",
-      "videoSrc": "img/indigo-cristal-thumb.mp4"
+      "videoSrc": "img/griots-home-thumb.mp4"
     },
     "lesgriotsxstudio": {
       "kickerFr": "AGENCE CRÉATIVE",
@@ -184,7 +184,7 @@ const SITE_CONTENT = {
       "descEn": "Creative studio: narrative strategy, art direction and audiovisual production for artists, brands and institutions.",
       "poster": "img/atavisme-01.jpg",
       "preview": "img/preview-lesgriotsxstudio.jpg",
-      "videoSrc": "img/nike-thumb.mp4"
+      "videoSrc": "img/indigo-cristal-thumb.mp4"
     },
     "lagriotheque": {
       "kickerFr": "PILIER FORMATION",

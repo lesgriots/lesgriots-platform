@@ -4017,41 +4017,48 @@ body.overview-open .utilbar {
     align-items: flex-start;
   }
 
-  /* Hero compact en haut : griot + accroche */
+  /* Hero : l'accroche seule, alignee a gauche et calee SOUS le sticker
+     jaune (fixe en haut a gauche, ~140px de haut avec sa marge) pour ne
+     plus jamais passer derriere. */
   .eco-mobile__hero {
     flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 96px 24px 8px;
-    text-align: center;
-    gap: 10px;
-  }
-  .eco-mobile__hero__griot {
-    width: min(38vw, 160px);
-    transform: scale(0.4);
-    transform-origin: center;
-    color: var(--ink);
-    opacity: 0.7;
-    margin: -48px 0 -36px;
-  }
-  .eco-mobile__hero__griot pre {
-    font-family: var(--font-mono);
-    font-size: 5px;
-    line-height: 1;
-    letter-spacing: 0;
-    white-space: pre;
+    padding: 150px 24px 10px;
+    text-align: left;
   }
   .eco-mobile__hero__lead {
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--ink-dim);
-    max-width: 280px;
-    line-height: 1.45;
+    max-width: 400px;
+    line-height: 1.55;
     margin: 0;
+  }
+  /* Griot ASCII en bas a droite : margin-top:auto le pousse au fond du
+     conteneur flex 100dvh, align-self a droite. Decoratif, il ne bloque
+     aucun tap. */
+  .eco-mobile__griot {
+    margin-top: auto;
+    align-self: flex-end;
+    padding: 28px 18px 0;
+    pointer-events: none;
+    line-height: 0;
+  }
+  /* Le pre .matrix-griot est fixe/centre plein ecran par defaut : on le
+     remet dans le flux de son wrapper, exactement comme .ahome__griot
+     (le griot bas-droite de la home). */
+  .eco-mobile__griot .matrix-griot {
+    position: static;
+    top: auto;
+    left: auto;
+    transform: none;
+    font-size: 3px;
+    line-height: 1;
+    color: var(--ink);
+    white-space: pre;
+    text-shadow: 0 0 6px rgba(138, 122, 32, 0.2);
+    pointer-events: none;
   }
 
   /* ---- Cards empilées : vignette pleine largeur + bloc texte ------- */
