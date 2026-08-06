@@ -1159,9 +1159,10 @@ button {
   transform: translateY(-1px);
 }
 @media (max-width: 900px) {
-  /* Mobile : padding-bottom de .lg__formation = 96px (barre fixed bottom).
-     On compense par margin-bottom: -96px pour coller au footer. */
-  .lg__cta-final { margin-bottom: -96px; }
+  /* Mobile : le panneau de reservation est deja fixe en bas de l'ecran et
+     porte le meme bouton. Repeter un grand bloc CTA juste au-dessus, c'est
+     deux fois la meme demande a dix centimetres d'intervalle. */
+  .lg__cta-final { display: none; }
 }
 @media (max-width: 700px) {
   .lg__cta-final { padding: 64px 20px 72px; margin-top: 40px; }
@@ -7829,9 +7830,11 @@ a.lg__partners__logo:hover {
   .lg__sheet__body .lg__cta-mini__cpfbox { margin-top: 4px; gap: 6px; }
   .lg__sheet__body .lg__cta-mini__cpfbox__logo { height: 20px; width: 20px; }
   .lg__sheet__body .lg__cta-mini__cpfbox__text { font-size: 9px; }
-  /* La page réserve la hauteur du panneau pour que tout le contenu (avis,
-     CTA final, footer) reste lisible au-dessus. */
-  .lg__formation { padding-bottom: calc(var(--lg-panel-h, 60svh) + 24px); }
+  /* Seul le footer réserve la hauteur du panneau fixe : c'est lui qui finit
+     la page. La fiche elle-même n'en a plus besoin depuis que le bloc CTA de
+     bas de page est masqué en mobile, sinon on verrait un grand trou blanc
+     entre la dernière section et le footer. */
+  .lg__formation { padding-bottom: 24px; }
   body.is-fiche .lg__footer { padding-bottom: calc(var(--lg-panel-h, 60svh) + 24px); }
 }
 
