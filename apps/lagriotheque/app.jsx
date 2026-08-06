@@ -405,8 +405,16 @@ function Splash({ onEnter }) {
   );
 }
 
+// ---- Interrupteur d'essai : accueil sans video -------------------------
+// Retire la video du hero et celle de la section recits. Les deux blocs
+// gardent leur place et leur fond noir, seul le media disparait. Repasser
+// cette constante a false remet tout en etat, rien d'autre n'a bouge.
+const SANS_VIDEO_ACCUEIL = true;
+
 function Manifesto() {
-  const [videoReady, setVideoReady] = useState(false);
+  // Sans video, il n'y a rien a attendre : on passe direct a l'etat pret,
+  // sinon le compteur de chargement tournerait quatre secondes dans le vide.
+  const [videoReady, setVideoReady] = useState(SANS_VIDEO_ACCUEIL);
   const [loadingText, setLoadingText] = useState("00000000");
   // Onglet actif de la section "LATEST" : formations (défaut) ou workshops.
   // Cliquer "Workshops" affiche la liste juste en dessous, sans changer de page.
@@ -533,18 +541,20 @@ function Manifesto() {
     <>
       {/* HERO splash : vidéo plein écran + griot géant + tagline (sans menu) */}
       <section className={"lg__hero-yard" + (videoReady ? " is-ready" : "")}>
-        <div className="lg__hero-yard__media">
-          <video
-            ref={heroVideoRef}
-            src={text("home.hero_video", "img/hero.mp4")}
-            autoPlay
-            loop
-            muted
-            playsInline
-            onCanPlay={() => setVideoReady(true)}
-            onLoadedData={() => setVideoReady(true)}
-          />
-        </div>
+        {!SANS_VIDEO_ACCUEIL && (
+          <div className="lg__hero-yard__media">
+            <video
+              ref={heroVideoRef}
+              src={text("home.hero_video", "img/hero.mp4")}
+              autoPlay
+              loop
+              muted
+              playsInline
+              onCanPlay={() => setVideoReady(true)}
+              onLoadedData={() => setVideoReady(true)}
+            />
+          </div>
+        )}
         {/* Bouton "Voir la vidéo" retiré — la vidéo joue déjà en autoplay
             loop muted sur le hero. Le code playFullVideo est conservé au
             cas où on voudrait le réactiver plus tard. */}
@@ -738,17 +748,19 @@ function Manifesto() {
           z-index supérieur). Vidéo éditable via BO (home.vision_video). */}
       <div className="lg__vision-track">
         <section className="lg__vision">
-          <div className="lg__vision__media">
-            <video
-              className="lg__vision__face"
-              data-face={0}
-              src={text("home.vision_video", "img/hero.mp4")}
-              autoPlay
-              loop
-              muted
-              playsInline
-            />
-          </div>
+          {!SANS_VIDEO_ACCUEIL && (
+            <div className="lg__vision__media">
+              <video
+                className="lg__vision__face"
+                data-face={0}
+                src={text("home.vision_video", "img/hero.mp4")}
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            </div>
+          )}
           <div className="lg__vision__overlay">
             <h2 className="lg__vision__title">{text("home.vision_title", "nouveaux récits,\nnouveaux visages")}</h2>
             <p className="lg__vision__text">{renderBrandInline(text("home.vision_text", "La vision de La Griothèque est de permettre l'émergence de nouveaux récits."), true)}</p>
