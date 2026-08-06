@@ -1450,7 +1450,8 @@ button {
 .lg__modal {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  /* Au-dessus du panneau de reservation fixe du mobile (48) et du header. */
+  z-index: 1000;
   background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
@@ -1458,10 +1459,12 @@ button {
   padding: 24px;
   animation: lg-modal-fade 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
+@media (max-width: 700px) {
+  .lg__modal { padding: 16px; }
+}
 @keyframes lg-modal-fade {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
-}
 }
 .lg__modal__panel {
   position: relative;
@@ -1584,7 +1587,12 @@ button {
   outline: 1px solid var(--ink);
 }
 @media (max-width: 700px) {
-  .lg__modal__panel { padding: 32px 22px 24px; max-width: 100%; }
+  .lg__modal__panel {
+    padding: 28px 20px 24px;
+    max-width: 100%;
+    /* Le panneau ne depasse jamais l'ecran : il defile a l'interieur. */
+    max-height: calc(100svh - 32px);
+  }
   .lg__modal__title { font-size: 22px; }
 }
 .lg__cta-mini__sub {
