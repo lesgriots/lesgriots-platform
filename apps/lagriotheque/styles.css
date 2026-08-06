@@ -8099,8 +8099,10 @@ a.lg__partners__logo:hover {
   font-family: var(--font-sans);
   font-size: 14px;
   letter-spacing: -0.01em;
-  padding: 11px 18px;
+  padding: 12px 26px;
   border: 1px solid var(--ink);
+  /* Pastille, comme le CTA du hero : c'est la forme de bouton de la maison. */
+  border-radius: 999px;
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease;
 }
