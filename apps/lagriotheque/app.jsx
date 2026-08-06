@@ -4720,29 +4720,25 @@ function ouvrirNewsletter(e) {
   }
 }
 
-function NewsletterModal({ onClose }) {
+// Le formulaire d'inscription lui-même : trois champs, une case, un bouton.
+// Extrait ici parce qu'il sert à deux endroits, la modale et la page
+// partageable. Un seul exemplaire, donc aucune chance qu'ils divergent.
+function FormulaireNewsletter({ onDone, autofocus = false, annuler = null }) {
   const [prenom, setPrenom] = useState("");
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
   const [consent, setConsent] = useState(false);
   const [envoi, setEnvoi] = useState(false);
   const [err, setErr] = useState("");
-  const [etape, setEtape] = useState("form");
   const premierRef = useRef(null);
 
   useEffect(() => {
-    const onKey = (ev) => { if (ev.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    // Le curseur est déjà dans le premier champ : une modale qui s'ouvre et
+    if (!autofocus) return;
+    // Le curseur est déjà dans le premier champ : un formulaire qui s'ouvre et
     // qui attend un clic de plus, c'est un abandon de plus.
     const t = setTimeout(() => { if (premierRef.current) premierRef.current.focus(); }, 60);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
+    return () => clearTimeout(t);
+  }, [autofocus]);
 
   async function submit(ev) {
     ev.preventDefault();
@@ -4768,7 +4764,7 @@ function NewsletterModal({ onClose }) {
         }),
       });
       if (!r.ok) throw new Error("refus " + r.status);
-      setEtape("done");
+      onDone(prenom);
     } catch (e) {
       setErr("L'inscription n'a pas abouti. Réessaie dans un instant.");
       setEnvoi(false);
@@ -4776,19 +4772,140 @@ function NewsletterModal({ onClose }) {
   }
 
   return (
+    <form className="lg__nl__form" onSubmit={submit} noValidate>
+      <div className="lg__nl__row">
+        <div className="lg__nl__field">
+          <label htmlFor="nl-prenom">Prénom</label>
+          <input
+            id="nl-prenom"
+            ref={premierRef}
+            type="text"
+            autoComplete="given-name"
+            value={prenom}
+            onChange={(e) => { setPrenom(e.target.value); if (err) setErr(""); }}
+          />
+        </div>
+        <div className="lg__nl__field">
+          <label htmlFor="nl-nom">Nom</label>
+          <input
+            id="nl-nom"
+            type="text"
+            autoComplete="family-name"
+            value={nom}
+            onChange={(e) => { setNom(e.target.value); if (err) setErr(""); }}
+          />
+        </div>
+      </div>
+
+      <div className="lg__nl__field">
+        <label htmlFor="nl-email">Email</label>
+        <input
+          id="nl-email"
+          type="email"
+          autoComplete="email"
+          placeholder="ton@email.com"
+          value={email}
+          onChange={(e) => { setEmail(e.target.value); if (err) setErr(""); }}
+        />
+      </div>
+
+      <label className="lg__nl__consent">
+        <input
+          type="checkbox"
+          checked={consent}
+          onChange={(e) => { setConsent(e.target.checked); if (err) setErr(""); }}
+        />
+        <span>
+          J'accepte de recevoir la newsletter de LA GRIOTHÈQUE.
+          Désinscription en un clic.
+        </span>
+      </label>
+
+      {err && <p className="lg__nl__err" role="alert">{err}</p>}
+
+      <div className="lg__nl__actions">
+        {annuler && (
+          <button type="button" className="lg__nl__ghost" onClick={annuler}>
+            Plus tard
+          </button>
+        )}
+        <button type="submit" className="lg__nl__btn" disabled={envoi}>
+          {envoi ? "Envoi…" : "Je m'inscris →"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// Page newsletter — la même inscription, mais à une adresse qu'on peut
+// partager : #/newsletter. Utile en bio Instagram, en signature de mail ou
+// au dos d'une carte, là où on ne peut pas demander à quelqu'un de chercher
+// un lien dans un menu.
+function NewsletterPage() {
+  const [prenom, setPrenom] = useState("");
+  const [fait, setFait] = useState(false);
+  return (
+    <section className="lg__nlpage">
+      <div className="lg__nlpage__inner">
+        <div className="lg__nlpage__intro">
+          <p className="lg__nlpage__logo" role="img" aria-label="LA GRIOTHÈQUE">
+            <GriotRing />
+          </p>
+          <p className="lg__nl__kicker">Newsletter</p>
+          <h1 className="lg__nlpage__title">
+            Les prochaines dates, les ressources, les coulisses.
+          </h1>
+          <p className="lg__nlpage__lede">
+            Un mail quand on a quelque chose à transmettre. Jamais pour occuper
+            ta boîte. Désinscription en un clic, au bas de chaque envoi.
+          </p>
+        </div>
+
+        <div className="lg__nlpage__form">
+          {fait ? (
+            <div className="lg__nlpage__done">
+              <h2 className="lg__nl__title">C'est fait{prenom ? ", " + prenom : ""}.</h2>
+              <p className="lg__nl__lede">
+                Tu reçois le prochain envoi. En attendant, le catalogue est
+                juste là.
+              </p>
+              <a className="lg__nl__btn" href="#/formations">Voir les formations →</a>
+            </div>
+          ) : (
+            <FormulaireNewsletter onDone={(p) => { setPrenom(p); setFait(true); }} />
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function NewsletterModal({ onClose }) {
+  const [prenom, setPrenom] = useState("");
+  const [fait, setFait] = useState(false);
+
+  useEffect(() => {
+    const onKey = (ev) => { if (ev.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  return (
     <div className="lg__nl" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="lg__nl__panel" role="dialog" aria-modal="true" aria-label="Inscription à la newsletter">
         <button type="button" className="lg__nl__close" onClick={onClose} aria-label="Fermer">×</button>
 
         <div className="lg__nl__body">
-          {/* Mot-marque vectorisé : la modale s'ouvre par-dessus la page, elle
-              doit se présenter elle-même. */}
           <p className="lg__nl__logo" role="img" aria-label="LA GRIOTHÈQUE">
             <GriotRing />
           </p>
           <p className="lg__nl__kicker">Newsletter</p>
 
-          {etape === "done" ? (
+          {fait ? (
             <div className="lg__nl__done">
               <h2 className="lg__nl__title">C'est fait{prenom ? ", " + prenom : ""}.</h2>
               <p className="lg__nl__lede">
@@ -4808,67 +4925,11 @@ function NewsletterModal({ onClose }) {
                 Un mail quand on a quelque chose à transmettre. Jamais pour
                 occuper ta boîte.
               </p>
-
-              <form className="lg__nl__form" onSubmit={submit} noValidate>
-                <div className="lg__nl__row">
-                  <div className="lg__nl__field">
-                    <label htmlFor="nl-prenom">Prénom</label>
-                    <input
-                      id="nl-prenom"
-                      ref={premierRef}
-                      type="text"
-                      autoComplete="given-name"
-                      value={prenom}
-                      onChange={(e) => { setPrenom(e.target.value); if (err) setErr(""); }}
-                    />
-                  </div>
-                  <div className="lg__nl__field">
-                    <label htmlFor="nl-nom">Nom</label>
-                    <input
-                      id="nl-nom"
-                      type="text"
-                      autoComplete="family-name"
-                      value={nom}
-                      onChange={(e) => { setNom(e.target.value); if (err) setErr(""); }}
-                    />
-                  </div>
-                </div>
-
-                <div className="lg__nl__field">
-                  <label htmlFor="nl-email">Email</label>
-                  <input
-                    id="nl-email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="ton@email.com"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); if (err) setErr(""); }}
-                  />
-                </div>
-
-                <label className="lg__nl__consent">
-                  <input
-                    type="checkbox"
-                    checked={consent}
-                    onChange={(e) => { setConsent(e.target.checked); if (err) setErr(""); }}
-                  />
-                  <span>
-                    J'accepte de recevoir la newsletter de LA GRIOTHÈQUE.
-                    Désinscription en un clic.
-                  </span>
-                </label>
-
-                {err && <p className="lg__nl__err" role="alert">{err}</p>}
-
-                <div className="lg__nl__actions">
-                  <button type="button" className="lg__nl__ghost" onClick={onClose}>
-                    Plus tard
-                  </button>
-                  <button type="submit" className="lg__nl__btn" disabled={envoi}>
-                    {envoi ? "Envoi…" : "Je m'inscris →"}
-                  </button>
-                </div>
-              </form>
+              <FormulaireNewsletter
+                autofocus
+                annuler={onClose}
+                onDone={(p) => { setPrenom(p); setFait(true); }}
+              />
             </>
           )}
         </div>
@@ -6381,6 +6442,7 @@ function App() {
       case "mentions-legales":page = <MentionsLegales />; break;
       case "confidentialite": page = <Confidentialite />; break;
       case "financement":     page = <Financement />; break;
+      case "newsletter":      page = <NewsletterPage />; break;
       default:                page = <Manifesto />;
     }
   }
