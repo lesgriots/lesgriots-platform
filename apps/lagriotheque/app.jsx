@@ -4313,6 +4313,10 @@ function ResourceModal({ resource, onClose }) {
   const [prenom, setPrenom] = useState("");
   const [nom, setNom] = useState("");
   const [consent, setConsent] = useState(false);
+  // Case newsletter : décochée par défaut. Un consentement pré-coché n'en est
+  // pas un, et surtout on ne conditionne pas un téléchargement à un
+  // abonnement — les deux demandes sont séparées.
+  const [newsletter, setNewsletter] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState("");
   // Étape post-submit : "form" → "done" (affiche la confirmation 2.5s avant fermeture)
@@ -4345,6 +4349,30 @@ function ResourceModal({ resource, onClose }) {
     a.remove();
   }
 
+  /*
+   * Un seul envoi, deux cas. Quand la ressource est ailleurs, on quitte la
+   * page juste après : un `fetch` ordinaire serait annulé en vol par la
+   * navigation et le contact serait perdu. `sendBeacon` est fait pour ça, le
+   * navigateur garantit l'envoi même si l'onglet change d'adresse dans la
+   * seconde. text/plain et non application/json : un envoi cross-origin en
+   * JSON déclenche un contrôle préalable que sendBeacon ne sait pas faire,
+   * et le contact partirait à la poubelle sans un mot. Le serveur lit le
+   * corps comme du JSON de toute façon.
+   */
+  async function poster(endpoint, charge) {
+    const beacon = externe
+      && typeof navigator !== "undefined"
+      && typeof navigator.sendBeacon === "function"
+      && navigator.sendBeacon(endpoint, new Blob([charge], { type: "text/plain;charset=UTF-8" }));
+    if (beacon) return;
+    await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: charge,
+      keepalive: true,
+    });
+  }
+
   async function submit(e) {
     e.preventDefault();
     if (!prenom.trim() || !nom.trim()) {
@@ -4352,50 +4380,37 @@ function ResourceModal({ resource, onClose }) {
       return;
     }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setErr("Email invalide");
+      setErr("Cet email n'a pas l'air valide.");
       return;
     }
     if (!consent) {
-      setErr("Tu dois accepter pour télécharger.");
+      setErr("Coche la case pour recevoir la ressource.");
       return;
     }
     setSubmitting(true);
     setErr("");
 
-    const endpoint = (window.SITE_CONFIG && window.SITE_CONFIG.leadsEndpoint)
-      || "http://localhost:3031/api/leads";
-
-    const charge = JSON.stringify({
+    const cfg = (typeof window !== "undefined" && window.SITE_CONFIG) || {};
+    const identite = {
       email,
       name: [prenom, nom].filter(Boolean).join(" "),
       first_name: prenom,
       last_name: nom,
-      resource_id: resource.id,
-      consent,
-    });
+    };
 
-    /*
-     * Quand la ressource est ailleurs, on quitte la page juste après. Un
-     * `fetch` ordinaire serait annulé en vol par la navigation et le contact
-     * serait perdu : `sendBeacon` est fait pour ça, le navigateur garantit
-     * l'envoi même si l'onglet change d'adresse dans la seconde.
-     */
     try {
-      const envoye = externe
-        && typeof navigator !== "undefined"
-        && typeof navigator.sendBeacon === "function"
-        // text/plain et non application/json : un envoi cross-origin en JSON
-        // declenche un controle prealable que sendBeacon ne sait pas faire,
-        // et le contact partirait a la poubelle sans un mot. Le serveur lit
-        // le corps comme du JSON de toute facon.
-        && navigator.sendBeacon(endpoint, new Blob([charge], { type: "text/plain;charset=UTF-8" }));
-      if (!envoye) {
-        await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: charge,
-          keepalive: true,
-        });
+      await poster(
+        cfg.leadsEndpoint || "https://admin.lagriotheque.com/api/leads",
+        JSON.stringify({ ...identite, resource_id: resource.id, consent })
+      );
+      // Abonnement newsletter : envoi séparé, vers la route qui pose le tag
+      // « Newsletter » dans Systeme.io. Un échec ici ne doit jamais empêcher
+      // le téléchargement.
+      if (newsletter) {
+        await poster(
+          cfg.subscribeEndpoint || "https://admin.lagriotheque.com/api/subscribe",
+          JSON.stringify({ ...identite, source: "newsletter", consent: true })
+        );
       }
     } catch (e) {
       // Si le backoffice est éteint, on laisse quand même passer le visiteur.
@@ -4406,7 +4421,6 @@ function ResourceModal({ resource, onClose }) {
     setSubmitting(false);
 
     // Déclenche le téléchargement + bascule sur l'écran de confirmation.
-    // Auto-close après 2.5s pour que le visiteur voie bien le message.
     if (externe) {
       // Un court instant sur l'écran de confirmation, le temps de lire son
       // prénom, puis on l'emmène. Une redirection franche plutôt qu'un
@@ -4425,193 +4439,114 @@ function ResourceModal({ resource, onClose }) {
 
   return (
     <div
+      className="lg__modal"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0, 0, 0, 0.6)",
-        zIndex: 1000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 20,
-      }}
+      role="dialog"
+      aria-modal="true"
     >
-      <div
-        style={{
-          background: "var(--paper)",
-          color: "var(--ink)",
-          maxWidth: 480,
-          width: "100%",
-          padding: "32px 28px",
-          border: "1px solid var(--ink)",
-          fontFamily: "var(--font-mono)",
-        }}
-      >
-        <button
-          onClick={onClose}
-          aria-label="Fermer"
-          style={{
-            position: "absolute",
-            top: 0, right: 0,
-            background: "none",
-            border: 0,
-            font: "inherit",
-            color: "var(--paper)",
-            padding: "10px 16px",
-            cursor: "pointer",
-            fontSize: 18,
-          }}
-        >×</button>
+      <div className="lg__modal__panel lg__modal__panel--ressource" onClick={(e) => e.stopPropagation()}>
+        <button type="button" className="lg__modal__close" onClick={onClose} aria-label="Fermer">
+          [ × Fermer ]
+        </button>
 
-        <p style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--ink)", opacity: 0.6, marginBottom: 10 }}>
-          {resource.format}
-        </p>
-        <h3 style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 24, lineHeight: 1.15, marginBottom: 18, letterSpacing: "-0.01em" }}>
-          {resource.title}
-        </h3>
+        <p className="lg__modal__kicker">{resource.format}</p>
+        <h2 className="lg__modal__title">{resource.title}</h2>
 
         {step === "done" ? (
           /* Écran de confirmation — visible 2.5s avant fermeture auto.
              Permet au visiteur de comprendre que (1) son email est enregistré
              et (2) le téléchargement vient de démarrer (au cas où le fichier
              arrive direct dans son dossier Téléchargements sans aucune fanfare). */
-          <div style={{ padding: "8px 0 12px" }}>
-            <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>
-              ✓ Merci{prenom ? `, ${prenom}` : ""} — ton email est enregistré.
+          <div className="lg__modal__done">
+            <p className="lg__modal__intro">
+              ✓ Merci{prenom ? ", " + prenom : ""}. Ton email est enregistré
+              {newsletter ? ", et tu es inscrit·e à la newsletter." : "."}
             </p>
-            <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 18, opacity: 0.75 }}>
+            <p className="lg__modal__intro">
               {externe
                 ? "On t'emmène sur l'outil. Si rien ne se passe, clique ici :"
-                : <>Le téléchargement vient de démarrer (regarde ton dossier <em>Téléchargements</em>). Si rien ne s'est lancé, clique ici :</>}
+                : <>Le téléchargement vient de démarrer, regarde ton dossier <em>Téléchargements</em>. Si rien ne s'est lancé, clique ici :</>}
             </p>
             <a
+              className="lg__modal__submit lg__modal__submit--lien"
               href={resource.href}
               {...(externe ? { rel: "noopener nofollow" } : { download: true, target: "_blank", rel: "noopener" })}
-              style={{
-                display: "inline-block",
-                padding: "10px 18px",
-                border: "1px solid var(--ink)",
-                background: "var(--ink)",
-                color: "var(--paper)",
-                fontFamily: "var(--font-mono)",
-                fontSize: 12,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                textDecoration: "none",
-              }}
             >
               {externe ? "→ Ouvrir l’outil" : "↓ Télécharger à nouveau"}
             </a>
-            <p style={{ fontSize: 11, opacity: 0.5, marginTop: 18 }}>
-              Cette fenêtre se fermera dans quelques secondes.
-            </p>
           </div>
         ) : (
-        <>
-        <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 24, opacity: 0.75 }}>
-          {externe
-            ? "Dis-nous qui tu es, et on t'ouvre l'outil dans la foulée. On t'enverra aussi occasionnellement nos prochaines ressources."
-            : "Laisse-nous ton email et le téléchargement démarre dans la foulée. On t'enverra aussi occasionnellement nos prochaines ressources."}
-        </p>
+          <>
+            <p className="lg__modal__intro">
+              {externe
+                ? "Dis-nous qui tu es, et on t'ouvre l'outil dans la foulée."
+                : "Dis-nous qui tu es, et le téléchargement démarre dans la foulée."}
+            </p>
 
-        <form onSubmit={submit}>
-          <label style={{ display: "block", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 6, opacity: 0.6 }}>
-            Prénom *
-          </label>
-          <input
-            type="text"
-            required
-            value={prenom}
-            onChange={(e) => setPrenom(e.target.value)}
-            style={{
-              width: "100%", padding: "10px 12px", marginBottom: 14,
-              border: "1px solid var(--ink)", background: "transparent",
-              fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--ink)",
-            }}
-          />
+            <form className="lg__modal__form" onSubmit={submit} noValidate>
+              <div className="lg__modal__row">
+                <label className="lg__modal__field">
+                  <span className="lg__modal__field__k">Prénom *</span>
+                  <input
+                    type="text"
+                    autoComplete="given-name"
+                    value={prenom}
+                    onChange={(e) => { setPrenom(e.target.value); if (err) setErr(""); }}
+                  />
+                </label>
+                <label className="lg__modal__field">
+                  <span className="lg__modal__field__k">Nom *</span>
+                  <input
+                    type="text"
+                    autoComplete="family-name"
+                    value={nom}
+                    onChange={(e) => { setNom(e.target.value); if (err) setErr(""); }}
+                  />
+                </label>
+              </div>
 
-          <label style={{ display: "block", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 6, opacity: 0.6 }}>
-            Nom *
-          </label>
-          <input
-            type="text"
-            required
-            value={nom}
-            onChange={(e) => setNom(e.target.value)}
-            style={{
-              width: "100%", padding: "10px 12px", marginBottom: 14,
-              border: "1px solid var(--ink)", background: "transparent",
-              fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--ink)",
-            }}
-          />
+              <label className="lg__modal__field">
+                <span className="lg__modal__field__k">Email *</span>
+                <input
+                  type="email"
+                  autoComplete="email"
+                  placeholder="ton@email.com"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); if (err) setErr(""); }}
+                />
+              </label>
 
-          <label style={{ display: "block", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 6, opacity: 0.6 }}>
-            Email *
-          </label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="ton@email.com"
-            style={{
-              width: "100%", padding: "10px 12px", marginBottom: 18,
-              border: "1px solid var(--ink)", background: "transparent",
-              fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--ink)",
-            }}
-          />
+              <label className="lg__modal__consent">
+                <input
+                  type="checkbox"
+                  checked={consent}
+                  onChange={(e) => { setConsent(e.target.checked); if (err) setErr(""); }}
+                />
+                <span>
+                  J'accepte que LA GRIOTHÈQUE m'envoie cette ressource et me
+                  recontacte à son sujet.
+                </span>
+              </label>
 
-          <label style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12, lineHeight: 1.5, cursor: "pointer", marginBottom: 22 }}>
-            <input
-              type="checkbox"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-              style={{ marginTop: 3 }}
-            />
-            <span>
-              J'accepte de recevoir occasionnellement des emails de LA GRIOTHÈQUE
-              (nouvelles ressources, sessions de formation). Désinscription en
-              1 clic dans chaque email.
-            </span>
-          </label>
+              <label className="lg__modal__consent">
+                <input
+                  type="checkbox"
+                  checked={newsletter}
+                  onChange={(e) => setNewsletter(e.target.checked)}
+                />
+                <span>
+                  Je veux aussi la newsletter : les prochaines dates, les
+                  ressources, les coulisses. Désinscription en un clic.
+                </span>
+              </label>
 
-          {err && (
-            <p style={{ color: "#d72d2d", fontSize: 12, marginBottom: 14 }}>✗ {err}</p>
-          )}
+              {err && <p className="lg__modal__err" role="alert">{err}</p>}
 
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                padding: "12px 18px", border: "1px solid var(--ink)",
-                background: "transparent", color: "var(--ink)",
-                fontFamily: "var(--font-sans)", fontSize: 14,
-                letterSpacing: "-0.01em",
-                cursor: "pointer",
-              }}
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              style={{
-                padding: "12px 18px", border: "1px solid var(--ink)",
-                background: submitting ? "var(--ink-dim)" : "var(--accent, #ffca00)",
-                color: "var(--ink)",
-                fontFamily: "var(--font-sans)", fontSize: 14,
-                letterSpacing: "-0.01em",
-                fontWeight: 600,
-                cursor: submitting ? "wait" : "pointer",
-              }}
-            >
-              {submitting ? "..." : externe ? "→ Accéder à l’outil" : "↓ Télécharger"}
-            </button>
-          </div>
-        </form>
-        </>
+              <button type="submit" className="lg__modal__submit" disabled={submitting}>
+                {submitting ? "Envoi…" : externe ? "→ Accéder à l’outil" : "↓ Télécharger"}
+              </button>
+            </form>
+          </>
         )}
       </div>
     </div>

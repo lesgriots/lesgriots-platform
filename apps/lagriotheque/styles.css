@@ -8163,3 +8163,23 @@ a.lg__partners__logo:hover {
 @media (prefers-reduced-motion: reduce) {
   .lg__nl, .lg__nl__panel { animation: none; }
 }
+
+/* ---- Complements pour la modale de telechargement -----------------------
+   Elle partage le gabarit des autres modales ; il lui manquait un style de
+   message d'erreur et un bouton-lien pour relancer le telechargement. */
+.lg__modal__err {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: #d72d2d;
+  margin: 0;
+}
+.lg__modal__submit--lien {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  margin-top: 4px;
+}
+.lg__modal__done .lg__modal__intro:last-of-type { margin-bottom: 16px; }
+/* Deux cases a cocher a la suite : on les rapproche pour qu'elles se lisent
+   comme un bloc, la seconde etant clairement facultative. */
+.lg__modal__consent + .lg__modal__consent { margin-top: -4px; }
