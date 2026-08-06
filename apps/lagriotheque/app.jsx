@@ -193,10 +193,10 @@ function MenuRow({ items }) {
 function HeaderInner({ utilityLinks, navLinks, onMenu }) {
   return (
     <>
-      <a className="lg__header__griot" href="#/" aria-label="Accueil">
+      <a className="lg__header__griot" href="/" aria-label="Accueil">
         <GriotRing />
       </a>
-      <a className="lg__header__wordmark" href="#/" aria-label="Accueil">
+      <a className="lg__header__wordmark" href="/" aria-label="Accueil">
         LA&nbsp;GRIOTHÈQUE
       </a>
       <div className="lg__menu">
@@ -231,7 +231,7 @@ function Header({ route }) {
 
   const navLink = (target, label) => (
     <a
-      href={"#/" + target}
+      href={"/" + target}
       className={"lg__menu__link" + (route === target ? " is-active" : "")}
       onClick={closeDrawer}
     >
@@ -240,13 +240,13 @@ function Header({ route }) {
   );
   const homeLink = (
     <a
-      href="#/"
+      href="/"
       className={"lg__menu__link" + (route === "" ? " is-active" : "")}
       onClick={closeDrawer}
     >La Griothèque</a>
   );
   const utilityLinks = [
-    <a key="news" href="#/" onClick={ouvrirNewsletter} className="lg__menu__link">Souscrire à notre newsletter</a>,
+    <a key="news" href="/" onClick={ouvrirNewsletter} className="lg__menu__link">Souscrire à notre newsletter</a>,
     <a key="ig" href="https://instagram.com/lagriotheque" className="lg__menu__link" target="_blank" rel="noopener">Instagram</a>,
     <a key="li" href="https://linkedin.com" className="lg__menu__link" target="_blank" rel="noopener">Linkedin</a>,
   ];
@@ -582,7 +582,7 @@ function Manifesto() {
               "Structure ton récit, cible la bonne audience, maîtrise les bons outils."
             )}
           </p>
-          <a className="lg__hero-yard__cta" href="#/formations">
+          <a className="lg__hero-yard__cta" href="/formations">
             {text("home.hero_cta", "Voir les formations")}
           </a>
         </div>
@@ -624,7 +624,7 @@ function Manifesto() {
               "home.formations_lede",
               "Des formations courtes et pratiques, pour tous les niveaux et toutes les disciplines. "
             )}
-            <a className="lg__latest__lede__link" href="#/formations">
+            <a className="lg__latest__lede__link" href="/formations">
               {text("home.formations_lede_link", "Trouve la formation faite pour toi.")}
             </a>
           </p>
@@ -697,7 +697,7 @@ function Manifesto() {
                 "home.workshops_lede",
                 "Des formats courts et intensifs, en groupe restreint, pour pratiquer sur ton projet réel. "
               )}
-              <a className="lg__latest__lede__link" href="#/workshops">
+              <a className="lg__latest__lede__link" href="/workshops">
                 {text("home.workshops_lede_link", "Découvre les prochains workshops.")}
               </a>
             </p>
@@ -834,7 +834,7 @@ function FormationRow({ f, onHover }) {
   return (
     <a
       className={"lg__row" + (f.available ? "" : " is-soon")}
-      href={"#/formations/" + f.id}
+      href={"/formations/" + f.id}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
     >
@@ -1670,7 +1670,7 @@ function ProgramPage({ item, kind }) {
   const isEvent = kind === "event";
   const isFormation = kind === "formation";
   const kindLabel = kind === "workshop" ? "workshop" : isEvent ? "événement" : "formation";
-  const backHref = kind === "workshop" ? "#/workshops" : isEvent ? "#/events" : "#/catalogue";
+  const backHref = kind === "workshop" ? "/workshops" : isEvent ? "/events" : "/catalogue";
   const backLabel = kind === "workshop"
     ? "← Retour aux workshops"
     : isEvent ? "← Retour aux événements" : "← Retour aux formations";
@@ -1952,7 +1952,7 @@ function ProgramPage({ item, kind }) {
           ) : (
             <p className="lg__formation__prose">
               Cette formation n'est pas certifiante. Pour nos formations éligibles
-              CPF, consulte le <a href="#/catalogue">catalogue</a>.
+              CPF, consulte le <a href="/catalogue">catalogue</a>.
             </p>
           ),
         },
@@ -2821,7 +2821,7 @@ function PageHero({ src, poster, title, children }) {
         <img src={media} alt="" />
       )}
       {/* Mot-marque en haut à gauche, comme la home (se fond au scroll). */}
-      <a className="lg__pagehero__brand" href="#/" aria-label="Accueil"><GriotRing /></a>
+      <a className="lg__pagehero__brand" href="/" aria-label="Accueil"><GriotRing /></a>
       {overlay}
     </div>
   );
@@ -2978,7 +2978,7 @@ function CheckoutStripe({ item }) {
     const { error: stripeErr } = await stripeRef.current.confirmPayment({
       elements: elementsRef.current,
       confirmParams: {
-        return_url: window.location.origin + window.location.pathname + "#/merci?ws=" + encodeURIComponent(item.id),
+        return_url: window.location.origin + "/merci?ws=" + encodeURIComponent(item.id),
         receipt_email: email || undefined,
       },
     });
@@ -3114,7 +3114,7 @@ function CheckoutDemo({ item }) {
             48h.
           </p>
           <div className="lg__checkout__success__actions">
-            <a href="#/" className="lg__checkout__btn lg__checkout__btn--ghost">
+            <a href="/" className="lg__checkout__btn lg__checkout__btn--ghost">
               ← Retour à l'accueil
             </a>
             <a
@@ -3266,8 +3266,8 @@ function CheckoutDemo({ item }) {
               onChange={(e) => setTos(e.target.checked)}
             />
             <span>
-              J'accepte les <a href="#/cgv">CGV</a> et la{" "}
-              <a href="#/confidentialite">politique de confidentialité</a>.
+              J'accepte les <a href="/cgv">CGV</a> et la{" "}
+              <a href="/confidentialite">politique de confidentialité</a>.
             </span>
           </label>
 
@@ -3378,7 +3378,7 @@ function WorkshopRow({ w, onHover }) {
   return (
     <a
       className={"lg__row" + (w.available ? "" : " is-soon")}
-      href={"#/workshops/" + w.id}
+      href={"/workshops/" + w.id}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
     >
@@ -3483,7 +3483,7 @@ function Workshops() {
             </p>
             {category !== "archives" && (
               <p className="lg__cat-empty__news">
-                <a href="#/" onClick={ouvrirNewsletter}>
+                <a href="/" onClick={ouvrirNewsletter}>
                   Inscris-toi à la newsletter
                 </a>{" "}
                 pour être prévenu des prochains workshops.
@@ -3527,7 +3527,7 @@ function EventCard({ e }) {
     [e.location, e.city].filter(Boolean).join(", "),
   ].filter(Boolean);
   return (
-    <a className={"lg__event" + (isPast ? " is-past" : "")} href={"#/events/" + e.id}>
+    <a className={"lg__event" + (isPast ? " is-past" : "")} href={"/events/" + e.id}>
       <div className="lg__event__main">
         <h3 className="lg__event__title">{e.title}</h3>
         <p className="lg__event__meta">
@@ -3767,8 +3767,8 @@ function AgendaRow({ s, item, isOpen, onToggle }) {
   const subject = encodeURIComponent(`Inscription — ${title} (${dateLong})`);
   const mailto = `mailto:formations@lesgriots.com?subject=${subject}`;
   const detailHref = isWorkshop
-    ? (targetId ? `#/workshops/${targetId}` : "#/workshops")
-    : (targetId ? `#/formations/${targetId}` : "#/catalogue");
+    ? (targetId ? `/workshops/${targetId}` : "/workshops")
+    : (targetId ? `/formations/${targetId}` : "/catalogue");
   const [showInscription, setShowInscription] = React.useState(false);
 
   return (
@@ -3907,7 +3907,7 @@ function AgendaEventRow({ e, isOpen, onToggle }) {
                 </button>
               )
             )}
-            <a href={"#/events/" + e.id} className="lg__ag__btn">
+            <a href={"/events/" + e.id} className="lg__ag__btn">
               → Voir la page complète
             </a>
           </div>
@@ -3957,8 +3957,8 @@ function _UnusedSessionDetailModal({ session, item, isWorkshop, onClose }) {
   const mailto = `mailto:formations@lesgriots.com?subject=${subject}`;
   const targetId = session.formation_id || session.workshop_id || session.targetId || "";
   const detailHref = isWorkshop
-    ? (targetId ? `#/workshops/${targetId}` : "#/workshops")
-    : (targetId ? `#/formations/${targetId}` : "#/catalogue");
+    ? (targetId ? `/workshops/${targetId}` : "/workshops")
+    : (targetId ? `/formations/${targetId}` : "/catalogue");
 
   return (
     <div
@@ -4869,7 +4869,7 @@ function NewsletterPage() {
                 Tu reçois le prochain envoi. En attendant, le catalogue est
                 juste là.
               </p>
-              <a className="lg__nl__btn" href="#/formations">Voir les formations →</a>
+              <a className="lg__nl__btn" href="/formations">Voir les formations →</a>
             </div>
           ) : (
             <FormulaireNewsletter onDone={(p) => { setPrenom(p); setFait(true); }} />
@@ -5350,7 +5350,7 @@ function MentionsLegales() {
           <p>
             Le traitement des données personnelles collectées via ce site
             (notamment via le formulaire de demande de ressources) est régi
-            par notre <a href="#/confidentialite">Politique de confidentialité</a>.
+            par notre <a href="/confidentialite">Politique de confidentialité</a>.
           </p>
         </li>
 
@@ -5908,9 +5908,17 @@ function Contact() {
 }
 
 function parseRoute() {
+  if (typeof window === "undefined") return "";
+  // Compatibilité : les liens historiques en /#/route (réseaux, favoris,
+  // pages SEO déjà indexées) sont réécrits vers la vraie adresse, sans
+  // rechargement et sans laisser l'entrée à hash dans l'historique.
   const h = window.location.hash || "";
-  if (h.startsWith("#/")) return h.slice(2);
-  return "";
+  if (h.startsWith("#/")) {
+    try { window.history.replaceState(null, "", "/" + h.slice(2)); } catch (e) {}
+  }
+  let p = window.location.pathname || "/";
+  try { p = decodeURIComponent(p); } catch (e) {}
+  return p.replace(/^\/+/, "").replace(/\/+$/, "");
 }
 
 // Sticker LES GRIOTS — accent jaune brand visible sur toutes les pages
@@ -5920,7 +5928,7 @@ function parseRoute() {
 function PromoSticker() {
   return (
     <a
-      href="#/approche"
+      href="/approche"
       className="lg__yellow-sticker"
       title="La Griothèque"
       aria-label="La Griothèque — voir notre approche"
@@ -6065,7 +6073,7 @@ function LaunchPage() {
 
       {/* Barre du haut : marque à gauche, réseaux à droite (comme le header) */}
       <header className="lg__launch__top">
-        <a className="lg__launch__logo" href="#/" aria-label="LA GRIOTHÈQUE">
+        <a className="lg__launch__logo" href="/" aria-label="LA GRIOTHÈQUE">
           {/* Logo officiel vectorisé (branding/logo-lagriotheque-wordmark-*.svg) */}
           <svg viewBox="0 0 8448 1095" role="img" aria-label="LA GRIOTHÈQUE" preserveAspectRatio="xMidYMid meet">
             <g
@@ -6155,12 +6163,39 @@ function App() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onHash = () => {
+    const surRoute = () => {
       setRoute(parseRoute());
       window.scrollTo(0, 0);
     };
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
+    // Retour/avance du navigateur, et vieux liens #/… encore dans la nature.
+    window.addEventListener("popstate", surRoute);
+    window.addEventListener("hashchange", surRoute);
+    // Interception des clics sur les liens internes : le site est une seule
+    // page, un vrai chargement serait un aller-retour serveur pour rien. Un
+    // seul écouteur au document plutôt qu'un onClick par lien : les liens
+    // restent de vrais <a>, copiables et ouvrables dans un nouvel onglet.
+    const surClic = (e) => {
+      if (e.defaultPrevented || e.button !== 0) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+      if (!a || a.target === "_blank" || a.hasAttribute("download")) return;
+      const brut = a.getAttribute("href") || "";
+      // Seules les adresses internes absolues (/x) : les ancres (#…), les
+      // mailto et les liens externes gardent leur comportement natif.
+      if (!brut.startsWith("/") || brut.startsWith("//")) return;
+      e.preventDefault();
+      const actuelle = window.location.pathname + window.location.search + window.location.hash;
+      if (brut !== actuelle) {
+        try { window.history.pushState(null, "", brut); } catch (err) { window.location.href = brut; return; }
+      }
+      surRoute();
+    };
+    document.addEventListener("click", surClic);
+    return () => {
+      window.removeEventListener("popstate", surRoute);
+      window.removeEventListener("hashchange", surRoute);
+      document.removeEventListener("click", surClic);
+    };
   }, []);
 
   // Tracking du scroll pour basculer le mode "splash hero" sur la home.
@@ -6319,6 +6354,48 @@ function App() {
     return () => clearTimeout(t);
   }, [route, scrolled]);
 
+  // Chaque adresse assume son titre, sa description et sa canonique. Google
+  // exécute le JavaScript : c'est lui le premier lecteur de ces balises. Les
+  // robots des réseaux, qui ne l'exécutent pas, lisent les pages relais
+  // statiques générées par genere-shells.py.
+  useEffect(() => {
+    const PAGES = {
+      "catalogue": ["Formations", "Des formations pratiques pour apprendre à raconter ton talent et en vivre."],
+      "formations": ["Formations", "Des formations pratiques pour apprendre à raconter ton talent et en vivre."],
+      "workshops": ["Workshops", "Des formats courts et intensifs, en groupe restreint, pour pratiquer sur ton projet réel."],
+      "events": ["Événements", "Masterclasses, talks et rencontres de LA GRIOTHÈQUE."],
+      "agenda": ["Agenda", "Les prochaines sessions de formation, workshops et événements."],
+      "ressources": ["Ressources", "Templates, guides et outils gratuits pour structurer ton récit et tes projets."],
+      "approche": ["Notre approche", "Transmettre à une nouvelle génération de créatifs les outils pour bâtir leur récit et vivre de leur passion."],
+      "contact": ["À propos", "Qui nous sommes, et comment nous écrire."],
+      "financement": ["Financement", "CPF, OPCO, FAF : les dispositifs pour financer ta formation."],
+      "newsletter": ["Newsletter", "Les prochaines dates, les ressources, les coulisses. Inscription en trente secondes."],
+      "cgv": ["Conditions générales de vente", "Les conditions générales de vente de LA GRIOTHÈQUE."],
+      "mentions-legales": ["Mentions légales", "Les mentions légales du site lagriotheque.com."],
+      "confidentialite": ["Politique de confidentialité", "Ce que nous faisons, et ne faisons pas, de tes données."],
+      "bientot": ["Bientôt", "LA GRIOTHÈQUE arrive."],
+    };
+    const id = route.includes("/") ? route.split("/").slice(1).join("/") : "";
+    const trouve = (liste) => ((typeof liste !== "undefined" ? liste : []).find((x) => x && x.id === id) || {});
+    let nom = PAGES[route] ? PAGES[route][0] : null;
+    let desc = PAGES[route] ? PAGES[route][1] : null;
+    if (route.startsWith("formations/")) { const f = trouve(FORMATIONS); nom = f.title || "Formations"; desc = f.tagline || null; }
+    else if (route.startsWith("workshops/")) { const w = trouve(typeof WORKSHOPS !== "undefined" ? WORKSHOPS : []); nom = w.title || "Workshops"; desc = w.tagline || null; }
+    else if (route.startsWith("events/")) { const ev = trouve(typeof EVENTS !== "undefined" ? EVENTS : []); nom = ev.title || "Événements"; desc = ev.description ? String(ev.description).slice(0, 155) : null; }
+    else if (route.startsWith("ressources/")) { const r = trouve(typeof RESOURCES !== "undefined" ? RESOURCES : []); nom = r.title || "Ressources"; desc = r.subtitle || null; }
+    document.title = nom ? nom + " · LA GRIOTHÈQUE" : "LA GRIOTHÈQUE · Formations pour créatifs";
+    const url = "https://lagriotheque.com/" + (route ? route.split("/").map(encodeURIComponent).join("/") + (route.includes("/") ? "" : "/") : "");
+    const poser = (sel, attr, valeur) => {
+      const el = document.querySelector(sel);
+      if (el && valeur) el.setAttribute(attr, valeur);
+    };
+    poser('link[rel="canonical"]', "href", url);
+    poser('meta[property="og:url"]', "content", url);
+    poser('meta[property="og:title"]', "content", document.title);
+    poser('meta[name="description"]', "content", desc);
+    poser('meta[property="og:description"]', "content", desc);
+  }, [route]);
+
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") setOpen(null); };
     window.addEventListener("keydown", onKey);
@@ -6391,7 +6468,7 @@ function App() {
         <p style={{ color: "var(--ink)", opacity: 0.6, marginBottom: 24 }}>
           Elle a été temporairement désactivée. Reviens plus tard ou explore le reste du site.
         </p>
-        <a href="#/" className="lg__menu__link" style={{ fontSize: 16, textDecoration: "underline" }}>
+        <a href="/" className="lg__menu__link" style={{ fontSize: 16, textDecoration: "underline" }}>
           retour à l'accueil →
         </a>
       </section>
@@ -6476,13 +6553,13 @@ function App() {
         <footer className="lg__footer">
           <div className="lg__footer__cols">
             <div className="lg__footer__col">
-              {footerOn("formations") && <a href="#/catalogue">formations</a>}
-              {footerOn("workshops") && <a href="#/workshops">workshops</a>}
-              {footerOn("events") && <a href="#/events">événements</a>}
-              {footerOn("agenda") && <a href="#/agenda">agenda</a>}
-              {footerOn("ressources") && <a href="#/ressources">ressources</a>}
-              {footerOn("approche") && <a href="#/approche">notre approche</a>}
-              {footerOn("contact") && <a href="#/contact">à propos</a>}
+              {footerOn("formations") && <a href="/catalogue">formations</a>}
+              {footerOn("workshops") && <a href="/workshops">workshops</a>}
+              {footerOn("events") && <a href="/events">événements</a>}
+              {footerOn("agenda") && <a href="/agenda">agenda</a>}
+              {footerOn("ressources") && <a href="/ressources">ressources</a>}
+              {footerOn("approche") && <a href="/approche">notre approche</a>}
+              {footerOn("contact") && <a href="/contact">à propos</a>}
             </div>
             <div className="lg__footer__col">
               <a href="https://lesgriotsxstudio.com" target="_blank" rel="noopener">{text("footer.col2_studio_label", "les griots studio")}</a>
@@ -6498,9 +6575,9 @@ function App() {
               {/* Les infos société (SIREN, RCS, NDA, DREETS, etc.) sont
                   centralisées sur la page Mentions légales pour ne pas alourdir
                   le footer — accessibles en un clic via le lien ci-dessous. */}
-              <a href="#/mentions-legales">mentions légales</a>
-              <a href="#/confidentialite">politique de confidentialité</a>
-              <a href="#/cgv">conditions générales de vente</a>
+              <a href="/mentions-legales">mentions légales</a>
+              <a href="/confidentialite">politique de confidentialité</a>
+              <a href="/cgv">conditions générales de vente</a>
               <div className="lg__qualiopi" aria-label="Certifié Qualiopi">
                 <img
                   className="lg__qualiopi__logo"

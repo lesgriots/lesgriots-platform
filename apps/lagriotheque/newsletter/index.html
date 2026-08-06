@@ -3,8 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Le site vit maintenant à de vraies adresses (/formations, …) mais ce
+         fichier est servi pour toutes : la base force chaque référence
+         relative (styles, scripts, images du back-office) à se résoudre
+         depuis la racine, où que soit le visiteur. -->
+    <base href="/" />
     <title>Newsletter · LA GRIOTHÈQUE</title>
-    <meta name="description" content="Les prochaines dates, les ressources, les coulisses. Un mail quand on a quelque chose à transmettre, jamais pour occuper ta boîte." />
+    <meta name="description" content="Les prochaines dates, les ressources, les coulisses. Inscription en trente secondes, désinscription en un clic." />
     <link rel="canonical" href="https://lagriotheque.com/newsletter/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="LA GRIOTHÈQUE" />
@@ -19,22 +24,36 @@
     <meta name="twitter:title" content="Newsletter · LA GRIOTHÈQUE" />
     <meta name="twitter:description" content="Les prochaines dates, les ressources, les coulisses. Inscription en trente secondes, désinscription en un clic." />
     <meta name="twitter:image" content="https://lagriotheque.com/img/og-lagriotheque.jpg" />
-    <link rel="icon" type="image/svg+xml" href="/img/favicon.svg?v=1" />
+    <link rel="icon" type="image/svg+xml" href="img/favicon.svg?v=1" />
+    <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png?v=1" />
+    <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16.png?v=1" />
+    <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png?v=1" />
     <meta name="theme-color" content="#f6f5f3" />
-    <!--
-      Page relais : elle existe pour donner au lien partagé une vraie adresse
-      (lagriotheque.com/newsletter) et un aperçu propre sur les réseaux. Les
-      robots des réseaux sociaux lisent les balises ci-dessus sans exécuter de
-      JavaScript ; un visiteur humain, lui, est emmené immédiatement sur le
-      formulaire (#/newsletter). La redirection JS préserve le hash, qu'une
-      redirection serveur ne saurait pas transporter proprement partout.
-    -->
-    <script>window.location.replace("/#/newsletter");</script>
-    <meta http-equiv="refresh" content="0;url=/#/newsletter" />
+    <link rel="stylesheet" href="styles.css?v=1786016728" />
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"EducationalOrganization","name":"LA GRIOTHÈQUE","url":"https://lagriotheque.com","image":"https://lagriotheque.com/img/og-lagriotheque.jpg","description":"École qui transmet aux créatifs les outils pour bâtir leur récit et vivre de leur passion. Organisme de formation certifié Qualiopi.","sameAs":["https://www.instagram.com/lagrioteque"],"parentOrganization":{"@type":"Organization","name":"LES GRIOTS","url":"https://lesgriots.com"}}
+    </script>
   </head>
-  <body style="margin:0;background:#f6f5f3;color:#000;font-family:system-ui,sans-serif">
-    <p style="padding:32px 24px">
-      <a href="/#/newsletter" style="color:#000">Continuer vers l’inscription à la newsletter →</a>
-    </p>
+  <body>
+    <div id="root"></div>
+
+    <script
+      src="https://unpkg.com/react@18.3.1/umd/react.development.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <!-- Stripe.js v3 — pour la page de checkout custom (Stripe Elements) -->
+    <script src="https://js.stripe.com/v3/" crossorigin="anonymous"></script>
+
+    <script type="text/babel" data-presets="env,react" src="data.jsx?v=1786009874"></script>
+    <script type="text/babel" data-presets="env,react" src="matrix-griot.jsx?v=1784233604"></script>
+    <script type="text/babel" data-presets="env,react" src="app.jsx?v=1786018869"></script>
   </body>
 </html>
