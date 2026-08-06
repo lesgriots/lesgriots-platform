@@ -1534,6 +1534,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 .lg__modal__field__k {
   font-family: var(--font-mono);
@@ -1544,6 +1545,8 @@ button {
   color: var(--ink-3, #888);
 }
 .lg__modal__field input {
+  width: 100%;
+  box-sizing: border-box;
   font-family: var(--font-sans);
   font-size: 15px;
   border: 1px solid var(--ink);
@@ -1587,13 +1590,30 @@ button {
   outline: 1px solid var(--ink);
 }
 @media (max-width: 700px) {
+  /* Mobile : on resserre tout. Un formulaire de quatre champs doit tenir
+     sans defilement sur un telephone courant, sinon le bouton d'envoi passe
+     sous la ligne de flottaison et personne ne le voit. */
   .lg__modal__panel {
-    padding: 28px 20px 24px;
+    padding: 20px 16px 18px;
     max-width: 100%;
     /* Le panneau ne depasse jamais l'ecran : il defile a l'interieur. */
     max-height: calc(100svh - 32px);
   }
-  .lg__modal__title { font-size: 22px; }
+  .lg__modal__close { top: 10px; right: 12px; }
+  .lg__modal__kicker { font-size: 10px; margin-bottom: 5px; }
+  .lg__modal__title { font-size: 19px; line-height: 1.12; margin-bottom: 8px; }
+  .lg__modal__intro { font-size: 13px; line-height: 1.42; margin-bottom: 16px; }
+  .lg__modal__form { gap: 10px; }
+  .lg__modal__field { gap: 4px; }
+  .lg__modal__field__k { font-size: 9px; }
+  .lg__modal__field input { font-size: 16px; padding: 8px 10px; }
+  .lg__modal__consent { font-size: 11px; line-height: 1.35; gap: 8px; margin-top: 2px; }
+  .lg__modal__submit { padding: 12px 14px; font-size: 13px; margin-top: 8px; }
+}
+/* Prenom et nom restent cote a cote meme sur un petit ecran : deux champs
+   courts empiles, c'est deux lignes perdues pour rien. */
+@media (max-width: 480px) {
+  .lg__modal__row { grid-template-columns: 1fr 1fr; gap: 10px; }
 }
 .lg__cta-mini__sub {
   display: block;
