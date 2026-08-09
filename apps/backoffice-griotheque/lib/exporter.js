@@ -392,8 +392,27 @@ async function generateSeoPages(formations) {
     pages++;
   }
 
-  // sitemap.xml : accueil + 1 url par formation.
-  const urls = [`${BASE_URL}/`, ...list.map((f) => `${BASE_URL}/formation/${f.id}/`)];
+  // sitemap.xml : accueil + pages relais + 1 url par formation.
+  // Les relais (/formations, /ressources, …) sont les copies d'index.html
+  // générées par apps/lagriotheque/genere-shells.py, chacune avec son titre
+  // et sa canonique. « catalogue » est exclu (canonique → /formations/),
+  // ainsi que les pages légales (cgv, mentions-legales, confidentialite).
+  const RELAIS = [
+    "formations",
+    "workshops",
+    "events",
+    "agenda",
+    "ressources",
+    "approche",
+    "contact",
+    "financement",
+    "newsletter",
+  ];
+  const urls = [
+    `${BASE_URL}/`,
+    ...RELAIS.map((s) => `${BASE_URL}/${s}/`),
+    ...list.map((f) => `${BASE_URL}/formation/${f.id}/`),
+  ];
   const today = new Date().toISOString().slice(0, 10);
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
