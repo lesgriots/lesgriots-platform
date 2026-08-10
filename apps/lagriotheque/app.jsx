@@ -6578,6 +6578,68 @@ function App() {
     window.addEventListener(EVENEMENT_NEWSLETTER, onOuvrir);
     return () => window.removeEventListener(EVENEMENT_NEWSLETTER, onOuvrir);
   }, []);
+  // Revelation au defilement. On marque les elements APRES le rendu de la
+  // page, puis un observateur leur pose .is-in quand ils entrent dans le
+  // champ. Le marquage est fait en JS (et pas en dur dans le JSX) pour que
+  // le contenu reste visible si le navigateur ne suit pas.
+  useEffect(() => {
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // Images : volet + dezoom. Titres et lignes : montee simple.
+    const MEDIAS = ".lg__ovw__media, .lg__tabsec figure, .lg__resource__media";
+    const TEXTES = [
+      ".lg__tabsec__title",
+      ".lg__latest__heading",
+      ".lg__vision__title",
+      ".lg__avis__title",
+      ".lg__cta-final__title",
+    ].join(", ");
+    const LIGNES = ".lg__rows .lg__row";
+
+    let obs = null;
+    const id = requestAnimationFrame(() => {
+      const marquer = (sel, classe) => {
+        const els = Array.prototype.slice.call(document.querySelectorAll(sel));
+        els.forEach((el, i) => {
+          if (el.dataset.lgRev) return;
+          el.dataset.lgRev = "1";
+          el.classList.add("lg-rev", classe);
+          // Cascade : chaque ligne d'une liste part 60 ms apres la precedente,
+          // plafonnee pour que la derniere n'attende pas une eternite.
+          if (classe === "lg-rev--ligne") {
+            el.style.transitionDelay = Math.min(i, 6) * 0.042 + "s";
+          }
+        });
+        return els;
+      };
+      const cibles = []
+        .concat(marquer(MEDIAS, "lg-rev--media"))
+        .concat(marquer(TEXTES, "lg-rev--texte"))
+        .concat(marquer(LIGNES, "lg-rev--ligne"));
+      if (!cibles.length) return;
+
+      obs = new IntersectionObserver(
+        (entrees) => {
+          entrees.forEach((e) => {
+            if (!e.isIntersecting) return;
+            e.target.classList.add("is-in");
+            obs.unobserve(e.target); // une seule fois : pas de clignotement
+          });
+        },
+        // Le declenchement se fait un peu avant le bord bas de l'ecran, pour
+        // que l'element soit deja pose quand le regard l'atteint.
+        { rootMargin: "0px 0px -8% 0px", threshold: 0.01 }
+      );
+      cibles.forEach((el) => obs.observe(el));
+    });
+
+    return () => {
+      cancelAnimationFrame(id);
+      if (obs) obs.disconnect();
+    };
+  }, [route]);
+
   const _ap = (typeof window !== "undefined" && window.SITE_CONFIG && window.SITE_CONFIG.activePages) || {};
   const launchMode = _ap.launch === true || _ap.home === false;
   // Le menu du footer suit les mêmes pages actives que le header : une page
@@ -6590,7 +6652,9 @@ function App() {
       <Header route={route} />
       {newsletterOuverte && <NewsletterModal onClose={() => setNewsletterOuverte(false)} />}
       <div className="lg">
-        <main>{page}</main>
+        {/* key={route} : React remonte le contenu, donc l'animation
+            d'entree rejoue a chaque changement de page. */}
+        <main key={route} className="lg__page">{page}</main>
         <footer className="lg__footer">
           <div className="lg__footer__cols">
             <div className="lg__footer__col">

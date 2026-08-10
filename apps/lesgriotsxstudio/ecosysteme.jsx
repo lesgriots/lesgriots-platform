@@ -135,8 +135,8 @@ function EcoView() {
       preview: "img/preview-lesgriots.jpg",  // screenshot homepage
       videoSrc: "img/griots-home-thumb.mp4", // video d'accueil de lesgriots.com
       description: lang === "fr"
-        ? "Plateforme éditoriale dédiée aux récits inattendus de l'Afrique et de ses diasporas. Une parole ancienne, une voix nouvelle."
-        : "Editorial platform devoted to the untold stories of Africa and its diasporas. An ancient voice, a new century.",
+        ? ""
+        : "",
     },
     {
       id: "lesgriotsxstudio",
@@ -153,8 +153,8 @@ function EcoView() {
       preview: "img/preview-lesgriotsxstudio.jpg",  // screenshot homepage
       videoSrc: "img/indigo-cristal-thumb.mp4",
       description: lang === "fr"
-        ? "Studio créatif : stratégie narrative, direction artistique et production audiovisuelle pour artistes, marques et institutions."
-        : "Creative studio: narrative strategy, art direction and audiovisual production for artists, brands and institutions.",
+        ? ""
+        : "",
     },
     {
       id: "lagriotheque",
@@ -170,8 +170,8 @@ function EcoView() {
       preview: "img/preview-lagriotheque.jpg",  // screenshot homepage
       videoSrc: "img/indigo-cristal-thumb.mp4",
       description: lang === "fr"
-        ? "École de transmission pour la nouvelle génération créative. Formations courtes, méthodes éprouvées sur le terrain, certifiée Qualiopi."
-        : "School of transmission for the next creative generation. Short formats, methods proven in the field, Qualiopi-certified.",
+        ? ""
+        : "",
     },
   ].map(merge);
 
@@ -580,15 +580,17 @@ function EcoView() {
           {/* Texte EXTÉRIEUR au terminal — sous la fenêtre */}
           <div className="eco-solar__info">
             <p className="eco-solar__info__kicker">[{active.kicker}]</p>
-            <p className="eco-solar__info__desc">
-              <Type
-                text={active.description.toUpperCase()}
-                speed={12}
-                delay={0}
-                cursor="always"
-                key={"eco-desc-" + active.id}
-              />
-            </p>
+            {active.description && (
+              <p className="eco-solar__info__desc">
+                <Type
+                  text={active.description.toUpperCase()}
+                  speed={12}
+                  delay={0}
+                  cursor="always"
+                  key={"eco-desc-" + active.id}
+                />
+              </p>
+            )}
             <p className="eco-solar__info__cta">
               {active.current
                 ? "› " + (lang === "fr" ? "VOUS ÊTES ICI" : "YOU ARE HERE")

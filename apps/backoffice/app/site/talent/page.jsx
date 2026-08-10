@@ -118,12 +118,16 @@ export default function TalentEditorPage() {
       </p>
 
       <h2>Photo & vidéo</h2>
+      <p className="note">
+        Le portrait accepte une image ou une vidéo. Une vidéo y jouera en
+        boucle, sans son, dans le même cadre que la photo.
+      </p>
       <div className="row" style={{ marginTop: 8 }}>
         <div>
-          <label>Photo portrait</label>
+          <label>Photo ou vidéo portrait</label>
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,video/*"
             disabled={upPhoto}
             onChange={(e) => upload(e.target.files[0], setPortrait, setUpPhoto)}
           />
@@ -134,9 +138,13 @@ export default function TalentEditorPage() {
             style={{ marginTop: 8 }}
           />
           {portrait ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={`/api/preview?p=${encodeURIComponent(portrait)}`} alt="portrait" style={{ marginTop: 10, maxWidth: "100%", maxHeight: 180, border: "1px solid var(--rule)" }} />
-          ) : <p className="note">{upPhoto ? "Upload en cours…" : "Aucune photo — seule la vidéo s'affichera."}</p>}
+            /\.(mp4|webm|mov|m4v)$/i.test(portrait) ? (
+              <video src={`/api/preview?p=${encodeURIComponent(portrait)}`} muted loop autoPlay playsInline style={{ marginTop: 10, maxWidth: "100%", maxHeight: 180, border: "1px solid var(--rule)" }} />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={`/api/preview?p=${encodeURIComponent(portrait)}`} alt="portrait" style={{ marginTop: 10, maxWidth: "100%", maxHeight: 180, border: "1px solid var(--rule)" }} />
+            )
+          ) : <p className="note">{upPhoto ? "Upload en cours…" : "Aucun média — le griot ASCII s'affichera à la place."}</p>}
         </div>
         <div>
           <label>Vidéo au survol</label>

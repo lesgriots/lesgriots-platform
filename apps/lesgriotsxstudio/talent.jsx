@@ -57,7 +57,10 @@ function TalentView() {
     ? overrides.bio[lang]
     : tr("talent.bio", lang);
   const hoverVideo = overrides.hoverVideo || "img/riles-live-04.mp4";
+  // Le champ « portrait » du back office accepte une photo OU une video :
+  // on regarde l'extension du fichier pour savoir quoi afficher.
   const portraitImg = overrides.portrait || null;
+  const portraitEstVideo = !!portraitImg && /\.(mp4|webm|mov|m4v)(\?|$)/i.test(portraitImg);
   // Savoir-faire du talent — liste de compétences (bilingue). Affichées en
   // tags sous la bio. Vide → section masquée.
   const skills = (overrides.skills && overrides.skills[lang]) || [];
@@ -141,7 +144,21 @@ function TalentView() {
               grille Work. */}
           <div className="ahome__cell__rest">
             {portraitImg ? (
-              <img src={portraitImg} alt={NAME} />
+              portraitEstVideo ? (
+                // Muette et en boucle : c'est un portrait qui respire, pas un
+                // film. playsInline empeche iOS de la passer en plein ecran.
+                <video
+                  src={portraitImg}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  aria-label={NAME}
+                />
+              ) : (
+                <img src={portraitImg} alt={NAME} />
+              )
             ) : (
               <MatrixGriot />
             )}

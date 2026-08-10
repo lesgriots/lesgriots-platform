@@ -170,8 +170,8 @@ const SITE_CONTENT = {
       "kickerFr": "PLATEFORME ÉDITORIALE",
       "kickerEn": "EDITORIAL PLATFORM",
       "url": "https://lesgriots.com",
-      "descFr": "Plateforme éditoriale dédiée aux récits inattendus de l'Afrique et de ses diasporas. Une parole ancienne, une voix nouvelle.",
-      "descEn": "Editorial platform devoted to the untold stories of Africa and its diasporas. An ancient voice, a new century.",
+      "descFr": "",
+      "descEn": "",
       "poster": "img/griots-home-poster.jpg",
       "preview": "img/preview-lesgriots.jpg",
       "videoSrc": "img/griots-home-thumb.mp4"
@@ -180,8 +180,8 @@ const SITE_CONTENT = {
       "kickerFr": "AGENCE CRÉATIVE",
       "kickerEn": "CREATIVE STUDIO",
       "url": "https://lesgriotsxstudio.com",
-      "descFr": "Studio créatif : stratégie narrative, direction artistique et production audiovisuelle pour artistes, marques et institutions.",
-      "descEn": "Creative studio: narrative strategy, art direction and audiovisual production for artists, brands and institutions.",
+      "descFr": "",
+      "descEn": "",
       "poster": "img/atavisme-01.jpg",
       "preview": "img/preview-lesgriotsxstudio.jpg",
       "videoSrc": "img/indigo-cristal-thumb.mp4"
@@ -190,8 +190,8 @@ const SITE_CONTENT = {
       "kickerFr": "PILIER FORMATION",
       "kickerEn": "TRAINING PILLAR",
       "url": "https://lagriotheque.com",
-      "descFr": "École de transmission pour la nouvelle génération créative. Formations courtes, méthodes éprouvées sur le terrain, certifiée Qualiopi.",
-      "descEn": "School of transmission for the next creative generation. Short formats, methods proven in the field, Qualiopi-certified.",
+      "descFr": "",
+      "descEn": "",
       "poster": "img/florale-01.jpg",
       "preview": "img/preview-lagriotheque.jpg",
       "videoSrc": "img/heor-gritoheque-mrc6cfjg.mp4"
