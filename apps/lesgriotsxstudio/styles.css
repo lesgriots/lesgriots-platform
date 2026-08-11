@@ -1876,7 +1876,10 @@ body:has(.eco3) .idcard { display: none !important; }
   gap: 90px 70px;
   align-items: center;
   justify-items: center;
-  padding: 90px 0 90px;
+  /* Un peu plus bas : le bloc etait legerement trop haut, et la barre
+     SMALL / LARGE / INDEX en bas d'ecran tire l'oeil vers le bas. On
+     redistribue la respiration, sans changer la hauteur totale. */
+  padding: 132px 0 68px;
   max-width: 1700px;
   margin: 0 auto;
   position: relative;
@@ -6467,3 +6470,49 @@ body.overview-open .utilbar {
 @media (max-width: 640px) {
   .lx-cd__sticker { width: 150px; top: 12px; left: 12px; }
 }
+
+
+/* ==========================================================================
+   FILIGRANE — le mot-marque LES GRIOTS pleine forme, au fond du site.
+   Le PNG sert de POCHOIR : la couleur vient de la CSS, pas de l'image, donc
+   la forme est peinte en --ink, exactement le mustard du griot ASCII.
+   Colle en haut, fixe, derriere absolument tout.
+   ========================================================================== */
+html { background-color: var(--bg); }
+body { background-color: transparent; }
+/* Les conteneurs de page peignent leur propre fond opaque, de la meme
+   couleur : sans ca ils recouvrent le filigrane. Transparents, l'aspect ne
+   change pas et le mot redevient visible. */
+.ahome,
+.about-min,
+.talent-page,
+.home,
+.viewer { background-color: transparent; }
+
+/* ::after et PAS ::before : ::before porte deja le grain de film. */
+body::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: auto;
+  /* Le logo fait 2587 x 665 : a pleine largeur, sa hauteur vaut 25,7 % de
+     la largeur de l'ecran. */
+  height: 25.71vw;
+  background-color: var(--ink);
+  -webkit-mask-image: url("img/les-griots-logo.png");
+  mask-image: url("img/les-griots-logo.png");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: top center;
+  mask-position: top center;
+  -webkit-mask-size: 100% auto;
+  mask-size: 100% auto;
+  opacity: 0.13;
+  pointer-events: none;
+  z-index: -1;
+}
+/* Ecran de demarrage et page Ecosysteme : le fond y est deja habite. */
+body.is-booting::after,
+body:has(.eco-solar)::after { display: none; }
