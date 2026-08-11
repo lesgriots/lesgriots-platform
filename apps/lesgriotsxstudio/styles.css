@@ -598,7 +598,8 @@ body:has(.eco3) .idcard { display: none !important; }
   max-height: 100vh;
   padding: 92px 40px 80px;
   display: flex;
-  align-items: flex-start;
+  /* Centre : la liste tenait en haut avec la moitie basse de l'ecran vide. */
+  align-items: center;
   justify-content: center;
   pointer-events: none;
   overflow: hidden;
@@ -634,12 +635,16 @@ body:has(.eco3) .idcard { display: none !important; }
    stay visually aligned regardless of content length. */
 .idx-term__row {
   display: grid;
+  /* Piste C : le nom porte la ligne, la nature du travail suit, le client et
+     la date se retirent a droite. L'image du projet passe en fond. */
+  /* Largeurs FIXES (pas de max-content) : chaque ligne est sa propre grille,
+     donc des colonnes dimensionnees par leur contenu ne s'alignent pas d'une
+     ligne a l'autre. Un index doit se lire en colonne. */
   grid-template-columns:
     34px                          /* 01 */
-    minmax(220px, 1.6fr)          /* PROJECT NAME */
-    minmax(160px, 1fr)            /* client */
-    minmax(72px,  max-content)    /* date */
-    minmax(140px, max-content);   /* services */
+    minmax(200px, 1fr)            /* NOM DU PROJET */
+    200px                         /* nature */
+    270px;                        /* client · date */
   gap: 24px;
   align-items: baseline;
   padding: 6px 0 6px 10px;
@@ -6516,3 +6521,54 @@ body::after {
 /* Ecran de demarrage et page Ecosysteme : le fond y est deja habite. */
 body.is-booting::after,
 body:has(.eco-solar)::after { display: none; }
+
+
+/* ---- Mode INDEX : ligne d'en-tete des colonnes -----------------------
+   Meme grille que les lignes de projet, donc les colonnes s'alignent. Elle
+   ne reagit ni au survol ni au clic : c'est une legende, pas une entree. */
+.idx-term__row--head {
+  cursor: default;
+  pointer-events: none;
+  padding-bottom: 10px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(138, 122, 32, 0.22);
+}
+.idx-term__row--head span,
+.idx-term__row--head .c-name {
+  color: rgba(138, 122, 32, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 10px;
+  font-weight: 500;
+}
+/* L'en-tete ne s'eteint pas quand on survole la liste. */
+.idx-term__rows:hover .idx-term__row--head span,
+.idx-term__rows:hover .idx-term__row--head .c-name {
+  color: rgba(138, 122, 32, 0.5);
+}
+
+
+/* ---- Mode INDEX : liste compacte ---------------------------------------- */
+.idx-term__row .c-meta {
+  color: var(--ink-dim);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: right;
+  white-space: nowrap;
+}
+.idx-term__rows:hover .idx-term__row:not(.is-active) .c-meta { color: rgba(138, 122, 32, 0.2); }
+.idx-term__row.is-active .c-meta { color: var(--ink); }
+/* Un filet fin separe les lignes : la liste se lit comme un depouillement. */
+.idx-term__row:not(.idx-term__row--head) { border-bottom: 1px solid rgba(138, 122, 32, 0.12); }
+
+/* En-tete : le libelle « Client · Date » se cale a droite comme sa colonne. */
+.idx-term__row--head .c-meta { text-align: right; }
+
+/* La nature du travail, dans la ligne. Meme graisse que le client et la date,
+   pour que le nom du projet reste seul a porter la ligne. */
+.idx-term__row .c-svc {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}

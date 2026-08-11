@@ -14,7 +14,6 @@ function pad(str, n) {
 function HomeIndex({ onOpenProject, onHover }) {
   const lang = useLang();
   const [hovered, setHovered] = useStateI(null);
-
   useEffectI(() => { onHover && onHover(hovered); }, [hovered]);
 
   // Derive a project's "services" line from its tags (Chems style)
@@ -25,7 +24,18 @@ function HomeIndex({ onOpenProject, onHover }) {
     if (t.includes("EDITORIAL") || t.includes("PHOTOGRAPHY")) out.push(tr("filt.editorial", lang));
     if (t.includes("MUSIC VIDEO")) out.push(tr("filt.music", lang));
     if (t.includes("FILM") || t.includes("SHORT FILM") || t.includes("DOCUMENTARY")) out.push(tr("filt.film", lang));
+    // Aucune correspondance ? On montre les mots-cles du projet plutot qu'un
+    // tiret : mieux vaut l'information brute que rien.
+    if (!out.length && t.length) return t.slice(0, 2).join(" · ");
     return out.length ? out.join(" · ") : "—";
+  };
+
+  // La date est du texte libre (« 2020 », « 2025 — PRESENT », « — ») : on
+  // l'affiche telle quelle. L'ancien decoupage mois/annee fabriquait des
+  // valeurs fausses du type « 20.SENT ».
+  const dateLisible = (p) => {
+    const d = String(p.date || "").trim();
+    return d ? d.toUpperCase() : "—";
   };
 
   const total = PROJECTS.length;
@@ -40,9 +50,15 @@ function HomeIndex({ onOpenProject, onHover }) {
         <div className="idx-term__line idx-term__spacer">&nbsp;</div>
 
         <ol className="idx-term__rows">
+          {/* En-tete : nomme les colonnes, sans cliquer ni survoler. */}
+          <li className="idx-term__row idx-term__row--head" aria-hidden="true">
+            <span className="c-num">№</span>
+            <span className="c-name">{lang === "fr" ? "Projet" : "Project"}</span>
+            <span className="c-svc">{lang === "fr" ? "Nature" : "Scope"}</span>
+            <span className="c-meta">{lang === "fr" ? "Client · Date" : "Client · Date"}</span>
+          </li>
+
           {PROJECTS.map((p, i) => {
-            const year = (p.date || "").slice(-4);
-            const month = (p.date || "").slice(0, 2) || "--";
             return (
               <li
                 key={p.id}
@@ -53,9 +69,8 @@ function HomeIndex({ onOpenProject, onHover }) {
               >
                 <span className="c-num">{String(i + 1).padStart(2, "0")}</span>
                 <span className="c-name">{p.name}</span>
-                <span className="c-client">{p.client || "—"}</span>
-                <span className="c-date">{month}.{year}</span>
                 <span className="c-svc">{servicesOf(p)}</span>
+                <span className="c-meta">{[p.client, dateLisible(p)].filter(Boolean).join(" · ")}</span>
               </li>
             );
           })}
@@ -66,6 +81,7 @@ function HomeIndex({ onOpenProject, onHover }) {
           <span className="prompt">&gt;</span> <span className="blink">█</span>
         </div>
       </div>
+
     </div>
   );
 }
