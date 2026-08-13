@@ -4646,10 +4646,10 @@ body.manifest-only .brand-mark {
        et les deux se superposaient. On la descend juste sous la bande. */
 @media (max-width: 720px) {
   button.lang-toggle.manifesto-lang {
-    top: 16px;
+    top: calc(var(--lg-marque) - 18px);
     right: 16px;
     z-index: 400;
-    font-size: 16px;
+    font-size: 12px;
     letter-spacing: 0.02em;
   }
 }
@@ -4706,6 +4706,55 @@ body.manifest-only #about-panel #ab-mission .manifest-lead {
 body.manifest-only #about-panel #ab-mission .manifest-lead .about-chapo {
   top: 50vh;
   translate: 0 -50%;
+}
+
+/* Composition éditoriale du manifeste.
+   Fer à gauche, césure linguistique et lignes de longueur régulière : on
+   garde la tension d'un grand titre de magazine sans les rivières blanches
+   que produirait une justification forcée à cette échelle. */
+body.manifest-only #about-panel #ab-mission .about-copy {
+  hanging-punctuation: first last;
+  font-kerning: normal;
+  font-optical-sizing: auto;
+  font-variant-ligatures: common-ligatures contextual;
+  text-rendering: optimizeLegibility;
+}
+body.manifest-only #about-panel #ab-mission .about-copy p {
+  text-align: left;
+  text-wrap: pretty;
+  -webkit-hyphens: none;
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
+  orphans: 3;
+  widows: 3;
+}
+body.manifest-only #about-panel #ab-mission .about-copy p br {
+  display: block;
+  content: "";
+}
+body.manifest-only #about-panel #ab-mission .about-chapo {
+  text-wrap: balance;
+  -webkit-hyphens: none;
+  hyphens: none;
+}
+html[lang="fr"] body.manifest-only #about-panel #ab-mission .about-copy p {
+  quotes: "« " " »" "‹ " " ›";
+}
+html[lang="en"] body.manifest-only #about-panel #ab-mission .about-copy p {
+  quotes: "“" "”" "‘" "’";
+}
+
+/* Quatre mouvements lisibles sans intertitres ajoutés : conviction (1),
+   regard et forme (2–3), effet du récit (4), engagement et conclusion
+   (5–6). Les respirations font la structure. */
+body.manifest-only #about-panel #ab-mission .about-copy .about-corps:nth-of-type(2),
+body.manifest-only #about-panel #ab-mission .about-copy .about-corps:nth-of-type(4),
+body.manifest-only #about-panel #ab-mission .about-copy .about-corps:nth-of-type(5) {
+  margin-top: 1.75em;
+}
+body.manifest-only #about-panel #ab-mission .about-copy .about-chute {
+  margin-top: 1.9em;
 }
 @media (max-width: 720px) {
   body.manifest-only #about-panel #ab-mission .manifest-lead .about-chapo {
@@ -4780,5 +4829,25 @@ body.manifest-only #about-panel #ab-mission {
   body.manifest-only #about-panel #ab-mission .about-slide .about-chute {
     font-size: clamp(23px, 6.8vw, 32px);
     line-height: 1.08;
+    max-width: min(25ch, calc(100vw - 40px));
+    letter-spacing: -0.01em;
+  }
+
+  body.manifest-only #about-panel #ab-mission .about-copy {
+    padding-inline: 20px;
+  }
+
+  body.manifest-only #about-panel #ab-mission .about-copy p + p {
+    margin-top: 1.15em;
+  }
+
+  body.manifest-only #about-panel #ab-mission .about-copy .about-corps:nth-of-type(2),
+  body.manifest-only #about-panel #ab-mission .about-copy .about-corps:nth-of-type(4),
+  body.manifest-only #about-panel #ab-mission .about-copy .about-corps:nth-of-type(5) {
+    margin-top: 1.65em;
+  }
+
+  body.manifest-only #about-panel #ab-mission .about-copy .about-chute {
+    margin-top: 1.8em;
   }
 }
