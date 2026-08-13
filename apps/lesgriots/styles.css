@@ -4603,3 +4603,41 @@ button.lang-toggle.manifesto-lang:hover span:not(.on) { color: rgba(244, 239, 22
 body.manifest-only #about-panel #ab-mission ~ * {
   display: none !important;
 }
+
+/* 58. L'ARRIVEE. En passant en « manifeste seul », la page se figeait dès le
+       premier frame avec le mot-marque déjà collé en haut : la montée
+       d'ouverture existait toujours dans le script, mais la règle
+       « transform: none !important » l'annulait sans bruit.
+       On la rétablit, et on lui donne son vrai parcours. La marque part
+       sous le bord bas, monte se poser en bas comme sur l'accueil, tient
+       une respiration, puis traverse l'écran jusqu'en haut où elle reste
+       pour toute la lecture. Trois temps, une seule variable. */
+body.manifest-only .brand-mark {
+  top: 0;
+  bottom: auto;
+  left: 0;
+  width: 100%;
+  height: var(--lg-marque);
+  /* Le !important est indispensable : la boucle de défilement réécrit un
+     transform en ligne à chaque image, il faut passer devant. */
+  transform: translate3d(0, var(--lg-montee, 0px), 0) !important;
+}
+/* Un seul geste est joué au temps : l'ouverture, quand la marque surgit du
+   bord bas et vient se poser. Tout le reste est du défilement, donc SANS
+   transition : une transition sur un mouvement piloté par la molette le fait
+   traîner d'une demi-seconde derrière le doigt, et c'est ce retard qu'on lit
+   comme une téléportation quand il se résorbe. */
+.brand-mark.lg-pose { transition: transform 860ms cubic-bezier(.16,.84,.18,1); }
+
+/* 59. Sur telephone, la bascule de langue tombait DANS le mot-marque une fois
+       celui-ci fige en haut : la bande du logo occupe le premier centieme de
+       l'ecran en desktop, mais un bon tiers de la largeur utile en portrait,
+       et les deux se superposaient. On la descend juste sous la bande. */
+@media (max-width: 720px) {
+  button.lang-toggle.manifesto-lang {
+    top: calc(var(--lg-marque) + 12px);
+    right: 16px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+  }
+}
