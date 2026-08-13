@@ -4641,3 +4641,25 @@ body.manifest-only .brand-mark {
     letter-spacing: 0.2em;
   }
 }
+
+/* 60. TROIS DEFAUTS PROPRES AU TELEPHONE, invisibles sur grand ecran.
+
+       a) La video d'ouverture etait en 100dvh. Sur iOS la barre d'outils se
+          retracte au defilement, dvh suit ce mouvement, et l'image se
+          redimensionne en pleine lecture pendant que le mot-marque, lui,
+          se cale sur la hauteur visible. Les deux se decalent. svh est la
+          hauteur stable, celle barre d'outils deployee : elle ne bouge plus.
+
+       b) Le magnetisme de defilement datait de la version a douze sections,
+          quand chaque ecran valait un arret. Il ne reste qu'un seul bloc, et
+          il fait quatre mille pixels de haut : « scroll-snap-stop: always »
+          sur un bloc pareil accroche le doigt sans jamais rien caler.
+
+       c) Le manifeste demarrait a 8 % de hauteur sous une bande de logo qui
+          occupe deja un tiers de l'ecran utile en portrait. */
+@media (max-width: 720px) {
+  .about-vid { height: 100svh; }
+
+  #about-panel { scroll-snap-type: none; }
+  #about-panel .about-slide { scroll-snap-align: none; scroll-snap-stop: normal; }
+}
