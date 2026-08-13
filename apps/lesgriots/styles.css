@@ -4899,3 +4899,34 @@ html body.manifest-only .brand-mark {
   -webkit-mask-image: linear-gradient(to bottom, #000 0 var(--lg-a, 100%), transparent var(--lg-a, 100%) var(--lg-b, 100%), #000 var(--lg-b, 100%) 100%) !important;
   mask-image: linear-gradient(to bottom, #000 0 var(--lg-a, 100%), transparent var(--lg-a, 100%) var(--lg-b, 100%), #000 var(--lg-b, 100%) 100%) !important;
 }
+
+
+/* 65. LE STUDIO SE COLLE EN HAUT, Y COMPRIS SUR TELEPHONE. Une regle ancienne
+       annulait tout le recouvrement en portrait : les sections y « se
+       suivaient » au lieu de se recouvrir, parce qu'a l'epoque la chaine
+       comptait douze ecrans et que l'empilement rendait la lecture confuse.
+       Il n'en reste qu'un, et c'est justement le geste qu'on veut voir : le
+       panneau du studio monte par-dessus le manifeste et se fige plein cadre.
+       On lui rend donc sa mecanique sur mobile aussi, en svh pour ne pas
+       suivre la retractation de la barre d'outils. */
+@media (max-width: 720px) {
+  body.manifest-only #about-panel #ab-travail {
+    min-height: 300svh;
+    margin-top: -100svh;
+    position: relative;
+  }
+  body.manifest-only #about-panel #ab-travail > .ab-wk {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+/* Sur grand ecran la hauteur reste en vh, mais on aligne le collage sur la
+   meme regle explicite : le panneau tient l'ecran tant que la section dure. */
+body.manifest-only #about-panel #ab-travail > .ab-wk {
+  position: sticky;
+  top: 0;
+  overflow: hidden;
+}
