@@ -4679,3 +4679,25 @@ body.manifest-only #about-panel #ab-mission > .about-slide {
 body.manifest-only #about-panel #ab-mission .manifest-lead {
   margin-top: 0;
 }
+
+/* 62. L'assombrissement de depart des paragraphes n'est plus inconditionnel.
+       Il ne s'applique que si JavaScript a pu poser « lg-js » sur la racine.
+       Sans cela, une page dont le script d'apparition ne rend pas la main
+       reste bloquee a 16 % d'opacite : on voit la video, le logo, et un
+       manifeste invisible. C'est exactement ce qui se passait sur telephone.
+       La regle par defaut redevient donc : le texte est lisible. */
+#about-panel #ab-mission .about-corps,
+#about-panel #ab-mission .about-chute {
+  opacity: 1;
+  translate: none;
+}
+html.lg-js #about-panel #ab-mission .about-corps,
+html.lg-js #about-panel #ab-mission .about-chute {
+  opacity: 0.16;
+  translate: 0 44px;
+}
+html.lg-js #about-panel #ab-mission .about-corps.lg-in,
+html.lg-js #about-panel #ab-mission .about-chute.lg-in {
+  opacity: 1;
+  translate: 0 0;
+}
