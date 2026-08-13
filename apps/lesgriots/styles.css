@@ -4942,3 +4942,22 @@ body.manifest-only #about-panel #ab-travail > .ab-wk {
 #about-panel #ab-travail .ab-wk__filigrane {
   top: 0;
 }
+
+
+/* 67. LE FILIGRANE EST RETIRE. Decision de Moos, le 13 aout, apres l'avoir vu
+       cale en haut. On ne supprime pas le reglage, on l'eteint : tout est
+       conserve ci-dessous pour pouvoir le rallumer en une ligne.
+
+       CE QU'IL FAISAIT, et pourquoi ca valait le coup :
+       le filigrane fait exactement la hauteur de la bande du mot-marque
+       (--lg-marque, soit 100vw / 3.89). Cale a top: 0, il occupait la place
+       precise de la marque jaune que le panneau du studio efface en montant.
+       On ne voyait pas un logo disparaitre et un autre apparaitre ailleurs :
+       on voyait le meme mot passer du jaune au creux, sans bouger d'un pixel.
+
+       POUR LE RALLUMER : retirer le bloc ci-dessous. Les deux reglages qui
+       comptent sont deja en place plus haut, correction 66 (top: 0) et la
+       regle d'origine (opacity: 0.09, ligne ~3246). */
+#about-panel #ab-travail .ab-wk__filigrane {
+  display: none;
+}
