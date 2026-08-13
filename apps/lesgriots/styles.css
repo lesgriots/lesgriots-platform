@@ -4961,3 +4961,17 @@ body.manifest-only #about-panel #ab-travail > .ab-wk {
 #about-panel #ab-travail .ab-wk__filigrane {
   display: none;
 }
+
+
+/* 68. LA SECTION TRAVAIL EST RETIREE. Decision de Moos, 13 aout, peu apres
+       l'avoir remise. La page redevient le manifeste et rien d'autre.
+
+       Comme pour le filigrane, on ne demonte rien : les corrections 63 a 67
+       restent en place au-dessus, ce bloc les neutralise. Pour faire revenir
+       le studio, il suffit de supprimer la regle ci-dessous. Tout le reste
+       repart avec : la remontee d'un ecran par-dessus le manifeste, le
+       collage plein cadre sur les deux formats, et le masque qui fait manger
+       le mot-marque par le bord superieur du panneau. */
+body.manifest-only #about-panel #ab-mission ~ section#ab-travail {
+  display: none !important;
+}
