@@ -4930,3 +4930,15 @@ body.manifest-only #about-panel #ab-travail > .ab-wk {
   top: 0;
   overflow: hidden;
 }
+
+
+/* 66. LE FILIGRANE MONTE TOUT EN HAUT DE LA SECTION. Il etait pose a 4 % de
+       la hauteur du panneau, soit 36 px plus bas que le bord. Or il fait
+       exactement la hauteur de la bande du mot-marque : cale a zero, il vient
+       prendre la place precise de la marque jaune que le panneau efface en
+       montant. Le remplacement devient invisible, on ne voit plus un logo
+       disparaitre et un autre apparaitre ailleurs, on voit le meme mot passer
+       du jaune au creux. C'est ce decalage de 36 px qui trahissait la bascule. */
+#about-panel #ab-travail .ab-wk__filigrane {
+  top: 0;
+}
