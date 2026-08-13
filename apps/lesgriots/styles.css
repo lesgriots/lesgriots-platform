@@ -4533,7 +4533,7 @@ body.panel-open .brand-mark {
 }
 #about-panel #ab-mission .manifest-lead .about-chapo {
   transform: translate3d(0, var(--lead-y, 0px), 0);
-  transition: transform 1100ms cubic-bezier(.12,.82,.14,1);
+  transition: transform 1450ms cubic-bezier(.12,.82,.14,1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4564,7 +4564,7 @@ body.panel-open .brand-mark {
    cran avec le nom de balise, sans recourir a !important. */
 button.lang-toggle.manifesto-lang {
   left: auto;
-  right: 22px;
+  right: 32px;
   top: 22px;
   width: -moz-max-content;
   width: max-content;
@@ -4579,21 +4579,25 @@ button.lang-toggle.manifesto-lang {
   backdrop-filter: none;
   border: 0;
   border-radius: 0;
-  font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  z-index: 700;
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
   line-height: 1;
-  color: rgba(244, 239, 227, 0.5);
+  color: #fff;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
 }
 button.lang-toggle.manifesto-lang span {
-  color: inherit;
+  color: #fff;
   transition: color 260ms ease;
 }
-button.lang-toggle.manifesto-lang span.on { color: #F8C40F; }
-button.lang-toggle.manifesto-lang i { font-style: normal; opacity: 0.3; }
-button.lang-toggle.manifesto-lang:hover span:not(.on) { color: rgba(244, 239, 227, 0.85); }
+button.lang-toggle.manifesto-lang span.on { color: #fff; opacity: 1; }
+button.lang-toggle.manifesto-lang span:not(.on) { opacity: 0.62; }
+button.lang-toggle.manifesto-lang i { font-style: normal; opacity: 0.62; }
+button.lang-toggle.manifesto-lang:hover span:not(.on) { color: #fff; opacity: 0.9; }
+
 
 /* 57. Le bandeau LES GRIOTS qui defile subsistait en bas de page. La regle
        de la version « manifeste seul » ne visait que les .ab-sec : le
@@ -4618,6 +4622,13 @@ body.manifest-only .brand-mark {
   left: 0;
   width: 100%;
   height: var(--lg-marque);
+  z-index: 500;
+  visibility: visible;
+  opacity: 1;
+  clip-path: none;
+  -webkit-clip-path: none;
+  mask-image: none;
+  -webkit-mask-image: none;
   /* Le !important est indispensable : la boucle de défilement réécrit un
      transform en ligne à chaque image, il faut passer devant. */
   transform: translate3d(0, var(--lg-montee, 0px), 0) !important;
@@ -4635,10 +4646,11 @@ body.manifest-only .brand-mark {
        et les deux se superposaient. On la descend juste sous la bande. */
 @media (max-width: 720px) {
   button.lang-toggle.manifesto-lang {
-    top: calc(var(--lg-marque) + 12px);
+    top: 16px;
     right: 16px;
-    font-size: 10px;
-    letter-spacing: 0.2em;
+    z-index: 400;
+    font-size: 16px;
+    letter-spacing: 0.02em;
   }
 }
 
@@ -4676,8 +4688,29 @@ body.manifest-only .brand-mark {
 body.manifest-only #about-panel #ab-mission > .about-slide {
   padding-top: 26px;
 }
+/* 61b. Deux temps distincts : le premier écran de scroll appartient
+   entièrement au mot-marque. Le manifeste reste sous le cadre jusqu'à ce
+   que le logo ait fini sa course et se soit fixé en haut ; alors seulement
+   WE TELL STORIES entre depuis le bas. */
+body.manifest-only #about-panel #ab-mission {
+  margin-top: calc(100vh - var(--lg-marque));
+}
+@media (max-width: 720px) {
+  body.manifest-only #about-panel #ab-mission {
+    margin-top: calc(100svh - var(--lg-marque));
+  }
+}
 body.manifest-only #about-panel #ab-mission .manifest-lead {
   margin-top: 0;
+}
+body.manifest-only #about-panel #ab-mission .manifest-lead .about-chapo {
+  top: 50vh;
+  translate: 0 -50%;
+}
+@media (max-width: 720px) {
+  body.manifest-only #about-panel #ab-mission .manifest-lead .about-chapo {
+    top: 50svh;
+  }
 }
 
 /* 62. L'assombrissement de depart des paragraphes n'est plus inconditionnel.
@@ -4700,4 +4733,44 @@ html.lg-js #about-panel #ab-mission .about-corps.lg-in,
 html.lg-js #about-panel #ab-mission .about-chute.lg-in {
   opacity: 1;
   translate: 0 0;
+}
+
+/* 63. En mode manifeste seul, l'ancien accueil vidéo n'existe plus dans le
+       rendu. Sur Safari mobile son calque accéléré pouvait repasser devant le
+       panneau About et masquer le texte. La seule vidéo conservée est celle
+       du manifeste, .about-vid. */
+body.manifest-only #stage,
+body.manifest-only #player,
+body.manifest-only .player,
+body.manifest-only .journal,
+body.manifest-only > .about-panel:not(#about-panel),
+body.manifest-only > .archive-panel,
+body.manifest-only > .shop-panel,
+body.manifest-only > .product-panel,
+body.manifest-only > .project-panel {
+  display: none !important;
+}
+body.manifest-only #about-panel {
+  z-index: 300;
+  isolation: isolate;
+}
+body.manifest-only #about-panel .about-vid { z-index: 0; }
+body.manifest-only #about-panel #ab-mission {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 720px) {
+  body.manifest-only #stage-home { display: none !important; }
+  body.manifest-only #about-panel { transform: none !important; }
+  body.manifest-only .brand-mark {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 500 !important;
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+  }
 }
