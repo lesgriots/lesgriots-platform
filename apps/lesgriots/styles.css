@@ -165,6 +165,72 @@ body.entered .landing-tag {
   .une-video { width: 86vw; }
 }
 
+/* 55. MANIFESTE SEUL — aucune navigation, aucune définition, aucun projet,
+       aucun appel à l'action. Le noir final recouvre le tableau figé. */
+body.manifest-only .jr-head,
+body.manifest-only #about-panel .ab-head {
+  display: none !important;
+}
+body.manifest-only #about-panel #ab-mission ~ .ab-sec {
+  display: none !important;
+}
+.manifesto-lang {
+  position: fixed;
+  right: 18px;
+  top: 18px;
+  z-index: 400;
+}
+body:not(.manifest-only) .manifesto-lang {
+  display: none;
+}
+
+/* 49. Après le manifeste, la définition — sans écran intermédiaire. Les
+       anciennes séquences restent dans le fichier mais sortent du parcours. */
+#about-panel #ab-recit,
+#about-panel #ab-feu,
+#about-panel #ab-scinde,
+#about-panel #ab-fil,
+#about-panel #ab-mot-legacy {
+  display: none;
+}
+#about-panel #ab-mot {
+  min-height: 300vh;
+  margin-top: -100vh;
+  position: relative;
+  z-index: 3;
+}
+#about-panel #ab-mot > .ab-mot {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* 50. La conclusion atteint son cadre puis reste immobile pendant un écran.
+       La définition, placée sur un calque supérieur, monte alors au-dessus
+       du texte figé et de la vidéo sticky en un seul mouvement. */
+#about-panel #ab-mission {
+  padding-bottom: 100vh;
+  position: relative;
+  z-index: 2;
+}
+#about-panel #ab-mission .about-chute {
+  position: relative;
+  top: auto;
+  z-index: 1;
+  will-change: transform;
+}
+#about-panel #ab-mot {
+  margin-top: -100vh;
+  z-index: 50;
+  isolation: isolate;
+}
+#about-panel #ab-mot > .ab-mot {
+  z-index: 1;
+}
+
 /* Scroll runway — logo rise, immediately followed by the black block */
 .scroll-runway { height: 100vh; width: 100%; pointer-events: none; }
 
@@ -336,69 +402,11 @@ body.entered .landing-tag {
   align-items: center;
   opacity: 0;
   pointer-events: none;
-  /* « top » est anime : c'est lui qui fait descendre le menu en bas d'ecran
-     quand on scrolle (classe .is-bas posee en JS). */
-  transition: opacity .4s ease, top .55s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: opacity .4s ease;
   color: #f4efe3;
 }
 body.entered .jr-head { opacity: 1; pointer-events: auto; }
 
-/* ---- Menu accroche en bas d'ecran des qu'on a scrolle ----------------
-   Le menu quitte le haut de page et se cale au bord bas, ou il reste
-   accessible sans jamais recouvrir le contenu. */
-.jr-head.is-bas {
-  top: calc(100dvh - 44px);
-  /* Des qu'on scrolle, le menu se montre, meme si l'intro n'est pas finie :
-     c'est le premier geste du visiteur, il doit trouver la navigation. */
-  opacity: 1;
-  pointer-events: auto;
-}
-/* Le deroulant s'ouvre alors VERS LE HAUT : ouvert vers le bas, il sortirait
-   de l'ecran. */
-.jr-head.is-bas .menu-drop {
-  top: auto;
-  bottom: calc(100% + 16px);
-}
-.jr-head.is-bas .menu-drop a { transform: translate3d(0, 8px, 0); }
-.jr-head.is-bas.menu-open .menu-drop a { transform: none; }
-
-/* ---- Menu deplie en bas d'ecran (reference : about.nike.com) ---------
-   Une fois la barre posee en bas, les rubriques s'ecrivent cote a cote et
-   restent lisibles sans clic. Le mot qui servait a ouvrir le menu n'a plus
-   de raison d'etre, la section courante reste a gauche. */
-@media (min-width: 701px) {
-  .jr-head.is-bas { justify-content: center; }
-  .jr-head.is-bas .section-name {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-  .jr-head.is-bas .menu-label { display: none; }
-  .jr-head.is-bas .menu-drop {
-    position: static;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(20px, 2.6vw, 44px);
-    text-align: center;
-    background: none;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    padding: 0;
-    opacity: 1;
-    pointer-events: auto;
-  }
-  .jr-head.is-bas .menu-drop a {
-    opacity: 1;
-    transform: none;
-    transition-delay: 0s;
-  }
-}
-/* Sur les ecrans sans unite dvh (vieux Safari), on retombe sur vh. */
-@supports not (height: 100dvh) {
-  .jr-head.is-bas { top: calc(100vh - 44px); }
-}
 /* Mouvement reduit demande : le menu se place, il ne glisse pas. */
 @media (prefers-reduced-motion: reduce) {
   .jr-head { transition: opacity .4s ease; }
@@ -1415,9 +1423,16 @@ body.entered .stage-home { pointer-events: none; }
 /* Subtle vignettes top + bottom for chrome legibility */
 .stage-veil {
   position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  /* Meme filtre que la video de la page About : un voile uniforme, renforce
+     en haut. On garde un rappel en bas, plus discret qu'avant (le voile de
+     base assombrit deja), pour les elements poses au bord bas. */
   background:
-    linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,0) 18%, rgba(0,0,0,0) 70%, rgba(0,0,0,.6)),
-    radial-gradient(120% 80% at 10% 95%, rgba(0,0,0,.55), rgba(0,0,0,0) 55%);
+    linear-gradient(to bottom,
+      rgba(10, 10, 10, 0.26) 0%,
+      rgba(10, 10, 10, 0) 40%,
+      rgba(10, 10, 10, 0) 72%,
+      rgba(10, 10, 10, 0.28) 100%),
+    rgba(10, 10, 10, 0.46);
 }
 
 /* Film grain removed */
@@ -1731,7 +1746,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
   line-height: 1.7;
   max-width: 780px;
 }
-#about-panel .about-scroll > .about-slide:first-child { scroll-snap-align: start; scroll-snap-stop: normal; }
+#about-panel .about-scroll > .about-slide:first-of-type { scroll-snap-align: start; scroll-snap-stop: normal; }
   /* Mobile : texte d'abord, puis le RECTANGLE apparaît dessous */
   .ah-section { flex-direction: column; align-items: flex-start; justify-content: center; gap: 26px; }
   .ah-txt { max-width: 100%; margin-right: 0; }
@@ -1813,7 +1828,7 @@ body.panel-open .stage-home { filter: brightness(.45); }
   line-height: 1.7;
   max-width: 780px;
 }
-#about-panel .about-scroll > .about-slide:first-child {
+#about-panel .about-scroll > .about-slide:first-of-type {
   /* Le texte part de plus bas ET son écran s'étire à sa longueur : on le
      défile en entier avant que les sections n'arrivent. */
   /* Entre-deux : le texte part bas (~72vh) sans coller au bord.
@@ -1997,7 +2012,7 @@ html.locked, html.locked body {
    · chapô (1er ¶) un cran plus grand, letter-spacing resserré
    · chute (dernier ¶) italique, centrée dans la colonne, isolée
    ========================================================= */
-#about-panel .about-scroll > .about-slide:first-child {
+#about-panel .about-scroll > .about-slide:first-of-type {
   justify-content: flex-start;
   text-align: left;
   padding-left: clamp(24px, 13vw, 240px);
@@ -2017,7 +2032,7 @@ html.locked, html.locked body {
   margin-top: 3em;
 }
 @media (max-width: 720px) {
-  #about-panel .about-scroll > .about-slide:first-child { padding-left: 8vw; padding-right: 8vw; }
+  #about-panel .about-scroll > .about-slide:first-of-type { padding-left: 8vw; padding-right: 8vw; }
   #about-panel .about-copy .about-chapo { font-size: 21px; }
   #about-panel .about-copy .about-chute { font-size: 19px; }
 }
@@ -2541,3 +2556,2041 @@ body.panel-open .jr-current { opacity: 0; pointer-events: none; }
 @media (max-width: 720px) {
   .pj-hero { height: 66vh; }
 }
+
+
+/* ==========================================================================
+   ABOUT — video d'ouverture, pleine largeur
+   Bord a bord, posee sous le logo (le logo est fixe en haut : la video
+   commence donc a sa hauteur, sinon elle passerait dessous). Elle se devoile
+   du bas vers le haut en remontant de 60 px, une fois le panneau ouvert.
+   ========================================================================== */
+.about-vid {
+  display: block;
+  /* « sticky » : la video reste collee en haut de l'ecran pendant que le
+     contenu qui suit remonte PAR-DESSUS elle. C'est le mecanisme de la
+     reference Nike : l'image ne defile pas, elle est recouverte. */
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  width: 100%;
+  /* Plein ecran, reference Nike : la video occupe toute la largeur ET toute
+     la hauteur. Le logo et le menu flottent par-dessus, comme sur l'accueil.
+     Pas de marge haute : elle part du bord. */
+  margin: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+}
+.about-vid video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Le voile. Une image brute avale le logo et le menu : un leger rideau sombre
+   par-dessus la video les fait tenir sans assombrir la scene. Un peu plus
+   dense en haut, la ou le mot-marque et la navigation se posent. */
+.about-vid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(10, 10, 10, 0.26) 0%, rgba(10, 10, 10, 0) 40%),
+    rgba(10, 10, 10, 0.46);
+  pointer-events: none;
+}
+/* L'arrivee : la video monte et se devoile. Le panneau met 350 ms a monter,
+   on laisse passer ce temps avant de lancer le mouvement. */
+.about-panel.open .about-vid video {
+  animation: lg-about-vid 900ms cubic-bezier(0.22, 1, 0.36, 1) 250ms both;
+}
+@keyframes lg-about-vid {
+  from { clip-path: inset(100% 0 0 0); transform: translate3d(0, 60px, 0); }
+  to   { clip-path: inset(0 0 0 0);    transform: none; }
+}
+/* Le manifeste demarrait tres bas (72vh) parce qu'il ouvrait la page. Avec la
+   video au-dessus, ce retrait devenait un trou de 650 px : on le resserre. */
+#about-panel #ab-mission > .about-slide {
+  padding-top: clamp(72px, 12vh, 150px);
+}
+
+/* SEUL le manifeste se lit a meme l'image : il passe devant la video, sans
+   fond. « position: relative » suffit a le faire peindre au-dessus d'elle.
+   Les ecrans suivants (la phrase, les sites, le contact) gardent leur aplat
+   noir d'origine : quand le manifeste a fini de monter, le noir arrive et
+   recouvre la video. */
+#about-panel #ab-mission > .about-slide {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  /* Le rideau entre PILE quand le bas du texte franchit le milieu de
+     l'ecran. Il apparait au defilement « fin du texte + marge - un ecran -
+     remontee du rideau » : en posant la marge a un demi-ecran plus la
+     remontee, la derniere ligne se trouve alors a mi-hauteur. */
+  padding-bottom: calc(115vh + (100vw / 3.89 + 48px));
+}
+/* La phrase se fige SOUS le logo : son aplat ne montait donc que jusque-la et
+   laissait une bande de video en haut de l'ecran. On prolonge son fond vers
+   le haut pour que le rideau noir couvre bien tout l'ecran. */
+#about-panel .aw-line-slide::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: calc(-1 * (100vw / 3.89 + 48px));
+  background: var(--bg);
+  z-index: -1;
+}
+
+/* Mouvement reduit demande : la video est la, sans glisser. */
+@media (prefers-reduced-motion: reduce) {
+  .about-panel.open .about-vid video { animation: none; }
+}
+
+
+
+
+/* ==========================================================================
+   LG_INDEX_LISTE — l'Index redevient une LISTE
+   Le « mode Division » (un seul nom en grand, points a droite, video en fond)
+   est masque, pas supprime : retirer ce bloc suffit a le retrouver.
+   ========================================================================== */
+/* Deux conditions pour la liste : une SOURIS (la miniature au survol n'a de
+   sens qu'avec un curseur) et de la PLACE (sous 701 px, quatre lignes fer a
+   gauche et une vignette de 280 px se marchent dessus). Tactile ou fenetre
+   etroite : on garde le carrousel — un nom, un fond, le geste qui defile. */
+@media (hover: hover) and (pointer: fine) and (min-width: 701px) {
+  .journal .jr-row { display: grid; }
+  .jr-current,
+  .jr-dots { display: none !important; }
+}
+
+
+/* ==========================================================================
+   LG_MENU_NUM — les entrees du menu sont numerotees
+   Le menu reste ce qu'il etait : un bouton qui ouvre le panneau. Seule la
+   numerotation est ajoutee, par un COMPTEUR CSS : aucune ligne de HTML a
+   toucher, le back-office peut ajouter ou retirer une entree, les numeros
+   suivent.
+   ========================================================================== */
+.jr-head .menu-drop { counter-reset: lg-menu; }
+.jr-head .menu-drop a::before {
+  counter-increment: lg-menu;
+  content: counter(lg-menu, decimal-leading-zero);
+  margin-right: 7px;
+  font-size: 0.8em;
+  opacity: 0.45;
+}
+/* Deux regles « order » posees sur des ID faisaient diverger l'ordre affiche
+   de l'ordre du HTML — or le compteur, lui, suit le HTML : les numeros
+   sortaient en desordre. On realigne les deux. */
+.jr-head .menu-drop #menu-index,
+.jr-head .menu-drop #menu-ig { order: 0; }
+
+/* Instagram et la bascule de langue ne sont plus des entrees du menu sur
+   grand ecran : Instagram vit dans le pied de page, la langue aussi. */
+@media (hover: hover) and (pointer: fine) and (min-width: 701px) {
+  /* « !important » impose : une regle plus haut force « display: block
+     !important » sur tous les liens du menu. */
+  .jr-head .menu-drop #menu-ig { display: none !important; }
+  .jr-head .menu-drop .lang-toggle { display: none; }
+}
+
+
+/* ==========================================================================
+   LG_PIED_LANGUE — pied de page : FR / EN a gauche, Instagram a droite
+   ========================================================================== */
+/* La mention de propriete laisse la place a la bascule de langue. */
+.jr-foot.has-lang > span { display: none; }
+.jr-foot .lang-toggle {
+  order: -1;
+  position: static;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  font-family: var(--serif);
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgba(244, 239, 227, 0.55);
+  opacity: 1;
+  transform: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+.jr-foot .lang-toggle:hover { color: #F1B81F; }
+
+
+/* ==========================================================================
+   LG_FOND_SURVOL — le projet survole passe en fond plein ecran
+   Les calques video sont peints DEVANT les images de fond. Quand le projet
+   survole n'a pas de film, il faut donc les effacer pour laisser voir son
+   image, sans quoi la video precedente resterait a l'ecran.
+   ========================================================================== */
+.jr-bg .jr-bgvid { transition: transform .6s cubic-bezier(.5, 0, .18, 1.1), filter .6s ease, opacity .45s ease; }
+.jr-bg.montre-image .jr-bgvid { opacity: 0; }
+
+
+/* ==========================================================================
+   LG_ABOUT_ENCY — About construite comme l'Encyclopedia Saint Heronica
+   Le cadre reste noir et jaune ; c'est la CONSTRUCTION qui est empruntee :
+   des chapitres numerotes, un titre qui se fige, un rolodex numerote, un
+   bandeau de label repete, des endnotes, une nav d'ancres — et un seul
+   fondu, partout.
+   ========================================================================== */
+
+/* ---- Le chapitre ------------------------------------------------------- */
+.ab-sec { position: relative; }
+/* Le titre se fige pendant que son chapitre defile, et se retire quand le
+   suivant arrive : c'est ce seul detail qui donne la sensation de chapitre. */
+.ab-head {
+  position: sticky;
+  top: calc(100vw / 3.89 + 16px);
+  /* Au-dessus des ecrans opaques du chapitre (jusqu'a z-index 3), sinon le
+     titre passe dessous et disparait. */
+  z-index: 5;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 0 clamp(20px, 2vw, 40px);
+  font-family: var(--serif);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(244, 239, 227, 0.62);
+  pointer-events: none;
+}
+.ab-head i { font-style: normal; opacity: 0.45; font-size: 11px; }
+/* Le titre passe au-dessus des images du rolodex : un fond sombre tres court
+   le detache sans faire bandeau. */
+.ab-head > * {
+  background: rgba(10, 10, 10, 0.82);
+  padding: 4px 8px;
+  margin: -4px -8px;
+}
+
+/* ---- Le bandeau repete ------------------------------------------------- */
+.ab-bande {
+  overflow: hidden;
+  padding: 6vh 0;
+  border-top: 1px solid rgba(244, 239, 227, 0.12);
+  border-bottom: 1px solid rgba(244, 239, 227, 0.12);
+}
+.ab-bande__piste {
+  display: flex;
+  gap: 2.2em;
+  width: max-content;
+  font-family: var(--serif);
+  font-size: clamp(28px, 5vw, 74px);
+  line-height: 1;
+  text-transform: uppercase;
+  color: rgba(244, 239, 227, 0.14);
+  white-space: nowrap;
+  animation: ab-defile 48s linear infinite;
+}
+@keyframes ab-defile { to { transform: translate3d(-50%, 0, 0); } }
+@media (prefers-reduced-motion: reduce) { .ab-bande__piste { animation: none; } }
+
+/* ---- Les endnotes ------------------------------------------------------ */
+.ab-endnotes {
+  padding: 12vh clamp(20px, 2vw, 40px) 8vh;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(244, 239, 227, 0.45);
+}
+.ab-endnotes__ligne {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(244, 239, 227, 0.1);
+}
+.ab-endnotes a { color: inherit; }
+.ab-endnotes a:hover { color: #F1B81F; }
+
+/* ---- Les teleports ----------------------------------------------------- */
+.ab-teleports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 28px;
+  padding: 0 clamp(20px, 2vw, 40px) 16vh;
+  font-family: var(--serif);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.ab-teleports a { display: flex; align-items: baseline; gap: 8px; color: rgba(244, 239, 227, 0.7); }
+.ab-teleports a:hover { color: #F1B81F; }
+.ab-teleports i { font-style: normal; font-size: 11px; opacity: 0.45; }
+
+/* ---- LE FONDU UNIQUE --------------------------------------------------- */
+/* Un seul effet sur toute la page : 300 ms, meme courbe, sans exception.
+   C'est la discipline qui fait le luxe, pas la variete. */
+#about-panel .fondu { opacity: 0; transition: opacity 0.3s ease-out; }
+#about-panel .fondu.est-la { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  #about-panel .fondu { opacity: 1; transition: none; }
+}
+
+@media (max-width: 720px) {
+  .ab-head { top: calc(100vw / 3.89 + 62px); font-size: 11px; }
+  .ab-endnotes__ligne { flex-direction: column; gap: 4px; }
+}
+
+
+/* ==========================================================================
+   LG_ABOUT_V2 — le mot, et les trois maisons en deux colonnes
+   ========================================================================== */
+
+/* ---- Le mot : une entree de dictionnaire, rien d'autre ----------------- */
+.ab-mot {
+  height: auto;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  padding: calc(100vw / 3.89 + 90px) clamp(24px, 5vw, 96px) 14vh;
+}
+.ab-mot__bloc { max-width: min(560px, 88vw); }
+/* Le terme en grand, la categorie grammaticale en italique : la grammaire
+   du dictionnaire fait tout le travail, aucune decoration n'est utile. */
+/* Specificite : « #about-panel .about-slide p » impose une taille de corps a
+   tous les paragraphes de la page, il faut passer devant. */
+#about-panel .ab-mot .ab-mot__terme {
+  font-family: var(--serif);
+  font-size: clamp(38px, 6vw, 84px);
+  line-height: 1;
+  margin-bottom: 0.5em;
+  color: #f4efe3;
+}
+#about-panel .ab-mot .ab-mot__terme em { font-size: 0.3em; letter-spacing: 0.02em; opacity: 0.55; }
+.ab-mot p + p { margin-top: 1.4em; }
+.ab-mot__chute { font-style: italic; color: rgba(244, 239, 227, 0.72); }
+
+/* ---- Les trois maisons : texte fige a gauche, vignettes a droite ------- */
+.ab-sec--duo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+/* L'en-tete de chapitre traverse les deux colonnes, sinon la grille en
+   ferait une cellule et decalerait tout le reste. */
+.ab-sec--duo > .ab-head { grid-column: 1 / -1; }
+.ab-eco {
+  /* Aplat noir : sans lui, la video d'ouverture, collante sur toute la
+     hauteur de la page, reapparaissait dans la colonne de gauche. */
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: calc(100vw / 3.89 + 60px) clamp(24px, 3vw, 56px) 10vh clamp(24px, 5vw, 96px);
+  text-align: left;
+}
+.ab-eco__bloc { max-width: 46ch; }
+#about-panel .ab-eco p { font-size: clamp(15px, 1.25vw, 20px); line-height: 1.55; }
+.ab-eco p + p { margin-top: 1.3em; }
+#about-panel .ab-eco .ab-eco__tete { font-size: clamp(17px, 1.6vw, 25px); line-height: 1.45; }
+.ab-eco__chute { color: rgba(244, 239, 227, 0.72); font-style: italic; }
+/* La troisieme maison, c'est le site ou l'on se trouve : pas de vignette,
+   une ligne discrete suffit a la nommer. */
+#about-panel .ab-eco .ab-eco__ici {
+  margin-top: 2.4em;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(244, 239, 227, 0.42);
+}
+/* La colonne des vignettes. On annule le chevauchement d'origine : il avait
+   un sens quand les ecrans se recouvraient en pleine largeur, pas dans une
+   grille a deux colonnes. */
+.ab-sec--duo .aw2-slide {
+  margin-top: 0;
+  padding: calc(100vw / 3.89 + 60px) clamp(24px, 5vw, 96px) 14vh clamp(24px, 3vw, 56px);
+  height: auto;
+  min-height: 100vh;
+}
+.ab-sec--duo .aw2-row { flex-direction: column; gap: clamp(28px, 4vh, 64px); }
+.ab-sec--duo .aw2-item { width: 100%; }
+/* Deux vignettes au lieu de trois : elles prennent toute la colonne. */
+.ab-sec--duo .aw2-frame { width: 100%; }
+.ab-sec--duo .aw2-label { text-align: left; }
+
+@media (max-width: 900px) {
+  /* Une colonne : le texte passe au-dessus, les vignettes en dessous. */
+  .ab-sec--duo { display: block; }
+  .ab-eco { position: static; height: auto; min-height: 0; padding: calc(100vw / 3.89 + 80px) 8vw 8vh; }
+  .ab-sec--duo .aw2-slide { padding: 0 8vw 12vh; min-height: 0; }
+}
+
+
+/* ==========================================================================
+   LG_RIDEAU — le rideau noir monte PAR-DESSUS la video ET le texte
+   Mecanique de la reference : le bloc suivant ne se pose pas apres le
+   precedent, il demarre une hauteur d'ecran plus tot et vient le recouvrir
+   (« .large-image + * { margin-top: -100svh } »).
+   ========================================================================== */
+/* Une fois le rideau pose, la page est noire : les chapitres qui suivent sont
+   opaques, seul le manifeste se lit a meme l'image. */
+#about-panel #ab-mot > .about-slide {
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
+}
+
+#about-panel #ab-recit {
+  /* Pas de marge negative ici : le rideau remonte deja d'une hauteur de logo
+     par son ::before, et la marge de bas du manifeste regle le reste. Cumuler
+     les deux mangeait le texte avant qu'on ait pu le lire. */
+  min-height: 100vh;
+  /* Le rideau vient de la phrase, qui est collante et ne couvre pas toute la
+     hauteur du chapitre : sans fond ici, une bande de video reapparaissait
+     entre deux chapitres. */
+  background: var(--bg);
+  position: relative;
+  z-index: 2;
+}
+
+
+/* ==========================================================================
+   LG_ABOUT_V3 — ordre des contenus, blocs collants, effets
+   ========================================================================== */
+
+/* ---- La grande affirmation --------------------------------------------- */
+.ab-dit {
+  height: auto;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  background: var(--bg);
+  position: relative;
+  z-index: 1;
+  padding: calc(100vw / 3.89 + 90px) clamp(24px, 5vw, 96px) 14vh;
+}
+/* Hierarchie par la TAILLE et les CAPITALES, jamais par le gras : c'est la
+   regle typographique de la reference, et la seule graisse dont on dispose. */
+/* « #about-panel .about-slide p » impose une taille de corps a tous les
+   paragraphes : il faut au moins autant de specificite pour passer devant. */
+#about-panel .about-slide p.ab-dit__mot,
+#about-panel .ab-dit__mot {
+  font-family: var(--serif);
+  font-size: clamp(34px, 5.4vw, 78px);
+  line-height: 1.02;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
+  max-width: 16ch;
+  color: #f4efe3;
+}
+
+/* ---- L'image scindee ---------------------------------------------------- */
+.ab-scinde {
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+}
+.ab-scinde__haut {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 clamp(24px, 5vw, 96px) 2vh;
+}
+.ab-scinde__bas {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2vh clamp(24px, 5vw, 96px) 0;
+  overflow: hidden;
+}
+/* L'image occupe la moitie basse, le mot se pose dessus. */
+.ab-scinde__bas img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ab-scinde__bas .ab-dit__mot { position: relative; }
+#about-panel .ab-scinde .ab-dit__mot { max-width: none; text-align: center; }
+
+/* Le mot-marque reste PLEINE LARGEUR sur About : c'est la demande, l'ecran
+   d'ouverture est concu autour de lui. Consequence assumee, les ecrans qui
+   suivent composent avec un logo qui occupe le tiers haut. */
+@media (max-width: 720px) {
+  .ab-scinde { grid-template-rows: 40vh 60vh; }
+}
+
+
+/* ==========================================================================
+   LG_RECOUVREMENT — les ecrans se recouvrent, ils ne se suivent pas
+   Chaque chapitre dure DEUX hauteurs d'ecran : la premiere pour lire, la
+   seconde pendant laquelle l'ecran reste fige et se fait recouvrir par le
+   chapitre suivant, qui remonte d'exactement une hauteur d'ecran.
+   L'empilement des z-index dit qui passe devant qui.
+   ========================================================================== */
+#about-panel #ab-recit { min-height: 200vh; z-index: 2; }
+
+#about-panel #ab-tradition,
+#about-panel #ab-mot,
+#about-panel #ab-scinde {
+  min-height: 200vh;
+  margin-top: -100vh;
+  position: relative;
+}
+#about-panel #ab-tradition { z-index: 3; }
+#about-panel #ab-mot { z-index: 4; }
+#about-panel #ab-scinde { z-index: 5; }
+#about-panel #ab-univers { margin-top: -100vh; position: relative; z-index: 6; }
+#about-panel #ab-contact { position: relative; z-index: 7; }
+
+/* L'ecran se fige pendant que le suivant le recouvre. */
+#about-panel #ab-tradition > .ab-dit,
+#about-panel #ab-mot > .ab-mot,
+#about-panel #ab-scinde > .ab-scinde {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+/* L'en-tete de chapitre reste au-dessus de son ecran fige. */
+#about-panel .ab-sec > .ab-head { z-index: 6; }
+
+/* La colonne de gauche des trois maisons se cale sous le logo replie, et le
+   chapitre entier est opaque puisqu'il recouvre l'image scindee. */
+#about-panel #ab-univers { background: var(--bg); }
+
+@media (max-width: 720px) {
+  /* Sur telephone, le recouvrement rend la lecture confuse : les ecrans se
+     suivent simplement. */
+  #about-panel #ab-recit,
+  #about-panel #ab-tradition,
+  #about-panel #ab-mot,
+  #about-panel #ab-scinde {
+    min-height: 100vh;
+    margin-top: 0;
+  }
+  #about-panel #ab-univers { margin-top: 0; }
+  #about-panel #ab-tradition > .ab-dit,
+  #about-panel #ab-mot > .ab-mot,
+  #about-panel #ab-scinde > .ab-scinde { position: static; height: auto; min-height: 100vh; }
+}
+
+
+/* ==========================================================================
+   LG_CHUTE — le rideau porte la chute du manifeste, en grand
+   ========================================================================== */
+/* La chute est desormais l'ecran du rideau : on la retire du paragraphe pour
+   ne pas la lire deux fois. Le decoupeur du manifeste lui pose deja cette
+   classe, le contenu du back-office reste intact. */
+#about-panel #ab-mission .about-chute { display: none; }
+
+/* Elle prend la taille d'une affirmation, pas d'une phrase de fin. */
+#about-panel .aw-line-title {
+  font-size: clamp(30px, 4.6vw, 66px);
+  line-height: 1.04;
+  text-transform: uppercase;
+  max-width: 20ch;
+  margin: 0 auto;
+}
+
+
+/* ==========================================================================
+   LG_REORG — l'ordre arrete et la mecanique de recouvrement
+   Retirer ce bloc annule toute la reorganisation visuelle.
+   ========================================================================== */
+
+/* ---- Le mot-marque : pleine largeur, mais EN HAUT le temps d'About ------ */
+/* tick() ecrit un transform en ligne a chaque image : il faut le neutraliser,
+   sinon le logo repart en bas des le premier scroll. */
+body.panel-open .brand-mark {
+  top: 0;
+  bottom: auto;
+  width: 100%;
+  height: calc(100vw / 3.89);
+  left: 0;
+  transform: none !important;
+  transition: none;
+}
+/* La bande de lecture commence donc SOUS le logo. */
+:root { --lg-marque: calc(100vw / 3.89); }
+#about-panel .ab-head { top: calc(var(--lg-marque) + 22px); }
+
+/* ---- L'image scindee devient une video pleine page ---------------------- */
+.ab-plein {
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
+  min-height: 100vh;
+  overflow: hidden;
+}
+.ab-plein video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Le meme voile que l'accueil et l'ouverture : la page garde une seule
+   densite de noir d'un bout a l'autre. */
+.ab-plein__voile {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(10,10,10,0.26) 0%, rgba(10,10,10,0) 40%), rgba(10,10,10,0.46);
+}
+/* Les deux mots encadrent l'image, ils ne la coupent plus en deux. */
+.ab-plein__mots {
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(var(--lg-marque) + 64px);
+  bottom: 6vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  padding: 0 clamp(24px, 5vw, 96px);
+}
+#about-panel .ab-plein__mots .ab-dit__mot {
+  max-width: none;
+  text-shadow: 0 2px 22px rgba(0,0,0,0.55);
+  font-size: clamp(28px, 3.6vw, 52px);
+}
+
+/* ---- Le parti pris ------------------------------------------------------ */
+.ab-pris {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  /* Pas un noir plat : une lueur centrale, c'est elle qui fait tenir un
+     ecran de texte pur sans image. */
+  background: radial-gradient(ellipse 70% 60% at 50% 62%, #232323 0%, var(--bg) 78%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--lg-marque) + 60px) clamp(24px, 6vw, 120px) 8vh;
+}
+#about-panel .ab-pris p {
+  font-family: "Instrument Serif", var(--serif);
+  font-style: italic;
+  font-size: clamp(24px, 2.9vw, 42px);
+  line-height: 1.2;
+  max-width: 26ch;
+  text-align: center;
+  color: #f7f4ec;
+}
+
+/* ---- La declaration ----------------------------------------------------- */
+.ab-decl {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: calc(var(--lg-marque) + 60px) clamp(24px, 5vw, 96px) 8vh;
+}
+/* Deux registres, deux fonctions : le Clearface capitales pour les phrases du
+   manifeste, l'Archivo condense pour les declarations de positionnement. */
+#about-panel .ab-decl h2 {
+  font-family: var(--sans);
+  font-weight: 800;
+  font-stretch: 64%;
+  font-size: clamp(26px, 3.1vw, 46px);
+  line-height: 1.0;
+  letter-spacing: -0.004em;
+  text-transform: uppercase;
+  /* La mesure est donnee en largeur d'ecran, pas en signes : une capitale
+     condensee compte beaucoup de caracteres par ligne. */
+  max-width: min(1100px, 78vw);
+  color: #f4efe3;
+}
+#about-panel .ab-decl p {
+  font-family: var(--sans);
+  font-size: clamp(13px, 1.05vw, 16px);
+  line-height: 1.5;
+  margin-top: 22px;
+  max-width: 62ch;
+  color: rgba(244, 239, 227, 0.8);
+}
+
+/* ---- Le travail : la page Work du studio, recopiee ---------------------- */
+/* Variables du studio, reprises telles quelles pour que la citation soit
+   exacte et non approximative. */
+.ab-wk {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  background: #050505;
+  overflow: hidden;
+  --wk-ink: #8a7a20;
+  --wk-dim: #5a5018;
+  --wk-jaune: #f6e21c;
+}
+.ab-wk__filigrane {
+  position: absolute;
+  top: 4%;
+  left: 0;
+  width: 100%;
+  opacity: 0.09;
+  pointer-events: none;
+}
+.ab-wk__stick {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: clamp(180px, 22vw, 280px);
+  z-index: 3;
+  filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, 0.35));
+}
+.ab-wk__stick img { display: block; width: 100%; height: auto; }
+.ab-wk__grille {
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 70px;
+  padding: 0 clamp(30px, 5vw, 90px);
+  justify-items: center;
+  align-items: center;
+}
+.ab-wk__c { display: block; width: 100%; max-width: 260px; }
+.ab-wk__c img {
+  width: 100%;
+  display: block;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.05);
+  transition: filter 0.3s ease;
+}
+.ab-wk__c:hover img { filter: none; }
+.ab-wk__c span {
+  display: block;
+  margin-top: 10px;
+  font-family: "Geist Mono", var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wk-dim);
+}
+.ab-wk__c span b {
+  display: block;
+  font-weight: 500;
+  color: var(--wk-ink);
+  margin-bottom: 3px;
+}
+.ab-wk__bascule {
+  position: absolute;
+  left: clamp(20px, 3vw, 44px);
+  bottom: 34px;
+  z-index: 3;
+  font-family: "Geist Mono", var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--wk-dim);
+}
+.ab-wk__bascule b {
+  font-weight: 400;
+  color: var(--wk-jaune);
+  border-bottom: 1px solid var(--wk-jaune);
+  padding-bottom: 2px;
+}
+.ab-wk__bascule i { font-style: normal; margin: 0 10px; opacity: 0.5; }
+/* Le studio arrive avec son propre sticker : le mot-marque LES GRIOTS
+   s'efface le temps de la section, et revient sur l'ecosysteme. */
+body.lg-studio .brand-mark { opacity: 0; transition: opacity 0.35s ease; }
+
+/* ---- La chaine de recouvrement ------------------------------------------ */
+/* Six ecrans, du rideau au travail. Chacun dure deux hauteurs : une pour
+   lire, une pendant laquelle il reste fige et se fait recouvrir. */
+#about-panel #ab-recit { min-height: 200vh; z-index: 2; }
+
+#about-panel #ab-scinde,
+#about-panel #ab-mot,
+#about-panel #ab-pris,
+#about-panel #ab-declaration,
+#about-panel #ab-travail {
+  min-height: 200vh;
+  margin-top: -100vh;
+  position: relative;
+}
+#about-panel #ab-scinde { z-index: 3; }
+#about-panel #ab-mot { z-index: 4; }
+#about-panel #ab-pris { z-index: 5; }
+#about-panel #ab-declaration { z-index: 6; }
+#about-panel #ab-travail { z-index: 7; }
+#about-panel #ab-univers { margin-top: -100vh; position: relative; z-index: 8; }
+#about-panel #ab-contact { position: relative; z-index: 9; margin-top: 0; }
+
+/* L'ecran se fige pendant que le suivant le recouvre. Regle d'or : tout ce
+   qui se fige doit etre OPAQUE, sinon on voit l'ecran precedent au travers.
+   Seule exception de toute la page, le manifeste. */
+/* On colle l'ENFANT, jamais la section : la section porte la longueur de
+   defilement, l'enfant porte l'ecran qui se fige. */
+#about-panel #ab-scinde > .ab-plein,
+#about-panel #ab-mot > .ab-mot,
+#about-panel #ab-pris > .ab-pris,
+#about-panel #ab-declaration > .ab-decl,
+#about-panel #ab-travail > .ab-wk {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---- La sortie : plus de recouvrement ----------------------------------- */
+#about-panel .ab-bande,
+#about-panel .ab-endnotes,
+#about-panel .ab-teleports { margin-top: 0; }
+
+@media (max-width: 720px) {
+  /* Sur telephone les ecrans se suivent : le recouvrement rend la lecture
+     confuse quand la hauteur utile est faible. */
+  #about-panel #ab-recit,
+  #about-panel #ab-scinde,
+  #about-panel #ab-mot,
+  #about-panel #ab-pris,
+  #about-panel #ab-declaration,
+  #about-panel #ab-travail {
+    min-height: 100vh;
+    margin-top: 0;
+  }
+  #about-panel #ab-univers { margin-top: 0; }
+  #about-panel #ab-scinde > .ab-plein,
+  #about-panel #ab-mot > .ab-mot,
+  #about-panel #ab-travail > .ab-wk {
+    position: static;
+    height: auto;
+    min-height: 100vh;
+  }
+  .ab-wk__grille {
+    position: static;
+    transform: none;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: calc(var(--lg-marque) + 40px) 24px 90px;
+  }
+  .ab-wk__filigrane { display: none; }
+}
+
+/* ---- Corrections issues du premier essai en local ----------------------- */
+/* 1. Le filigrane du studio : le fondu general d'About pose opacity:1 sur
+      toutes les images du panneau, il faut le tenir en dehors. */
+#about-panel .ab-wk__filigrane { opacity: 0.09 !important; }
+
+/* 2. L'en-tete de chapitre entrait un ecran trop tot : les sections de la
+      chaine commencent 100vh plus haut que l'ecran qu'elles affichent, le
+      titre doit attendre son tour. Deux titres se chevauchaient. */
+#about-panel #ab-scinde > .ab-head,
+#about-panel #ab-mot > .ab-head,
+#about-panel #ab-pris > .ab-head,
+#about-panel #ab-declaration > .ab-head,
+#about-panel #ab-travail > .ab-head,
+#about-panel #ab-univers > .ab-head { margin-top: 100vh; }
+/* Et il disparait des que l'ecran suivant commence a le recouvrir. */
+#about-panel .ab-sec > .ab-head { z-index: 1; }
+
+/* 3. Le mot-marque doit vraiment s'effacer sur la section du studio :
+      d'autres regles posent opacity: 1 sur .brand-mark. */
+body.lg-studio .brand-mark { opacity: 0 !important; transition: opacity 0.35s ease; }
+
+/* 4. Le manifeste commence SOUS le mot-marque : il est desormais en haut,
+      et ses premieres lignes passaient derriere. */
+#about-panel #ab-mission > .about-slide { padding-top: calc(var(--lg-marque) + 46px); }
+
+/* 5. La chute du rideau ne tenait plus dans l'espace laisse par le logo :
+      sept lignes pour cinq de place. On l'elargit et on la calme. */
+#about-panel .aw-line-title {
+  font-size: clamp(24px, 3.3vw, 50px);
+  max-width: min(1120px, 84vw);
+}
+
+/* 6. Les reperes de chapitre (« 01 LA MISSION » a gauche) etaient un outil
+      de travail, pas un element de la page. On les retire. Le numero reste
+      dans le HTML : reafficher ce bloc suffit a les retrouver. */
+#about-panel .ab-head { display: none; }
+
+/* 7. Les teleports reprenaient la meme nomenclature interne : ils sautent
+      avec elle. La page se termine desormais sur les endnotes. */
+#about-panel .ab-teleports { display: none; }
+
+/* 8. Fin de page. Deux corrections vues a l'essai.
+      a) La vidéo d'ouverture est un element positionne : elle repeint
+         par-dessus tout ce qui est en flux normal, quel que soit l'ordre du
+         HTML. Le bandeau et les endnotes disparaissaient derriere elle.
+      b) Le bloc contact demarrait sous le mot-marque, son texte passait
+         derriere le logo. */
+#about-panel .ab-bande,
+#about-panel .ab-endnotes {
+  position: relative;
+  z-index: 10;
+  background: var(--bg);
+}
+#about-panel #ab-contact > .pitch-slide { padding-top: calc(var(--lg-marque) + 46px); }
+
+/* 9. Le manifeste se FIGE lui aussi, puis le rideau passe dessus.
+      Avant : le texte montait sur la video puis defilait vers le haut, et le
+      rideau arrivait sur une video vide. Maintenant il rejoint la mecanique
+      de toute la page, il se fige plein ecran et se fait recouvrir.
+      La section porte la longueur (deux hauteurs), le texte porte l'ecran. */
+#about-panel #ab-mission {
+  min-height: 200vh;
+  position: relative;
+  z-index: 1;
+}
+#about-panel #ab-mission > .about-slide {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+  /* Il reste le seul bloc transparent de la page : c'est ce qui laisse la
+     video vivre dessous. */
+  background: transparent;
+  padding-top: calc(var(--lg-marque) + 46px);
+  /* L'ancien retrait bas servait a declencher le rideau ; la longueur de la
+     section s'en charge desormais. */
+  padding-bottom: 6vh;
+}
+/* Le rideau remonte d'un ecran pour venir couvrir le texte fige ET la video. */
+#about-panel #ab-recit { margin-top: -100vh; }
+
+/* 10. Le manifeste doit desormais tenir dans UN ecran, puisqu'il se fige.
+       On elargit la mesure et on calme le corps plutot que de le rogner. */
+#about-panel #ab-mission > .about-slide {
+  padding-top: calc(var(--lg-marque) + 30px);
+  padding-bottom: 5vh;
+}
+#about-panel #ab-mission > .about-slide p {
+  font-size: clamp(12.5px, 1.05vw, 16px);
+  line-height: 1.55;
+  max-width: 92ch;
+}
+
+/* 11. Le rideau arrivait 418 px trop tot : son fond etait prolonge vers le
+       haut par un ::before, heritage de l'epoque ou il se figeait SOUS le
+       logo. Maintenant il se fige a ras du haut et couvre l'ecran entier,
+       donc l'extension n'a plus lieu d'etre. */
+#about-panel .aw-line-slide {
+  top: 0;
+  height: 100vh;
+  padding-top: calc(var(--lg-marque) + 46px);
+}
+#about-panel .aw-line-slide::before { display: none; }
+
+/* 12. Retour en arriere demande sur le manifeste. Il ne se fige plus et il
+       retrouve son corps d'origine (clamp 15-21 px, mesure 780 px). Il monte
+       sur la video et peut passer DERRIERE le mot-marque, c'est assume.
+       Le declencheur du rideau devient precis : il entre par le bas de
+       l'ecran a l'instant ou la DERNIERE ligne du texte disparait derriere
+       le logo. Toute la mecanique tient dans le retrait bas ci-dessous ; le
+       calcul est explique en une ligne : le rideau entre a
+       « fin du texte - hauteur du logo », donc le retrait vaut un ecran
+       moins le logo. */
+#about-panel #ab-mission { min-height: 0; }
+#about-panel #ab-mission > .about-slide {
+  position: relative;
+  top: auto;
+  height: auto;
+  overflow: visible;
+  padding-top: calc(var(--lg-marque) + 46px);
+  padding-bottom: calc(100vh - var(--lg-marque));
+}
+#about-panel #ab-mission > .about-slide p {
+  font-size: clamp(15px, 1.3vw, 21px);
+  line-height: 1.7;
+  max-width: 780px;
+}
+#about-panel #ab-recit { margin-top: 0; }
+
+/* 13. Le texte se FIGE au declenchement, et le rideau passe par-dessus la
+       video ET le texte fige.
+       La difficulte : on veut epingler le bloc quand son BAS atteint le
+       logo, pas quand son haut atteint le sommet. C'est exactement ce que
+       fait « position: sticky » avec un decalage BAS plutot que HAUT : le
+       bloc defile librement, puis se bloque quand son bord inferieur arrive
+       a la hauteur voulue. Il reste alors immobile pendant que le noir
+       monte dessus. */
+#about-panel #ab-mission {
+  min-height: 0;
+  /* La duree du gel : un ecran, soit le temps que le rideau met a couvrir. */
+  padding-bottom: 100vh;
+}
+#about-panel #ab-mission > .about-slide {
+  position: sticky;
+  top: auto;
+  bottom: calc(100vh - var(--lg-marque));
+  height: auto;
+  overflow: visible;
+  padding-top: calc(var(--lg-marque) + 46px);
+  padding-bottom: 0;
+}
+/* On remonte le rideau de la hauteur du logo pour que son entree par le bas
+   coincide toujours avec l'instant du gel. */
+#about-panel #ab-recit { margin-top: calc(-1 * var(--lg-marque)); }
+
+/* 14. Le texte ne doit pas continuer a monter : il se pose sur la video et
+       il y RESTE, immobile, jusqu'a ce que le noir vienne le prendre.
+       Pour cela il doit tenir dans un seul ecran. On ne touche pas au corps
+       du texte, qui reste celui du site (15 a 21 px) : on elargit la mesure
+       et on resserre l'interligne, ce qui fait passer le manifeste de dix-
+       sept lignes a une douzaine. */
+#about-panel #ab-mission {
+  min-height: 200vh;
+  padding-bottom: 0;
+}
+#about-panel #ab-mission > .about-slide {
+  position: sticky;
+  top: 0;
+  bottom: auto;
+  height: 100vh;
+  overflow: hidden;
+  padding-top: calc(var(--lg-marque) + 30px);
+  padding-bottom: 5vh;
+}
+#about-panel #ab-mission > .about-slide p {
+  font-size: clamp(15px, 1.3vw, 21px);
+  line-height: 1.55;
+  max-width: min(1000px, 78vw);
+}
+/* Le rideau remonte d'un ecran : il vient couvrir la video ET le texte pose
+   dessus, sans que ni l'un ni l'autre n'ait bouge. */
+#about-panel #ab-recit { margin-top: -100vh; }
+
+/* 15. Le mot-marque ne se fait recouvrir par rien, pas meme par le studio.
+       On annule l'effacement pose plus haut : il reste la constante de la
+       page d'un bout a l'autre. */
+body.lg-studio .brand-mark { opacity: 1 !important; }
+/* Consequence : le sticker du studio descend sous la bande du logo, sinon
+   les deux marques se chevauchent en haut a gauche. Et le filigrane saute,
+   il faisait doublon avec le vrai mot-marque a l'ecran. */
+.ab-wk__stick { top: calc(var(--lg-marque) + 18px); }
+.ab-wk__filigrane { display: none; }
+/* La grille de projets se recale dans la bande basse. */
+.ab-wk__grille {
+  top: auto;
+  bottom: 96px;
+  transform: none;
+}
+
+/* 16. Le studio doit recouvrir MEME le mot-marque. Impossible par simple
+       empilement : le panneau About vit sous le logo (z 90 contre 250) et
+       porte un transform, donc rien a l'interieur ne peut passer au-dessus.
+       On procede autrement : le logo se fait MANGER par le bas, decoupe a la
+       hauteur exacte du bord superieur du panneau studio pendant qu'il monte.
+       Le script LG_REORG_COUPE tient la variable a jour a chaque image. */
+body.panel-open .brand-mark {
+  clip-path: inset(0 0 var(--lg-coupe, 0px) 0);
+  -webkit-clip-path: inset(0 0 var(--lg-coupe, 0px) 0);
+}
+/* On annule le repli du sticker : une fois le logo mange, le studio reprend
+   sa mise en page d'origine, sticker en haut a gauche et filigrane en fond. */
+.ab-wk__stick { top: 14px; }
+.ab-wk__filigrane { display: block; }
+.ab-wk__grille { top: 50%; bottom: auto; transform: translateY(-50%); }
+
+/* 17. Le retour du logo doit etre aussi juste que sa disparition : la
+       section qui recouvre le studio passe SOUS le mot-marque, donc le logo
+       doit se redessiner au fur et a mesure qu'elle monte, par le bas.
+       Une simple decoupe ne suffit plus, il faut un masque a deux bornes :
+       visible au-dessus du bord du studio, cache entre les deux, visible
+       sous le bord de la section suivante. */
+body.panel-open .brand-mark {
+  clip-path: none;
+  -webkit-clip-path: none;
+  -webkit-mask-image: linear-gradient(to bottom,
+    #000 0 var(--lg-a, 100%),
+    transparent var(--lg-a, 100%) var(--lg-b, 100%),
+    #000 var(--lg-b, 100%) 100%);
+  mask-image: linear-gradient(to bottom,
+    #000 0 var(--lg-a, 100%),
+    transparent var(--lg-a, 100%) var(--lg-b, 100%),
+    #000 var(--lg-b, 100%) 100%);
+}
+
+/* 18. Le bandeau defilant du studio : ce ne sont pas nos noms qui passent,
+       ce sont ceux des maisons qui nous ont confie leurs recits. Une preuve
+       qui se lit sans se decrire, dans la section travail. */
+.ab-wk__marques {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 84px;
+  z-index: 3;
+  overflow: hidden;
+  padding: 13px 0;
+  border-top: 1px solid rgba(138, 122, 32, 0.22);
+  border-bottom: 1px solid rgba(138, 122, 32, 0.22);
+  /* Les bords s'estompent : le bandeau n'a ni debut ni fin. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 9%, #000 91%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 9%, #000 91%, transparent 100%);
+}
+.ab-wk__marques__piste {
+  display: flex;
+  width: max-content;
+  white-space: nowrap;
+  font-family: "Geist Mono", var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--wk-ink);
+  animation: lg-marques 46s linear infinite;
+}
+/* La piste contient DEUX fois la meme serie : a mi-course elle est
+   exactement superposee a son point de depart, la boucle ne se voit pas. */
+@keyframes lg-marques {
+  to { transform: translateX(-50%); }
+}
+.ab-wk__marques__piste span { padding: 0 1.6em; }
+.ab-wk__marques__piste span::after {
+  content: "\00b7";
+  margin-left: 3.2em;
+  opacity: 0.45;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab-wk__marques__piste { animation: none; }
+}
+
+/* 19. Respiration de la chaine. Avec des sections de deux hauteurs d'ecran,
+       la suivante commence a monter A L'INSTANT MEME ou la precedente se
+       fige : aucun ecran n'est jamais visible seul, et la moitie basse de
+       chaque section reste toujours recouverte. C'est ce qui empechait de
+       voir le bandeau des marques et la bascule du studio.
+       Trois hauteurs : une pour monter, une pour rester seul et se lire,
+       une pour se faire recouvrir. */
+#about-panel #ab-recit,
+#about-panel #ab-scinde,
+#about-panel #ab-mot,
+#about-panel #ab-pris,
+#about-panel #ab-declaration,
+#about-panel #ab-travail { min-height: 300vh; }
+
+@media (max-width: 720px) {
+  #about-panel #ab-recit,
+  #about-panel #ab-scinde,
+  #about-panel #ab-mot,
+  #about-panel #ab-pris,
+  #about-panel #ab-declaration,
+  #about-panel #ab-travail { min-height: 100vh; }
+}
+
+/* 20. Le bandeau porte desormais les logos, pas les noms, et sans filets :
+       une ligne de marques qui traverse la section travail, rien d'autre.
+       Chaque logo a sa propre hauteur optique — un swoosh et un bloc de
+       texte sur deux lignes n'occupent pas la meme place a taille egale. */
+.ab-wk__marques {
+  border-top: 0;
+  border-bottom: 0;
+  padding: 0;
+  bottom: 88px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+}
+.ab-wk__marques__piste { align-items: center; gap: 0; }
+.ab-wk__marques__piste img {
+  display: block;
+  width: auto;
+  height: 26px;
+  margin: 0 42px;
+  opacity: 0.62;
+}
+.ab-wk__marques__piste img[alt="Nike"] { height: 22px; }
+.ab-wk__marques__piste img[alt="Ril\00e8sundayz"] { height: 19px; }
+.ab-wk__marques__piste img[alt="Universal Music"] { height: 34px; }
+.ab-wk__marques__piste img[alt="FILA"] { height: 30px; }
+
+/* 21. Meme taille et meme couleur pour tous : les logos sont desormais
+       fournis a la couleur exacte du mot-marque de la section (#F8C40F) et
+       affiches a une hauteur unique. On retire les hauteurs optiques. */
+.ab-wk__marques__piste img,
+.ab-wk__marques__piste img[alt="Nike"],
+.ab-wk__marques__piste img[alt="Ril\00e8sundayz"],
+.ab-wk__marques__piste img[alt="Universal Music"],
+.ab-wk__marques__piste img[alt="FILA"] {
+  height: 24px;
+  margin: 0 46px;
+  opacity: 1;
+}
+
+/* 22. Chaque marque occupe une BOITE identique. C'est la seule facon de les
+       mettre a egalite : a hauteur egale, un mot-marque long ecrase un
+       monogramme carre, et un lockup empile devient minuscule. Ici chaque
+       logo se loge dans le meme rectangle et s'y adapte, en gardant ses
+       proportions. */
+.ab-wk__marques__piste img,
+.ab-wk__marques__piste img[alt="Nike"],
+.ab-wk__marques__piste img[alt="Ril\00e8sundayz"],
+.ab-wk__marques__piste img[alt="Universal Music"],
+.ab-wk__marques__piste img[alt="FILA"] {
+  width: 176px;
+  height: 44px;
+  object-fit: contain;
+  object-position: center;
+  margin: 0 22px;
+  opacity: 1;
+}
+.ab-wk__marques { height: 56px; bottom: 84px; }
+
+/* 23. Plus discret encore : la teinte descend au jeton le plus sourd du
+       studio (#5A5018) et l'opacite tombe a 0,85. Les marques se lisent
+       comme une trame de fond, dans le meme registre que le mot-marque en
+       filigrane, sans venir concurrencer les vignettes de projets. */
+.ab-wk__marques__piste img { opacity: 0.85; }
+
+/* 24. Encore un cran de retrait : la trame se devine plutot qu'elle ne se
+       lit. En dessous de cette valeur, sur le noir du studio, les logos
+       cessent simplement d'exister. */
+.ab-wk__marques__piste img { opacity: 0.9; }
+
+/* 25. Nettoyage du bas.
+       a) La bascule SMALL / LARGE / INDEX venait du vrai site du studio,
+          mais ici elle ne pilote rien : c'est un bouton mort. Elle saute,
+          et le bandeau de marques descend prendre sa place.
+       b) Le generique de fin de page saute aussi. Le dossier se termine
+          desormais sur « Une histoire a raconter ? ». */
+.ab-wk__bascule { display: none; }
+.ab-wk__marques { bottom: 46px; }
+#about-panel .ab-endnotes { display: none; }
+
+/* 26. Les vignettes descendent : elles se posent juste au-dessus du bandeau
+       de marques plutot que de flotter au milieu. Le haut de la section
+       respire, le bas se lit comme un bloc, vignettes puis marques. */
+.ab-wk__grille {
+  top: auto;
+  bottom: 132px;
+  transform: none;
+}
+
+/* 27. Le bandeau de marques est retire. Les vignettes restent basses, elles
+       reprennent la place qu'il occupait. */
+.ab-wk__marques { display: none; }
+.ab-wk__grille { bottom: 78px; }
+
+/* 28. LE FEU — l'intention, posee juste apres le rideau.
+       Le rideau est un noir plat ; enchainer sur un deuxieme noir plat
+       aurait ete monotone. Ici une braise monte du bas de l'ecran, un
+       degrade radial dans le jaune de la maison a tres faible densite. */
+.ab-feu {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 88% 62% at 50% 106%,
+      rgba(248, 196, 15, 0.26) 0%,
+      rgba(248, 196, 15, 0.08) 34%,
+      rgba(10, 10, 10, 0) 66%),
+    var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: calc(var(--lg-marque) + 60px) clamp(24px, 6vw, 130px) 12vh;
+}
+#about-panel .ab-feu p {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.7vw, 40px);
+  line-height: 1.24;
+  max-width: 34ch;
+  color: #f7f4ec;
+}
+
+/* Le feu rejoint la chaine de recouvrement, entre le rideau et la video. */
+#about-panel #ab-feu {
+  min-height: 300vh;
+  margin-top: -100vh;
+  position: relative;
+}
+#about-panel #ab-feu > .ab-feu {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+/* L'empilement se decale d'un cran a partir du feu. */
+#about-panel #ab-feu { z-index: 3; }
+#about-panel #ab-scinde { z-index: 4; }
+#about-panel #ab-mot { z-index: 5; }
+#about-panel #ab-pris { z-index: 6; }
+#about-panel #ab-declaration { z-index: 7; }
+#about-panel #ab-travail { z-index: 8; }
+#about-panel #ab-univers { z-index: 9; }
+#about-panel #ab-contact { z-index: 10; }
+
+@media (max-width: 720px) {
+  #about-panel #ab-feu { min-height: 100vh; margin-top: 0; }
+  #about-panel #ab-feu > .ab-feu { position: static; height: auto; min-height: 100vh; }
+}
+
+/* 29. LA TRANSMISSION — La Griotheque.
+       La page parlait de tout ce que la maison raconte, jamais de ce qu'elle
+       transmet. C'est pourtant la seule chose qu'une agence ne fait pas.
+       Cet ecran est le contrepoint du panneau studio : meme principe de
+       citation, registre inverse. Le studio est noir et monospace, l'ecole
+       est claire et en sans-serif, et elle tutoie.
+       Le fond reste noir SOUS le mot-marque : le jaune sur creme serait
+       illisible. La carte claire occupe la bande de lecture. */
+.ab-grio {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  background: var(--bg);
+  padding: calc(var(--lg-marque) + 26px) clamp(18px, 2.4vw, 40px) clamp(18px, 2.4vw, 40px);
+}
+.ab-grio__carte {
+  height: 100%;
+  min-height: calc(100vh - var(--lg-marque) - 26px - clamp(18px, 2.4vw, 40px));
+  background: #f4efe3;
+  color: #0f0f0f;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(32px, 6vw, 96px);
+}
+.ab-grio__nom {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(13px, 1.1vw, 17px);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-bottom: clamp(20px, 3vh, 42px);
+}
+.ab-grio__nom sup { font-size: 0.58em; vertical-align: super; }
+#about-panel .ab-grio h2 {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: clamp(24px, 3vw, 46px);
+  line-height: 1.14;
+  letter-spacing: -0.015em;
+  max-width: 22ch;
+  color: #0f0f0f;
+}
+#about-panel .ab-grio__trois {
+  font-family: var(--sans);
+  font-size: clamp(15px, 1.35vw, 21px);
+  line-height: 1.42;
+  margin-top: clamp(14px, 2vh, 26px);
+  max-width: 30ch;
+  color: rgba(15, 15, 15, 0.62);
+}
+#about-panel .ab-grio__preuve {
+  font-family: var(--mono);
+  font-size: clamp(9.5px, 0.78vw, 11.5px);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  line-height: 1.8;
+  margin-top: clamp(24px, 4vh, 52px);
+  max-width: 54ch;
+  color: rgba(15, 15, 15, 0.5);
+}
+.ab-grio__lien {
+  font-family: var(--sans);
+  font-size: clamp(13px, 1.05vw, 16px);
+  margin-top: 14px;
+  color: #0f0f0f;
+  border-bottom: 1px solid rgba(15, 15, 15, 0.35);
+  align-self: flex-start;
+  padding-bottom: 2px;
+}
+.ab-grio__lien:hover { border-bottom-color: #0f0f0f; }
+
+/* Elle prend place dans la chaine, juste apres le studio. */
+#about-panel #ab-grio {
+  min-height: 300vh;
+  margin-top: -100vh;
+  position: relative;
+  z-index: 9;
+}
+#about-panel #ab-grio > .ab-grio {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+#about-panel #ab-univers { z-index: 10; }
+#about-panel #ab-contact { z-index: 11; }
+
+@media (max-width: 720px) {
+  #about-panel #ab-grio { min-height: 100vh; margin-top: 0; }
+  #about-panel #ab-grio > .ab-grio { position: static; height: auto; min-height: 100vh; }
+}
+
+/* 30. Corrections de l'ecran Griotheque, releves a l'essai.
+       a) Le panneau About centre tout par defaut : la carte se compose a
+          gauche, comme le site de l'ecole.
+       b) Deux regles manquaient le prefixe #about-panel et se faisaient
+          battre par la regle serif generale du panneau.
+       c) Le masque du mot-marque cherchait « ab-univers » comme section
+          suivante ; c'est desormais l'ecole qui suit le studio, donc le logo
+          restait mange pendant tout cet ecran. */
+#about-panel .ab-grio,
+#about-panel .ab-grio__carte { text-align: left; }
+#about-panel .ab-grio__nom {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(13px, 1.1vw, 17px);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #0f0f0f;
+}
+#about-panel .ab-grio__lien { font-family: var(--sans); color: #0f0f0f; }
+#about-panel .ab-grio h2 { max-width: 26ch; }
+.ab-grio__carte { justify-content: center; gap: 0; }
+
+/* 31. TRANSMETTRE — la video de l'ecole, et la phrase qui monte dessus.
+       On rejoue ici la mecanique de l'arrivee, une seule fois dans la page :
+       l'image reste collee, le texte la rejoint et se fige par-dessus. Puis
+       la carte claire de La Griotheque recouvre les deux. C'est le seul
+       endroit du dossier ou une video revient apres l'ouverture. */
+#about-panel #ab-transmettre {
+  min-height: 360vh;
+  margin-top: -100vh;
+  position: relative;
+  z-index: 9;
+  background: var(--bg);
+}
+.ab-trans__video {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 0;
+  background: var(--bg);
+}
+.ab-trans__video video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* L'ecart donne au lecteur le temps de voir l'image seule avant que la
+   phrase n'arrive. */
+.ab-trans__ecart { height: 60vh; }
+.ab-trans__mot {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: calc(var(--lg-marque) + 40px) clamp(24px, 7vw, 150px) 10vh;
+}
+#about-panel .ab-trans__mot .ab-dit__mot {
+  max-width: 26ch;
+  text-align: center;
+  text-shadow: 0 2px 26px rgba(0, 0, 0, 0.6);
+  font-size: clamp(26px, 3.4vw, 50px);
+}
+/* La carte de l'ecole passe donc au-dessus. */
+#about-panel #ab-grio { z-index: 10; }
+#about-panel #ab-univers { z-index: 11; }
+#about-panel #ab-contact { z-index: 12; }
+
+@media (max-width: 720px) {
+  #about-panel #ab-transmettre { min-height: 200vh; margin-top: 0; }
+  .ab-trans__ecart { height: 0; }
+}
+
+/* 32. Le bloc beige devient pleine page, il monte SOUS la phrase, et la
+       phrase s'inverse en le traversant.
+       Tout se joue dans une seule section, ce qui est la condition pour que
+       les trois plans se superposent : la video en fond, le beige qui monte
+       au-dessus d'elle, et le texte au-dessus des deux.
+       L'inversion du texte n'est pas un changement de couleur declenche par
+       du script : le texte est blanc et compose en « difference ». Sur le
+       noir de la video il reste blanc, sur le creme il vire au presque noir,
+       et pendant la traversee la bascule se fait lettre par lettre, a la
+       ligne exacte du bord du bloc. */
+#about-panel #ab-transmettre { min-height: 0; }
+.ab-trans__ecart2 { height: 90vh; }
+.ab-trans__queue { height: 120vh; }
+
+.ab-trans__mot {
+  z-index: 3;
+  pointer-events: none;
+  padding-bottom: 0;
+}
+#about-panel .ab-trans__mot .ab-dit__mot {
+  color: #ffffff;
+  text-shadow: none;
+  mix-blend-mode: difference;
+}
+
+/* Le beige : pleine largeur, pleine hauteur, plus de carte inseree. */
+.ab-grio {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 0;
+  z-index: 2;
+  overflow: hidden;
+  padding: 0;
+  background: #f4efe3;
+}
+.ab-grio__carte {
+  height: 100%;
+  min-height: 0;
+  background: transparent;
+  padding: calc(var(--lg-marque) + 40px) clamp(32px, 7vw, 130px) 10vh;
+  justify-content: center;
+}
+/* Le mot-marque se ferait manger par le beige comme par le studio : le
+   script LG_REORG_COUPE traite les deux panneaux. */
+
+/* 33. L'inversion ne fonctionnait pas : le « difference » etait pose sur le
+       paragraphe, dont le parent porte un z-index et forme donc un calque
+       ferme. Un element compose en difference se melange au fond de son
+       calque parent ; ici ce fond etait vide, le texte restait blanc.
+       On deplace le mode de fusion sur le conteneur lui-meme, qui, lui, se
+       melange bien a la video et au bloc beige. */
+#about-panel .ab-trans__mot .ab-dit__mot { mix-blend-mode: normal; }
+.ab-trans__mot { mix-blend-mode: difference; }
+
+/* 34. La phrase restait epinglee jusqu'au bout de la section et venait se
+       poser sur le texte de l'ecole. Un element colle est borne par son
+       parent : on lui en donne un, la « scene », qui s'arrete une fois le
+       bloc beige monte. Le bloc, lui, reste hors de la scene et remonte de
+       150 vh pour croiser la phrase pendant qu'elle est encore figee. */
+.ab-trans__scene { position: relative; }
+.ab-trans__ecart2 { height: 190vh; }
+.ab-grio { margin-top: -150vh; }
+
+/* 35. Reglage fin du croisement. La phrase se libere exactement quand le
+       bloc beige finit de monter : la remontee du bloc vaut donc une
+       hauteur d'ecran, ni plus ni moins. Sans ca, la phrase restait 50 vh de
+       trop et se posait sur le texte de l'ecole. */
+.ab-grio { margin-top: -100vh; }
+
+/* 36. Le bloc beige monte VIDE, et le texte de l'ecole arrive apres.
+       Sinon le contenu de la carte apparaissait derriere la phrase pendant
+       toute la traversee, et les deux textes se superposaient. Maintenant
+       la sequence est propre : la video, la phrase, le beige qui passe
+       dessous et retourne la phrase, puis l'ecole qui s'installe. */
+.ab-trans__ecart2 { height: 120vh; }
+.ab-grio { margin-top: -100vh; }
+.ab-grio__carte {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 2;
+  background: #f4efe3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: calc(var(--lg-marque) + 40px) clamp(32px, 7vw, 130px) 10vh;
+}
+
+/* 37. La carte etant sortie du bloc beige, les selecteurs qui la
+       composaient ne la trouvaient plus : le titre repassait au corps du
+       texte courant. On les recale sur la carte elle-meme. */
+#about-panel .ab-grio__carte { text-align: left; }
+#about-panel .ab-grio__carte .ab-grio__nom {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(13px, 1.1vw, 17px);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #0f0f0f;
+  margin-bottom: clamp(20px, 3vh, 42px);
+}
+#about-panel .ab-grio__carte h2 {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: clamp(24px, 3vw, 46px);
+  line-height: 1.14;
+  letter-spacing: -0.015em;
+  max-width: 26ch;
+  color: #0f0f0f;
+}
+#about-panel .ab-grio__carte .ab-grio__trois {
+  font-family: var(--sans);
+  font-size: clamp(15px, 1.35vw, 21px);
+  line-height: 1.42;
+  margin-top: clamp(14px, 2vh, 26px);
+  max-width: 30ch;
+  color: rgba(15, 15, 15, 0.62);
+}
+#about-panel .ab-grio__carte .ab-grio__preuve {
+  font-family: var(--mono);
+  font-size: clamp(9.5px, 0.78vw, 11.5px);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  line-height: 1.8;
+  margin-top: clamp(24px, 4vh, 52px);
+  max-width: 54ch;
+  color: rgba(15, 15, 15, 0.5);
+}
+#about-panel .ab-grio__carte .ab-grio__lien {
+  font-family: var(--sans);
+  font-size: clamp(13px, 1.05vw, 16px);
+  margin-top: 14px;
+  color: #0f0f0f;
+  border-bottom: 1px solid rgba(15, 15, 15, 0.35);
+  align-self: flex-start;
+  padding-bottom: 2px;
+}
+
+/* 38. LE FIL — une phrase qui se deplie au defilement.
+       Sept etats, un par palier. La ligne active monte d'un demi-cadratin
+       en apparaissant, la precedente s'efface vers le haut : c'est la
+       mecanique de la reference, sans librairie, pilotee par un seul
+       gestionnaire de defilement. */
+#about-panel #ab-fil {
+  min-height: 520vh;
+  margin-top: -100vh;
+  position: relative;
+  z-index: 3;
+  background: var(--bg);
+}
+#about-panel #ab-fil > .ab-fil {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  padding: calc(var(--lg-marque) + 40px) clamp(24px, 5vw, 96px) 14vh;
+}
+.ab-fil__pile { position: relative; width: 100%; }
+#about-panel .ab-fil__pile p {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(calc(-50% + 0.34em));
+  font-family: var(--sans);
+  font-weight: 800;
+  font-stretch: 64%;
+  font-size: clamp(30px, 5.2vw, 88px);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: #f4efe3;
+  opacity: 0;
+  max-width: 17ch;
+  transition: opacity 0.36s ease, transform 0.46s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+#about-panel .ab-fil__pile p.on {
+  opacity: 1;
+  transform: translateY(-50%);
+}
+/* La jauge dit ou l'on en est dans la phrase, sept traits, un par etat. */
+.ab-fil__jauge {
+  position: absolute;
+  left: clamp(24px, 5vw, 96px);
+  bottom: 8vh;
+  width: 148px;
+  height: 2px;
+  background: rgba(244, 239, 227, 0.16);
+}
+.ab-fil__jauge i {
+  display: block;
+  height: 100%;
+  width: 14.28%;
+  background: #f8c40f;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: left;
+}
+
+/* La chaine se decale d'un cran a partir du fil. */
+#about-panel #ab-feu { z-index: 4; }
+#about-panel #ab-scinde { z-index: 5; }
+#about-panel #ab-mot { z-index: 6; }
+#about-panel #ab-pris { z-index: 7; }
+#about-panel #ab-declaration { z-index: 8; }
+#about-panel #ab-travail { z-index: 9; }
+#about-panel #ab-transmettre { z-index: 10; }
+#about-panel #ab-univers { z-index: 11; }
+#about-panel #ab-contact { z-index: 12; }
+
+@media (max-width: 720px) {
+  #about-panel #ab-fil { min-height: 300vh; margin-top: 0; }
+}
+
+/* 39. Deux corrections sur le fil.
+       a) L'empilement : le fil arrive APRES la video scindee dans le HTML,
+          il lui fallait donc un z-index superieur, sinon la video le
+          recouvrait purement et simplement. On renumerote la chaine dans
+          l'ordre du document.
+       b) La course : les sept etats se repartissaient sur toute la hauteur
+          de la section, y compris la part qui se fait deja recouvrir par la
+          suivante. Le septieme etat n'etait jamais visible. */
+#about-panel #ab-recit { z-index: 2; }
+#about-panel #ab-feu { z-index: 3; }
+#about-panel #ab-scinde { z-index: 4; }
+#about-panel #ab-fil { z-index: 5; }
+#about-panel #ab-mot { z-index: 6; }
+#about-panel #ab-pris { z-index: 7; }
+#about-panel #ab-declaration { z-index: 8; }
+#about-panel #ab-travail { z-index: 9; }
+#about-panel #ab-transmettre { z-index: 10; }
+#about-panel #ab-univers { z-index: 11; }
+#about-panel #ab-contact { z-index: 12; }
+
+/* 40. Le fil passe par-dessus une video. Un texte de cette taille sur un
+       noir plat reste une affiche ; sur une image qui bouge, il devient une
+       sequence. On reprend le plan d'ouverture, ce qui cree une rime : la
+       page s'ouvre dessus, et la phrase revient s'y poser.
+       Le voile est celui du site, a l'identique, pour que la densite de noir
+       ne change pas d'un ecran a l'autre. */
+.ab-fil__fond {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+.ab-fil__fond video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+#about-panel #ab-fil > .ab-fil { background: #000; }
+.ab-fil__pile { z-index: 1; }
+.ab-fil__jauge { z-index: 2; }
+#about-panel .ab-fil__pile p {
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.55);
+}
+
+/* 41. Le fil se compose au corps exact du mot « griot » de la definition :
+       clamp(38px, 6vw, 84px). Les deux plus grandes prises de parole de la
+       page ont ainsi la meme voix haute, et le lecteur les relie sans qu'on
+       ait besoin de le lui dire. */
+#about-panel .ab-fil__pile p {
+  font-size: clamp(38px, 6vw, 84px);
+  line-height: 1;
+  max-width: 15ch;
+}
+
+/* 42. Meme police que la definition, pas seulement meme corps : le fil passe
+       en ITC Clearface. La page n'a donc plus qu'une seule voix pour ses
+       grandes affirmations, et l'Archivo condense redevient ce qu'il devait
+       etre, la police d'un seul ecran, celui de la mission. */
+#about-panel .ab-fil__pile p {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-stretch: normal;
+  font-size: clamp(38px, 6vw, 84px);
+  line-height: 1.02;
+  letter-spacing: -0.005em;
+  max-width: 16ch;
+}
+
+/* 43. Pas de capitales : le fil se lit en bas de casse, comme le mot
+       « griot » qu'il cite. La phrase redevient une phrase, pas une
+       proclamation. */
+#about-panel .ab-fil__pile p { text-transform: none; }
+
+/* 44. NOUVEAU TEXTE DE PRESENTATION. Sept paragraphes au lieu de trois, et
+       le bloc reste fige sur un seul ecran : le corps descend en
+       consequence, et l'inter-paragraphe se resserre. La premiere ligne,
+       ecrite en capitales, sert de tete et se detache.
+       On rend aussi visible la derniere phrase : la regle qui masquait la
+       chute existait pour ne pas la lire deux fois, quand elle etait celle
+       du rideau. Ce n'est plus le cas. */
+#about-panel #ab-mission > .about-slide p {
+  font-size: clamp(12.5px, 1.08vw, 17px);
+  line-height: 1.52;
+  max-width: min(1060px, 80vw);
+}
+#about-panel #ab-mission .about-chute { display: block; }
+
+/* 45. Le decoupeur du manifeste imbrique les paragraphes : le selecteur en
+       « enfant direct » ne les atteignait pas, la mesure restait etroite et
+       le dernier paragraphe tombait hors de l'ecran. On cible en
+       descendance, et on resserre encore d'un cran pour que les sept
+       paragraphes tiennent dans la bande. */
+#about-panel #ab-mission .about-slide p,
+#about-panel #ab-mission .about-slide .about-chute {
+  font-size: clamp(12px, 1.02vw, 16px);
+  line-height: 1.5;
+  max-width: min(1080px, 82vw);
+}
+
+/* 46. Le manifeste n'avait aucun temps a lui : le rideau commencait a monter
+       a l'instant meme ou le texte se figeait, et le dernier paragraphe se
+       faisait couper avant d'avoir pu etre lu. Une hauteur d'ecran de plus,
+       et le texte reste seul le temps qu'on le lise. */
+#about-panel #ab-mission { min-height: 300vh; }
+
+/* 47. Retour à la grande voix du manifeste : même échelle éditoriale que
+       la définition de « griot », avec de vrais paragraphes qui respirent. */
+#about-panel #ab-mission > .about-slide {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
+  padding-top: calc(var(--lg-marque) + 46px);
+  padding-bottom: 18vh;
+}
+#about-panel #ab-mission .about-copy {
+  width: 100%;
+  max-width: none;
+}
+#about-panel #ab-mission .about-slide .about-copy p,
+#about-panel #ab-mission .about-slide .about-chapo,
+#about-panel #ab-mission .about-slide .about-corps,
+#about-panel #ab-mission .about-slide .about-chute {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5.5vw, 76px);
+  line-height: 1.02;
+  letter-spacing: -0.005em;
+  width: 100%;
+  max-width: min(26ch, 88vw);
+  font-weight: 400;
+}
+#about-panel #ab-mission .about-copy p + p {
+  margin-top: 1.2em;
+}
+
+/* Ordre final du parcours éditorial. */
+#about-panel #ab-recit,
+#about-panel #ab-feu,
+#about-panel #ab-scinde,
+#about-panel #ab-fil,
+#about-panel #ab-mot-legacy {
+  display: none !important;
+}
+#about-panel #ab-mot {
+  margin-top: 0;
+  z-index: 3;
+}
+
+/* 48. Ouverture en deux temps : la phrase source monte seule, puis le corps
+       du manifeste la rejoint et poursuit un unique défilement continu. */
+#about-panel #ab-mission {
+  min-height: 0;
+  height: auto;
+}
+#about-panel #ab-mission > .about-slide {
+  position: relative;
+  top: auto;
+  bottom: auto;
+}
+#about-panel #ab-mission .about-chapo {
+  margin: 0;
+}
+#about-panel #ab-mission .about-chapo + p {
+  margin-top: 0;
+}
+#about-panel #ab-mission .manifest-lead {
+  position: relative;
+  height: 86vh;
+  margin-top: 12vh;
+}
+#about-panel #ab-mission .manifest-lead .about-chapo {
+  position: sticky;
+  top: calc(var(--lg-marque) + 58px);
+}
+#about-panel #ab-mission .manifest-lead + p {
+  margin-top: 0;
+}
+
+@media (max-width: 720px) {
+  #about-panel #ab-mission .manifest-lead {
+    height: 72vh;
+    margin-top: 8vh;
+  }
+}
+
+/* 49. OVERLAP FINAL — placé après toutes les anciennes règles pour ne plus
+       être annulé. La chute reste fixe pendant que la définition monte. */
+#about-panel #ab-mission {
+  min-height: 0;
+  height: auto;
+  padding-bottom: 0;
+  position: relative;
+  z-index: 2;
+}
+#about-panel #ab-mission .about-chute {
+  position: sticky;
+  top: 18vh;
+  z-index: 1;
+}
+#about-panel #ab-mission .about-copy {
+  padding-bottom: 100vh;
+}
+#about-panel #ab-mot {
+  display: block;
+  min-height: 300vh;
+  margin-top: -100vh;
+  position: relative;
+  z-index: 50;
+  isolation: isolate;
+}
+#about-panel #ab-mot > .ab-mot {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg);
+  z-index: 1;
+}
+
+/* 51. LE VOILE, A L'EXACT DE LA REFERENCE NIKE. Le notre etait un aplat :
+       46 % de noir sur toute la hauteur, plus une barre plus sombre en haut.
+       Celui de Nike ne pose aucun aplat. C'est un degrade unique, transparent
+       en haut, qui n'atteint 45 % qu'en bas de l'image, exactement la ou le
+       texte se pose. Leur systeme de design le nomme « bgTextProtection » :
+       ce n'est pas un assombrissement, c'est une protection de lisibilite.
+       Valeurs reprises telles quelles, y compris le noir #111111. */
+.about-vid::after {
+  background: linear-gradient(180deg, rgba(17, 17, 17, 0) 0%, rgba(17, 17, 17, 0.45) 100%);
+}
+
+/* 52. Plus sombre. On reste dans la reference : c'est l'autre reglage du
+       meme systeme, celui que Nike applique a ses cartes, ou le texte doit
+       tenir sur une image plus claire. Le voile demarre a 8 % des le haut
+       et descend jusqu'a 72 %. Meme noir, meme logique, un cran plus appuye. */
+.about-vid::after {
+  background: linear-gradient(180deg, rgba(17, 17, 17, 0.08) 10%, rgba(17, 17, 17, 0.72) 100%);
+}
+
+/* 53. Chorégraphie finale du manifeste.
+       - davantage d'air après l'ouverture ;
+       - une jonction continue lorsque le corps la rattrape ;
+       - une conclusion strictement alignée sur les autres paragraphes. */
+#about-panel #ab-mission .manifest-lead {
+  height: 104vh;
+  margin-top: 14vh;
+}
+#about-panel #ab-mission .manifest-lead .about-chapo {
+  position: sticky;
+  top: calc(var(--lg-marque) + 58px);
+  transition: transform 180ms cubic-bezier(.22,.7,.25,1);
+  will-change: transform;
+}
+#about-panel #ab-mission .manifest-lead + .about-corps {
+  margin-top: 0;
+}
+#about-panel #ab-mission .about-slide .about-copy .about-chute {
+  position: relative;
+  top: auto;
+  display: block;
+  font-family: var(--serif);
+  font-size: clamp(36px, 5.5vw, 76px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.005em;
+  text-align: left;
+  width: 100%;
+  max-width: min(26ch, 88vw);
+  margin-top: 1.2em;
+}
+#about-panel #ab-mission .about-copy {
+  padding-bottom: 100vh;
+  will-change: transform;
+  transition: none;
+}
+#about-panel #ab-mot {
+  margin-top: -100vh;
+  z-index: 50;
+}
+
+/* 54. Arrivées douces : les paragraphes se révèlent avec une légère montée,
+       sans casser le mouvement continu ni modifier l'overlap final. */
+#about-panel #ab-mission .about-corps,
+#about-panel #ab-mission .about-chute {
+  opacity: .16;
+  translate: 0 44px;
+  transition:
+    opacity 980ms cubic-bezier(.16,.82,.16,1),
+    translate 1180ms cubic-bezier(.16,.82,.16,1);
+}
+#about-panel #ab-mission .about-corps.lg-in,
+#about-panel #ab-mission .about-chute.lg-in {
+  opacity: 1;
+  translate: 0 0;
+}
+#about-panel #ab-mission .manifest-lead .about-chapo {
+  transform: translate3d(0, var(--lead-y, 0px), 0);
+  transition: transform 1100ms cubic-bezier(.12,.82,.14,1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #about-panel #ab-mission .about-copy,
+  #about-panel #ab-mission .about-corps,
+  #about-panel #ab-mission .about-chute {
+    transition: none;
+  }
+}
+
+@media (max-width: 720px) {
+  #about-panel #ab-mission .manifest-lead {
+    height: 86vh;
+    margin-top: 10vh;
+  }
+}
+
+/* 56. LE BOUTON DE LANGUE DU MANIFESTE. Il etait fixe a droite mais sans
+       largeur propre : il s'etirait sur 1402 px et dessinait une barre
+       sombre en travers du haut de la page. Il n'etait relie a rien non
+       plus, les deux scripts de langue prenant le PREMIER .lang-toggle du
+       document, celui du menu.
+       Ici : un vrai coin superieur droit, largeur au contenu, plus de fond
+       ni de cadre, et les deux langues cote a cote, l'active en jaune.
+       C'est l'unique repere de la page : il doit se voir sans peser. */
+/* Specificite : la regle de base .lang-toggle vit dans un <style> pose APRES
+   le lien vers styles.css, elle gagne donc a specificite egale. On monte d'un
+   cran avec le nom de balise, sans recourir a !important. */
+button.lang-toggle.manifesto-lang {
+  left: auto;
+  right: 22px;
+  top: 22px;
+  width: -moz-max-content;
+  width: max-content;
+  max-width: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  margin: 0;
+  padding: 0;
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border: 0;
+  border-radius: 0;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: rgba(244, 239, 227, 0.5);
+}
+button.lang-toggle.manifesto-lang span {
+  color: inherit;
+  transition: color 260ms ease;
+}
+button.lang-toggle.manifesto-lang span.on { color: #F8C40F; }
+button.lang-toggle.manifesto-lang i { font-style: normal; opacity: 0.3; }
+button.lang-toggle.manifesto-lang:hover span:not(.on) { color: rgba(244, 239, 227, 0.85); }
