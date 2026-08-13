@@ -4594,3 +4594,12 @@ button.lang-toggle.manifesto-lang span {
 button.lang-toggle.manifesto-lang span.on { color: #F8C40F; }
 button.lang-toggle.manifesto-lang i { font-style: normal; opacity: 0.3; }
 button.lang-toggle.manifesto-lang:hover span:not(.on) { color: rgba(244, 239, 227, 0.85); }
+
+/* 57. Le bandeau LES GRIOTS qui defile subsistait en bas de page. La regle
+       de la version « manifeste seul » ne visait que les .ab-sec : le
+       bandeau est un simple <div>, il passait donc au travers et venait
+       recouvrir la conclusion. On coupe tout ce qui suit le manifeste,
+       quelle que soit la balise. */
+body.manifest-only #about-panel #ab-mission ~ * {
+  display: none !important;
+}
