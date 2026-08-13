@@ -4773,4 +4773,12 @@ body.manifest-only #about-panel #ab-mission {
     mask-image: none !important;
     -webkit-mask-image: none !important;
   }
+
+  body.manifest-only #about-panel #ab-mission .about-slide .about-copy p,
+  body.manifest-only #about-panel #ab-mission .about-slide .about-chapo,
+  body.manifest-only #about-panel #ab-mission .about-slide .about-corps,
+  body.manifest-only #about-panel #ab-mission .about-slide .about-chute {
+    font-size: clamp(27px, 8.2vw, 38px);
+    line-height: 1.05;
+  }
 }
