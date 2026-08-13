@@ -4865,3 +4865,37 @@ body.manifest-only #about-panel #ab-mission {
     margin-top: 1.8em;
   }
 }
+
+
+/* 63. LE TRAVAIL REVIENT, ET IL RECOUVRE TOUT. La regle du mode « manifeste
+       seul » coupait tout ce qui suit le manifeste. On y ouvre une seule
+       exception, nommement le panneau du studio, qui redevient le dernier
+       geste de la page.
+       Sa mecanique de recouvrement n'a pas bouge depuis qu'on l'avait reglee :
+       trois hauteurs d'ecran, une remontee d'un ecran par-dessus le precedent,
+       et un enfant colle qui se fige plein cadre. Le manifeste se termine
+       justement sur un ecran de reserve : la remontee du studio le consomme
+       exactement. Le bandeau de marques reste retire, les vignettes basses. */
+body.manifest-only #about-panel #ab-mission ~ section#ab-travail {
+  display: block !important;
+}
+/* Le panneau du studio est le dernier ecran : plus rien ne vient le
+   recouvrir, donc il n'a plus a rendre la place qu'il prend. */
+body.manifest-only #about-panel #ab-travail {
+  z-index: 60;
+}
+
+
+/* 64. LE STUDIO MANGE A NOUVEAU LE MOT-MARQUE. Le mode « manifeste seul »
+       avait pose « mask-image: none !important » sur la marque, pour garantir
+       qu'elle reste visible quand elle est le seul repere de la page. Juste,
+       tant que rien ne venait par-dessus. Le studio, lui, doit la recouvrir :
+       c'etait la demande d'origine, et c'est ce qui fait que le panneau
+       arrive comme un autre site et non comme une section de plus.
+       On retablit donc le masque, d'un cran de specificite au-dessus. Il est
+       sans effet hors du studio : le script laisse alors les deux bornes a
+       100 %, ce qui donne un degrade entierement opaque. */
+html body.manifest-only .brand-mark {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 var(--lg-a, 100%), transparent var(--lg-a, 100%) var(--lg-b, 100%), #000 var(--lg-b, 100%) 100%) !important;
+  mask-image: linear-gradient(to bottom, #000 0 var(--lg-a, 100%), transparent var(--lg-a, 100%) var(--lg-b, 100%), #000 var(--lg-b, 100%) 100%) !important;
+}
