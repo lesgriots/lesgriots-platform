@@ -4778,7 +4778,7 @@ body.manifest-only #about-panel #ab-mission {
   body.manifest-only #about-panel #ab-mission .about-slide .about-chapo,
   body.manifest-only #about-panel #ab-mission .about-slide .about-corps,
   body.manifest-only #about-panel #ab-mission .about-slide .about-chute {
-    font-size: clamp(27px, 8.2vw, 38px);
-    line-height: 1.05;
+    font-size: clamp(23px, 6.8vw, 32px);
+    line-height: 1.08;
   }
 }
