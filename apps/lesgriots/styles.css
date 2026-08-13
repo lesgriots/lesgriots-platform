@@ -4663,3 +4663,19 @@ body.manifest-only .brand-mark {
   #about-panel { scroll-snap-type: none; }
   #about-panel .about-slide { scroll-snap-align: none; scroll-snap-stop: normal; }
 }
+
+/* 61. « Le manifeste dans la foulee ». Entre l'instant ou la marque se fige
+       en haut et celui ou la premiere ligne devient lisible, il y avait six
+       cents pixels de vide : un ecran entier de video avec un logo pose
+       dessus et rien a lire. Le coupable est un retrait de 416 px en tete du
+       bloc, plus 14 vh de marge sur la ligne d'ouverture. Ce retrait avait un
+       sens quand le mot-marque etait fige en haut des la premiere image : il
+       lui laissait la place. Depuis que la marque monte au scroll, la place
+       est deja faite par l'ecran de video qui precede. On la supprime, et le
+       texte enchaine exactement quand le logo arrive. */
+body.manifest-only #about-panel #ab-mission > .about-slide {
+  padding-top: 26px;
+}
+body.manifest-only #about-panel #ab-mission .manifest-lead {
+  margin-top: 0;
+}
