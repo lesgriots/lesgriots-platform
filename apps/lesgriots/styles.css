@@ -5018,9 +5018,12 @@ body.manifest-only #about-panel #ab-mission ~ section#ab-vitrine {
   max-width: 84vw;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: #0c0c0c;
-  border: 1px solid rgba(244, 239, 227, 0.14);
-  transition: border-color 400ms ease, transform 600ms cubic-bezier(.16,.84,.18,1);
+  /* Ni cadre ni fond : la capture est deja tres sombre, un liset clair et un
+     aplat gris autour dessinaient une boite noire posee sur du noir. On
+     retire les deux, l'image touche directement la page. */
+  background: none;
+  border: 0;
+  transition: opacity 400ms ease;
 }
 .ab-vitrine__cadre img {
   width: 100%;
@@ -5029,7 +5032,7 @@ body.manifest-only #about-panel #ab-mission ~ section#ab-vitrine {
   object-position: center top;
   display: block;
 }
-.ab-vitrine__cadre:hover { border-color: rgba(248, 196, 15, 0.55); }
+.ab-vitrine__cadre:hover { opacity: 0.82; }
 #about-panel #ab-vitrine .ab-vitrine__pied {
   margin: 0;
   align-self: center;
