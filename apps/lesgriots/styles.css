@@ -4991,18 +4991,30 @@ body.manifest-only #about-panel #ab-mission ~ section#ab-vitrine {
   min-height: 300vh;
   margin-top: -100vh;
   position: relative;
-  z-index: 60;
+  z-index: 200;
+  /* Le manifeste passait PAR-DESSUS l'image alors que son z-index est plus
+     bas. Cause : son bloc de texte porte « will-change: transform », qui le
+     promeut sur une couche de composition a part ; face a un voisin non
+     promu, le navigateur ne respecte plus l'ordre declare. Attention : on ne
+     corrige PAS en posant un transform ici, cela casserait le « sticky » de
+     l'enfant, qui se recalerait sur cette boite au lieu du panneau. */
+  isolation: isolate;
 }
 #about-panel #ab-vitrine > .ab-vitrine {
   position: sticky;
   top: 0;
   height: 100vh;
   overflow: hidden;
-  /* La section redevient opaque : on ne voit pas le manifeste au travers.
-     Ce qui a saute, c'est le cadre autour de l'image, pas le fond de
-     l'ecran. La fenetre se detache donc sur un noir plein, sans liseré ni
-     boite grise pour la delimiter. */
-  background: var(--bg);
+  /* Promotion sur sa propre couche. Le texte du manifeste est deja promu
+     (will-change sur .about-copy) et passait devant malgre un z-index plus
+     bas. On promeut ICI, sur l'enfant colle, et pas sur la section : un
+     transform sur la section casserait le collage. */
+  will-change: transform;
+  /* La section est transparente : elle ne pose pas de plaque noire, seule
+     la fenetre monte. En revanche l'image, elle, doit rester parfaitement
+     opaque : c'est elle qui masque le texte derriere. Voir la regle sur
+     .ab-vitrine__cadre img plus bas. */
+  background: none;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -5035,6 +5047,13 @@ body.manifest-only #about-panel #ab-mission ~ section#ab-vitrine {
   object-fit: cover;
   object-position: center top;
   display: block;
+  /* Franche, sans discussion. Le panneau About applique une apparition en
+     fondu a ses images, et ce fondu laissait le manifeste transparaitre a
+     travers la capture du studio. Ici l'image sert d'ecran : elle doit
+     couvrir ce qu'il y a derriere, pas s'y melanger. */
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
+  filter: none !important;
 }
 .ab-vitrine__cadre:hover { opacity: 0.82; }
 #about-panel #ab-vitrine .ab-vitrine__pied {
@@ -5069,4 +5088,21 @@ body.manifest-only #about-panel #ab-mission ~ section#ab-vitrine {
   }
   .ab-vitrine__cadre { width: 88vw; height: auto; max-width: 88vw; }
   #about-panel #ab-vitrine .ab-vitrine__pied { font-size: 10px; gap: 0; flex-direction: column; text-align: center; }
+}
+
+
+/* 70. Quand la vitrine tient l'ecran, le manifeste se retire. Sans cela son
+       texte se peignait par-dessus la capture du studio, malgre un z-index
+       inferieur : le bloc de texte est promu sur sa propre couche de
+       composition et le moteur n'honore plus l'ordre declare. Plutot que de
+       lutter, on retire ce qui n'a plus lieu d'etre affiche.
+       La section reste transparente : derriere la fenetre, on voit la video,
+       pas le texte. */
+body.lg-vitrine #about-panel #ab-mission .about-copy {
+  opacity: 0;
+  transition: opacity 420ms ease;
+  pointer-events: none;
+}
+#about-panel #ab-mission .about-copy {
+  transition: opacity 420ms ease;
 }
