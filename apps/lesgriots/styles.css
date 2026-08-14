@@ -4998,10 +4998,11 @@ body.manifest-only #about-panel #ab-mission ~ section#ab-vitrine {
   top: 0;
   height: 100vh;
   overflow: hidden;
-  /* Pas de fond : la section ne pose pas une plaque noire par-dessus la
-     page, elle fait monter la seule fenetre. Le manifeste et la video
-     restent visibles derriere, et c'est l'image du studio qui traverse. */
-  background: none;
+  /* La section redevient opaque : on ne voit pas le manifeste au travers.
+     Ce qui a saute, c'est le cadre autour de l'image, pas le fond de
+     l'ecran. La fenetre se detache donc sur un noir plein, sans liseré ni
+     boite grise pour la delimiter. */
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   align-items: center;
