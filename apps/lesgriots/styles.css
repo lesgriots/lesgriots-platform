@@ -5106,3 +5106,15 @@ body.lg-vitrine #about-panel #ab-mission .about-copy {
 #about-panel #ab-mission .about-copy {
   transition: opacity 420ms ease;
 }
+
+
+/* 71. LA VITRINE DU STUDIO EST RETIREE. Decision de Moos. La page redevient
+       le manifeste et rien d'autre.
+       Comme pour le panneau du travail (corrections 63 a 68), rien n'est
+       demonte : les corrections 69 et 70 restent au-dessus, ce bloc les
+       neutralise. Pour faire revenir la fenetre 16/9, supprimer la regle
+       ci-dessous et tout repart, y compris le retrait en fondu du manifeste
+       a son arrivee. L'image reste sur le serveur, uploads/apercu-studio.jpg. */
+body.manifest-only #about-panel #ab-mission ~ section#ab-vitrine {
+  display: none !important;
+}
