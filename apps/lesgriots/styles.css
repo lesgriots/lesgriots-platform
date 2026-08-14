@@ -4998,7 +4998,10 @@ body.manifest-only #about-panel #ab-mission ~ section#ab-vitrine {
   top: 0;
   height: 100vh;
   overflow: hidden;
-  background: var(--bg);
+  /* Pas de fond : la section ne pose pas une plaque noire par-dessus la
+     page, elle fait monter la seule fenetre. Le manifeste et la video
+     restent visibles derriere, et c'est l'image du studio qui traverse. */
+  background: none;
   display: flex;
   flex-direction: column;
   align-items: center;
