@@ -4975,3 +4975,91 @@ body.manifest-only #about-panel #ab-travail > .ab-wk {
 body.manifest-only #about-panel #ab-mission ~ section#ab-travail {
   display: none !important;
 }
+
+
+/* 69. LA VITRINE DU STUDIO. Une grande miniature 16/9 du site du studio, qui
+       monte par-dessus le manifeste et se fige plein cadre. Le panneau
+       reconstitue (correction 63) montrait trois projets recomposes ; celui-ci
+       montre le site lui-meme, en un seul plan. On ne raconte pas le travail,
+       on ouvre une fenetre dessus.
+       Meme mecanique de recouvrement que le reste de la chaine : trois
+       hauteurs d'ecran, une remontee d'un ecran, un enfant colle. */
+body.manifest-only #about-panel #ab-mission ~ section#ab-vitrine {
+  display: block !important;
+}
+#about-panel #ab-vitrine {
+  min-height: 300vh;
+  margin-top: -100vh;
+  position: relative;
+  z-index: 60;
+}
+#about-panel #ab-vitrine > .ab-vitrine {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* La bande du mot-marque tient le haut de l'ecran : la fenetre se pose
+     dessous, elle ne se glisse pas derriere. */
+  padding: calc(var(--lg-marque) + 3vh) 6vw 6vh;
+  gap: 22px;
+}
+.ab-vitrine__cadre {
+  display: block;
+  /* La bande du mot-marque prend deja 40 % de la hauteur : c'est elle qui
+     limite la fenetre, pas la largeur de l'ecran. On dimensionne donc par la
+     hauteur disponible et on laisse le 16/9 calculer la largeur. */
+  height: min(54vh, calc(100vh - var(--lg-marque) - 15vh));
+  width: auto;
+  max-width: 84vw;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #0c0c0c;
+  border: 1px solid rgba(244, 239, 227, 0.14);
+  transition: border-color 400ms ease, transform 600ms cubic-bezier(.16,.84,.18,1);
+}
+.ab-vitrine__cadre img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.ab-vitrine__cadre:hover { border-color: rgba(248, 196, 15, 0.55); }
+#about-panel #ab-vitrine .ab-vitrine__pied {
+  margin: 0;
+  align-self: center;
+  text-align: center;
+  max-width: none;
+  /* Le pied est lui-meme une boite flexible : c'est justify-content, pas
+     text-align, qui centre ses deux etiquettes. */
+  justify-content: center;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(244, 239, 227, 0.5);
+  display: flex;
+  align-items: baseline;
+  gap: 1.6em;
+}
+#about-panel #ab-vitrine .ab-vitrine__pied i { font-style: normal; color: rgba(248, 196, 15, 0.75); }
+
+@media (max-width: 720px) {
+  #about-panel #ab-vitrine {
+    min-height: 300svh;
+    margin-top: -100svh;
+  }
+  #about-panel #ab-vitrine > .ab-vitrine {
+    height: 100svh;
+    padding: calc(var(--lg-marque) + 4vh) 6vw 7vh;
+    gap: 16px;
+  }
+  .ab-vitrine__cadre { width: 88vw; height: auto; max-width: 88vw; }
+  #about-panel #ab-vitrine .ab-vitrine__pied { font-size: 10px; gap: 0; flex-direction: column; text-align: center; }
+}
