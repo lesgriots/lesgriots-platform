@@ -5784,7 +5784,13 @@ body.overview-open .utilbar {
   /* neutralise le cap mobile (max-height calc(100vh - 380px)) et le
      positionnement centre du mode normal */
   max-height: none !important;
-  top: 50dvh !important;
+  /* PAS de « top » ici. En dessous de 1200 px, le wrap est en
+     position:fixed avec translate(-50%,-50%) : « top: 50dvh » l'y centre.
+     Au-dessus, il reste en position:relative, et le meme « top » le
+     decalait alors d'un demi-ecran vers le bas — la moitie basse de la
+     video sortait de l'ecran. Le decalage est donc redonne plus bas,
+     uniquement la ou le positionnement fixe existe. */
+  top: auto !important;
   max-width: none !important;
   display: flex;
   flex-direction: column;
@@ -5801,6 +5807,11 @@ body.overview-open .utilbar {
   max-height: 100dvh !important;
   object-fit: contain;
   background: #000;
+}
+/* Le centrage geometrique du wrap n'a de sens que la ou il est en
+   position:fixed, c'est-a-dire sous 1200 px. */
+@media (max-width: 1200px) {
+  .viewer--fs .viewer__media-wrap { top: 50dvh !important; }
 }
 /* Embeds YouTube/Vimeo : le conteneur a des dimensions inline (80vw…) —
    on les écrase pour occuper tout l'écran, l'iframe suit en 100 %.
