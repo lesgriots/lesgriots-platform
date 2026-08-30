@@ -15,13 +15,22 @@
 
 export const SITE_CONTENT_DEFAULTS = {
   home: {
-    hero_tagline_line1: "L'école de transmission",
-    hero_tagline_line2: "pour la nouvelle génération",
-    hero_tagline_line3: "créative.",
+    // Le hero reel de la page d'accueil. Ces trois cles etaient lues par le
+    // site depuis toujours mais n'existaient pas ici : la phrase affichee
+    // venait du repli ecrit en dur dans app.jsx, donc elle n'etait pas
+    // modifiable sans redeployer.
+    hero_eyebrow: "L\u2019école qui transmet les outils pour que les créatifs bâtissent leur récit et vivent de leur passion.",
+    hero_statement: "Structure ton récit, cible la bonne audience, maîtrise les bons outils.",
+    hero_cta: "Voir les formations",
     manifesto:
       "LA GRIOTHÈQUE est une école dédiée à la transmission de méthodes éprouvées sur le terrain, au croisement de la direction artistique, du récit de marque et de la production. Dans un paysage culturel saturé, où trop de talents avancent sans cadre et trop de récits puissants se dissipent faute de structure, nous offrons aux artistes, aux créatifs et aux entrepreneurs de la prochaine génération les outils pour bâtir leur récit et créer de nouveaux imaginaires.",
-    latest_tab_formations: "Nos formations",
-    latest_tab_workshops: "Workshops",
+    // Les deux blocs « derniers contenus » de l'accueil.
+    formations_heading: "Nos formations",
+    formations_lede: "Des formations courtes et pratiques, pour tous les niveaux et toutes les disciplines. ",
+    formations_lede_link: "Trouve la formation faite pour toi.",
+    workshops_heading: "Nos workshops",
+    workshops_lede: "Des formats courts et intensifs, en groupe restreint, pour pratiquer sur ton projet réel. ",
+    workshops_lede_link: "Découvre les prochains workshops.",
     // Vidéo (ou image) de fond du hero. Vide = img/hero.mp4 hardcodé du site.
     hero_video: "",
     // Section « nouveaux imaginaires » (bas de la page d'accueil).
@@ -43,20 +52,27 @@ export const SITE_CONTENT_DEFAULTS = {
     pilier3_title: "Formations pratiques",
     pilier3_body:
       "Pédagogie par le faire — tes propres récits comme matière. Tu repars avec un livrable concret, pas un certificat. Plateforme de marque, plan éditorial, vidéo finie, calendrier — utilisable dès le lundi matin.",
-    about_griotheque:
-      "LA GRIOTHÈQUE est l'école de LES GRIOTS : un lieu de transmission dédié aux créatifs et aux entrepreneurs de la nouvelle génération. On y apprend à bâtir son récit, à construire sa marque et à en vivre — avec des méthodes éprouvées sur le terrain, jamais avec de la théorie hors-sol.",
+    // Bloc partenaires, bas de la page Approche.
+    partners_title: "Nos partenaires",
+    partners_intro:
+      "La Griothèque avance entourée de structures qui accompagnent, financent et font grandir les créatifs et les entrepreneurs.",
     about_lesgriots:
       "LES GRIOTS est une plateforme d'ingénierie narrative et une infrastructure culturelle afro-diasporique. La maison raconte ses propres histoires, structure et amplifie celles des artistes et des marques, et transmet à une nouvelle génération de créatifs de quoi bâtir de nouveaux imaginaires.",
   },
 
   catalogue: {
+    heading: "Formations",
+    // Le texte par defaut etait reste en Lorem ipsum. Il ne s'affichait pas
+    // (la valeur du back office prenait le dessus), mais il serait remonte a
+    // la premiere fois qu'on aurait vide le champ.
     intro:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    sub: "Lorem ipsum · dolor sit amet · consectetur",
+      "Une formation certifiante, éligible CPF, pensée pour les indépendants et les TPE qui veulent tenir leur communication eux-mêmes. Douze places par session, sur tes propres projets.",
+    sub: "Certifiante · éligible CPF · 12 places",
     media: "", // vidéo/image du hero de page (vide = img/hero.mp4)
   },
 
   workshops_page: {
+    heading: "Workshops",
     intro:
       "Des formats courts, intenses, pour passer à l'action sur un sujet précis : récit de marque, structure éditoriale, négociation, propriété intellectuelle. Une journée pour repartir avec un livrable.",
     sub: "Formats courts · livrable concret · sans pré-requis",
@@ -64,6 +80,7 @@ export const SITE_CONTENT_DEFAULTS = {
   },
 
   ressources: {
+    heading: "Ressources",
     intro:
       "Outils, guides et frameworks issus de la méthode LA GRIOTHÈQUE. Téléchargeables après inscription — on garde le contact pour t'envoyer les mises à jour.",
     sub: "Méthodes · templates · études de cas",
@@ -71,6 +88,7 @@ export const SITE_CONTENT_DEFAULTS = {
   },
 
   agenda: {
+    heading: "Agenda",
     intro:
       "Les prochaines sessions ouvertes — formations longues et workshops. Inscription en ligne, financement CPF/OPCO possible sur la majorité des formats.",
     sub: "Sessions ouvertes · inscription en ligne",
@@ -91,15 +109,13 @@ export const SITE_CONTENT_DEFAULTS = {
     line2: "Organisme de formation",
     line3: "de la SASU LES GRIOTS",
     line4: "Certifié Qualiopi",
-    location_main: "Présentiel à Paris",
-    location_hq: "Siège social — Le Havre",
     email: "formations@lesgriots.com",
     instagram_url: "https://instagram.com/lagriotheque",
     instagram_label: "instagram",
     linkedin_url: "https://linkedin.com",
     linkedin_label: "linkedin",
-    studio_url: "https://lesgriotsxstudio.com",
-    studio_label: "lesgriotsxstudio.com",
+    // Le lien vers le studio est pilote par le pied de page
+    // (footer.col2_studio_url / col2_studio_label), pas ici.
   },
 
   financement: {
@@ -157,11 +173,13 @@ export const SITE_CONTENT_DEFAULTS = {
   cta: {
     reserve_label: "Réserver ma place",
     payer_template: "Payer {price}",
-    telecharger_label: "Télécharger",
     demande_label: "Demander une inscription",
-    contact_label: "Nous contacter",
   },
 
+  // PAS ENCORE BRANCHE. Aucun envoi d'e-mail ne lit ces textes aujourd'hui :
+  // ils sont ecrits d'avance, pour le jour ou le webhook Stripe et le
+  // telechargement de ressource enverront vraiment un message. On les garde
+  // plutot que de jeter du texte deja redige, mais rien ne les affiche.
   emails: {
     // Mail envoyé après achat Stripe d'un workshop (déclenché par webhook)
     welcome_subject: "Bienvenue dans LA GRIOTHÈQUE — confirmation de ta place",
@@ -200,13 +218,13 @@ export const SITE_CONTENT_DEFAULTS = {
   // est désactivé (Pages → Accueil OFF). Modifiable ici.
   launch: {
     media: "img/hero.mp4",
-    brand: "LA GRIOTHÈQUE",
     title: "Transmettre à une nouvelle génération de créatifs les outils pour bâtir leur récit et vivre de leur passion.",
     text: "Le site arrive très bientôt. Laisse ton email pour être prévenu en premier.",
     cta: "Me prévenir →",
     success: "Merci. On te tient au courant.",
     name_placeholder: "Ton prénom",
     placeholder: "ton@email.com",
+    tel_placeholder: "06 00 00 00 00",
     legal: "En t'inscrivant, tu acceptes de recevoir les actualités de LA GRIOTHÈQUE. Désinscription en 1 clic, à tout moment.",
     poster: "img/launch-poster.jpg",
     invalid: "Email invalide, vérifie l'adresse.",
@@ -222,14 +240,18 @@ export const SITE_CONTENT_SECTIONS = [
   {
     key: "home",
     title: "Page d'accueil",
-    desc: "Hero, tagline, manifeste, libellés des onglets formations/workshops.",
+    desc: "Hero, manifeste, blocs formations et workshops, section vision.",
     fields: [
-      { key: "hero_tagline_line1", label: "Tagline — ligne 1", type: "text" },
-      { key: "hero_tagline_line2", label: "Tagline — ligne 2", type: "text" },
-      { key: "hero_tagline_line3", label: "Tagline — ligne 3", type: "text" },
+      { key: "hero_eyebrow", label: "Hero — la phrase (première ligne)", type: "textarea", rows: 3 },
+      { key: "hero_statement", label: "Hero — sous-ligne", type: "textarea", rows: 2 },
+      { key: "hero_cta", label: "Hero — libellé du bouton", type: "text" },
       { key: "manifesto", label: "Manifeste (paragraphe sous le hero)", type: "textarea", rows: 8 },
-      { key: "latest_tab_formations", label: "Onglet « Nos formations »", type: "text" },
-      { key: "latest_tab_workshops", label: "Onglet « Workshops »", type: "text" },
+      { key: "formations_heading", label: "Bloc formations — titre", type: "text" },
+      { key: "formations_lede", label: "Bloc formations — chapô", type: "textarea", rows: 3 },
+      { key: "formations_lede_link", label: "Bloc formations — fin de phrase cliquable", type: "text" },
+      { key: "workshops_heading", label: "Bloc workshops — titre", type: "text" },
+      { key: "workshops_lede", label: "Bloc workshops — chapô", type: "textarea", rows: 3 },
+      { key: "workshops_lede_link", label: "Bloc workshops — fin de phrase cliquable", type: "text" },
       { key: "hero_video", label: "Vidéo hero (fond plein écran — vide = hero.mp4 par défaut)", type: "upload" },
       { key: "vision_title", label: "Section « nouveaux imaginaires » — titre", type: "textarea", rows: 2 },
       { key: "vision_text", label: "Section « nouveaux imaginaires » — texte", type: "textarea", rows: 5 },
@@ -249,7 +271,8 @@ export const SITE_CONTENT_SECTIONS = [
       { key: "pilier2_body", label: "Pilier 2 — texte", type: "textarea", rows: 4 },
       { key: "pilier3_title", label: "Pilier 3 — titre", type: "text" },
       { key: "pilier3_body", label: "Pilier 3 — texte", type: "textarea", rows: 4 },
-      { key: "about_griotheque", label: "À propos — LA GRIOTHÈQUE (texte long)", type: "textarea", rows: 8 },
+      { key: "partners_title", label: "Bloc partenaires — titre", type: "text" },
+      { key: "partners_intro", label: "Bloc partenaires — texte", type: "textarea", rows: 3 },
       { key: "about_lesgriots", label: "À propos — LES GRIOTS, la maison (texte long)", type: "textarea", rows: 8 },
     ],
   },
@@ -258,6 +281,7 @@ export const SITE_CONTENT_SECTIONS = [
     title: "Catalogue (formations)",
     desc: "Intro affichée en tête de la liste des formations.",
     fields: [
+      { key: "heading", label: "Titre de la page", type: "text" },
       { key: "intro", label: "Texte d'intro", type: "textarea", rows: 4 },
       { key: "sub", label: "Sous-titre court (· · ·)", type: "text" },
       { key: "media", label: "Vidéo/image du hero de page (vide = défaut)", type: "upload" },
@@ -268,6 +292,7 @@ export const SITE_CONTENT_SECTIONS = [
     title: "Page Workshops",
     desc: "Intro affichée en tête de la liste des workshops.",
     fields: [
+      { key: "heading", label: "Titre de la page", type: "text" },
       { key: "intro", label: "Texte d'intro", type: "textarea", rows: 4 },
       { key: "sub", label: "Sous-titre court", type: "text" },
       { key: "media", label: "Vidéo/image du hero de page (vide = défaut)", type: "upload" },
@@ -278,6 +303,7 @@ export const SITE_CONTENT_SECTIONS = [
     title: "Page Ressources",
     desc: "Intro affichée en tête de la liste des ressources téléchargeables.",
     fields: [
+      { key: "heading", label: "Titre de la page", type: "text" },
       { key: "intro", label: "Texte d'intro", type: "textarea", rows: 4 },
       { key: "sub", label: "Sous-titre court", type: "text" },
       { key: "media", label: "Vidéo/image du hero de page (vide = défaut)", type: "upload" },
@@ -288,6 +314,7 @@ export const SITE_CONTENT_SECTIONS = [
     title: "Page Agenda",
     desc: "Intro affichée en tête de l'agenda des sessions.",
     fields: [
+      { key: "heading", label: "Titre de la page", type: "text" },
       { key: "intro", label: "Texte d'intro", type: "textarea", rows: 4 },
       { key: "sub", label: "Sous-titre court", type: "text" },
       { key: "media", label: "Vidéo/image du hero de page (vide = défaut)", type: "upload" },
@@ -330,15 +357,11 @@ export const SITE_CONTENT_SECTIONS = [
       { key: "line2", label: "Ligne 2", type: "text" },
       { key: "line3", label: "Ligne 3", type: "text" },
       { key: "line4", label: "Ligne 4", type: "text" },
-      { key: "location_main", label: "Lieu principal", type: "text" },
-      { key: "location_hq", label: "Siège social", type: "text" },
       { key: "email", label: "Email", type: "text" },
       { key: "instagram_label", label: "Instagram — libellé", type: "text" },
       { key: "instagram_url", label: "Instagram — URL", type: "text" },
       { key: "linkedin_label", label: "LinkedIn — libellé", type: "text" },
       { key: "linkedin_url", label: "LinkedIn — URL", type: "text" },
-      { key: "studio_label", label: "Studio — libellé", type: "text" },
-      { key: "studio_url", label: "Studio — URL", type: "text" },
     ],
   },
   {
@@ -413,9 +436,7 @@ export const SITE_CONTENT_SECTIONS = [
     fields: [
       { key: "reserve_label", label: "Bouton « Réserver »", type: "text" },
       { key: "payer_template", label: "Bouton « Payer » (utiliser {price})", type: "text" },
-      { key: "telecharger_label", label: "Bouton « Télécharger »", type: "text" },
       { key: "demande_label", label: "Bouton « Demander une inscription »", type: "text" },
-      { key: "contact_label", label: "Bouton « Nous contacter »", type: "text" },
     ],
   },
   {
@@ -438,14 +459,16 @@ export const SITE_CONTENT_SECTIONS = [
     fields: [
       { key: "media", label: "Vidéo / image de fond", type: "upload" },
       { key: "poster", label: "Image de secours (si la vidéo ne démarre pas)", type: "upload" },
-      { key: "brand", label: "Nom de marque (haut)", type: "text" },
       { key: "title", label: "Titre", type: "text" },
       { key: "text", label: "Texte sous le titre", type: "textarea", rows: 3 },
       { key: "cta", label: "Bouton", type: "text" },
       { key: "success", label: "Message de remerciement (après envoi)", type: "text" },
       { key: "name_placeholder", label: "Placeholder du champ prénom", type: "text" },
       { key: "placeholder", label: "Placeholder du champ email", type: "text" },
+      { key: "tel_placeholder", label: "Placeholder du champ téléphone", type: "text" },
       { key: "legal", label: "Mention légale sous le formulaire (consentement newsletter)", type: "textarea", rows: 2 },
+      { key: "invalid", label: "Erreur — adresse invalide", type: "text" },
+      { key: "error", label: "Erreur — envoi impossible", type: "text" },
     ],
   },
 ];
