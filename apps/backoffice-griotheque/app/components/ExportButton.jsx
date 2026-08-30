@@ -50,18 +50,20 @@ export default function ExportButton({ variant = "nav" }) {
     );
   }
 
-  // Variante "btn" (gros bouton, pour la home)
+  // Variante "btn" — le bouton du pied de la barre laterale. Il est jaune
+  // parce que c'est le seul geste de la page qui touche le site public : tout
+  // le reste n'ecrit que dans griotheque.json.
   return (
     <button
-      className="btn"
+      className={"btn btn--accent btn--large" + (state === "error" ? " btn--danger" : "")}
       onClick={go}
       disabled={state === "loading"}
-      title="Régénère apps/lagriotheque/data.jsx"
+      title="Régénère le fichier que lit lagriotheque.com"
     >
-      {state === "loading" ? "..." :
+      {state === "loading" ? "Export…" :
        state === "ok" ? msg :
        state === "error" ? msg :
-       "↳ Exporter vers le site"}
+       "Exporter vers le site"}
     </button>
   );
 }

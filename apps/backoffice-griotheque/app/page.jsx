@@ -3,8 +3,6 @@
 // avec le nombre d'entrées et un lien vers chaque liste.
 "use client";
 import { useEffect, useState } from "react";
-import Type from "./components/Type";
-import ExportButton from "./components/ExportButton";
 
 const SECTIONS = [
   { key: "formations", title: "FORMATIONS", desc: "Formations longues, 1-3 jours" },
@@ -50,14 +48,18 @@ export default function HomePage() {
 
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>
-          <Type text="griothèque — back office" speed={28} cursor="always" />
-        </h1>
-        <ExportButton variant="btn" />
+      <div className="bo-tete">
+        <div className="bo-tete__gauche">
+          <div className="bo-fil">La Griothèque</div>
+          <h1>Back office</h1>
+        </div>
+        <div className="actions">
+          <a className="btn btn--ghost" href="https://lagriotheque.com"
+             target="_blank" rel="noopener noreferrer">Voir le site ↗</a>
+        </div>
       </div>
 
-      <p className="note" style={{ marginTop: 18 }}>
+      <p className="note">
         Le back office de La Griothèque permet d'éditer les contenus du site
         <code>lagriotheque.com</code> : formations, workshops, intervenants,
         sessions, ressources, et les textes mutualisés. Les modifs sont
@@ -65,12 +67,12 @@ export default function HomePage() {
         régénère <code>apps/lagriotheque/data.jsx</code>.
       </p>
 
-      <div className="cards-grid">
+      <div className="bo-cartes">
         {SECTIONS.map((s) => (
-          <a key={s.key} href={`/${s.key}`} className="card">
-            <div className="card__title">{s.title}</div>
-            <div className="card__desc">{s.desc}</div>
-            <div className="card__count">
+          <a key={s.key} href={`/${s.key}`} className="bo-carte">
+            <div className="bo-carte__titre">{s.title}</div>
+            <div className="bo-carte__desc">{s.desc}</div>
+            <div className="bo-carte__compte">
               {s.key === "defaults"
                 ? "4 textes"
                 : s.key === "pages"
