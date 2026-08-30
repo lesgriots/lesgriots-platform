@@ -409,7 +409,11 @@ function Splash({ onEnter }) {
 // Retire la video du hero et celle de la section recits. Les deux blocs
 // gardent leur place et leur fond noir, seul le media disparait. Repasser
 // cette constante a false remet tout en etat, rien d'autre n'a bouge.
-const SANS_VIDEO_ACCUEIL = true;
+// 30/08/2026 : REOUVERT. Les deux videos de l'accueil sont chargees depuis le
+// back office (home.hero_video et home.vision_video) ; l'essai sans video a
+// fait son temps. Le repli de quatre secondes plus bas garantit que le hero
+// se libere meme si le fichier ne se charge pas.
+const SANS_VIDEO_ACCUEIL = false;
 
 function Manifesto() {
   // Sans video, il n'y a rien a attendre : on passe direct a l'etat pret,
