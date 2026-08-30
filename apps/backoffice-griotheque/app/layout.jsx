@@ -26,6 +26,19 @@ const basePathShim = `(function(){
     }
     return of.call(this, input, init);
   };
+  // XHR AUSSI, PAS SEULEMENT FETCH. Les champs de media uploadent par
+  // XMLHttpRequest, seule facon d'afficher une barre de progression. Ces
+  // appels echappaient au shim : ils partaient sur /api/upload, que le hub
+  // envoie au BO Studio, et le fichier atterrissait dans le dossier du site
+  // studio pendant que la Griotheque enregistrait un chemin introuvable.
+  var oo = window.XMLHttpRequest.prototype.open;
+  window.XMLHttpRequest.prototype.open = function (method, url) {
+    if (typeof url === "string" && url.charAt(0) === "/" && url.indexOf(BP + "/") !== 0) {
+      url = BP + url;
+      arguments[1] = url;
+    }
+    return oo.apply(this, arguments);
+  };
   document.addEventListener("click", function (e) {
     var a = e.target && e.target.closest ? e.target.closest("a[href^='/']") : null;
     if (!a) return;
