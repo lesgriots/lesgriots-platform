@@ -8,7 +8,7 @@ const { useState, useEffect, useRef, useLayoutEffect } = React;
 // dur dans les composants. Permet d'éditer la totalité du contenu depuis le
 // back office sans avoir à toucher au code.
 //
-//   text("home.manifesto", "Texte par défaut...")  → string
+//   text("home.manifesto", "LA GRIOTHÈQUE est une école dédiée à la transmission des savoirs, des méthodes et des outils qui permettent aux créatifs de structurer leur vision, développer leur pratique et vivre de leur créativité.\n\nDans un paysage où de nombreux talents avancent sans cadre, nous accompagnons une nouvelle génération de créateurs dans la construction de leur récit, le développement de leurs compétences et la création d’une activité durable autour de leur talent.")  → string
 //
 // Si la clé existe en BO ET est non-vide, on la prend. Sinon on retombe sur
 // le fallback. Donc on peut migrer les blocs un par un sans rien casser :
@@ -976,13 +976,13 @@ function ctaLabel(item) {
   // payer_template peut contenir {price} qui est remplacé par le prix de
   // l'item courant. La flèche → est ajoutée systématiquement.
   if (isFree(item)) {
-    return text("cta.demande_label", "Réserver gratuitement") + " →";
+    return text("cta.demande_label", "Demander une inscription") + " →";
   }
   if (item.stripePaymentLink) {
     const tmpl = text("cta.payer_template", "Payer {price}");
     return tmpl.replace("{price}", item.price || "") + " →";
   }
-  return text("cta.reserve_label", "Réserver une place") + " →";
+  return text("cta.reserve_label", "Réserver ma place") + " →";
 }
 function ctaIsExternal(item) {
   if (isFree(item) || !item.stripePaymentLink) return false;
@@ -3331,7 +3331,7 @@ function Catalogue() {
         <PageIntro
           text={text(
             "catalogue.intro",
-            "Des formations courtes et pratiques en communication, image de marque et réseaux sociaux. Animées par des professionnels en activité, en petits groupes. Formats certifiants et finançables selon les cas (CPF, OPCO, FAF)."
+            "Des formations conçues pour les créatifs qui veulent transformer leurs idées en projets solides.\n\nÀ travers la communication, l’image de marque et les réseaux sociaux, nous transmettons les outils et les méthodes nécessaires pour développer une pratique créative plus forte et plus visible.\n\nAnimées par des professionnels en activité, nos formations privilégient l’apprentissage par la pratique, en petits groupes, avec des formats certifiants et finançables selon les dispositifs disponibles."
           )}
         />
       </PageHero>
@@ -3445,7 +3445,7 @@ function Workshops() {
         <PageIntro
           text={text(
             "workshops_page.intro",
-            "Des formats courts et intensifs pour les créatifs. Immersion totale, groupes restreints, accompagnement sur ton projet réel."
+            "Des formats courts et immersifs pour approfondir un sujet précis, développer de nouvelles compétences et passer à l’action."
           )}
           sub={text("workshops_page.sub", "")}
         />
@@ -4194,7 +4194,7 @@ function Agenda() {
     <section className="lg__catalogue" id="agenda">
       <PageHero src={text("agenda.media", "")} title={text("agenda.heading", "Agenda")}>
         <PageIntro
-          text={text("agenda.intro", "Les prochaines dates : formations, workshops et événements. Places disponibles et modalités (présentiel ou à distance).")}
+          text={text("agenda.intro", "Retrouvez les prochaines formations et workshops : dates, formats, disponibilités et modalités de participation.")}
         />
       </PageHero>
 
@@ -4976,7 +4976,7 @@ function Ressources() {
         <PageIntro
           text={text(
             "ressources.intro",
-            "Des ressources gratuites à télécharger : worksheets, templates et guides pour structurer ton récit et tes contenus."
+            "Des outils, des conseils et des inspirations pour développer votre créativité, structurer vos projets et mieux comprendre les enjeux de la création, de la communication et de la stratégie de marque."
           )}
         />
       </PageHero>
@@ -5880,7 +5880,7 @@ function Contact() {
       </p>
 
       {/* Notre écosystème d'abord, Contact ensuite (ordre demandé par Moos). */}
-      {text("approche.about_lesgriots", "") && (
+      {text("approche.about_lesgriots", "LES GRIOTS est une plateforme d'ingénierie narrative et une infrastructure culturelle afro-diasporique. La maison raconte ses propres histoires, structure et amplifie celles des artistes et des marques, et transmet à une nouvelle génération de créatifs de quoi bâtir de nouveaux imaginaires.") && (
         <div className="lg__approche__about">
           {text("approche.about_lesgriots", "") && (
             <div className="lg__approche__about__col">
@@ -6707,7 +6707,7 @@ function App() {
             <div className="lg__footer__marquee__track">
               {Array.from({ length: 4 }).map((_, i) => (
                 <span key={i}>
-                  {text("footer.marquee", "TRANSMETTRE ET PERMETTRE À UNE NOUVELLE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DES IMAGINAIRES")}
+                  {text("footer.marquee", "TRANSMETTRE LES OUTILS ET PERMETTRE À UNE NOUVELLE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DES IMAGINAIRES")}
                   &nbsp;·&nbsp;
                 </span>
               ))}

@@ -23,7 +23,7 @@ export const SITE_CONTENT_DEFAULTS = {
     hero_statement: "Structure ton récit, cible la bonne audience, maîtrise les bons outils.",
     hero_cta: "Voir les formations",
     manifesto:
-      "LA GRIOTHÈQUE est une école dédiée à la transmission de méthodes éprouvées sur le terrain, au croisement de la direction artistique, du récit de marque et de la production. Dans un paysage culturel saturé, où trop de talents avancent sans cadre et trop de récits puissants se dissipent faute de structure, nous offrons aux artistes, aux créatifs et aux entrepreneurs de la prochaine génération les outils pour bâtir leur récit et créer de nouveaux imaginaires.",
+      "LA GRIOTHÈQUE est une école dédiée à la transmission des savoirs, des méthodes et des outils qui permettent aux créatifs de structurer leur vision, développer leur pratique et vivre de leur créativité.\n\nDans un paysage où de nombreux talents avancent sans cadre, nous accompagnons une nouvelle génération de créateurs dans la construction de leur récit, le développement de leurs compétences et la création d’une activité durable autour de leur talent.",
     // Les deux blocs « derniers contenus » de l'accueil.
     formations_heading: "Nos formations",
     formations_lede: "Des formations courtes et pratiques, pour tous les niveaux et toutes les disciplines. ",
@@ -66,7 +66,7 @@ export const SITE_CONTENT_DEFAULTS = {
     // (la valeur du back office prenait le dessus), mais il serait remonte a
     // la premiere fois qu'on aurait vide le champ.
     intro:
-      "Une formation certifiante, éligible CPF, pensée pour les indépendants et les TPE qui veulent tenir leur communication eux-mêmes. Douze places par session, sur tes propres projets.",
+      "Des formations conçues pour les créatifs qui veulent transformer leurs idées en projets solides.\n\nÀ travers la communication, l’image de marque et les réseaux sociaux, nous transmettons les outils et les méthodes nécessaires pour développer une pratique créative plus forte et plus visible.\n\nAnimées par des professionnels en activité, nos formations privilégient l’apprentissage par la pratique, en petits groupes, avec des formats certifiants et finançables selon les dispositifs disponibles.",
     sub: "Certifiante · éligible CPF · 12 places",
     media: "", // vidéo/image du hero de page (vide = img/hero.mp4)
   },
@@ -74,15 +74,15 @@ export const SITE_CONTENT_DEFAULTS = {
   workshops_page: {
     heading: "Workshops",
     intro:
-      "Des formats courts, intenses, pour passer à l'action sur un sujet précis : récit de marque, structure éditoriale, négociation, propriété intellectuelle. Une journée pour repartir avec un livrable.",
-    sub: "Formats courts · livrable concret · sans pré-requis",
+      "Des formats courts et immersifs pour approfondir un sujet précis, développer de nouvelles compétences et passer à l’action.",
+    sub: "",
     media: "",
   },
 
   ressources: {
     heading: "Ressources",
     intro:
-      "Outils, guides et frameworks issus de la méthode LA GRIOTHÈQUE. Téléchargeables après inscription — on garde le contact pour t'envoyer les mises à jour.",
+      "Des outils, des conseils et des inspirations pour développer votre créativité, structurer vos projets et mieux comprendre les enjeux de la création, de la communication et de la stratégie de marque.",
     sub: "Méthodes · templates · études de cas",
     media: "",
   },
@@ -90,7 +90,7 @@ export const SITE_CONTENT_DEFAULTS = {
   agenda: {
     heading: "Agenda",
     intro:
-      "Les prochaines sessions ouvertes — formations longues et workshops. Inscription en ligne, financement CPF/OPCO possible sur la majorité des formats.",
+      "Retrouvez les prochaines formations et workshops : dates, formats, disponibilités et modalités de participation.",
     sub: "Sessions ouvertes · inscription en ligne",
     media: "",
   },
@@ -99,12 +99,12 @@ export const SITE_CONTENT_DEFAULTS = {
     heading: "Événements",
     intro:
       "La scène de La Griothèque, en vrai. Masterclasses, talks, soirées et projections pour se rencontrer, apprendre et bâtir ensemble.",
-    sub: "Masterclasses · talks · soirées · projections",
+    sub: "",
     media: "",
   },
 
   contact: {
-    title: "Contact",
+    title: "À propos",
     line1: "LA GRIOTHÈQUE",
     line2: "Organisme de formation",
     line3: "de la SASU LES GRIOTS",
@@ -112,7 +112,7 @@ export const SITE_CONTENT_DEFAULTS = {
     email: "formations@lesgriots.com",
     instagram_url: "https://instagram.com/lagriotheque",
     instagram_label: "instagram",
-    linkedin_url: "https://linkedin.com",
+    linkedin_url: "https://www.linkedin.com/company/lesgriots",
     linkedin_label: "linkedin",
     // Le lien vers le studio est pilote par le pied de page
     // (footer.col2_studio_url / col2_studio_label), pas ici.
@@ -135,7 +135,7 @@ export const SITE_CONTENT_DEFAULTS = {
 
   footer: {
     marquee:
-      "TRANSMETTRE — ET PERMETTRE À UNE NOUVELLE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DES IMAGINAIRES",
+      "TRANSMETTRE LES OUTILS ET PERMETTRE À UNE NOUVELLE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DES IMAGINAIRES",
     qualiopi_caption:
       "La certification qualité a été délivrée au titre de la catégorie d'action : Actions de formation",
     col2_studio_label: "les griots studio",
