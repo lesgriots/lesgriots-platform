@@ -752,12 +752,13 @@ body.is-home .lg__manifesto { min-height: calc(100vh - 121px); }
    en em : la mesure (nombre de signes par ligne) ne bouge plus quand la
    taille change, donc la lecture reste fluide du mobile au grand ecran. */
 .lg__manifeste--hero .lg__manifeste__prose p {
-  /* Meme echelle typographique que le manifeste d'origine. */
-  font-size: clamp(20px, 3vw, 48px);
+  /* Calee sur la reference TFP : ~50px de corps, interligne 1,15, et une
+     mesure d'environ 17,5 em (donc la meme longueur de ligne a l'oeil). */
+  font-size: clamp(24px, 3.6vw, 50px);
   font-weight: 500;
   line-height: 1.15;
   letter-spacing: -0.02em;
-  max-width: 16em;
+  max-width: 17.5em;
   width: 100%;
   /* Phrase calee a gauche : c'est la marge de la section qui la place, pas
      un centrage. Elle reste centree verticalement dans l'ecran. */
