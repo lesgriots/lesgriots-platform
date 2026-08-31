@@ -573,17 +573,16 @@ function Manifesto() {
         <p className="lg__hero-yard__wordmark" aria-hidden="true">LA&nbsp;GRIOTHÈQUE</p>
         {/* Lien "Prochaines sessions" désactivé sur le hero d'arrivée —
             redondant avec la nav et l'agenda accessible depuis le menu. */}
+        {/* UNE SEULE PHRASE. Le hero portait un enonce et une sous-ligne
+            empiles ; il n'en porte plus qu'un. Le texte reste pilote depuis
+            le back office (Contenus du site → Page d'accueil → « Hero — la
+            phrase »), la sous-ligne « home.hero_statement » a disparu du
+            schema en meme temps que du rendu. */}
         <div className="lg__hero-yard__tagline lg__hero-yard__tagline--quote">
           <p className="lg__hero-yard__eyebrow">
             {text(
               "home.hero_eyebrow",
               "L’école qui transmet les outils pour que les créatifs bâtissent leur récit et vivent de leur passion."
-            )}
-          </p>
-          <p>
-            {text(
-              "home.hero_statement",
-              "Structure ton récit, cible la bonne audience, maîtrise les bons outils."
             )}
           </p>
           <a className="lg__hero-yard__cta" href="/formations">

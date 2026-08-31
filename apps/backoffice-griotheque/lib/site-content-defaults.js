@@ -20,7 +20,6 @@ export const SITE_CONTENT_DEFAULTS = {
     // venait du repli ecrit en dur dans app.jsx, donc elle n'etait pas
     // modifiable sans redeployer.
     hero_eyebrow: "L\u2019école qui transmet les outils pour que les créatifs bâtissent leur récit et vivent de leur passion.",
-    hero_statement: "Structure ton récit, cible la bonne audience, maîtrise les bons outils.",
     hero_cta: "Voir les formations",
     manifesto:
       "LA GRIOTHÈQUE est une école dédiée à la transmission des savoirs, des méthodes et des outils qui permettent aux créatifs de structurer leur vision, développer leur pratique et vivre de leur créativité.\n\nDans un paysage où de nombreux talents avancent sans cadre, nous accompagnons une nouvelle génération de créateurs dans la construction de leur récit, le développement de leurs compétences et la création d’une activité durable autour de leur talent.",
@@ -243,7 +242,6 @@ export const SITE_CONTENT_SECTIONS = [
     desc: "Hero, manifeste, blocs formations et workshops, section vision.",
     fields: [
       { key: "hero_eyebrow", label: "Hero — la phrase (première ligne)", type: "textarea", rows: 3 },
-      { key: "hero_statement", label: "Hero — sous-ligne", type: "textarea", rows: 2 },
       { key: "hero_cta", label: "Hero — libellé du bouton", type: "text" },
       { key: "manifesto", label: "Manifeste (paragraphe sous le hero)", type: "textarea", rows: 8 },
       { key: "formations_heading", label: "Bloc formations — titre", type: "text" },
