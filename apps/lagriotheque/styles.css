@@ -612,7 +612,7 @@ button {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 /* Sur la home la section se fige sous le menu : on retire la hauteur du
    menu, sinon le bas de l'ecran passe sous la ligne de flottaison et la
@@ -758,9 +758,11 @@ body.is-home .lg__manifesto { min-height: calc(100vh - 121px); }
   letter-spacing: -0.02em;
   max-width: 16em;
   width: 100%;
-  margin-left: auto;
+  /* Phrase calee a gauche : c'est la marge de la section qui la place, pas
+     un centrage. Elle reste centree verticalement dans l'ecran. */
+  margin-left: 0;
   margin-right: auto;
-  text-align: center;
+  text-align: left;
   hyphens: none;
   -webkit-hyphens: none;
 }
