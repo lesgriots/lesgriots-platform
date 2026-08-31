@@ -8,7 +8,7 @@ const { useState, useEffect, useRef, useLayoutEffect } = React;
 // dur dans les composants. Permet d'éditer la totalité du contenu depuis le
 // back office sans avoir à toucher au code.
 //
-//   text("home.manifesto", "LA GRIOTHÈQUE est une école dédiée à la transmission des savoirs, des méthodes et des outils qui permettent aux créatifs de structurer leur vision, développer leur pratique et vivre de leur créativité.\n\nDans un paysage où de nombreux talents avancent sans cadre, nous accompagnons une nouvelle génération de créateurs dans la construction de leur récit, le développement de leurs compétences et la création d’une activité durable autour de leur talent.")  → string
+//   text("home.manifesto", "Développe ta pratique, clarifie le récit que tu portes, structure tes projets, présente ton travail, trouve les bons partenaires, défends ta valeur et construis une activité qui te permet de durer.")  → string
 //
 // Si la clé existe en BO ET est non-vide, on la prend. Sinon on retombe sur
 // le fallback. Donc on peut migrer les blocs un par un sans rien casser :
@@ -605,7 +605,7 @@ function Manifesto() {
           <div className="lg__manifeste__prose">
             <p>{renderManifestoBrand(text(
               "home.manifesto",
-              "Dans un monde où trop de talents avancent sans cadre et trop de récits puissants se dissipent faute de structure, LA GRIOTHÈQUE offre aux créatifs de la prochaine génération les outils pour bâtir leur récit, créer de nouveaux imaginaires et vivre de leurs passions."
+              "Développe ta pratique, clarifie le récit que tu portes, structure tes projets, présente ton travail, trouve les bons partenaires, défends ta valeur et construis une activité qui te permet de durer."
             ))}</p>
           </div>
         </div>

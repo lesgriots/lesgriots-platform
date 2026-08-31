@@ -20,8 +20,7 @@ export const SITE_CONTENT_DEFAULTS = {
     // venait du repli ecrit en dur dans app.jsx, donc elle n'etait pas
     // modifiable sans redeployer.
     hero_eyebrow: "L\u2019école qui transmet les outils pour que les créatifs bâtissent leur récit et vivent de leur passion.",
-    manifesto:
-      "LA GRIOTHÈQUE est une école dédiée à la transmission des savoirs, des méthodes et des outils qui permettent aux créatifs de structurer leur vision, développer leur pratique et vivre de leur créativité.\n\nDans un paysage où de nombreux talents avancent sans cadre, nous accompagnons une nouvelle génération de créateurs dans la construction de leur récit, le développement de leurs compétences et la création d’une activité durable autour de leur talent.",
+    manifesto: "Développe ta pratique, clarifie le récit que tu portes, structure tes projets, présente ton travail, trouve les bons partenaires, défends ta valeur et construis une activité qui te permet de durer.",
     // Les deux blocs « derniers contenus » de l'accueil.
     formations_heading: "Nos formations",
     formations_lede: "Des formations courtes et pratiques, pour tous les niveaux et toutes les disciplines. ",
