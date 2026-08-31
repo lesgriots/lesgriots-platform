@@ -2682,11 +2682,17 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
   background: var(--ink);
   color: var(--accent);
 }
+/* La phrase du hero est centree dans le cadre, pas posee en bas a gauche :
+   le bloc occupe tout le hero et centre son contenu sur les deux axes. */
 .lg__hero-yard__tagline {
   position: absolute;
-  bottom: 16vh;
-  left: 24px;
-  right: 24px;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 24px;
   z-index: 2;
   color: var(--paper);
   pointer-events: none;
@@ -2716,13 +2722,13 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 /* Eyebrow descriptif au-dessus de la phrase forte (situe l'école).
    Sélecteur renforcé pour battre .lg__hero-yard__tagline--quote p. */
 .lg__hero-yard__tagline .lg__hero-yard__eyebrow {
-  margin: 0 0 10px;
-  max-width: 1000px;
+  margin: 0;
+  max-width: 760px;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: clamp(30px, 4.2vw, 62px);
-  line-height: 1.1;
-  letter-spacing: -0.025em;
+  font-size: clamp(20px, 2.3vw, 34px);
+  line-height: 1.22;
+  letter-spacing: -0.02em;
   color: #ffffff;
   opacity: 1;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
@@ -2747,6 +2753,7 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 .lg__hero-yard__cta {
   pointer-events: auto;
   display: inline-block;
+  align-self: center;
   margin-top: 24px;
   padding: 14px 28px;
   background: var(--paper);
@@ -2770,8 +2777,9 @@ body.is-scrolled .lg__hero-yard__scrollhint { opacity: 0; }
 @media (max-width: 700px) {
   .lg__hero-yard { aspect-ratio: 4 / 5; max-height: none; }
   .lg__hero-yard__play { top: 16px; left: 24px; font-size: 10px; padding: 6px 10px; }
-  .lg__hero-yard__tagline { bottom: 33.333vh; left: 24px; right: 24px; }
+  .lg__hero-yard__tagline { padding: 0 22px; }
   .lg__hero-yard__tagline p { font-size: clamp(22px, 7vw, 36px); }
+  .lg__hero-yard__tagline .lg__hero-yard__eyebrow { font-size: clamp(19px, 5vw, 26px); max-width: none; }
 }
 
 /* ===========================================================
