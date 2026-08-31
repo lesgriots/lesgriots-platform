@@ -601,17 +601,26 @@ button {
 /* ----- MANIFESTO / PRESENTATION (page d'accueil) -------------- */
 
 .lg__manifesto {
-  /* Full-bleed comme catalogue/trainers */
+  /* Full-bleed comme catalogue/trainers, et pleine hauteur : la phrase
+     occupe seule un ecran entier, centree sur les deux axes comme le hero.
+     Les gouttieres laterales sont posees plus bas (regle commune a toutes
+     les sections). */
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  /* Une seule phrase dans le bloc blanc : on lui donne de l'air en haut et
-     en bas plutot que de la coller au hero. Les gouttieres laterales sont
-     posees plus bas (regle commune a toutes les sections). */
-  padding: 96px 16px 112px;
+  padding: 80px 16px;
   position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+/* Sur la home la section se fige sous le menu : on retire la hauteur du
+   menu, sinon le bas de l'ecran passe sous la ligne de flottaison et la
+   phrase n'est plus centree dans ce qu'on voit. */
+body.is-home .lg__manifesto { min-height: calc(100vh - 121px); }
 @media (max-width: 600px) {
-  .lg__manifesto { padding-top: 56px; padding-bottom: 64px; }
+  .lg__manifesto { padding: 56px 16px; }
+  body.is-home .lg__manifesto { min-height: calc(100vh - 85px); }
 }
 
 /* ----- MÉTHODE EN 3 ÉTAPES (home) ----- */
@@ -749,6 +758,9 @@ button {
   letter-spacing: -0.02em;
   max-width: 16em;
   width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
   hyphens: none;
   -webkit-hyphens: none;
 }
