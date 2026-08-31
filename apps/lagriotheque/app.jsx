@@ -585,9 +585,10 @@ function Manifesto() {
               "L’école qui transmet les outils pour que les créatifs bâtissent leur récit et vivent de leur passion."
             )}
           </p>
-          <a className="lg__hero-yard__cta" href="/formations">
-            {text("home.hero_cta", "Voir les formations")}
-          </a>
+          {/* Bouton « Voir les formations » retire du hero : la phrase reste
+              seule dans le cadre, la navigation porte deja l'acces aux
+              formations. Le champ « home.hero_cta » a disparu du back office
+              en meme temps, pour que les deux disent la meme chose. */}
         </div>
         <div className="lg__hero-yard__scrollhint" aria-hidden="true">
           ↓ scroll
