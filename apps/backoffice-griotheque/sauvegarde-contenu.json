@@ -1,6 +1,6 @@
 {
   "_lisezmoi": "Instantane du contenu du back office Griotheque, pris sur la production. Sert de sauvegarde versionnee : l'historique git donne l'etat du contenu a chaque date. La cle « leads » est volontairement absente : elle contient des e-mails de personnes, qui n'ont rien a faire dans un depot. Le fichier de travail du back office reste griotheque.json, non versionne.",
-  "_pris_le": "2026-08-31",
+  "_pris_le": "2026-09-10",
   "formations": [
     {
       "id": "communication-reseaux-sociaux-tpe",
@@ -195,17 +195,7 @@
       "created_at": "2026-05-25T10:37:44.878Z"
     }
   ],
-  "sessions": [
-    {
-      "id": "ses-crs-tpe-2026-09",
-      "date": "2026-09-14",
-      "formation_id": "communication-reseaux-sociaux-tpe",
-      "workshop_id": "",
-      "places": "8",
-      "status": "OUVERTE",
-      "format": "PRÉSENTIEL · PARIS / DISTANCIEL ZOOM"
-    }
-  ],
+  "sessions": [],
   "resources": [
     {
       "id": "arborescences-de-projet",
