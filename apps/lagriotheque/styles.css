@@ -631,6 +631,20 @@ body.is-home .lg__manifesto { min-height: calc(100vh - 121px); }
   body.is-home .lg__manifesto { min-height: calc(100vh - 85px); }
 }
 
+/* ----- MANIFESTO : revelation mot a mot (meme mecanique que la promesse des
+   fiches formation). La section reste celle du site — deja epinglee sous le
+   menu, recouverte ensuite par la section suivante : les mots s'allument avec
+   le scroll pendant qu'elle est figee. --------------------------------------- */
+.lg__manifesto--reveal .lg__manifeste__prose .w {
+  opacity: 0.2;
+  transition: opacity 0.25s ease-out;
+  will-change: opacity;
+}
+.lg__manifesto--reveal .lg__manifeste__prose .w.on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .lg__manifesto--reveal .lg__manifeste__prose .w { opacity: 1; }
+}
+
 /* ----- MÉTHODE EN 3 ÉTAPES (home) ----- */
 .lg__method {
   position: relative;

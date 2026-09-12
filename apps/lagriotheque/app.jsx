@@ -66,6 +66,75 @@ function renderBrandInline(part, ci) {
   );
 }
 
+// Revelation mot a mot du manifeste de la home, meme mecanique que la
+// promesse des fiches formation (formation-tfp.jsx) : la section fait deux
+// ecrans, le texte est epingle sur le premier et les mots s'allument avec la
+// progression du scroll. Le mot-marque LA GRIOTHEQUE reste un logo inline.
+function ManifestoReveal({ text: t }) {
+  const secRef = React.useRef(null);
+  const proseRef = React.useRef(null);
+  React.useEffect(() => {
+    const sec = secRef.current, prose = proseRef.current;
+    if (!sec || !prose) return;
+    const words = prose.querySelectorAll(".w");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const allOn = () => { for (let i = 0; i < words.length; i++) words[i].classList.add("on"); };
+    const reveal = () => {
+      if (reduce) return allOn();
+      // La section est DEJA epinglee sous le menu par le CSS de la home, et la
+      // section suivante remonte par-dessus. La progression se mesure donc
+      // entre le moment ou le manifeste se fige et celui ou la section
+      // suivante entre par le bas : les mots sont tous allumes avant d'etre
+      // recouverts.
+      const menu = window.innerWidth <= 600 ? 85 : 121;
+      const next = sec.nextElementSibling;
+      // Fenetre de lecture : du moment ou le manifeste entre par le bas de
+      // l'ecran jusqu'a celui ou la section suivante finit de le recouvrir
+      // (elle se cale sous le menu). Les mots sont tous allumes avant.
+      const start = sec.offsetTop - window.innerHeight;
+      const end = next ? next.offsetTop - menu : sec.offsetTop + window.innerHeight;
+      const span = end - start;
+      if (span <= 0) return allOn();
+      const p = Math.min(1, Math.max(0, (window.pageYOffset - start) / span));
+      const k = p < 0.3 ? 0 : Math.round(((p - 0.3) / 0.5) * words.length);
+      for (let i = 0; i < words.length; i++) words[i].classList.toggle("on", i < k);
+    };
+    reveal();
+    window.addEventListener("scroll", reveal, { passive: true });
+    window.addEventListener("resize", reveal);
+    return () => { window.removeEventListener("scroll", reveal); window.removeEventListener("resize", reveal); };
+  }, [t]);
+  // Une phrase par ligne (meme decoupe que renderManifestoBrand), puis un
+  // span .w par mot. Le mot-marque devient un seul token, logo compris.
+  const sentences = String(t || "").split(/(?<=[.!?])\s+/).filter(Boolean);
+  let key = 0;
+  return (
+    <section className="lg__manifesto lg__manifesto--reveal" ref={secRef}>
+      <div className="lg__manifeste lg__manifeste--hero">
+        <div className="lg__manifeste__prose" ref={proseRef}>
+          <p>
+            {sentences.map((sentence, si) => {
+              const parts = String(sentence).split(/(la\s+griothèque)/i);
+              const nodes = [];
+              parts.forEach((part) => {
+                if (!part) return;
+                if (/^la\s+griothèque$/i.test(part)) {
+                  nodes.push(<span className="w" key={key++}><BrandLogo /></span>, " ");
+                  return;
+                }
+                part.trim().split(/\s+/).filter(Boolean).forEach((w) => {
+                  nodes.push(<span className="w" key={key++}>{w}</span>, " ");
+                });
+              });
+              return <React.Fragment key={"s" + si}>{si > 0 && <br />}{nodes}</React.Fragment>;
+            })}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function renderManifestoBrand(str) {
   if (!str) return null;
   // Une phrase par ligne : retour à la ligne au début de chaque phrase.
@@ -600,16 +669,10 @@ function Manifesto() {
           (section "home" → manifesto). On remplace ici le 1er "LA GRIOTHÈQUE"
           par un span .lg-brand pour conserver le style typographique
           historique, indépendamment du texte saisi en BO. */}
-      <section className="lg__manifesto">
-        <div className="lg__manifeste lg__manifeste--hero">
-          <div className="lg__manifeste__prose">
-            <p>{renderManifestoBrand(text(
-              "home.manifesto",
-              "Développe ta pratique, clarifie le récit que tu portes, structure tes projets, présente ton travail, trouve les bons partenaires, défends ta valeur et construis une activité qui te permet de durer."
-            ))}</p>
-          </div>
-        </div>
-      </section>
+      <ManifestoReveal text={text(
+        "home.manifesto",
+        "Développe ta pratique, clarifie le récit que tu portes, structure tes projets, présente ton travail, trouve les bons partenaires, défends ta valeur et construis une activité qui te permet de durer."
+      )} />
 
       {/* LATEST — liste des formations à l'affiche, style YARD. L'onglet
           Workshops n'apparaît que s'il y a au moins un workshop dispo.
