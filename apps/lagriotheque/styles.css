@@ -635,6 +635,14 @@ body.is-home .lg__manifesto { min-height: calc(100vh - 121px); }
    fiches formation). La section reste celle du site — deja epinglee sous le
    menu, recouverte ensuite par la section suivante : les mots s'allument avec
    le scroll pendant qu'elle est figee. --------------------------------------- */
+/* Phrase centree, comme la phrase d'accueil juste au-dessus : les deux
+   ecrans se repondent au lieu de se decaler. */
+.lg__manifesto--reveal { justify-content: center; }
+.lg__manifesto--reveal .lg__manifeste--hero .lg__manifeste__prose p {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
 .lg__manifesto--reveal .lg__manifeste__prose .w {
   opacity: 0.2;
   transition: opacity 0.25s ease-out;

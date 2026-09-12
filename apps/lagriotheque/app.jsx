@@ -96,7 +96,9 @@ function ManifestoReveal({ text: t }) {
       const span = end - start;
       if (span <= 0) return allOn();
       const p = Math.min(1, Math.max(0, (window.pageYOffset - start) / span));
-      const k = p < 0.3 ? 0 : Math.round(((p - 0.3) / 0.5) * words.length);
+      // La section suivante commence a recouvrir vers la moitie de cette
+      // fenetre : la phrase doit etre entierement allumee avant.
+      const k = p < 0.12 ? 0 : Math.round(((p - 0.12) / 0.34) * words.length);
       for (let i = 0; i < words.length; i++) words[i].classList.toggle("on", i < k);
     };
     reveal();
