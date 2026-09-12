@@ -5144,3 +5144,37 @@ body.manifest-only #about-panel #ab-mission ~ section#ab-vitrine {
     cursor: pointer;
   }
 }
+
+
+/* 73. LA VIDEO DU MANIFESTE BOUGEAIT AU DEFILEMENT (telephone, 12/09/2026).
+       Elle est « sticky » dans le panneau qui defile (#about-panel). Sur
+       Safari iOS, un element sticky dans un conteneur a defilement interne
+       n'est pas recale a chaque image : il traine d'un ou deux pixels derriere
+       le doigt, et il suit franchement le rebond elastique en haut de page.
+       Decision de Moos : elle ne doit pas bouger du tout.
+       Ici : la video et son voile passent en position fixe, calee sur la
+       fenetre, a hauteur stable (lvh, barre d'outils repliee, jamais
+       redimensionnee) ; .about-vid reste dans le flux comme simple reserve de
+       100svh pour que le texte arrive au meme endroit qu'avant. Le panneau
+       portait will-change: transform, qui fait d'un fixe un absolu : on le
+       retire ici, ou le panneau n'a de toute facon plus de transform
+       (correction 63). */
+@media (max-width: 720px) {
+  body.manifest-only #about-panel { will-change: auto; }
+  body.manifest-only #about-panel .about-vid {
+    position: relative;
+    height: 100svh;
+    overflow: visible;
+    background: transparent;
+  }
+  body.manifest-only #about-panel .about-vid video,
+  body.manifest-only #about-panel .about-vid::after {
+    position: fixed;
+    inset: auto;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100lvh;
+  }
+}
