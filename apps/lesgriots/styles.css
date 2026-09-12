@@ -5118,3 +5118,29 @@ body.lg-vitrine #about-panel #ab-mission .about-copy {
 body.manifest-only #about-panel #ab-mission ~ section#ab-vitrine {
   display: none !important;
 }
+
+
+/* 72. LA BASCULE DE LANGUE NE REPONDAIT PAS AU DOIGT (telephone, 12/09/2026).
+       Le bouton FR / EN du manifeste (correction 56, puis 59) est en 12 px,
+       sans marge interieure : sa zone tactile fait 43 x 12 px. Un pouce
+       couvre 44 x 44 : neuf fois sur dix la touche atterrit sur le texte du
+       manifeste, jamais sur le bouton. Le script, lui, marchait.
+       Ici : on garde exactement le meme rendu, mais on gonfle la zone
+       cliquable a 44 px de haut par une marge interieure, en decalant le
+       point d'ancrage d'autant ; touch-action supprime le delai du double
+       tap ; le z-index passe au-dessus du mot-marque pour qu'aucune couche
+       fixe ne prenne le contact a sa place. */
+@media (max-width: 720px) {
+  button.lang-toggle.manifesto-lang {
+    top: calc(var(--lg-marque) - 18px - 16px);
+    right: 0;
+    padding: 16px 16px 16px 20px;
+    min-height: 44px;
+    min-width: 44px;
+    box-sizing: border-box;
+    z-index: 700;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+  }
+}
