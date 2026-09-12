@@ -231,13 +231,25 @@
   .tfp__obj__grid, .tfp__steps__grid, .tfp__deliv__grid { grid-template-columns: 1fr; }
   .tfp__split__img { min-height: 0; aspect-ratio: 4 / 3; order: -1; }
   .tfp__prog__intro { min-height: 0; padding-top: 72px; }
-  .tfp__day { position: static; height: auto; grid-template-columns: 1fr; }
-  .tfp__day__img { aspect-ratio: 4 / 3; order: -1; }
-  .tfp__day__img img { position: static; height: 100%; }
-  .tfp__day__txt { padding: 32px var(--tfp-gut) 44px; }
+  /* Sur mobile on GARDE l'empilement sticky de TFP (leurs panneaux font
+     ~95 svh et se recouvrent aussi sur téléphone) : un jour = un écran,
+     image en bandeau haut, texte dessous. Le détail complet du programme
+     reste disponible plus bas dans le dépliant réglementaire. */
+  .tfp__day { position: sticky; top: 0; height: 100svh; grid-template-columns: 1fr; grid-template-rows: 28svh minmax(0, 1fr);
+    padding-top: calc(85px + var(--lg-title-h, 40px) + 34px); }
+  .tfp__day__img { aspect-ratio: auto; order: -1; }
+  .tfp__day__txt { padding: 18px var(--tfp-gut) 84px; gap: 10px; justify-content: flex-start; overflow: hidden; }
+  .tfp__day__num { font-size: 20px; }
+  .tfp__day h3 { font-size: clamp(22px, 6vw, 30px); max-width: none; }
+  .tfp__day__txt > p { font-size: 15px; }
+  .tfp__day__mods { gap: 8px; }
+  .tfp__day__m ul { display: none; }
+  .tfp__day__m h4 { font-size: 14px; margin: 0; }
   .tfp__hero h1 { font-size: clamp(38px, 11vw, 56px); }
 }
 @media (max-width: 600px) {
+  .tfp__day { grid-template-rows: 24svh minmax(0, 1fr); }
+  .tfp__day__ex { display: none; }
   .tfp__titlebar { top: 85px; }
   .tfp__titlebar__title { font-size: clamp(16px, 4.5vw, 22px); }
   .tfp__titlebar__meta .dur { display: none; }
