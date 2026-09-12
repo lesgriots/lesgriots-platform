@@ -15,9 +15,15 @@
 }
 
 :root {
+  /* Gouttière du site (12/09/2026) : 24 px sur mobile, jusqu'à 64 px sur grand écran.
+     Même valeur que la fiche formation TFP. Remplace les 24/32 px en dur. */
+  --lg-gutter: clamp(24px, 4vw, 64px);
   /* Palette officielle La Griothèque — extraite du deck formation
      "Stratégie de contenu et acquisition client" */
   --paper: #f6f5f3;       /* crème, fond principal */
+  --beige: #f5f4f1;       /* beige de section (validé par Moos le 12/09/2026) :
+                             fond des sections calmes, des cartes et des réserves
+                             d'image. Se pose sur --paper sans rupture. */
   --paper-2: #eeebe6;
   --ink: #000000;         /* noir pur */
   --ink-2: #2a2a2a;
@@ -113,7 +119,7 @@ button {
 .lg {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 32px;
+  padding: 0 var(--lg-gutter);
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -376,7 +382,9 @@ button {
 }
 /* Deuxième ligne : nav principale, gros — fluide pour rester sur 1 ligne */
 .lg__menu__row:last-child {
-  font-size: clamp(16px, 1.8vw, 32px);
+  /* 1.8vw → 1.5vw le 12/09/2026 : avec la gouttière élargie (--lg-gutter), la
+     rangée de nav ne tenait plus à 1440 px et se faisait couper à gauche. */
+  font-size: clamp(16px, 1.5vw, 32px);
   gap: clamp(8px, 1vw, 14px);
 }
 .lg__menu__sep {
@@ -1849,7 +1857,7 @@ body.is-home .lg__manifesto { min-height: calc(100vh - 121px); }
   left: 0;
   right: 0;
   z-index: 40;
-  padding: 8px 16px;
+  padding: 8px var(--lg-gutter);
   border-bottom: 1px solid var(--ink);
   background: var(--paper);
   font-family: var(--font-sans);
@@ -2161,7 +2169,7 @@ body.is-home .lg__manifesto { min-height: calc(100vh - 121px); }
   margin: 0;
   font-size: clamp(20px, 2.4vw, 32px);
   line-height: 1.1;
-  padding: 6px 24px 8px;
+  padding: 6px var(--lg-gutter) 8px;
 }
 /* Le grand titre du bandeau s'efface quand la barre le remplace : les deux
    visibles en même temps, ce serait le même texte à deux endroits. */
@@ -2285,7 +2293,7 @@ body.menu-dark .lg__header__plate {
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 12px 24px;
+  padding: 12px var(--lg-gutter);
 }
 .lg__header__layer--white {
   color: #fff;
@@ -6650,7 +6658,7 @@ a.lg__partners__logo:hover {
 .lg__footer {
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  padding: 18px 24px 0;
+  padding: 18px var(--lg-gutter) 0;
   border-top: 1px solid var(--paper);
   font-family: var(--font-sans);
   color: var(--paper);

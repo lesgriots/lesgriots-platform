@@ -1533,6 +1533,14 @@ function ProgramAccordion({ program }) {
 }
 
 function ProgramPage({ item, kind }) {
+  // Fiche FORMATION : gabarit « The Freelance Photographer » (formation-tfp.jsx,
+  // chargé avant ce fichier). Retour avant tout hook → l'ordre des hooks reste
+  // stable (kind ne change pas pour une page montée). Workshops et événements
+  // gardent la fiche à onglets ci-dessous. ?tfp=0 dans l'URL désactive.
+  if (kind === "formation" && typeof window !== "undefined" && window.FormationTfp
+      && !/[?&]tfp=0/.test(window.location.search)) {
+    return <FormationTfp item={item} />;
+  }
   const titleRef = useFitOne(160);
   const titleSentinelRef = useRef(null);
   const headerRef = useRef(null);

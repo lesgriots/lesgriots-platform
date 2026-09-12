@@ -408,7 +408,11 @@ export default function FormationForm({
         <Section title="Programme (jour par jour)">
           <p className="note" style={{ marginBottom: 14 }}>
             Pour chaque jour, liste les sessions/modules. Champ JSON brut pour
-            l'instant — on fera une UI plus fluide plus tard.
+            l'instant — on fera une UI plus fluide plus tard. Clés optionnelles
+            par jour, lues par la fiche formation (gabarit TFP) : "title"
+            (thème du jour, sinon les titres des modules), "promise" (une
+            phrase sous le titre) et "image" (photo de l'écran du jour, ex.
+            "img/jour-1.jpg" — sinon les médias de la fiche en boucle).
           </p>
           <textarea
             value={JSON.stringify(data.program || [], null, 2)}
