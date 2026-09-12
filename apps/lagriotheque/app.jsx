@@ -79,24 +79,16 @@ function ManifestoReveal({ text: t }) {
     const words = prose.querySelectorAll(".w");
     const allOn = () => { for (let i = 0; i < words.length; i++) words[i].classList.add("on"); };
     const reveal = () => {
-      // La section est DEJA epinglee sous le menu par le CSS de la home, et la
-      // section suivante remonte par-dessus. La progression se mesure donc
-      // entre le moment ou le manifeste se fige et celui ou la section
-      // suivante entre par le bas : les mots sont tous allumes avant d'etre
-      // recouverts.
+      // L'effet se joue pendant que la section MONTE : du moment ou son haut
+      // entre par le bas de l'ecran jusqu'a ce qu'elle se cale sous le menu.
+      // Quand elle est en place, la phrase est entiere ; elle le reste tant
+      // que la section suivante ne l'a pas recouverte.
       const menu = window.innerWidth <= 600 ? 85 : 121;
-      const next = sec.nextElementSibling;
-      // Fenetre de lecture : du moment ou le manifeste entre par le bas de
-      // l'ecran jusqu'a celui ou la section suivante finit de le recouvrir
-      // (elle se cale sous le menu). Les mots sont tous allumes avant.
-      const start = sec.offsetTop - window.innerHeight;
-      const end = next ? next.offsetTop - menu : sec.offsetTop + window.innerHeight;
-      const span = end - start;
+      const r = sec.getBoundingClientRect();
+      const span = window.innerHeight - menu;
       if (span <= 0) return allOn();
-      const p = Math.min(1, Math.max(0, (window.pageYOffset - start) / span));
-      // La section suivante commence a recouvrir vers la moitie de cette
-      // fenetre : la phrase doit etre entierement allumee avant.
-      const k = p < 0.12 ? 0 : Math.round(((p - 0.12) / 0.34) * words.length);
+      const p = Math.min(1, Math.max(0, (window.innerHeight - r.top) / span));
+      const k = p < 0.1 ? 0 : Math.round(((p - 0.1) / 0.8) * words.length);
       for (let i = 0; i < words.length; i++) words[i].classList.toggle("on", i < k);
     };
     reveal();
