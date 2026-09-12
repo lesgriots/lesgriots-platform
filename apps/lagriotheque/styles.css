@@ -649,8 +649,10 @@ body.is-home .lg__manifesto { min-height: calc(100vh - 121px); }
   will-change: opacity;
 }
 .lg__manifesto--reveal .lg__manifeste__prose .w.on { opacity: 1; }
+/* « Reduire les animations » : on garde la revelation (c'est une variation
+   d'opacite, pas un mouvement) mais sans transition, donc sans fondu. */
 @media (prefers-reduced-motion: reduce) {
-  .lg__manifesto--reveal .lg__manifeste__prose .w { opacity: 1; }
+  .lg__manifesto--reveal .lg__manifeste__prose .w { transition: none; }
 }
 
 /* ----- MÉTHODE EN 3 ÉTAPES (home) ----- */

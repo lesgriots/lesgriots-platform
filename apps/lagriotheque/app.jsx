@@ -77,10 +77,8 @@ function ManifestoReveal({ text: t }) {
     const sec = secRef.current, prose = proseRef.current;
     if (!sec || !prose) return;
     const words = prose.querySelectorAll(".w");
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const allOn = () => { for (let i = 0; i < words.length; i++) words[i].classList.add("on"); };
     const reveal = () => {
-      if (reduce) return allOn();
       // La section est DEJA epinglee sous le menu par le CSS de la home, et la
       // section suivante remonte par-dessus. La progression se mesure donc
       // entre le moment ou le manifeste se fige et celui ou la section
