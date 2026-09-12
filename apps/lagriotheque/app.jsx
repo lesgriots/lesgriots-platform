@@ -79,16 +79,21 @@ function ManifestoReveal({ text: t }) {
     const words = prose.querySelectorAll(".w");
     const allOn = () => { for (let i = 0; i < words.length; i++) words[i].classList.add("on"); };
     const reveal = () => {
-      // L'effet se joue pendant que la section MONTE : du moment ou son haut
-      // entre par le bas de l'ecran jusqu'a ce qu'elle se cale sous le menu.
-      // Quand elle est en place, la phrase est entiere ; elle le reste tant
-      // que la section suivante ne l'a pas recouverte.
-      const menu = window.innerWidth <= 600 ? 85 : 121;
-      const r = sec.getBoundingClientRect();
-      const span = window.innerHeight - menu;
+      // Comme sur les fiches formation (TFP) : la section monte, se FIGE sous
+      // le menu, et c'est PENDANT qu'elle est figee que les mots s'allument.
+      // Le temps de pose vient du bloc vide qui la suit (.lg__manifesto__hold) :
+      // tant qu'il defile, la phrase reste a l'ecran, rien ne la recouvre.
+      // On mesure sur le bloc de pose, PAS sur la section : offsetTop d'un
+      // element sticky inclut son decalage, donc il bouge au scroll et ne
+      // peut pas servir de repere.
+      const hold = sec.nextElementSibling;
+      const span = hold ? hold.offsetHeight : 0;
       if (span <= 0) return allOn();
-      const p = Math.min(1, Math.max(0, (window.innerHeight - r.top) / span));
-      const k = p < 0.1 ? 0 : Math.round(((p - 0.1) / 0.8) * words.length);
+      // p = 0 : le haut du bloc de pose est au bas de l'ecran, la section
+      // vient de se figer. p = 1 : le bloc est consomme, la section suivante
+      // arrive par-dessus.
+      const p = Math.min(1, Math.max(0, (window.innerHeight - hold.getBoundingClientRect().top) / span));
+      const k = p < 0.05 ? 0 : Math.round(((p - 0.05) / 0.7) * words.length);
       for (let i = 0; i < words.length; i++) words[i].classList.toggle("on", i < k);
     };
     reveal();
@@ -101,7 +106,8 @@ function ManifestoReveal({ text: t }) {
   const sentences = String(t || "").split(/(?<=[.!?])\s+/).filter(Boolean);
   let key = 0;
   return (
-    <section className="lg__manifesto lg__manifesto--reveal" ref={secRef}>
+    <>
+      <section className="lg__manifesto lg__manifesto--reveal" ref={secRef}>
       <div className="lg__manifeste lg__manifeste--hero">
         <div className="lg__manifeste__prose" ref={proseRef}>
           <p>
@@ -123,7 +129,12 @@ function ManifestoReveal({ text: t }) {
           </p>
         </div>
       </div>
-    </section>
+      </section>
+      {/* Temps de pose : bloc vide et transparent qui donne au manifeste, deja
+          fige sous le menu, la duree de scroll necessaire pour que la phrase
+          s'allume avant que la section suivante ne remonte par-dessus. */}
+      <div className="lg__manifesto__hold" aria-hidden="true" />
+    </>
   );
 }
 

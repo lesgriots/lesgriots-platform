@@ -635,6 +635,16 @@ body.is-home .lg__manifesto { min-height: calc(100vh - 121px); }
    fiches formation). La section reste celle du site — deja epinglee sous le
    menu, recouverte ensuite par la section suivante : les mots s'allument avec
    le scroll pendant qu'elle est figee. --------------------------------------- */
+/* Temps de pose du manifeste : hauteur d'un ecran, transparent, sans
+   interaction — c'est lui qui donne la duree de la revelation pendant que la
+   section est figee. */
+.lg__manifesto__hold {
+  height: 100svh;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lg__manifesto__hold { height: 0; }
+}
 /* Phrase centree, comme la phrase d'accueil juste au-dessus : les deux
    ecrans se repondent au lieu de se decaler. */
 .lg__manifesto--reveal { justify-content: center; }
