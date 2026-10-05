@@ -77,6 +77,13 @@ case "$APP" in
     # Idem pour les fichiers générés par l'exporteur.
     ssh -t "$VPS_USER@$VPS_HOST" "sudo -u $DEPLOY_USER git -C $REPO_PATH checkout -- apps/backoffice/package-lock.json apps/lesgriotsxstudio/data.jsx apps/lesgriotsxstudio/index.html 2>/dev/null; sudo -u $DEPLOY_USER git -C $REPO_PATH pull --ff-only"
 
+    # Le checkout ci-dessus remet data.jsx/index.html du site studio à leur
+    # version git (périmée) → on régénère TOUJOURS juste après, sinon le site
+    # studio sert des liens vidéo morts (incident 12/09 → 24/09/2026 : films
+    # pointés vers img/ au lieu de R2, « vidéo indisponible »).
+    echo "  → régénération data.jsx du site studio (exporteur)"
+    ssh -t "$VPS_USER@$VPS_HOST" "sudo /usr/local/bin/sync-site"
+
     echo "  → npm install + build"
     ssh -t "$VPS_USER@$VPS_HOST" "sudo -u $DEPLOY_USER bash -c 'cd $BO_PATH && npm install --omit=dev && npm run build'"
 
@@ -101,6 +108,13 @@ case "$APP" in
     # checkout avant le pull (le lockfile de référence est celui du repo).
     # Idem pour les fichiers générés par l'exporteur.
     ssh -t "$VPS_USER@$VPS_HOST" "sudo -u $DEPLOY_USER git -C $REPO_PATH checkout -- apps/backoffice/package-lock.json apps/lesgriotsxstudio/data.jsx apps/lesgriotsxstudio/index.html 2>/dev/null; sudo -u $DEPLOY_USER git -C $REPO_PATH pull --ff-only"
+
+    # Le checkout ci-dessus remet data.jsx/index.html du site studio à leur
+    # version git (périmée) → on régénère TOUJOURS juste après, sinon le site
+    # studio sert des liens vidéo morts (incident 12/09 → 24/09/2026 : films
+    # pointés vers img/ au lieu de R2, « vidéo indisponible »).
+    echo "  → régénération data.jsx du site studio (exporteur)"
+    ssh -t "$VPS_USER@$VPS_HOST" "sudo /usr/local/bin/sync-site"
 
     echo "  → npm ci + build (npm ci COMPLET : next build a besoin des devDeps,"
     echo "    et better-sqlite3 est un module natif recompilé si l'ABI Node change)"
