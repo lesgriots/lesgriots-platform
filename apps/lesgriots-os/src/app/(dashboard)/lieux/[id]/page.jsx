@@ -14,6 +14,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import TopBar from '@/components/layout/TopBar';
 import FicheEntite, { styleCarte, styleAttenue, styleTitre } from '@/components/donnees/FicheEntite';
+import ContactsLieu from '@/components/donnees/ContactsLieu';
 
 const BLOCS = [
   {
@@ -44,7 +45,7 @@ const BLOCS = [
     intro: 'Ce qu’il faut pour animer et pour calculer la marge réelle d’une session.',
     champs: [
       { cle: 'equipements', libelle: 'Équipements', aide: 'Vidéoprojecteur, paperboard, wifi et son mot de passe, prises. Ce qui manque, tu l’apportes.', lignes: 2, large: true },
-      { cle: 'contact_nom', libelle: 'Contact sur place', aide: 'La personne qui ouvre la porte.' },
+      { cle: 'contact_nom', libelle: 'Contact principal', aide: 'Celui qui part sur la convocation. Les autres interlocuteurs sont dans « Contacts du lieu ».' },
       { cle: 'contact_tel', libelle: 'Téléphone du contact' },
       { cle: 'contact_email', libelle: 'E-mail du contact' },
       { cle: 'cout_location', libelle: 'Coût de location', aide: 'Par jour. Sans lui, la marge affichée sur la session est fausse.' },
@@ -101,7 +102,7 @@ export default function FicheLieuPage() {
         onChange={(cle, v) => setBrouillon((c) => ({ ...c, [cle]: v }))}
         onEnregistrer={enregistrer} modifie={modifie} occupe={occupe}
         message={message} erreur={erreur}
-        enfants={<section style={styleCarte}>
+        enfants={<><ContactsLieu lieuId={id} /><section style={styleCarte}>
           <h2 style={styleTitre}>Sessions tenues ici</h2>
           <p style={{ ...styleAttenue, margin: '6px 0 12px' }}>{sessions.length} session(s).</p>
           {sessions.length ? <div style={{ display: 'grid', gap: 8 }}>
@@ -110,7 +111,7 @@ export default function FicheLieuPage() {
               <Link href={`/sessions/${s.id}`} style={{ color: 'var(--gold)', fontWeight: 800, textDecoration: 'none', fontSize: 13 }}>Ouvrir →</Link>
             </div>)}
           </div> : <p style={{ ...styleAttenue, margin: 0 }}>Aucune session n’a encore eu lieu ici.</p>}
-        </section>}
+        </section></>}
       />
     </div>
   </>;

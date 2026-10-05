@@ -1275,6 +1275,23 @@ function initSchema(db) {
     )
   `);
 
+  // -- Contacts d'un lieu de formation : un lieu a souvent plusieurs interlocuteurs
+  //    (celui qui reserve la salle, celui qui ouvre la porte, celui qui a negocie le pret).
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS lieu_contacts (
+      id TEXT PRIMARY KEY,
+      lieu_id TEXT NOT NULL REFERENCES lieux_formation(id) ON DELETE CASCADE,
+      first_name TEXT DEFAULT '',
+      last_name TEXT DEFAULT '',
+      organisation TEXT DEFAULT '',
+      role TEXT DEFAULT '',
+      email TEXT DEFAULT '',
+      phone TEXT DEFAULT '',
+      notes TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
+
   // -- Apprenants : champs Digiforma manquants (civilité, nationalité, lieu naissance, n° sécu) --
   const aCols2 = db.prepare("PRAGMA table_info(apprenants)").all().map(c => c.name);
   const appMigrations2 = [
