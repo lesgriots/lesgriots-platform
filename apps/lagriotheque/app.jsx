@@ -4773,12 +4773,14 @@ function InscriptionModal({ target, kind, onClose }) {
   };
   const labelStyle = { display: "block", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 6, opacity: 0.6 };
 
-  return (
+  // Rendue dans <body> (portail) : un parent animé (transform) cassait le
+  // position:fixed, la modale s'ouvrait décalée, hors de l'écran.
+  return ReactDOM.createPortal(
     <div
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
     >
-      <div style={{ position: "relative", background: "var(--paper)", color: "var(--ink)", maxWidth: 480, width: "100%", padding: "32px 28px", border: "1px solid var(--ink)", fontFamily: "var(--font-mono)" }}>
+      <div style={{ position: "relative", background: "var(--paper)", color: "var(--ink)", maxWidth: 480, width: "100%", maxHeight: "calc(100dvh - 40px)", overflowY: "auto", WebkitOverflowScrolling: "touch", padding: "32px 28px", border: "1px solid var(--ink)", fontFamily: "var(--font-mono)" }}>
         <button onClick={onClose} aria-label="Fermer" style={{ position: "absolute", top: 0, right: 0, background: "var(--ink)", border: 0, color: "var(--paper)", padding: "10px 16px", cursor: "pointer", fontSize: 18 }}>×</button>
 
         <p style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", opacity: 0.6, marginBottom: 10 }}>
@@ -4873,7 +4875,8 @@ function InscriptionModal({ target, kind, onClose }) {
           </>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
