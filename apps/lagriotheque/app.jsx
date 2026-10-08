@@ -4705,6 +4705,7 @@ function InscriptionModal({ target, kind, onClose }) {
   const [profile, setProfile] = useState("");
   const [organization, setOrganization] = useState("");
   const [link, setLink] = useState("");
+  const [birthdate, setBirthdate] = useState("");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -4729,6 +4730,7 @@ function InscriptionModal({ target, kind, onClose }) {
     e.preventDefault();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr("Email invalide"); return; }
     if (isEvt && !name.trim()) { setErr("Indique ton nom et ton prénom."); return; }
+    if (isEvt && !birthdate) { setErr("Indique ta date de naissance."); return; }
     if (isEvt && !profile) { setErr("Indique ton profil."); return; }
     if (isEvt && !organization.trim()) { setErr("Indique ta structure ou ton projet."); return; }
     if (!consent) { setErr("Merci d'accepter pour envoyer ta demande."); return; }
@@ -4753,7 +4755,7 @@ function InscriptionModal({ target, kind, onClose }) {
           resource_id: target.id,
           consent,
           source: `inscription:${kind}:${target.title || target.id}`,
-          ...(isEvt ? { profile, organization, link } : {}),
+          ...(isEvt ? { profile, organization, link, birthdate } : {}),
         }),
       });
     } catch (e) {
@@ -4836,6 +4838,9 @@ function InscriptionModal({ target, kind, onClose }) {
 
               {isEvt && (
                 <>
+                  <label style={labelStyle}>Date de naissance *</label>
+                  <input type="date" required value={birthdate} onChange={(e) => setBirthdate(e.target.value)} min="1920-01-01" max={new Date().toISOString().slice(0, 10)} style={inputStyle} />
+
                   <label style={labelStyle}>Tu es *</label>
                   <select required value={profile} onChange={(e) => setProfile(e.target.value)} style={inputStyle}>
                     <option value="">Choisir…</option>

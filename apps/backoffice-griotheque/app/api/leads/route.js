@@ -85,7 +85,7 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { email, name, first_name, last_name, phone, resource_id, consent, subject, message, profile, organization, link } = body || {};
+    const { email, name, first_name, last_name, phone, resource_id, consent, subject, message, profile, organization, link, birthdate } = body || {};
 
     // Validation basique de l'email
     if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -113,7 +113,7 @@ export async function POST(req) {
       }
     }
 
-    const lead = addLead({ email, name, first_name, last_name, phone, resource_id, consent, source, subject, message, profile, organization, link });
+    const lead = addLead({ email, name, first_name, last_name, phone, resource_id, consent, source, subject, message, profile, organization, link, birthdate });
 
     // Passerelle CRM : chaque lead est poussé vers Systeme.io (contact +
     // champ "source" + tags). Fire-and-forget : une panne Systeme.io ne

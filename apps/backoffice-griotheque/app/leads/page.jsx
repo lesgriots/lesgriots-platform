@@ -33,7 +33,7 @@ export default function LeadsPage() {
 
   function exportCsv() {
     const rows = [
-      ["email", "name", "phone", "source", "profile", "organization", "link", "subject", "message", "resource_id", "resource_title", "consent", "date"],
+      ["email", "name", "phone", "source", "profile", "organization", "link", "birthdate", "age", "subject", "message", "resource_id", "resource_title", "consent", "date"],
       ...leads.map((l) => [
         l.email,
         l.name || "",
@@ -42,6 +42,8 @@ export default function LeadsPage() {
         l.profile || "",
         l.organization || "",
         l.link || "",
+        l.birthdate || "",
+        ageFrom(l.birthdate),
         l.subject || "",
         l.message || "",
         l.resource_id || "",
@@ -110,9 +112,9 @@ export default function LeadsPage() {
                 <td>{l.phone || "—"}</td>
                 <td><span className="pill">{l.source || "site"}</span></td>
                 <td style={{ maxWidth: 320 }}>
-                  {(l.profile || l.organization || l.link) ? (
+                  {(l.profile || l.organization || l.link || l.birthdate) ? (
                     <div style={{ marginBottom: 4 }}>
-                      {[l.profile, l.organization].filter(Boolean).join(" · ")}
+                      {[l.profile, l.organization, l.birthdate ? `${ageFrom(l.birthdate)} ans` : ""].filter(Boolean).join(" · ")}
                       {l.link ? <> · <a href={/^https?:/i.test(l.link) ? l.link : "https://" + l.link.replace(/^@/, "instagram.com/")} target="_blank" rel="noopener noreferrer">{l.link}</a></> : null}
                     </div>
                   ) : null}
@@ -142,4 +144,14 @@ export default function LeadsPage() {
       )}
     </>
   );
+}
+
+// Âge à partir d'une date de naissance AAAA-MM-JJ ("" si absente).
+function ageFrom(d) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || "");
+  if (!m) return "";
+  const now = new Date();
+  let a = now.getFullYear() - Number(m[1]);
+  if (now.getMonth() + 1 < Number(m[2]) || (now.getMonth() + 1 === Number(m[2]) && now.getDate() < Number(m[3]))) a--;
+  return String(a);
 }

@@ -229,7 +229,7 @@ export function listLeads({ sort = true } = {}) {
 
 const MAX_LEADS = 10000; // garde-fou anti-spam : évite un JSON qui explose
 
-export function addLead({ email, name, first_name, last_name, phone, resource_id, consent, source, subject, message, profile, organization, link }) {
+export function addLead({ email, name, first_name, last_name, phone, resource_id, consent, source, subject, message, profile, organization, link, birthdate }) {
   if (!email) throw new Error("addLead: email required");
   const store = load();
   const normalized = String(email).trim().toLowerCase();
@@ -267,6 +267,7 @@ export function addLead({ email, name, first_name, last_name, phone, resource_id
     profile: profile ? String(profile).trim().slice(0, 60) : "",
     organization: organization ? String(organization).trim().slice(0, 120) : "",
     link: link ? String(link).trim().slice(0, 200) : "",
+    birthdate: /^\d{4}-\d{2}-\d{2}$/.test(String(birthdate || "")) ? String(birthdate) : "",
     created_at: new Date().toISOString(),
   };
   store.leads = [...(store.leads || []), lead];
