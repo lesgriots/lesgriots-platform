@@ -229,7 +229,7 @@ export function listLeads({ sort = true } = {}) {
 
 const MAX_LEADS = 10000; // garde-fou anti-spam : évite un JSON qui explose
 
-export function addLead({ email, name, first_name, last_name, phone, resource_id, consent, source, subject, message }) {
+export function addLead({ email, name, first_name, last_name, phone, resource_id, consent, source, subject, message, profile, organization, link }) {
   if (!email) throw new Error("addLead: email required");
   const store = load();
   const normalized = String(email).trim().toLowerCase();
@@ -263,11 +263,36 @@ export function addLead({ email, name, first_name, last_name, phone, resource_id
     source: source || "site",
     subject: subject ? String(subject).trim().slice(0, 80) : "",
     message: message ? String(message).trim().slice(0, 2000) : "",
+    // Inscription à un événement : qui s'inscrit (profil, structure, lien).
+    profile: profile ? String(profile).trim().slice(0, 60) : "",
+    organization: organization ? String(organization).trim().slice(0, 120) : "",
+    link: link ? String(link).trim().slice(0, 200) : "",
     created_at: new Date().toISOString(),
   };
   store.leads = [...(store.leads || []), lead];
   save(store);
   return lead;
+}
+
+// Places prises sur un événement : nombre d'emails distincts inscrits via le
+// formulaire du site (source inscription-evenement) pour cet id d'événement.
+export function countEventSeats(eventId) {
+  const store = load();
+  const emails = new Set(
+    (store.leads || [])
+      .filter((l) => l.resource_id === eventId && l.source === "inscription-evenement")
+      .map((l) => l.email)
+  );
+  return emails.size;
+}
+
+// Jauge d'un événement : capacité (0 = illimitée), places prises, restantes.
+export function eventPlaces(ev) {
+  const capacity = Number(ev && ev.capacity) > 0 ? Math.floor(Number(ev.capacity)) : 0;
+  const taken = ev ? countEventSeats(ev.id) : 0;
+  const closed = String((ev && ev.status) || "").toUpperCase() === "COMPLET";
+  const remaining = capacity ? Math.max(0, capacity - taken) : null;
+  return { capacity: capacity || null, taken, remaining, full: closed || (capacity > 0 && taken >= capacity) };
 }
 
 export function deleteLead(id) {

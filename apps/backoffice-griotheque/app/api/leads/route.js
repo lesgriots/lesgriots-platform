@@ -7,7 +7,7 @@
 // Chaque lead est aussi poussé vers Systeme.io (contact + champ "source" +
 // tags) via lib/systeme.js — fire-and-forget, la capture locale prime.
 import { NextResponse } from "next/server";
-import { listLeads, addLead } from "../../../lib/db.js";
+import { listLeads, addLead, getEvent, eventPlaces } from "../../../lib/db.js";
 import { rateLimit, clientIp, tooMany } from "../../../lib/rate-limit.js";
 import { syncContactToSystemeIo, sioSlug, splitName } from "../../../lib/systeme.js";
 
@@ -85,7 +85,7 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { email, name, first_name, last_name, phone, resource_id, consent, subject, message } = body || {};
+    const { email, name, first_name, last_name, phone, resource_id, consent, subject, message, profile, organization, link } = body || {};
 
     // Validation basique de l'email
     if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -93,7 +93,27 @@ export async function POST(req) {
     }
 
     const { source, detail } = normalizeSource(body);
-    const lead = addLead({ email, name, first_name, last_name, phone, resource_id, consent, source, subject, message });
+
+    // Jauge des événements : au-delà de la capacité (ou statut COMPLET), on
+    // refuse l'inscription (409). Une personne déjà inscrite peut renvoyer le
+    // formulaire sans être refusée (le lead est dédoublonné).
+    let places = null;
+    if (source === "inscription-evenement" && resource_id) {
+      const ev = getEvent(String(resource_id));
+      if (ev) {
+        const p = eventPlaces(ev);
+        const normalized = String(email).trim().toLowerCase();
+        const already = listLeads({ sort: false }).some(
+          (l) => l.email === normalized && l.resource_id === ev.id && l.source === source
+        );
+        if (!already && p.full) {
+          return NextResponse.json({ error: "complet", full: true, remaining: 0 }, { status: 409, headers });
+        }
+        places = p.capacity ? { capacity: p.capacity, remaining: Math.max(0, p.remaining - (already ? 0 : 1)) } : null;
+      }
+    }
+
+    const lead = addLead({ email, name, first_name, last_name, phone, resource_id, consent, source, subject, message, profile, organization, link });
 
     // Passerelle CRM : chaque lead est poussé vers Systeme.io (contact +
     // champ "source" + tags). Fire-and-forget : une panne Systeme.io ne
@@ -113,7 +133,7 @@ export async function POST(req) {
       tags,
     }).catch((e) => console.warn("systeme.io sync:", e.message));
 
-    return NextResponse.json({ ok: true, id: lead.id }, { headers });
+    return NextResponse.json({ ok: true, id: lead.id, places }, { headers });
   } catch (err) {
     // Route publique : on log le détail côté serveur, message générique côté client
     console.error("leads POST error:", err);

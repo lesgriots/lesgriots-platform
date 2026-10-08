@@ -10,7 +10,8 @@ export function middleware(req) {
   // le CORS pour n'accepter que les origines connues (localhost:8082, prod).
   // Le preflight OPTIONS aussi doit passer sans auth, sinon CORS échoue.
   const publicPaths = ["/api/leads", "/api/subscribe", "/api/stripe/create-payment-intent"];
-  if (publicPaths.includes(req.nextUrl.pathname)) {
+  // /api/places/<id> = jauge publique d'un événement (lecture seule).
+  if (publicPaths.includes(req.nextUrl.pathname) || req.nextUrl.pathname.startsWith("/api/places/")) {
     return NextResponse.next();
   }
 

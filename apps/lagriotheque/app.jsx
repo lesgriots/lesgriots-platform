@@ -1768,6 +1768,8 @@ function ProgramPage({ item, kind }) {
   const evDate = isEvent ? [formatEventDate(f.date), f.time].filter(Boolean).join(" · ") : "";
   const evLieu = isEvent ? [f.location, f.city].filter(Boolean).join(" · ") : "";
   const evExterne = isEvent && /^https?:\/\//i.test(f.link || "");
+  const evPlaces = useEventPlaces(isEvent ? f : null);
+  const evComplet = isEvent && ((f.status || "").toUpperCase() === "COMPLET" || !!(evPlaces && evPlaces.full));
   // Réservation d’un workshop : gratuit → modale maison (le lead atterrit
   // dans le back-office), payant → lien de paiement Stripe.
   const boutonWorkshop = (classe) =>
@@ -1788,6 +1790,13 @@ function ProgramPage({ item, kind }) {
   // modale maison (le lead atterrit dans le back-office).
   const boutonEvent = (classe) => {
     if (evPasse) return null;
+    if (evComplet) {
+      return (
+        <button type="button" className={classe} disabled aria-disabled="true" style={{ opacity: 0.5, cursor: "not-allowed" }}>
+          Complet
+        </button>
+      );
+    }
     return evExterne ? (
       <a className={classe} href={f.link} target="_blank" rel="noopener noreferrer">
         {f.link_label || "Réserver"}
@@ -2303,9 +2312,12 @@ function ProgramPage({ item, kind }) {
               {f.format && <li>{f.format}</li>}
               {isEvent && evLieu && <li>{evLieu}</li>}
               {isEvent && f.kind && <li>{f.kind}</li>}
-              {isEvent && (evPasse || f.status) && (
-                <li>{evPasse ? "Événement passé" : f.status}</li>
+              {isEvent && (evPasse || evComplet || f.status) && (
+                <li>{evPasse ? "Événement passé" : evComplet ? "Complet" : f.status}</li>
               )}
+              {isEvent && !evPasse && !evComplet && evPlaces && evPlaces.capacity ? (
+                <li>{placesRestantes(evPlaces.remaining)}</li>
+              ) : null}
             </ul>
           )}
           {upcoming.length > 0 && (
@@ -3600,6 +3612,31 @@ function formatEventDate(iso) {
   return full.charAt(0).toUpperCase() + full.slice(1);
 }
 
+// Jauge d'un événement (places max fixées dans le back-office) : lue en
+// direct sur /api/places/<id>, à côté de l'adresse de collecte des leads.
+function placesEndpoint(id) {
+  const lead = (window.SITE_CONFIG && window.SITE_CONFIG.leadsEndpoint) || "https://admin.lagriotheque.com/api/leads";
+  return lead.replace(/\/api\/leads\/?$/, "") + "/api/places/" + encodeURIComponent(id);
+}
+function useEventPlaces(ev) {
+  const [places, setPlaces] = useState(null);
+  const id = ev && ev.id;
+  const wants = !!(ev && Number(ev.capacity) > 0);
+  useEffect(() => {
+    if (!wants) return;
+    let alive = true;
+    fetch(placesEndpoint(id), { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (alive && j) setPlaces(j); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [id, wants]);
+  return places;
+}
+function placesRestantes(n) {
+  return `${n} place${n > 1 ? "s" : ""} restante${n > 1 ? "s" : ""}`;
+}
+
 function eventIsPast(e) {
   if ((e.status || "").toUpperCase() === "PASSÉ") return true;
   const m = /^(\d{4}-\d{2}-\d{2})/.exec(e.date || "");
@@ -3941,6 +3978,8 @@ function AgendaEventRow({ e, isOpen, onToggle }) {
   const status = normalizeStatus(e.status);
   const dateLong = fullDateLabel(dateInfo);
   const [showInscription, setShowInscription] = React.useState(false);
+  const places = useEventPlaces(e);
+  const evFull = !!(places && places.full);
   const isExternal = /^https?:\/\//i.test(e.link || "");
   return (
     <div className={"lg__ag" + (isOpen ? " is-open" : "") + " is-" + status.class}>
@@ -3965,7 +4004,7 @@ function AgendaEventRow({ e, isOpen, onToggle }) {
           </p>
         </div>
         <div className="lg__ag__side">
-          <span className={"lg__ag__pill is-" + status.class}>{status.label}</span>
+          <span className={"lg__ag__pill is-" + (evFull && status.class !== "past" ? "full" : status.class)}>{evFull && status.class !== "past" ? "complet" : status.label}</span>
           <span className="lg__ag__caret">{isOpen ? "−" : "+"}</span>
         </div>
       </button>
@@ -3980,7 +4019,7 @@ function AgendaEventRow({ e, isOpen, onToggle }) {
           </div>
           {e.description && <p className="lg__ag__desc">{shortSummary(e.description)}</p>}
           <div className="lg__ag__actions">
-            {status.class !== "past" && (
+            {status.class !== "past" && !evFull && (
               isExternal ? (
                 <a href={e.link} target="_blank" rel="noopener" className="lg__ag__btn lg__ag__btn--primary">
                   ↗ {e.link_label || "En savoir plus"}
@@ -4662,6 +4701,10 @@ function ResourceModal({ resource, onClose }) {
 // et l'id de la cible dans `resource_id`. Ce lead alimente ensuite les emails
 // (systeme.io) et le process Qualiopi (génération des documents via l'OS).
 function InscriptionModal({ target, kind, onClose }) {
+  const isEvt = kind === "event";
+  const [profile, setProfile] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [link, setLink] = useState("");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -4685,6 +4728,9 @@ function InscriptionModal({ target, kind, onClose }) {
   async function submit(e) {
     e.preventDefault();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr("Email invalide"); return; }
+    if (isEvt && !name.trim()) { setErr("Indique ton nom et ton prénom."); return; }
+    if (isEvt && !profile) { setErr("Indique ton profil."); return; }
+    if (isEvt && !organization.trim()) { setErr("Indique ta structure ou ton projet."); return; }
     if (!consent) { setErr("Merci d'accepter pour envoyer ta demande."); return; }
     setSubmitting(true);
     setErr("");
@@ -4695,8 +4741,9 @@ function InscriptionModal({ target, kind, onClose }) {
     // domaine : deux sources de vérité, c'est une de trop.
     const endpoint = (window.SITE_CONFIG && window.SITE_CONFIG.leadsEndpoint)
       || "https://admin.lagriotheque.com/api/leads";
+    let res = null;
     try {
-      await fetch(endpoint, {
+      res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -4706,12 +4753,16 @@ function InscriptionModal({ target, kind, onClose }) {
           resource_id: target.id,
           consent,
           source: `inscription:${kind}:${target.title || target.id}`,
+          ...(isEvt ? { profile, organization, link } : {}),
         }),
       });
     } catch (e) {
       console.warn("Lead capture failed:", e);
     }
     setSubmitting(false);
+    // Événement complet : le back-office refuse l'inscription (409).
+    if (res && res.status === 409) { setStep("full"); return; }
+    if (isEvt && res && res.status === 429) { setErr("Trop de tentatives, réessaie dans une minute."); return; }
     setStep("done");
   }
 
@@ -4737,15 +4788,28 @@ function InscriptionModal({ target, kind, onClose }) {
           {target.title}
         </h3>
 
-        {step === "done" ? (
+        {step === "full" ? (
+          <div style={{ padding: "8px 0 12px" }}>
+            <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 18 }}>
+              Désolé, c'est complet : toutes les places ont été réservées.
+            </p>
+            <button onClick={onClose} style={{ padding: "10px 18px", border: "1px solid var(--ink)", background: "var(--ink)", color: "var(--paper)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", cursor: "pointer" }}>
+              Fermer
+            </button>
+          </div>
+        ) : step === "done" ? (
           <div style={{ padding: "8px 0 12px" }}>
             <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>
-              ✓ Merci{name ? `, ${name}` : ""} — ta demande d'inscription est enregistrée.
+              {isEvt
+                ? `✓ Merci${name ? `, ${name}` : ""} — ta place est réservée.`
+                : `✓ Merci${name ? `, ${name}` : ""} — ta demande d'inscription est enregistrée.`}
             </p>
             <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 18, opacity: 0.75 }}>
               {kind === "formation"
                 ? "On te recontacte sous 48h ouvrées avec les modalités et le devis. Tu recevras un email de confirmation."
-                : "Ta place est demandée — on te confirme par email avec les infos pratiques."}
+                : isEvt
+                  ? "Tu recevras les infos pratiques par email avant le jour J."
+                  : "Ta place est demandée — on te confirme par email avec les infos pratiques."}
             </p>
             <button onClick={onClose} style={{ padding: "10px 18px", border: "1px solid var(--ink)", background: "var(--ink)", color: "var(--paper)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", cursor: "pointer" }}>
               Fermer
@@ -4754,17 +4818,39 @@ function InscriptionModal({ target, kind, onClose }) {
         ) : (
           <>
             <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 24, opacity: 0.75 }}>
-              Laisse-nous tes coordonnées : on revient vers toi sous 48h ouvrées avec les modalités et le financement possible (CPF, OPCO, FAF).
+              {isEvt
+                ? "Remplis ce formulaire pour réserver ta place. Les places sont limitées."
+                : "Laisse-nous tes coordonnées : on revient vers toi sous 48h ouvrées avec les modalités et le financement possible (CPF, OPCO, FAF)."}
             </p>
             <form onSubmit={submit}>
-              <label style={labelStyle}>Nom et prénom</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
+              <label style={labelStyle}>{isEvt ? "Nom et prénom *" : "Nom et prénom"}</label>
+              <input type="text" value={name} required={isEvt} onChange={(e) => setName(e.target.value)} style={inputStyle} />
 
               <label style={labelStyle}>Email *</label>
               <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ton@email.com" style={inputStyle} />
 
               <label style={labelStyle}>Téléphone (optionnel)</label>
-              <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="06 00 00 00 00" style={{ ...inputStyle, marginBottom: 18 }} />
+              <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="06 00 00 00 00" style={{ ...inputStyle, marginBottom: isEvt ? 14 : 18 }} />
+
+              {isEvt && (
+                <>
+                  <label style={labelStyle}>Tu es *</label>
+                  <select required value={profile} onChange={(e) => setProfile(e.target.value)} style={inputStyle}>
+                    <option value="">Choisir…</option>
+                    <option>Jeune fondateur·rice</option>
+                    <option>Créatif·ve / créateur·rice</option>
+                    <option>Agence</option>
+                    <option>Marque</option>
+                    <option>Autre</option>
+                  </select>
+
+                  <label style={labelStyle}>Structure ou projet *</label>
+                  <input type="text" required value={organization} onChange={(e) => setOrganization(e.target.value)} placeholder="Nom de ta marque, ton agence ou ton projet" style={inputStyle} />
+
+                  <label style={labelStyle}>Lien (Instagram, site…)</label>
+                  <input type="text" value={link} onChange={(e) => setLink(e.target.value)} placeholder="@toncompte ou https://…" style={{ ...inputStyle, marginBottom: 18 }} />
+                </>
+              )}
 
               <label style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12, lineHeight: 1.5, cursor: "pointer", marginBottom: 22 }}>
                 <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} style={{ marginTop: 3 }} />
@@ -4779,8 +4865,8 @@ function InscriptionModal({ target, kind, onClose }) {
                 <button type="button" onClick={onClose} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: "transparent", color: "var(--ink)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", cursor: "pointer" }}>
                   Annuler
                 </button>
-                <button type="submit" disabled={submitting} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: submitting ? "var(--ink-dim)" : "var(--accent, #ffca00)", color: "var(--ink)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", fontWeight: 600, cursor: submitting ? "wait" : "pointer" }}>
-                  {submitting ? "..." : "Envoyer ma demande"}
+                <button type="submit" disabled={submitting} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: submitting ? "var(--ink-dim)" : "var(--ink)", color: "var(--paper)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", fontWeight: 600, cursor: submitting ? "wait" : "pointer" }}>
+                  {submitting ? "..." : isEvt ? "Réserver ma place" : "Envoyer ma demande"}
                 </button>
               </div>
             </form>

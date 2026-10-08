@@ -28,11 +28,22 @@ export default function EventForm({ initial = null }) {
       link: "",
       link_label: "",
       status: "À VENIR",
+      capacity: 0,
       position: 0,
     };
   }
 
   const set = (key, val) => setData((d) => ({ ...d, [key]: val }));
+
+  // Jauge en direct (places prises / restantes) pour un événement existant.
+  const [places, setPlaces] = useState(null);
+  useEffect(() => {
+    if (!isEdit || !data.id) return;
+    fetch((window.__BP || "") + `/api/places/${data.id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setPlaces)
+      .catch(() => {});
+  }, [isEdit, data.id]);
 
   // Auto-id à partir du titre + date
   useEffect(() => {
@@ -209,6 +220,30 @@ export default function EventForm({ initial = null }) {
               onChange={(e) => set("position", Number(e.target.value))}
             />
             <p className="note">Plus petit = affiché en premier.</p>
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginTop: 16 }}>
+          <div>
+            <label>Places max (inscriptions en ligne)</label>
+            <input
+              type="number"
+              min={0}
+              value={data.capacity ?? 0}
+              onChange={(e) => set("capacity", Math.max(0, Number(e.target.value) || 0))}
+            />
+            <p className="note">0 = pas de limite. Une fois atteint, le site affiche « Complet » et ferme le formulaire.</p>
+          </div>
+          <div>
+            <label>Inscrits</label>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: 15, marginTop: 10 }}>
+              {places
+                ? (places.capacity
+                    ? `${places.capacity - places.remaining} / ${places.capacity}${places.full ? " — complet" : ` — ${places.remaining} restante${places.remaining > 1 ? "s" : ""}`}`
+                    : "pas de limite")
+                : "—"}
+            </p>
+            <p className="note">Détail dans l'onglet Leads (source inscription-evenement).</p>
           </div>
         </div>
       </section>

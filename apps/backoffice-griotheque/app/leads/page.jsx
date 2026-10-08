@@ -33,12 +33,15 @@ export default function LeadsPage() {
 
   function exportCsv() {
     const rows = [
-      ["email", "name", "phone", "source", "subject", "message", "resource_id", "resource_title", "consent", "date"],
+      ["email", "name", "phone", "source", "profile", "organization", "link", "subject", "message", "resource_id", "resource_title", "consent", "date"],
       ...leads.map((l) => [
         l.email,
         l.name || "",
         l.phone || "",
         l.source || "",
+        l.profile || "",
+        l.organization || "",
+        l.link || "",
         l.subject || "",
         l.message || "",
         l.resource_id || "",
@@ -107,6 +110,12 @@ export default function LeadsPage() {
                 <td>{l.phone || "—"}</td>
                 <td><span className="pill">{l.source || "site"}</span></td>
                 <td style={{ maxWidth: 320 }}>
+                  {(l.profile || l.organization || l.link) ? (
+                    <div style={{ marginBottom: 4 }}>
+                      {[l.profile, l.organization].filter(Boolean).join(" · ")}
+                      {l.link ? <> · <a href={/^https?:/i.test(l.link) ? l.link : "https://" + l.link.replace(/^@/, "instagram.com/")} target="_blank" rel="noopener noreferrer">{l.link}</a></> : null}
+                    </div>
+                  ) : null}
                   {l.subject ? <strong>{l.subject}</strong> : null}
                   {l.subject && l.message ? " — " : null}
                   {l.message ? <span style={{ whiteSpace: "pre-line" }}>{l.message}</span> : (!l.subject ? "—" : null)}
