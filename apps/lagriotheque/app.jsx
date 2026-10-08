@@ -533,7 +533,7 @@ function Manifesto() {
         return k !== "9999-00-00" && k.slice(0, 10) < todayKeyWs;
       });
     };
-    return WORKSHOPS.filter((w) => !passe(w));
+    return [...eventWorkshops(false), ...WORKSHOPS.filter((w) => !passe(w))];
   }, [todayKeyWs]);
   const homeWorkshopCategories = React.useMemo(() => {
     const set = new Set();
@@ -3478,12 +3478,13 @@ function WorkshopRow({ w, onHover }) {
   return (
     <a
       className={"lg__row" + (w.available ? "" : " is-soon")}
-      href={"/workshops/" + w.id}
+      href={w.href || "/workshops/" + w.id}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
     >
       <p className="lg__row__label">
         WORKSHOP
+        {w.isEvent && w.date && <span> · {formatEventDate(w.date)}</span>}
         {!w.available && <span className="lg__row__soon"> · PROCHAINEMENT</span>}
       </p>
       <h3 className="lg__row__title" ref={titleRef}>
@@ -3508,8 +3509,8 @@ function Workshops() {
       return k !== "9999-00-00" && k.slice(0, 10) < todayKey;
     });
   };
-  const current = WORKSHOPS.filter((w) => !isPast(w));
-  const archived = WORKSHOPS.filter(isPast);
+  const current = [...eventWorkshops(false), ...WORKSHOPS.filter((w) => !isPast(w))];
+  const archived = [...WORKSHOPS.filter(isPast), ...eventWorkshops(true)];
   const categories = React.useMemo(() => {
     const set = new Set();
     WORKSHOPS.forEach((w) => {
@@ -3635,6 +3636,15 @@ function useEventPlaces(ev) {
 }
 function placesRestantes(n) {
   return `${n} place${n > 1 ? "s" : ""} restante${n > 1 ? "s" : ""}`;
+}
+
+// Les événements de type « Workshop » (ex. chez un partenaire) apparaissent
+// aussi dans les listes de workshops ; la ligne mène à leur fiche événement.
+function eventWorkshops(past = false) {
+  const list = typeof EVENTS !== "undefined" ? EVENTS : [];
+  return list
+    .filter((e) => /workshop/i.test(e.kind || "") && eventIsPast(e) === past)
+    .map((e) => ({ ...e, available: true, isEvent: true, href: "/events/" + e.id, discipline: e.discipline || "" }));
 }
 
 function eventIsPast(e) {
