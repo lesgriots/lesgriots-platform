@@ -1607,6 +1607,11 @@ function ProgramPage({ item, kind }) {
       && !/[?&]tfp=0/.test(window.location.search)) {
     return <FormationTfp item={item} />;
   }
+  // Fiche ÉVÉNEMENT : même construction que la fiche formation (formation-tfp.jsx).
+  if (kind === "event" && typeof window !== "undefined" && window.EventTfp
+      && !/[?&]tfp=0/.test(window.location.search)) {
+    return <EventTfp item={item} />;
+  }
   const titleRef = useFitOne(160);
   const titleSentinelRef = useRef(null);
   const headerRef = useRef(null);

@@ -682,5 +682,245 @@
     );
   }
 
+
+  // ==========================================================================
+  // FICHE ÉVÉNEMENT / WORKSHOP — même construction que la fiche formation
+  // (hero vidéo, promesse mot à mot, sections, barres sous le menu, bloc de
+  // réservation, CTA final), sans ce qui est propre aux formations (prix,
+  // CPF, programme par jour, modalités réglementaires).
+  // ==========================================================================
+  function EventTfp({ item }) {
+    const f = item;
+    const [showInscription, setShowInscription] = useState(false);
+    const pageRef = useRef(null);
+    const places = useEventPlaces(f);
+    const passe = eventIsPast(f);
+    const complet = !passe && ((f.status || "").toUpperCase() === "COMPLET" || !!(places && places.full));
+    const ouvert = !passe && !complet;
+    const dateTxt = [formatEventDate(f.date), f.time].filter(Boolean).join(" · ");
+    const lieuTxt = [f.location, f.city].filter(Boolean).join(", ");
+    const externe = /^https?:\/\//i.test(f.link || "");
+    const ctaTexte = passe ? "Événement passé" : complet ? "Complet" : (f.link_label || "Réserver ma place");
+    const inscrire = () => {
+      if (!ouvert) return;
+      if (externe) { window.open(f.link, "_blank", "noopener"); return; }
+      setShowInscription(true);
+    };
+
+    const ownVideo = f.media && /\.(mp4|webm|mov|m4v)$/i.test(f.media.src || "") ? f.media.src : "";
+    const heroVideo = ownVideo || text("home.hero_video", "");
+    const heroPoster = (f.media && f.media.poster) || (f.media && f.media.type === "image" ? f.media.src : "");
+
+    const blocs = (Array.isArray(f.overview) ? f.overview : []).map((b) => ({
+      head: Array.isArray(b) ? b[0] : b && b.title,
+      text: Array.isArray(b) ? b[1] : b && b.text,
+      media: (() => { const m = Array.isArray(b) ? b[2] : b && b.media; return typeof m === "string" ? m : (m && m.src) || ""; })(),
+    })).filter((b) => b.head || b.text);
+    // 1er bloc = la promesse (écran plein, mot à mot) ; le bloc « Pour qui »
+    // alimente la section Public ; les autres deviennent des sections.
+    const promesse = blocs[0] ? blocs[0].text : (f.tagline || "");
+    const pourQui = blocs.find((b) => /pour qui/i.test(b.head || ""));
+    const autres = blocs.slice(1).filter((b) => b !== pourQui);
+
+    useEffect(() => {
+      const root = pageRef.current;
+      if (!root) return;
+      const header = document.querySelector(".lg__header");
+      const hero = root.querySelector(".tfp__hero");
+      const h1 = root.querySelector(".tfp__hero h1");
+      const tb = document.querySelector(".tfp__titlebar");
+      const sb = document.querySelector(".tfp__sectionbar");
+      const sbName = document.querySelector("#tfp-sb-name");
+      const bar = document.querySelector(".tfp__bar");
+      const secs = Array.from(root.querySelectorAll("[data-bar]"));
+      if (!hero || !tb || !sb || !bar) return;
+      let raf = false;
+      const mesure = () => {
+        raf = false;
+        const hH = header ? header.offsetHeight : 121;
+        const h1rel = h1 ? h1.getBoundingClientRect().top - hero.getBoundingClientRect().top : 0;
+        const stuck = window.scrollY >= hero.offsetHeight - h1rel;
+        tb.classList.toggle("is-stuck", stuck);
+        tb.setAttribute("aria-hidden", stuck ? "false" : "true");
+        document.documentElement.style.setProperty("--lg-title-h", tb.offsetHeight + "px");
+        const barsH = hH + tb.offsetHeight;
+        let cur = null;
+        for (const sx of secs) {
+          const r = sx.getBoundingClientRect();
+          if (r.top <= barsH + 1 && r.bottom > barsH + 1) cur = sx;
+        }
+        const on = stuck && !!cur;
+        sb.classList.toggle("is-on", on);
+        sb.setAttribute("aria-hidden", on ? "false" : "true");
+        if (on) sbName.textContent = cur.getAttribute("data-bar");
+        bar.classList.toggle("is-on", stuck);
+        bar.setAttribute("aria-hidden", stuck ? "false" : "true");
+      };
+      const onScroll = () => { if (!raf) { raf = true; requestAnimationFrame(mesure); } };
+      mesure();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      document.body.classList.add("is-tfp");
+      return () => {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+        document.body.classList.remove("is-tfp");
+      };
+    }, [f.id]);
+
+    const etatPlaces = passe ? "Événement passé" : complet ? "Complet" : (places && places.capacity ? placesRestantes(places.remaining) : (f.status || ""));
+    const carte = (
+      <div className="lg__cta-mini">
+        <p className="lg__cta-mini__title">{f.title}</p>
+        <div className="lg__cta-mini__head">
+          <strong className="lg__cta-mini__price">{formatEventDate(f.date) || "Date à venir"}</strong>
+        </div>
+        <ul className="lg__cta-mini__meta">
+          {f.time && <li>{f.time}</li>}
+          {lieuTxt && <li>{lieuTxt}</li>}
+          {f.kind && <li>{f.kind}</li>}
+          {etatPlaces && <li>{etatPlaces}</li>}
+          {Number(f.min_age) > 0 && <li>Réservé aux {f.min_age} ans et plus</li>}
+        </ul>
+        {f.audience && (
+          <div className="lg__cta-mini__sessions">
+            <p className="lg__cta-mini__sessions__label">Pour qui</p>
+            <p className="lg__cta-mini__audience__text">{f.audience}</p>
+          </div>
+        )}
+        {!passe && (
+          <button type="button" className="lg__cta-mini__btn" onClick={inscrire} disabled={!ouvert} style={!ouvert ? { opacity: 0.5, cursor: "not-allowed" } : undefined}>
+            {ctaTexte}{ouvert ? " →" : ""}
+          </button>
+        )}
+        <a className="lg__cta-mini__sub" href="mailto:formations@lesgriots.com">Une question ? Écris-nous</a>
+      </div>
+    );
+
+    return (
+      <section className="lg__formation tfp tfp--event" ref={pageRef}>
+        {ReactDOM.createPortal(
+          <div className="tfp__fixed">
+            <div className="tfp__titlebar" aria-hidden="true">
+              <div className="tfp__titlebar__title">{f.title}</div>
+              <div className="tfp__titlebar__meta">
+                {formatEventDate(f.date) && <span className="dur">{formatEventDate(f.date)}</span>}
+                {etatPlaces && <span>{etatPlaces}</span>}
+                {!passe && <button type="button" onClick={inscrire} disabled={!ouvert}>{ctaTexte}</button>}
+              </div>
+            </div>
+            <div className="tfp__sectionbar" aria-hidden="true">
+              <span className="tfp__sectionbar__name" id="tfp-sb-name"></span>
+              <span className="tfp__sectionbar__cur" id="tfp-sb-cur"></span>
+              <span className="tfp__sectionbar__count" id="tfp-sb-count"></span>
+            </div>
+            <div className="tfp__bar" aria-hidden="true">
+              <div className="tfp__bar__price"><strong>{formatEventDate(f.date) || f.title}</strong>{etatPlaces && <span>{etatPlaces.toLowerCase()}</span>}</div>
+              {!passe && <button type="button" className="tfp__btn" onClick={inscrire} disabled={!ouvert}>{ctaTexte}{ouvert ? " →" : ""}</button>}
+            </div>
+          </div>,
+          document.body
+        )}
+
+        {/* ---- 1. Hero ---------------------------------------------------- */}
+        <div className="lg__pagehero tfp__hero">
+          {heroVideo ? (
+            <video src={heroVideo} poster={heroPoster || undefined} autoPlay loop muted playsInline preload="metadata" />
+          ) : heroPoster ? (
+            <img src={heroPoster} alt="" />
+          ) : null}
+          <div className="tfp__hero__txt">
+            <span className="tfp__pill">{[f.kind || "Événement", ouvert ? "sur inscription" : etatPlaces.toLowerCase()].filter(Boolean).join(" · ")}</span>
+            <h1>{f.title}</h1>
+            {f.tagline && <p className="tfp__lead">{f.tagline}</p>}
+            <div className="tfp__hero__cta">
+              {!passe && <button type="button" className="tfp__btn tfp__btn--paper" onClick={inscrire} disabled={!ouvert}>{ctaTexte}{ouvert ? " →" : ""}</button>}
+              <small>{[formatEventDate(f.date), lieuTxt].filter(Boolean).join(" · ").toLowerCase()}</small>
+            </div>
+          </div>
+        </div>
+
+        <div className="tfp__after">
+          {/* ---- 2. Promesse mot à mot ------------------------------------ */}
+          {promesse && <Promise_ text={promesse} onCta={inscrire} ctaLabel={ctaTexte} />}
+
+          {/* ---- 3. Blocs de la fiche ------------------------------------- */}
+          {autres.map((b, i) => (
+            <section className="tfp__split" data-bar={b.head || f.title} key={i}>
+              <div className="tfp__split__txt">
+                {b.head && <h2>{b.head}</h2>}
+                {String(b.text || "").split(/\n\n/).map((p, j) => <p key={j}>{p}</p>)}
+              </div>
+              {b.media && <div className="tfp__split__img" style={{ backgroundImage: "url(" + b.media + ")" }} />}
+            </section>
+          ))}
+
+          {/* ---- 4. Pour qui ---------------------------------------------- */}
+          {(pourQui || f.audience) && (
+            <section className="tfp__two" data-bar="Public">
+              <div>
+                <h2>Pour qui</h2>
+                {f.audience && <p className="tfp__lead">{f.audience}</p>}
+                {Number(f.min_age) > 0 && <p className="tfp__fine">Réservé aux {f.min_age} ans et plus.</p>}
+              </div>
+              {pourQui && pourQui.text && <ul className="tfp__arrows">{sentences(pourQui.text).map((pt, i) => <li key={i}>{pt}</li>)}</ul>}
+            </section>
+          )}
+
+          {/* ---- 5. Comment ça se passe ----------------------------------- */}
+          <section className="tfp__steps" data-bar="Comment ça se passe">
+            <h2>Comment ça se passe</h2>
+            <div className="tfp__steps__grid">
+              <div><span className="k">Étape 1</span><h3>Tu réserves</h3><p>{places && places.capacity ? "Le formulaire reste ouvert jusqu'à " + places.capacity + " inscrits, puis il se ferme." : "Le formulaire prend une minute."}{Number(f.min_age) > 0 ? " Réservé aux " + f.min_age + " ans et plus." : ""}</p></div>
+              <div><span className="k">Étape 2</span><h3>On te confirme</h3><p>Tu reçois les infos pratiques par email avant le jour J.</p></div>
+              <div><span className="k">Étape 3</span><h3>Le jour J</h3><p>{[dateTxt, lieuTxt].filter(Boolean).join(" · ")}.</p></div>
+            </div>
+          </section>
+
+          {/* ---- 6. Infos pratiques (calqué sur « Prochaine session ») ------- */}
+          <section className="tfp__next" data-bar="Infos pratiques">
+            <div className="tfp__next__col">
+              <p className="tfp__pill">Infos pratiques</p>
+              <h2 className="tfp__next__title">{formatEventDate(f.date) || "Date à venir"}</h2>
+              <p className="tfp__next__sub">{[f.kind, lieuTxt].filter(Boolean).join(" · ").toLowerCase()}</p>
+              <ul className="tfp__next__list">
+                {f.time && <li className="tfp__next__row"><time className="tfp__next__date">Horaires</time><span className="tfp__next__meta">{f.time}</span></li>}
+                {lieuTxt && <li className="tfp__next__row"><time className="tfp__next__date">Lieu</time><span className="tfp__next__meta">{lieuTxt}</span></li>}
+                {etatPlaces && <li className="tfp__next__row"><time className="tfp__next__date">Places</time><span className={"tfp__next__meta is-" + (ouvert ? "open" : "full")}>{etatPlaces}</span></li>}
+                {Number(f.min_age) > 0 && <li className="tfp__next__row"><time className="tfp__next__date">Âge</time><span className="tfp__next__meta">{f.min_age} ans et plus</span></li>}
+              </ul>
+              {!passe && <button type="button" className="tfp__btn tfp__next__cta" onClick={inscrire} disabled={!ouvert}>{ctaTexte}</button>}
+            </div>
+          </section>
+
+          {/* ---- 7. Réserver ---------------------------------------------- */}
+          <section className="tfp__offer" id="reserver" data-bar="Réserver">
+            <div className="tfp__offer__grid">
+              <div className="tfp__offer__txt">
+                <h2>Réserver ma place</h2>
+                <p className="tfp__lead">{f.description || [dateTxt, lieuTxt].filter(Boolean).join(" · ")}</p>
+              </div>
+              <div className="tfp__offer__card">{carte}</div>
+            </div>
+          </section>
+
+          {/* ---- 8. CTA final --------------------------------------------- */}
+          <div className="lg__cta-final">
+            {heroVideo ? <video className="lg__cta-final__bg" src={heroVideo} poster={heroPoster || undefined} autoPlay loop muted playsInline aria-hidden="true" /> : heroPoster ? <img className="lg__cta-final__bg" src={heroPoster} alt="" aria-hidden="true" /> : null}
+            <div className="lg__cta-final__veil" aria-hidden="true" />
+            <div className="lg__cta-final__inner">
+              <p className="lg__cta-final__kicker">{formatEventDate(f.date)}{lieuTxt ? " · " + lieuTxt : ""}</p>
+              <h2 className="lg__cta-final__title">{f.title}</h2>
+              {!passe && <button type="button" className="lg__cta-final__btn" onClick={inscrire} disabled={!ouvert}>{ctaTexte}{ouvert ? " →" : ""}</button>}
+            </div>
+          </div>
+        </div>
+
+        {showInscription && <InscriptionModal target={{ id: f.id, title: f.title, min_age: f.min_age }} kind="event" onClose={() => setShowInscription(false)} />}
+      </section>
+    );
+  }
+
+  window.EventTfp = EventTfp;
   window.FormationTfp = FormationTfp;
 })();
