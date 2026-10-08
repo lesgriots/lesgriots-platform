@@ -1639,9 +1639,13 @@ function ProgramPage({ item, kind }) {
   // pour amener le bouton actif au cran de gauche (utile sur mobile où les onglets
   // sont en scroll horizontal).
   useEffect(() => {
+    // On fait défiler la seule barre d'onglets : scrollIntoView faisait aussi
+    // défiler la page en largeur (marge de gauche mangée sur les fiches).
     const btn = document.querySelector(".lg__tabs .lg__tabs__btn.is-active");
-    if (btn && typeof btn.scrollIntoView === "function") {
-      btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    const bar = btn && btn.closest(".lg__tabs__scroll");
+    if (btn && bar) {
+      const delta = btn.getBoundingClientRect().left - bar.getBoundingClientRect().left;
+      bar.scrollTo({ left: bar.scrollLeft + delta, behavior: "smooth" });
     }
   }, [activeTab]);
 

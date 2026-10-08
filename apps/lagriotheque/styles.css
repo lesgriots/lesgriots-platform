@@ -8411,3 +8411,15 @@ a.lg__partners__logo:hover {
      gardee en memoire pour rien. */
   .lg-rev.is-in { will-change: auto; }
 }
+
+/* Fiches événement / workshop : même marge latérale que la fiche formation
+   (gouttière --lg-gutter : 24 px sur mobile, jusqu'à 64 px sur grand écran). */
+.lg__formation:not(.tfp) {
+  padding-left: var(--lg-gutter);
+  padding-right: var(--lg-gutter);
+}
+/* …titre du bandeau compris : il s'aligne sur la même gouttière que le texte. */
+.lg__formation:not(.tfp) .lg__pagehero__overlay {
+  padding-left: var(--lg-gutter);
+  padding-right: var(--lg-gutter);
+}
