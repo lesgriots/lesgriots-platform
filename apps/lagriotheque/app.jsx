@@ -2649,7 +2649,7 @@ function ProgramPage({ item, kind }) {
           ne faisait rien. */}
       {showInscription && (
         <InscriptionModal
-          target={{ id: f.id, title: f.title }}
+          target={{ id: f.id, title: f.title, min_age: f.min_age }}
           kind={kind}
           onClose={() => setShowInscription(false)}
         />
@@ -4042,7 +4042,7 @@ function AgendaEventRow({ e, isOpen, onToggle }) {
       )}
       {showInscription && (
         <InscriptionModal
-          target={{ id: e.id, title: e.title }}
+          target={{ id: e.id, title: e.title, min_age: e.min_age }}
           kind="event"
           onClose={() => setShowInscription(false)}
         />
@@ -4702,6 +4702,15 @@ function ResourceModal({ resource, onClose }) {
 // (systeme.io) et le process Qualiopi (génération des documents via l'OS).
 function InscriptionModal({ target, kind, onClose }) {
   const isEvt = kind === "event";
+  const minAge = Number(target && target.min_age) > 0 ? Math.floor(Number(target.min_age)) : 0;
+  const ageAt = (d) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || "");
+    if (!m) return -1;
+    const now = new Date();
+    let a = now.getFullYear() - Number(m[1]);
+    if (now.getMonth() + 1 < Number(m[2]) || (now.getMonth() + 1 === Number(m[2]) && now.getDate() < Number(m[3]))) a--;
+    return a;
+  };
   const [profile, setProfile] = useState("");
   const [organization, setOrganization] = useState("");
   const [link, setLink] = useState("");
@@ -4731,6 +4740,7 @@ function InscriptionModal({ target, kind, onClose }) {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr("Email invalide"); return; }
     if (isEvt && !name.trim()) { setErr("Indique ton nom et ton prénom."); return; }
     if (isEvt && !birthdate) { setErr("Indique ta date de naissance."); return; }
+    if (isEvt && minAge && ageAt(birthdate) < minAge) { setErr(`Ce workshop est réservé aux ${minAge} ans et plus.`); return; }
     if (isEvt && !profile) { setErr("Indique ton profil."); return; }
     if (isEvt && !organization.trim()) { setErr("Indique ta structure ou ton projet."); return; }
     if (!consent) { setErr("Merci d'accepter pour envoyer ta demande."); return; }
@@ -4764,6 +4774,10 @@ function InscriptionModal({ target, kind, onClose }) {
     setSubmitting(false);
     // Événement complet : le back-office refuse l'inscription (409).
     if (res && res.status === 409) { setStep("full"); return; }
+    if (isEvt && res && res.status === 400) {
+      let j = null; try { j = await res.json(); } catch (e2) {}
+      if (j && j.error === "age") { setErr(`Ce workshop est réservé aux ${j.min_age || minAge} ans et plus.`); return; }
+    }
     if (isEvt && res && res.status === 429) { setErr("Trop de tentatives, réessaie dans une minute."); return; }
     setStep("done");
   }
@@ -4823,7 +4837,7 @@ function InscriptionModal({ target, kind, onClose }) {
           <>
             <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 24, opacity: 0.75 }}>
               {isEvt
-                ? "Remplis ce formulaire pour réserver ta place. Les places sont limitées."
+                ? `Remplis ce formulaire pour réserver ta place. Les places sont limitées.${minAge ? ` Réservé aux ${minAge} ans et plus.` : ""}`
                 : "Laisse-nous tes coordonnées : on revient vers toi sous 48h ouvrées avec les modalités et le financement possible (CPF, OPCO, FAF)."}
             </p>
             <form onSubmit={submit}>

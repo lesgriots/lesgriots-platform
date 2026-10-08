@@ -101,6 +101,20 @@ export async function POST(req) {
     if (source === "inscription-evenement" && resource_id) {
       const ev = getEvent(String(resource_id));
       if (ev) {
+        // Âge minimum (ex. 18) : vérifié côté serveur sur la date de naissance.
+        const minAge = Number(ev.min_age) > 0 ? Math.floor(Number(ev.min_age)) : 0;
+        if (minAge) {
+          const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(birthdate || ""));
+          let age = -1;
+          if (m) {
+            const now = new Date();
+            age = now.getFullYear() - Number(m[1]);
+            if (now.getMonth() + 1 < Number(m[2]) || (now.getMonth() + 1 === Number(m[2]) && now.getDate() < Number(m[3]))) age--;
+          }
+          if (age < minAge) {
+            return NextResponse.json({ error: "age", min_age: minAge }, { status: 400, headers });
+          }
+        }
         const p = eventPlaces(ev);
         const normalized = String(email).trim().toLowerCase();
         const already = listLeads({ sort: false }).some(

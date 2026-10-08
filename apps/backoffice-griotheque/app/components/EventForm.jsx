@@ -29,6 +29,7 @@ export default function EventForm({ initial = null }) {
       link_label: "",
       status: "À VENIR",
       capacity: 0,
+      min_age: 0,
       position: 0,
     };
   }
@@ -244,6 +245,19 @@ export default function EventForm({ initial = null }) {
                 : "—"}
             </p>
             <p className="note">Détail dans l'onglet Leads (source inscription-evenement).</p>
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginTop: 16 }}>
+          <div>
+            <label>Âge minimum</label>
+            <input
+              type="number"
+              min={0}
+              value={data.min_age ?? 0}
+              onChange={(e) => set("min_age", Math.max(0, Number(e.target.value) || 0))}
+            />
+            <p className="note">0 = pas de limite. Ex. 18 : l'inscription est refusée en dessous.</p>
           </div>
         </div>
       </section>
