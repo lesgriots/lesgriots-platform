@@ -706,16 +706,6 @@
             <h2 className="lg__avis__title">Avis</h2>
             <p className="lg__avis__text">Les premiers avis seront publiés à l'issue des sessions 2025-2026. La Griothèque démarre sa première promotion en 2025 — les indicateurs de satisfaction et de recommandation seront accessibles ici dès le bilan de la promo.</p>
           </section>
-          <div className="lg__cta-final">
-            {heroVideo ? <video className="lg__cta-final__bg" src={heroVideo} poster={heroPoster || undefined} autoPlay loop muted playsInline aria-hidden="true" /> : heroPoster ? <img className="lg__cta-final__bg" src={heroPoster} alt="" aria-hidden="true" /> : null}
-            <div className="lg__cta-final__veil" aria-hidden="true" />
-            <div className="lg__cta-final__inner">
-              <p className="lg__cta-final__kicker">Prêt à commencer ?</p>
-              <h2 className="lg__cta-final__title">{f.title}</h2>
-              {f.price && <p className="lg__cta-final__price">{f.price}<span className="lg__cta-final__price__ht"> HT</span></p>}
-              <button type="button" className="lg__cta-final__btn" onClick={ctaAction}>{ctaTexte} →</button>
-            </div>
-          </div>
         </div>
 
         {/* ---- Modales (mêmes composants que la fiche actuelle) ------------- */}
