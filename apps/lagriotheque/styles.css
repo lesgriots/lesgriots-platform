@@ -8434,7 +8434,6 @@ a.lg__partners__logo:hover {
 @media (max-width: 700px) { :root { --fs-micro: 12px; --fs-second: 14px; --fs-body: 16px; } }
 
 /* Labels, pastilles, mentions */
-.lg__qualiopi__text,
 .lg__hero-yard__scrollhint,
 .lg__cta-mini__hint,
 .lg__cta-mini__badges span,
@@ -8443,11 +8442,8 @@ a.lg__partners__logo:hover {
 .lg__row__label,
 .lg__row__label span,
 .lg__ag__pill,
-.lg__cta-final__kicker,
-.lg__footer__nl label,
-.lg__footer__col a,
-.lg__footer__col li,
-.lg__footer a { font-size: var(--fs-micro); }
+.lg__cta-final__kicker { font-size: var(--fs-micro); }
+/* Le pied de page garde ses tailles d origine : seul endroit exempte du minimum (11/10/2026). */
 
 /* Texte secondaire et boutons */
 .lg__cta-mini__sub,
@@ -8469,4 +8465,5 @@ a.lg__partners__logo:hover {
 .lg__contact__form__send { font-size: var(--fs-second); }
 
 /* Champs de formulaire : 16 px (en dessous, l'iPhone zoome à la saisie) */
-.lg input, .lg select, .lg textarea { font-size: max(16px, 1em); }
+.lg input:not(.lg__footer input), .lg select, .lg textarea { font-size: max(16px, 1em); }
+@media (max-width: 700px) { .lg .lg__footer input { font-size: 16px; } }
