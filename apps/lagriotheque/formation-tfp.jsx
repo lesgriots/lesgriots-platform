@@ -31,6 +31,51 @@
       .filter((s) => s.length > 0);
   }
 
+  // Texte révélé au défilement (effet TFP) : chaque mot est un <span>, les mots
+  // passent du gris au noir à mesure que le paragraphe traverse l'écran.
+  function Rv({ as: Tag = "p", className, children }) {
+    const t = typeof children === "string" ? children : String(children == null ? "" : children);
+    const words = t.trim().split(/\s+/).filter(Boolean);
+    return (
+      <Tag className={(className ? className + " " : "") + "rv"}>
+        {words.map((w, i) => (
+          <React.Fragment key={i}><span className="rv-w">{w}</span>{i < words.length - 1 ? " " : ""}</React.Fragment>
+        ))}
+      </Tag>
+    );
+  }
+  function useRevealText(rootRef, deps) {
+    useEffect(() => {
+      const root = rootRef.current;
+      if (!root) return;
+      // Les paragraphes d'un même bloc s'allument à la suite (un seul fil de
+      // lecture), pas tous en même temps : on mesure leur conteneur commun.
+      const blocks = Array.from(new Set(Array.from(root.querySelectorAll(".rv")).map((e) => e.parentElement)));
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) { blocks.forEach((b) => b.querySelectorAll(".rv-w").forEach((w) => w.classList.add("on"))); return; }
+      let raf = false;
+      const run = () => {
+        raf = false;
+        const vh = window.innerHeight;
+        for (const b of blocks) {
+          const r = b.getBoundingClientRect();
+          if (r.bottom < 0 || r.top > vh) continue;
+          // Début : haut du bloc à 85 % de l'écran ; fin : bas du bloc à 45 %.
+          const start = vh * 0.85, end = vh * 0.45;
+          const p = Math.min(1, Math.max(0, (start - r.top) / Math.max(1, (start - end) + r.height)));
+          const ws = b.querySelectorAll(".rv-w");
+          const k = Math.round(p * ws.length);
+          for (let i = 0; i < ws.length; i++) ws[i].classList.toggle("on", i < k);
+        }
+      };
+      const onScroll = () => { if (!raf) { raf = true; requestAnimationFrame(run); } };
+      run();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
+    }, deps);
+  }
+
   // Découpe un champ texte en { lead, note, items } : 1re phrase = chapeau,
   // phrases correspondant à `noteRe` = mention grise, le reste = liste fléchée.
   function splitField(str, noteRe) {
@@ -284,6 +329,7 @@
     }, [f.id]);
 
     const inscrire = () => setShowInscription(true);
+    useRevealText(pageRef, [f.id]);
 
     // La carte de réservation du site (lg__cta-mini), posée DEUX FOIS dans le fil
     // de la page (après la promesse et après la FAQ), comme les deux blocs de prix
@@ -453,7 +499,7 @@
             <section className="tfp__split" data-bar="Pourquoi">
               <div className="tfp__split__txt">
                 <h2>{accroche.head}</h2>
-                {String(accroche.text).split(/\n\n/).map((p, i) => <p key={i}>{p}</p>)}
+                {String(accroche.text).split(/\n\n/).map((p, i) => <Rv key={i}>{p}</Rv>)}
               </div>
               {accroche.media && <div className="tfp__split__img" style={{ backgroundImage: "url(" + accroche.media + ")" }} />}
             </section>
@@ -464,7 +510,7 @@
             <section className="tfp__two" data-bar="Public">
               <div>
                 <h2>Pour qui</h2>
-                {f.audience && <p className="tfp__lead">{f.audience}</p>}
+                {f.audience && <Rv className="tfp__lead">{f.audience}</Rv>}
                 {prereq.note && <p className="tfp__fine">{prereq.note}.</p>}
               </div>
               {Array.isArray(f.audience_points) && f.audience_points.length > 0 && (
@@ -504,7 +550,7 @@
               <section className="tfp__prog__intro" id="programme" data-bar="Programme">
                 <span className="tfp__pill">{program.length} journée{program.length > 1 ? "s" : ""}{f.duration ? " · " + f.duration.split("·")[0].trim().toLowerCase() : ""}</span>
                 <h2>Programme</h2>
-                {notre ? String(notre.text).split(/\n\n/).map((p, i) => <p key={i}>{p}</p>) : <p>{program.length} jours, un par écran.</p>}
+                {notre ? String(notre.text).split(/\n\n/).map((p, i) => <Rv key={i}>{p}</Rv>) : <p>{program.length} jours, un par écran.</p>}
               </section>
               <div className="tfp__stack" data-bar="Programme" data-days>
                 {program.map((d, i) => {
@@ -560,7 +606,7 @@
               <div className="tfp__split__txt">
                 <span className="tfp__pill">Après la formation</span>
                 <h2>La certification</h2>
-                <p>{certifText}</p>
+                <Rv>{certifText}</Rv>
                 <p className="tfp__fine">{[f.rs.replace(/^RS/i, "RS "), "France Compétences", f.certifier && "certificateur " + f.certifier].filter(Boolean).join(" · ")}{f.franceCompetencesUrl && <> · <a href={f.franceCompetencesUrl} target="_blank" rel="noopener">référentiel</a></>}</p>
               </div>
               {imgs[1] && <div className="tfp__split__img" style={{ backgroundImage: "url(" + imgs[1] + ")" }} />}
@@ -579,7 +625,7 @@
                   <p className="tfp__trainer__role">{trainerCard.role || trainerFiche.role}</p>
                 )}
                 {!plusieursFormateurs && (trainerBio || f.description) && String(trainerBio || f.description).split(/\n\n/).map((para, i) => (
-                  <p className={i === 0 ? "tfp__lead" : "tfp__trainer__para"} key={i}>{para}</p>
+                  <Rv className={i === 0 ? "tfp__lead" : "tfp__trainer__para"} key={i}>{para}</Rv>
                 ))}
               </div>
               {plusieursFormateurs ? (
@@ -768,6 +814,7 @@
       };
     }, [f.id]);
 
+    useRevealText(pageRef, [f.id]);
     const etatPlaces = passe ? "Événement passé" : complet ? "Complet" : (places && places.capacity ? placesRestantes(places.remaining) : (f.status || ""));
     const carte = (
       <div className="lg__cta-mini">
@@ -849,7 +896,7 @@
             <section className="tfp__split" data-bar={b.head || f.title} key={i}>
               <div className="tfp__split__txt">
                 {b.head && <h2>{b.head}</h2>}
-                {String(b.text || "").split(/\n\n/).map((p, j) => <p key={j}>{p}</p>)}
+                {String(b.text || "").split(/\n\n/).map((p, j) => <Rv key={j}>{p}</Rv>)}
               </div>
               {b.media && <div className="tfp__split__img" style={{ backgroundImage: "url(" + b.media + ")" }} />}
             </section>
@@ -860,7 +907,7 @@
             <section className="tfp__two" data-bar="Public">
               <div>
                 <h2>Pour qui</h2>
-                {f.audience && <p className="tfp__lead">{f.audience}</p>}
+                {f.audience && <Rv className="tfp__lead">{f.audience}</Rv>}
                 {Number(f.min_age) > 0 && <p className="tfp__fine">Réservé aux {f.min_age} ans et plus.</p>}
               </div>
               {pourQui && pourQui.text && <ul className="tfp__arrows">{sentences(pourQui.text).map((pt, i) => <li key={i}>{pt}</li>)}</ul>}
@@ -898,7 +945,7 @@
             <div className="tfp__offer__grid">
               <div className="tfp__offer__txt">
                 <h2>Réserver ma place</h2>
-                <p className="tfp__lead">{f.description || [dateTxt, lieuTxt].filter(Boolean).join(" · ")}</p>
+                <Rv className="tfp__lead">{f.description || [dateTxt, lieuTxt].filter(Boolean).join(" · ")}</Rv>
               </div>
               <div className="tfp__offer__card">{carte}</div>
             </div>

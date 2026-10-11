@@ -284,3 +284,10 @@
   .tfp__next__date { font-size: 18px; }
   .tfp__next__cta { align-self: stretch; }
 }
+
+/* Texte révélé au défilement (effet TFP) : les mots passent du gris au noir. */
+.rv .rv-w { opacity: 0.18; transition: opacity 0.3s ease-out; }
+.rv .rv-w.on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .rv .rv-w { opacity: 1; transition: none; }
+}
