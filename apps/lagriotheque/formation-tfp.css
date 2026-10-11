@@ -339,3 +339,8 @@
 /* Pour qui : titre puis liste en dessous, sur toute la largeur. */
 .tfp__two.tfp__two--stack { display: block; }
 .tfp__two--stack .tfp__arrows { margin-top: 32px; }
+
+/* 11/10/2026 : barre de section plus lisible, date de la barre titre en noir. */
+.tfp__sectionbar { font-size: clamp(17px, 1.5vw, 22px); padding-top: 10px; padding-bottom: 10px; }
+.tfp__titlebar__meta .dur { color: var(--ink); }
+@media (max-width: 700px) { .tfp__sectionbar { font-size: 16px; } }
