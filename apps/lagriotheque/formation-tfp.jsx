@@ -507,14 +507,12 @@
 
           {/* ---- 4. Pour qui ------------------------------------------------ */}
           {(f.audience || (Array.isArray(f.audience_points) && f.audience_points.length)) && (
-            <section className="tfp__two" data-bar="Public">
-              <div>
-                <h2>Pour qui</h2>
-                {f.audience && <p className="tfp__lead">{f.audience}</p>}
-                {prereq.note && <p className="tfp__fine">{prereq.note}.</p>}
-              </div>
-              {Array.isArray(f.audience_points) && f.audience_points.length > 0 && (
+            <section className="tfp__two tfp__two--stack" data-bar="Public">
+              <h2>Pour qui</h2>
+              {Array.isArray(f.audience_points) && f.audience_points.length > 0 ? (
                 <ul className="tfp__arrows">{f.audience_points.map((pt, i) => <li key={i}>{pt}</li>)}</ul>
+              ) : (
+                f.audience && <p className="tfp__lead">{f.audience}</p>
               )}
             </section>
           )}
@@ -904,13 +902,13 @@
 
           {/* ---- 4. Pour qui ---------------------------------------------- */}
           {(pourQui || f.audience) && (
-            <section className="tfp__two" data-bar="Public">
-              <div>
-                <h2>Pour qui</h2>
-                {f.audience && <p className="tfp__lead">{f.audience}</p>}
-                {Number(f.min_age) > 0 && <p className="tfp__fine">Réservé aux {f.min_age} ans et plus.</p>}
-              </div>
-              {pourQui && pourQui.text && <ul className="tfp__arrows">{sentences(pourQui.text).map((pt, i) => <li key={i}>{pt}</li>)}</ul>}
+            <section className="tfp__two tfp__two--stack" data-bar="Public">
+              <h2>Pour qui</h2>
+              {pourQui && pourQui.text ? (
+                <ul className="tfp__arrows">{sentences(pourQui.text).map((pt, i) => <li key={i}>{pt}</li>)}</ul>
+              ) : (
+                f.audience && <p className="tfp__lead">{f.audience}</p>
+              )}
             </section>
           )}
 

@@ -334,3 +334,7 @@
   .lg .tfp__day__txt p, .lg .tfp__day__ex, .lg .tfp__day__ex b,
   .lg .tfp__next__sub { font-size: 17px; }
 }
+
+/* Pour qui : titre puis liste en dessous, sur toute la largeur. */
+.tfp__two.tfp__two--stack { display: block; }
+.tfp__two--stack .tfp__arrows { margin-top: 32px; }
