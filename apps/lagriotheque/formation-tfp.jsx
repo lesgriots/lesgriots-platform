@@ -940,15 +940,6 @@
           </section>
 
           {/* ---- 8. CTA final --------------------------------------------- */}
-          <div className="lg__cta-final">
-            {heroVideo ? <video className="lg__cta-final__bg" src={heroVideo} poster={heroPoster || undefined} autoPlay loop muted playsInline aria-hidden="true" /> : heroPoster ? <img className="lg__cta-final__bg" src={heroPoster} alt="" aria-hidden="true" /> : null}
-            <div className="lg__cta-final__veil" aria-hidden="true" />
-            <div className="lg__cta-final__inner">
-              <p className="lg__cta-final__kicker">{formatEventDate(f.date)}{lieuTxt ? " · " + lieuTxt : ""}</p>
-              <h2 className="lg__cta-final__title">{f.title}</h2>
-              {!passe && <button type="button" className="lg__cta-final__btn" onClick={inscrire} disabled={!ouvert}>{ctaTexte}{ouvert ? " →" : ""}</button>}
-            </div>
-          </div>
         </div>
 
         {showInscription && <InscriptionModal target={{ id: f.id, title: f.title, min_age: f.min_age }} kind="event" onClose={() => setShowInscription(false)} />}
