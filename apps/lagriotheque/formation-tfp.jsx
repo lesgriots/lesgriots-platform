@@ -751,9 +751,20 @@
     })).filter((b) => b.head || b.text);
     // 1er bloc = la promesse (écran plein, mot à mot) ; le bloc « Pour qui »
     // alimente la section Public ; les autres deviennent des sections.
-    const promesse = blocs[0] ? blocs[0].text : (f.tagline || "");
+    const promesse = f.promise || (blocs[0] ? blocs[0].text : (f.tagline || ""));
     const pourQui = blocs.find((b) => /pour qui/i.test(b.head || ""));
     const autres = blocs.slice(1).filter((b) => b !== pourQui);
+    // Gabarit workshop (11/10/2026) : promesse, tu repars avec, programme en
+    // écrans (comme les formations), intervenants, public, réserver, et après.
+    const inclus = (Array.isArray(f.included) ? f.included : []).filter(Boolean);
+    const prog = (Array.isArray(f.program) ? f.program : []).filter((d) => d && (d.title || d.text));
+    const intervenants = (Array.isArray(f.speakers) ? f.speakers : []).filter((x) => x && x.name);
+    const publicPts = Array.isArray(f.audience_points) && f.audience_points.filter(Boolean).length
+      ? f.audience_points.filter(Boolean)
+      : (pourQui && pourQui.text ? sentences(pourQui.text) : []);
+    const apres = f.after && (f.after.text || f.after.title) ? f.after : null;
+    const gabarit = inclus.length > 0 || prog.length > 0 || intervenants.length > 0;
+    const minutes = prog.reduce((n, d) => n + (parseInt(d.duration, 10) || 0), 0);
 
     useEffect(() => {
       const root = pageRef.current;
@@ -764,8 +775,11 @@
       const tb = document.querySelector(".tfp__titlebar");
       const sb = document.querySelector(".tfp__sectionbar");
       const sbName = document.querySelector("#tfp-sb-name");
+      const sbCur = document.querySelector("#tfp-sb-cur");
+      const sbCount = document.querySelector("#tfp-sb-count");
       const bar = document.querySelector(".tfp__bar");
       const secs = Array.from(root.querySelectorAll("[data-bar]"));
+      const days = Array.from(root.querySelectorAll(".tfp__day"));
       if (!hero || !tb || !sb || !bar) return;
       let raf = false;
       const mesure = () => {
@@ -785,7 +799,17 @@
         const on = stuck && !!cur;
         sb.classList.toggle("is-on", on);
         sb.setAttribute("aria-hidden", on ? "false" : "true");
-        if (on) sbName.textContent = cur.getAttribute("data-bar");
+        if (on) {
+          sbName.textContent = cur.getAttribute("data-bar");
+          if (cur.hasAttribute("data-days") && days.length) {
+            let k = 0;
+            for (let i = 0; i < days.length; i++) if (days[i].getBoundingClientRect().top <= barsH + 1) k = i;
+            const num = days[k].querySelector(".tfp__day__num");
+            const h3 = days[k].querySelector("h3");
+            sbCur.innerHTML = "<b>" + (num ? num.textContent : "") + "</b> · " + (h3 ? h3.textContent : "");
+            sbCount.textContent = (k + 1) + " / " + days.length;
+          } else { sbCur.textContent = ""; sbCount.textContent = ""; }
+        }
         bar.classList.toggle("is-on", stuck);
         bar.setAttribute("aria-hidden", stuck ? "false" : "true");
       };
@@ -864,7 +888,7 @@
             <img src={heroPoster} alt="" />
           ) : null}
           <div className="tfp__hero__txt">
-            <span className="tfp__pill">{[f.kind || "Événement", ouvert ? "sur inscription" : etatPlaces.toLowerCase()].filter(Boolean).join(" · ")}</span>
+            <span className="tfp__pill">{[f.kind || "Événement", ouvert ? (places && places.capacity ? places.capacity + " places" : "sur inscription") : etatPlaces.toLowerCase()].filter(Boolean).join(" · ")}</span>
             <h1>{f.title}</h1>
             {f.tagline && <p className="tfp__lead">{f.tagline}</p>}
             <div className="tfp__hero__cta">
@@ -878,8 +902,78 @@
           {/* ---- 2. Promesse mot à mot ------------------------------------ */}
           {promesse && <Promise_ text={promesse} onCta={inscrire} ctaLabel={ctaTexte} />}
 
-          {/* ---- 3. Blocs de la fiche ------------------------------------- */}
-          {autres.map((b, i) => (
+          {/* ---- 3. Tu repars avec ---------------------------------------- */}
+          {inclus.length > 0 && (
+            <section className="tfp__deliv" data-bar="Tu repars avec">
+              <h2>Tu repars avec</h2>
+              <div className="tfp__deliv__grid">
+                {inclus.map((it, i) => {
+                  const parts = String(it).split(/\s*:\s*/);
+                  return <div key={i}>{parts[0]}{parts[1] && <small>{parts.slice(1).join(" : ")}</small>}</div>;
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* ---- 4. Programme : un écran par temps, comme la formation ------ */}
+          {prog.length > 0 && (
+            <>
+              <section className="tfp__prog__intro" id="programme" data-bar="Programme">
+                <span className="tfp__pill">{prog.length} temps{minutes ? " · " + minutes + " min" : ""}</span>
+                <h2>Programme</h2>
+              </section>
+              <div className="tfp__stack" data-bar="Programme" data-days>
+                {prog.map((d, i) => {
+                  const items = (Array.isArray(d.items) ? d.items : []).filter(Boolean);
+                  return (
+                    <article className="tfp__day" key={i}>
+                      <div className="tfp__day__txt">
+                        <div className="tfp__day__num">{d.label || "Temps " + (i + 1)}</div>
+                        <h3>{d.title}</h3>
+                        {d.text && <p>{d.text}</p>}
+                        {items.length > 0 && (
+                          <div className="tfp__day__mods"><div className="tfp__day__m"><ul>{items.map((it, k) => <li key={k}>{it}</li>)}</ul></div></div>
+                        )}
+                        {(d.duration || items.length > 0) && (
+                          <div className="tfp__day__meta">
+                            {d.duration && <b>{d.duration}</b>}
+                            {d.duration && items.length > 0 && <span>·</span>}
+                            {items.length > 0 && <span>{items.length} point{items.length > 1 ? "s" : ""}</span>}
+                          </div>
+                        )}
+                      </div>
+                      {d.image ? (
+                        <div className="tfp__day__img"><img src={d.image} alt="" loading="lazy" /></div>
+                      ) : (
+                        <div className="tfp__day__img tfp__day__img--type" aria-hidden="true"><span>{d.duration || String(i + 1).padStart(2, "0")}</span></div>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* ---- 5. Avec qui ---------------------------------------------- */}
+          {intervenants.length > 0 && (
+            <section className="tfp__speakers" data-bar="Avec qui">
+              <h2>Avec qui</h2>
+              <div className="tfp__speakers__grid">
+                {intervenants.map((x, i) => (
+                  <div className={"tfp__speaker" + (x.photo ? " has-photo" : "")} key={i}>
+                    {x.photo && <div className="tfp__speaker__photo" style={{ backgroundImage: "url(" + x.photo + ")" }} />}
+                    <h3>{x.name}</h3>
+                    {x.role && <p className="tfp__speaker__role">{x.role}</p>}
+                    {x.bio && <p className="tfp__speaker__bio">{x.bio}</p>}
+                  </div>
+                ))}
+              </div>
+              {f.speakers_note && <p className="tfp__speakers__note">{f.speakers_note}</p>}
+            </section>
+          )}
+
+          {/* Anciennes fiches (sans les nouveaux champs) : blocs libres. */}
+          {!gabarit && autres.map((b, i) => (
             <section className="tfp__split" data-bar={b.head || f.title} key={i}>
               <div className="tfp__split__txt">
                 {b.head && <h2>{b.head}</h2>}
@@ -889,56 +983,45 @@
             </section>
           ))}
 
-          {/* ---- 4. Pour qui ---------------------------------------------- */}
-          {(pourQui || f.audience) && (
+          {/* ---- 6. Pour qui ---------------------------------------------- */}
+          {(publicPts.length > 0 || f.audience) && (
             <section className="tfp__two tfp__two--stack" data-bar="Public">
               <h2>Pour qui</h2>
-              {pourQui && pourQui.text ? (
-                <ul className="tfp__arrows">{sentences(pourQui.text).map((pt, i) => <li key={i}>{pt}</li>)}</ul>
+              {publicPts.length > 0 ? (
+                <ul className="tfp__arrows">{publicPts.map((pt, i) => <li key={i}>{pt}</li>)}</ul>
               ) : (
-                f.audience && <p className="tfp__lead">{f.audience}</p>
+                <p className="tfp__lead">{f.audience}</p>
               )}
             </section>
           )}
 
-          {/* ---- 5. Comment ça se passe ----------------------------------- */}
-          <section className="tfp__steps" data-bar="Comment ça se passe">
-            <h2>Comment ça se passe</h2>
-            <div className="tfp__steps__grid">
-              <div><span className="k">Étape 1</span><h3>Tu réserves</h3><p>{places && places.capacity ? "Le formulaire reste ouvert jusqu'à " + places.capacity + " inscrits, puis il se ferme." : "Le formulaire prend une minute."}{Number(f.min_age) > 0 ? " Réservé aux " + f.min_age + " ans et plus." : ""}</p></div>
-              <div><span className="k">Étape 2</span><h3>On te confirme</h3><p>Tu reçois les infos pratiques par email avant le jour J.</p></div>
-              <div><span className="k">Étape 3</span><h3>Le jour J</h3><p>{[dateTxt, lieuTxt].filter(Boolean).join(" · ")}.</p></div>
-            </div>
-          </section>
-
-          {/* ---- 6. Infos pratiques (calqué sur « Prochaine session ») ------- */}
-          <section className="tfp__next" data-bar="Infos pratiques">
-            <div className="tfp__next__col">
-              <p className="tfp__pill">Infos pratiques</p>
-              <h2 className="tfp__next__title">{formatEventDate(f.date) || "Date à venir"}</h2>
-              <p className="tfp__next__sub">{[f.kind, lieuTxt].filter(Boolean).join(" · ").toLowerCase()}</p>
-              <ul className="tfp__next__list">
-                {f.time && <li className="tfp__next__row"><time className="tfp__next__date">Horaires</time><span className="tfp__next__meta">{f.time}</span></li>}
-                {lieuTxt && <li className="tfp__next__row"><time className="tfp__next__date">Lieu</time><span className="tfp__next__meta">{lieuTxt}</span></li>}
-                {etatPlaces && <li className="tfp__next__row"><time className="tfp__next__date">Places</time><span className={"tfp__next__meta is-" + (ouvert ? "open" : "full")}>{etatPlaces}</span></li>}
-                {Number(f.min_age) > 0 && <li className="tfp__next__row"><time className="tfp__next__date">Âge</time><span className="tfp__next__meta">{f.min_age} ans et plus</span></li>}
-              </ul>
-              {!passe && <button type="button" className="tfp__btn tfp__next__cta" onClick={inscrire} disabled={!ouvert}>{ctaTexte}</button>}
-            </div>
-          </section>
-
-          {/* ---- 7. Réserver ---------------------------------------------- */}
+          {/* ---- 7. Réserver (avec le déroulé de l'inscription) ------------ */}
           <section className="tfp__offer" id="reserver" data-bar="Réserver">
             <div className="tfp__offer__grid">
               <div className="tfp__offer__txt">
                 <h2>Réserver ma place</h2>
-                <p className="tfp__lead">{f.description || [dateTxt, lieuTxt].filter(Boolean).join(" · ")}</p>
+                <ol className="tfp__offer__steps">
+                  <li><b>Tu réserves.</b> {places && places.capacity ? "Le formulaire reste ouvert jusqu'à " + places.capacity + " inscrits, puis il se ferme." : "Le formulaire prend une minute."}{Number(f.min_age) > 0 ? " Réservé aux " + f.min_age + " ans et plus." : ""}</li>
+                  <li><b>On te confirme.</b> Tu reçois les infos pratiques par email avant le jour J.</li>
+                  <li><b>Le jour J.</b> {[dateTxt, lieuTxt].filter(Boolean).join(" · ")}.</li>
+                </ol>
               </div>
               <div className="tfp__offer__card">{carte}</div>
             </div>
           </section>
 
-          {/* ---- 8. CTA final --------------------------------------------- */}
+          {/* ---- 8. Et après ---------------------------------------------- */}
+          {apres && (
+            <section className="tfp__split tfp__apres" data-bar="Et après">
+              <div className="tfp__split__txt">
+                <span className="tfp__pill">Et après</span>
+                {apres.title && <h2>{apres.title}</h2>}
+                {apres.text && String(apres.text).split(/\n\n/).map((p, j) => <p key={j}>{p}</p>)}
+                {apres.link && <a className="tfp__btn" href={apres.link}>{apres.label || "Découvrir"} →</a>}
+              </div>
+              {apres.image && <div className="tfp__split__img" style={{ backgroundImage: "url(" + apres.image + ")" }} />}
+            </section>
+          )}
         </div>
 
         {showInscription && <InscriptionModal target={{ id: f.id, title: f.title, min_age: f.min_age }} kind="event" onClose={() => setShowInscription(false)} />}

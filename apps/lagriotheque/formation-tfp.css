@@ -344,3 +344,30 @@
 .tfp__sectionbar { font-size: clamp(17px, 1.5vw, 22px); padding-top: 10px; padding-bottom: 10px; }
 .tfp__titlebar__meta .dur { color: var(--ink); }
 @media (max-width: 700px) { .tfp__sectionbar { font-size: 16px; } }
+
+/* Gabarit workshop (11/10/2026) : écran de programme sans image, intervenants,
+   déroulé de l'inscription dans le bloc Réserver, section « Et après ». */
+.tfp__day__img--type { display: flex; align-items: center; justify-content: center; background: var(--ink); color: var(--paper); }
+.tfp__day:nth-child(even) .tfp__day__img--type { background: var(--paper); color: var(--ink); }
+.tfp__day__img--type span { font-size: clamp(72px, 11vw, 180px); font-weight: 500; letter-spacing: -0.05em; line-height: 1; white-space: nowrap; }
+.tfp__speakers { padding: clamp(80px, 12vh, 140px) var(--tfp-gut); border-top: 1px solid var(--tfp-line); }
+.tfp__speakers h2 { font-size: clamp(34px, 4.4vw, 64px); }
+.tfp__speakers__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 32px 40px; margin-top: 48px; }
+.tfp__speaker { border-top: 1px solid var(--ink); padding-top: 16px; display: grid; gap: 8px; align-content: start; }
+.tfp__speaker__photo { aspect-ratio: 4 / 5; background: var(--tfp-soft) center / cover no-repeat; margin-bottom: 8px; }
+.tfp__speaker h3 { font-size: clamp(24px, 2.2vw, 32px); letter-spacing: -0.02em; }
+.tfp__speaker__role { color: var(--tfp-mute); font-size: 17px; line-height: 1.4; }
+.tfp__speaker__bio { color: var(--tfp-body); font-size: 17px; line-height: 1.45; max-width: 44ch; }
+.tfp__speakers__note { margin-top: 40px; color: var(--tfp-mute); font-size: 17px; max-width: 60ch; }
+.tfp__offer__steps { list-style: none; margin: 36px 0 0; padding: 0; display: grid; max-width: 56ch; }
+.tfp__offer__steps li { border-top: 1px solid var(--tfp-line); padding: 16px 0; font-size: 17px; line-height: 1.45; color: var(--tfp-body); }
+.tfp__offer__steps li:last-child { border-bottom: 1px solid var(--tfp-line); }
+.tfp__offer__steps b { font-weight: 500; color: var(--ink); }
+.tfp__apres .tfp__btn { align-self: flex-start; margin-top: 12px; }
+.tfp--event .tfp__day__m ul { font-size: 17px; line-height: 1.45; }
+.tfp--event .tfp__day__txt > p { font-size: 17px; }
+@media (max-width: 700px) {
+  .tfp__speaker__role, .tfp__speaker__bio, .tfp__speakers__note, .tfp__offer__steps li,
+  .tfp--event .tfp__day__m ul, .tfp--event .tfp__day__txt > p { font-size: 16px; }
+  .tfp__day__img--type span { font-size: 64px; }
+}

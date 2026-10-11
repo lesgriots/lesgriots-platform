@@ -8,6 +8,49 @@ import MediaInput from "./MediaInput";
 
 const STATUS_OPTIONS = ["À VENIR", "COMPLET", "ANNULÉ", "PASSÉ"];
 
+// Liste éditable (programme, intervenants) : une carte par élément.
+function ListeEditable({ items, onChange, champs, nouveau, libelle }) {
+  const liste = Array.isArray(items) ? items : [];
+  const maj = (i, k, v) => onChange(liste.map((it, j) => (j === i ? { ...it, [k]: v } : it)));
+  const bouge = (i, d) => {
+    const j = i + d;
+    if (j < 0 || j >= liste.length) return;
+    const copie = liste.slice();
+    [copie[i], copie[j]] = [copie[j], copie[i]];
+    onChange(copie);
+  };
+  return (
+    <div style={{ display: "grid", gap: 14, marginTop: 8 }}>
+      {liste.map((it, i) => (
+        <div key={i} style={{ border: "1px solid var(--line, #ddd)", padding: 14, display: "grid", gap: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <strong>{libelle} {i + 1}</strong>
+            <span style={{ display: "flex", gap: 6 }}>
+              <button type="button" className="btn btn--ghost" onClick={() => bouge(i, -1)}>↑</button>
+              <button type="button" className="btn btn--ghost" onClick={() => bouge(i, 1)}>↓</button>
+              <button type="button" className="btn btn--danger" onClick={() => onChange(liste.filter((_, j) => j !== i))}>Retirer</button>
+            </span>
+          </div>
+          {champs.map(([k, label, type, ph]) => (
+            <div key={k}>
+              <label>{label}</label>
+              {type === "lignes" ? (
+                <textarea rows={4} value={(it[k] || []).join("\n")} placeholder={ph} onChange={(e) => maj(i, k, e.target.value.split("\n"))} />
+              ) : type === "texte" ? (
+                <textarea rows={3} value={it[k] || ""} placeholder={ph} onChange={(e) => maj(i, k, e.target.value)} />
+              ) : (
+                <input value={it[k] || ""} placeholder={ph} onChange={(e) => maj(i, k, e.target.value)} />
+              )}
+            </div>
+          ))}
+        </div>
+      ))}
+      <button type="button" className="btn btn--ghost" onClick={() => onChange([...liste, { ...nouveau }])}>+ Ajouter</button>
+    </div>
+  );
+}
+
+
 export default function EventForm({ initial = null }) {
   const isEdit = initial !== null;
   const [data, setData] = useState(() => initial || newBlank());
@@ -259,6 +302,84 @@ export default function EventForm({ initial = null }) {
             />
             <p className="note">0 = pas de limite. Ex. 18 : l'inscription est refusée en dessous.</p>
           </div>
+        </div>
+      </section>
+
+      <section style={{ marginTop: 40 }}>
+        <h2 style={{ fontSize: 20 }}>Contenu de la page</h2>
+        <p className="note">Gabarit workshop : promesse, tu repars avec, programme (un écran par temps, comme les formations), avec qui, pour qui, réserver, et après. Une section vide n'est pas affichée.</p>
+
+        <div style={{ marginTop: 16 }}>
+          <label>Accroche (sous le titre, en haut de page)</label>
+          <input value={data.tagline || ""} onChange={(e) => set("tagline", e.target.value)} placeholder="Une ligne." />
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          <label>Promesse (le texte qui passe du gris au noir)</label>
+          <textarea rows={3} value={data.promise || ""} onChange={(e) => set("promise", e.target.value)} placeholder="Ce que tu sais faire en sortant, pas ce qu'on va aborder." />
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          <label>Tu repars avec (une ligne par point, « Titre : détail »)</label>
+          <textarea rows={5} value={(data.included || []).join("\n")} onChange={(e) => set("included", e.target.value.split("\n"))} placeholder={"La grammaire de Snapchat : face caméra, sur le vif, sous-titré."} />
+        </div>
+
+        <div style={{ marginTop: 24 }}>
+          <label style={{ fontWeight: 600 }}>Programme</label>
+          <p className="note">Un écran par temps. Sans image, l'écran affiche la durée en grand.</p>
+          <ListeEditable
+            items={data.program}
+            onChange={(v) => set("program", v)}
+            libelle="Temps"
+            nouveau={{ label: "", duration: "", title: "", text: "", items: [], image: "" }}
+            champs={[
+              ["label", "Étiquette", "input", "ex : Temps 1 (laisser vide = automatique)"],
+              ["duration", "Durée", "input", "ex : 20 min"],
+              ["title", "Titre", "input", "ex : La génération Snapchat"],
+              ["text", "Texte", "texte", "Une ou deux phrases."],
+              ["items", "Points (un par ligne)", "lignes", ""],
+              ["image", "Image (chemin ou URL, facultatif)", "input", "img/..."],
+            ]}
+          />
+        </div>
+
+        <div style={{ marginTop: 24 }}>
+          <label style={{ fontWeight: 600 }}>Avec qui</label>
+          <ListeEditable
+            items={data.speakers}
+            onChange={(v) => set("speakers", v)}
+            libelle="Intervenant"
+            nouveau={{ name: "", role: "", bio: "", photo: "" }}
+            champs={[
+              ["name", "Nom", "input", ""],
+              ["role", "Rôle", "input", "ex : Head of Creative Strategy, Snap"],
+              ["bio", "Une phrase (facultatif)", "texte", ""],
+              ["photo", "Photo (chemin ou URL, facultatif)", "input", "img/..."],
+            ]}
+          />
+          <div style={{ marginTop: 12 }}>
+            <label>Note sous les intervenants (facultatif)</label>
+            <input value={data.speakers_note || ""} onChange={(e) => set("speakers_note", e.target.value)} />
+          </div>
+        </div>
+
+        <div style={{ marginTop: 24 }}>
+          <label>Pour qui (une ligne par profil)</label>
+          <textarea rows={3} value={(data.audience_points || []).join("\n")} onChange={(e) => set("audience_points", e.target.value.split("\n"))} />
+        </div>
+        <div style={{ marginTop: 16 }}>
+          <label>Pour qui, en une phrase (carte de réservation)</label>
+          <input value={data.audience || ""} onChange={(e) => set("audience", e.target.value)} />
+        </div>
+
+        <div style={{ marginTop: 24 }}>
+          <label style={{ fontWeight: 600 }}>Et après</label>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginTop: 8 }}>
+            <div><label>Titre</label><input value={(data.after || {}).title || ""} onChange={(e) => set("after", { ...(data.after || {}), title: e.target.value })} placeholder="La Griothèque" /></div>
+            <div><label>Lien</label><input value={(data.after || {}).link || ""} onChange={(e) => set("after", { ...(data.after || {}), link: e.target.value })} placeholder="/formations" /></div>
+          </div>
+          <div style={{ marginTop: 12 }}><label>Texte</label><textarea rows={3} value={(data.after || {}).text || ""} onChange={(e) => set("after", { ...(data.after || {}), text: e.target.value })} /></div>
+          <div style={{ marginTop: 12 }}><label>Texte du bouton</label><input value={(data.after || {}).label || ""} onChange={(e) => set("after", { ...(data.after || {}), label: e.target.value })} placeholder="Voir les formations" /></div>
         </div>
       </section>
 
