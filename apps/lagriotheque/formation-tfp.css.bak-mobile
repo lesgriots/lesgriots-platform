@@ -1,0 +1,274 @@
+/* ============================================================================
+   FICHE FORMATION — gabarit « The Freelance Photographer » (12/09/2026)
+   Feuille dédiée, chargée après styles.css. Préfixe .tfp — n'écrase rien
+   du site sauf .lg__pagehero.tfp__hero (le hero de la fiche) et le padding
+   de .lg__formation.tfp. Tokens : ceux de styles.css (--paper, --ink…).
+   ---------------------------------------------------------------------------
+   Règles validées : Geist, majuscule en début de phrase seulement, jamais un
+   mot en capitales, bouton carré du site, alternance papier / noir (pas de
+   beige), gouttière --tfp-gut = clamp(24px, 4vw, 64px).
+   ========================================================================== */
+:root {
+  --tfp-gut: var(--lg-gutter, clamp(24px, 4vw, 64px));
+  --tfp-soft: var(--beige, #f5f4f1); /* beige officiel (styles.css) */
+  --tfp-mute: #66625a;
+  --tfp-line: #d6d0c2;
+  --tfp-body: #3a3630;
+}
+
+.lg__formation.tfp { padding: 0; }
+.tfp h1, .tfp h2, .tfp h3, .tfp h4 { margin: 0; font-family: var(--font-sans); font-weight: 500; letter-spacing: -0.02em; line-height: 1.02; text-wrap: balance; }
+.tfp p { margin: 0; }
+.tfp__lead { font-size: clamp(17px, 1.5vw, 20px); line-height: 1.45; max-width: 38ch; color: var(--tfp-body); }
+.tfp__fine { font-size: 13px; color: var(--tfp-mute); }
+.tfp__pill { display: inline-block; align-self: flex-start; border: 1px solid var(--ink); border-radius: 999px; padding: 4px 12px; font-size: 12px; letter-spacing: 0.02em; line-height: 1.3; }
+
+/* Bouton pilule, comme chez TFP (« Join Waitlist » : radius = moitié de la
+   hauteur, 56 px de haut, padding 20/22, 13 px medium, noir sur blanc). */
+.tfp__btn { display: inline-block; background: var(--ink); color: var(--paper); border: 0; cursor: pointer; padding: 18px 26px; border-radius: 999px; font-family: var(--font-sans); font-size: 13px; font-weight: 500; letter-spacing: 0.01em; text-align: center; text-decoration: none; transition: background 0.15s ease, color 0.15s ease; }
+.tfp__btn:hover { background: #222; }
+.tfp__btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.tfp__btn--paper { background: var(--paper); color: var(--ink); }
+.tfp__btn--paper:hover { background: #fff; }
+
+/* ---- Barre de titre sous le menu ----------------------------------------- */
+.tfp__titlebar { position: fixed; top: 121px; left: 0; right: 0; z-index: 42; display: flex; align-items: center; gap: 16px; padding: 6px var(--tfp-gut) 8px; background: var(--paper); border-bottom: 1px solid var(--ink); color: var(--ink); transform: translateY(-100%); opacity: 0; transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.3s; pointer-events: none; }
+.tfp__titlebar.is-stuck { transform: none; opacity: 1; pointer-events: auto; }
+.tfp__titlebar__title { font-family: var(--font-sans); font-weight: 500; font-size: clamp(20px, 2.4vw, 32px); line-height: 1.1; letter-spacing: -0.035em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+.tfp__titlebar__meta { display: flex; align-items: center; gap: 16px; flex-shrink: 0; font-size: clamp(13px, 1.1vw, 15px); font-weight: 500; }
+.tfp__titlebar__meta > * { padding-left: 16px; border-left: 1px solid var(--ink); white-space: nowrap; }
+.tfp__titlebar__meta .dur { color: var(--tfp-mute); }
+.tfp__titlebar__meta button { background: none; border: 0; border-left: 1px solid var(--ink); border-radius: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 0 0 0 16px; }
+
+/* ---- Barre de section sous le titre --------------------------------------- */
+.tfp__sectionbar { position: fixed; top: calc(121px + var(--lg-title-h, 52px)); left: 0; right: 0; z-index: 41; display: flex; align-items: center; gap: 16px; padding: 8px var(--tfp-gut); background: var(--paper); border-bottom: 1px solid var(--ink); color: var(--ink); font-size: clamp(13px, 1.1vw, 15px); font-weight: 500; transform: translateY(-100%); opacity: 0; transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.3s; pointer-events: none; }
+.tfp__sectionbar.is-on { transform: none; opacity: 1; pointer-events: auto; }
+.tfp__sectionbar__name { letter-spacing: 0.02em; flex-shrink: 0; }
+.tfp__sectionbar__cur { color: var(--tfp-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+.tfp__sectionbar__cur:not(:empty) { padding-left: 16px; border-left: 1px solid var(--ink); }
+.tfp__sectionbar__cur b { color: var(--ink); font-weight: 500; }
+.tfp__sectionbar__count { margin-left: auto; flex-shrink: 0; font-variant-numeric: tabular-nums; color: var(--tfp-mute); }
+
+/* ---- Bloc de réservation, un seul, à la fin ------------------------------
+   Deux colonnes sur fond beige : à gauche tout ce qui touche à l'argent et à
+   l'accès (tarif, franchise de TVA, financements, délai, lieu), à droite la
+   carte du site (lg__cta-mini). Plus de carte flottante ; sur mobile, la barre
+   compacte du bas (.tfp__bar) reprend prix + bouton. */
+.tfp__offer { padding: clamp(72px, 10vh, 140px) var(--tfp-gut); background: var(--tfp-soft); border-top: 1px solid var(--tfp-line); }
+.tfp__offer__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 56px; align-items: start; }
+.tfp__offer__txt h2 { font-size: clamp(34px, 4.4vw, 64px); }
+.tfp__offer__txt .tfp__lead { margin-top: 14px; }
+.tfp__offer__lines { margin: 44px 0 0; display: grid; gap: 0; }
+.tfp__offer__lines > div { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 16px; padding: 16px 0; border-top: 1px solid var(--tfp-line); }
+.tfp__offer__lines > div:last-child { border-bottom: 1px solid var(--tfp-line); }
+.tfp__offer__lines dt { font-size: 13px; letter-spacing: 0.02em; color: var(--tfp-mute); }
+.tfp__offer__lines dd { margin: 0; font-size: 15px; line-height: 1.45; color: var(--tfp-body); max-width: 52ch; }
+.tfp__offer__lines dd strong { font-weight: 500; color: var(--ink); }
+.tfp__offer .lg__cta-mini { box-shadow: none; padding: 28px 28px 26px; }
+.tfp__offer .lg__cta-mini__price { font-size: clamp(32px, 3.4vw, 44px); }
+.tfp__offer .lg__cta-mini__btn { width: 100%; border: 0; cursor: pointer; border-radius: 999px; padding: 16px 22px; }
+.tfp__offer .lg__cta-mini__btn--ghost { border: 1px solid var(--ink); background: transparent; color: var(--ink); }
+
+/* ---- Liste d'attente (le « Join Waitlist » de TFP) -----------------------
+   Prend la place du bouton de réservation quand aucune session n'est ouverte.
+   Champ souligné + bouton carré du site, comme la newsletter du footer. */
+.tfp__wait { display: grid; gap: 8px; margin-bottom: 10px; }
+.tfp__wait label { font-size: 13px; font-weight: 500; letter-spacing: -0.01em; }
+.tfp__wait__row { display: flex; gap: 8px; align-items: stretch; }
+.tfp__wait__row input { flex: 1; min-width: 0; background: var(--paper); border: 1px solid var(--ink); border-radius: 999px; padding: 11px 16px; font: inherit; font-size: 13px; color: var(--ink); }
+.tfp__wait__row input::placeholder { color: var(--tfp-mute); }
+.tfp__wait__row input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.tfp__wait__row .lg__cta-mini__btn { width: auto; margin: 0; white-space: nowrap; padding: 11px 20px; border-radius: 999px; }
+.tfp__wait__fine, .tfp__wait__err, .tfp__wait__done { margin: 0; font-size: 12px; line-height: 1.4; color: var(--tfp-mute); }
+.tfp__wait__err { color: var(--ink); }
+.tfp__wait__done { font-size: 13px; color: var(--ink); margin-bottom: 10px; }
+
+/* ---- Barre compacte du bas, mobile uniquement ---------------------------- */
+.tfp__bar { display: none; }
+@media (max-width: 900px) {
+  .tfp__bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; align-items: center; gap: 14px; padding: 10px var(--tfp-gut); background: var(--paper); border-top: 1px solid var(--ink); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .tfp__bar.is-on { transform: none; }
+  .tfp__bar__price { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.15; }
+  .tfp__bar__price strong { font-weight: 500; font-size: 18px; letter-spacing: -0.02em; }
+  .tfp__bar__price span { font-size: 11px; letter-spacing: 0.04em; color: var(--tfp-mute); }
+  .tfp__bar .tfp__btn { white-space: nowrap; }
+}
+
+/* ---- Hero : vidéo plein écran, titre par-dessus, sticky sous le contenu -- */
+.lg__pagehero.tfp__hero { position: sticky; top: 0; z-index: 0; width: 100%; margin: 0; height: 100svh; max-height: none; aspect-ratio: auto; display: flex; align-items: flex-end; background: #111; color: var(--paper); overflow: hidden; }
+.lg__pagehero.tfp__hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.28) 45%, rgba(0, 0, 0, 0.08) 100%); }
+.lg__pagehero.tfp__hero video, .lg__pagehero.tfp__hero img { object-position: center; }
+.tfp__hero__txt { position: relative; z-index: 1; padding: clamp(40px, 8vh, 96px) var(--tfp-gut) 56px; display: flex; flex-direction: column; gap: 22px; max-width: 1100px; }
+.tfp__hero .tfp__pill { border-color: var(--paper); color: var(--paper); }
+.tfp__hero h1 { font-size: clamp(44px, 6.4vw, 104px); max-width: 12ch; color: var(--paper); }
+.tfp__hero .tfp__lead { color: #e8e3d8; }
+.tfp__hero__cta { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.tfp__hero__cta small { color: #cfc8b8; font-size: 13px; }
+.tfp__after { position: relative; z-index: 1; background: var(--paper); }
+
+/* ---- Promesse : 2 écrans, texte épinglé, mot à mot ----------------------- */
+.tfp__promise { height: 200svh; background: var(--paper); }
+.tfp__promise__pin { position: sticky; top: 0; height: 100svh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 var(--tfp-gut); }
+.tfp__promise h2 { font-size: clamp(30px, 4.2vw, 72px); max-width: 24ch; }
+.tfp__promise h2 .w { opacity: 0.2; transition: opacity 0.25s ease-out; will-change: opacity; }
+.tfp__promise h2 .w.on { opacity: 1; }
+.tfp__promise .tfp__btn { margin-top: 40px; opacity: 0; transform: translateY(8px); transition: opacity 0.4s ease, transform 0.4s ease; }
+.tfp__promise .tfp__btn.on { opacity: 1; transform: none; }
+
+/* ---- Sections deux colonnes (pour qui, prérequis, moyens) --------------- */
+.tfp__two { padding: clamp(72px, 10vh, 120px) var(--tfp-gut); border-top: 1px solid var(--tfp-line); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 48px; align-items: start; }
+.tfp__two h2 { font-size: clamp(32px, 4.4vw, 64px); }
+.tfp__two .tfp__lead { margin-top: 18px; }
+.tfp__arrows { list-style: none; margin: 0; padding: 0; }
+.tfp__arrows li { display: flex; gap: 18px; align-items: baseline; padding: 18px 0; border-top: 1px solid var(--ink); font-size: clamp(18px, 1.8vw, 26px); font-weight: 500; letter-spacing: -0.02em; line-height: 1.2; }
+.tfp__arrows li:last-child { border-bottom: 1px solid var(--ink); }
+.tfp__arrows li::before { content: "→"; flex-shrink: 0; font-weight: 400; color: var(--tfp-mute); }
+
+/* ---- Objectifs : grille numérotée ---------------------------------------- */
+.tfp__obj { padding: clamp(72px, 10vh, 120px) var(--tfp-gut); border-top: 1px solid var(--tfp-line); }
+.tfp__obj h2 { font-size: clamp(32px, 4.4vw, 64px); }
+.tfp__obj .tfp__lead { margin-top: 14px; }
+.tfp__obj__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px 32px; margin-top: 48px; counter-reset: obj; }
+.tfp__obj__grid div { border-top: 1px solid var(--ink); padding-top: 14px; font-size: 17px; line-height: 1.35; display: grid; gap: 8px; }
+.tfp__obj__grid div::before { counter-increment: obj; content: "0" counter(obj); font-size: 13px; color: var(--tfp-mute); letter-spacing: 0.02em; }
+
+/* ---- Split texte / image (accroche, certification) ----------------------- */
+.tfp__split { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--tfp-line); }
+.tfp__split__txt { padding: clamp(56px, 9vh, 110px) var(--tfp-gut); display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+.tfp__split h2 { font-size: clamp(32px, 4vw, 60px); max-width: 16ch; }
+.tfp__split p { max-width: 42ch; font-size: 17px; color: var(--tfp-body); }
+.tfp__split .tfp__fine { font-size: 13px; color: var(--tfp-mute); }
+.tfp__split__img { background: var(--tfp-soft) center / cover no-repeat; min-height: 420px; }
+
+/* ---- Programme : intro + écrans par jour, sticky, papier / noir ---------- */
+.tfp__prog__intro { padding: clamp(80px, 14vh, 160px) var(--tfp-gut) 56px; display: flex; flex-direction: column; gap: 18px; justify-content: flex-end; min-height: 60svh; }
+.tfp__prog__intro h2 { font-size: clamp(48px, 7vw, 104px); }
+.tfp__prog__intro p { max-width: 48ch; color: var(--tfp-mute); font-size: 17px; }
+.tfp__stack { position: relative; }
+.tfp__day { position: sticky; top: 0; height: 100svh; display: grid; grid-template-columns: 1fr 1fr; background: var(--paper); border-top: 1px solid var(--tfp-line); }
+.tfp__day:nth-child(even) { background: var(--ink); color: var(--paper); border-top-color: var(--ink); }
+.tfp__day__txt { padding: 32px var(--tfp-gut); display: flex; flex-direction: column; justify-content: center; gap: 14px; overflow: hidden; }
+.tfp__day__num { font-size: clamp(22px, 2.4vw, 32px); color: var(--tfp-mute); letter-spacing: -0.02em; }
+.tfp__day:nth-child(even) .tfp__day__num { color: #bdb6a7; }
+.tfp__day h3 { font-size: clamp(26px, 2.8vw, 40px); max-width: 18ch; }
+.tfp__day__txt > p { max-width: 40ch; color: var(--tfp-body); font-size: 16px; }
+.tfp__day:nth-child(even) .tfp__day__txt > p { color: #e8e3d8; }
+.tfp__day__mods { display: grid; gap: 14px; max-width: 44ch; }
+.tfp__day__m h4 { font-size: 15px; margin: 0 0 4px; letter-spacing: -0.01em; }
+.tfp__day__m ul { margin: 0; padding-left: 16px; font-size: 14px; line-height: 1.4; color: var(--tfp-body); display: grid; gap: 2px; }
+.tfp__day:nth-child(even) .tfp__day__m ul { color: #e8e3d8; }
+.tfp__day__ex { font-size: 13px; color: var(--tfp-mute); max-width: 44ch; line-height: 1.45; }
+.tfp__day__ex b { font-weight: 500; color: var(--ink); }
+.tfp__day:nth-child(even) .tfp__day__ex { color: #bdb6a7; }
+.tfp__day:nth-child(even) .tfp__day__ex b { color: var(--paper); }
+.tfp__day__meta { font-size: 13px; color: var(--tfp-mute); display: flex; gap: 10px; flex-wrap: wrap; }
+.tfp__day__meta b { color: var(--ink); font-weight: 500; }
+.tfp__day:nth-child(even) .tfp__day__meta { color: #bdb6a7; }
+.tfp__day:nth-child(even) .tfp__day__meta b { color: var(--paper); }
+.tfp__day__img { position: relative; overflow: hidden; background: var(--tfp-soft); }
+.tfp__day__img img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; display: block; }
+
+/* ---- Ce que tu repars avec (f.included) : section encre, grille 3 --------- */
+.tfp__deliv { padding: clamp(80px, 12vh, 140px) var(--tfp-gut); background: var(--ink); color: var(--paper); }
+.tfp__deliv h2 { font-size: clamp(32px, 4.4vw, 64px); max-width: 16ch; }
+.tfp__deliv .tfp__lead { color: #bdb6a7; margin-top: 14px; }
+.tfp__deliv__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px 32px; margin-top: 56px; }
+.tfp__deliv__grid div { border-top: 1px solid #3a3733; padding-top: 14px; font-size: 17px; line-height: 1.35; display: grid; gap: 6px; }
+.tfp__deliv__grid small { color: #bdb6a7; font-size: 14px; line-height: 1.4; }
+
+/* ---- Formateur ------------------------------------------------------------ */
+/* Formateur : un seul → son nom est le titre, la bio suit, la photo (si elle
+   existe un jour) prend la colonne de droite. À plusieurs → liste dépliante. */
+.tfp__trainer { padding: clamp(72px, 10vh, 120px) var(--tfp-gut); border-top: 1px solid var(--tfp-line); display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; align-items: start; }
+.tfp__trainer.has-photo, .tfp__trainer.is-multi { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); }
+.tfp__trainer__txt { max-width: 60ch; }
+.tfp__trainer h2 { font-size: clamp(32px, 4.4vw, 64px); margin-top: 18px; }
+.tfp__trainer__role { margin-top: 10px; font-size: 13px; letter-spacing: 0.02em; color: var(--tfp-mute); }
+.tfp__trainer .tfp__lead { margin-top: 22px; }
+.tfp__trainer__photo { background: var(--tfp-soft) center / cover no-repeat; aspect-ratio: 4 / 5; min-height: 320px; }
+.tfp__trainer__para { margin-top: 18px; font-size: 17px; line-height: 1.55; color: var(--tfp-body); max-width: 52ch; }
+
+/* ---- Étapes --------------------------------------------------------------- */
+.tfp__steps { padding: clamp(72px, 10vh, 120px) var(--tfp-gut); border-top: 1px solid var(--tfp-line); }
+.tfp__steps h2 { font-size: clamp(30px, 3.6vw, 52px); }
+.tfp__steps__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 44px; }
+.tfp__steps__grid div { border-top: 1px solid var(--ink); padding-top: 14px; display: grid; gap: 8px; }
+.tfp__steps__grid .k { font-size: 12px; letter-spacing: 0.04em; color: var(--tfp-mute); }
+.tfp__steps__grid h3 { font-size: 22px; }
+.tfp__steps__grid p { color: var(--tfp-body); font-size: 15px; }
+
+/* ---- Réglementaire (dépliants) + FAQ -------------------------------------- */
+.tfp__reg { padding: clamp(56px, 8vh, 96px) var(--tfp-gut); background: var(--tfp-soft); }
+.tfp__reg h2 { font-size: 22px; margin-bottom: 10px; }
+.tfp__hint { color: var(--tfp-mute); font-size: 14px; max-width: 60ch; }
+.tfp__reg__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 48px; margin-top: 28px; }
+.tfp__reg details, .tfp__faq details { border-top: 1px solid var(--tfp-line); }
+.tfp__reg summary, .tfp__faq summary { cursor: pointer; list-style: none; padding: 16px 0; font-size: 16px; font-weight: 500; display: flex; justify-content: space-between; gap: 16px; }
+.tfp__reg summary::-webkit-details-marker, .tfp__faq summary::-webkit-details-marker { display: none; }
+.tfp__reg summary::after, .tfp__faq summary::after { content: "+"; color: var(--tfp-mute); font-weight: 400; }
+.tfp__reg details[open] summary::after, .tfp__faq details[open] summary::after { content: "−"; }
+.tfp__reg .body, .tfp__faq .body { padding: 0 0 20px; color: var(--tfp-body); font-size: 15px; max-width: 60ch; }
+.tfp__reg .body a, .tfp__faq .body a { color: var(--ink); }
+.tfp__faq { padding: clamp(72px, 10vh, 120px) var(--tfp-gut); }
+.tfp__faq h2 { font-size: clamp(30px, 3.6vw, 52px); margin-bottom: 24px; }
+.tfp__faq details { max-width: 760px; }
+.tfp__faq details:last-of-type { border-bottom: 1px solid var(--tfp-line); }
+.tfp__faq summary { padding: 18px 0; font-size: 18px; }
+.tfp__faq .body { padding-bottom: 22px; font-size: 16px; }
+
+/* ---- Mobile --------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .tfp__card { right: 0; bottom: 0; left: 0; width: auto; transform: translateY(100%); }
+  .tfp__card.is-on { transform: none; }
+  .tfp__card .lg__cta-mini { display: flex; align-items: center; gap: 14px; padding: 10px 24px; border-width: 1px 0 0; box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08); }
+  .tfp__card .lg__cta-mini__title, .tfp__card .lg__cta-mini__cert, .tfp__card .lg__cta-mini__badges, .tfp__card .lg__cta-mini__meta, .tfp__card .lg__cta-mini__sessions, .tfp__card .lg__cta-mini__btn--ghost, .tfp__card .lg__cta-mini__sub, .tfp__card .lg__cta-mini__cpfbox, .tfp__card .lg__cta-mini__btn + .lg__cta-mini__btn { display: none; }
+  .tfp__card .lg__cta-mini__head { border: 0; margin: 0; padding: 0; flex: 1; }
+  .tfp__card .lg__cta-mini__btn { width: auto; margin: 0; white-space: nowrap; border-radius: 999px; }
+}
+@media (max-width: 820px) {
+  .tfp__two, .tfp__trainer, .tfp__split, .tfp__reg__grid, .tfp__offer__grid { grid-template-columns: 1fr; gap: 28px; }
+  .tfp__offer__lines > div { grid-template-columns: 1fr; gap: 4px; }
+  .tfp__obj__grid, .tfp__steps__grid, .tfp__deliv__grid { grid-template-columns: 1fr; }
+  .tfp__split__img { min-height: 0; aspect-ratio: 4 / 3; order: -1; }
+  .tfp__prog__intro { min-height: 0; padding-top: 72px; }
+  .tfp__day { position: static; height: auto; grid-template-columns: 1fr; }
+  .tfp__day__img { aspect-ratio: 4 / 3; order: -1; }
+  .tfp__day__img img { position: static; height: 100%; }
+  .tfp__day__txt { padding: 32px var(--tfp-gut) 44px; }
+  .tfp__hero h1 { font-size: clamp(38px, 11vw, 56px); }
+}
+@media (max-width: 600px) {
+  .tfp__titlebar { top: 85px; }
+  .tfp__titlebar__title { font-size: clamp(16px, 4.5vw, 22px); }
+  .tfp__titlebar__meta .dur { display: none; }
+  .tfp__sectionbar { top: calc(85px + var(--lg-title-h, 40px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tfp__promise { height: auto; }
+  .tfp__promise__pin { position: static; height: auto; padding-block: 120px; }
+  .tfp__promise h2 .w { opacity: 1; }
+  .tfp__promise .tfp__btn { opacity: 1; transform: none; }
+  .tfp__btn { transition: none; }
+}
+
+/* Prochaine session — transposition du « Upcoming Events » de TFP :
+   section blanche, colonne centrée de 700 px (padding 100px), pastille,
+   H1 72px semi-bold à -0.05em, sous-titre 16px gris, liste flex gap 16px,
+   chaque ligne date à gauche / détail à droite, sans filets. */
+.tfp__next { padding: clamp(64px, 10vh, 100px) var(--tfp-gut); background: var(--paper); border-top: 1px solid var(--tfp-line); }
+.tfp__next__col { width: 100%; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 0; }
+.tfp__next .tfp__pill { align-self: center; }
+.tfp__next__title { margin: 36px 0 0; font-size: clamp(40px, 5vw, 72px); line-height: 1; font-weight: 600; letter-spacing: -0.05em; text-align: center; }
+.tfp__next__sub { margin: 36px 0 0; font-size: 16px; line-height: 1.45; color: var(--tfp-mute); text-align: center; max-width: 44ch; }
+.tfp__next__list { margin: 40px 0 0; padding: 0; width: 100%; list-style: none; display: flex; flex-direction: column; gap: 16px; }
+.tfp__next__row { display: flex; align-items: baseline; justify-content: space-between; gap: 32px; }
+.tfp__next__date { font-size: 20px; letter-spacing: -0.03em; color: var(--tfp-mute); white-space: nowrap; }
+.tfp__next__meta { font-size: 20px; letter-spacing: -0.03em; color: var(--tfp-mute); text-align: right; }
+.tfp__next__meta.is-open { color: var(--ink); }
+.tfp__next__cta { margin-top: 40px; }
+@media (max-width: 700px) {
+  .tfp__next__row { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .tfp__next__meta { text-align: left; font-size: 17px; }
+  .tfp__next__date { font-size: 18px; }
+  .tfp__next__cta { align-self: stretch; }
+}

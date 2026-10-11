@@ -1,0 +1,610 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Stratégie de marque et réseaux sociaux</title>
+<style>
+@font-face{font-family:"Geist";src:url("fonts/Geist-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Geist";src:url("fonts/Geist-Medium.woff2") format("woff2");font-weight:500;font-display:swap}
+:root{
+  --paper:#f6f5f3; --soft:#efeae0; --beige:#e6e0d4; --ink:#000; --mute:#66625a; --line:#d6d0c2; --white:#fbfaf8;
+  --gut:clamp(24px,4vw,64px);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Geist",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;font-weight:500;letter-spacing:-.02em;line-height:1.02;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+img,video{max-width:100%;display:block}
+.pill{display:inline-block;border:1px solid var(--ink);border-radius:999px;padding:4px 12px;font-size:12px;letter-spacing:.02em;line-height:1.3}
+/* bouton carré du site (lg__cta-mini__btn) : sans arrondi, 13px medium, padding 13/18 */
+.btn{display:inline-block;background:var(--ink);color:var(--paper);text-decoration:none;padding:13px 18px;border-radius:0;font-size:13px;font-weight:500;letter-spacing:.01em;text-align:center;transition:background .15s ease,color .15s ease}
+.btn:hover{background:#222}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.btn.ghost{background:var(--paper);color:var(--ink);outline:1px solid var(--ink)}
+.btn.ghost:hover{background:var(--soft)}
+.mute{color:var(--mute)}
+.lead{font-size:clamp(17px,1.5vw,20px);line-height:1.45;max-width:38ch}
+.mark{background:var(--ink);color:var(--paper);padding:0 .18em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+
+/* header — menu lagriotheque.com : wordmark à gauche, deux rangées de liens à droite,
+   blanc sur la vidéo, plaque papier + filet encre dès qu'on scrolle */
+.lg__header{position:fixed;top:0;left:0;right:0;z-index:55;height:121px;display:flex;align-items:center;gap:20px;padding:12px 24px;color:#fff;background:transparent;border-bottom:1px solid transparent;transition:background .35s ease,border-color .35s ease,color .35s ease}
+.lg__header.past-hero{background:var(--paper);color:var(--ink);border-bottom-color:var(--ink)}
+.lg__header__griot{width:min(240px,55vw);flex-shrink:0;display:flex;align-items:center;color:inherit;text-decoration:none}
+.lg__header__griot .wm{width:100%;height:auto;display:block;overflow:visible}
+.lg__menu{display:flex;flex-direction:column;gap:10px;flex:1;min-width:0;font-weight:500;letter-spacing:-.01em;line-height:1.1}
+.lg__menu__row{display:flex;flex-wrap:nowrap;align-items:baseline;justify-content:flex-end;gap:10px;white-space:nowrap;overflow:hidden;min-width:0}
+.lg__menu__row:first-child{font-size:17px}
+.lg__menu__row:last-child{font-size:clamp(16px,1.8vw,32px);gap:clamp(8px,1vw,14px)}
+.lg__menu__link{color:inherit;text-decoration:none;text-transform:lowercase}
+.lg__menu__link:hover{text-decoration:underline;text-underline-offset:3px}
+.lg__menu__link.is-active{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;pointer-events:none}
+.lg__menu__sep{font-weight:500}
+.lg__header__menubtn{display:none;font:inherit;font-weight:500;font-size:20px;letter-spacing:-.01em;color:inherit;background:transparent;border:0;padding:8px 12px;cursor:pointer;margin-left:auto}
+@media (max-width:600px){
+  .lg__header{height:85px}
+  .lg__menu{display:none}
+  .lg__header__menubtn{display:inline-block}
+}
+
+/* barre de titre sous le menu — reprise de .lg__formation__title.is-stuck + stickybar du site :
+   fixée sous le header, papier + filet encre, apparaît quand le titre du hero touche le menu */
+.lg__titlebar{position:fixed;top:121px;left:0;right:0;z-index:42;display:flex;align-items:center;gap:16px;padding:6px 24px 8px;background:var(--paper);border-bottom:1px solid var(--ink);color:var(--ink);transform:translateY(-100%);opacity:0;transition:transform .3s cubic-bezier(.2,.7,.2,1),opacity .3s;pointer-events:none}
+.lg__titlebar.is-stuck{transform:none;opacity:1;pointer-events:auto}
+.lg__titlebar__title{font-weight:500;font-size:clamp(20px,2.4vw,32px);line-height:1.1;letter-spacing:-.035em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.lg__titlebar__meta{display:flex;align-items:center;gap:16px;flex-shrink:0;font-size:clamp(13px,1.1vw,15px);font-weight:500}
+.lg__titlebar__meta>*{padding-left:16px;border-left:1px solid var(--ink);white-space:nowrap}
+.lg__titlebar__meta .dur{color:var(--mute)}
+.lg__titlebar__meta a{text-decoration:underline;text-underline-offset:3px}
+@media (max-width:600px){
+  .lg__titlebar{top:85px;padding:6px 24px 8px}
+  .lg__titlebar__title{font-size:clamp(16px,4.5vw,22px)}
+  .lg__titlebar__meta .dur{display:none}
+}
+
+/* barre de section sous le titre — indique où on est (Programme) et le module courant */
+.lg__sectionbar{position:fixed;top:calc(121px + var(--lg-title-h,52px));left:0;right:0;z-index:41;display:flex;align-items:center;gap:16px;padding:8px 24px;background:var(--paper);border-bottom:1px solid var(--ink);color:var(--ink);font-size:clamp(13px,1.1vw,15px);font-weight:500;transform:translateY(-100%);opacity:0;transition:transform .3s cubic-bezier(.2,.7,.2,1),opacity .3s;pointer-events:none}
+.lg__sectionbar.is-on{transform:none;opacity:1;pointer-events:auto}
+.lg__sectionbar__name{letter-spacing:.02em;flex-shrink:0}
+.lg__sectionbar__cur:not(:empty){padding-left:16px;border-left:1px solid var(--ink)}
+.lg__sectionbar__cur{color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.lg__sectionbar__cur b{color:var(--ink);font-weight:500}
+.lg__sectionbar__count{margin-left:auto;flex-shrink:0;font-variant-numeric:tabular-nums;color:var(--mute)}
+@media (max-width:600px){.lg__sectionbar{top:calc(85px + var(--lg-title-h,40px))}}
+
+/* hero — vidéo pleine largeur, titre par-dessus (comme lagriotheque.com) */
+.hero{position:sticky;top:0;z-index:0;height:100svh;display:flex;align-items:flex-end;background:#111;color:var(--paper);overflow:hidden}
+.after{position:relative;z-index:1;background:var(--paper)}
+.hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.28) 45%,rgba(0,0,0,.08) 100%)}
+.hero__txt{position:relative;z-index:1;padding:clamp(40px,8vh,96px) var(--gut) 56px;display:flex;flex-direction:column;gap:22px;max-width:1100px}
+.hero .pill{border-color:var(--paper);color:var(--paper)}
+.hero h1{font-size:clamp(44px,6.4vw,104px);max-width:12ch}
+.hero .lead{color:#e8e3d8}
+.hero__cta{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.hero__cta .btn{background:var(--paper);color:var(--ink)}
+.hero__cta .btn:hover{background:#fff}
+.hero__cta small{color:#cfc8b8;font-size:13px}
+.hero .cap{position:absolute;right:var(--gut);bottom:18px;z-index:1;font-size:12px;letter-spacing:.02em;opacity:.7}
+
+/* promise — texte épinglé plein écran, révélé mot à mot au scroll (0.2 → 1), comme la
+   « Mission Statement » de TFP : section de 2 écrans, panneau sticky d'un écran */
+.promise{height:200svh;background:var(--paper)}
+.promise__pin{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 var(--gut)}
+.promise h2{font-size:clamp(30px,4.2vw,72px);max-width:24ch;text-wrap:balance}
+.promise h2 .w{opacity:.2;transition:opacity .25s ease-out;will-change:opacity}
+.promise h2 .w.on{opacity:1}
+.promise .btn{margin-top:40px;opacity:0;transform:translateY(8px);transition:opacity .4s ease,transform .4s ease}
+.promise .btn.on{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.promise{height:auto}.promise__pin{position:static;height:auto;padding-block:120px}.promise h2 .w{opacity:1}.promise .btn{opacity:1;transform:none}}
+
+/* pour qui — les 4 audience_points du BO + le public visé */
+.who{padding:clamp(72px,10vh,120px) var(--gut);border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:48px;align-items:start}
+.who h2{font-size:clamp(32px,4.4vw,64px)}
+.who .lead{margin-top:18px;color:#3a3630}
+.who__list{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.who__list li{display:flex;gap:18px;align-items:baseline;padding:18px 0;border-top:1px solid var(--ink);font-size:clamp(20px,2vw,28px);font-weight:500;letter-spacing:-.02em;line-height:1.15}
+.who__list li:last-child{border-bottom:1px solid var(--ink)}
+.who__list li::before{content:"→";flex-shrink:0;font-weight:400;color:var(--mute)}
+.who__note{margin-top:22px;font-size:14px;color:var(--mute);max-width:52ch}
+@media (max-width:820px){.who{grid-template-columns:1fr;gap:28px}}
+
+/* objectifs pédagogiques — les 6 objectifs du référentiel en grille numérotée */
+.obj{padding:clamp(72px,10vh,120px) var(--gut);border-top:1px solid var(--line)}
+.obj h2{font-size:clamp(32px,4.4vw,64px)}
+.obj .lead{margin-top:14px;color:#3a3630}
+.obj__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 32px;margin-top:48px;counter-reset:obj}
+.obj__grid div{border-top:1px solid var(--ink);padding-top:14px;font-size:17px;line-height:1.35;display:grid;gap:8px}
+.obj__grid div::before{counter-increment:obj;content:"0" counter(obj);font-size:13px;color:var(--mute);letter-spacing:.02em}
+/* prérequis */
+.prereq{padding:clamp(72px,10vh,120px) var(--gut);border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:48px;align-items:start}
+.prereq h2{font-size:clamp(32px,4.4vw,64px)}
+.prereq .lead{margin-top:18px;color:#3a3630}
+.prereq__list{list-style:none;margin:0;padding:0}
+.prereq__list li{display:flex;gap:18px;align-items:baseline;padding:18px 0;border-top:1px solid var(--ink);font-size:clamp(18px,1.6vw,24px);font-weight:500;letter-spacing:-.02em;line-height:1.2}
+.prereq__list li:last-child{border-bottom:1px solid var(--ink)}
+.prereq__list li::before{content:"→";flex-shrink:0;font-weight:400;color:var(--mute)}
+@media (max-width:820px){.obj__grid{grid-template-columns:1fr}.prereq{grid-template-columns:1fr;gap:28px}}
+
+/* carte de réservation du site (lg__cta-mini, style SENZA) — fixée à droite dès qu'on a passé le hero,
+   masquée pendant la pile des modules ; sur mobile, barre compacte en bas prix + bouton */
+.lg__cta-mini{position:fixed;right:24px;bottom:24px;z-index:40;width:300px;background:var(--paper);border:1px solid var(--ink);padding:22px 22px 20px;box-shadow:0 12px 32px rgba(0,0,0,.06);text-align:left;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .3s cubic-bezier(.2,.7,.2,1),opacity .3s}
+.lg__cta-mini.is-on{transform:none;opacity:1;pointer-events:auto}
+.lg__cta-mini__title{font-weight:500;font-size:15px;line-height:1.25;letter-spacing:-.01em;margin:0 0 16px;padding-bottom:14px;border-bottom:1px solid var(--ink)}
+.lg__cta-mini__head{display:flex;flex-direction:column;gap:4px;padding-bottom:14px;border-bottom:1px solid var(--ink);margin-bottom:14px}
+.lg__cta-mini__price{font-weight:500;font-size:24px;letter-spacing:-.02em;line-height:1}
+.lg__cta-mini__hint{font-size:10px;letter-spacing:.06em;color:#888}
+.lg__cta-mini__cert{font-size:13px;font-weight:500;line-height:1.3;margin:0 0 10px}
+.lg__cta-mini__badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.lg__cta-mini__badges span{display:inline-block;font-size:10px;font-weight:500;letter-spacing:.06em;background:var(--ink);color:var(--paper);padding:4px 8px}
+.lg__cta-mini__meta{list-style:none;padding:0;margin:0 0 16px;font-size:13px;line-height:1.4}
+.lg__cta-mini__label{font-size:10px;letter-spacing:.14em;color:#888;margin:0 0 6px}
+.lg__cta-mini__val{font-size:13px;margin:0 0 14px}
+.lg__cta-mini__btn{display:block;background:var(--ink);color:var(--paper);padding:13px 18px;text-align:center;text-decoration:none;font-weight:500;font-size:13px;letter-spacing:.01em;margin-bottom:10px}
+.lg__cta-mini__btn--ghost{background:var(--paper);color:var(--ink);outline:1px solid var(--ink)}
+.lg__cta-mini__sub{display:block;text-align:center;font-size:10px;letter-spacing:.04em;text-decoration:underline;text-underline-offset:3px}
+.lg__cta-mini__cpfbox{display:flex;align-items:center;gap:12px;margin-top:16px;padding:12px 14px;border:1px solid rgba(0,0,0,.15);border-radius:4px;font-size:12px;line-height:1.3}
+.lg__cta-mini__cpfbox img{width:34px;height:34px;object-fit:contain}
+@media (max-width:900px){
+  .lg__cta-mini{right:0;bottom:0;left:0;width:auto;padding:10px 24px;border-width:1px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.08);display:flex;align-items:center;gap:14px;transform:translateY(100%)}
+  .lg__cta-mini.is-on{transform:none}
+  .lg__cta-mini__title,.lg__cta-mini__cert,.lg__cta-mini__badges,.lg__cta-mini__meta,.lg__cta-mini__label,.lg__cta-mini__val,.lg__cta-mini__btn--ghost,.lg__cta-mini__sub,.lg__cta-mini__cpfbox{display:none}
+  .lg__cta-mini__head{border:0;margin:0;padding:0;flex:1}
+  .lg__cta-mini__btn{margin:0;white-space:nowrap}
+}
+
+/* testimonial */
+.quote{display:grid;grid-template-columns:1fr 1fr;background:var(--soft)}
+.quote__img{aspect-ratio:1/1;background:var(--beige) center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:13px}
+.quote__txt{padding:clamp(40px,6vw,80px) var(--gut);display:flex;flex-direction:column;justify-content:center;gap:22px}
+.quote blockquote{margin:0;font-size:clamp(20px,2vw,28px);line-height:1.3;letter-spacing:-.01em;max-width:28ch}
+.quote .who{font-size:14px}
+.quote .who span{display:block;color:var(--mute)}
+
+/* modules */
+.mods__intro{padding:clamp(80px,14vh,160px) var(--gut) 56px;display:flex;flex-direction:column;gap:18px;justify-content:flex-end;min-height:60svh}
+.mods__intro h2{font-size:clamp(48px,7vw,104px)}
+.mods__intro p{max-width:40ch;color:var(--mute);font-size:17px}
+.stack{position:relative}
+.mod{position:sticky;top:0;height:100svh;display:grid;grid-template-columns:1fr 1fr;background:var(--paper);border-top:1px solid var(--line)}
+.mod:nth-child(even){background:var(--ink);color:var(--paper);border-top-color:var(--ink)}
+.mod:nth-child(even) .mod__num,.mod:nth-child(even) .mod__meta,.mod:nth-child(even) .mod__link{color:#bdb6a7}
+.mod:nth-child(even) .mod__txt>p{color:#e8e3d8}
+.mod:nth-child(even) .mod__meta b{color:var(--paper)}
+.mod__txt{padding:32px var(--gut);display:flex;flex-direction:column;justify-content:center;gap:14px;overflow:hidden}
+.mod__num{font-size:clamp(22px,2.4vw,32px);color:var(--mute);font-weight:400;letter-spacing:-.02em}
+.mod h3{font-size:clamp(26px,2.8vw,40px);max-width:18ch}
+.mod__txt>p{max-width:40ch;color:#3a3630;font-size:16px}
+.mod__mods{display:grid;gap:14px;max-width:44ch}
+.mod__m h4{font-size:15px;font-weight:500;margin:0 0 4px;letter-spacing:-.01em}
+.mod__m ul{margin:0;padding-left:16px;font-size:14px;line-height:1.4;color:#3a3630;display:grid;gap:2px}
+.mod:nth-child(even) .mod__m ul{color:#e8e3d8}
+.mod__ex{font-size:13px;color:var(--mute);max-width:44ch;line-height:1.45}
+.mod__ex b{font-weight:500;color:var(--ink)}
+.mod:nth-child(even) .mod__ex{color:#bdb6a7}
+.mod:nth-child(even) .mod__ex b{color:var(--paper)}
+.mod__meta{font-size:13px;color:var(--mute);letter-spacing:.01em;display:flex;gap:10px;flex-wrap:wrap}
+.mod__meta b{color:var(--ink);font-weight:500}
+.mod__link{font-size:14px;text-decoration:underline;text-underline-offset:4px;color:var(--mute)}
+.mod__img{position:relative;overflow:hidden;background:var(--beige)}
+.mod__img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.mod__img .tag{position:absolute;left:18px;top:16px;background:var(--paper);border-radius:999px;padding:4px 10px;font-size:11px;letter-spacing:.03em}
+.mod__img .tag.miss{background:var(--paper);color:#8f2d2d}
+
+/* deliverables */
+.deliv{padding:clamp(80px,12vh,140px) var(--gut);background:var(--ink);color:var(--paper)}
+.deliv h2{font-size:clamp(32px,4.4vw,64px);max-width:16ch}
+.deliv .lead{color:#bdb6a7;margin-top:14px}
+.deliv__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 32px;margin-top:56px}
+.deliv__grid div{border-top:1px solid #3a3733;padding-top:14px;font-size:17px;display:grid;gap:6px}
+.deliv__grid small{color:#bdb6a7;font-size:14px;line-height:1.4}
+.deliv a.more{display:inline-block;margin-top:44px;color:var(--paper);font-size:15px;text-underline-offset:4px}
+
+/* certification + trainer : shared split */
+.split{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+.split__txt{padding:clamp(56px,9vh,110px) var(--gut);display:flex;flex-direction:column;justify-content:center;gap:18px}
+.split h2{font-size:clamp(32px,4vw,60px);max-width:14ch}
+.split p{max-width:40ch;font-size:17px;color:#3a3630}
+.split .fine{font-size:13px;color:var(--mute)}
+.split__img{background:var(--beige) center/cover no-repeat;min-height:420px;position:relative}
+.split__img .tag{position:absolute;left:18px;top:16px;background:var(--paper);border-radius:999px;padding:4px 10px;font-size:11px;letter-spacing:.03em;color:#8f2d2d}
+.split--rev .split__img{order:-1}
+
+/* steps */
+.steps{padding:clamp(72px,10vh,120px) var(--gut);border-top:1px solid var(--line)}
+.steps h2{font-size:clamp(30px,3.6vw,52px)}
+.steps__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:44px}
+.steps__grid div{border-top:1px solid var(--ink);padding-top:14px;display:grid;gap:8px}
+.steps__grid .k{font-size:12px;letter-spacing:.04em;color:var(--mute)}
+.steps__grid h3{font-size:22px}
+.steps__grid p{color:#3a3630;font-size:15px}
+
+/* reglementaire */
+.reg{padding:clamp(56px,8vh,96px) var(--gut);background:var(--soft)}
+.reg h2{font-size:22px;margin-bottom:10px}
+.reg .hint{color:var(--mute);font-size:14px;max-width:60ch}
+.reg__grid{display:grid;grid-template-columns:1fr 1fr;gap:0 48px;margin-top:28px}
+.reg details{border-top:1px solid var(--line)}
+.reg summary{cursor:pointer;list-style:none;padding:16px 0;font-size:16px;font-weight:500;display:flex;justify-content:space-between;gap:16px}
+.reg summary::-webkit-details-marker{display:none}
+.reg summary::after{content:"+";color:var(--mute);font-weight:400}
+.reg details[open] summary::after{content:"−"}
+.reg .body{padding:0 0 20px;color:#3a3630;font-size:15px;max-width:60ch;display:grid;gap:8px}
+.reg .body ol,.reg .body ul{margin:0;padding-left:18px;display:grid;gap:6px}
+
+/* faq + final */
+.faq{padding:clamp(72px,10vh,120px) var(--gut)}
+.faq h2{font-size:clamp(30px,3.6vw,52px);margin-bottom:24px}
+.faq details{border-top:1px solid var(--line);max-width:760px}
+.faq details:last-of-type{border-bottom:1px solid var(--line)}
+.faq summary{cursor:pointer;list-style:none;padding:18px 0;font-size:18px;font-weight:500;display:flex;justify-content:space-between;gap:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--mute);font-weight:400}
+.faq details[open] summary::after{content:"−"}
+.faq .body{padding:0 0 22px;color:#3a3630;font-size:16px;max-width:60ch}
+.final{padding:clamp(80px,12vh,140px) var(--gut);background:var(--ink);color:var(--paper);display:grid;gap:24px;justify-items:start}
+.final h2{font-size:clamp(36px,5vw,72px);max-width:14ch}
+.final .btn{background:var(--paper);color:var(--ink)}
+.final .btn:hover{background:#fff}
+.final small{color:#bdb6a7;font-size:13px}
+
+/* footer du site (lg__footer) repris tel quel : 4 colonnes, newsletter, Qualiopi, marquee */
+.lg__footer{padding:18px 24px 0;border-top:1px solid var(--paper);color:var(--paper);background:var(--ink)}
+.lg__footer a{color:var(--paper)}
+.lg__footer__cols{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;padding-bottom:16px}
+.lg__footer__col{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:500;letter-spacing:.04em}
+.lg__footer__col a,.lg__footer__col p{color:var(--paper);text-decoration:none;margin:0}
+.lg__footer__col a:hover{text-decoration:underline;text-underline-offset:3px}
+.lg__footer__nl{display:flex;flex-direction:column;gap:6px;margin-top:2px}
+.lg__footer__nl label{color:var(--paper);cursor:pointer}
+.lg__footer__nl__row{display:flex;align-items:center;gap:8px;border-bottom:1px solid color-mix(in srgb,var(--paper) 45%,transparent);max-width:220px}
+.lg__footer__nl__row input{flex:1;min-width:0;background:none;border:0;outline:none;padding:4px 0 6px;color:var(--paper);font:inherit;font-size:11px;font-weight:500;letter-spacing:.04em}
+.lg__footer__nl__row input::placeholder{color:color-mix(in srgb,var(--paper) 50%,transparent)}
+.lg__footer__nl__row button{background:none;border:0;padding:0 0 2px;color:var(--paper);font-size:14px;line-height:1;cursor:pointer}
+.lg__qualiopi{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:14px;max-width:280px}
+.lg__qualiopi__logo{height:56px;width:auto;display:block}
+.lg__qualiopi__text{font-style:normal;font-size:9px;line-height:1.35;letter-spacing:.01em;color:var(--paper)}
+.lg__footer__marquee{margin:0 -24px;overflow:hidden;border-top:1px solid var(--paper);padding:6px 0 8px}
+.lg__footer__marquee__track{display:inline-flex;white-space:nowrap;font-weight:500;font-size:clamp(20px,2.6vw,36px);line-height:1;letter-spacing:-.02em;color:var(--paper);animation:lg-marquee 30s linear infinite}
+@keyframes lg-marquee{from{transform:translateX(0)}to{transform:translateX(-25%)}}
+@media (prefers-reduced-motion:reduce){.lg__footer__marquee__track{animation:none}}
+@media (max-width:600px){.lg__footer__cols{grid-template-columns:1fr}}
+
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+@media (max-width:820px){
+  .hero{height:100svh}
+  .hero h1{font-size:clamp(38px,11vw,56px)}
+  .hero .cap{display:none}
+  .offer__grid,.quote,.split,.reg__grid{grid-template-columns:1fr}
+  .quote__img{aspect-ratio:4/3}
+  .mods__intro{min-height:0;padding-top:72px}
+  .mod{position:static;height:auto;grid-template-columns:1fr}
+  .mod__img{aspect-ratio:4/3;order:-1}
+  .mod__img img{position:static;height:100%}
+  .mod__txt{padding:32px var(--gut) 44px}
+  .split__img{min-height:0;aspect-ratio:4/3;order:-1}
+  .deliv__grid,.steps__grid{grid-template-columns:1fr}
+}
+</style></head><body>
+
+<header class="lg__header" id="hdr">
+  <a class="lg__header__griot" href="https://lagriotheque.com/" aria-label="Accueil"><svg class="wm" viewBox="0 0 8448 1095" role="img" aria-label="LA GRIOTHÈQUE"><g transform="matrix(1 0 0 -1 -26.0 968.0)" fill="currentColor" stroke="currentColor" stroke-width="26" stroke-linejoin="round" stroke-linecap="round" paint-order="stroke"><path d="M86 0V710H194V99H540V0Z M603 0 859 710H996L1252 0H1137L1072 185H782L718 0ZM816 283H1039L927 607Z M1880 -16Q1779 -16 1707.0 31.5Q1635 79 1597.0 162.5Q1559 246 1559 354Q1559 461 1598.0 545.0Q1637 629 1709.5 677.5Q1782 726 1884 726Q1971 726 2031.5 695.0Q2092 664 2127.5 610.0Q2163 556 2177 487L2064 481Q2052 546 2010.0 586.5Q1968 627 1884 627Q1810 627 1763.0 590.0Q1716 553 1693.5 491.0Q1671 429 1671 354Q1671 276 1693.5 215.0Q1716 154 1763.5 118.5Q1811 83 1885 83Q1943 83 1985.0 108.0Q2027 133 2050.5 176.0Q2074 219 2076 271H1886V362H2179V0H2105L2100 113Q2073 55 2013.0 19.5Q1953 -16 1880 -16Z M2314 0V710H2597Q2710 710 2776.5 652.0Q2843 594 2843 496Q2843 434 2807.5 389.5Q2772 345 2722 330Q2771 322 2798.5 292.0Q2826 262 2831 207L2850 0H2741L2724 193Q2721 236 2695.0 256.5Q2669 277 2610 277H2422V0ZM2422 376H2599Q2660 376 2695.5 406.0Q2731 436 2731 493Q2731 550 2694.5 580.5Q2658 611 2590 611H2422Z M2994 0V710H3102V0Z M3563 -16Q3460 -16 3386.0 28.5Q3312 73 3272.0 156.0Q3232 239 3232 354Q3232 469 3272.0 552.5Q3312 636 3386.0 681.0Q3460 726 3563 726Q3667 726 3741.5 681.0Q3816 636 3855.5 552.5Q3895 469 3895 354Q3895 239 3855.5 156.0Q3816 73 3741.5 28.5Q3667 -16 3563 -16ZM3563 83Q3666 83 3724.5 154.5Q3783 226 3783 354Q3783 482 3724.5 554.5Q3666 627 3563 627Q3461 627 3402.5 554.5Q3344 482 3344 354Q3344 226 3402.5 154.5Q3461 83 3563 83Z M4169 0V611H3951V710H4495V611H4277V0Z M4593 0V710H4701V406H5029V710H5137V0H5029V308H4701V0Z M5309 0V710H5771V611H5417V404H5759V308H5417V99H5779V0ZM5505 774 5415 908H5526L5589 774Z M6386 -67 6329 7Q6305 -4 6272.5 -10.0Q6240 -16 6204 -16Q6101 -16 6027.5 33.0Q5954 82 5915.0 165.5Q5876 249 5876 354Q5876 458 5914.0 542.5Q5952 627 6025.5 676.5Q6099 726 6204 726Q6311 726 6384.0 676.5Q6457 627 6495.0 542.5Q6533 458 6533 354Q6533 256 6498.5 176.0Q6464 96 6399 46L6489 -67ZM6204 83Q6223 83 6238.5 85.0Q6254 87 6265 92L6164 219H6267L6335 129Q6421 201 6421 354Q6421 428 6397.5 490.0Q6374 552 6326.0 589.5Q6278 627 6204 627Q6131 627 6083.0 589.5Q6035 552 6011.5 490.0Q5988 428 5988 354Q5988 281 6012.0 219.0Q6036 157 6084.0 120.0Q6132 83 6204 83Z M6924 -16Q6839 -16 6777.0 16.5Q6715 49 6681.5 109.0Q6648 169 6648 251V710H6756V251Q6756 170 6800.0 126.5Q6844 83 6924 83Q7004 83 7048.0 126.5Q7092 170 7092 251V710H7200V251Q7200 169 7166.5 109.0Q7133 49 7071.0 16.5Q7009 -16 6924 -16Z M7357 0V710H7819V611H7465V404H7807V308H7465V99H7827V0Z M8169.78 624.58V842.2H8226.82L8291.92 669.22L8357.64 842.2H8414.06V624.58H8371.28V775.86L8316.1 624.58H8267.74L8212.56 773.38V624.58ZM8030.28 624.58V801.28H7963.32V842.2H8141.26V801.28H8074.92V624.58Z"/></g></svg></a>
+  <div class="lg__menu">
+    <div class="lg__menu__row"><a class="lg__menu__link" href="#">Souscrire à notre newsletter</a><span class="lg__menu__sep">•</span><a class="lg__menu__link" href="https://instagram.com/lagriotheque">Instagram</a><span class="lg__menu__sep">•</span><a class="lg__menu__link" href="https://www.linkedin.com/company/lesgriots">Linkedin</a></div>
+    <div class="lg__menu__row"><a class="lg__menu__link is-active" href="https://lagriotheque.com/catalogue">Formations</a><span class="lg__menu__sep">•</span><a class="lg__menu__link" href="https://lagriotheque.com/workshops">Workshops</a><span class="lg__menu__sep">•</span><a class="lg__menu__link" href="https://lagriotheque.com/events">Événements</a><span class="lg__menu__sep">•</span><a class="lg__menu__link" href="https://lagriotheque.com/agenda">Agenda</a><span class="lg__menu__sep">•</span><a class="lg__menu__link" href="https://lagriotheque.com/ressources">Ressources</a><span class="lg__menu__sep">•</span><a class="lg__menu__link" href="https://lagriotheque.com/approche">Notre approche</a><span class="lg__menu__sep">•</span><a class="lg__menu__link" href="https://lagriotheque.com/contact">À propos</a></div>
+  </div>
+  <button class="lg__header__menubtn" type="button" aria-label="Ouvrir le menu">Menu</button>
+</header>
+
+<div class="lg__titlebar" id="titlebar" aria-hidden="true">
+  <div class="lg__titlebar__title">Stratégie de marque et réseaux sociaux</div>
+  <div class="lg__titlebar__meta"><span class="dur">28 h · 4 journées</span><span>1 650 € TTC</span><a href="mailto:formations@lesgriots.com?subject=Demande%20d'inscription">Réserver ma place</a></div>
+</div>
+
+<div class="lg__sectionbar" id="sectionbar" aria-hidden="true">
+  <span class="lg__sectionbar__name" id="sectionbar-name">Public</span>
+  <span class="lg__sectionbar__cur" id="sectionbar-cur"></span>
+  <span class="lg__sectionbar__count" id="sectionbar-count"></span>
+</div>
+
+<aside class="lg__cta-mini" id="ctamini" aria-hidden="true">
+  <p class="lg__cta-mini__title">Stratégie de marque et réseaux sociaux</p>
+  <div class="lg__cta-mini__head"><strong class="lg__cta-mini__price">1 650 € TTC</strong><span class="lg__cta-mini__hint">Exonéré de TVA</span></div>
+  <p class="lg__cta-mini__cert"><span aria-hidden="true">✓</span> Formation certifiante · RS 7200</p>
+  <div class="lg__cta-mini__badges"><span>CPF</span><span>OPCO</span><span>FAF</span><span>RS 7200</span></div>
+  <ul class="lg__cta-mini__meta"><li>Présentiel · Paris ou Le Havre / distanciel Zoom</li></ul>
+  <p class="lg__cta-mini__label">Prochaine session</p><p class="lg__cta-mini__val">Dates à venir · 8 places</p>
+  <p class="lg__cta-mini__label">Durée</p><p class="lg__cta-mini__val">28h / 4 jours</p>
+  <a class="lg__cta-mini__btn" href="mailto:formations@lesgriots.com?subject=Demande%20d'inscription">Demander une inscription →</a>
+  <a class="lg__cta-mini__btn" href="https://www.moncompteformation.gouv.fr/espace-prive/html/#/formation/recherche/90262868400018_Communiquer1/90262868400018_Communiquer1?contexteFormation=ACTIVITE_PROFESSIONNELLE">S'inscrire via Mon Compte Formation</a>
+  <a class="lg__cta-mini__btn lg__cta-mini__btn--ghost" href="#detail">↓ Télécharger le programme</a>
+  <a class="lg__cta-mini__sub" href="mailto:formations@lesgriots.com?subject=Devis%20OPCO%20%2F%20FAF">Étudier un financement</a>
+  <div class="lg__cta-mini__cpfbox"><img src="img/moncompteformation.webp" alt="Mon Compte Formation"><span>Finançable avec ton Compte Personnel de Formation</span></div>
+</aside>
+
+<section class="hero">
+  <video src="img/v-catalogue-mtg1lcn5.mp4" poster="img/launch-poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+  <div class="hero__txt">
+    <span class="pill" style="align-self:flex-start">Formation certifiante · RS7200 · éligible CPF</span>
+    <h1>Stratégie de marque et réseaux sociaux</h1>
+    <p class="lead">Clarifie ce que tu vends, à qui, et ce qui te distingue. puis construis une présence en ligne qui amène les bonnes personnes vers ton activité.</p>
+    <div class="hero__cta"><a class="btn" href="mailto:formations@lesgriots.com?subject=Demande%20d'inscription">Réserver ma place</a><small>28 h · 4 journées · 8 places</small></div>
+  </div>
+  <span class="cap">La griothèque · vidéo catalogue</span>
+</section>
+
+<main class="after">
+<section class="promise" id="promesse">
+  <div class="promise__pin">
+    <h2 id="promise-text">Tu repars avec un positionnement écrit, tes pages professionnelles créées, une ligne éditoriale que tu tiens seul, et une lecture de tes statistiques qui te dit ce qui t'amène des clients.</h2>
+    <a class="btn" id="promise-btn" href="mailto:formations@lesgriots.com?subject=Demande%20d'inscription">Réserver ma place</a>
+  </div>
+</section>
+
+<section class="who" id="pour-qui" data-bar="Public">
+  <div>
+    <h2>Pour qui</h2>
+    <p class="lead">Dirigeants de TPE, indépendants, artisans, commerçants, créateurs d'activité : celles et ceux qui veulent gérer eux-mêmes leur présence en ligne, sans agence et sans y passer leurs soirées.</p>
+    <p class="who__note">Admission sur entretien. Il faut être à l'aise à l'écrit, savoir utiliser un ordinateur, et avoir un téléphone qui prend des photos et des vidéos.</p>
+  </div>
+  <ul class="who__list">
+    <li>Tu diriges une TPE ou tu es indépendant</li>
+    <li>Tu publies déjà, sans savoir si ça sert</li>
+    <li>Ton activité dépend du bouche-à-oreille</li>
+    <li>Tu veux gérer ta communication toi-même</li>
+  </ul>
+</section>
+
+<section class="obj" id="objectifs" data-bar="Objectifs pédagogiques">
+  <h2>Objectifs pédagogiques</h2>
+  <p class="lead">Les six compétences du référentiel RS 7200. À la fin des quatre jours, tu sais :</p>
+  <div class="obj__grid">
+    <div>Définir une stratégie réseaux sociaux adaptée à la TPE (ressources, cible, objectifs commerciaux)</div>
+    <div>Sélectionner les plateformes pertinentes en analysant audience, algorithmes et concurrence</div>
+    <div>Créer et paramétrer la page entreprise sur les réseaux choisis (identité visuelle, fonctionnalités)</div>
+    <div>Élaborer une stratégie éditoriale et un planning de publication régulier</div>
+    <div>Produire des contenus engageants en s'appuyant sur l'IA générative et des outils de design, accessibles aux personnes en situation de handicap</div>
+    <div>Cultiver la e-réputation (publicité, modération, bad buzz, e-influenceurs, KPIs)</div>
+  </div>
+</section>
+
+<section class="prereq" id="prerequis" data-bar="Prérequis et admission">
+  <div>
+    <h2>Prérequis</h2>
+    <p class="lead">Pas de niveau en communication demandé. Il faut être à l'aise avec un ordinateur et à l'écrit, et avoir de quoi filmer.</p>
+    <p class="who__note">Admission sur entretien téléphonique, visio ou présentiel. Délai d'accès minimum : 2 semaines après l'inscription.</p>
+  </div>
+  <ul class="prereq__list">
+    <li>Maîtrise des outils bureautiques : traitement de texte, images, navigation internet, tableur</li>
+    <li>Aisance dans le rédactionnel et le traitement de données chiffrées</li>
+    <li>Un ordinateur (PC ou Mac) et une connexion internet haut débit</li>
+    <li>Un téléphone portable qui prend photos et vidéos</li>
+  </ul>
+</section>
+
+<section class="prereq" id="moyens" data-bar="Moyens pédagogiques">
+  <div>
+    <h2>Moyens pédagogiques</h2>
+    <p class="lead">Méthode active et participative : exposés courts, cas pratiques sur ton projet réel et partage d'expérience, animés par un praticien en activité.</p>
+    <p class="who__note">Encadrement par Moos Coulibaly, fondateur de LES GRIOTS, référent pédagogique. Formation adaptable et personnalisable, modalités à communiquer avant la signature.</p>
+  </div>
+  <ul class="prereq__list">
+    <li>En présentiel ou en distanciel via Zoom</li>
+    <li>De 1 à 12 participants, 8 par session ouverte</li>
+    <li>Plateforme de contenus Teachizy, accessible pendant et après la formation</li>
+    <li>Supports, gabarits et exercices remis à chaque module</li>
+    <li>Matériel requis : ordinateur, connexion haut débit, téléphone pour les prises de vues</li>
+  </ul>
+</section>
+
+<section class="quote" data-bar="Témoignage">
+  <div class="quote__img">Témoignage à photographier — session du 14 septembre</div>
+  <div class="quote__txt">
+    <blockquote>« Avant la formation je publiais au feeling. maintenant je sais pour qui je publie, et je vois ce qui ramène des clients. »</blockquote>
+    <p class="who">Prénom nom <span>Activité · ville · @compte — texte provisoire, à remplacer par un vrai témoignage</span></p>
+  </div>
+</section>
+
+<section class="mods__intro" id="programme" data-bar="Programme">
+  <span class="pill" style="align-self:flex-start">4 journées · 28 h</span>
+  <h2>Programme</h2>
+  <p>Quatre jours, un par écran. Six modules du référentiel RS 7200, répartis dans l'ordre où on les vit.</p>
+</section>
+
+<div class="stack" data-bar="Programme" data-modules>
+  <article class="mod">
+    <div class="mod__txt">
+      <div class="mod__num">Jour 1</div>
+      <h3>Poser ta marque et choisir tes réseaux</h3>
+      <p>Ce que tu vends vraiment, à qui, ce qui te distingue, et les réseaux où sont réellement tes clients.</p>
+      <div class="mod__mods"><div class="mod__m"><h4>Module 1 — Stratégie réseaux sociaux</h4><ul><li>Définir une stratégie adaptée aux ressources mobilisables par la TPE</li><li>Aligner stratégie, public cible et objectifs commerciaux</li><li>Élaborer un plan d'action réaliste (capacités financières et temporelles)</li></ul></div><div class="mod__m"><h4>Module 2 — Sélection des plateformes</h4><ul><li>Comparer les positionnements des plateformes (audience, algorithmes, fonctionnalités)</li><li>Vérifier la correspondance avec son public cible</li><li>Analyser les pratiques de la concurrence pour identifier les bonnes communautés</li></ul></div></div>
+      <p class="mod__ex"><b>Ateliers</b> Élaboration de la stratégie sociale du stagiaire · Cartographie comparée des plateformes pertinentes pour le projet</p>
+      <div class="mod__meta"><b>7 h</b><span>·</span><span>2 modules</span><span>·</span><span>6 points</span></div>
+    </div>
+    <div class="mod__img"><img src="img/f-marque.jpg" alt=""><span class="tag miss">Photo provisoire</span></div>
+  </article>
+  <article class="mod">
+    <div class="mod__txt">
+      <div class="mod__num">Jour 2</div>
+      <h3>Créer et paramétrer ta page entreprise</h3>
+      <p>Tu repars avec ta page professionnelle créée, paramétrée et optimisée pendant la journée.</p>
+      <div class="mod__mods"><div class="mod__m"><h4>Module 3 — Page entreprise</h4><ul><li>Créer une page de présentation de l'entreprise TPE</li><li>Exploiter les interfaces et fonctionnalités de la plateforme</li><li>Intégrer nom et identité visuelle pour ancrer la page dans le réseau social</li></ul></div></div>
+      <p class="mod__ex"><b>Ateliers</b> Création et paramétrage d'une page professionnelle complète · Optimisation des descriptions et fonctionnalités (messagerie, suivi des performances)</p>
+      <div class="mod__meta"><b>7 h</b><span>·</span><span>1 module</span><span>·</span><span>3 points</span></div>
+    </div>
+    <div class="mod__img"><img src="img/w-residence.jpg" alt=""><span class="tag miss">Photo provisoire</span></div>
+  </article>
+  <article class="mod">
+    <div class="mod__txt">
+      <div class="mod__num">Jour 3</div>
+      <h3>Construire ta ligne éditoriale et produire tes contenus</h3>
+      <p>Un planning que tu tiens seul, et tes premiers contenus produits en séance, texte et visuel.</p>
+      <div class="mod__mods"><div class="mod__m"><h4>Module 4 — Stratégie éditoriale</h4><ul><li>Définir objectifs qualitatifs, quantitatifs et temporels</li><li>Élaborer un planning éditorial basé sur la saisonnalité du projet</li><li>Organiser une régularité dans la ligne éditoriale</li></ul></div><div class="mod__m"><h4>Module 5 — Création de contenus</h4><ul><li>Concevoir des contenus visuels et textuels adaptés aux formats des plateformes</li><li>S'appuyer sur l'IA générative (prompts) et outils de design graphique</li><li>Garantir l'accessibilité (sous-titrage, descriptions alternatives, etc.)</li><li>Ajuster le ton à la communauté visée</li></ul></div></div>
+      <p class="mod__ex"><b>Ateliers</b> Planning éditorial du stagiaire (saisonnalité, cadence) · Production d'un post complet (texte + visuel) prêt à publier</p>
+      <div class="mod__meta"><b>7 h</b><span>·</span><span>2 modules</span><span>·</span><span>7 points</span></div>
+    </div>
+    <div class="mod__img"><img src="img/f-contenu.jpg" alt=""><span class="tag miss">Photo provisoire</span></div>
+  </article>
+  <article class="mod">
+    <div class="mod__txt">
+      <div class="mod__num">Jour 4</div>
+      <h3>Tenir la cadence, lire tes statistiques, préparer le jury</h3>
+      <p>Une campagne montée, les avis et le bad buzz traités, et ton dossier de certification prêt.</p>
+      <div class="mod__mods"><div class="mod__m"><h4>Module 6 — E-réputation</h4><ul><li>Construire une campagne publicitaire (durée, cible, budget, contenu)</li><li>Traiter avis, commentaires négatifs, bad buzz et crises d'image</li><li>Sélectionner et collaborer avec des e-influenceurs pertinents</li><li>Suivre et interpréter les données du réseau social (KPIs, performance)</li></ul></div><div class="mod__m"><h4>Préparation à la certification</h4><ul><li>Structuration du dossier écrit (stratégie, page, ligne édito, post, publicité)</li><li>Préparation du diaporama et de la soutenance orale</li><li>Simulation de jury</li></ul></div></div>
+      <p class="mod__ex"><b>Ateliers</b> Mise en place d'une campagne publicitaire sur le réseau choisi · Cas pratique : gestion d'un commentaire négatif et d'un bad buzz · Restitution finale + retours individualisés</p>
+      <div class="mod__meta"><b>7 h</b><span>·</span><span>2 modules</span><span>·</span><span>7 points</span></div>
+    </div>
+    <div class="mod__img"><img src="img/w-mobile.jpg" alt=""><span class="tag miss">Photo provisoire</span></div>
+  </article>
+</div>
+
+<section class="deliv" data-bar="Ce que tu repars avec">
+  <h2>Ce que tu repars avec</h2>
+  <p class="lead">Tu ne pars jamais d'une page blanche. tout se construit sur ton projet réel, pendant les quatre jours.</p>
+  <div class="deliv__grid">
+    <div>Un positionnement écrit<small>Ce que tu vends, à qui, ce qui te distingue</small></div>
+    <div>Tes pages professionnelles<small>Créées et paramétrées sur les réseaux choisis</small></div>
+    <div>Une ligne éditoriale et un planning<small>Calés sur la saisonnalité de ton activité</small></div>
+    <div>Tes premiers contenus publiés<small>Produits en séance, texte et visuel</small></div>
+    <div>Une campagne publicitaire montée<small>Durée, cible, budget, contenu</small></div>
+    <div>Ton dossier de certification préparé<small>Stratégie, page, ligne éditoriale, post, publicité</small></div>
+  </div>
+  <a class="more" href="#detail">Voir le programme complet, jour par jour →</a>
+</section>
+
+<section class="split" data-bar="Certification">
+  <div class="split__txt">
+    <span class="pill" style="align-self:flex-start">Après la formation</span>
+    <h2>La certification</h2>
+    <p>Tu constitues un dossier écrit (stratégie, page professionnelle, ligne éditoriale, publication, publicité), tu prépares un diaporama et tu le soutiens devant un jury de trois personnes : un représentant du certificateur et deux professionnels extérieurs.</p>
+    <p class="fine">RS7200 · France Compétences · certificateur CréActifs · évaluation individuelle réalisée chez le certificateur</p>
+  </div>
+  <div class="split__img" style="background-image:url(img/og-lagriotheque.jpg)"><span class="tag">Photo jury / soutenance à faire</span></div>
+</section>
+
+<section class="split split--rev" data-bar="Formateur">
+  <div class="split__txt">
+    <span class="pill" style="align-self:flex-start">Animée par</span>
+    <h2>Moos Coulibaly</h2>
+    <p>Fondateur de LES GRIOTS, il structure depuis dix ans la communication digitale d'artistes signés en major et de TPE/PME créatives. praticien transversal — chorégraphie, réalisation, direction artistique, stratégie de marque — il a accompagné Rilès, Vacra, Oumar, Médine, Eesah Yasuke, FILA, le CCN du Havre.</p>
+    <p class="fine"><a href="https://lesgriotsxstudio.com">Voir le travail du studio →</a></p>
+  </div>
+  <div class="split__img" style="background-image:url(img/f-marque.jpg)"><span class="tag">Portrait à faire</span></div>
+</section>
+
+<section class="steps" data-bar="Comment ça se passe">
+  <h2>Comment ça se passe</h2>
+  <div class="steps__grid">
+    <div><span class="k">Étape 1</span><h3>Un entretien</h3><p>Par téléphone, en visio ou en présentiel. on vérifie que la formation répond à ton projet, et que tu as le matériel : ordinateur, connexion, téléphone.</p></div>
+    <div><span class="k">Étape 2</span><h3>Le dossier CPF</h3><p>Tu réserves sur Mon Compte Formation au moins 11 jours ouvrés avant le premier jour. nous validons sous 48 h. en intra, devis et convention.</p></div>
+    <div><span class="k">Étape 3</span><h3>Quatre jours</h3><p>En groupe de 8, à Paris, au Havre ou sur Zoom. puis la certification, dans les semaines qui suivent, chez le certificateur.</p></div>
+  </div>
+</section>
+
+<section class="reg" id="detail" data-bar="Programme détaillé et modalités">
+  <h2>Programme détaillé et modalités</h2>
+  <p class="hint">Tout ce que la formation professionnelle exige de publier, au complet. déplie ce dont tu as besoin.</p>
+  <div class="reg__grid">
+    <details open><summary>Programme jour par jour</summary><div class="body">
+      <p><b>Jour 1</b> — Module 1, stratégie réseaux sociaux : définir une stratégie adaptée aux ressources de la TPE ; aligner stratégie, public cible et objectifs commerciaux ; élaborer un plan d'action réaliste. Module 2, sélection des plateformes : comparer les positionnements (audience, algorithmes, fonctionnalités) ; vérifier la correspondance avec son public ; analyser les pratiques de la concurrence. Ateliers : stratégie sociale du stagiaire ; cartographie des plateformes.</p>
+      <p><b>Jour 2</b> — Module 3, page entreprise : créer une page de présentation ; exploiter les interfaces et fonctionnalités ; intégrer nom et identité visuelle. Ateliers : création et paramétrage d'une page complète ; optimisation des descriptions et fonctionnalités.</p>
+      <p><b>Jour 3</b> — Module 4, stratégie éditoriale : objectifs qualitatifs, quantitatifs, temporels ; planning basé sur la saisonnalité ; régularité. Module 5, création de contenus : contenus adaptés aux formats ; IA générative et design ; accessibilité (sous-titrage, descriptions alternatives) ; ton ajusté à la communauté. Ateliers : planning éditorial ; production d'un post complet.</p>
+      <p><b>Jour 4</b> — Module 6, e-réputation : campagne publicitaire ; avis, commentaires négatifs, bad buzz ; e-influenceurs ; KPIs. Préparation à la certification : dossier écrit, diaporama, simulation de jury. Ateliers : campagne publicitaire ; gestion d'un commentaire négatif ; restitution finale et retours individualisés.</p>
+    </div></details>
+    <details><summary>Modalités d'évaluation</summary><div class="body"><p>Évaluation certifiante (RS7200) : conception et mise en place d'une stratégie de communication et éditoriale d'une entreprise TPE via les réseaux sociaux, avec remise d'un rapport écrit et soutenance orale devant un jury composé de 3 personnes (un représentant CréActifs + deux professionnels extérieurs, soit 66 % d'externes). Le candidat présente un diaporama et est questionné par le jury. Évaluation individuelle réalisée chez le certificateur. Référentiel d'évaluation complet sur <a href="https://www.francecompetences.fr/recherche/rs/7200/">Francecompetences.fr (RS7200)</a>.</p></div></details>
+    <details><summary>Accessibilité handicap</summary><div class="body"><p>Des adaptations sont possibles pour les personnes en situation de handicap, après échange avec le référent handicap (Moos Coulibaly, lesgriots.of@gmail.com, 06 47 04 15 35). Supports, modalités d'évaluation et outils pédagogiques peuvent être ajustés en fonction des besoins identifiés, dans le respect du référentiel de certification.</p></div></details>
+    <details><summary>Lieu, délai d'accès, tarif</summary><div class="body"><p>En distanciel via Zoom (lien envoyé après inscription) ou en présentiel — salles louées en France sélectionnées pour leur conformité aux exigences réglementaires de la formation professionnelle (accessibilité, sécurité, équipements pédagogiques). Sessions intra-entreprise sur demande.</p><p>Délai d'accès minimum : 2 semaines après l'inscription ; dossier CPF à déposer 11 jours ouvrés avant le début de la session. Tarif : 1 650 € TTC (éligible CPF, OPCO, FAF). Intra-entreprise sur devis.</p></div></details>
+  </div>
+</section>
+
+<section class="faq" data-bar="Questions fréquentes">
+  <h2>Questions fréquentes</h2>
+  <details><summary>Je n'ai pas encore de niche, c'est un problème ?</summary><div class="body">Non, c'est même le point de départ du premier jour. on écrit ensemble ce que tu vends, à qui, et ce qui te distingue, avant de toucher à un réseau social.</div></details>
+  <details><summary>Combien de temps ça demande, en dehors des quatre jours ?</summary><div class="body">Rien pendant la formation : tout se produit en séance, sur ton projet. après, la ligne éditoriale est conçue pour tenir en quelques heures par mois. la préparation du dossier de certification prend une à deux semaines.</div></details>
+  <details><summary>Comment fonctionne le financement CPF ?</summary><div class="body">Tu réserves la session depuis Mon Compte Formation, au moins 11 jours ouvrés avant le premier jour. la formation est prise en charge à hauteur de tes droits ; une participation forfaitaire peut s'appliquer selon ta situation. les indépendants peuvent aussi passer par leur FAF, les salariés par leur OPCO.</div></details>
+  <details><summary>Et si la session est complète ?</summary><div class="body">On te prévient de la suivante. les sessions sont limitées à 8 personnes parce que chaque atelier se fait sur ton projet réel, et qu'on relit chaque page.</div></details>
+  <details><summary>Présentiel ou Zoom, qu'est-ce qui change ?</summary><div class="body">Le programme et la certification sont identiques. en présentiel, les ateliers de production de contenu se font en conditions réelles, téléphone en main.</div></details>
+</section>
+
+<section class="final">
+  <h2>Prochaine session : 8 places.</h2>
+  <a class="btn" href="mailto:formations@lesgriots.com?subject=Demande%20d'inscription">Réserver ma place</a>
+  <small>Ou être prévenu de la prochaine session — formations@lesgriots.com</small>
+</section>
+
+<footer class="lg__footer">
+  <div class="lg__footer__cols">
+    <div class="lg__footer__col">
+      <a href="https://lagriotheque.com/catalogue">formations</a>
+      <a href="https://lagriotheque.com/workshops">workshops</a>
+      <a href="https://lagriotheque.com/events">événements</a>
+      <a href="https://lagriotheque.com/agenda">agenda</a>
+      <a href="https://lagriotheque.com/ressources">ressources</a>
+      <a href="https://lagriotheque.com/approche">notre approche</a>
+      <a href="https://lagriotheque.com/contact">à propos</a>
+    </div>
+    <div class="lg__footer__col">
+      <a href="https://lesgriotsxstudio.com">les griots studio</a>
+      <a href="https://lesgriotsxstudio.com">plateforme éditoriale</a>
+      <a href="https://lesgriotsxstudio.com">agence créative</a>
+    </div>
+    <div class="lg__footer__col">
+      <a href="https://instagram.com/lagriotheque">instagram</a>
+      <a href="https://www.linkedin.com/company/lesgriots">linkedin</a>
+      <form class="lg__footer__nl" onsubmit="return false">
+        <label for="footer-nl">newsletter</label>
+        <div class="lg__footer__nl__row"><input id="footer-nl" type="email" placeholder="ton@email.com" autocomplete="email"><button type="submit" aria-label="S'inscrire à la newsletter">→</button></div>
+      </form>
+    </div>
+    <div class="lg__footer__col">
+      <a href="https://lagriotheque.com/mentions-legales">mentions légales</a>
+      <a href="https://lagriotheque.com/confidentialite">politique de confidentialité</a>
+      <a href="https://lagriotheque.com/cgv">conditions générales de vente</a>
+      <div class="lg__qualiopi" aria-label="Certifié Qualiopi"><img class="lg__qualiopi__logo" src="img/qualiopi.png" alt="Qualiopi — processus certifié"><em class="lg__qualiopi__text">La certification qualité a été délivrée au titre de la catégorie d'action : Actions de formation</em></div>
+    </div>
+  </div>
+  <div class="lg__footer__marquee" aria-hidden="true"><div class="lg__footer__marquee__track"><span>Transmettre les outils et permettre à une nouvelle génération de bâtir ses récits et créer des imaginaires&nbsp;·&nbsp;</span><span>Transmettre les outils et permettre à une nouvelle génération de bâtir ses récits et créer des imaginaires&nbsp;·&nbsp;</span><span>Transmettre les outils et permettre à une nouvelle génération de bâtir ses récits et créer des imaginaires&nbsp;·&nbsp;</span><span>Transmettre les outils et permettre à une nouvelle génération de bâtir ses récits et créer des imaginaires&nbsp;·&nbsp;</span></div></div>
+</footer>
+</main>
+<script>
+(function(){
+  var h=document.getElementById('hdr'), hero=document.querySelector('.hero');
+  var tb=document.getElementById('titlebar'), h1=hero.querySelector('h1');
+  function upd(){ var past = window.scrollY > hero.offsetHeight - h.offsetHeight; h.classList.toggle('past-hero', past); var h1rel = h1.getBoundingClientRect().top - hero.getBoundingClientRect().top; var stuck = window.scrollY >= hero.offsetHeight - h1rel; /* le panneau papier recouvre le titre du hero */ tb.classList.toggle('is-stuck', stuck); tb.setAttribute('aria-hidden', stuck?'false':'true'); }
+  upd(); addEventListener('scroll',upd,{passive:true}); addEventListener('resize',upd);
+
+  // Révélation mot à mot de la promesse, pilotée par la progression du scroll dans la section.
+  var sec=document.getElementById('promesse'), h2=document.getElementById('promise-text'), btn=document.getElementById('promise-btn');
+  h2.innerHTML=h2.textContent.trim().split(/\s+/).map(function(w){return '<span class="w">'+w+'</span>';}).join(' ');
+  var words=h2.querySelectorAll('.w'), reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function reveal(){
+    if(reduce) return;
+    var r=sec.getBoundingClientRect(), total=sec.offsetHeight-innerHeight;
+    var p=Math.min(1,Math.max(0,-r.top/total));          // 0 en haut de la section, 1 en bas
+    var k=p<0.12?0:Math.round((p-0.12)/0.68*words.length); // les mots se révèlent entre 12 % et 80 %
+    for(var i=0;i<words.length;i++) words[i].classList.toggle('on', i<k);
+    btn.classList.toggle('on', p>0.8);
+  }
+  reveal(); addEventListener('scroll',reveal,{passive:true}); addEventListener('resize',reveal);
+  // Barre de section : sous le titre, nomme la section en cours (Public, Tarifs, Programme…) ;
+  // dans le programme, ajoute le module courant et le compteur.
+  var sb=document.getElementById('sectionbar'), sbName=document.getElementById('sectionbar-name'), sbCur=document.getElementById('sectionbar-cur'), sbCount=document.getElementById('sectionbar-count');
+  var secs=[].slice.call(document.querySelectorAll('[data-bar]')), mods=[].slice.call(document.querySelectorAll('.stack .mod'));
+  function sectionUpd(){
+    document.documentElement.style.setProperty('--lg-title-h', tb.offsetHeight+'px');
+    var barsH = h.offsetHeight + tb.offsetHeight, cur=null;
+    for(var i=0;i<secs.length;i++){ var r=secs[i].getBoundingClientRect(); if(r.top <= barsH + 1 && r.bottom > barsH + 1) cur=secs[i]; }
+    var on = tb.classList.contains('is-stuck') && !!cur;
+    sb.classList.toggle('is-on', on); sb.setAttribute('aria-hidden', on?'false':'true');
+    var cm=document.getElementById('ctamini'), inStack = cur && cur.hasAttribute('data-modules'), cmOn = tb.classList.contains('is-stuck') && !inStack;
+    cm.classList.toggle('is-on', cmOn); cm.setAttribute('aria-hidden', cmOn?'false':'true');
+    if(!on) return;
+    sbName.textContent = cur.getAttribute('data-bar');
+    if(cur.hasAttribute('data-modules')){
+      var k=0; for(var m=0;m<mods.length;m++){ if(mods[m].getBoundingClientRect().top <= barsH + 1) k=m; }
+      sbCur.innerHTML = '<b>'+mods[k].querySelector('.mod__num').textContent+'</b> · '+mods[k].querySelector('h3').textContent;
+      sbCount.textContent = (k+1)+' / '+mods.length;
+    } else { sbCur.textContent=''; sbCount.textContent=''; }
+  }
+  sectionUpd(); addEventListener('scroll',sectionUpd,{passive:true}); addEventListener('resize',sectionUpd);
+})();
+</script>
+</body></html>

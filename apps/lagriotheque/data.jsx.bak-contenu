@@ -1,0 +1,405 @@
+/* global window */
+// LA GRIOTHÈQUE — formations data
+// ⚠️  FICHIER GÉNÉRÉ AUTOMATIQUEMENT par backoffice-griotheque/.
+// Ne pas éditer à la main — ouvre le back office (http://localhost:3031).
+// Dernière génération : 2026-09-10T19:45:08.081Z
+
+const DEFAULT_METHODS = "La formation se structure autour d'un accompagnement global sur la session et individuel sur les exercices pratiques, en groupes limités à 12 stagiaires maximum. Chaque module mêle exposés magistraux, cas pratiques sur projets réels et partage d'expérience, animés par un praticien actif qui transmet ce qu'il a construit — pas un théoricien qui enseigne ce qu'il a lu.";
+const DEFAULT_EVALUATION = "En amont, un questionnaire d'auto-évaluation est envoyé à chaque stagiaire. En fin de session, une évaluation des acquis est proposée, suivie d'un certificat de réalisation. Une enquête de satisfaction est envoyée à chaque stagiaire pour suivre la qualité pédagogique.";
+const DEFAULT_ACCESSIBILITY = "Nos formations sont accessibles aux personnes en situation de handicap. Pour étudier les adaptations nécessaires, contacter notre référente handicap à formations@lesgriots.com en amont de l'inscription.";
+const DEFAULT_LOCATION = "Présentiel : structure de formation à Paris (adresse communiquée lors de l'inscription). En ligne : sessions live via Zoom ou Google Meet, lien communiqué à l'inscription.";
+const FORMATIONS = [
+  {
+    id: "communication-reseaux-sociaux-tpe",
+    title: "Stratégie de marque et réseaux sociaux",
+    tagline: "Clarifie ton positionnement, construis ton récit de marque et développe une présence en ligne capable d’attirer les bonnes personnes vers ton activité.",
+    discipline: "STRATÉGIE · RÉSEAUX SOCIAUX",
+    duration: "28H · 4 JOURNÉES",
+    format: "PRÉSENTIEL · PARIS OU LE HAVRE / DISTANCIEL ZOOM",
+    location: "En distanciel via Zoom (lien envoyé après inscription) ou en présentiel — salles louées en France sélectionnées pour leur conformité aux exigences réglementaires de la formation professionnelle (accessibilité, sécurité, équipements pédagogiques). Sessions intra-entreprise sur demande.",
+    price: "1 650 € TTC",
+    cpf: true,
+    opco: true,
+    trainer: {
+    "name": "MOOS COULIBALY",
+    "role": "Directeur créatif / Fondateur · LA GRIOTHÈQUE"
+  },
+    trainer_id: "moos-coulibaly",
+    media: {
+    "type": "image",
+    "src": "img/f-rs7200.jpg",
+    "credit": "LES GRIOTS"
+  },
+    overview: [
+    [
+      "Publier ne suffit pas quand personne ne comprend ce que tu portes.",
+      "Publie tous les jours, fais des vidéos, sois partout, soigne tes hashtags. Entre ces conseils contradictoires, tu publies au feeling et tu recommences à zéro chaque semaine.\n\nChoisir à qui tu t’adresses n’est pas une restriction, c’est un service : quand ton message est fait pour quelqu’un en particulier, cette personne le reconnaît immédiatement. Une stratégie relie ensuite tout le reste, ce que tu vends, à qui, ce que tu racontes, où tu le dis et à quel rythme. Chaque contenu sert le suivant, et tu sais enfin pourquoi tu publies.",
+      "img/f-marque.jpg"
+    ],
+    [
+      "Notre formation",
+      "Quatre jours en présentiel, en groupe de douze au maximum.\n\nLe premier pour poser ta marque : ce que tu vends vraiment, à qui, et ce qui te distingue de ceux qui font la même chose. Le deuxième pour choisir les réseaux où sont réellement tes clients, créer et paramétrer tes pages professionnelles. Le troisième pour construire ta ligne éditoriale et produire tes premiers contenus. Le quatrième pour apprendre à tenir la cadence, lire tes statistiques et distinguer ce qui t’amène des clients de ce qui te fait perdre du temps.",
+      ""
+    ],
+    [
+      "À la fin de la formation",
+      "Tu repars avec un positionnement écrit : ce que tu vends, à qui, et ce qui te distingue. Tes pages professionnelles créées et paramétrées sur les réseaux où sont vraiment tes clients. Une ligne éditoriale et un planning de publication que tu tiens seul, en quelques heures par mois. Tes premiers contenus produits pendant la formation. Et une lecture de tes statistiques qui te dit ce qui t’amène des clients.\n\nPour la certification, tu constitues un dossier écrit (stratégie, page professionnelle, ligne éditoriale, publication, publicité), tu prépares un diaporama et tu le soutiens devant un jury de trois personnes.",
+      "img/f-contenu.jpg"
+    ]
+  ],
+    description: "Formation certifiante (RS7200, France Compétences, certificateur CréActifs) éligible CPF. 28 heures réparties sur 4 journées de 7 heures, en distanciel (Zoom) ou en présentiel. Effectif limité à 12 stagiaires. Animée par Moos Coulibaly, fondateur de LES GRIOTS, qui structure depuis dix ans la communication digitale d'artistes signés en major et de TPE/PME créatives.",
+    audience: "Dirigeants de TPE (auto-entrepreneurs, artisans, commerçants, créateurs d'activité) souhaitant développer leur visibilité en ligne, acquérir les bases de la communication digitale et utiliser efficacement les réseaux sociaux pour promouvoir leur activité. La certification s'adresse à des créateurs ou chefs d'entreprise qui veulent gérer eux-mêmes leur présence sur les réseaux sociaux.",
+    prerequisites: "Maîtrise des outils bureautiques (traitement de texte, traitement des images, navigation internet, tableur). Aisance dans le rédactionnel et le traitement de données chiffrées. Disposer d'un ordinateur (PC ou Mac), d'une connexion internet haut-débit et d'un téléphone portable permettant de prendre photos et vidéos. Admission sur entretien téléphonique, visio ou présentiel.",
+    objectives: [
+    "Définir une stratégie réseaux sociaux adaptée à la TPE (ressources, cible, objectifs commerciaux)",
+    "Sélectionner les plateformes pertinentes en analysant audience, algorithmes et concurrence",
+    "Créer et paramétrer la page entreprise sur les réseaux choisis (identité visuelle, fonctionnalités)",
+    "Élaborer une stratégie éditoriale et un planning de publication régulier",
+    "Produire des contenus engageants en s'appuyant sur l'IA générative et des outils de design (accessibles aux personnes en situation de handicap)",
+    "Cultiver la e-réputation (publicité, modération, bad buzz, e-influenceurs, KPIs)"
+  ],
+    chapters: [
+    "Module 1 — Stratégie réseaux sociaux adaptée à la TPE",
+    "Module 2 — Sélection des plateformes cibles",
+    "Module 3 — Page entreprise : création et paramétrage",
+    "Module 4 — Stratégie éditoriale et planning",
+    "Module 5 — Création de contenus (IA, design, accessibilité)",
+    "Module 6 — E-réputation et publicité"
+  ],
+    program: [
+    {
+      "day": "jour 1",
+      "modules": [
+        {
+          "title": "Module 1 — Stratégie réseaux sociaux",
+          "items": [
+            "Définir une stratégie adaptée aux ressources mobilisables par la TPE",
+            "Aligner stratégie, public cible et objectifs commerciaux",
+            "Élaborer un plan d'action réaliste (capacités financières et temporelles)"
+          ]
+        },
+        {
+          "title": "Module 2 — Sélection des plateformes",
+          "items": [
+            "Comparer les positionnements des plateformes (audience, algorithmes, fonctionnalités)",
+            "Vérifier la correspondance avec son public cible",
+            "Analyser les pratiques de la concurrence pour identifier les bonnes communautés"
+          ]
+        }
+      ],
+      "exercises": [
+        "Atelier : élaboration de la stratégie sociale du stagiaire",
+        "Cartographie comparée des plateformes pertinentes pour le projet"
+      ]
+    },
+    {
+      "day": "jour 2",
+      "modules": [
+        {
+          "title": "Module 3 — Page entreprise",
+          "items": [
+            "Créer une page de présentation de l'entreprise TPE",
+            "Exploiter les interfaces et fonctionnalités de la plateforme",
+            "Intégrer nom et identité visuelle pour ancrer la page dans le réseau social"
+          ]
+        }
+      ],
+      "exercises": [
+        "Création et paramétrage d'une page professionnelle complète",
+        "Optimisation des descriptions, fonctionnalités (messagerie, suivi des performances)"
+      ]
+    },
+    {
+      "day": "jour 3",
+      "modules": [
+        {
+          "title": "Module 4 — Stratégie éditoriale",
+          "items": [
+            "Définir objectifs qualitatifs, quantitatifs et temporels",
+            "Élaborer un planning éditorial basé sur la saisonnalité du projet",
+            "Organiser une régularité dans la ligne éditoriale"
+          ]
+        },
+        {
+          "title": "Module 5 — Création de contenus",
+          "items": [
+            "Concevoir des contenus visuels et textuels adaptés aux formats des plateformes",
+            "S'appuyer sur l'IA générative (prompts) et outils de design graphique",
+            "Garantir l'accessibilité (sous-titrage, descriptions alternatives, etc.)",
+            "Ajuster le ton à la communauté visée"
+          ]
+        }
+      ],
+      "exercises": [
+        "Planning éditorial du stagiaire (saisonnalité, cadence)",
+        "Production d'un post complet (texte + visuel) prêt à publier"
+      ]
+    },
+    {
+      "day": "jour 4",
+      "modules": [
+        {
+          "title": "Module 6 — E-réputation",
+          "items": [
+            "Construire une campagne publicitaire (durée, cible, budget, contenu)",
+            "Traiter avis, commentaires négatifs, bad buzz et crises d'image",
+            "Sélectionner et collaborer avec des e-influenceurs pertinents",
+            "Suivre et interpréter les données du réseau social (KPIs, performance)"
+          ]
+        },
+        {
+          "title": "Préparation à la certification",
+          "items": [
+            "Structuration du dossier écrit (stratégie, page, ligne édito, post, publicité)",
+            "Préparation du diaporama et de la soutenance orale",
+            "Simulation de jury"
+          ]
+        }
+      ],
+      "exercises": [
+        "Mise en place d'une campagne publicitaire sur le réseau choisi",
+        "Cas pratique : gestion d'un commentaire négatif et d'un bad buzz",
+        "Restitution finale + retours individualisés"
+      ]
+    }
+  ],
+    methods: "Méthode pédagogique active et participative, en distanciel via Zoom ou en présentiel. Nombre de participants : de 1 à 12 maximum. Plateforme de contenus : Teachizy. Délai d'accès minimum : 2 semaines après l'inscription. Sessions permanentes. Encadrement par un formateur expérimenté (Moos Coulibaly, fondateur LES GRIOTS, référent pédagogique). Matériel requis : ordinateur PC ou Mac, connexion internet haut-débit, téléphone portable pour prises de vues. Formation adaptable et personnalisable (modalités à communiquer en amont de la signature).",
+    evaluation: "Évaluation certifiante (RS7200) : conception et mise en place d'une stratégie de communication et éditoriale d'une entreprise TPE via les réseaux sociaux, avec remise d'un rapport écrit et soutenance orale devant un jury composé de 3 personnes (un représentant CréActifs + deux professionnels extérieurs, soit 66 % d'externes). Le candidat présente un diaporama et est questionné par le jury. Évaluation individuelle réalisée chez le certificateur. Référentiel d'évaluation complet sur francecompetences.fr (RS7200).",
+    accessibility: "Des adaptations sont possibles pour les personnes en situation de handicap, après échange avec le référent handicap (Moos Coulibaly, lesgriots.of@gmail.com, 06 47 04 15 35). Supports, modalités d'évaluation et outils pédagogiques peuvent être ajustés en fonction des besoins identifiés, dans le respect du référentiel de certification.",
+    available: true,
+    rs: "RS7200",
+    certifier: "CréActifs",
+    cpfUrl: "https://www.moncompteformation.gouv.fr/espace-prive/html/#/formation/recherche/90262868400018_Communiquer1/90262868400018_Communiquer1?contexteFormation=ACTIVITE_PROFESSIONNELLE",
+    franceCompetencesUrl: "https://www.francecompetences.fr/recherche/rs/7200/",
+    faf: true,
+    audience_points: [
+    "Tu diriges une TPE ou tu es indépendant",
+    "Tu publies déjà, sans savoir si ça sert",
+    "Ton activité dépend du bouche-à-oreille",
+    "Tu veux gérer ta communication toi-même"
+  ],
+  },
+];
+
+const WORKSHOPS = [];
+
+const TRAINERS = [
+  {
+    id: "moos-coulibaly",
+    name: "MOOS COULIBALY",
+    role: "Directeur créatif / Fondateur · LA GRIOTHÈQUE",
+    bio: "Moos a fondé Les Griots (SASU, 2021), plateforme d'ingénierie narrative regroupant un studio créatif, une production originale et La Griothèque. Praticien transversal — chorégraphie, réalisation, direction artistique, stratégie de marque — il accompagne Rilès, Vacra, Oumar, Médine, Eesah Yasuke, FILA, CCN Le Havre. Il forme désormais créatifs, entrepreneurs et institutions à structurer leur récit et leur marque.",
+    photo: null,
+    formations: [
+    "strategie-marque",
+    "strategie-contenu",
+    "filmer-au-telephone",
+    "contenu-video-telephone"
+  ],
+  },
+];
+
+const SESSIONS = [];
+
+const RESOURCES = [
+  {
+    id: "arborescences-de-projet",
+    title: "Templates de projet créatif",
+    format: "Archive ZIP · Mac et Windows",
+    description: "Un projet qui commence dans « nouveau dossier 2 » finit en rushes introuvables, en versions qui se marchent dessus et en livraisons fausses. Ranger avant de commencer coûte deux minutes. Ranger après coûte un week-end.\n\nTu connais la scène. Le tournage est bouclé, les cartes sont vidées sur le bureau, et il y a maintenant quatre dossiers qui s’appellent « final », « final2 », « FINAL_OK » et « final vrai ». Le monteur en ouvre un au hasard. Trois semaines plus tard, le client demande le plan de la fin, celui où la lumière était juste, et personne ne sait sur quelle carte il était.\n\nCe n’est pas un problème de rigueur, c’est un problème d’ordre. Personne n’a le temps de ranger au milieu d’un tournage. La seule façon d’avoir un projet rangé, c’est qu’il le soit avant d’avoir commencé : les dossiers existent déjà, on n’a plus qu’à poser les fichiers dedans.\n\nC’est ce que tu télécharges ici. Cinq arborescences complètes, une par nature de projet : vidéo, photo, design, podcast, contenu. Tu dupliques celle qui correspond, tu la renommes à la date et au nom du client, et ton disque ressemble à celui d’une maison de production avant même le premier fichier.\n\nL’avantage se voit plus tard, jamais tout de suite. Il se voit quand tu retrouves un plan deux ans après pour une bande démo. Quand tu confies un dossier à un monteur sans passer une heure au téléphone à lui expliquer où sont les choses. Quand un client revient pour une déclinaison et que tu n’as pas à refacturer trois heures de fouille.\n\nUne règle suffit, et c’est la seule à retenir : rien ne se pose à la racine. Chaque fichier a un dossier, et le dossier existe déjà. Si tu hésites sur l’endroit, c’est que ton arborescence manque d’un dossier : ajoute-le une fois, il servira à tous les projets suivants.\n\nDeux conventions de nommage viennent avec. La date en tête, écrite à l’envers, année puis mois puis jour : tes dossiers se rangent alors tout seuls dans l’ordre chronologique, sans que tu aies à trier quoi que ce soit. Et jamais d’espace ni d’accent dans les noms : le jour où tu envoies le dossier à quelqu’un qui travaille sur un autre système, ou que tu le déposes sur un serveur, les espaces et les accents cassent les liens.\n\nLes versions se numérotent, elles ne se qualifient pas. V01, V02, V03. La dernière est la plus haute, c’est tout ce qu’il y a à savoir, et personne n’ouvre plus le mauvais fichier.\n\nCe sont nos dossiers, ceux qu’on utilise sur nos propres projets et qu’on installe avec nos apprenants dès le premier jour de formation, avant même de parler de cadre ou de montage. Si tu veux automatiser la duplication, l’application gratuite Post Haste le fait très bien : tu déposes ces modèles dans son dossier de templates et l’arborescence se crée en deux clics. Un créatif qui sait ranger son travail est un créatif à qui on confie des projets plus gros.",
+    type: "template",
+    href: "img/ressources/arborescences-projet-lagriotheque.zip",
+    available: true,
+    subtitle: "Cinq arborescences de projet prêtes à dupliquer : vidéo, photo, design, podcast, contenu. Celles qu’on installe le premier jour, sur tous les postes.",
+    author: "LA GRIOTHÈQUE",
+    cover: "img/ressources/arborescence.svg",
+    whatsInside: "Cinq modèles : vidéo, photo, design, podcast, contenu\nUne arborescence complète par projet, prête à dupliquer et à renommer\nUn nommage qui tient sur Mac, sur Windows et sur un serveur\nUn mode d’emploi court : une seule règle à retenir\nCompatible Post Haste si tu veux automatiser la duplication",
+  },
+];
+
+const EVENTS = [];
+
+const SITE_CONFIG = {
+  "activePages": {
+    "launch": false,
+    "home": true,
+    "approche": true,
+    "formations": true,
+    "workshops": true,
+    "agenda": true,
+    "events": true,
+    "financement": false,
+    "ressources": true,
+    "cgv": true,
+    "contact": true
+  },
+  "leadsEndpoint": "http://localhost:3031/griotheque/api/leads"
+};
+
+const SITE_CONTENT = {
+  "home": {
+    "hero_eyebrow": "Transmettre aux créatifs les méthodes et les outils qui leur permettent de faire évoluer leur pratique, donner forme à leurs idées et construire les conditions pour les faire vivre.",
+    "manifesto": "Développe ta pratique, clarifie le récit que tu portes, structure tes projets, présente ton travail, trouve les bons partenaires, défends ta valeur et construis une activité qui te permet de durer.",
+    "formations_heading": "Nos formations",
+    "formations_lede": "Des formations courtes et pratiques, pour tous les niveaux et toutes les disciplines. ",
+    "formations_lede_link": "Trouve la formation faite pour toi.",
+    "workshops_heading": "Nos workshops",
+    "workshops_lede": "Des formats courts et intensifs, en groupe restreint, pour pratiquer sur ton projet réel. ",
+    "workshops_lede_link": "Découvre les prochains workshops.",
+    "hero_video": "img/v-home-hero-mtg2c8sc.mp4",
+    "vision_title": "Les nouveaux récits ont besoin de nouveaux visages.",
+    "vision_text": "La Griothèque existe pour permettre l’émergence d’une nouvelle génération de créatifs capables de raconter le monde autrement.\nNous transmettons les outils nécessaires pour donner une voix aux visions qui méritent d’exister.",
+    "vision_video": "img/v-workshops-mtg2cmib.mp4",
+    "hero_tagline_line1": "L'école de transmission",
+    "hero_tagline_line2": "pour la nouvelle génération",
+    "hero_tagline_line3": "créative.",
+    "latest_tab_formations": "Nos formations",
+    "latest_tab_workshops": "Workshops",
+    "hero_statement": "",
+    "hero_cta": "Voir les formations"
+  },
+  "approche": {
+    "title": "Notre approche",
+    "lede": "Les outils évoluent, les plateformes changent, mais les principes qui permettent de créer, raconter et transmettre restent essentiels. LA GRIOTHÈQUE crée un pont entre l’expérience des créateurs d’aujourd’hui et la génération qui construira les récits de demain.",
+    "pilier1_title": "Le récit comme point de départ",
+    "pilier1_body": "Avant les outils, il y a une vision.\n\nChaque création forte commence par une histoire à raconter. Nous aidons les créatifs à clarifier leur intention, structurer leur pensée et construire un récit cohérent qui donne du sens à leur travail.",
+    "pilier2_title": "L’expérience du terrain comme transmission",
+    "pilier2_body": "Apprendre de ceux qui créent aujourd’hui.\n\nNos formations sont animées par des professionnels en activité qui partagent leurs expériences, leurs méthodes et les enseignements issus de projets réels.",
+    "pilier3_title": "La pratique comme moteur",
+    "pilier3_body": "Les compétences se construisent en faisant.\n\nNos formations privilégient l’expérimentation, les cas concrets et la mise en application pour transformer les connaissances en savoir-faire.",
+    "partners_title": "Nos partenaires",
+    "partners_intro": "La Griothèque avance entourée de structures qui accompagnent, financent et font grandir les créatifs et les entrepreneurs.",
+    "about_lesgriots": "LES GRIOTS est une plateforme d'ingénierie narrative et une infrastructure culturelle afro-diasporique. La maison raconte ses propres histoires, structure et amplifie celles des artistes et des marques, et transmet à une nouvelle génération de créatifs de quoi bâtir de nouveaux imaginaires."
+  },
+  "catalogue": {
+    "heading": "Formations",
+    "intro": "Des formations conçues pour les créatifs qui veulent transformer leurs idées en projets solides.\n\nÀ travers la communication, l’image de marque et les réseaux sociaux, nous transmettons les outils et les méthodes nécessaires pour développer une pratique créative plus forte et plus visible.\n\nAnimées par des professionnels en activité, nos formations privilégient l’apprentissage par la pratique, en petits groupes, avec des formats certifiants et finançables selon les dispositifs disponibles.",
+    "sub": "Stratégie de marque · Réseaux sociaux · Storytelling",
+    "media": "img/v-catalogue-mtg1lcn5.mp4"
+  },
+  "workshops_page": {
+    "heading": "Workshops",
+    "intro": "Des formats courts et immersifs pour approfondir un sujet précis, développer de nouvelles compétences et passer à l’action.",
+    "sub": "",
+    "media": "img/test-v-home-vision-mtg1ktng.mp4"
+  },
+  "ressources": {
+    "heading": "Ressources",
+    "intro": "Des outils, des conseils et des inspirations pour développer votre créativité, structurer vos projets et mieux comprendre les enjeux de la création, de la communication et de la stratégie de marque.",
+    "sub": "Méthodes · templates · études de cas",
+    "media": ""
+  },
+  "agenda": {
+    "heading": "Agenda",
+    "intro": "Retrouvez les prochaines formations et workshops : dates, formats, disponibilités et modalités de participation.",
+    "sub": "Sessions ouvertes · inscription en ligne",
+    "media": ""
+  },
+  "events_page": {
+    "heading": "Événements",
+    "intro": "Des rencontres, conférences et masterclass pour explorer les idées, les méthodes et les pratiques qui façonnent les projets créatifs de demain.",
+    "sub": "",
+    "media": ""
+  },
+  "contact": {
+    "title": "À propos",
+    "line1": "Une école de transmission créative  LA GRIOTHÈQUE est l’organisme de formation de LES GRIOTS.  Nous créons un pont entre l’expérience des créateurs d’aujourd’hui et la génération qui écrira les récits de demain.  À travers nos formations, nous transmettons des savoirs, des méthodes et des outils issus du terrain dans les domaines de la direction artistique, du récit de marque, de la communication et de la production.",
+    "line2": "Organisme de formation",
+    "line3": "de la SASU LES GRIOTS",
+    "line4": "Certifié Qualiopi",
+    "email": "formations@lesgriots.com",
+    "instagram_url": "https://instagram.com/lagriotheque",
+    "instagram_label": "instagram",
+    "linkedin_url": "https://linkedin.com",
+    "linkedin_label": "linkedin",
+    "location_main": "Présentiel à Paris",
+    "location_hq": "Siège social — Le Havre",
+    "studio_url": "https://lesgriotsxstudio.com",
+    "studio_label": "lesgriotsxstudio.com"
+  },
+  "financement": {
+    "title": "Comment s'inscrire et quel financement ?",
+    "col1_intro": "Pour toute question et inscription, écris-nous par mail :",
+    "col1_email": "formations@lesgriots.com",
+    "col1_response": "Nous répondons systématiquement sous deux jours ouvrés.",
+    "col1_eligibility": "Que tu sois inscrit·e à la MDA / Agessa, auto-entrepreneur·euse, entreprise individuelle ou dirigeant·e non salarié·e de SASU/EURL, tu cotises déjà pour ta formation professionnelle continue et tu disposes de possibilités de financement.",
+    "col2_intro": "Nous t'accompagnons et simplifions tes démarches administratives auprès des organismes de référence — OPCO (salariés), FAF / FIF-PL / AGEFICE / AFDAS (indépendants selon ton statut). EDOF en cours, CPF à venir.",
+    "col2_qualiopi": "LA GRIOTHÈQUE est le pilier formation de la SASU LES GRIOTS, certifié Qualiopi (Actions de formation), Lauréat French Tech, et déclaré sous le numéro NDA 28760747176 auprès de la DREETS Normandie — spécialité techniques de l'image et du son, métiers connexes du spectacle.",
+    "col2_accessibility": "Pour toute question d'accessibilité ou d'adaptation, merci de nous contacter par mail en amont de l'inscription."
+  },
+  "footer": {
+    "marquee": "TRANSMETTRE LES OUTILS ET PERMETTRE À UNE NOUVELLE GÉNÉRATION DE BÂTIR SES RÉCITS ET CRÉER DES IMAGINAIRES",
+    "qualiopi_caption": "La certification qualité a été délivrée au titre de la catégorie d'action : Actions de formation",
+    "col2_studio_label": "les griots studio",
+    "col2_plateforme_label": "plateforme éditoriale",
+    "col2_agence_label": "agence créative"
+  },
+  "splash": {
+    "loading_target": "LOADING",
+    "cue": "[ ENTRER ]"
+  },
+  "cgv": {
+    "title": "Conditions générales de vente",
+    "lede": "Applicables aux prestations de formation et d'accompagnement proposées par LA GRIOTHÈQUE, pilier formation de la SASU LES GRIOTS. Version mise à jour le 14 mars 2026.",
+    "footer_contact": "Pour toute question relative aux présentes CGV, contacter LA GRIOTHÈQUE à formations@lesgriots.com."
+  },
+  "mentions_legales": {
+    "title": "Mentions légales",
+    "lede": "Informations légales relatives au site lagriotheque.com, édité par la SASU LES GRIOTS. Conformément à la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN). Version au 25 mai 2026.",
+    "footer_contact": "Pour toute question relative à ces mentions, contacter formations@lesgriots.com."
+  },
+  "confidentialite": {
+    "title": "Politique de confidentialité",
+    "lede": "Comment LA GRIOTHÈQUE traite les données personnelles collectées via ce site. Conforme au Règlement général sur la protection des données (RGPD, UE 2016/679) et à la Loi Informatique et Libertés. Version au 25 mai 2026."
+  },
+  "cta": {
+    "reserve_label": "Réserver ma place",
+    "payer_template": "Payer {price}",
+    "demande_label": "Demander une inscription"
+  },
+  "emails": {
+    "welcome_subject": "Bienvenue dans LA GRIOTHÈQUE — confirmation de ta place",
+    "welcome_intro": "Merci pour ton inscription au workshop. Tu trouveras ci-dessous le récapitulatif de ton achat et les prochaines étapes pour préparer la session.",
+    "welcome_signoff": "À très vite,\nL'équipe LA GRIOTHÈQUE",
+    "lead_gate_subject": "Voici ta ressource — LA GRIOTHÈQUE",
+    "lead_gate_intro": "Merci pour ton intérêt. Tu trouveras le téléchargement de la ressource demandée ci-dessous. On reste en contact pour les prochaines parutions.",
+    "lead_gate_signoff": "Bonne lecture,\nL'équipe LA GRIOTHÈQUE"
+  },
+  "faq": {
+    "q_cpf": "Puis-je financer cette formation via mon CPF ?",
+    "a_cpf_yes": "Oui, cette formation est éligible CPF. Tu peux t'inscrire directement depuis Mon Compte Formation.",
+    "a_cpf_no": "Cette formation n'est pas éligible CPF, mais des prises en charge OPCO ou FAF sont possibles selon ton statut. Contacte-nous pour étudier un montage.",
+    "q_delais": "Quels sont les délais d'inscription ?",
+    "a_delais": "Réponse à toute demande sous 48h ouvrées. Inscription possible jusqu'à 14 jours avant le démarrage de la session, dans la limite des places disponibles.",
+    "q_apres": "Que se passe-t-il après la formation ?",
+    "a_apres": "Tu reçois une attestation de fin de formation. Pour les formations certifiantes, le passage de certification est intégré. Nous gardons le contact via notre newsletter et l'accès à la communauté Griothèque.",
+    "q_handicap": "La formation est-elle accessible aux personnes en situation de handicap ?",
+    "a_handicap_fallback": "Oui. Contacte notre référent handicap pour un entretien préalable et adapter les modalités à ta situation."
+  },
+  "launch": {
+    "media": "img/v-home-hero-mtg49rxi.mp4",
+    "title": "Transmettre à une nouvelle génération de créatifs les outils pour bâtir leur récit et vivre de leur passion.",
+    "text": "Le site arrive très bientôt. Laisse ton email pour être prévenu en premier.",
+    "cta": "Me prévenir →",
+    "success": "Merci ! À très bientôt ",
+    "name_placeholder": "Ton prénom",
+    "placeholder": "nom@email.com",
+    "tel_placeholder": "06 00 00 00 00",
+    "legal": "En t'inscrivant, tu acceptes de recevoir les actualités de LA GRIOTHÈQUE. Désinscription en 1 clic, à tout moment.",
+    "poster": "img/launch-poster.jpg",
+    "invalid": "Email invalide, vérifie l'adresse.",
+    "error": "Une erreur est survenue, réessaie dans un instant.",
+    "brand": "LA GRIOTHÈQUE"
+  }
+};
+
+if (typeof window !== "undefined") {
+  window.FORMATIONS = FORMATIONS;
+  window.WORKSHOPS = WORKSHOPS;
+  window.TRAINERS = TRAINERS;
+  window.SESSIONS = SESSIONS;
+  window.RESOURCES = RESOURCES;
+  window.EVENTS = EVENTS;
+  window.SITE_CONFIG = SITE_CONFIG;
+  window.SITE_CONTENT = SITE_CONTENT;
+}

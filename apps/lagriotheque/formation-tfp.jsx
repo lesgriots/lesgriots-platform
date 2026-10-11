@@ -528,17 +528,17 @@
 
           {/* ---- 6. Prérequis ----------------------------------------------- */}
           {(prereq.lead || prereq.items.length > 0) && (
-            <section className="tfp__two" data-bar="Prérequis et admission">
-              <div><h2>Prérequis</h2>{prereq.lead && <p className="tfp__lead">{prereq.lead}.</p>}{prereq.note && <p className="tfp__fine">{prereq.note}.</p>}</div>
-              <ul className="tfp__arrows">{prereq.items.map((s, i) => <li key={i}>{s}</li>)}</ul>
+            <section className="tfp__two tfp__two--stack" data-bar="Prérequis et admission">
+              <h2>Prérequis</h2>
+              {prereq.items.length > 0 ? <ul className="tfp__arrows">{prereq.items.map((s, i) => <li key={i}>{s}</li>)}</ul> : <p className="tfp__lead">{prereq.lead}.</p>}
             </section>
           )}
 
           {/* ---- 7. Moyens pédagogiques ------------------------------------- */}
           {(moyens.lead || moyens.items.length > 0) && (
-            <section className="tfp__two" data-bar="Moyens pédagogiques">
-              <div><h2>Moyens pédagogiques</h2>{moyens.lead && <p className="tfp__lead">{moyens.lead}.</p>}{moyens.note && <p className="tfp__fine">{moyens.note}.</p>}</div>
-              <ul className="tfp__arrows">{moyens.items.map((s, i) => <li key={i}>{s}</li>)}</ul>
+            <section className="tfp__two tfp__two--stack" data-bar="Moyens pédagogiques">
+              <h2>Moyens pédagogiques</h2>
+              {moyens.items.length > 0 ? <ul className="tfp__arrows">{moyens.items.map((s, i) => <li key={i}>{s}</li>)}</ul> : <p className="tfp__lead">{moyens.lead}.</p>}
             </section>
           )}
 
