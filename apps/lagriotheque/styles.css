@@ -7183,7 +7183,8 @@ a.lg__partners__logo:hover {
   width: 100vw;
   margin-left: calc(50% - 50vw);
   max-width: none;
-  padding: 40px 24px 80px;
+  /* Même gouttière que la fiche formation (--lg-gutter), 11/10/2026. */
+  padding: 40px var(--lg-gutter) 80px;
 }
 .lg__resource__grid {
   display: grid;
@@ -7369,7 +7370,7 @@ a.lg__partners__logo:hover {
 }
 
 @media (max-width: 900px) {
-  .lg__resource { padding: var(--space-6) 16px var(--space-15); }
+  .lg__resource { padding: var(--space-6) var(--lg-gutter) var(--space-15); }
   /* Sur téléphone, tenir sur une ligne voudrait dire écrire en 18px : on
      laisse le titre se casser, et on reprend une taille lisible. */
   .lg__resource__title {
