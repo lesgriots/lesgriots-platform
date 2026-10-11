@@ -499,7 +499,7 @@
             <section className="tfp__split" data-bar="Pourquoi">
               <div className="tfp__split__txt">
                 <h2>{accroche.head}</h2>
-                {String(accroche.text).split(/\n\n/).map((p, i) => <Rv key={i}>{p}</Rv>)}
+                {String(accroche.text).split(/\n\n/).map((p, i) => <p key={i}>{p}</p>)}
               </div>
               {accroche.media && <div className="tfp__split__img" style={{ backgroundImage: "url(" + accroche.media + ")" }} />}
             </section>
@@ -510,7 +510,7 @@
             <section className="tfp__two" data-bar="Public">
               <div>
                 <h2>Pour qui</h2>
-                {f.audience && <Rv className="tfp__lead">{f.audience}</Rv>}
+                {f.audience && <p className="tfp__lead">{f.audience}</p>}
                 {prereq.note && <p className="tfp__fine">{prereq.note}.</p>}
               </div>
               {Array.isArray(f.audience_points) && f.audience_points.length > 0 && (
@@ -550,7 +550,7 @@
               <section className="tfp__prog__intro" id="programme" data-bar="Programme">
                 <span className="tfp__pill">{program.length} journée{program.length > 1 ? "s" : ""}{f.duration ? " · " + f.duration.split("·")[0].trim().toLowerCase() : ""}</span>
                 <h2>Programme</h2>
-                {notre ? String(notre.text).split(/\n\n/).map((p, i) => <Rv key={i}>{p}</Rv>) : <p>{program.length} jours, un par écran.</p>}
+                {notre ? String(notre.text).split(/\n\n/).map((p, i) => <p key={i}>{p}</p>) : <p>{program.length} jours, un par écran.</p>}
               </section>
               <div className="tfp__stack" data-bar="Programme" data-days>
                 {program.map((d, i) => {
@@ -606,7 +606,7 @@
               <div className="tfp__split__txt">
                 <span className="tfp__pill">Après la formation</span>
                 <h2>La certification</h2>
-                <Rv>{certifText}</Rv>
+                <p>{certifText}</p>
                 <p className="tfp__fine">{[f.rs.replace(/^RS/i, "RS "), "France Compétences", f.certifier && "certificateur " + f.certifier].filter(Boolean).join(" · ")}{f.franceCompetencesUrl && <> · <a href={f.franceCompetencesUrl} target="_blank" rel="noopener">référentiel</a></>}</p>
               </div>
               {imgs[1] && <div className="tfp__split__img" style={{ backgroundImage: "url(" + imgs[1] + ")" }} />}
@@ -625,7 +625,7 @@
                   <p className="tfp__trainer__role">{trainerCard.role || trainerFiche.role}</p>
                 )}
                 {!plusieursFormateurs && (trainerBio || f.description) && String(trainerBio || f.description).split(/\n\n/).map((para, i) => (
-                  <Rv className={i === 0 ? "tfp__lead" : "tfp__trainer__para"} key={i}>{para}</Rv>
+                  <p className={i === 0 ? "tfp__lead" : "tfp__trainer__para"} key={i}>{para}</p>
                 ))}
               </div>
               {plusieursFormateurs ? (
@@ -896,7 +896,7 @@
             <section className="tfp__split" data-bar={b.head || f.title} key={i}>
               <div className="tfp__split__txt">
                 {b.head && <h2>{b.head}</h2>}
-                {String(b.text || "").split(/\n\n/).map((p, j) => <Rv key={j}>{p}</Rv>)}
+                {String(b.text || "").split(/\n\n/).map((p, j) => <p key={j}>{p}</p>)}
               </div>
               {b.media && <div className="tfp__split__img" style={{ backgroundImage: "url(" + b.media + ")" }} />}
             </section>
@@ -907,7 +907,7 @@
             <section className="tfp__two" data-bar="Public">
               <div>
                 <h2>Pour qui</h2>
-                {f.audience && <Rv className="tfp__lead">{f.audience}</Rv>}
+                {f.audience && <p className="tfp__lead">{f.audience}</p>}
                 {Number(f.min_age) > 0 && <p className="tfp__fine">Réservé aux {f.min_age} ans et plus.</p>}
               </div>
               {pourQui && pourQui.text && <ul className="tfp__arrows">{sentences(pourQui.text).map((pt, i) => <li key={i}>{pt}</li>)}</ul>}
@@ -945,7 +945,7 @@
             <div className="tfp__offer__grid">
               <div className="tfp__offer__txt">
                 <h2>Réserver ma place</h2>
-                <Rv className="tfp__lead">{f.description || [dateTxt, lieuTxt].filter(Boolean).join(" · ")}</Rv>
+                <p className="tfp__lead">{f.description || [dateTxt, lieuTxt].filter(Boolean).join(" · ")}</p>
               </div>
               <div className="tfp__offer__card">{carte}</div>
             </div>

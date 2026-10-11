@@ -6714,7 +6714,7 @@ function App() {
         <p style={{ color: "var(--ink)", opacity: 0.6, marginBottom: 24 }}>
           Elle a été temporairement désactivée. Reviens plus tard ou explore le reste du site.
         </p>
-        <a href="/" className="lg__menu__link" style={{ fontSize: 16, textDecoration: "underline" }}>
+        <a href="/" className="lg__menu__link" style={{ fontSize: 17, textDecoration: "underline" }}>
           retour à l'accueil →
         </a>
       </section>

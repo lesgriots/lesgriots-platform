@@ -8426,11 +8426,12 @@ a.lg__partners__logo:hover {
 
 /* ============================================================
    TAILLES MINIMALES DU TEXTE (règle du 11/10/2026)
-   Texte courant ≥ 16 px · texte secondaire et boutons ≥ 14 px ·
-   labels, pastilles et mentions ≥ 13 px sur ordinateur, ≥ 12 px sur mobile.
+   Ordinateur : rien sous 17 px (décision du 11/10/2026).
+   Mobile : texte courant ≥ 16 px · secondaire et boutons ≥ 14 px · labels ≥ 12 px.
    ============================================================ */
-:root { --fs-micro: 13px; --fs-second: 14px; --fs-body: 16px; }
-@media (max-width: 700px) { :root { --fs-micro: 12px; } }
+:root { --fs-micro: 17px; --fs-second: 17px; --fs-body: 17px; }
+/* Mobile : 16 / 14 / 12 */
+@media (max-width: 700px) { :root { --fs-micro: 12px; --fs-second: 14px; --fs-body: 16px; } }
 
 /* Labels, pastilles, mentions */
 .lg__qualiopi__text,

@@ -314,3 +314,23 @@
 .tfp .tfp__fine a,
 .tfp .tfp__day__meta,
 .tfp .tfp__day__meta span { font-size: var(--fs-second, 14px); }
+
+/* Ordinateur : rien sous 17 px (décision du 11/10/2026). */
+@media (min-width: 701px) {
+  .lg .lg__cgv__footer,
+  .lg .lg__cgv__list p, .lg .lg__cgv__list strong, .lg .lg__cgv__list a,
+  .lg .lg__program__exercises li, .lg .lg__program__items li,
+  .lg .lg__event__meta, .lg .lg__event__kind, .lg .lg__event__cta span,
+  .lg .lg__contact__coords__links a,
+  .lg .lg__page > section > p,
+  .lg .lg__partners__intro,
+  .lg .lg__menu__link, .lg .lg__page a.lg__menu__link,
+  .lg .lg__cta-mini__title,
+  .lg .lg__cta-final__btn,
+  .lg .tfp__steps__grid p,
+  .lg .tfp__reg .body, .lg .tfp__reg .body p, .lg .tfp__reg .body a, .lg .tfp__reg summary,
+  .lg .tfp__faq .body, .lg .tfp__faq summary,
+  .lg .tfp__offer__lines dd, .lg .tfp__offer__lines dd strong,
+  .lg .tfp__day__txt p, .lg .tfp__day__ex, .lg .tfp__day__ex b,
+  .lg .tfp__next__sub { font-size: 17px; }
+}
