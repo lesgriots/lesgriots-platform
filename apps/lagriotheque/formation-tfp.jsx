@@ -548,7 +548,6 @@
               <section className="tfp__prog__intro" id="programme" data-bar="Programme">
                 <span className="tfp__pill">{program.length} journée{program.length > 1 ? "s" : ""}{f.duration ? " · " + f.duration.split("·")[0].trim().toLowerCase() : ""}</span>
                 <h2>Programme</h2>
-                {notre ? String(notre.text).split(/\n\n/).map((p, i) => <p key={i}>{p}</p>) : <p>{program.length} jours, un par écran.</p>}
               </section>
               <div className="tfp__stack" data-bar="Programme" data-days>
                 {program.map((d, i) => {
