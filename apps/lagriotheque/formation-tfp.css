@@ -291,3 +291,26 @@
 @media (prefers-reduced-motion: reduce) {
   .rv .rv-w { opacity: 1; transition: none; }
 }
+
+/* Tailles minimales (règle du 11/10/2026 — voir styles.css) */
+.tfp__pill,
+.tfp__steps .k,
+.tfp__wait__fine,
+.tfp__offer__lines dt { font-size: var(--fs-micro, 13px); }
+.tfp__fine,
+.tfp__hint,
+.tfp__trainer__role,
+.tfp__hero__cta small,
+.tfp__deliv__grid small,
+.tfp__wait label,
+.tfp__btn,
+.tfp__titlebar__meta,
+.tfp__bar__price span,
+.tfp__next__meta,
+.tfp .lg__cta-mini__btn { font-size: var(--fs-second, 14px); }
+.tfp__day__m li,
+.tfp__day__m h4 { font-size: var(--fs-body, 16px); }
+.tfp .tfp__fine,
+.tfp .tfp__fine a,
+.tfp .tfp__day__meta,
+.tfp .tfp__day__meta span { font-size: var(--fs-second, 14px); }

@@ -8423,3 +8423,49 @@ a.lg__partners__logo:hover {
   padding-left: var(--lg-gutter);
   padding-right: var(--lg-gutter);
 }
+
+/* ============================================================
+   TAILLES MINIMALES DU TEXTE (règle du 11/10/2026)
+   Texte courant ≥ 16 px · texte secondaire et boutons ≥ 14 px ·
+   labels, pastilles et mentions ≥ 13 px sur ordinateur, ≥ 12 px sur mobile.
+   ============================================================ */
+:root { --fs-micro: 13px; --fs-second: 14px; --fs-body: 16px; }
+@media (max-width: 700px) { :root { --fs-micro: 12px; } }
+
+/* Labels, pastilles, mentions */
+.lg__qualiopi__text,
+.lg__hero-yard__scrollhint,
+.lg__cta-mini__hint,
+.lg__cta-mini__badges span,
+.lg__cta-mini__sessions__label,
+.lg__cta-mini__cert__code,
+.lg__row__label,
+.lg__row__label span,
+.lg__ag__pill,
+.lg__cta-final__kicker,
+.lg__footer__nl label,
+.lg__footer__col a,
+.lg__footer__col li,
+.lg__footer a { font-size: var(--fs-micro); }
+
+/* Texte secondaire et boutons */
+.lg__cta-mini__sub,
+.lg__cta-mini__cert,
+.lg__cta-mini__meta li,
+.lg__cta-mini__audience__text,
+.lg__cta-mini__session__date,
+.lg__cta-mini__session__loc,
+.lg__cta-mini__session__meta,
+.lg__cta-mini__cpfbox__text,
+.lg__cta-mini__btn,
+.lg__ag__meta,
+.lg__ag__meta__kind,
+.lg__contact__eco__label,
+.lg__contact__eco__desc,
+.lg__contact__eco strong,
+.lg__contact__coords__line,
+.lg__contact__form__subject,
+.lg__contact__form__send { font-size: var(--fs-second); }
+
+/* Champs de formulaire : 16 px (en dessous, l'iPhone zoome à la saisie) */
+.lg input, .lg select, .lg textarea { font-size: max(16px, 1em); }
