@@ -6847,8 +6847,10 @@ a.lg__partners__logo:hover {
 /* Tagline marquee défilante en bas */
 .lg__footer__marquee {
   width: 100vw;
-  margin-left: -16px;
-  margin-right: -16px;
+  /* Annule exactement la gouttière du footer (avant : -16px fixe, la bande
+     débordait à droite de la page et créait un défilement horizontal). */
+  margin-left: calc(-1 * var(--lg-gutter));
+  margin-right: calc(-1 * var(--lg-gutter));
   overflow: hidden;
   border-top: 1px solid var(--paper);
   padding: 6px 0 8px;
