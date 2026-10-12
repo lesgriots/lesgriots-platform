@@ -7,6 +7,7 @@ import { CSS as FORM_CSS } from "../components/AutomationForm";
 
 const ONGLETS = [
   ["automatisations", "Automatisations"],
+  ["publications", "Publications"],
   ["contacts", "Contacts"],
   ["journal", "Journal"],
   ["simulateur", "Simulateur"],
@@ -48,7 +49,7 @@ export default function InstagramPage() {
           <div className="bo-fil">Relation · Griot DM</div>
           <h1>Instagram{status ? <span className="bo-tete__compte">{status.counts.actives} active{status.counts.actives > 1 ? "s" : ""}</span> : null}</h1>
         </div>
-        <div className="actions"><a className="btn" href="/instagram/new">+ Automatisation</a></div>
+        <div className="actions"><a className="btn btn--ghost" href="/instagram/publier">+ Publication</a><a className="btn" href="/instagram/new">+ Automatisation</a></div>
       </div>
 
       <Etat status={status} onRefresh={reload} />
@@ -60,6 +61,7 @@ export default function InstagramPage() {
       </div>
 
       {tab === "automatisations" && <Automatisations autos={autos} onToggle={toggle} />}
+      {tab === "publications" && <Publications autos={autos || []} />}
       {tab === "contacts" && <Contacts autos={autos || []} />}
       {tab === "journal" && <Journal log={status ? status.log : null} onRefresh={reload} />}
       {tab === "simulateur" && <Simulateur autos={autos || []} />}
@@ -129,6 +131,72 @@ function Automatisations({ autos, onToggle }) {
         </tr>
       ))}
     </tbody></table></div>
+  );
+}
+
+const STATUTS = {
+  programme: ["programmé", "pill"],
+  a_publier: ["en file", "pill"],
+  publication: ["publication…", "pill"],
+  publie: ["publié", "pill pill--on"],
+  erreur: ["erreur", "pill"],
+};
+const TYPES_POST = { image: "Photo", carousel: "Carrousel", reel: "Reel", story: "Story" };
+
+function Publications({ autos }) {
+  const [posts, setPosts] = useState(null);
+  const [quota, setQuota] = useState(null);
+  const load = () => fetch("/api/instagram/posts").then((r) => r.json()).then((d) => setPosts(Array.isArray(d) ? d : [])).catch(() => setPosts([]));
+  useEffect(() => {
+    load();
+    fetch("/api/instagram/limit").then((r) => r.json()).then((d) => !d.error && setQuota(d)).catch(() => {});
+    const t = setInterval(load, 8000); // suit les publications en cours
+    return () => clearInterval(t);
+  }, []);
+  async function act(p, method) {
+    if (method === "DELETE" && !confirm(p.status === "publie" ? "Retirer de la liste ? (le post reste sur Instagram)" : "Supprimer cette publication ?")) return;
+    await fetch(`/api/instagram/posts/${p.id}`, { method });
+    load();
+  }
+  const titre = (id) => (autos.find((a) => a.id === id) || {}).title || id;
+  if (posts === null) return <div className="empty">Chargement…</div>;
+  return (
+    <>
+      <div className="actions" style={{ justifyContent: "space-between", marginBottom: 6 }}>
+        <span className="note" style={{ margin: 0 }}>{quota && quota.total ? `${quota.used} / ${quota.total} publications via l'API sur les dernières 24 h` : "Les posts programmés partent tout seuls à l'heure dite."}</span>
+        <a className="btn" href="/instagram/publier">+ Publication</a>
+      </div>
+      {!posts.length ? (
+        <div className="empty">Rien de publié depuis le BO pour l'instant. Prépare un post, choisis l'heure, et relie-le à une réponse automatique en DM.</div>
+      ) : (
+        <div className="bo-tableau"><table><thead><tr><th style={{ width: 76 }}></th><th>Publication</th><th>Quand</th><th>Statut</th><th>Réponse DM</th><th></th></tr></thead><tbody>
+          {posts.map((p) => {
+            const m = p.media[0] || {};
+            const st = STATUTS[p.status] || [p.status, "pill"];
+            return (
+              <tr key={p.id}>
+                <td>{m.path ? (m.type === "video"
+                  ? <video src={`/api/preview?p=${encodeURIComponent(m.path)}`} muted style={{ width: 56, height: 70, objectFit: "cover", borderRadius: 10, display: "block" }} />
+                  : <img src={`/api/preview?p=${encodeURIComponent(m.path)}`} alt="" style={{ width: 56, height: 70, objectFit: "cover", borderRadius: 10, display: "block" }} />) : null}</td>
+                <td style={{ maxWidth: 360 }}>
+                  <b>{TYPES_POST[p.kind]}{p.media.length > 1 ? ` · ${p.media.length} médias` : ""}</b>
+                  <div className="note" style={{ margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.caption || "—"}</div>
+                  {p.error ? <div style={{ color: "var(--danger)", fontSize: 12.5, marginTop: 4 }}>{p.error}</div> : null}
+                </td>
+                <td style={{ fontSize: 13, whiteSpace: "nowrap" }}>{new Date(p.published_at || p.scheduled_at || p.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</td>
+                <td><span className={st[1]}>{st[0]}</span></td>
+                <td style={{ fontSize: 13 }}>{p.automation_id ? <a href={`/instagram/${p.automation_id}`}>{titre(p.automation_id)}</a> : p.automation ? (p.automation.mode === "new" ? `nouvelle : ${p.automation.keywords.join(", ")}` : titre(p.automation.id)) : "—"}</td>
+                <td><div className="actions">
+                  {p.permalink && <a className="btn btn--ghost btn--petit" href={p.permalink} target="_blank" rel="noopener noreferrer">Voir ↗</a>}
+                  {(p.status === "erreur" || p.status === "programme") && <button className="btn btn--ghost btn--petit" onClick={() => act(p, "POST")}>{p.status === "erreur" ? "Relancer" : "Publier maintenant"}</button>}
+                  {p.status !== "publication" && <button className="btn btn--danger btn--petit" onClick={() => act(p, "DELETE")}>×</button>}
+                </div></td>
+              </tr>
+            );
+          })}
+        </tbody></table></div>
+      )}
+    </>
   );
 }
 

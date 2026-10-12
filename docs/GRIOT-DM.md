@@ -104,3 +104,17 @@ Pour tout le monde :
 - Le **jeton** se rafraîchit seul tous les ~30 jours (bouton manuel dans l'en-tête).
 - Varier les réponses publiques (3+ variantes) : des réponses identiques en série sont
   lues comme du spam par Instagram.
+
+## Publier des posts (ajouté le 12/10/2026)
+
+BO → Instagram → **+ Publication** : photo, carrousel (2 à 10), reel ou story ; légende ;
+**maintenant** ou **programmé** ; et en option une **réponse automatique en DM** reliée au post
+(nouvelle automatisation créée à la publication, ou ajout du post à une existante).
+
+- Code : `lib/instagram-publish.js`, routes `app/api/instagram/posts`, `tick`, `limit`, page `app/instagram/publier`.
+- Médias envoyés dans `apps/lagriotheque/img/instagram/` → Meta les récupère sur `https://lagriotheque.com/img/instagram/…`.
+  Photos en **JPEG** uniquement (exigence Instagram). Pas de musique Instagram sur les reels.
+- Programmation : `griotdm-tick.timer` (systemd, chaque minute) → `POST /api/instagram/tick` en local.
+  Fichiers dans `infra/systemd/`, installés dans `/etc/systemd/system/`.
+- Permission Meta nécessaire : `instagram_business_content_publishing`, puis **régénérer le jeton**
+  (`ssh -t debian@51.210.4.77 sudo pose-secrets-griotdm`, Entrée pour garder la clé secrète et l'ID).

@@ -1,0 +1,10 @@
+[Unit]
+Description=Griot DM : verifie chaque minute les posts Instagram programmes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target

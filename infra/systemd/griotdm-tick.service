@@ -1,0 +1,10 @@
+# Griot DM — publie les posts Instagram programmés dont l'heure est passée.
+# Lancé chaque minute par griotdm-tick.timer. Appel local, Basic auth du BO.
+[Unit]
+Description=Griot DM : publication des posts Instagram programmes
+After=lagriotheque-backoffice.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/lagriotheque-backoffice.env
+ExecStart=/bin/sh -c 'curl -fsS --max-time 900 -u "griotdm:$ADMIN_PASSWORD" -X POST http://127.0.0.1:3031/griotheque/api/instagram/tick'
