@@ -5,16 +5,16 @@
 import { useEffect, useState } from "react";
 
 const SECTIONS = [
-  { key: "formations", title: "FORMATIONS", desc: "Formations longues, 1-3 jours" },
-  { key: "workshops", title: "WORKSHOPS", desc: "Formats courts, sessions thématiques" },
-  { key: "trainers", title: "INTERVENANTS", desc: "Profils des formateurs" },
-  { key: "sessions", title: "SESSIONS", desc: "Dates concrètes, places dispo" },
-  { key: "resources", title: "RESSOURCES", desc: "Guides, articles, outils téléchargeables" },
-  { key: "leads", title: "LEADS", desc: "Emails capturés via téléchargement de ressource" },
-  { key: "instagram", api: "instagram/automations", title: "INSTAGRAM (DM)", desc: "Mot-clé en commentaire → DM → email → ressource livrée" },
-  { key: "defaults", title: "TEXTES PAR DÉFAUT", desc: "Méthodes, évaluation, accessibilité, lieu" },
-  { key: "site/content", title: "CONTENU DU SITE", desc: "Manifeste, approche, headers de page, FAQ générique" },
-  { key: "pages", title: "PAGES ACTIVES", desc: "Activer/désactiver chaque page du site" },
+  { key: "formations", title: "Formations", desc: "Formations longues, 1-3 jours" },
+  { key: "workshops", title: "Workshops", desc: "Formats courts, sessions thématiques" },
+  { key: "trainers", title: "Intervenants", desc: "Profils des formateurs" },
+  { key: "sessions", title: "Sessions", desc: "Dates concrètes, places dispo" },
+  { key: "resources", title: "Ressources", desc: "Guides, articles, outils téléchargeables" },
+  { key: "leads", title: "Leads", desc: "Emails capturés via téléchargement de ressource" },
+  { key: "instagram", api: "instagram/automations", title: "Instagram (DM)", desc: "Mot-clé en commentaire → DM → email → ressource livrée" },
+  { key: "defaults", title: "Textes par défaut", desc: "Méthodes, évaluation, accessibilité, lieu" },
+  { key: "site/content", title: "Contenu du site", desc: "Manifeste, approche, headers de page, FAQ générique" },
+  { key: "pages", title: "Pages actives", desc: "Activer/désactiver chaque page du site" },
 ];
 
 export default function HomePage() {

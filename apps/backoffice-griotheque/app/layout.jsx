@@ -24,6 +24,7 @@
 // Le shim de basePath reste en tête : le BO est servi sous /griotheque via
 // admin.lesgriots.com, et tout le code client utilise des URLs absolues.
 import Barre from "./components/Barre";
+import { charteCss } from "./charte-bo";
 
 const BASE_PATH = process.env.NODE_ENV === "production" ? "/griotheque" : "";
 
@@ -578,6 +579,7 @@ export default function RootLayout({ children }) {
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <script dangerouslySetInnerHTML={{ __html: basePathShim }} />
         <style>{globalCss}</style>
+        <style>{charteCss}</style>
       </head>
       <body>
         <Barre>{children}</Barre>
