@@ -765,6 +765,10 @@
     const apres = f.after && (f.after.text || f.after.title) ? f.after : null;
     const gabarit = inclus.length > 0 || prog.length > 0 || intervenants.length > 0;
     const minutes = prog.reduce((n, d) => n + (parseInt(d.duration, 10) || 0), 0);
+    // Titre et pastille de la section en écrans : « Programme » par défaut,
+    // mais la même mise en forme peut porter autre chose (ex. « Les enjeux »).
+    const progTitre = f.program_title || "Programme";
+    const progPill = f.program_pill || (minutes ? prog.length + " temps · " + minutes + " min" : "");
 
     useEffect(() => {
       const root = pageRef.current;
@@ -918,11 +922,11 @@
           {/* ---- 4. Programme : un écran par temps, comme la formation ------ */}
           {prog.length > 0 && (
             <>
-              <section className="tfp__prog__intro" id="programme" data-bar="Programme">
-                <span className="tfp__pill">{prog.length} temps{minutes ? " · " + minutes + " min" : ""}</span>
-                <h2>Programme</h2>
+              <section className="tfp__prog__intro" id="programme" data-bar={progTitre}>
+                {progPill && <span className="tfp__pill">{progPill}</span>}
+                <h2>{progTitre}</h2>
               </section>
-              <div className="tfp__stack" data-bar="Programme" data-days>
+              <div className="tfp__stack" data-bar={progTitre} data-days>
                 {prog.map((d, i) => {
                   const items = (Array.isArray(d.items) ? d.items : []).filter(Boolean);
                   return (

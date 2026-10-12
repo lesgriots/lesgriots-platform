@@ -325,12 +325,16 @@ export default function EventForm({ initial = null }) {
         </div>
 
         <div style={{ marginTop: 24 }}>
-          <label style={{ fontWeight: 600 }}>Programme</label>
-          <p className="note">Un écran par temps. Sans image, l'écran affiche la durée en grand.</p>
+          <label style={{ fontWeight: 600 }}>Section en écrans (programme, enjeux…)</label>
+          <p className="note">Un écran par élément, comme le programme des formations. Sans image, l'écran affiche la durée en grand, ou son numéro.</p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginTop: 8 }}>
+            <div><label>Titre de la section</label><input value={data.program_title || ""} onChange={(e) => set("program_title", e.target.value)} placeholder="Programme" /></div>
+            <div><label>Pastille (facultatif)</label><input value={data.program_pill || ""} onChange={(e) => set("program_pill", e.target.value)} placeholder="ex : 3 enjeux" /></div>
+          </div>
           <ListeEditable
             items={data.program}
             onChange={(v) => set("program", v)}
-            libelle="Temps"
+            libelle="Écran"
             nouveau={{ label: "", duration: "", title: "", text: "", items: [], image: "" }}
             champs={[
               ["label", "Étiquette", "input", "ex : Temps 1 (laisser vide = automatique)"],
