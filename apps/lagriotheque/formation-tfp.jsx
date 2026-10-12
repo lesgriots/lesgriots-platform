@@ -728,15 +728,18 @@
     const pageRef = useRef(null);
     const places = useEventPlaces(f);
     const passe = eventIsPast(f);
-    const complet = !passe && ((f.status || "").toUpperCase() === "COMPLET" || !!(places && places.full));
+    // Lien d'invitation (?invitation) : même page, formulaire « Confirmer ma
+    // présence », hors des places publiques (jamais « complet »).
+    const invite = typeof window !== "undefined" && /[?&]invitation\b/.test(window.location.search || "");
+    const complet = !invite && !passe && ((f.status || "").toUpperCase() === "COMPLET" || !!(places && places.full));
     const ouvert = !passe && !complet;
     const dateTxt = [formatEventDate(f.date), f.time].filter(Boolean).join(" · ");
     const lieuTxt = [f.location, f.city].filter(Boolean).join(", ");
     const externe = /^https?:\/\//i.test(f.link || "");
-    const ctaTexte = passe ? "Événement passé" : complet ? "Complet" : (f.link_label || "Réserver ma place");
+    const ctaTexte = passe ? "Événement passé" : complet ? "Complet" : invite ? "Confirmer ma présence" : (f.link_label || "Réserver ma place");
     const inscrire = () => {
       if (!ouvert) return;
-      if (externe) { window.open(f.link, "_blank", "noopener"); return; }
+      if (externe && !invite) { window.open(f.link, "_blank", "noopener"); return; }
       setShowInscription(true);
     };
 
@@ -830,7 +833,7 @@
     }, [f.id]);
 
     useRevealText(pageRef, [f.id]);
-    const etatPlaces = passe ? "Événement passé" : complet ? "Complet" : (places && places.capacity ? placesRestantes(places.remaining) : (f.status || ""));
+    const etatPlaces = passe ? "Événement passé" : complet ? "Complet" : invite ? "Sur invitation" : (places && places.capacity ? placesRestantes(places.remaining) : (f.status || ""));
     const carte = (
       <div className="lg__cta-mini">
         <p className="lg__cta-mini__title">{f.title}</p>
@@ -892,7 +895,7 @@
             <img src={heroPoster} alt="" />
           ) : null}
           <div className="tfp__hero__txt">
-            <span className="tfp__pill">{[f.kind || "Événement", ouvert ? (places && places.capacity ? places.capacity + " places" : "sur inscription") : etatPlaces.toLowerCase()].filter(Boolean).join(" · ")}</span>
+            <span className="tfp__pill">{[f.kind || "Événement", ouvert ? (invite ? "sur invitation" : places && places.capacity ? places.capacity + " places" : "sur inscription") : etatPlaces.toLowerCase()].filter(Boolean).join(" · ")}</span>
             <h1>{f.title}</h1>
             {f.tagline && <p className="tfp__lead">{f.tagline}</p>}
             <div className="tfp__hero__cta">
@@ -1003,9 +1006,9 @@
           <section className="tfp__offer" id="reserver" data-bar="Réserver">
             <div className="tfp__offer__grid">
               <div className="tfp__offer__txt">
-                <h2>Réserver ma place</h2>
+                <h2>{invite ? "Confirmer ma présence" : "Réserver ma place"}</h2>
                 <ol className="tfp__offer__steps">
-                  <li><b>Tu réserves.</b> {places && places.capacity ? "Le formulaire reste ouvert jusqu'à " + places.capacity + " inscrits, puis il se ferme." : "Le formulaire prend une minute."}{Number(f.min_age) > 0 ? " Réservé aux " + f.min_age + " ans et plus." : ""}</li>
+                  <li><b>{invite ? "Tu confirmes." : "Tu réserves."}</b> {invite ? "Le formulaire prend une minute." : places && places.capacity ? "Le formulaire reste ouvert jusqu'à " + places.capacity + " inscrits, puis il se ferme." : "Le formulaire prend une minute."}{Number(f.min_age) > 0 ? " Réservé aux " + f.min_age + " ans et plus." : ""}</li>
                   <li><b>On te confirme.</b> Tu reçois les infos pratiques par email avant le jour J.</li>
                   <li><b>Le jour J.</b> {[dateTxt, lieuTxt].filter(Boolean).join(" · ")}.</li>
                 </ol>
@@ -1028,7 +1031,7 @@
           )}
         </div>
 
-        {showInscription && <InscriptionModal target={{ id: f.id, title: f.title, min_age: f.min_age }} kind="event" onClose={() => setShowInscription(false)} />}
+        {showInscription && <InscriptionModal target={{ id: f.id, title: f.title, min_age: f.min_age }} kind="event" invite={invite} onClose={() => setShowInscription(false)} />}
       </section>
     );
   }

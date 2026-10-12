@@ -4719,7 +4719,7 @@ function ResourceModal({ resource, onClose }) {
 // .leadsEndpoint), avec le contexte dans `source` (inscription:<kind>:<titre>)
 // et l'id de la cible dans `resource_id`. Ce lead alimente ensuite les emails
 // (systeme.io) et le process Qualiopi (génération des documents via l'OS).
-function InscriptionModal({ target, kind, onClose }) {
+function InscriptionModal({ target, kind, onClose, invite = false }) {
   const isEvt = kind === "event";
   const minAge = Number(target && target.min_age) > 0 ? Math.floor(Number(target.min_age)) : 0;
   const ageAt = (d) => {
@@ -4752,7 +4752,7 @@ function InscriptionModal({ target, kind, onClose }) {
     };
   }, [onClose]);
 
-  const kindLabel = kind === "workshop" ? "workshop" : kind === "event" ? "événement" : "formation";
+  const kindLabel = invite ? "invitation" : kind === "workshop" ? "workshop" : kind === "event" ? "événement" : "formation";
 
   async function submit(e) {
     e.preventDefault();
@@ -4783,7 +4783,7 @@ function InscriptionModal({ target, kind, onClose }) {
           phone,
           resource_id: target.id,
           consent,
-          source: `inscription:${kind}:${target.title || target.id}`,
+          source: `inscription:${invite ? "invitation" : kind}:${target.title || target.id}`,
           ...(isEvt ? { profile, organization, link, birthdate } : {}),
         }),
       });
@@ -4837,7 +4837,9 @@ function InscriptionModal({ target, kind, onClose }) {
         ) : step === "done" ? (
           <div style={{ padding: "8px 0 12px" }}>
             <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>
-              {isEvt
+              {invite
+                ? `✓ Merci${name ? `, ${name}` : ""} — ta présence est confirmée.`
+                : isEvt
                 ? `✓ Merci${name ? `, ${name}` : ""} — ta place est réservée.`
                 : `✓ Merci${name ? `, ${name}` : ""} — ta demande d'inscription est enregistrée.`}
             </p>
@@ -4855,7 +4857,9 @@ function InscriptionModal({ target, kind, onClose }) {
         ) : (
           <>
             <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 24, opacity: 0.75 }}>
-              {isEvt
+              {invite
+                ? `Tu es invité·e. Confirme ta présence avec ce formulaire.${minAge ? ` Réservé aux ${minAge} ans et plus.` : ""}`
+                : isEvt
                 ? `Remplis ce formulaire pour réserver ta place. Les places sont limitées.${minAge ? ` Réservé aux ${minAge} ans et plus.` : ""}`
                 : "Laisse-nous tes coordonnées : on revient vers toi sous 48h ouvrées avec les modalités et le financement possible (CPF, OPCO, FAF)."}
             </p>
@@ -4906,7 +4910,7 @@ function InscriptionModal({ target, kind, onClose }) {
                   Annuler
                 </button>
                 <button type="submit" disabled={submitting} style={{ padding: "12px 18px", border: "1px solid var(--ink)", background: submitting ? "var(--ink-dim)" : "var(--ink)", color: "var(--paper)", fontFamily: "var(--font-sans)", fontSize: 14, letterSpacing: "-0.01em", fontWeight: 600, cursor: submitting ? "wait" : "pointer" }}>
-                  {submitting ? "..." : isEvt ? "Réserver ma place" : "Envoyer ma demande"}
+                  {submitting ? "..." : invite ? "Confirmer ma présence" : isEvt ? "Réserver ma place" : "Envoyer ma demande"}
                 </button>
               </div>
             </form>

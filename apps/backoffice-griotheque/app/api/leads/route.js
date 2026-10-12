@@ -55,7 +55,7 @@ export async function GET() {
 //   - detail : la trace complète pour le champ "source" du contact Systeme.io
 // Historique : l'ancienne whitelist ["site","launch","cpf","contact"] écrasait
 // "inscription:…" et les ressources en "site" — l'intention était perdue.
-const KIND_LABELS = { formation: "inscription-formation", workshop: "inscription-workshop", event: "inscription-evenement" };
+const KIND_LABELS = { formation: "inscription-formation", workshop: "inscription-workshop", event: "inscription-evenement", invitation: "invitation-evenement" };
 
 function normalizeSource(body) {
   const raw = String(body.source || "").slice(0, 160);
@@ -98,7 +98,10 @@ export async function POST(req) {
     // refuse l'inscription (409). Une personne déjà inscrite peut renvoyer le
     // formulaire sans être refusée (le lead est dédoublonné).
     let places = null;
-    if (source === "inscription-evenement" && resource_id) {
+    // Les invités (lien d'invitation) passent par le même contrôle d'âge, mais
+    // ne comptent pas dans la jauge publique et ne sont jamais refusés pour « complet ».
+    const invite = source === "invitation-evenement";
+    if ((source === "inscription-evenement" || invite) && resource_id) {
       const ev = getEvent(String(resource_id));
       if (ev) {
         // Âge minimum (ex. 18) : vérifié côté serveur sur la date de naissance.
@@ -120,10 +123,10 @@ export async function POST(req) {
         const already = listLeads({ sort: false }).some(
           (l) => l.email === normalized && l.resource_id === ev.id && l.source === source
         );
-        if (!already && p.full) {
+        if (!invite && !already && p.full) {
           return NextResponse.json({ error: "complet", full: true, remaining: 0 }, { status: 409, headers });
         }
-        places = p.capacity ? { capacity: p.capacity, remaining: Math.max(0, p.remaining - (already ? 0 : 1)) } : null;
+        places = !invite && p.capacity ? { capacity: p.capacity, remaining: Math.max(0, p.remaining - (already ? 0 : 1)) } : null;
       }
     }
 
