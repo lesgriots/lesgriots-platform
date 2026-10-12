@@ -11,6 +11,7 @@ const SECTIONS = [
   { key: "sessions", title: "SESSIONS", desc: "Dates concrètes, places dispo" },
   { key: "resources", title: "RESSOURCES", desc: "Guides, articles, outils téléchargeables" },
   { key: "leads", title: "LEADS", desc: "Emails capturés via téléchargement de ressource" },
+  { key: "instagram", api: "instagram/automations", title: "INSTAGRAM (DM)", desc: "Mot-clé en commentaire → DM → email → ressource livrée" },
   { key: "defaults", title: "TEXTES PAR DÉFAUT", desc: "Méthodes, évaluation, accessibilité, lieu" },
   { key: "site/content", title: "CONTENU DU SITE", desc: "Manifeste, approche, headers de page, FAQ générique" },
   { key: "pages", title: "PAGES ACTIVES", desc: "Activer/désactiver chaque page du site" },
@@ -25,7 +26,7 @@ export default function HomePage() {
     const SKIP = new Set(["defaults", "pages", "site/content"]);
     Promise.all(
       SECTIONS.filter((s) => !SKIP.has(s.key)).map((s) =>
-        fetch(`/api/${s.key}`)
+        fetch(`/api/${s.api || s.key}`)
           .then((r) => (r.ok ? r.json() : []))
           .then((arr) => [s.key, Array.isArray(arr) ? arr.length : 0])
           .catch(() => [s.key, 0])

@@ -110,3 +110,7 @@ apps/lesgriots/site.live.html
 apps/lesgriots/attente.live.html
 apps/lesgriots/index.html
 apps/lesgriots/uploads/
+
+# Griot DM (automatisations Instagram) — contacts, emails, jeton : jamais commités
+apps/backoffice-griotheque/instagram.json
+apps/backoffice-griotheque/instagram.json.*

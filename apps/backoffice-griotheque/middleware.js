@@ -9,7 +9,8 @@ export function middleware(req) {
   // donc on laisse passer sans auth. La route elle-même valide l'email + applique
   // le CORS pour n'accepter que les origines connues (localhost:8082, prod).
   // Le preflight OPTIONS aussi doit passer sans auth, sinon CORS échoue.
-  const publicPaths = ["/api/leads", "/api/subscribe", "/api/stripe/create-payment-intent"];
+  // /api/instagram/webhook = appelé par Meta ; protégé par la signature HMAC (IG_APP_SECRET).
+  const publicPaths = ["/api/leads", "/api/subscribe", "/api/stripe/create-payment-intent", "/api/instagram/webhook"];
   // /api/places/<id> = jauge publique d'un événement (lecture seule).
   if (publicPaths.includes(req.nextUrl.pathname) || req.nextUrl.pathname.startsWith("/api/places/")) {
     return NextResponse.next();

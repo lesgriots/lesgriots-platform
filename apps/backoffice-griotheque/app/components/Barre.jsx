@@ -36,6 +36,7 @@ const GROUPES = [
     titre: "Relation",
     entrees: [
       { href: "/leads", libelle: "Leads", api: "leads" },
+      { href: "/instagram", libelle: "Instagram (DM)", api: "instagram/automations" },
       { href: "/projects", libelle: "Projets", api: "projects" },
     ],
   },
