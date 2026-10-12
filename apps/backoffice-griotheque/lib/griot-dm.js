@@ -128,6 +128,16 @@ async function deliver(ctx) {
   const vars = { username: contact.username, url };
   const text = fill(a.delivery_text || DEFAULTS.delivery_text, vars).slice(0, 640);
 
+  // Média d'abord (ex. la vidéo d'invitation), puis le texte et son bouton.
+  if (a.video_url) {
+    const type = /\.(jpe?g|png|gif|webp)(\?|$)/i.test(a.video_url) ? "image" : "video";
+    try {
+      await sender.sendMessage(contact.igsid, { attachment: { type, payload: { url: a.video_url } } });
+      logs.push({ type: "média envoyé", automation: a.id, url: a.video_url });
+    } catch (e) {
+      logs.push({ type: "erreur", error: "média : " + e.message });
+    }
+  }
   if (url) {
     const tpl = {
       attachment: {

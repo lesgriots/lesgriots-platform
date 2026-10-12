@@ -101,6 +101,9 @@ export function normalizeAutomation(a) {
     resource_id: String(a.resource_id || "").slice(0, 100),
     link_url: String(a.link_url || "").slice(0, 500),
     link_label: String(a.link_label || "").slice(0, 20),
+    // Vidéo (ou image) envoyée avant le message de livraison : URL publique
+    // https, mp4 de moins de 25 Mo (règle Meta). Vide = pas de média.
+    video_url: String(a.video_url || "").slice(0, 500),
     delivery_text: String(a.delivery_text || "").slice(0, 900),
     followup_text: String(a.followup_text || "").slice(0, 900),
     position: Number(a.position) || 0,

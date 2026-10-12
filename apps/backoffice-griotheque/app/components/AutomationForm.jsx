@@ -10,7 +10,7 @@ const VIDE = {
   media_ids: [], public_replies: "Je t'envoie ça en DM 📩\nRegarde tes messages 👀\nC'est parti, check tes DM ✨",
   opening_text: "", opening_button: "", follow_gate: false, follow_text: "",
   ask_email: true, email_text: "", email_invalid_text: "", newsletter: true,
-  resource_id: "", link_url: "", link_label: "", delivery_text: "", followup_text: "", position: 0,
+  resource_id: "", link_url: "", link_label: "", delivery_text: "", followup_text: "", video_url: "", position: 0,
 };
 
 const slug = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
@@ -182,6 +182,7 @@ export default function AutomationForm({ initial, isNew }) {
               {resources.map((r) => <option key={r.id} value={r.id}>{r.title}</option>)}
             </select></div>
           <div className="champ"><label>…ou lien libre (prioritaire)</label><input className="mono" value={f.link_url} onChange={set("link_url")} placeholder="https://lagriotheque.com/…" /></div>
+          <div className="champ"><label>Vidéo ou image envoyée avant le message (facultatif)</label><input className="mono" value={f.video_url || ""} onChange={set("video_url")} placeholder="https://lagriotheque.com/img/….mp4" /></div>
         </div>
         <div className="champ"><label>Message de livraison</label><textarea value={f.delivery_text} onChange={set("delivery_text")} placeholder={DEFAULTS.delivery_text} rows={3} /></div>
         <div className="champ"><label>Texte du bouton lien (20 car.)</label><input value={f.link_label} onChange={set("link_label")} placeholder={DEFAULTS.link_label} maxLength={20} /></div>
