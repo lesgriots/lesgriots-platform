@@ -1,7 +1,195 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8">
-<title>Invitation · Snapchat for Storytellers · La Griothèque</title>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Invitation · Snapchat for Storytellers · LA GRIOTHÈQUE™</title>
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="0; url=/events/evt-snapchat-for-storytellers-261023?invitation">
-<script>location.replace("/events/evt-snapchat-for-storytellers-261023?invitation");</script>
-</head><body><a href="/events/evt-snapchat-for-storytellers-261023?invitation">Confirmer ma présence</a></body></html>
+<meta name="description" content="Tu es invité·e au workshop Snapchat for Storytellers, chez Snap France, le vendredi 23 octobre 2026.">
+<meta property="og:title" content="Invitation · Snapchat for Storytellers">
+<meta property="og:description" content="LA GRIOTHÈQUE™ et Snap Noir t'invitent chez Snap France, le vendredi 23 octobre 2026.">
+<meta property="og:image" content="https://lagriotheque.com/img/invitation/carton.jpg">
+<link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:Geist;src:url(/fonts/Geist-Regular.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:Geist;src:url(/fonts/Geist-Medium.woff2) format("woff2");font-weight:500;font-display:swap}
+:root{--ink:#0b0b0b;--paper:#f6f5f3;--beige:#f5f4f1;--mute:rgba(11,11,11,.6);--line:rgba(11,11,11,.18);--g:clamp(24px,4vw,64px)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{font-family:Geist,system-ui,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:17px;line-height:1.45}
+a{color:inherit}
+
+/* ---- Haut : la vidéo de l'événement ---- */
+.hero{position:relative;color:var(--paper);background:var(--ink);overflow:hidden;min-height:min(92svh,860px);display:flex;flex-direction:column;padding:calc(var(--g)*.8) var(--g) var(--g)}
+.hero video,.hero .poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.35);transform-origin:50% 0}
+.hero .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.5) 0%,rgba(0,0,0,.08) 22%,rgba(0,0,0,.25) 45%,rgba(0,0,0,.62) 100%)}
+.hero>*:not(video):not(.veil):not(.poster){position:relative}
+.logos{display:flex;align-items:center;gap:18px}
+.logos .wm{height:22px}.logos .sn{height:32px}.logos .sep{width:1.5px;height:32px;background:rgba(246,245,243,.6)}
+.hero .bot{margin-top:auto;max-width:1100px}
+.pill{display:inline-block;border:1.5px solid currentColor;border-radius:999px;padding:7px 18px;font-size:17px}
+h1{font-weight:500;font-size:clamp(52px,9vw,128px);line-height:.96;letter-spacing:-.04em;margin-top:22px}
+.lead{font-size:clamp(18px,1.6vw,24px);line-height:1.4;margin-top:20px;max-width:760px}
+.lead img{height:.74em;vertical-align:baseline;margin:0 .05em}
+.info{display:flex;flex-wrap:wrap;gap:22px 40px;margin-top:32px;padding-top:22px;border-top:1.5px solid rgba(246,245,243,.35)}
+.info small{display:block;font-size:14px;letter-spacing:.06em;text-transform:uppercase;opacity:.7;margin-bottom:6px}
+.info b{display:block;font-weight:500;font-size:clamp(17px,1.4vw,21px);line-height:1.3}
+.go{display:inline-flex;align-items:center;gap:10px;margin-top:32px;background:var(--paper);color:var(--ink);border-radius:999px;padding:16px 28px;font-weight:500;text-decoration:none;font-size:17px}
+
+/* ---- Formulaire ---- */
+.rsvp{padding:clamp(56px,8vw,112px) var(--g);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:clamp(32px,6vw,96px);max-width:1440px;margin:0 auto}
+.rsvp h2{font-weight:500;font-size:clamp(40px,5vw,72px);line-height:1;letter-spacing:-.035em}
+.rsvp .intro p{margin-top:20px;color:var(--mute);max-width:440px}
+form{display:grid;gap:22px}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.choice label{display:flex;align-items:center;justify-content:center;gap:10px;border:1.5px solid var(--ink);border-radius:999px;padding:16px 18px;cursor:pointer;font-weight:500;text-align:center;transition:background .15s,color .15s}
+.choice input{position:absolute;opacity:0;pointer-events:none}
+.choice input:checked+label{background:var(--ink);color:var(--paper)}
+.choice input:focus-visible+label{outline:2px solid var(--ink);outline-offset:3px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.f label{display:block;font-size:15px;color:var(--mute);margin-bottom:6px}
+.f input[type=text],.f input[type=email],.f input[type=tel],.f input[type=date]{width:100%;font:inherit;font-size:17px;color:var(--ink);background:transparent;border:0;border-bottom:1.5px solid var(--line);padding:10px 0;border-radius:0;outline:none;-webkit-appearance:none;appearance:none;min-height:46px}
+.f input:focus{border-bottom-color:var(--ink)}
+.f .hint{font-size:14px;color:var(--mute);margin-top:6px}
+.check{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
+.check input{width:22px;height:22px;margin-top:1px;accent-color:#0b0b0b;flex:none}
+.plus{display:none}
+.plus.on{display:block}
+.only-yes.off{display:none}
+button[type=submit]{justify-self:start;font:inherit;font-weight:500;font-size:17px;background:var(--ink);color:var(--paper);border:0;border-radius:999px;padding:18px 32px;cursor:pointer}
+button[disabled]{opacity:.5;cursor:default}
+.err{color:#b3261e;font-size:15px;min-height:1px}
+.done{display:none;border-top:1.5px solid var(--ink);padding-top:28px}
+.done.on{display:block}
+.done h3{font-weight:500;font-size:clamp(28px,3vw,40px);letter-spacing:-.02em;line-height:1.1}
+.done p{margin-top:14px;color:var(--mute)}
+footer{padding:28px var(--g);border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:15px;color:var(--mute)}
+footer img{height:16px;vertical-align:middle}
+@media(max-width:800px){
+  .rsvp{grid-template-columns:minmax(0,1fr)}
+  .row{grid-template-columns:minmax(0,1fr)}
+  .hero video,.hero .poster{transform:scale(1.15)}
+  .f label{font-size:15px}
+}
+@media(max-width:420px){.choice{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <img class="poster" src="/img/snap-ghost-hero.jpg" alt="">
+  <video src="/img/snap-ghost-hero.mp4" poster="/img/snap-ghost-hero.jpg" autoplay loop muted playsinline preload="metadata"></video>
+  <div class="veil"></div>
+  <div class="logos"><a href="/" aria-label="LA GRIOTHÈQUE™"><img class="wm" src="/img/invitation/wordmark_paper.png" alt="LA GRIOTHÈQUE™"></a><div class="sep"></div><img class="sn" src="/img/invitation/snapnoir_blanc.png" alt="Snap Noir"></div>
+  <div class="bot">
+    <span class="pill">Workshop · Sur invitation</span>
+    <h1>Snapchat for<br>Storytellers</h1>
+    <p class="lead">Tu es invité·e. <img src="/img/invitation/wordmark_paper.png" alt="LA GRIOTHÈQUE™"> et Snap Noir t'invitent chez Snap France pour comprendre comment l'application est pensée, et comment créatifs, marques et agences peuvent y raconter, collaborer et se faire repérer.</p>
+    <div class="info">
+      <div><small>Date</small><b>Vendredi 23 octobre 2026</b></div>
+      <div><small>Horaires</small><b>18 h accueil · 18 h 30 présentation</b><b>19 h 30–20 h networking</b></div>
+      <div><small>Lieu</small><b>Snap France</b><b>18 rue d'Aguesseau, 75008 Paris</b></div>
+    </div>
+    <a class="go" href="#reponse">Répondre à l'invitation ↓</a>
+  </div>
+</header>
+
+<main class="rsvp" id="reponse">
+  <div class="intro">
+    <h2>Ta réponse</h2>
+    <p>Dis-nous si tu viens, en une minute. Tu peux venir accompagné·e d'une personne. L'événement est réservé aux 18 ans et plus.</p>
+  </div>
+
+  <div>
+    <form id="f" novalidate>
+      <div class="choice" role="radiogroup" aria-label="Ta réponse">
+        <input type="radio" name="rep" id="oui" value="Présent" checked><label for="oui">Je viens</label>
+        <input type="radio" name="rep" id="non" value="Absent"><label for="non">Je ne viens pas</label>
+      </div>
+      <div class="row">
+        <div class="f"><label for="prenom">Prénom</label><input type="text" id="prenom" autocomplete="given-name" required></div>
+        <div class="f"><label for="nom">Nom</label><input type="text" id="nom" autocomplete="family-name" required></div>
+      </div>
+      <div class="row">
+        <div class="f"><label for="email">E-mail</label><input type="email" id="email" autocomplete="email" inputmode="email" required></div>
+        <div class="f only-yes"><label for="tel">Téléphone</label><input type="tel" id="tel" autocomplete="tel" inputmode="tel"></div>
+      </div>
+      <div class="row only-yes">
+        <div class="f"><label for="org">Structure ou activité (facultatif)</label><input type="text" id="org" autocomplete="organization"></div>
+        <div class="f"><label for="naiss">Date de naissance</label><input type="date" id="naiss" autocomplete="bday"><div class="hint">Pour vérifier que tu as 18 ans ou plus.</div></div>
+      </div>
+      <div class="only-yes">
+        <label class="check"><input type="checkbox" id="acc"><span>Je viens accompagné·e d'une personne</span></label>
+        <div class="f plus" id="plus" style="margin-top:14px"><label for="accnom">Prénom et nom de la personne qui t'accompagne</label><input type="text" id="accnom"></div>
+      </div>
+      <p class="err" id="err" role="alert"></p>
+      <button type="submit" id="go">Envoyer ma réponse</button>
+    </form>
+    <div class="done" id="done" aria-live="polite"><h3 id="dt"></h3><p id="dp"></p></div>
+  </div>
+</main>
+
+<footer><span><img src="/img/invitation/wordmark_noir.png" alt="LA GRIOTHÈQUE™"> × Snap Noir</span><a href="/events/evt-snapchat-for-storytellers-261023">Voir la page de l'événement</a></footer>
+
+<script>
+(function(){
+  var API = "https://admin.lagriotheque.com/api/leads";
+  var EVT = "evt-snapchat-for-storytellers-261023";
+  var $ = function(id){ return document.getElementById(id); };
+  var form = $("f");
+  function oui(){ return $("oui").checked; }
+  function sync(){
+    var y = oui();
+    Array.prototype.forEach.call(document.querySelectorAll(".only-yes"), function(el){ el.classList.toggle("off", !y); });
+    $("plus").classList.toggle("on", y && $("acc").checked);
+    $("go").textContent = y ? "Confirmer ma présence" : "Envoyer ma réponse";
+  }
+  $("oui").addEventListener("change", sync); $("non").addEventListener("change", sync); $("acc").addEventListener("change", sync);
+  sync();
+  function age(d){
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || ""); if (!m) return -1;
+    var n = new Date(), a = n.getFullYear() - +m[1];
+    if (n.getMonth()+1 < +m[2] || (n.getMonth()+1 === +m[2] && n.getDate() < +m[3])) a--;
+    return a;
+  }
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var err = $("err"); err.textContent = "";
+    var y = oui(), pr = $("prenom").value.trim(), no = $("nom").value.trim(), em = $("email").value.trim();
+    if (!pr || !no) { err.textContent = "Indique ton prénom et ton nom."; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { err.textContent = "Vérifie ton adresse e-mail."; return; }
+    var bd = $("naiss").value;
+    if (y) {
+      if (!bd) { err.textContent = "Indique ta date de naissance."; return; }
+      if (age(bd) < 18) { err.textContent = "Cet événement est réservé aux 18 ans et plus."; return; }
+      if ($("acc").checked && !$("accnom").value.trim()) { err.textContent = "Indique le nom de la personne qui t'accompagne."; return; }
+    }
+    var acc = y && $("acc").checked ? $("accnom").value.trim() : "";
+    var body = {
+      source: "inscription:invitation:Snapchat for Storytellers",
+      resource_id: EVT, email: em, name: pr + " " + no, first_name: pr, last_name: no,
+      phone: y ? $("tel").value.trim() : "", organization: y ? $("org").value.trim() : "",
+      birthdate: y ? bd : "", subject: y ? "Présent" : "Absent",
+      message: acc ? "Accompagné·e de : " + acc : "", consent: false
+    };
+    var b = $("go"); b.disabled = true; b.textContent = "Envoi…";
+    fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok: r.ok, d: d }; }); })
+      .then(function(res){
+        if (!res.ok) {
+          b.disabled = false; sync();
+          err.textContent = res.d && res.d.error === "age" ? "Cet événement est réservé aux 18 ans et plus." : "L'envoi n'a pas marché. Réessaie dans un instant.";
+          return;
+        }
+        form.style.display = "none";
+        $("dt").textContent = y ? "Merci " + pr + ", ta présence est confirmée." : "Merci " + pr + " pour ta réponse.";
+        $("dp").textContent = y
+          ? "On t'attend le vendredi 23 octobre chez Snap France, 18 rue d'Aguesseau, 75008 Paris. Accueil à partir de 18 h." + (acc ? " " + acc + " est noté·e avec toi." : "")
+          : "Dommage ! Si tes plans changent, tu peux revenir sur cette page et confirmer ta présence.";
+        $("done").classList.add("on");
+      })
+      .catch(function(){ b.disabled = false; sync(); err.textContent = "Connexion impossible. Réessaie dans un instant."; });
+  });
+})();
+</script>
+</body>
+</html>

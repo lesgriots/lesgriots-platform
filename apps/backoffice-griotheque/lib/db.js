@@ -233,6 +233,22 @@ export function addLead({ email, name, first_name, last_name, phone, resource_id
   if (!email) throw new Error("addLead: email required");
   const store = load();
   const normalized = String(email).trim().toLowerCase();
+  // Invitation (RSVP) : un invité peut changer d'avis (« je viens » puis
+  // « je ne viens pas », ou ajouter un accompagnant). On met à jour sa réponse
+  // au lieu de garder la première.
+  if (source === "invitation-evenement") {
+    const prev = (store.leads || []).find((l) => l.email === normalized && (l.resource_id || "") === (resource_id || "") && l.source === source);
+    if (prev) {
+      const put = (k, v, n) => { if (v !== undefined && v !== null) prev[k] = String(v).trim().slice(0, n); };
+      put("name", name, 120); put("first_name", first_name, 60); put("last_name", last_name, 60);
+      put("phone", phone, 30); put("subject", subject, 80); put("message", message, 2000);
+      put("organization", organization, 120);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(String(birthdate || ""))) prev.birthdate = String(birthdate);
+      prev.updated_at = new Date().toISOString();
+      save(store);
+      return prev;
+    }
+  }
   // Dédoublonnage : même email + même contexte (ressource/source) = on
   // retourne le lead existant au lieu d'empiler des doublons.
   // Exception : un lead avec message (formulaire de contact) est toujours

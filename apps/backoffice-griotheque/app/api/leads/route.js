@@ -106,7 +106,8 @@ export async function POST(req) {
       if (ev) {
         // Âge minimum (ex. 18) : vérifié côté serveur sur la date de naissance.
         const minAge = Number(ev.min_age) > 0 ? Math.floor(Number(ev.min_age)) : 0;
-        if (minAge) {
+        // Un invité qui décline (« Absent ») n'a pas à donner sa date de naissance.
+        if (minAge && !(invite && body.subject === "Absent")) {
           const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(birthdate || ""));
           let age = -1;
           if (m) {
