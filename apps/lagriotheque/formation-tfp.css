@@ -371,3 +371,9 @@
   .tfp--event .tfp__day__m ul, .tfp--event .tfp__day__txt > p { font-size: 16px; }
   .tfp__day__img--type span { font-size: 64px; }
 }
+
+/* Écrans chiffrés (sans image) : la vidéo du haut de page en fond, à la place du noir.
+   Zoom ancré en haut pour écarter la bande sombre du bas de la vidéo. */
+.tfp__day__img--video, .tfp__day:nth-child(even) .tfp__day__img--video { background: var(--ink); color: var(--paper); }
+.tfp__day__img--video video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.45); transform-origin: 50% 0%; display: block; }
+.tfp__day__img--video span { position: relative; z-index: 1; text-shadow: 0 2px 30px rgba(0,0,0,.25); }

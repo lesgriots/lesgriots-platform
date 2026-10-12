@@ -952,7 +952,7 @@
                       {d.image ? (
                         <div className="tfp__day__img"><img src={d.image} alt="" loading="lazy" /></div>
                       ) : (
-                        <div className="tfp__day__img tfp__day__img--type" aria-hidden="true"><span>{d.duration || String(i + 1).padStart(2, "0")}</span></div>
+                        <div className={"tfp__day__img tfp__day__img--type" + (heroVideo ? " tfp__day__img--video" : "")} aria-hidden="true">{heroVideo && <video src={heroVideo} poster={heroPoster || undefined} autoPlay loop muted playsInline preload="metadata" />}<span>{d.duration || String(i + 1).padStart(2, "0")}</span></div>
                       )}
                     </article>
                   );
