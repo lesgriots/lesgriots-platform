@@ -140,7 +140,14 @@ footer img{height:16px;vertical-align:middle}
       </div>
       <div class="only-yes">
         <label class="check"><input type="checkbox" id="acc"><span>Je viens accompagné·e d'une personne</span></label>
-        <div class="f plus" id="plus" style="margin-top:14px"><label for="accnom">Prénom et nom de la personne qui t'accompagne</label><input type="text" id="accnom"></div>
+        <div class="plus" id="plus" style="margin-top:18px">
+          <p style="font-weight:500;margin-bottom:10px">La personne qui t'accompagne</p>
+          <div class="row">
+            <div class="f"><label for="accpre">Son prénom</label><input type="text" id="accpre" autocomplete="off"></div>
+            <div class="f"><label for="accnom">Son nom</label><input type="text" id="accnom" autocomplete="off"></div>
+          </div>
+          <div class="f" style="margin-top:18px"><label for="accmail">Son e-mail</label><input type="email" id="accmail" inputmode="email" autocomplete="off"></div>
+        </div>
       </div>
       <div class="only-no off keep">
         <label class="check"><input type="checkbox" id="news"><span>Je veux être tenu·e au courant des prochains événements de LA GRIOTHÈQUE™<small>Une invitation par e-mail quand un nouvel événement est annoncé. Désinscription en un clic.</small></span></label>
@@ -186,15 +193,19 @@ footer img{height:16px;vertical-align:middle}
     if (y) {
       if (!bd) { err.textContent = "Indique ta date de naissance."; return; }
       if (age(bd) < 18) { err.textContent = "Cet événement est réservé aux 18 ans et plus."; return; }
-      if ($("acc").checked && !$("accnom").value.trim()) { err.textContent = "Indique le nom de la personne qui t'accompagne."; return; }
+      if ($("acc").checked) {
+        if (!$("accpre").value.trim() || !$("accnom").value.trim()) { err.textContent = "Indique le prénom et le nom de la personne qui t'accompagne."; return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($("accmail").value.trim())) { err.textContent = "Vérifie l'e-mail de la personne qui t'accompagne."; return; }
+      }
     }
-    var acc = y && $("acc").checked ? $("accnom").value.trim() : "";
+    var acc = y && $("acc").checked ? $("accpre").value.trim() + " " + $("accnom").value.trim() : "";
+    var accMail = acc ? $("accmail").value.trim() : "";
     var body = {
       source: "inscription:invitation:Snapchat for Storytellers",
       resource_id: EVT, email: em, name: pr + " " + no, first_name: pr, last_name: no,
       phone: y ? $("tel").value.trim() : "", organization: y ? $("org").value.trim() : "",
       birthdate: y ? bd : "", subject: y ? "Présent" : "Absent",
-      message: acc ? "Accompagné·e de : " + acc : "", consent: !y && $("news").checked
+      message: acc ? "Accompagné·e de : " + acc + " (" + accMail + ")" : "", consent: !y && $("news").checked
     };
     var news = !y && $("news").checked;
     var b = $("go"); b.disabled = true; b.textContent = "Envoi…";
