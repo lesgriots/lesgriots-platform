@@ -55,7 +55,9 @@ form{display:grid;gap:22px}
 .check input{width:22px;height:22px;margin-top:1px;accent-color:#0b0b0b;flex:none}
 .plus{display:none}
 .plus.on{display:block}
-.only-yes.off{display:none}
+.only-yes.off,.only-no.off{display:none}
+.keep{border:1.5px solid var(--line);border-radius:14px;padding:18px 20px}
+.keep .check span small{display:block;color:var(--mute);font-size:15px;margin-top:4px}
 button[type=submit]{justify-self:start;font:inherit;font-weight:500;font-size:17px;background:var(--ink);color:var(--paper);border:0;border-radius:999px;padding:18px 32px;cursor:pointer}
 button[disabled]{opacity:.5;cursor:default}
 .err{color:#b3261e;font-size:15px;min-height:1px}
@@ -140,6 +142,9 @@ footer img{height:16px;vertical-align:middle}
         <label class="check"><input type="checkbox" id="acc"><span>Je viens accompagné·e d'une personne</span></label>
         <div class="f plus" id="plus" style="margin-top:14px"><label for="accnom">Prénom et nom de la personne qui t'accompagne</label><input type="text" id="accnom"></div>
       </div>
+      <div class="only-no off keep">
+        <label class="check"><input type="checkbox" id="news"><span>Je veux être tenu·e au courant des prochains événements de LA GRIOTHÈQUE™<small>Une invitation par e-mail quand un nouvel événement est annoncé. Désinscription en un clic.</small></span></label>
+      </div>
       <p class="err" id="err" role="alert"></p>
       <button type="submit" id="go">Envoyer ma réponse</button>
     </form>
@@ -159,6 +164,7 @@ footer img{height:16px;vertical-align:middle}
   function sync(){
     var y = oui();
     Array.prototype.forEach.call(document.querySelectorAll(".only-yes"), function(el){ el.classList.toggle("off", !y); });
+    Array.prototype.forEach.call(document.querySelectorAll(".only-no"), function(el){ el.classList.toggle("off", y); });
     $("plus").classList.toggle("on", y && $("acc").checked);
     $("go").textContent = y ? "Confirmer ma présence" : "Envoyer ma réponse";
   }
@@ -188,8 +194,9 @@ footer img{height:16px;vertical-align:middle}
       resource_id: EVT, email: em, name: pr + " " + no, first_name: pr, last_name: no,
       phone: y ? $("tel").value.trim() : "", organization: y ? $("org").value.trim() : "",
       birthdate: y ? bd : "", subject: y ? "Présent" : "Absent",
-      message: acc ? "Accompagné·e de : " + acc : "", consent: false
+      message: acc ? "Accompagné·e de : " + acc : "", consent: !y && $("news").checked
     };
+    var news = !y && $("news").checked;
     var b = $("go"); b.disabled = true; b.textContent = "Envoi…";
     fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
       .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok: r.ok, d: d }; }); })
@@ -199,11 +206,16 @@ footer img{height:16px;vertical-align:middle}
           err.textContent = res.d && res.d.error === "age" ? "Cet événement est réservé aux 18 ans et plus." : "L'envoi n'a pas marché. Réessaie dans un instant.";
           return;
         }
+        if (news) {
+          fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+            source: "newsletter", email: em, name: pr + " " + no, first_name: pr, last_name: no, consent: true
+          }) }).catch(function(){});
+        }
         form.style.display = "none";
         $("dt").textContent = y ? "Merci " + pr + ", ta présence est confirmée." : "Merci " + pr + " pour ta réponse.";
         $("dp").textContent = y
           ? "On t'attend le vendredi 23 octobre chez Snap France, 18 rue d'Aguesseau, 75008 Paris. Accueil à partir de 18 h." + (acc ? " " + acc + " est noté·e avec toi." : "")
-          : "Dommage ! Si tes plans changent, tu peux revenir sur cette page et confirmer ta présence.";
+          : "Dommage ! Si tes plans changent, tu peux revenir sur cette page et confirmer ta présence." + (news ? " Tu seras invité·e aux prochains événements de LA GRIOTHÈQUE™." : "");
         $("done").classList.add("on");
       })
       .catch(function(){ b.disabled = false; sync(); err.textContent = "Connexion impossible. Réessaie dans un instant."; });
