@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { CSS as FORM_CSS } from "../components/AutomationForm";
 
 const ONGLETS = [
+  ["feed", "Feed"],
   ["automatisations", "Automatisations"],
   ["publications", "Publications"],
   ["contacts", "Contacts"],
@@ -61,6 +62,7 @@ export default function InstagramPage() {
       </div>
 
       {tab === "automatisations" && <Automatisations autos={autos} onToggle={toggle} />}
+      {tab === "feed" && <Feed autos={autos || []} />}
       {tab === "publications" && <Publications autos={autos || []} />}
       {tab === "contacts" && <Contacts autos={autos || []} />}
       {tab === "journal" && <Journal log={status ? status.log : null} onRefresh={reload} />}
@@ -131,6 +133,88 @@ function Automatisations({ autos, onToggle }) {
         </tr>
       ))}
     </tbody></table></div>
+  );
+}
+
+// ---- Feed : la grille du compte, posts programmés en tête ------------------
+function Feed({ autos }) {
+  const [media, setMedia] = useState(null);
+  const [err, setErr] = useState("");
+  const [posts, setPosts] = useState([]);
+  const [open, setOpen] = useState(null);
+  useEffect(() => {
+    fetch("/api/instagram/media?limit=48").then((r) => r.json())
+      .then((d) => Array.isArray(d) ? setMedia(d) : (setMedia([]), setErr(d.error || "indisponible")))
+      .catch((e) => { setMedia([]); setErr(e.message); });
+    fetch("/api/instagram/posts").then((r) => r.json()).then((d) => Array.isArray(d) && setPosts(d)).catch(() => {});
+  }, []);
+  useEffect(() => {
+    const k = (e) => e.key === "Escape" && setOpen(null);
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, []);
+
+  // Une automatisation « tous les posts » couvre tout le feed ; les autres, leurs posts cochés.
+  const autosFor = (id) => autos.filter((a) => a.trigger !== "dm" && (a.media_ids.length ? a.media_ids.includes(id) : true));
+  const prevu = posts.filter((p) => ["programme", "a_publier", "publication"].includes(p.status) && p.kind !== "story")
+    .sort((a, b) => String(b.scheduled_at || "").localeCompare(String(a.scheduled_at || "")));
+  const img = (m) => m.media_type === "VIDEO" ? m.thumbnail_url : m.media_url;
+  const kind = (m) => m.media_product_type === "REELS" ? "Reel" : m.media_type === "CAROUSEL_ALBUM" ? "Carrousel" : m.media_type === "VIDEO" ? "Vidéo" : "";
+
+  if (media === null) return <div className="empty">Chargement du feed…</div>;
+  return (
+    <>
+      {err && <div className="empty">Feed indisponible : {err}</div>}
+      <div className="feed">
+        {prevu.map((p) => {
+          const m = p.media[0] || {};
+          return (
+            <a key={p.id} href="/instagram?tab=publications" className="feed__case feed__case--prevu" title={p.caption}>
+              {m.type === "video" ? <video src={`/api/preview?p=${encodeURIComponent(m.path)}`} muted /> : <img src={`/api/preview?p=${encodeURIComponent(m.path)}`} alt="" />}
+              <span className="feed__etiquette">{p.status === "programme" && p.scheduled_at ? new Date(p.scheduled_at).toLocaleString("fr-FR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "en cours"}</span>
+            </a>
+          );
+        })}
+        {media.map((m) => {
+          const linked = autosFor(m.id).filter((a) => a.active);
+          return (
+            <button key={m.id} type="button" className="feed__case" onClick={() => setOpen(m)} title={(m.caption || "").slice(0, 120)}>
+              {img(m) ? <img src={img(m)} alt="" loading="lazy" /> : null}
+              {kind(m) && <span className="feed__type">{kind(m)}</span>}
+              {linked.length > 0 && <span className="feed__dm">DM auto</span>}
+              <span className="feed__stats">♥ {m.like_count ?? "–"}  ·  💬 {m.comments_count ?? "–"}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {open && (
+        <div className="feed__voile" onClick={() => setOpen(null)}>
+          <aside className="feed__tiroir" onClick={(e) => e.stopPropagation()} aria-label="Détail du post">
+            <button type="button" className="feed__fermer" onClick={() => setOpen(null)} aria-label="Fermer">×</button>
+            <div className="feed__visuel">{open.media_type === "VIDEO"
+              ? <video src={open.media_url} poster={open.thumbnail_url} controls playsInline />
+              : <img src={open.media_url} alt="" />}</div>
+            <div className="feed__corps">
+              <div className="feed__chiffres"><span><b>{open.like_count ?? "–"}</b> j'aime</span><span><b>{open.comments_count ?? "–"}</b> commentaires</span></div>
+              <div className="note" style={{ margin: "0 0 12px" }}>{new Date(open.timestamp).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" })}{kind(open) ? " · " + kind(open) : ""}</div>
+              <p className="feed__legende">{open.caption || "Sans légende."}</p>
+              <h2 style={{ marginTop: 24 }}>Réponse automatique en DM</h2>
+              {autosFor(open.id).length ? (
+                <ul className="feed__autos">{autosFor(open.id).map((a) => (
+                  <li key={a.id}><a href={`/instagram/${a.id}`}>{a.title}</a> <span className={"pill " + (a.active ? "pill--on" : "pill--off")}>{a.active ? "active" : "en pause"}</span>
+                    <div className="note" style={{ margin: 0 }}>{a.match === "any" ? "tous les commentaires" : "mot-clé : " + a.keywords.join(", ")}{a.media_ids.length ? "" : " · tous les posts"}</div></li>
+                ))}</ul>
+              ) : <p className="note">Aucune sur ce post.</p>}
+              <div className="actions" style={{ marginTop: 16 }}>
+                <a className="btn" href={`/instagram/new?media=${open.id}`}>Créer une réponse DM sur ce post</a>
+                <a className="btn btn--ghost" href={open.permalink} target="_blank" rel="noopener noreferrer">Voir sur Instagram ↗</a>
+              </div>
+            </div>
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -330,6 +414,29 @@ function Simulateur({ autos }) {
 }
 
 const CSS = `
+
+.feed { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; max-width: 760px; }
+.feed__case { position: relative; aspect-ratio: 3/4; padding: 0; border: 0; background: var(--paper-3); overflow: hidden; cursor: pointer; display: block; }
+.feed__case img, .feed__case video { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .15s; }
+.feed__case:hover img, .feed__case:hover video { opacity: .82; }
+.feed__case--prevu img, .feed__case--prevu video { opacity: .55; }
+.feed__case--prevu { box-shadow: inset 0 0 0 2px var(--ink); }
+.feed__etiquette, .feed__type, .feed__dm { position: absolute; font-size: 11.5px; font-weight: 500; border-radius: 999px; padding: 3px 9px; }
+.feed__etiquette { left: 8px; bottom: 8px; background: var(--ink); color: var(--paper); }
+.feed__type { right: 8px; top: 8px; background: rgba(246,245,243,.92); color: var(--ink); }
+.feed__dm { left: 8px; top: 8px; background: var(--ink); color: var(--paper); }
+.feed__stats { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 10px 8px; font-size: 12.5px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.55)); opacity: 0; transition: opacity .15s; text-align: left; }
+.feed__case:hover .feed__stats, .feed__case:focus-visible .feed__stats { opacity: 1; }
+.feed__voile { position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,.35); display: flex; justify-content: flex-end; }
+.feed__tiroir { position: relative; width: min(480px, 100%); height: 100%; overflow-y: auto; background: var(--paper); box-shadow: -1px 0 0 var(--rule); }
+.feed__fermer { position: absolute; right: 14px; top: 14px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: 0; background: rgba(246,245,243,.92); font-size: 20px; cursor: pointer; }
+.feed__visuel img, .feed__visuel video { width: 100%; display: block; background: var(--paper-3); }
+.feed__corps { padding: 20px 22px 40px; }
+.feed__chiffres { display: flex; gap: 20px; font-size: 14px; margin-bottom: 4px; }
+.feed__chiffres b { font-size: 20px; font-weight: 500; letter-spacing: -.02em; margin-right: 4px; }
+.feed__legende { white-space: pre-line; font-size: 14px; line-height: 1.5; color: var(--ink); }
+.feed__autos { list-style: none; display: grid; gap: 10px; }
+@media (max-width: 700px) { .feed { gap: 2px; } }
 .gdm-onglets { display: flex; gap: 0; border-bottom: 1px solid var(--ink); margin: 28px 0 18px; overflow-x: auto; }
 .gdm-onglets button { background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 16px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-dim); cursor: pointer; white-space: nowrap; }
 .gdm-onglets button.est-actif { color: var(--ink); border-bottom-color: var(--accent); }

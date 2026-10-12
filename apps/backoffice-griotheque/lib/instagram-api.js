@@ -109,7 +109,7 @@ export async function getAccount() {
 
 export async function listMedia(limit = 24) {
   const d = await call(`/me/media`, {
-    query: { fields: "id,caption,media_type,media_product_type,thumbnail_url,media_url,permalink,timestamp", limit: String(limit) },
+    query: { fields: "id,caption,media_type,media_product_type,thumbnail_url,media_url,permalink,timestamp,like_count,comments_count", limit: String(limit) },
   });
   return d.data || [];
 }

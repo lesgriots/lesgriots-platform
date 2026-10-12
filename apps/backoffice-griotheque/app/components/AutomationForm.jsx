@@ -30,6 +30,13 @@ export default function AutomationForm({ initial, isNew }) {
   const [msg, setMsg] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // Arrivée depuis le feed (« Réponse DM sur ce post ») : le post est pré-coché.
+  useEffect(() => {
+    if (!isNew) return;
+    const m = new URLSearchParams(window.location.search).get("media");
+    if (m) setF((x) => ({ ...x, media_ids: x.media_ids.includes(m) ? x.media_ids : [...x.media_ids, m] }));
+  }, [isNew]);
+
   useEffect(() => {
     fetch("/api/resources").then((r) => r.json()).then((r) => setResources(Array.isArray(r) ? r : [])).catch(() => {});
     fetch("/api/instagram/media").then((r) => r.json()).then((d) => {
