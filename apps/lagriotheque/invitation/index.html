@@ -20,7 +20,7 @@ body{font-family:Geist,system-ui,sans-serif;background:var(--paper);color:var(--
 a{color:inherit}
 
 /* ---- Haut : la vidéo de l'événement ---- */
-.hero{position:relative;color:var(--paper);background:var(--ink);overflow:hidden;min-height:min(92svh,860px);display:flex;flex-direction:column;padding:calc(var(--g)*.8) var(--g) var(--g)}
+.hero{position:relative;color:var(--paper);background:var(--ink);overflow:hidden;min-height:min(92svh,860px);display:flex;flex-direction:column;gap:48px;padding:calc(var(--g)*.8) var(--g) var(--g)}
 .hero video,.hero .poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.35);transform-origin:50% 0}
 .hero .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.5) 0%,rgba(0,0,0,.08) 22%,rgba(0,0,0,.25) 45%,rgba(0,0,0,.62) 100%)}
 .hero>*:not(video):not(.veil):not(.poster){position:relative}
@@ -70,6 +70,7 @@ footer img{height:16px;vertical-align:middle}
   .row{grid-template-columns:minmax(0,1fr)}
   .hero video,.hero .poster{transform:scale(1.15)}
   .f label{font-size:15px}
+  .logos{gap:12px}.logos .wm{height:17px}.logos .sn{height:24px}.logos .sep{height:24px}
 }
 @media(max-width:420px){.choice{grid-template-columns:minmax(0,1fr)}}
 </style>
