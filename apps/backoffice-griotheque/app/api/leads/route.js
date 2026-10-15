@@ -10,6 +10,7 @@ import { NextResponse } from "next/server";
 import { listLeads, addLead, getEvent, eventPlaces } from "../../../lib/db.js";
 import { rateLimit, clientIp, tooMany } from "../../../lib/rate-limit.js";
 import { syncContactToSystemeIo, sioSlug, splitName } from "../../../lib/systeme.js";
+import { markConversion } from "../../../lib/griot-track.js";
 
 // Empêche next build de figer le GET en statique (cf. bug 405 /api/pages).
 export const dynamic = "force-dynamic";
@@ -133,6 +134,11 @@ export async function POST(req) {
 
     const lead = addLead({ email, name, first_name, last_name, phone, resource_id, consent, source, subject, message, profile, organization, link, birthdate });
 
+    // Inscription venue d'un DM Griot DM (?ig=<jeton> capté par le site) :
+    // on relie la personne Instagram à son inscription et on annule sa relance.
+    let fromDm = null;
+    if (body.ig_ref) { try { fromDm = markConversion(String(body.ig_ref), { email: lead.email, source }); } catch (e) { console.warn("griot conversion:", e.message); } }
+
     // Passerelle CRM : chaque lead est poussé vers Systeme.io (contact +
     // champ "source" + tags). Fire-and-forget : une panne Systeme.io ne
     // bloque jamais la capture, le lead est déjà enregistré dans le BO.
@@ -142,6 +148,7 @@ export async function POST(req) {
     // upgrade. Une inscription newsletter/launch vaut abonnement.
     if (source === "newsletter" || source === "launch") tags.unshift("Newsletter");
     if (source === "contact" && subject) tags.push("sujet-" + sioSlug(subject));
+    if (fromDm) tags.push("src-instagram-dm");
     syncContactToSystemeIo({
       email,
       firstName: first_name || guessed.firstName,

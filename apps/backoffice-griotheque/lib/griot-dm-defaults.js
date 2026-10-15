@@ -8,4 +8,5 @@ export const DEFAULTS = {
   email_invalid_text: "Hmm, ça ne ressemble pas à une adresse email 🤔 Tu peux me la réécrire ? (ex. prenom@gmail.com)",
   delivery_text: "Et voilà {pseudo} 🎁 Bonne lecture !",
   link_label: "Ouvrir",
+  relance_text: "Petit rappel {pseudo} 👋 Il reste encore quelques places. Le lien est juste ici 👇",
 };

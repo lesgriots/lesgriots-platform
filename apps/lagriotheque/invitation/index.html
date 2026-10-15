@@ -94,6 +94,41 @@ footer img{height:16px;vertical-align:middle}
   h1{font-size:38px}
 }
 </style>
+    <script>
+      /* Griot DM : relie une inscription au DM Instagram qui l'a amenée.
+         ?ig=<jeton> est gardé 48 h dans ce navigateur, puis ajouté (ig_ref) aux
+         envois vers /api/leads. Aucun cookie, aucun tiers. */
+      (function () {
+        var K = "griot_ig", t = null;
+        try {
+          var m = /[?&]ig=([a-f0-9]{10})(?:&|$)/.exec(location.search);
+          if (m) localStorage.setItem(K, JSON.stringify({ t: m[1], at: Date.now() }));
+          var v = JSON.parse(localStorage.getItem(K) || "null");
+          if (v && Date.now() - v.at < 48 * 3600e3) t = v.t; else localStorage.removeItem(K);
+        } catch (e) {}
+        if (!t || !window.fetch) return;
+        var f = window.fetch;
+        window.fetch = function (u, o) {
+          try {
+            var url = typeof u === "string" ? u : (u && u.url) || "";
+            if (/\/api\/leads(\?|$)/.test(url) && o && String(o.method || "").toUpperCase() === "POST" && typeof o.body === "string") {
+              var b = JSON.parse(o.body);
+              if (b && typeof b === "object" && !b.ig_ref) { b.ig_ref = t; o = Object.assign({}, o, { body: JSON.stringify(b) }); }
+            }
+          } catch (e) {}
+          return f.call(this, u, o);
+        };
+        // Les ressources passent par sendBeacon (corps illisible) : pour un
+        // contact venu d'un DM on refuse le beacon, le site retombe sur fetch.
+        try {
+          var nb = navigator.sendBeacon && navigator.sendBeacon.bind(navigator);
+          if (nb) navigator.sendBeacon = function (u, d) {
+            if (/\/api\/leads(\?|$)/.test(String(u))) return false;
+            return nb(u, d);
+          };
+        } catch (e) {}
+      })();
+    </script>
 </head>
 <body>
 <header class="hero">

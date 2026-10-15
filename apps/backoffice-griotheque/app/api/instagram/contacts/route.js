@@ -10,12 +10,15 @@ export async function GET() {
   return NextResponse.json(list);
 }
 export async function PATCH(req) {
-  const { igsid, paused, reset } = await req.json();
+  const { igsid, paused, reset, labels, note, resume } = await req.json();
   const c = mutateIg((s) => {
     const x = s.contacts.find((k) => k.igsid === String(igsid));
     if (!x) return null;
     if (typeof paused === "boolean") x.paused = paused;
     if (reset) { x.state = null; x.pending = null; }
+    if (resume) x.paused_until = null; // reprendre l'automate tout de suite
+    if (Array.isArray(labels)) x.labels = [...new Set(labels.map((l) => String(l).trim().toLowerCase().slice(0, 30)).filter(Boolean))].slice(0, 12);
+    if (typeof note === "string") x.note = note.slice(0, 2000);
     x.updated_at = new Date().toISOString();
     return x;
   });

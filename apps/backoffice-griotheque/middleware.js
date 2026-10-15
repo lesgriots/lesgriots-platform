@@ -12,7 +12,7 @@ export function middleware(req) {
   // /api/instagram/webhook = appelé par Meta ; protégé par la signature HMAC (IG_APP_SECRET).
   const publicPaths = ["/api/leads", "/api/subscribe", "/api/stripe/create-payment-intent", "/api/instagram/webhook"];
   // /api/places/<id> = jauge publique d'un événement (lecture seule).
-  if (publicPaths.includes(req.nextUrl.pathname) || req.nextUrl.pathname.startsWith("/api/places/")) {
+  if (publicPaths.includes(req.nextUrl.pathname) || req.nextUrl.pathname.startsWith("/api/places/") || req.nextUrl.pathname.startsWith("/api/instagram/go/")) {
     return NextResponse.next();
   }
 

@@ -115,6 +115,24 @@ export async function listMedia(limit = 24) {
 }
 
 // Un jeton longue durée se rafraîchit s'il a plus de 24 h ; il repart pour 60 j.
+// ---- Boîte de réception ----------------------------------------------------
+// Conversations Instagram du compte (Instagram API with Instagram Login).
+// Les messages arrivent du plus récent au plus ancien.
+
+export async function listConversations(limit = 40) {
+  const r = await call(`/me/conversations`, { query: {
+    platform: "instagram", limit: String(limit),
+    fields: "id,updated_time,participants,messages.limit(1){id,message,from,created_time}",
+  } });
+  return r.data || [];
+}
+
+export async function getConversation(id, limit = 50) {
+  return call(`/${encodeURIComponent(id)}`, { query: {
+    fields: `id,updated_time,participants,messages.limit(${limit}){id,message,from,created_time}`,
+  } });
+}
+
 export async function refreshToken() {
   const token = currentToken();
   if (!token) throw new Error("Aucun jeton à rafraîchir");

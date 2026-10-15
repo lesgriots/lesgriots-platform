@@ -11,6 +11,7 @@ const VIDE = {
   opening_text: "", opening_button: "", follow_gate: false, follow_text: "",
   ask_email: true, email_text: "", email_invalid_text: "", newsletter: true,
   resource_id: "", link_url: "", link_label: "", delivery_text: "", followup_text: "", video_url: "", position: 0,
+  relance_enabled: false, relance_delay_h: 3, relance_text: "",
 };
 
 const slug = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
@@ -104,6 +105,7 @@ export default function AutomationForm({ initial, isNew }) {
     }
     steps.push({ who: "nous", where: "DM", text: p(f.delivery_text || DEFAULTS.delivery_text), button: url ? (f.link_label || DEFAULTS.link_label) : "" });
     if (f.followup_text) steps.push({ who: "nous", where: "DM", text: p(f.followup_text) });
+    if (f.relance_enabled) steps.push({ who: "nous", where: `DM · +${f.relance_delay_h || 3} h si pas inscrit`, text: p(f.relance_text || DEFAULTS.relance_text), button: url ? (f.link_label || DEFAULTS.link_label) : "" });
     return steps;
   }, [f, url]);
 
@@ -193,9 +195,21 @@ export default function AutomationForm({ initial, isNew }) {
         </div>
         <div className="champ"><label>Message de livraison</label><textarea value={f.delivery_text} onChange={set("delivery_text")} placeholder={DEFAULTS.delivery_text} rows={3} /></div>
         <div className="champ"><label>Texte du bouton lien (20 car.)</label><input value={f.link_label} onChange={set("link_label")} placeholder={DEFAULTS.link_label} maxLength={20} /></div>
-        <div className="champ"><label>Message de relance (optionnel, juste après)</label>
+        <div className="champ"><label>Message complémentaire (optionnel, juste après le lien)</label>
           <textarea value={f.followup_text} onChange={set("followup_text")} rows={2} placeholder="Si tu veux aller plus loin, le workshop Stratégie et Storytelling c'est ici : https://lagriotheque.com/…" />
           <div className="champ__aide">Une ressource = une douleur = une offre payante derrière. C'est l'endroit pour la nommer.</div></div>
+        <h2 style={{ marginTop: 26 }}>Relance automatique</h2>
+        <label className="gdm-case"><input type="checkbox" checked={!!f.relance_enabled} onChange={set("relance_enabled")} /> Relancer si la personne ne s'est pas inscrite</label>
+        {f.relance_enabled && (<>
+          <div className="row">
+            <div className="champ"><label>Délai après le lien (heures)</label>
+              <input type="number" min={1} max={20} value={f.relance_delay_h} onChange={set("relance_delay_h")} />
+              <div className="champ__aide">Instagram n'autorise un message que dans les 24 h après le dernier message de la personne. Au-delà, la relance est annulée.</div></div>
+          </div>
+          <div className="champ"><label>Message de relance (le bouton lien est remis dessous)</label>
+            <textarea value={f.relance_text} onChange={set("relance_text")} rows={2} placeholder={DEFAULTS.relance_text} />
+            <div className="champ__aide">Annulée automatiquement si la personne s'inscrit via le lien, ou si tu mets le contact en pause.</div></div>
+        </>)}
         <div className="champ__aide" style={{ marginTop: 14 }}>Variables : <code>{"{pseudo}"}</code> (@pseudo), <code>{"{prenom}"}</code> (pseudo sans @), <code>{"{lien}"}</code>.</div>
 
         <div className="bo-actions-collees">

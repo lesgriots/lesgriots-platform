@@ -106,6 +106,9 @@ export function normalizeAutomation(a) {
     video_url: String(a.video_url || "").slice(0, 500),
     delivery_text: String(a.delivery_text || "").slice(0, 900),
     followup_text: String(a.followup_text || "").slice(0, 900),
+    relance_enabled: !!a.relance_enabled,
+    relance_delay_h: Math.max(1, Math.min(20, Number(a.relance_delay_h) || 3)),
+    relance_text: String(a.relance_text || "").slice(0, 640),
     position: Number(a.position) || 0,
   };
 }

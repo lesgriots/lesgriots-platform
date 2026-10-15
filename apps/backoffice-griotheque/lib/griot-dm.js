@@ -16,7 +16,7 @@
 // Parcours « DM » : même chose à partir de l'étape 5, déclenché par un mot-clé
 // envoyé en message direct (ou en réponse à une story).
 
-import { loadIg, saveIg, logIg, bumpStat, getContact, upsertContact } from "./instagram-store.js";
+import { loadIg, saveIg, mutateIg, logIg, bumpStat, getContact, upsertContact } from "./instagram-store.js";
 import { getResource, addLead } from "./db.js";
 import { syncContactToSystemeIo } from "./systeme.js";
 
@@ -24,6 +24,7 @@ const SITE = "https://lagriotheque.com";
 const EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
 
 import { DEFAULTS } from "./griot-dm-defaults.js";
+import { createLink, trackedUrl } from "./griot-track.js";
 export { DEFAULTS };
 
 // ---- File d'attente ----------------------------------------------------------
@@ -34,6 +35,12 @@ export function enqueue(task) {
   const run = queue.then(task, task);
   queue = run.catch((e) => console.error("griot-dm:", e));
   return run;
+}
+
+// Pause manuelle (bouton « Pause ») ou automatique pendant 24 h quand tu
+// réponds toi-même depuis la boîte de réception.
+export function isPaused(c) {
+  return !!(c && (c.paused || (c.paused_until && Date.parse(c.paused_until) > Date.now())));
 }
 
 // ---- Outils -----------------------------------------------------------------
@@ -124,7 +131,11 @@ async function proceed(ctx) {
 
 async function deliver(ctx) {
   const { store, contact, a, sender, logs } = ctx;
-  const url = deliveryUrl(a);
+  const target = deliveryUrl(a);
+  // Lien suivi : clic compté, et inscription reliée à ce DM (voir griot-track.js).
+  // En simulation, on garde le lien brut.
+  const token = target && !ctx.dry ? createLink(store, { igsid: contact.igsid, username: contact.username, automation: a.id, url: target }) : "";
+  const url = token ? trackedUrl(token) : target;
   const vars = { username: contact.username, url };
   const text = fill(a.delivery_text || DEFAULTS.delivery_text, vars).slice(0, 640);
 
@@ -157,7 +168,84 @@ async function deliver(ctx) {
   contact.pending = null;
   contact.history = [...(contact.history || []), { automation: a.id, delivered_at: new Date().toISOString() }].slice(-30);
   bumpStat(store, a.id, "delivered");
-  logs.push({ type: "livré", automation: a.id, url });
+  logs.push({ type: "livré", automation: a.id, url: target });
+
+  // Relance si la personne ne s'inscrit pas. Instagram n'autorise un message que
+  // dans les 24 h qui suivent son dernier message : on vise avant cette limite.
+  if (a.relance_enabled && token) {
+    const now = Date.now();
+    const due = now + Math.max(1, Math.min(20, Number(a.relance_delay_h) || 3)) * 3600e3;
+    const windowEnd = Date.parse(contact.last_in_at || new Date(now).toISOString()) + 24 * 3600e3 - 10 * 60e3;
+    if (due < windowEnd) {
+      store.followups = [...(store.followups || []), {
+        id: "f" + now.toString(36) + Math.random().toString(36).slice(2, 5),
+        igsid: contact.igsid, username: contact.username, automation: a.id, token,
+        due_at: new Date(due).toISOString(), window_end: new Date(windowEnd).toISOString(), done: false,
+      }].slice(-2000);
+      logs.push({ type: "relance programmée", automation: a.id, text: new Date(due).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }) });
+    }
+  }
+}
+
+// Envoie les relances dues (appelé chaque minute par le timer, via /tick).
+// Annulée si : inscrit entre-temps, contact en pause, fenêtre de 24 h passée,
+// automatisation supprimée ou désactivée.
+export function processFollowups(sender) {
+  return enqueue(async () => {
+    // 1) on réserve les relances dues (écriture immédiate, pour ne jamais
+    //    écraser un clic ou une inscription arrivés pendant l'envoi).
+    const now = Date.now();
+    const jobs = mutateIg((store) => {
+      const out = [];
+      for (const f of store.followups || []) {
+        if (f.done || Date.parse(f.due_at) > now) continue;
+        f.done = true;
+        const a = store.automations.find((x) => x.id === f.automation && x.active);
+        const c = (store.contacts || []).find((x) => x.igsid === f.igsid);
+        const link = store.links && store.links[f.token];
+        const lastIn = Date.parse((c && c.last_in_at) || 0);
+        if (!a || !c) f.result = "annulée";
+        else if (link && link.converted) f.result = "inscrit";
+        else if (isPaused(c)) f.result = "contact en pause";
+        else if (!lastIn || now > lastIn + 24 * 3600e3 - 60e3) f.result = "fenêtre fermée";
+        else {
+          f.result = "en cours";
+          const url = trackedUrl(f.token);
+          const text = fill(a.relance_text || DEFAULTS.relance_text, { username: c.username, url }).slice(0, 640);
+          out.push({ id: f.id, igsid: c.igsid, username: c.username, automation: a.id, url, text, label: (a.link_label || DEFAULTS.link_label).slice(0, 20) });
+        }
+      }
+      return out;
+    }) || [];
+    if (!jobs.length) return [];
+    // 2) envoi
+    const results = [];
+    for (const j of jobs) {
+      const logs = [];
+      const tpl = { attachment: { type: "template", payload: { template_type: "button", text: j.text, buttons: [{ type: "web_url", url: j.url, title: j.label }] } } };
+      try {
+        await sendSafe((m) => sender.sendMessage(j.igsid, m), tpl, `${j.text}\n\n👉 ${j.url}`, logs);
+        results.push({ ...j, ok: true, logs });
+      } catch (e) {
+        results.push({ ...j, ok: false, error: e.message, logs });
+      }
+    }
+    // 3) résultat
+    mutateIg((store) => {
+      for (const r of results) {
+        const f = (store.followups || []).find((x) => x.id === r.id);
+        if (f) f.result = r.ok ? "envoyée" : "erreur : " + r.error;
+        for (const l of r.logs) logIg(store, { ...l, igsid: r.igsid, username: r.username });
+        if (r.ok) {
+          bumpStat(store, r.automation, "relances");
+          logIg(store, { type: "relance envoyée", automation: r.automation, igsid: r.igsid, username: r.username });
+        } else {
+          logIg(store, { type: "erreur", error: "relance : " + r.error, igsid: r.igsid, username: r.username });
+        }
+      }
+    });
+    return results.map((r) => (r.ok ? "envoyée" : "erreur"));
+  });
 }
 
 async function captureEmail(ctx, text) {
@@ -224,7 +312,7 @@ export async function handleComment(ev, { sender, store: given, dry = false } = 
     if (!a) { logs.push({ type: "commentaire ignoré", text: String(ev.text).slice(0, 80) }); return { matched: null }; }
 
     const contact = upsertContact(store, String(ev.fromId), ev.username ? { username: ev.username } : {});
-    if (contact.paused) { logs.push({ type: "contact en pause", automation: a.id }); return { matched: a.id, paused: true }; }
+    if (isPaused(contact)) { logs.push({ type: "contact en pause", automation: a.id }); return { matched: a.id, paused: true }; }
     bumpStat(store, a.id, "triggered");
     logs.push({ type: "déclenché (commentaire)", automation: a.id, text: String(ev.text).slice(0, 80) });
 
@@ -269,7 +357,8 @@ export async function handleMessage(ev, { sender, store: given, dry = false } = 
     }
     contact = getContact(store, String(ev.igsid)) || upsertContact(store, String(ev.igsid));
     contact.updated_at = new Date().toISOString();
-    if (contact.paused) return { paused: true };
+    contact.last_in_at = new Date().toISOString(); // ouvre (ou prolonge) la fenêtre de 24 h
+    if (isPaused(contact)) return { paused: true };
 
     // Pseudo inconnu (contact venu par DM) : on le demande une fois à Meta.
     if (!contact.username && !sender.dry) {
