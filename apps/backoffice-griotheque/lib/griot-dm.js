@@ -203,7 +203,7 @@ export function processFollowups(sender) {
         const a = store.automations.find((x) => x.id === f.automation && x.active);
         const c = (store.contacts || []).find((x) => x.igsid === f.igsid);
         const link = store.links && store.links[f.token];
-        const lastIn = Date.parse((c && c.last_in_at) || 0);
+        const lastIn = c && c.last_in_at ? Date.parse(c.last_in_at) : 0;
         if (!a || !c) f.result = "annulée";
         else if (link && link.converted) f.result = "inscrit";
         else if (isPaused(c)) f.result = "contact en pause";

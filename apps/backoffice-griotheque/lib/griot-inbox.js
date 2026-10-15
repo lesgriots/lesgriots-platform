@@ -34,7 +34,7 @@ export function contactView(c) {
 // Fenêtre de 24 h : calculée sur le dernier message reçu (fil Instagram ou
 // dernier message vu par le webhook, le plus récent des deux).
 export function windowInfo(lastInIso) {
-  const t = Date.parse(lastInIso || 0);
+  const t = lastInIso ? Date.parse(lastInIso) : 0;
   if (!t) return { open: false, ends_at: null };
   const end = t + WINDOW;
   return { open: Date.now() < end, ends_at: new Date(end).toISOString() };
