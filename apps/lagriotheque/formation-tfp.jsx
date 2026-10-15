@@ -157,7 +157,7 @@
               <React.Fragment key={i}><span className="w">{w}</span>{i < words.length - 1 ? " " : ""}</React.Fragment>
             ))}
           </h2>
-          <button type="button" className="tfp__btn" ref={btnRef} onClick={onCta}>{ctaLabel || "Demander une inscription"} →</button>
+          {onCta && <button type="button" className="tfp__btn" ref={btnRef} onClick={onCta}>{ctaLabel || "Demander une inscription"} →</button>}
         </div>
       </section>
     );
@@ -732,7 +732,8 @@
     // présence », hors des places publiques (jamais « complet »).
     const invite = typeof window !== "undefined" && /[?&]invitation\b/.test(window.location.search || "");
     const complet = !invite && !passe && ((f.status || "").toUpperCase() === "COMPLET" || !!(places && places.full));
-    const ouvert = !passe && !complet;
+    const fermee = f.inscriptions === false;
+    const ouvert = !passe && !complet && !fermee;
     const dateTxt = [formatEventDate(f.date), f.time].filter(Boolean).join(" · ");
     const lieuTxt = [f.location, f.city].filter(Boolean).join(", ");
     const externe = /^https?:\/\//i.test(f.link || "");
@@ -853,7 +854,7 @@
             <p className="lg__cta-mini__audience__text">{f.audience}</p>
           </div>
         )}
-        {!passe && (
+        {!passe && !fermee && (
           <button type="button" className="lg__cta-mini__btn" onClick={inscrire} disabled={!ouvert} style={!ouvert ? { opacity: 0.5, cursor: "not-allowed" } : undefined}>
             {ctaTexte}{ouvert ? " →" : ""}
           </button>
@@ -871,7 +872,7 @@
               <div className="tfp__titlebar__meta">
                 {formatEventDate(f.date) && <span className="dur">{formatEventDate(f.date)}</span>}
                 {etatPlaces && <span>{etatPlaces}</span>}
-                {!passe && <button type="button" onClick={inscrire} disabled={!ouvert}>{ctaTexte}</button>}
+                {!passe && !fermee && <button type="button" onClick={inscrire} disabled={!ouvert}>{ctaTexte}</button>}
               </div>
             </div>
             <div className="tfp__sectionbar" aria-hidden="true">
@@ -881,7 +882,7 @@
             </div>
             <div className="tfp__bar" aria-hidden="true">
               <div className="tfp__bar__price"><strong>{formatEventDate(f.date) || f.title}</strong>{etatPlaces && <span>{etatPlaces.toLowerCase()}</span>}</div>
-              {!passe && <button type="button" className="tfp__btn" onClick={inscrire} disabled={!ouvert}>{ctaTexte}{ouvert ? " →" : ""}</button>}
+              {!passe && !fermee && <button type="button" className="tfp__btn" onClick={inscrire} disabled={!ouvert}>{ctaTexte}{ouvert ? " →" : ""}</button>}
             </div>
           </div>,
           document.body
@@ -899,7 +900,7 @@
             <h1>{f.title}</h1>
             {f.tagline && <p className="tfp__lead">{f.tagline}</p>}
             <div className="tfp__hero__cta">
-              {!passe && <button type="button" className="tfp__btn tfp__btn--paper" onClick={inscrire} disabled={!ouvert}>{ctaTexte}{ouvert ? " →" : ""}</button>}
+              {!passe && !fermee && <button type="button" className="tfp__btn tfp__btn--paper" onClick={inscrire} disabled={!ouvert}>{ctaTexte}{ouvert ? " →" : ""}</button>}
               <small>{[formatEventDate(f.date), lieuTxt].filter(Boolean).join(" · ").toLowerCase()}</small>
             </div>
           </div>
@@ -907,7 +908,7 @@
 
         <div className="tfp__after">
           {/* ---- 2. Promesse mot à mot ------------------------------------ */}
-          {promesse && <Promise_ text={promesse} onCta={inscrire} ctaLabel={ctaTexte} />}
+          {promesse && <Promise_ text={promesse} onCta={fermee ? null : inscrire} ctaLabel={ctaTexte} />}
 
           {/* ---- 3. Tu repars avec ---------------------------------------- */}
           {inclus.length > 0 && (
