@@ -1004,6 +1004,7 @@
           )}
 
           {/* ---- 7. Réserver (avec le déroulé de l'inscription) ------------ */}
+          {!fermee && (
           <section className="tfp__offer" id="reserver" data-bar="Réserver">
             <div className="tfp__offer__grid">
               <div className="tfp__offer__txt">
@@ -1017,6 +1018,7 @@
               <div className="tfp__offer__card">{carte}</div>
             </div>
           </section>
+          )}
 
           {/* ---- 8. Et après ---------------------------------------------- */}
           {apres && (
