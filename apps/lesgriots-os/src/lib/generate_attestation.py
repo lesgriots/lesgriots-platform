@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 LES GRIOTS — Generateur d'Attestation de Fin de Formation PDF
-Charte graphique : fond beige, titres monospace bold, encadres gold,
-footer legal LES GRIOTS / La Griotheque.
+Charte LA GRIOTHÈQUE : Geist 400/500, noir, beige clair #f5f4f1, wordmark en en-tête,
+footer legal LES GRIOTS / La Griothèque.
 
 Usage: echo '<json>' | python3 generate_attestation.py
 """
@@ -20,6 +20,40 @@ from reportlab.platypus import (
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import ImageReader
+
+# --- Charte LA GRIOTHÈQUE : Geist 400/500, noir, papier, beige clair ---
+import os as _os
+from reportlab.pdfbase import pdfmetrics as _pm
+from reportlab.pdfbase.ttfonts import TTFont as _TTF
+from reportlab.lib.fonts import addMapping as _am
+_RACINE = _os.path.normpath(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', '..'))
+_WORDMARK = _os.path.join(_RACINE, 'public', 'branding', 'griotheque-wordmark-ink.png')
+try:
+    _pm.registerFont(_TTF('Geist', _os.path.join(_RACINE, 'resources', 'fonts', 'Geist-Regular.ttf')))
+    _pm.registerFont(_TTF('Geist-Medium', _os.path.join(_RACINE, 'resources', 'fonts', 'Geist-Medium.ttf')))
+    for _b in (0, 1):
+        for _i in (0, 1):
+            _am('Geist', _b, _i, 'Geist-Medium' if _b else 'Geist')
+    F, FB = 'Geist', 'Geist-Medium'
+except Exception:
+    F, FB = 'Helvetica', 'Helvetica-Bold'
+
+
+def _wordmark():
+    try:
+        return ImageReader(_WORDMARK) if _os.path.exists(_WORDMARK) else None
+    except Exception:
+        return None
+
+
+def _dessiner_wordmark(canvas, x, y):
+    """Le wordmark LA GRIOTHÈQUE™, 34 mm de large, ancré en bas à gauche."""
+    wm = _wordmark()
+    if wm is None:
+        canvas.setFont(FB, 9)
+        canvas.drawString(x, y, 'LA GRIOTHÈQUE™')
+        return
+    canvas.drawImage(wm, x, y, width=34 * mm, height=34 * mm * 253 / 2095, mask='auto')
 
 
 def _load_logo(data):
@@ -52,8 +86,8 @@ W, H = A4
 MARGIN = 22 * mm
 BK = colors.black
 LGRAY = colors.HexColor("#999999")
-BEIGE = colors.HexColor("#F5F0EB")
-GOLD = colors.HexColor("#D4A843")
+BEIGE = colors.HexColor("#f5f4f1")
+GOLD = colors.HexColor("#000000")
 WHITE = colors.white
 
 
@@ -68,8 +102,8 @@ def fmt_date(d):
     if not d:
         return ""
     try:
-        months = ["janvier", "fevrier", "mars", "avril", "mai", "juin",
-                  "juillet", "aout", "septembre", "octobre", "novembre", "decembre"]
+        months = ["janvier", "février", "mars", "avril", "mai", "juin",
+                  "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
         dt = datetime.strptime(str(d)[:10], "%Y-%m-%d")
         return f"{dt.day} {months[dt.month - 1]} {dt.year}"
     except Exception:
@@ -82,31 +116,31 @@ def fmt_date(d):
 
 def _make_styles():
     return {
-        "doc_title": ParagraphStyle("at_doc_title", fontName="Courier-Bold", fontSize=18,
+        "doc_title": ParagraphStyle("at_doc_title", fontName=FB, fontSize=18,
                                      textColor=BK, leading=24, alignment=TA_CENTER),
-        "h2": ParagraphStyle("at_h2", fontName="Courier-Bold", fontSize=11,
+        "h2": ParagraphStyle("at_h2", fontName=FB, fontSize=11,
                               textColor=BK, leading=15, spaceBefore=8, spaceAfter=4),
-        "body": ParagraphStyle("at_body", fontName="Courier", fontSize=9,
+        "body": ParagraphStyle("at_body", fontName=F, fontSize=9,
                                 textColor=BK, leading=14, alignment=TA_JUSTIFY),
-        "body_b": ParagraphStyle("at_body_b", fontName="Courier-Bold", fontSize=9,
+        "body_b": ParagraphStyle("at_body_b", fontName=FB, fontSize=9,
                                   textColor=BK, leading=14),
-        "body_center": ParagraphStyle("at_body_center", fontName="Courier", fontSize=9,
+        "body_center": ParagraphStyle("at_body_center", fontName=F, fontSize=9,
                                        textColor=BK, leading=14, alignment=TA_CENTER),
-        "small": ParagraphStyle("at_small", fontName="Courier", fontSize=8,
+        "small": ParagraphStyle("at_small", fontName=F, fontSize=8,
                                  textColor=BK, leading=11),
-        "small_b": ParagraphStyle("at_small_b", fontName="Courier-Bold", fontSize=8,
+        "small_b": ParagraphStyle("at_small_b", fontName=FB, fontSize=8,
                                    textColor=BK, leading=11),
-        "th": ParagraphStyle("at_th", fontName="Courier-Bold", fontSize=8,
+        "th": ParagraphStyle("at_th", fontName=FB, fontSize=8,
                               textColor=LGRAY, leading=10),
-        "tc": ParagraphStyle("at_tc", fontName="Courier", fontSize=9,
+        "tc": ParagraphStyle("at_tc", fontName=F, fontSize=9,
                               textColor=BK, leading=13),
-        "tc_b": ParagraphStyle("at_tc_b", fontName="Courier-Bold", fontSize=9,
+        "tc_b": ParagraphStyle("at_tc_b", fontName=FB, fontSize=9,
                                 textColor=BK, leading=13),
-        "legal": ParagraphStyle("at_legal", fontName="Courier", fontSize=7,
+        "legal": ParagraphStyle("at_legal", fontName=F, fontSize=7,
                                  textColor=LGRAY, leading=10, alignment=TA_CENTER),
-        "header_left": ParagraphStyle("at_header_left", fontName="Courier-Bold", fontSize=8,
+        "header_left": ParagraphStyle("at_header_left", fontName=FB, fontSize=8,
                                        textColor=BK, leading=10),
-        "header_right": ParagraphStyle("at_header_right", fontName="Courier", fontSize=7,
+        "header_right": ParagraphStyle("at_header_right", fontName=F, fontSize=7,
                                         textColor=BK, leading=9, alignment=TA_RIGHT),
     }
 
@@ -123,7 +157,7 @@ def gold_box(S, lines, cw):
         content.append(Spacer(1, 1 * mm))
     inner = Table([[content]], colWidths=[cw - 8 * mm])
     inner.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), GOLD),
+        ("BACKGROUND", (0, 0), (-1, -1), BEIGE),
         ("LEFTPADDING", (0, 0), (-1, -1), 10),
         ("RIGHTPADDING", (0, 0), (-1, -1), 10),
         ("TOPPADDING", (0, 0), (-1, -1), 10),
@@ -171,7 +205,7 @@ def generate(data):
     buf = io.BytesIO()
     cw = W - 2 * MARGIN
 
-    header_state = {"left": "LA GRIOTHEQUE . ATTESTATION DE FIN DE FORMATION", "right": ""}
+    header_state = {"left": "Attestation de fin de formation", "right": ""}
 
     company_name = safe(data.get("companyName"), "LES GRIOTS")
     siret = safe(data.get("siret"), "902 628 684 00018")
@@ -182,41 +216,37 @@ def generate(data):
     email = safe(data.get("emailFormation"), "formation@lesgriots.com")
 
     footer_text = (
-        f"{company_name} -- SASU au capital de 1 000 EUR "
-        f"-- SIRET {siret} -- NDA {nda}"
+        f"{company_name} · SASU au capital de 1 000 € "
+        f"· SIRET {siret} · NDA {nda}"
     )
 
-    logo_img = _load_logo(data)
+    logo_img = True  # le wordmark est toujours dessiné
 
     # --- Page drawing ---
     def draw_page(canvas, doc):
         canvas.saveState()
-        # Fond beige
-        canvas.setFillColor(BEIGE)
-        canvas.rect(0, 0, W, H, fill=True, stroke=False)
         # Header
         left_text = header_state.get("left", "")
         right_text = header_state.get("right", "")
         text_x = MARGIN
         if logo_img is not None:
             try:
-                canvas.drawImage(logo_img, MARGIN, H - 16.5 * mm, width=8 * mm, height=8 * mm,
-                                 preserveAspectRatio=True, mask='auto')
+                _dessiner_wordmark(canvas, MARGIN, H - 14.6 * mm)
                 text_x = MARGIN + 10 * mm
             except Exception:
                 text_x = MARGIN
-        canvas.setFont("Courier-Bold", 8)
+        canvas.setFont(FB, 8)
         canvas.setFillColor(BK)
-        canvas.drawString(text_x, H - 14 * mm, left_text)
+        canvas.drawRightString(W - MARGIN, H - 14 * mm, left_text)
         if right_text:
-            canvas.setFont("Courier", 7)
+            canvas.setFont(F, 7)
             canvas.drawRightString(W - MARGIN, H - 14 * mm, right_text)
         # Gold accent line
         canvas.setStrokeColor(GOLD)
         canvas.setLineWidth(0.5)
         canvas.line(MARGIN, H - 17 * mm, W - MARGIN, H - 17 * mm)
         # Footer
-        canvas.setFont("Courier", 6)
+        canvas.setFont(F, 6)
         canvas.setFillColor(LGRAY)
         canvas.drawCentredString(W / 2, 12 * mm, footer_text)
         canvas.restoreState()
@@ -238,15 +268,15 @@ def generate(data):
 
     # Set header before content
     story.append(SetHeader(header_state,
-        left="LA GRIOTHEQUE . ATTESTATION DE FIN DE FORMATION",
-        right=f"(C){year} {company_name}"))
+        left="Attestation de fin de formation",
+        right=""))
 
     # ===============================================================
     # TITLE
     # ===============================================================
 
     story.append(Spacer(1, 6 * mm))
-    story.append(Paragraph("ATTESTATION DE FIN DE FORMATION", S["doc_title"]))
+    story.append(Paragraph("Attestation de fin de formation", S["doc_title"]))
     story.append(Spacer(1, 8 * mm))
     story.append(hr_line(cw))
     story.append(Spacer(1, 6 * mm))
@@ -256,7 +286,7 @@ def generate(data):
     # ===============================================================
 
     org_lines = [
-        f"{company_name} -- SASU",
+        f"{company_name} · SASU",
         f"Adresse : {address}, {postal_code} {city}" if address else f"Ville : {city}",
         f"SIRET : {siret}",
         f"NDA : {nda}",
@@ -275,12 +305,12 @@ def generate(data):
     nom = safe(data.get("stagiaireName"), "")
     stagiaire_company = safe(data.get("stagiaireCompany"), "")
 
-    story.append(Paragraph("ATTESTE QUE", S["h2"]))
+    story.append(Paragraph("atteste que", S["h2"]))
     story.append(Spacer(1, 3 * mm))
 
     stagiaire_text = f"<b>{prenom} {nom}</b>"
     if stagiaire_company:
-        stagiaire_text += f", de la societe <b>{stagiaire_company}</b>,"
+        stagiaire_text += f", de la société <b>{stagiaire_company}</b>,"
     stagiaire_text += " a suivi la formation suivante :"
 
     story.append(Paragraph(stagiaire_text, S["body"]))
@@ -295,20 +325,20 @@ def generate(data):
     end_date = fmt_date(data.get("endDate"))
     duration_hours = safe(data.get("durationHours"), "7")
     location = safe(data.get("location"), city)
-    modality = safe(data.get("formationModality"), "Presentiel")
+    modality = safe(data.get("formationModality"), "Présentiel")
 
     date_str = f"Du {start_date} au {end_date}" if end_date else start_date
 
     rows = [
-        ["INTITULE", formation_title],
-        ["DATES", date_str],
-        ["DUREE", f"{duration_hours} heures"],
-        ["LIEU", location],
-        ["MODALITE", modality],
+        ["Intitulé", formation_title],
+        ["Dates", date_str],
+        ["Durée", f"{duration_hours} heures"],
+        ["Lieu", location],
+        ["Modalité", modality],
     ]
 
     story.append(KeepTogether([
-        Paragraph("FORMATION", S["h2"]),
+        Paragraph("Formation", S["h2"]),
         Spacer(1, 3 * mm),
         info_table(S, rows, cw),
         Spacer(1, 6 * mm),
@@ -321,11 +351,11 @@ def generate(data):
     objectives = data.get("formationObjectives", [])
     if objectives:
         obj_elements = [
-            Paragraph("OBJECTIFS PEDAGOGIQUES ATTEINTS", S["h2"]),
+            Paragraph("Objectifs pédagogiques atteints", S["h2"]),
             Spacer(1, 3 * mm),
         ]
         for obj in objectives:
-            obj_elements.append(Paragraph(f"  -- {obj}", S["body"]))
+            obj_elements.append(Paragraph(f"– {obj}", S["body"]))
         obj_elements.append(Spacer(1, 6 * mm))
         story.append(KeepTogether(obj_elements))
 
@@ -334,11 +364,11 @@ def generate(data):
     # ===============================================================
 
     story.append(KeepTogether([
-        Paragraph("RESULTATS DE L'EVALUATION", S["h2"]),
+        Paragraph("Résultats de l'évaluation", S["h2"]),
         Spacer(1, 3 * mm),
         Paragraph(
-            f"<b>{prenom} {nom}</b> a suivi l'integralite de la formation "
-            f"et atteint les objectifs pedagogiques definis dans le programme.",
+            f"<b>{prenom} {nom}</b> a suivi l'intégralité de la formation "
+            f"et atteint les objectifs pédagogiques définis dans le programme.",
             S["body"]
         ),
         Spacer(1, 8 * mm),
@@ -358,7 +388,7 @@ def generate(data):
     story.append(Spacer(1, 6 * mm))
 
     story.append(Paragraph(
-        f"Fait a {city}, le {attestation_date}.",
+        f"Fait à {city}, le {attestation_date}.",
         S["body"]
     ))
     story.append(Spacer(1, 8 * mm))

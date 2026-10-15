@@ -2,7 +2,7 @@
 """
 LES GRIOTS — Bilan d'Évaluation PDF (Qualiopi)
 Synthèse des évaluations à chaud et à froid pour une session.
-Charte graphique : beige (#F5F0EB), gold (#D4A843), Courier monospace.
+Charte LA GRIOTHÈQUE : Geist 400/500, noir, beige clair #f5f4f1, wordmark en en-tête.
 
 Usage: echo '<json>' | python3 generate_bilan_eval.py
 """
@@ -12,6 +12,7 @@ from datetime import datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib import colors
+from reportlab.lib.utils import ImageReader
 from reportlab.platypus import (
     BaseDocTemplate, Frame, PageTemplate,
     Paragraph, Spacer, Table, TableStyle, PageBreak, Flowable
@@ -19,13 +20,47 @@ from reportlab.platypus import (
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 
+# --- Charte LA GRIOTHÈQUE : Geist 400/500, noir, papier, beige clair ---
+import os as _os
+from reportlab.pdfbase import pdfmetrics as _pm
+from reportlab.pdfbase.ttfonts import TTFont as _TTF
+from reportlab.lib.fonts import addMapping as _am
+_RACINE = _os.path.normpath(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', '..'))
+_WORDMARK = _os.path.join(_RACINE, 'public', 'branding', 'griotheque-wordmark-ink.png')
+try:
+    _pm.registerFont(_TTF('Geist', _os.path.join(_RACINE, 'resources', 'fonts', 'Geist-Regular.ttf')))
+    _pm.registerFont(_TTF('Geist-Medium', _os.path.join(_RACINE, 'resources', 'fonts', 'Geist-Medium.ttf')))
+    for _b in (0, 1):
+        for _i in (0, 1):
+            _am('Geist', _b, _i, 'Geist-Medium' if _b else 'Geist')
+    F, FB = 'Geist', 'Geist-Medium'
+except Exception:
+    F, FB = 'Helvetica', 'Helvetica-Bold'
+
+
+def _wordmark():
+    try:
+        return ImageReader(_WORDMARK) if _os.path.exists(_WORDMARK) else None
+    except Exception:
+        return None
+
+
+def _dessiner_wordmark(canvas, x, y):
+    """Le wordmark LA GRIOTHÈQUE™, 34 mm de large, ancré en bas à gauche."""
+    wm = _wordmark()
+    if wm is None:
+        canvas.setFont(FB, 9)
+        canvas.drawString(x, y, 'LA GRIOTHÈQUE™')
+        return
+    canvas.drawImage(wm, x, y, width=34 * mm, height=34 * mm * 253 / 2095, mask='auto')
+
 W, H = A4
 MARGIN = 22 * mm
 BK = colors.black
 LGRAY = colors.HexColor("#999999")
-BEIGE = colors.HexColor("#F5F0EB")
-GOLD = colors.HexColor("#D4A843")
-ROW_ALT = colors.HexColor("#EDE8E2")
+BEIGE = colors.HexColor("#f5f4f1")
+GOLD = colors.HexColor("#000000")
+ROW_ALT = colors.HexColor("#e9e8e5")
 
 
 class SetHeader(Flowable):
@@ -50,8 +85,8 @@ def safe(v, fb=""):
 def fmt_date(d):
     if not d: return ""
     try:
-        MOIS = ["janvier","fevrier","mars","avril","mai","juin",
-                "juillet","aout","septembre","octobre","novembre","decembre"]
+        MOIS = ["janvier","février","mars","avril","mai","juin",
+                "juillet","août","septembre","octobre","novembre","décembre"]
         dt = datetime.strptime(str(d)[:10], "%Y-%m-%d")
         return f"{dt.day} {MOIS[dt.month-1]} {dt.year}"
     except: return str(d)
@@ -59,36 +94,36 @@ def fmt_date(d):
 
 def _styles():
     return {
-        "title": ParagraphStyle("bt", fontName="Courier-Bold", fontSize=18, textColor=BK, leading=22, alignment=TA_CENTER),
-        "subtitle": ParagraphStyle("bst", fontName="Courier-Bold", fontSize=12, textColor=BK, leading=16, alignment=TA_CENTER),
-        "h2": ParagraphStyle("bh2", fontName="Courier-Bold", fontSize=11, textColor=BK, leading=14, spaceBefore=10, spaceAfter=4),
-        "body": ParagraphStyle("bb", fontName="Courier", fontSize=9, textColor=BK, leading=13),
-        "body_b": ParagraphStyle("bbb", fontName="Courier-Bold", fontSize=9, textColor=BK, leading=13),
-        "small": ParagraphStyle("bs", fontName="Courier", fontSize=8, textColor=BK, leading=11),
-        "th": ParagraphStyle("bth", fontName="Courier-Bold", fontSize=8, textColor=BK, leading=10, alignment=TA_CENTER),
-        "tc": ParagraphStyle("btc", fontName="Courier", fontSize=9, textColor=BK, leading=12),
-        "tc_c": ParagraphStyle("btcc", fontName="Courier-Bold", fontSize=9, textColor=BK, leading=12, alignment=TA_CENTER),
-        "info_label": ParagraphStyle("bil", fontName="Courier-Bold", fontSize=8, textColor=LGRAY, leading=10),
-        "info_value": ParagraphStyle("biv", fontName="Courier", fontSize=9, textColor=BK, leading=13),
-        "legend": ParagraphStyle("blg", fontName="Courier", fontSize=7, textColor=LGRAY, leading=9),
-        "score_big": ParagraphStyle("bsb", fontName="Courier-Bold", fontSize=24, textColor=GOLD, leading=28, alignment=TA_CENTER),
+        "title": ParagraphStyle("bt", fontName=FB, fontSize=18, textColor=BK, leading=22, alignment=TA_CENTER),
+        "subtitle": ParagraphStyle("bst", fontName=FB, fontSize=12, textColor=BK, leading=16, alignment=TA_CENTER),
+        "h2": ParagraphStyle("bh2", fontName=FB, fontSize=11, textColor=BK, leading=14, spaceBefore=10, spaceAfter=4),
+        "body": ParagraphStyle("bb", fontName=F, fontSize=9, textColor=BK, leading=13),
+        "body_b": ParagraphStyle("bbb", fontName=FB, fontSize=9, textColor=BK, leading=13),
+        "small": ParagraphStyle("bs", fontName=F, fontSize=8, textColor=BK, leading=11),
+        "th": ParagraphStyle("bth", fontName=FB, fontSize=8, textColor=BK, leading=10, alignment=TA_CENTER),
+        "tc": ParagraphStyle("btc", fontName=F, fontSize=9, textColor=BK, leading=12),
+        "tc_c": ParagraphStyle("btcc", fontName=FB, fontSize=9, textColor=BK, leading=12, alignment=TA_CENTER),
+        "info_label": ParagraphStyle("bil", fontName=FB, fontSize=8, textColor=LGRAY, leading=10),
+        "info_value": ParagraphStyle("biv", fontName=F, fontSize=9, textColor=BK, leading=13),
+        "legend": ParagraphStyle("blg", fontName=F, fontSize=7, textColor=LGRAY, leading=9),
+        "score_big": ParagraphStyle("bsb", fontName=FB, fontSize=24, textColor=BK, leading=28, alignment=TA_CENTER),
     }
 
 
 QUESTIONS = {
     "satisfaction": [
-        "Attentes", "Contenu adapte", "Methodes efficaces", "Maitrise formateur",
-        "Ecoute formateur", "Supports qualite", "Organisation", "Rythme", "Recommandation"
+        "Attentes", "Contenu adapté", "Méthodes efficaces", "Maîtrise du formateur",
+        "Écoute du formateur", "Qualité des supports", "Organisation", "Rythme", "Recommandation"
     ],
     "froid": [
-        "Utilisation competences", "Impact pratique", "Autonomie",
-        "Pertinence", "Transmission", "Objectifs pro", "Approfondissement"
+        "Utilisation des compétences", "Impact pratique", "Autonomie",
+        "Pertinence", "Transmission", "Objectifs professionnels", "Approfondissement"
     ],
     "positionnement": [
-        "Connaissance sujet", "Maitrise outils", "Experience pratique", "Autonomie"
+        "Connaissance du sujet", "Maîtrise des outils", "Expérience pratique", "Autonomie"
     ],
     "acquis": [
-        "Concepts cles", "Reproduction exercices", "Maitrise outils", "Objectifs atteints"
+        "Concepts clés", "Reproduction des exercices", "Maîtrise des outils", "Objectifs atteints"
     ],
 }
 
@@ -98,12 +133,12 @@ def generate(data):
     buf = io.BytesIO()
     cw = W - 2 * MARGIN
 
-    header_state = {"left": "LA GRIOTHEQUE · BILAN EVALUATIONS", "right": ""}
+    header_state = {"left": "Bilan des évaluations", "right": ""}
 
     company = safe(data.get("companyName"), "LES GRIOTS")
     siret = safe(data.get("siret"), "902 628 684 00018")
     nda = safe(data.get("nda"), "28 76 07471 76")
-    footer = f"{company} — SASU au capital de 1 000 € — SIRET {siret} — NDA {nda}"
+    footer = f"{company} · SASU au capital de 1 000 € · SIRET {siret} · NDA {nda}"
 
     formation = safe(data.get("formationTitle"), "Formation")
     start = safe(data.get("startDate"))
@@ -112,24 +147,24 @@ def generate(data):
     evals = data.get("evaluations") or []
 
     year = datetime.now().year
-    right_hdr = f"{formation.upper()}\n(c){year} {company}"
+    right_hdr = ""
 
     def draw_page(canvas, doc):
         canvas.saveState()
-        canvas.setFillColor(BEIGE)
-        canvas.rect(0, 0, W, H, fill=True, stroke=False)
-        canvas.setFont("Courier-Bold", 8)
+        canvas.setFont(FB, 8)
         canvas.setFillColor(BK)
-        canvas.drawString(MARGIN, H - 14*mm, header_state.get("left",""))
+        _dessiner_wordmark(canvas, MARGIN, H - 14.6*mm)
+        canvas.setFont(FB, 8)
+        canvas.drawRightString(W-MARGIN, H - 14*mm, header_state.get("left",""))
         rt = header_state.get("right","")
         if rt:
-            canvas.setFont("Courier", 7)
+            canvas.setFont(F, 7)
             for i, line in enumerate(rt.split("\n")):
                 canvas.drawRightString(W-MARGIN, H-14*mm - i*9, line)
         canvas.setStrokeColor(GOLD)
         canvas.setLineWidth(0.5)
         canvas.line(MARGIN, H-17*mm, W-MARGIN, H-17*mm)
-        canvas.setFont("Courier", 6)
+        canvas.setFont(F, 6)
         canvas.setFillColor(LGRAY)
         canvas.drawCentredString(W/2, 12*mm, footer)
         canvas.drawRightString(W-MARGIN, 12*mm, f"{doc.page}")
@@ -146,8 +181,8 @@ def generate(data):
 
     # Title
     story.append(Spacer(1, 4*mm))
-    type_labels = {"satisfaction": "A CHAUD", "froid": "A FROID", "positionnement": "POSITIONNEMENT", "acquis": "ACQUIS"}
-    story.append(Paragraph(f"BILAN D'EVALUATION {type_labels.get(eval_type, eval_type.upper())}", S["title"]))
+    type_labels = {"satisfaction": "à chaud", "froid": "à froid", "positionnement": "de positionnement", "acquis": "des acquis"}
+    story.append(Paragraph(f"Bilan d'évaluation {type_labels.get(eval_type, eval_type)}", S["title"]))
     story.append(Spacer(1, 3*mm))
     story.append(Paragraph(formation, S["subtitle"]))
     story.append(Spacer(1, 6*mm))
@@ -155,18 +190,18 @@ def generate(data):
     # Info block
     dates_str = f"Du {fmt_date(start)} au {fmt_date(end)}" if start and end else fmt_date(start)
     info = [
-        ["FORMATION", formation],
-        ["DATES", dates_str],
-        ["TYPE", type_labels.get(eval_type, eval_type)],
-        ["NB REPONDANTS", f"{len(evals)} apprenant{'s' if len(evals)>1 else ''}"],
-        ["DATE DU BILAN", fmt_date(datetime.now().strftime("%Y-%m-%d"))],
+        ["Formation", formation],
+        ["Dates", dates_str],
+        ["Type", type_labels.get(eval_type, eval_type)],
+        ["Répondants", f"{len(evals)} apprenant{'s' if len(evals)>1 else ''}"],
+        ["Date du bilan", fmt_date(datetime.now().strftime("%Y-%m-%d"))],
     ]
     info_data = [[Paragraph(l, S["info_label"]), Paragraph(v, S["info_value"])] for l, v in info]
     t = Table(info_data, colWidths=[cw*0.28, cw*0.72])
     t.setStyle(TableStyle([
         ("VALIGN",(0,0),(-1,-1),"TOP"),
         ("TOPPADDING",(0,0),(-1,-1),3),("BOTTOMPADDING",(0,0),(-1,-1),3),
-        ("LINEBELOW",(0,0),(-1,-2),0.3,colors.HexColor("#DDD")),
+        ("LINEBELOW",(0,0),(-1,-2),0.3,colors.HexColor("#DDDDDD")),
         ("LEFTPADDING",(0,0),(0,-1),0),
     ]))
     story.append(t)
@@ -205,7 +240,7 @@ def generate(data):
 
     # Global score
     global_avg = sum(scores) / len(scores) if scores else 0
-    story.append(Paragraph("SCORE GLOBAL", S["h2"]))
+    story.append(Paragraph("Score global", S["h2"]))
     story.append(Spacer(1, 2*mm))
 
     score_display = f"{global_avg:.1f} / 10"
@@ -213,20 +248,20 @@ def generate(data):
     story.append(Spacer(1, 6*mm))
 
     # Results per question
-    story.append(Paragraph("RESULTATS PAR CRITERE", S["h2"]))
+    story.append(Paragraph("Résultats par critère", S["h2"]))
     story.append(Spacer(1, 3*mm))
 
     header_row = [
-        Paragraph("CRITERE", S["th"]),
-        Paragraph("MOY.", S["th"]),
-        Paragraph("REPONSES", S["th"]),
-        Paragraph("BARRE", S["th"]),
+        Paragraph("Critère", S["th"]),
+        Paragraph("Moyenne", S["th"]),
+        Paragraph("Réponses", S["th"]),
+        Paragraph("Note", S["th"]),
     ]
     table_data = [header_row]
     for qi, q_label in enumerate(questions):
         avg = q_totals[qi] / q_counts[qi] if q_counts[qi] > 0 else 0
         pct = avg / 5.0 * 100
-        bar_text = f"{'█' * int(avg)} {'░' * (5 - int(avg))}  {avg:.1f}/5"
+        bar_text = f"{avg:.1f} / 5"
         table_data.append([
             Paragraph(q_label, S["tc"]),
             Paragraph(f"{avg:.1f}", S["tc_c"]),
@@ -238,9 +273,9 @@ def generate(data):
     qt = Table(table_data, colWidths=col_w)
     style = [
         ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
-        ("BACKGROUND",(0,0),(-1,0), GOLD),
-        ("GRID",(0,0),(-1,-1),0.4,colors.HexColor("#CCC")),
-        ("BOX",(0,0),(-1,-1),0.6,colors.HexColor("#AAA")),
+        ("BACKGROUND",(0,0),(-1,0), BEIGE),
+        ("GRID",(0,0),(-1,-1),0.4,colors.HexColor("#CCCCCC")),
+        ("BOX",(0,0),(-1,-1),0.6,colors.HexColor("#AAAAAA")),
         ("LEFTPADDING",(0,0),(-1,-1),5),
         ("RIGHTPADDING",(0,0),(-1,-1),5),
         ("TOPPADDING",(0,0),(-1,-1),4),
@@ -254,12 +289,12 @@ def generate(data):
     story.append(Spacer(1, 8*mm))
 
     # Individual results
-    story.append(Paragraph("DETAIL PAR APPRENANT", S["h2"]))
+    story.append(Paragraph("Détail par apprenant", S["h2"]))
     story.append(Spacer(1, 3*mm))
 
     ind_header = [
-        Paragraph("APPRENANT", S["th"]),
-        Paragraph("SCORE", S["th"]),
+        Paragraph("Apprenant", S["th"]),
+        Paragraph("Score", S["th"]),
     ] + [Paragraph(f"Q{i+1}", S["th"]) for i in range(len(questions))]
 
     ind_data = [ind_header]
@@ -288,9 +323,9 @@ def generate(data):
     it = Table(ind_data, colWidths=ind_widths)
     istyle = [
         ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
-        ("BACKGROUND",(0,0),(-1,0), GOLD),
-        ("GRID",(0,0),(-1,-1),0.3,colors.HexColor("#CCC")),
-        ("BOX",(0,0),(-1,-1),0.5,colors.HexColor("#AAA")),
+        ("BACKGROUND",(0,0),(-1,0), BEIGE),
+        ("GRID",(0,0),(-1,-1),0.3,colors.HexColor("#CCCCCC")),
+        ("BOX",(0,0),(-1,-1),0.5,colors.HexColor("#AAAAAA")),
         ("LEFTPADDING",(0,0),(-1,-1),3),
         ("RIGHTPADDING",(0,0),(-1,-1),3),
         ("TOPPADDING",(0,0),(-1,-1),3),
@@ -308,7 +343,7 @@ def generate(data):
     # Comments
     if comments_list:
         story.append(Spacer(1, 8*mm))
-        story.append(Paragraph("COMMENTAIRES LIBRES", S["h2"]))
+        story.append(Paragraph("Commentaires libres", S["h2"]))
         story.append(Spacer(1, 3*mm))
         for c in comments_list:
             story.append(Paragraph(f"• {c}", S["body"]))
