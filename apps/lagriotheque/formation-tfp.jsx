@@ -499,7 +499,7 @@
             <section className="tfp__split" data-bar="Pourquoi">
               <div className="tfp__split__txt">
                 <h2>{accroche.head}</h2>
-                {String(accroche.text).split(/\n\n/).map((p, i) => <p key={i}>{p}</p>)}
+                {String(accroche.text).split(/\n\n/).map((p, i) => <Rv key={i}>{p}</Rv>)}
               </div>
               {accroche.media && <div className="tfp__split__img" style={{ backgroundImage: "url(" + accroche.media + ")" }} />}
             </section>
@@ -512,7 +512,7 @@
               {Array.isArray(f.audience_points) && f.audience_points.length > 0 ? (
                 <ul className="tfp__arrows">{f.audience_points.map((pt, i) => <li key={i}>{pt}</li>)}</ul>
               ) : (
-                f.audience && <p className="tfp__lead">{f.audience}</p>
+                f.audience && <Rv className="tfp__lead">{f.audience}</Rv>
               )}
             </section>
           )}
@@ -603,7 +603,7 @@
               <div className="tfp__split__txt">
                 <span className="tfp__pill">Après la formation</span>
                 <h2>La certification</h2>
-                <p>{certifText}</p>
+                <Rv>{certifText}</Rv>
                 <p className="tfp__fine">{[f.rs.replace(/^RS/i, "RS "), "France Compétences", f.certifier && "certificateur " + f.certifier].filter(Boolean).join(" · ")}{f.franceCompetencesUrl && <> · <a href={f.franceCompetencesUrl} target="_blank" rel="noopener">référentiel</a></>}</p>
               </div>
               {imgs[1] && <div className="tfp__split__img" style={{ backgroundImage: "url(" + imgs[1] + ")" }} />}
@@ -622,7 +622,7 @@
                   <p className="tfp__trainer__role">{trainerCard.role || trainerFiche.role}</p>
                 )}
                 {!plusieursFormateurs && (trainerBio || f.description) && String(trainerBio || f.description).split(/\n\n/).map((para, i) => (
-                  <p className={i === 0 ? "tfp__lead" : "tfp__trainer__para"} key={i}>{para}</p>
+                  <Rv className={i === 0 ? "tfp__lead" : "tfp__trainer__para"} key={i}>{para}</Rv>
                 ))}
               </div>
               {plusieursFormateurs ? (
@@ -985,7 +985,7 @@
             <section className="tfp__split" data-bar={b.head || f.title} key={i}>
               <div className="tfp__split__txt">
                 {b.head && <h2>{b.head}</h2>}
-                {String(b.text || "").split(/\n\n/).map((p, j) => <p key={j}>{p}</p>)}
+                {String(b.text || "").split(/\n\n/).map((p, j) => <Rv key={j}>{p}</Rv>)}
               </div>
               {b.media && <div className="tfp__split__img" style={{ backgroundImage: "url(" + b.media + ")" }} />}
             </section>
@@ -998,7 +998,7 @@
               {publicPts.length > 0 ? (
                 <ul className="tfp__arrows">{publicPts.map((pt, i) => <li key={i}>{pt}</li>)}</ul>
               ) : (
-                <p className="tfp__lead">{f.audience}</p>
+                <Rv className="tfp__lead">{f.audience}</Rv>
               )}
             </section>
           )}
@@ -1026,7 +1026,7 @@
               <div className="tfp__split__txt">
                 <span className="tfp__pill">Et après</span>
                 {apres.title && <h2>{apres.title}</h2>}
-                {apres.text && String(apres.text).split(/\n\n/).map((p, j) => <p key={j}>{p}</p>)}
+                {apres.text && String(apres.text).split(/\n\n/).map((p, j) => <Rv key={j}>{p}</Rv>)}
                 {apres.link && <a className="tfp__btn" href={apres.link}>{apres.label || "Découvrir"} →</a>}
               </div>
               {apres.image && <div className="tfp__split__img" style={{ backgroundImage: "url(" + apres.image + ")" }} />}
